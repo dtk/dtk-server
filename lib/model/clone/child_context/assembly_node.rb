@@ -67,7 +67,6 @@ module DTK; class Clone
 
         # mapping from node stub to node template and overriding appropriate node template columns
         unless matches.empty?
-          
           ndx_node_matches = NodeMatch.ndx_node_matches(matches)
           mappings = ndx_node_matches.values.map{ |m| m.mapping}
           mapping_ds = array_dataset(mappings, :mapping)
@@ -83,8 +82,6 @@ module DTK; class Clone
           end
         end
         ret
-pp ret
-raise 'here'
       end
 
       def find_target_ref_matches(target, assembly_template_idh)

@@ -35,18 +35,18 @@ module DTK; class Clone::ChildContext::AssemblyNode
 
     # Returns the node to template mappings given by NodeTemplateMapping indexed by instance display name
     def self.ndx_node_matches(hash_matches)
-      hash_matches.inject({}) do |h, mapping|
-        ndx = display_name = mapping[:instance_display_name]
-        node_template_id = mapping[:node_template_idh].get_id()
-        node = {
-          type: mapping[:instance_type],
-          ancestor_id: mapping[:node_stub_idh].get_id(),
+      hash_matches.inject({}) do |h, node_match|
+        ndx = display_name = node_match[:instance_display_name]
+        node_template_id = node_match[:node_template_idh].get_id()
+        mapping = {
+          type: node_match[:instance_type],
+          ancestor_id: node_match[:node_stub_idh].get_id(),
           canonical_template_node_id: node_template_id,
           node_template_id: node_template_id,
           display_name: display_name,
-          ref: mapping[:instance_ref]
+          ref: node_match[:instance_ref]
         }
-        h.merge(ndx => new(node, mapping) )
+        h.merge(ndx => new(node_match, mapping))
       end
     end
 

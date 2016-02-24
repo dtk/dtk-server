@@ -19,7 +19,6 @@ module DTK
   class Clone
     class CopyProcessor
       class Assembly < self
-        r8_nested_require('assembly', 'service_add_on_proc')
         def cloning_assembly?
           true
         end
@@ -30,24 +29,11 @@ module DTK
 
         attr_reader :project, :component_module_refs
 
-        def service_add_on_node_bindings
-          @service_add_on_proc ? @service_add_on_proc.node_bindings() : []
-        end
-
-        def get_service_add_on_mapped_nodes(create_override_attrs, create_opts)
-          @service_add_on_proc ? @service_add_on_proc.get_mapped_nodes(create_override_attrs, create_opts) : []
-        end
-
-        def service_add_on_proc?
-          @service_add_on_proc
-        end
-
         private
 
         def initialize(target_obj, source_obj, opts = {})
           super(source_obj, opts)
           @project = (target_obj.respond_to?(:get_project) && target_obj.get_project)
-          @service_add_on_proc = opts[:service_add_on_info] && ServiceAddOnProc.new(opts[:service_add_on_info])
           @component_module_refs = get_component_module_refs(source_obj)
         end
 

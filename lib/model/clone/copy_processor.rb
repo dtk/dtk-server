@@ -100,11 +100,6 @@ module DTK
         @ret
       end
 
-      # optionally overwritten
-      def service_add_on_proc?
-        nil
-      end
-
       def shift_foregn_keys
         fk_info.shift_foregn_keys()
       end

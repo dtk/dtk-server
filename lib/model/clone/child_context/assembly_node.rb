@@ -35,8 +35,6 @@ module DTK; class Clone
       def initialize(clone_proc, hash)
         super
         assembly_template_idh = model_handle.createIDH(model_name: :component, id: hash[:ancestor_id])
-        sao_node_bindings = clone_proc.service_add_on_node_bindings()
-pp [:sao_node_bindings, sao_node_bindings]
         target = hash[:target_idh].create_object(model_name: :target_instance)
         matches =
           unless target.iaas_properties.supports_create_image?()
@@ -85,11 +83,6 @@ raise 'here'
           end
         end
 
-        # add to ret rows for each service add node binding
-        service_add_additions = @clone_proc.get_service_add_on_mapped_nodes(create_override_attrs, create_opts)
-        unless service_add_additions.empty?
-          ret += service_add_additions
-        end
         ret
       end
 
@@ -112,7 +105,6 @@ raise 'here'
 
       def find_matches_for_nodes(target, assembly_template_idh, sao_node_bindings = nil)
         # find the assembly's stub nodes and then use the node binding to find the node templates
-        # as will as using, if non-empty, service_add_on_node_bindings to
         # see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
           cols: [:id, :display_name, :type, :node_binding_ruleset],

@@ -62,17 +62,13 @@ module DTK
         new_id_handle = clone_copy_output.id_handles.first
         return nil unless new_id_handle
 
-        # calling with respect to target
-        if service_add_on_proc = proc.service_add_on_proc?()
-          opts.merge!(service_add_on_proc: service_add_on_proc)
-        end
         clone_post_copy_hook(clone_copy_output, opts)
-
-         unless opts[:no_violation_checking]
-           if clone_source_object.class == Component && target_id_handle[:model_name] == :node
-             Violation.update_violations([target_id_handle])
-           end
-         end
+        
+        unless opts[:no_violation_checking]
+          if clone_source_object.class == Component && target_id_handle[:model_name] == :node
+            Violation.update_violations([target_id_handle])
+          end
+        end
 
 Aux.stop_for_testing?(:stage) # TODO: for debugging
 

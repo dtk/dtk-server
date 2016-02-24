@@ -107,7 +107,7 @@ module DTK; class LinkDef
 
       if link_type = link_def[:link_type]
         aug_cmps.each do |cmp|
-          cmp_name = cmp[:display_name].gsub('__','::')
+          cmp_name = cmp[:component_type].gsub('__','::')
 
           if node = link_type.include?('/') && cmp[:node]
             cmp_name = "#{node[:display_name]}/#{cmp_name}"

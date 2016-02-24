@@ -39,6 +39,11 @@ module DTK
       def match_or_create_node?(_target)
         :match
       end
+
+      # This can be overwritten
+      def external_ref?
+        nil
+      end
     end
   end
 end

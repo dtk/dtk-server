@@ -23,9 +23,7 @@ module DTK
       # node_target
       def find_matching_node_template(node_target)
         #TODO: stub
-        pp [:debug, 'Service::Target::Image', node_target]
         # TODO: find in target the image associated with node_target; create if needed
-        # stub
         Node::Template.null_node_template(@target.model_handle)
       end
     end

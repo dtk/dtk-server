@@ -73,7 +73,11 @@ module DTK; class Clone
           
           select_ds = ancestor_rel_ds.join_table(:inner, node_template_ds).join_table(:inner, mapping_ds, [:node_template_id])
           ret = Model.create_from_select(model_handle, field_set_to_copy, select_ds, create_override_attrs, create_opts)
-          
+
+pp [1111, ret.map{|r|model_handle.createIDH(id: r[:id]).create_object().get_field?(:external_ref)}]
+          # update any external refs if any are set in ndx_node_matches
+          update_external_refs!(ret, ndx_node_matches)
+pp [2222, ret.map{|r|model_handle.createIDH(id: r[:id]).create_object().get_field?(:external_ref)}]
           ret.each do |r|
             if node_match = ndx_node_matches[r[:display_name]]
               r[:node_template_id] = node_match.mapping[:node_template_id]
@@ -82,6 +86,19 @@ module DTK; class Clone
           end
         end
         ret
+      end
+
+      def update_external_refs!(ret, ndx_node_matches)
+        ndx_id = ret.inject({}) { |h, r| h.merge(r[:display_name] => r[:id]) }
+        external_ref_rows = []
+        ndx_node_matches.each_pair do |ndx, node_match|
+          if external_ref = node_match.external_ref
+            external_ref_rows << { id: ndx_id[ndx], external_ref: external_ref }
+          end
+        end
+        unless external_ref_rows.empty?
+          Model.update_from_rows(model_handle, external_ref_rows, partial_value: true)
+        end
       end
 
       def find_target_ref_matches(target, assembly_template_idh)
@@ -122,7 +139,7 @@ module DTK; class Clone
               node_template = node_target ? 
                 target_service.find_matching_node_template(node_target) :
                 Node::Template.find_matching_node_template(target, node_binding_ruleset: nb_ruleset)
-              NodeMatch.hash__when_creating_node(self, node, node_template)
+              NodeMatch.hash__when_creating_node(self, node, node_template, node_target: node_target)
             when :match
               if target_ref = NodeBindings.create_linked_target_ref?(target, node, node_target)
                 NodeMatch.hash__when_match(self, node, target_ref)

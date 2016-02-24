@@ -32,7 +32,11 @@ module DTK; class NodeBindings::NodeTarget
           end
         end
       end
-      
+
+      def self.external_ref?(image_type)      
+        { type: image_type }
+      end
+
       private
 
       def self.map_to_canonical_form!(internal_form_hash)

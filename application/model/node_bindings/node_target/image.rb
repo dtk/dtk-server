@@ -35,6 +35,10 @@ module DTK; class NodeBindings
         super.merge(image_type: @image_type, image: @image, size: @size)
       end
 
+      def external_ref?
+        LegalFields.external_ref?(@image_type)
+      end
+
       # returns a TargetSpecificObject
       def find_target_specific_info(target)
         ret = TargetSpecificInfo.new(self)

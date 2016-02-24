@@ -42,7 +42,7 @@ module DTK; class Clone
           else
             # can either be node templates, meaning spinning up node, or
             #  a match to an existing node in which case the existing node target ref is returned
-            find_matches_for_nodes(target, assembly_template_idh, sao_node_bindings)
+            find_matches_for_nodes(target, assembly_template_idh)
           end
         merge!(matches: matches) if matches
       end
@@ -103,7 +103,7 @@ raise 'here'
         end
       end
 
-      def find_matches_for_nodes(target, assembly_template_idh, sao_node_bindings = nil)
+      def find_matches_for_nodes(target, assembly_template_idh)
         # find the assembly's stub nodes and then use the node binding to find the node templates
         # see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
@@ -111,12 +111,6 @@ raise 'here'
           filter: [:eq, :assembly_id, assembly_template_idh.get_id()]
         }
         node_info = Model.get_objs(assembly_template_idh.createMH(:node), sp_hash)
-        unless sao_node_bindings.empty?
-          stubs_to_omit = sao_node_bindings.map { |r| r[:sub_assembly_node_id] }
-          unless stubs_to_omit.empty?
-            node_info.reject! { |n| stubs_to_omit.include?(n[:id]) }
-          end
-        end
 
         node_bindings = NodeBindings.get_node_bindings(assembly_template_idh)
         node_mh = target.model_handle(:node)

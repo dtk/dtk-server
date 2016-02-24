@@ -93,7 +93,6 @@ module DTK
       def post(path, body, include_headers = true)
         wrap_response do
           rez = ::RestClient::Resource.new(full_url(path), include_headers ? @default_post_headers : {})
-          byebug
           rez.post(body)
         end
       end

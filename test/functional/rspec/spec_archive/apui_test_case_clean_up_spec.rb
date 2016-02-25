@@ -7,6 +7,7 @@ user='demo_user'
 existing_user = 'existing_user'
 existing_group = 'existing_group'
 group='demo_group'
+editet_group = 'edited_user_group'
 ns='demo_ns'
 
 invalid_chars='!@#$%'
@@ -35,6 +36,7 @@ describe "(Admin Panel UI) Test Script Clean up" do
 			results += group_panel.get_all_results(invalid_chars)
 			results += group_panel.get_all_results(too_long)
 			results += group_panel.get_all_results(existing_group)
+			results += group_panel.get_all_results(editet_group)
 			puts "Found #{results.length} matching results. "
 			results.each do |x|
 				puts "Deleting user group: #{x}"
@@ -59,14 +61,15 @@ describe "(Admin Panel UI) Test Script Clean up" do
 			results += user_panel.get_all_results(invalid_user)
 			results += user_panel.get_all_results(too_long)
 			results += user_panel.get_all_results(existing_user)
-			puts "Found #{results.length} matching results. "
+			puts "Found #{results.length - 1} matching results. "
 			results.each do |x|
+                                next if x == 'dtk-public-user'
 				puts "Deleting user: #{x}"
 				user_panel.search_for_object(x)
 				user_panel.press_delete_link(x)
 			end
 			puts " "
-			expect(results.length).to be > 0
+			expect(results.length - 1).to be > 0
 		end
 	end
 
@@ -88,7 +91,7 @@ describe "(Admin Panel UI) Test Script Clean up" do
 				ns_panel.press_delete_link(x)
 			end
 			puts " "
-			expect(results.length).to be > 0 
+			expect(results.length).to be > 0
 		end
 	end
 end

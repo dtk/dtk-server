@@ -1,7 +1,7 @@
 module DTK; class Clone::ChildContext::AssemblyNode
   class NodeMatch
     attr_reader :node, :mapping, :external_ref
-    def initialize(node, mapping, external_ref = nil)
+    def initialize(node, mapping, external_ref)
       @node         = node
       @mapping      = mapping
       @external_ref = external_ref
@@ -11,19 +11,14 @@ module DTK; class Clone::ChildContext::AssemblyNode
 
     def self.hash__when_creating_node(parent, node, node_template, opts={})
       instance_type = node.is_assembly_wide_node?() ? node_class(node).assembly_wide : node_class(node).staged
-      ret = {
+      {
         instance_type: instance_type,
         node_stub_idh: node.id_handle,
         instance_display_name: node[:display_name],
         instance_ref: instance_ref(parent, node[:display_name]),
-        node_template_idh: node_template.id_handle()
+        node_template_idh: node_template.id_handle(),
+        external_ref: node_external_ref(opts[:node_target])
       }
-      if node_target = opts[:node_target]
-        if external_ref = node_target.external_ref?
-          ret.merge!(external_ref: external_ref)
-        end
-      end
-      ret
     end
     
     def self.hash__when_match(parent, node, target_ref, extra_fields = {})
@@ -58,6 +53,11 @@ module DTK; class Clone::ChildContext::AssemblyNode
     end
 
     private
+
+      
+    def self.node_external_ref(node_target = nil)
+      (node_target && node_target.node_external_ref?) || NodeBindings::NodeTarget::Image.default_node_external_ref  
+    end
 
     def self.node_class(node)
       node.is_node_group?() ? Node::Type::NodeGroup : Node::Type::Node

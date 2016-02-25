@@ -41,7 +41,7 @@ module DTK
       end
 
       # This can be overwritten
-      def external_ref?
+      def node_external_ref?
         nil
       end
     end

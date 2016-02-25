@@ -212,6 +212,7 @@ module DTK
             node = val
             case iaas_type = node.get_iaas_type()
               when :ec2_instance then :ec2
+              when :bosh_instance then :bosh
               when :physical then :physical
               else fail Error.new("iaas type (#{iaas_type}) not treated")
             end

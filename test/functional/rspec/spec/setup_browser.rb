@@ -69,6 +69,7 @@ def load_headless(full_host, parallel = false)
   Capybara.default_driver = :webkit
   port = Capybara.server_port || 9000
   Capybara.server_port = port + rand(100) if parallel
+  puts "Capybara running on port: #{Capybara.server_port}"
   @headless = Headless.new(display: 100, reuse: true, destroy_at_exit: false)
   @headless.start
   session = Capybara::Session.new :webkit

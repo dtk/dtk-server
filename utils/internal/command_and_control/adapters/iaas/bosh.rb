@@ -17,18 +17,9 @@
 #
 module DTK
   module CommandAndControlAdapter
-    class Physical < CommandAndControlIAAS
+    class Bosh < CommandAndControlIAAS
       def pbuilderid(node)
-        node.update_object!(:ref, :external_ref)
-        if node[:ref] =~ Regexp.new("^#{Node::TargetRef.physical_node_prefix()}")
-          node[:ref]
-        else
-          if ret = Node::TargetRef::Input::InventoryData.pbuilderid?(node[:external_ref])
-            ret
-          else
-            fail Error.new("Cannot compute the communication id for physical node with id (#{node.id})")
-          end
-        end
+        fail "Need to write CommandAndControlAdapter::Bosh"
       end
 
       def find_matching_node_binding_rule(_node_binding_rules, _target)
@@ -40,7 +31,8 @@ module DTK
       end
 
       def self.destroy_node?(_node, _opts = {})
-        true # vacuously succeeds
+        Log.error("Need to write Bosh.destroy_node?")
+        true 
       end
 
       def check_iaas_properties(_iaas_properties, _opts = {})

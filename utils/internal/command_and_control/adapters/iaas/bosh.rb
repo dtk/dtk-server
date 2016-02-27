@@ -18,51 +18,25 @@
 module DTK
   module CommandAndControlAdapter
     class Bosh < CommandAndControlIAAS
-      def pbuilderid(node)
-        fail "Need to write CommandAndControlAdapter::Bosh"
-      end
+      r8_nested_require('bosh', 'create_nodes_processor')
 
-      def find_matching_node_binding_rule(_node_binding_rules, _target)
-        nil
-      end
-
-      def references_image?(_node_external_ref)
-        nil
+      def self.execute(_task_idh, top_task_idh, task_action)
+        top_task_id = top_task_idh.get_id
+        # Assumption is that all all task_action's actions associated with same top_task_id have same target
+        target = task_action.target()
+        create_nodes_proc = CreateNodesProcessor.get_or_create(top_task_id, target)
+        # task_action wil be either be to queue node or to execute
+        # TODO: Stub that just assumes one node and does trigger outside of it
+        # need to case on task_action
+        create_nodes_proc.queue(task_action)
+pp [:create_nodes_proc, create_nodes_proc]
+        create_nodes_proc.execute
+        create_nodes_proc.remove!(top_task_id)
       end
 
       def self.destroy_node?(_node, _opts = {})
         Log.error("Need to write Bosh.destroy_node?")
         true 
-      end
-
-      def check_iaas_properties(_iaas_properties, _opts = {})
-        {}
-      end
-
-      def start_instances(_nodes)
-        raise_not_applicable_error(:start)
-      end
-
-      def stop_instances(_nodes)
-        raise_not_applicable_error(:stop)
-      end
-
-      def execute(_task_idh, _top_task_idh, task_action)
-        # Aldin: just for testing
-        node = task_action[:node]
-        external_ref = node[:external_ref] || {}
-
-        { status: 'succeeded',
-          node: {
-            external_ref: external_ref
-          }
-        }
-      end
-
-      private
-
-      def raise_not_applicable_error(command)
-        fail ErrorUsage.new("#{command.to_s.capitalize} is not applicable operation for physical nodes")
       end
     end
   end

@@ -115,7 +115,7 @@ module DTK; class Task
       end
 
       def ret_command_and_control_adapter_info
-        [:iaas, R8::Config[:command_and_control][:iaas][:type].to_sym]
+        [:iaas, iaas_adapter_name]
       end
 
       def update_state_change_status(task_mh, status)
@@ -151,6 +151,15 @@ module DTK; class Task
       end
 
       private
+
+      def iaas_adapter_name
+        if node = self[:node]
+          CommandAndControl.iaas_adapter_name(node: node)
+        else
+          Log.error("Unexpected that there is no node key in this object")
+          R8::Config[:command_and_control][:iaas][:type].to_sym
+        end
+      end
 
       def self.node_status(object, _opts)
         node = object[:node] || {}

@@ -44,8 +44,8 @@ module DTK
 
       def execute
         deployment_name = 'dtk'
-        pp [:bosh_client_info, client.info,
-            client.deployment_vms(deployment_name)]
+        pp [:bosh_client_info, client.info]
+        pp [:bosh_deployment_vms, client.deployment_vms(deployment_name)]
       end
 
       private

@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  class CommandAndControlAdapter::Bosh
+  module CommandAndControlAdapter; class Bosh
     class CreateNodesProcessor
       def self.get_or_create(top_task_id, target)
         (@@active_tasks ||= {})[top_task_id] || @@active_tasks[top_task_id] = new(top_task_id, target)
@@ -41,6 +41,20 @@ module DTK
           @nodes << NodeInfo.new(node, base_node)
         end
       end
+
+      def execute
+        deployment_name = 'dtk'
+        pp [:bosh_client_info, client.info,
+            client.deployment_vms(deployment_name)]
+      end
+
+      private
+
+      def client
+        @client ||= Bosh::Client.new
+      end
+
     end
   end
-end
+end; end
+

@@ -18,6 +18,7 @@
 module DTK
   module CommandAndControlAdapter
     class Bosh < CommandAndControlIAAS
+      r8_nested_require('bosh', 'client')
       r8_nested_require('bosh', 'create_nodes_processor')
 
       def self.execute(_task_idh, top_task_idh, task_action)
@@ -32,6 +33,7 @@ module DTK
 pp [:create_nodes_proc, create_nodes_proc]
         create_nodes_proc.execute
         create_nodes_proc.remove!(top_task_id)
+fail ErrorUsage.new("Got here for testing")
       end
 
       def self.destroy_node?(_node, _opts = {})

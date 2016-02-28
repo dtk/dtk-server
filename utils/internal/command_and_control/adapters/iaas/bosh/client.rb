@@ -2,13 +2,11 @@ require 'addressable/uri'
 require 'rest-client'
 
 module DTK
-  module Bosh
-
+  class CommandAndControlAdapter::Bosh
     ##
     # HTTP Client for Bosh Director.
     # API information can be found here: https://bosh.io/docs/director-api-v1.html
     #
-
     class Client
 
       def initialize(options = {})
@@ -132,5 +130,3 @@ module DTK
     end
   end
 end
-
-

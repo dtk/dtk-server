@@ -74,10 +74,8 @@ module DTK; class Clone
           select_ds = ancestor_rel_ds.join_table(:inner, node_template_ds).join_table(:inner, mapping_ds, [:node_template_id])
           ret = Model.create_from_select(model_handle, field_set_to_copy, select_ds, create_override_attrs, create_opts)
 
-pp [1111, ret.map{|r|model_handle.createIDH(id: r[:id]).create_object().get_field?(:external_ref)}]
           # update any external refs if any are set in ndx_node_matches
           update_external_refs!(ret, ndx_node_matches)
-pp [2222, ret.map{|r|model_handle.createIDH(id: r[:id]).create_object().get_field?(:external_ref)}]
           ret.each do |r|
             if node_match = ndx_node_matches[r[:display_name]]
               r[:node_template_id] = node_match.mapping[:node_template_id]

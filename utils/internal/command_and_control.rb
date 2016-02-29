@@ -195,46 +195,47 @@ module DTK
       klass.poll_to_detect_node_ready(node, opts)
     end
 
+    def self.iaas_adapter_name(key_val)
+      key = key_val.keys.first
+      val = key_val.values.first
+      case key
+       when :node
+        node = val
+        case iaas_type = node.get_iaas_type()
+         when :ec2_instance then :ec2
+         when :bosh_instance then :bosh
+         when :physical then :physical
+         else fail Error.new("iaas type (#{iaas_type}) not treated")
+        end
+       when :target
+        target =  val
+        iaas_type = target.get_field?(:iaas_type)
+        case iaas_type
+         when 'ec2' then :ec2
+         when 'physical' then :physical
+         else fail Error.new("iaas type (#{iaas_type}) not treated")
+        end
+       when :image_type
+        image_type = val
+        case image_type
+         when :ec2_image then :ec2
+         else fail Error.new("image type (#{key_val[:image_type]}) not treated")
+        end
+       else
+        fail Error.new("#{key_val.inspect} not treated")
+      end
+    end
+
     private
+
+    def self.load_iaas_for(key_val)
+      load_for_aux(:iaas, iaas_adapter_name(key_val))
+    end
 
     def self.load_for_node_config(protocol_type = nil)
       adapter_name = protocol_type || R8::Config[:command_and_control][:node_config][:type]
       Log.debug("Node config adapter chosen: #{adapter_name}")
       load_for_aux(:node_config, adapter_name)
-    end
-
-    def self.load_iaas_for(key_val)
-      key = key_val.keys.first
-      val = key_val.values.first
-      adapter_name =
-        case key
-          when :node
-            node = val
-            case iaas_type = node.get_iaas_type()
-              when :ec2_instance then :ec2
-              when :bosh_instance then :bosh
-              when :physical then :physical
-              else fail Error.new("iaas type (#{iaas_type}) not treated")
-            end
-          when :target
-            target =  val
-            iaas_type = target.get_field?(:iaas_type)
-            case iaas_type
-              when 'ec2' then :ec2
-              when 'physical' then :physical
-              else fail Error.new("iaas type (#{iaas_type}) not treated")
-            end
-          when :image_type
-            image_type = val
-            case image_type
-              when :ec2_image then :ec2
-              else fail Error.new("image type (#{key_val[:image_type]}) not treated")
-            end
-          else
-            fail Error.new("#{key_val.inspect} not treated")
-        end
-      adapter_type = :iaas
-      load_for_aux(adapter_type, adapter_name)
     end
 
     def self.load_config_node_adapter

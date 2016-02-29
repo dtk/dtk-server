@@ -39,8 +39,8 @@ module DTK
         nil
       end
 
-      def destroy_node?(_node, _opts = {})
-        true #vacuously succeeds
+      def self.destroy_node?(_node, _opts = {})
+        true # vacuously succeeds
       end
 
       def check_iaas_properties(_iaas_properties, _opts = {})

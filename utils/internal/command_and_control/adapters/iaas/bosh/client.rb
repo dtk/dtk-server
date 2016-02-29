@@ -2,24 +2,21 @@ require 'addressable/uri'
 require 'rest-client'
 
 module DTK
-  module Bosh
-
+  class CommandAndControlAdapter::Bosh
     ##
     # HTTP Client for Bosh Director.
     # API information can be found here: https://bosh.io/docs/director-api-v1.html
     #
-
     class Client
+      ClientDefaults = {
+        scheme: 'https',
+        port: 25555,
+        user: 'admin',
+        password: 'admin'
+      }
 
-      def initialize(options = {})
-        @uri = Addressable::URI.new({
-          scheme: 'https',
-          host: R8::Config[:bosh][:host],
-          port: 25555,
-          user: R8::Config[:bosh][:username],
-          password: R8::Config[:bosh][:password],
-        }.merge!(options))
-
+      def initialize(director_host, options = {})
+        @uri = Addressable::URI.new(ClientDefaults.merge(host: director_host).merge(options))
         @default_post_headers = { headers: { 'Content-Type' => 'text/yaml' }}
       end
 
@@ -136,5 +133,3 @@ module DTK
     end
   end
 end
-
-

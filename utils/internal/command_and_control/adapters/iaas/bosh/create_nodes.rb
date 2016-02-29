@@ -17,7 +17,9 @@
 #
 module DTK
   module CommandAndControlAdapter; class Bosh
-    class CreateNodesProcessor
+    class CreateNodes
+      r8_nested_require('create_nodes', 'deployment_manifest')
+
       def self.get_or_create(top_task_id, target)
         (@@active_tasks ||= {})[top_task_id] || @@active_tasks[top_task_id] = new(top_task_id, target)
       end
@@ -30,6 +32,7 @@ module DTK
       def initialize(top_task_id, target)
         @top_task_id = top_task_id
         @target      = target 
+        @client      = Bosh::Client.new('52.71.180.183')
         @nodes       = [] # Array of NodeInfo
       end
       private :initialize
@@ -44,16 +47,11 @@ module DTK
 
       def execute
         deployment_name = 'dtk'
-        pp [:bosh_client_info, client.info]
-        pp [:bosh_deployment_vms, client.deployment_vms(deployment_name)]
+        pp [:bosh_client_info, @client.info]
+##        pp [:bosh_deployment_vms, @client.deployment_vms(deployment_name)]
+        manifest_yaml = DeploymentManifest.generate_yaml(self)
+        pp @client.deploy(manifest_yaml)
       end
-
-      private
-
-      def client
-        @client ||= Bosh::Client.new
-      end
-
     end
   end
 end; end

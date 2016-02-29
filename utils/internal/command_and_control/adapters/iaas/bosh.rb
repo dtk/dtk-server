@@ -19,20 +19,20 @@ module DTK
   module CommandAndControlAdapter
     class Bosh < CommandAndControlIAAS
       r8_nested_require('bosh', 'client')
-      r8_nested_require('bosh', 'create_nodes_processor')
+      r8_nested_require('bosh', 'create_nodes')
 
       def self.execute(_task_idh, top_task_idh, task_action)
         top_task_id = top_task_idh.get_id
         # Assumption is that all all task_action's actions associated with same top_task_id have same target
         target = task_action.target()
-        create_nodes_proc = CreateNodesProcessor.get_or_create(top_task_id, target)
+        create_nodes = CreateNodes.get_or_create(top_task_id, target)
         # task_action wil be either be to queue node or to execute
         # TODO: Stub that just assumes one node and does trigger outside of it
         # need to case on task_action
-        create_nodes_proc.queue(task_action)
-pp [:create_nodes_proc, create_nodes_proc]
-        create_nodes_proc.execute
-        create_nodes_proc.remove!(top_task_id)
+        create_nodes.queue(task_action)
+pp [:create_nodes, create_nodes]
+        create_nodes.execute
+        create_nodes.remove!(top_task_id)
 fail ErrorUsage.new("Got here for testing")
       end
 

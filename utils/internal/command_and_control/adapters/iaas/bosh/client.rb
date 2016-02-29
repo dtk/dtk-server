@@ -35,6 +35,8 @@ module DTK
         get('/releases')
       end
 
+      # @returns (Hash)
+      #  Hash contains :task_url, :task_id
       def deploy(manifest_yaml)
         post('/deployments', manifest_yaml)
       end
@@ -68,7 +70,7 @@ module DTK
       # *Output Type can be one of these values:
       #  debug, event, result
       #
-      # = Return
+      # @returns (Hash)
       # Hash with :output element (when output type provided)
       #
       def task(id, output_type = nil)
@@ -112,7 +114,9 @@ module DTK
           # there are cases where 301, 302 are returned for long running processes
           # these are success responses, as explained https://bosh.io/docs/director-api-v1.html#long-running-ops
           if [301, 302].include?(e.http_code)
-            return { success: true }
+            location_url = e.response.headers[:location]
+            task_id = location_url.match(/tasks\/(.*)$/)[1] rescue nil
+            return { task_url: location_url, task_id: task_id.to_i }
           end
 
           raise e

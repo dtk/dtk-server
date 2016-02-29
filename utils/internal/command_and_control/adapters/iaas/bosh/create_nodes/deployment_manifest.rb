@@ -17,7 +17,7 @@ module DTK
       private :initialize
 
       def generate_yaml
-        ManifestTemplate.result
+        ManifestTemplate.result(arbiter_ssh_private_key: '')
       end
 
 

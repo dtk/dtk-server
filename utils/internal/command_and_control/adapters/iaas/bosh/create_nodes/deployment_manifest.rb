@@ -11,8 +11,8 @@ module DTK
         new(create_nodes_proc).generate_yaml
       end
 
-      def initialize(create_nodes_proc)
-        @create_nodes_proc = create_nodes_proc
+      def initialize(params = {})
+        @params = params
       end
       private :initialize
 
@@ -26,8 +26,8 @@ module DTK
         {
           dtk_server_host: '10.0.0.253',
           arbiter_ssh_private_key: arbiter_ssh_private_key,
-          director_uuid: '3c7d47a0-26ec-44a5-a963-57125fa3c633',
-          release: { name: 'dtk-agent2', version: '0+dev.10' }
+          director_uuid: @params[:director_uuid],
+          release: { name: 'dtk-agent', version: '0+dev.1' }
         }
       end
 

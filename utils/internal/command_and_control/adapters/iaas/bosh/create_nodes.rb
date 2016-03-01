@@ -32,7 +32,7 @@ module DTK
       def initialize(top_task_id, target)
         @top_task_id = top_task_id
         @target      = target 
-        @client      = Bosh::Client.new('52.71.180.183')
+        @bosh_client      = Bosh::Client.new('52.71.180.183')
         @nodes       = [] # Array of NodeInfo
       end
       private :initialize
@@ -47,19 +47,14 @@ module DTK
 
       def execute
         deployment_name = 'dtk'
-        pp [:bosh_client_info, @client.info]
-##        pp [:bosh_deployment_vms, @client.deployment_vms(deployment_name)]
-        manifest_yaml = DeploymentManifest.generate_yaml(self)
-        deploy_result = @client.deploy(manifest_yaml)
+        pp [:bosh_client_info, @bosh_client.info]
+##        pp [:bosh_deployment_vms, @bosh_client.deployment_vms(deployment_name)]
+        manifest_yaml = DeploymentManifest.generate_yaml(director_uuid: @bosh_client.director_uuid)
+        deploy_result = @bosh_client.deploy(manifest_yaml)
         if bosh_task_id = deploy_result[:task_id]
-          process = true
-          count = 0
-          while process
-            count += 1
-            task_result = @client.task(bosh_task_id)
-            pp [:bosh_task, count, task_result, task_result['state']]
-            sleep 2
-            process = false if count > 10 or %w{error done}.include?(task_result['state'])
+          steady_state = @bosh_client.poll_task_until_steady_state(bosh_task_id)
+          if error_msg = steady_state.error?
+            fail ErrorUsage.new(error_msg)
           end
         end
       end

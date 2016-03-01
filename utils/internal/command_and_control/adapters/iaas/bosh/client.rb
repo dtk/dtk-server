@@ -8,6 +8,9 @@ module DTK
     # API information can be found here: https://bosh.io/docs/director-api-v1.html
     #
     class Client
+      r8_nested_require('client', 'poll_task') 
+      include PollTaskMixin
+
       ClientDefaults = {
         scheme: 'https',
         port: 25555,
@@ -15,13 +18,23 @@ module DTK
         password: 'admin'
       }
 
+      attr_reader :director_uuid
       def initialize(director_host, options = {})
-        @uri = Addressable::URI.new(ClientDefaults.merge(host: director_host).merge(options))
+        @uri                  = Addressable::URI.new(ClientDefaults.merge(host: director_host).merge(options))
+        @director_uuid        = director_uuid # most be called after uri set
         @default_post_headers = { headers: { 'Content-Type' => 'text/yaml' }}
       end
-
+      
       def info
         get('/info')
+      end
+      
+      def director_uuid
+        info = info()
+        unless ok_response?(info)
+          fail ErrorUsage.new("Not able to connect to BOSH director at '#{@uri}'")
+        end
+        info['uuid']
       end
 
       def stemcells
@@ -81,7 +94,7 @@ module DTK
         get(url, params)
       end
 
-  private
+      private
 
       def get(path, params = {})
         wrap_response do
@@ -130,6 +143,10 @@ module DTK
         params.map { |k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}" }.join('&')
       end
 
+      def ok_response?(response)
+        # TODO: there may be more checks
+        response.kind_of?(Hash)
+      end
     end
   end
 end

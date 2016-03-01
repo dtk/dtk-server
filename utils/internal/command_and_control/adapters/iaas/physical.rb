@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 module DTK
-  module CommandAndControlAdapter
-    class Physical < CommandAndControlIAAS
+  class CommandAndControl::IAAS
+    class Physical < self
       def pbuilderid(node)
         node.update_object!(:ref, :external_ref)
         if node[:ref] =~ Regexp.new("^#{Node::TargetRef.physical_node_prefix()}")
@@ -39,7 +39,7 @@ module DTK
         nil
       end
 
-      def self.destroy_node?(_node, _opts = {})
+      def destroy_node?(_node, _opts = {})
         true # vacuously succeeds
       end
 

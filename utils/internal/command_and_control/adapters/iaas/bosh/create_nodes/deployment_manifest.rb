@@ -1,7 +1,7 @@
 require 'erubis'
 
 module DTK
-  class CommandAndControlAdapter::Bosh::CreateNodes
+  class CommandAndControl::IAAS::Bosh::CreateNodes
     ##
     # Methods to generate the BOSH deployment manifest
     # API information can be found here: https://bosh.io/docs/director-api-v1.html

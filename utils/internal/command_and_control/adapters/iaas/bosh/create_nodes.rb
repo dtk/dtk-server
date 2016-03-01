@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module CommandAndControlAdapter; class Bosh
+  class CommandAndControl::IAAS; class Bosh
     class CreateNodes
       r8_nested_require('create_nodes', 'deployment_manifest')
 
@@ -64,6 +64,6 @@ module DTK
         end
       end
     end
-  end
-end; end
+  end; end
+end
 

@@ -16,9 +16,11 @@
 # limitations under the License.
 #
 module DTK
+  # TODO: remove CommandAndControlAdapter module
   module CommandAndControlAdapter
   end
   class CommandAndControl
+    r8_nested_require('command_and_control', 'iaas')
     r8_nested_require('command_and_control', 'install_script')
 
     def self.create_without_task
@@ -255,11 +257,13 @@ module DTK
       Adapters[adapter_type] ||= {}
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
-
         r8_nested_require('command_and_control', "adapters/#{adapter_type}/#{adapter_name}")
-        klass = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
-        klass_or_instance = (instance_style_adapter?(adapter_type, adapter_name) ? klass.create_without_task() : klass)
-        Adapters[adapter_type][adapter_name] =  klass_or_instance
+        if base_class = base_class_when_instance_style_adapter?(adapter_name) 
+          klass = base_class.const_get adapter_name.to_s.capitalize
+          Adapters[adapter_type][adapter_name] = klass.create_without_task()
+        else
+          Adapters[adapter_type][adapter_name] = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize 
+        end
        rescue LoadError => e
         raise ErrorUsage.new("IAAS type ('#{adapter_name}') not supported! Reason #{e.message}!")
        rescue Exception => e
@@ -285,15 +289,16 @@ module DTK
     Lock = Mutex.new
 
     # TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
-    def self.instance_style_adapter?(adapter_type, adapter_name)
-      (InstanceStyleAdapters[adapter_type.to_sym] || []).include?(adapter_name.to_sym)
+    def self.base_class_when_instance_style_adapter?(adapter_name)
+      InstanceStyleAdapters[adapter_name]
     end
     InstanceStyleAdapters = {
-      iaas: [:physical]
+      physical: IAAS,
+      bosh: IAAS
     }
 
     #### Error classes
-    class Error < XYZ::Error
+    class Error < DTK::Error
       def to_hash
         { error_type: Aux.demodulize(self.class.to_s) }
       end
@@ -322,6 +327,7 @@ module DTK
     end
   end
 
+ # TODO: change to CommandAndControl::NodeConfig
   class CommandAndControlNodeConfig < CommandAndControl
 
     def self.mc_info_for_config_agent(config_agent)
@@ -335,8 +341,5 @@ module DTK
       chef: { agent: 'chef_solo', action: 'run' }
     }
 
-  end
-
-  class CommandAndControlIAAS < CommandAndControl
   end
 end

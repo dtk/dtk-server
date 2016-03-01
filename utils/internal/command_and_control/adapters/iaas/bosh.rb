@@ -16,12 +16,12 @@
 # limitations under the License.
 #
 module DTK
-  module CommandAndControlAdapter
-    class Bosh < CommandAndControlIAAS
+  class CommandAndControl::IAAS
+    class Bosh < self
       r8_nested_require('bosh', 'client')
       r8_nested_require('bosh', 'create_nodes')
 
-      def self.execute(_task_idh, top_task_idh, task_action)
+      def execute(_task_idh, top_task_idh, task_action)
         top_task_id = top_task_idh.get_id
         # Assumption is that all all task_action's actions associated with same top_task_id have same target
         target = task_action.target()
@@ -36,7 +36,7 @@ pp [:create_nodes, create_nodes]
 fail ErrorUsage.new("Got here for testing")
       end
 
-      def self.destroy_node?(_node, _opts = {})
+      def destroy_node?(_node, _opts = {})
         Log.error("Need to write Bosh.destroy_node?")
         true 
       end

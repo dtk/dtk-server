@@ -17,14 +17,31 @@ module DTK
       private :initialize
 
       def generate_yaml
-        ManifestTemplate.result(arbiter_ssh_private_key: '')
+        ManifestTemplate.result(erb_values)
+      end
+      
+      private
+
+      def erb_values
+        {
+          dtk_server_host: '10.0.0.253',
+          arbiter_ssh_private_key: arbiter_ssh_private_key,
+          director_uuid: '3c7d47a0-26ec-44a5-a963-57125fa3c633',
+          release: { name: 'dtk-agent2', version: '0+dev.10' }
+        }
       end
 
+      KeyIdentInYaml = 6 
+      def arbiter_ssh_private_key
+        private_key_path = R8::Config[:arbiter][:ssh][:remote][:private_key]
+        # get file and add KeyIdentInYaml spaces in front of each line so at right place in yaml file
+        File.open(private_key_path).inject(''){ |s, line| s + (" " * KeyIdentInYaml) + line } 
+      end
 
       ManifestTemplate = Erubis::Eruby.new <<eos
 ---
 name: dtk
-director_uuid: bf814f44-4319-4841-828a-fa5c624dd47f
+director_uuid: <%= director_uuid %>
 
 networks:
 - name: default
@@ -53,8 +70,8 @@ compilation:
     instance_type: m3.large
 
 releases:
-- name: dtk-agent2
-  version: 0+dev.5
+- name: <%= release[:name] %>
+  version: <%= release[:version] %>
 
 jobs:
 - name: master
@@ -73,7 +90,7 @@ update:
 
 properties:
   dtk-agent:
-    dtk_server_host: 10.0.0.253
+    dtk_server_host: <%= dtk_server_host %>
     stomp_port: 6163
     stomp_username: dtk1
     stomp_password: marionette
@@ -81,7 +98,7 @@ properties:
     arbiter_queue: /queue/arbiter.dtk1.reply
     arbiter_ssh_private_key: |
 <%= arbiter_ssh_private_key %>
-    git_server_url: "ssh://git1@10.0.0.253:2222"
+    git_server_url: "ssh://git1@<%= dtk_server_host %>:2222"
     pbuilderid: i-d8eada58
 eos
     end

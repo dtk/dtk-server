@@ -50,7 +50,18 @@ module DTK
         pp [:bosh_client_info, @client.info]
 ##        pp [:bosh_deployment_vms, @client.deployment_vms(deployment_name)]
         manifest_yaml = DeploymentManifest.generate_yaml(self)
-        pp @client.deploy(manifest_yaml)
+        deploy_result = @client.deploy(manifest_yaml)
+        if bosh_task_id = deploy_result[:task_id]
+          process = true
+          count = 0
+          while process
+            count += 1
+            task_result = @client.task(bosh_task_id)
+            pp [:bosh_task, count, task_result, task_result['state']]
+            sleep 2
+            process = false if count > 10 or %w{error done}.include?(task_result['state'])
+          end
+        end
       end
     end
   end

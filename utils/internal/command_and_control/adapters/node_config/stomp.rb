@@ -22,7 +22,7 @@ r8_nested_require('stomp', 'stomp_listener')
 
 module DTK
   module CommandAndControlAdapter
-    class Stomp < CommandAndControlNodeConfig
+    class Stomp < CommandAndControl::NodeConfig
       extend Messaging::AssemblyActionClassMixin
 
       DEFAULT_TIMEOUT_AUTH_NODE = 60

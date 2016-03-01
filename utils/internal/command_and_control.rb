@@ -20,7 +20,8 @@ module DTK
   module CommandAndControlAdapter
   end
   class CommandAndControl
-    r8_nested_require('command_and_control', 'iaas')
+    r8_nested_require('command_and_control', 'adapters/iaas')
+    r8_nested_require('command_and_control', 'adapters/node_config')
     r8_nested_require('command_and_control', 'install_script')
 
     def self.create_without_task
@@ -325,21 +326,5 @@ module DTK
       class WhileCreatingNode < Error
       end
     end
-  end
-
- # TODO: change to CommandAndControl::NodeConfig
-  class CommandAndControlNodeConfig < CommandAndControl
-
-    def self.mc_info_for_config_agent(config_agent)
-      type = config_agent.type()
-      ConfigAgentTypeToMCInfo[type] || fail(Error.new("unexpected config adapter: #{type}"))
-    end
-
-    ConfigAgentTypeToMCInfo = {
-      puppet: { agent: 'puppet_apply', action: 'run' },
-      dtk_provider: { agent: 'action_agent', action: 'run_command' },
-      chef: { agent: 'chef_solo', action: 'run' }
-    }
-
   end
 end

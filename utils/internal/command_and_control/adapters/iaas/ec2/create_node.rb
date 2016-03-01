@@ -98,7 +98,7 @@ module DTK; module CommandAndControlAdapter
           }
           updated_external_ref = @external_ref.merge(update_hash)
 
-          Log.info("#{node_print_form()} with ec2 instance id #{instance_id}; waiting for it to be available")
+          Log.info("#{node_print_form} with ec2 instance id #{instance_id}; waiting for it to be available")
           node_update_hash = {
             external_ref: updated_external_ref,
             type: Node::Type.new_type_when_create_node(base_node),
@@ -112,18 +112,14 @@ module DTK; module CommandAndControlAdapter
 
         process_addresses__first_boot?(@node)
 
-        { status: 'succeeded',
-          node: {
-            external_ref: @external_ref
-          }
-        }
+        Ec2.return_status_ok.merge(node: {external_ref: @external_ref})
       end
 
       def generate_client_token?
         unless @external_ref[:client_token]
           # generate client token
           client_token = @external_ref[:client_token] = Ec2::ClientToken.generate()
-          Log.info("Generated client token '#{client_token}' for node '#{node_print_form()}'")
+          Log.info("Generated client token '#{client_token}' for node '#{node_print_form}'")
           updated_external_ref = external_ref.merge(client_token: client_token)
           update_node!(external_ref: updated_external_ref)
         end
@@ -181,7 +177,7 @@ module DTK; module CommandAndControlAdapter
         end
 
       def node_print_form
-        "#{node[:display_name]} (#{node[:id]})"
+        Ec2.node_print_form(node)
       end
     end
   end

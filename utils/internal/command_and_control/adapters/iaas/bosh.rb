@@ -33,7 +33,7 @@ module DTK
 pp [:create_nodes, create_nodes]
         create_nodes.execute
         create_nodes.remove!(top_task_id)
-fail ErrorUsage.new("Got here for testing")
+        return_status_ok
       end
 
       def destroy_node?(_node, _opts = {})

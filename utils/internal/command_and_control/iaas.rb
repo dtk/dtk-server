@@ -18,6 +18,16 @@
 module DTK
   class CommandAndControl
     class IAAS < self
+      def self.node_print_form(node)
+        "#{node[:display_name]} (#{node[:id]})"
+      end
+
+      def return_status_ok
+        self.class.return_status_ok
+      end
+      def self.return_status_ok
+        { status: 'succeeded' }
+      end
     end
   end
 end

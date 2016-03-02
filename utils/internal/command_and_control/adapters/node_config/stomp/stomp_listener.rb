@@ -20,11 +20,8 @@ module DTK
     include EM::Protocols::Stomp
 
     NUMBER_OF_RETRIES = 5
-    IDLE_RECONNECT_TIME = 60
 
     def connection_completed
-      @message_registry = {}
-      @sync_lock = Mutex.new
       # there is an issue with stomp connection, which results in ERROR thrown first time when connecting. This is something that can be ignore
       # it looks like issue with EM stomp client since it does not effect functionaliy. After first error all seems to be working fine.
       @stomp_rdy = false
@@ -69,9 +66,15 @@ module DTK
         msg_request_id = original_msg[:requestid]
         pbuilder_id    = original_msg[:pbuilderid]
         is_heartbeat   = original_msg[:heartbeat]
+        is_pong        = original_msg[:pong]
+
+        if is_pong
+          Log.debug "Received pong response from node with pbuilderid '#{pbuilder_id}' ..."
+          return
+        end
 
         # decode message
-        Log.debug "Recived message from STOMP, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
+        Log.debug "Received message from STOMP, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
 
         # we map our heartbeat calls to requst IDs
         if is_heartbeat
@@ -84,7 +87,7 @@ module DTK
           end
         end
 
-        deregister_incoming(msg_request_id)
+        # deregister_incoming(msg_request_id)
 
         callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
 
@@ -112,53 +115,14 @@ module DTK
         tries -= 1
       end
 
-      register_outgoing(message[:request_id])
-
       if defined?(PhusionPassenger)
         @backup_client.publish(R8::Config[:arbiter][:topic], encode(message))
       else
         send(R8::Config[:arbiter][:topic], encode(message))
       end
-
-      R8EM.add_timer(IDLE_RECONNECT_TIME) { check_hanging_messages() }
     end
 
   private
-
-    def register_outgoing(request_id)
-      return unless request_id
-      Log.info("Request ID: #{request_id} registered!")
-      @message_registry[request_id] = Time.now
-    end
-
-    def deregister_incoming(request_id)
-      return unless request_id
-      Log.info("Request ID: #{request_id} unregistered!")
-      @message_registry.delete(request_id)
-    end
-
-    def check_hanging_messages
-      return if @message_registry.size == 0
-
-      @sync_lock.synchronize do
-        current_time = Time.now
-
-        # return 2-element array with key and value
-        max_time = @message_registry.max_by { |k, v| v }
-        max_wait_time = current_time - max_time.last
-        if max_wait_time > (IDLE_RECONNECT_TIME - 10)
-          # to avoid repeatition we set max time
-          @message_registry[max_time.first] = Time.now
-          R8EM.add_timer(IDLE_RECONNECT_TIME) { check_hanging_messages() }
-
-          Log.info("STOMP listener has not received response for #{(IDLE_RECONNECT_TIME-10)} seconds, we are restarting connection")
-          reconnect(R8::Config[:stomp][:host], R8::Config[:stomp][:port].to_i)
-          Log.info("STOMP connection has been restarted, waiting for a queue")
-        else
-          Log.debug("No STOMP pending messages that are waiting more than '#{(IDLE_RECONNECT_TIME - 10)}'")
-        end
-      end
-    end
 
     def safe_print_stomp_password
       (R8::Config[:stomp][:password] || '').gsub(/./,'*')

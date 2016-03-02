@@ -107,24 +107,6 @@ module DTK
         handler.sendreq_with_callback(msg, agent, context, filter)
       end
 
-      #
-      # Since I am switching to mcollective response I do not need this
-      #
-      # def self.parse_response__execute_action(_nodes, msg)
-      #   ret = {}
-      #   body = msg[:body]
-      #   return ret.merge(status: :notok) unless body
-
-      #   payload = body[:data]
-      #   ret[:status] = body[:status]
-      #   ret[:pbuilderid] = body[:pbuilderid]
-
-      #   # not every time we encapsulate our response under :data key
-      #   ret[:data] = (payload && payload[:data]) ? payload[:data] : payload
-      #   ret
-      # end
-
-      # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_execution(task_idh, top_task_idh, config_node, opts)
         config_agent = ConfigAgent.load(config_node[:config_agent_type])
 

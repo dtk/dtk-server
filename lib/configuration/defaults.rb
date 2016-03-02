@@ -224,7 +224,6 @@ R8::Config[:arbiter][:queue] = "/queue/arbiter.#{R8.app_user}.reply"
 R8::Config[:arbiter][:update] = true
 R8::Config[:arbiter][:branch] = 'stable'
 R8::Config[:arbiter][:auth_type] = 'ssh'
-R8::Config[:arbiter][:keep_alive_period] = 300
 
 R8::Config[:stomp][:host] = ::DTK::Common::Aux.get_ec2_public_dns()
 R8::Config[:stomp][:port] = '6163'

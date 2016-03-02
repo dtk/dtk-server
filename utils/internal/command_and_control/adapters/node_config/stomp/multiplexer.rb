@@ -27,23 +27,11 @@ module DTK
     class StompMultiplexer < ProtocolMultiplexer
       include Singleton
 
-      KEEP_STOMP_ALIVE = R8::Config[:arbiter][:keep_alive_period]
-
-      @@keep_alive_enabled = true
       # this map is used to keep track of sent / received requirst_ids
       @@callback_registry = {}
       @@callback_heartbeat_registry = {}
 
       def self.create(stomp_client)
-        unless @@keep_alive_enabled
-          R8EM.add_periodic_timer(KEEP_STOMP_ALIVE) do
-            Log.info("Sending PING broadcast to all nodes via STOMP, this is periodic message sent every #{KEEP_STOMP_ALIVE}s.")
-            instance.send_ping_request
-          end
-
-          @@keep_alive_enabled = true
-        end
-
         instance.set(stomp_client)
       end
 

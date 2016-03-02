@@ -63,10 +63,24 @@ module DTK
         get(url)
       end
 
-      def deployment_vms(deployment_name, full_format = false)
+      def vm_info(node)
+        deployment_vms(NodeId.new(node).deployment_name, full_format: true)
+      end
+
+      # opts can have
+      #  full_format: Boolean
+      def deployment_vms(deployment_name, opts = {})
         url  = "/deployments/#{deployment_name}/vms"
-        options = full_format ? { format: 'full' } : {}
-        get(url, options)
+        unless opts[:full_format]
+          get(url)
+        else
+          task_info = get(url, format: 'full')
+          unless task_id = task_info['id']
+            fail Error.new("Unexpected that no 'id' in #{task_info.inspect}")
+          end
+          task_obj = poll_task_until_steady_state(task_id)
+          task_obj.result
+        end
       end
 
       ##
@@ -127,8 +141,8 @@ module DTK
           # these are success responses, as explained https://bosh.io/docs/director-api-v1.html#long-running-ops
           if [301, 302].include?(e.http_code)
             location_url = e.response.headers[:location]
-            task_id = location_url.match(/tasks\/(.*)$/)[1] rescue nil
-            return { task_url: location_url, task_id: task_id.to_i }
+            bosh_task_id = location_url.match(/tasks\/(.*)$/)[1] rescue nil
+            return poll_task_until_steady_state(bosh_task_id.to_i)
           end
 
           raise e

@@ -1,8 +1,10 @@
 module DTK; class CommandAndControl::IAAS::Bosh
   class Client
     module TaskMixin
-      def poll_task_until_steady_state(id, output_type = nil)
-        Task.poll_task_until_steady_state(self, id, output_type)
+      private
+
+      def poll_task_until_steady_state(id)
+        Task.poll_task_until_steady_state(self, id)
       end
     end
     
@@ -14,41 +16,50 @@ module DTK; class CommandAndControl::IAAS::Bosh
       end
       module States
         Error       = ['error']
-        SteadyState = ['done', 'processing'] + Error 
+        SteadyState = ['done', 'processing'] + Error + [State::Timeout] 
       end
 
       # Represents end state
-      def initialize(task_result_hash)
+      def initialize(client, task_result_hash)
+        @client = client
         @task_result_hash = task_result_hash
       end
+      private :initialize
 
-      def self.poll_task_until_steady_state(client, task_id, output_type = nil)
+      def self.poll_task_until_steady_state(client, task_id)
         process = true
         count = 0
         while process
           count += 1
           task_result_hash = client.task(task_id)
-          pp [:bosh_task, count, task_result_hash]
+pp [:task_result_hash, task_result_hash]
           sleep SleepInterval
           process = false if count > NumTimesToPoll or States::SteadyState.include?(task_state(task_result_hash))
         end
         if count > NumTimesToPoll
-          new('state' => State::Timeout)
+          new(client, 'state' => State::Timeout)
         else
-          new(task_result_hash)
+          new(client, task_result_hash)
         end
       end
 
       # Returns error message if there is an error
       def error?
-        if States::Error.include?(task_state)
-          result
-        end 
+        task_result_field if States::Error.include?(task_state)
+      end
+
+      def result
+        result_field = task_result_field || ''
+        result_field.empty? ? @client.task(task_id, 'result') : result_field
       end
 
       private
 
-      def result
+      def task_id
+        @task_result_hash['id']
+      end
+
+      def task_result_field
         @task_result_hash['result']
       end
 

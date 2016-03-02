@@ -17,14 +17,41 @@
 #
 module DTK
   class CommandAndControl::IAAS::Bosh
-    module NodeId
-      def self.compute_node_id(node)
-        # TODO: stub
-        'dtk--master--0'
+    class NodeId
+      attr_reader :deployment_name, :job, :index
+      def initialize(node)
+        @node = node
+        # parsed_node_id needs to go after '@node = node'
+        @deployment_name, @job, @index = parsed_node_id
       end
+
       def self.node_id(node)
         (node.get_field?(:external_ref) || {})[:instance_id]
       end
+
+      def self.compute_node_id(node)
+        # TODO: stub
+        node_id_info = ['dtk', 'master', '0']
+         node_id_info.join(Delimiter)
+      end
+      Delimiter = '--'
+
+      private
+
+      # returns [deployment_name, job, index]
+      def parsed_node_id
+        ret = node_id.split(Delimiter)
+        pp [:node_id_split, ret]
+        unless ret.size == 3 and ret[2] =~ /^[0-9]+$/
+          fail Error.new("Node id '#{node_id}' has unexpected form")
+        end
+        ret
+      end
+
+      def node_id
+        self.class.node_id(@node)
+      end
+
     end
   end
 end

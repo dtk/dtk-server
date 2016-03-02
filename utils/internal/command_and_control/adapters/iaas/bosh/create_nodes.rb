@@ -58,14 +58,11 @@ module DTK; class CommandAndControl::IAAS
           deployment_name: deployment_name
         }
         manifest_yaml = DeploymentManifest.generate_yaml(deployment_params)
-        deploy_task_info = @bosh_client.deploy(manifest_yaml)
-        if bosh_task_id = deploy_task_info[:task_id]
-          steady_state = @bosh_client.poll_task_until_steady_state(bosh_task_id)
-          if error_msg = steady_state.error?
-            fail ErrorUsage.new(error_msg)
-          end
-          @nodes.each { |n| update_node_from_create_node!(n.node, n.base_node) }
+        deploy_task = @bosh_client.deploy(manifest_yaml)
+        if error_msg = deploy_task.error?
+          fail ErrorUsage.new(error_msg)
         end
+        @nodes.each { |n| update_node_from_create_node!(n.node, n.base_node) }
       end
 
       def update_node_from_create_node!(node, base_node)

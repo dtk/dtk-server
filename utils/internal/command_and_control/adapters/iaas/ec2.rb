@@ -227,12 +227,6 @@ module DTK
 
       private
 
-      def self.update_node!(node, update_hash)
-        node.merge!(update_hash)
-        node.update(update_hash)
-        node
-      end
-
       def self.external_ref(node)
         node.get_field?(:external_ref) || {}
       end

@@ -38,6 +38,33 @@ module DTK
       def self.return_status_ok
         { status: 'succeeded' }
       end
+
+
+      # param keys are
+      #  base_node, 
+      #  external_ref
+      #  iaas_specfic_params (hash - optional)
+      def self.update_node_from_create_node!(node, iaas_type, instance_id, params = {})
+        eref_update_hash = {instance_id: instance_id, type: iaas_type}.merge(params[:iaas_specfic_params] || {})
+        updated_external_ref = (params[:external_ref] || {}).merge(eref_update_hash)
+        
+        Log.info("#{node_print_form(node)} with ec2 instance id #{instance_id}; waiting for it to be available")
+        node_update_hash = {
+          external_ref: updated_external_ref,
+          type: Node::Type.new_type_when_create_node(params[:base_node]),
+          is_deployed: true,
+          # TODO: better unify these below
+          operational_status: 'starting',
+          admin_op_status: 'pending'
+        }
+        update_node!(node, node_update_hash)
+      end
+
+      def self.update_node!(node, update_hash)
+        node.merge!(update_hash)
+        node.update(update_hash)
+        node
+      end
     end
   end
 end

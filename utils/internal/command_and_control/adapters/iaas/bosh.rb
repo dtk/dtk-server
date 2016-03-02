@@ -20,6 +20,7 @@ module DTK
     class Bosh < self
       r8_nested_require('bosh', 'client')
       r8_nested_require('bosh', 'create_nodes')
+      r8_nested_require('bosh', 'node_id')
 
       def execute(_task_idh, top_task_idh, task_action)
         top_task_id = top_task_idh.get_id
@@ -35,13 +36,17 @@ module DTK
         return_status_ok
       end
 
+      def get_and_update_node_state!(node, attribute_names)
+        pp [:get_and_update_node_state, node, attribute_names]
+        fail ErrorUsage.new("got to get_and_update_node_state!")
+      end
+
       def set_pbuilderid!(node)
         # TODO: write; put it in the external ref
       end
 
       def pbuilderid(node)
-        Log.info_pp(["Need to write Bosh#pbuilderid", node])
-        'dtk/master/0'
+        NodeId.node_id(node)
       end
 
       def destroy_node?(node, _opts = {})

@@ -91,23 +91,13 @@ module DTK; module CommandAndControlAdapter
 
           instance_id = response[:id]
           state = response[:state]
-          update_hash = {
-            instance_id: instance_id,
-            type:        'ec2_instance',
-            size:        flavor_id
-          }
-          updated_external_ref = @external_ref.merge(update_hash)
 
-          Log.info("#{node_print_form} with ec2 instance id #{instance_id}; waiting for it to be available")
-          node_update_hash = {
-            external_ref: updated_external_ref,
-            type: Node::Type.new_type_when_create_node(base_node),
-            is_deployed: true,
-            # TODO: better unify these below
-            operational_status: 'starting',
-            admin_op_status: 'pending'
+          update_params = {
+            base_node: base_node,
+            iaas_specfic_params: { size: flavor_id},
+            external_ref: @external_ref
           }
-          update_node!(node_update_hash)
+          Ec2.update_node_from_create_node!(node, 'ec2_instance', instance_id, update_params)
         end
 
         process_addresses__first_boot?(@node)
@@ -130,6 +120,7 @@ module DTK; module CommandAndControlAdapter
         if er = node_update_hash[:external_ref]
           @external_ref = er
         end
+        # TODO: no sure if '.merge!(node_update_hash)' needed
         @node.merge!(node_update_hash)
       end
 

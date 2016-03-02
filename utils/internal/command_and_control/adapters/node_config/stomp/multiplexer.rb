@@ -29,7 +29,7 @@ module DTK
 
       KEEP_STOMP_ALIVE = R8::Config[:arbiter][:keep_alive_period]
 
-      @@keep_alive_enabled = false
+      @@keep_alive_enabled = true
       # this map is used to keep track of sent / received requirst_ids
       @@callback_registry = {}
       @@callback_heartbeat_registry = {}

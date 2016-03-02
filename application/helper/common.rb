@@ -414,8 +414,13 @@ module Ramaze::Helper
 
     def node_binding_ruleset?(node_template_identifier_param, node_binding_identifier = nil)
       if node_binding_identifier ||= ret_request_params(node_template_identifier_param)
-        unless node_binding_rs_id = NodeBindingRuleset.name_to_id(model_handle(:node_binding_ruleset), node_binding_identifier)
-          fail ::DTK::ErrorUsage.new("Illegal node template indentifier (#{node_binding_identifier})")
+        model_handle = model_handle(:node_binding_ruleset)
+        if node_binding_identifier.match(/^[0-9]+$/)
+          node_binding_rs_id = NodeBindingRuleset.check_valid_id(model_handle, node_binding_identifier)
+        else
+          unless node_binding_rs_id = NodeBindingRuleset.name_to_id(model_handle, node_binding_identifier)
+            fail ::DTK::ErrorUsage.new("Illegal node template indentifier (#{node_binding_identifier})")
+          end
         end
         create_object_from_id(node_binding_rs_id, :node_binding_ruleset)
       end

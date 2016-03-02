@@ -151,9 +151,7 @@ module DTK
     end
 
     def self.get_and_update_node_state!(node, attribute_names)
-      # TODO: Haris - Test more this change
-      adapter_name = node.get_target_iaas_type() || R8::Config[:command_and_control][:iaas][:type]
-      klass = load_for_aux(:iaas, adapter_name)
+      klass = load_iaas_for(node: node)
       klass.get_and_update_node_state!(node, attribute_names)
     end
 

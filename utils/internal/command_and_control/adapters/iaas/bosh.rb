@@ -30,14 +30,18 @@ module DTK
         # TODO: Stub that just assumes one node and does trigger outside of it
         # need to case on task_action
         create_nodes.queue(task_action)
-pp [:create_nodes, create_nodes]
         create_nodes.execute
         create_nodes.remove!(top_task_id)
         return_status_ok
       end
 
-      def destroy_node?(_node, _opts = {})
-        Log.error("Need to write Bosh.destroy_node?")
+      def pbuilderid(node)
+        Log.info_pp(["Need to write Bosh#pbuilderid", node])
+        'i-d8eada58'
+      end
+
+      def destroy_node?(node, _opts = {})
+        Log.info_pp(["Need to write Bosh#destroy_node?", node])
         true 
       end
     end

@@ -18,6 +18,16 @@
 module DTK
   class CommandAndControl
     class IAAS < self
+
+      # Can be overwritten
+      def associate_persistent_dns?(_node)
+      end
+
+      # This should be overwritten
+      def get_and_update_node_state!(_node, _attribute_names)
+        fail Error.new("The method '#{self.class}#get_and_update_node_state' should be defined")
+      end
+
       def self.node_print_form(node)
         "#{node[:display_name]} (#{node[:id]})"
       end

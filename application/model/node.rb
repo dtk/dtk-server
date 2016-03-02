@@ -205,10 +205,6 @@ module DTK
         filter: [:eq, :id, target_id()]
       }
       target_found = Target::Instance.get_obj(model_handle(:target_instance), sp_hash)
-
-      Log.info("Found and using target: ")
-      Log.info_pp(target_found)
-
       target_found
     end
 

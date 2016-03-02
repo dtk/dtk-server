@@ -27,8 +27,6 @@ module DTK
     class StompMultiplexer < ProtocolMultiplexer
       include Singleton
 
-
-      @@listener_active = false
       # this map is used to keep track of sent / received requirst_ids
       @@callback_registry = {}
       @@callback_heartbeat_registry = {}
@@ -45,7 +43,8 @@ module DTK
       def create_message(uuid, msg, agent, pbuilderid)
         msg.merge({
           request_id: uuid,
-          pbuilderid: pbuilderid
+          pbuilderid: pbuilderid,
+          agent: agent
         })
       end
 
@@ -71,10 +70,15 @@ module DTK
         @@callback_heartbeat_registry.delete(pbuilder_id)
       end
 
+      def send_ping_request
+        message = create_message(generate_request_id, {}, 'discovery', "/^(.*)$/")
+        @stomp_client.publish(message)
+      end
+
       def sendreq_with_callback(msg, agent, context_with_callbacks, filter = {})
         trigger = {
           generate_request_id: proc do |client|
-            ::MCollective::SSL.uuid.gsub("-", "")
+            generate_request_id
           end,
           send_message: proc do |client, reqid|
             pbuilderid = filter['fact'].first[:value]
@@ -91,6 +95,14 @@ module DTK
 
         process_request(trigger, context_with_callbacks)
       end
+
+    private
+
+      def generate_request_id
+        ::MCollective::SSL.uuid.gsub("-", "")
+      end
+
+
     end
   end
 end

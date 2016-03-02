@@ -54,7 +54,8 @@ module DTK
         pp [:version_obj, version_obj]
         deployment_params = {
           director_uuid: @bosh_client.director_uuid,
-          release: { name: release_name, version: version_obj.version }
+          release: { name: release_name, version: version_obj.version },
+          deployment_name: deployment_name
         }
         manifest_yaml = DeploymentManifest.generate_yaml(deployment_params)
         deploy_result = @bosh_client.deploy(manifest_yaml)

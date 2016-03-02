@@ -35,9 +35,13 @@ module DTK
         return_status_ok
       end
 
+      def set_pbuilderid!(node)
+        # TODO: write; put it in the external ref
+      end
+
       def pbuilderid(node)
         Log.info_pp(["Need to write Bosh#pbuilderid", node])
-        'i-d8eada58'
+        'dtk/master/0'
       end
 
       def destroy_node?(node, _opts = {})

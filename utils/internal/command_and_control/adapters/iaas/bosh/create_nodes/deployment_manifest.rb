@@ -27,10 +27,15 @@ module DTK
           dtk_server_host: '10.0.0.253',
           arbiter_ssh_private_key: arbiter_ssh_private_key,
           director_uuid: required_param(:director_uuid),
-          release: required_param(:release)
+          release: required_param(:release),
+          deployment_name: required_param(:deployment_name),
+          instances: param(:instances) || 1,
         }
       end
 
+      def param(key)
+        @params[key]
+      end
       def required_param(key)
         unless @params.has_key?(key)
           fail Error.new("Missing required param '#{key}'")
@@ -47,7 +52,7 @@ module DTK
 
       ManifestTemplate = Erubis::Eruby.new <<eos
 ---
-name: dtk
+name: <%= deployment_name %>
 director_uuid: <%= director_uuid %>
 
 networks:
@@ -82,7 +87,7 @@ releases:
 
 jobs:
 - name: master
-  instances: 1
+  instances: <%= instances %>
   templates:
   - name: dtk-agent
   resource_pool: default
@@ -106,7 +111,6 @@ properties:
     arbiter_ssh_private_key: |
 <%= arbiter_ssh_private_key %>
     git_server_url: "ssh://git1@<%= dtk_server_host %>:2222"
-    pbuilderid: i-d8eada58
 eos
     end
   end

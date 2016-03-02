@@ -8,8 +8,10 @@ module DTK
     # API information can be found here: https://bosh.io/docs/director-api-v1.html
     #
     class Client
-      r8_nested_require('client', 'poll_task') 
-      include PollTaskMixin
+      r8_nested_require('client', 'task') 
+      r8_nested_require('client', 'releases') 
+      include TaskMixin
+      include ReleasesMixin
 
       ClientDefaults = {
         scheme: 'https',

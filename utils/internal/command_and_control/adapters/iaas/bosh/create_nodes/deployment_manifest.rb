@@ -11,7 +11,7 @@ module DTK
         new(create_nodes_proc).generate_yaml
       end
 
-      def initialize(params = {})
+      def initialize(params)
         @params = params
       end
       private :initialize
@@ -26,9 +26,16 @@ module DTK
         {
           dtk_server_host: '10.0.0.253',
           arbiter_ssh_private_key: arbiter_ssh_private_key,
-          director_uuid: @params[:director_uuid],
-          release: { name: 'dtk-agent', version: '0+dev.1' }
+          director_uuid: required_param(:director_uuid),
+          release: required_param(:release)
         }
+      end
+
+      def required_param(key)
+        unless @params.has_key?(key)
+          fail Error.new("Missing required param '#{key}'")
+        end
+        @params[key]
       end
 
       KeyIdentInYaml = 6 

@@ -1,21 +1,20 @@
 module DTK; class CommandAndControl::IAAS::Bosh
   class Client
-    module PollTaskMixin
+    module TaskMixin
       def poll_task_until_steady_state(id, output_type = nil)
-        PollTask.poll_task_until_steady_state(self, id, output_type)
+        Task.poll_task_until_steady_state(self, id, output_type)
       end
     end
     
-    class PollTask
+    class Task
       NumTimesToPoll = 30
       SleepInterval  = 1
       module State
-        Timeout  = 'timeout'
+        Timeout = 'timeout'
       end
       module States
-        Error = ['error']
-        Ok    = ['done']
-        End   = Error + Ok
+        Error       = ['error']
+        SteadyState = ['done', 'processing'] + Error 
       end
 
       # Represents end state
@@ -31,7 +30,7 @@ module DTK; class CommandAndControl::IAAS::Bosh
           task_result_hash = client.task(task_id)
           pp [:bosh_task, count, task_result_hash]
           sleep SleepInterval
-          process = false if count > NumTimesToPoll or States::End.include?(task_state(task_result_hash))
+          process = false if count > NumTimesToPoll or States::SteadyState.include?(task_state(task_result_hash))
         end
         if count > NumTimesToPoll
           new('state' => State::Timeout)
@@ -40,7 +39,7 @@ module DTK; class CommandAndControl::IAAS::Bosh
         end
       end
 
-      # Returns error message f theeris an error
+      # Returns error message if there is an error
       def error?
         if States::Error.include?(task_state)
           result

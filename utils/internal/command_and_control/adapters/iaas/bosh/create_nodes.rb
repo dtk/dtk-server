@@ -47,9 +47,16 @@ module DTK
 
       def execute
         deployment_name = 'dtk'
-        pp [:bosh_client_info, @bosh_client.info]
-##        pp [:bosh_deployment_vms, @bosh_client.deployment_vms(deployment_name)]
-        manifest_yaml = DeploymentManifest.generate_yaml(director_uuid: @bosh_client.director_uuid)
+        release_name = 'dtk-agent'
+        unless version_obj = @bosh_client.latest_release_version?(release_name)
+          fail ErrorUsage.new("BOSH release '#{release_name}' does not exist")
+        end
+        pp [:version_obj, version_obj]
+        deployment_params = {
+          director_uuid: @bosh_client.director_uuid,
+          release: { name: release_name, version: version_obj.version }
+        }
+        manifest_yaml = DeploymentManifest.generate_yaml(deployment_params)
         deploy_result = @bosh_client.deploy(manifest_yaml)
         if bosh_task_id = deploy_result[:task_id]
           steady_state = @bosh_client.poll_task_until_steady_state(bosh_task_id)

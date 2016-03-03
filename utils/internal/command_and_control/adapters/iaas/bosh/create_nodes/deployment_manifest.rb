@@ -30,6 +30,7 @@ module DTK
           release: required_param(:release),
           deployment_name: required_param(:deployment_name),
           job_objects: required_param(:job_objects),
+          repo_user: R8::Config[:repo][:git][:server_username],
         }
       end
 
@@ -112,7 +113,7 @@ properties:
     arbiter_queue: /queue/arbiter.dtk1.reply
     arbiter_ssh_private_key: |
 <%= arbiter_ssh_private_key %>
-    git_server_url: "ssh://git1@<%= dtk_server_host %>:2222"
+    git_server_url: "ssh://<%= repo_user %>@<%= dtk_server_host %>:2222"
 eos
     end
   end

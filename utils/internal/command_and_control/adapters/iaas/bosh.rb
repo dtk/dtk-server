@@ -28,8 +28,9 @@ module DTK
         target = task_action.target()
         create_nodes = CreateNodes.get_or_create(top_task, target)
         create_nodes.queue(task_action)
-        if task_action[:trigger_create_nodes]
-        create_nodes.execute_if_last_bosh_create_subtask?(task_action)
+        if task_action[:initiate_create_nodes]
+          create_nodes.dispatch_bosh_deployment
+        end
         return_status_ok
       end
 
@@ -40,11 +41,7 @@ module DTK
         fail ErrorUsage.new("got to get_and_update_node_state!")
       end
 
-      def set_pbuilderid!(node)
-        # TODO: write; put it in the external ref
-      end
-
-      def pbuilderid(node)
+       def pbuilderid(node)
         InstanceId.node_id(node)
       end
 

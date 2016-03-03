@@ -83,21 +83,20 @@ module DTK
             # TODO: hack for DTK-2471 that needs to be cleaned up
             # Does not allow mxied bosh and non bosh
             # This intercepts a create node stages subtask and makes into one queue tasks
-            bulked_up_create_nodes?(task, context) || compute_process_body_concurrent(task.subtasks, context)
+            bulked_up_create_nodes?(task.subtasks, context) || compute_process_body_concurrent(task.subtasks, context)
           else
             Log.error('do not have rules to process task')
         end
       end
 
       # TODO: DTK-2471: begin: ============================================
-      def bulked_up_create_nodes?(task, context)
-        subtasks = task[:subtasks] || []
+      def bulked_up_create_nodes?(subtasks, context)
         unless subtasks.empty?
           if subtasks.find { |subtask| bosh_create_node?(subtask) }
             if subtasks.find { |subtask| ! bosh_create_node?(subtask) }
               fail ErrorUsage.new("Not Handling create nodes with mixed BOSH and non-BOSH nodes")
             end
-            compute_process_body_reformatted_bulked_up_create_nodes(task, context)
+            compute_process_body_reformatted_bulked_up_create_nodes(subtasks, context)
           end
         end
       end
@@ -112,21 +111,23 @@ module DTK
         end
       end
       
-      def compute_process_body_reformatted_bulked_up_create_nodes(task, context)
-        queue_tasks = task.subasks do |task|
-          participant_executable_action(:create_node, task, context, task_start: true)
+      def compute_process_body_reformatted_bulked_up_create_nodes(subtasks, context)
+        # mark last subtask to initiate create nodes
+        mark_initiate_create_nodes!(subtasks)
+        queue_tasks = subtasks.map do |task|
+          sequence([participant_executable_action(:create_node, task, context, task_start: true)])
         end
-        # mark last queue task to trigger deployment
-        mark_trigger_deployment!(queue_tasks)
-        detect_created_tasks = task.subasks do |task|
-          participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
+Log.error("Need to format right way the detect_created_tasks")
+return sequence(queue_tasks)
+        detect_created_tasks = subtasks.map do |task|
+          sequence([participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)])
         end
-        sequence(*(queue_tasks + concurrence(*detect_created_tasks)))
+        sequence(queue_tasks + concurrence(detect_created_tasks))
       end
 
-      def mark_trigger_deployment!(queue_tasks)
-        last_task = queue_tasks.last
-        last_task[:executable_action].merge!(trigger_deployment: true)
+      def mark_initiate_create_nodes!(subtasks)
+        last_task = subtasks.last
+        last_task[:executable_action].merge!(initiate_create_nodes: true)
       end
   
       # TODO: DTK-2471: end: ============================================

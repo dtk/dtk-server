@@ -31,6 +31,7 @@ module DTK
           deployment_name: required_param(:deployment_name),
           job_objects: required_param(:job_objects),
           repo_user: R8::Config[:repo][:git][:server_username],
+          ec2_vpc_subnet: R8::Config[:bosh][:ec2][:vpc_subnet],
         }
       end
 
@@ -60,7 +61,8 @@ networks:
 - name: default
   subnets:
   - cloud_properties:
-      subnet: subnet-94b11ce2
+      subnet: <%= ec2_vpc_subnet %>
+    # This is ignored since dynamic
     range: 10.0.0.0/24
   type: dynamic
 

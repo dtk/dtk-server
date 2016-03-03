@@ -72,8 +72,23 @@ module DTK
         get(url)
       end
 
+      VMInfo = Struct.new(:name, :host_addresses_ipv4)
+
       def vm_info(node)
-        deployment_vms(InstanceId.new(node).deployment_name, full_format: true)
+        node_name = node.get_field?(:display_name)
+        job_name, index = InstanceId.bosh_job_and_index(node)
+        vm_info_results = deployment_vms(InstanceId.new(node).deployment_name, full_format: true)
+        matching_result = vm_info_results.find do |result|
+          result['job_name'] == job_name and result['index'] == index
+        end
+        host_addresses_ipv4 = nil
+        unless matching_result
+          Log.error("Unexpected that did not find VM info for node '#{node_name}'")
+        else
+          host_addresses_ipv4 = matching_result['ips'] || []
+          host_addresses_ipv4 = nil if host_addresses_ipv4.empty?
+        end
+        VMInfo.new(node_name, host_addresses_ipv4)
       end
 
       # opts can have
@@ -87,8 +102,9 @@ module DTK
           unless task_id = task_info['id']
             fail Error.new("Unexpected that no 'id' in #{task_info.inspect}")
           end
-          task_obj = poll_task_until_steady_state(task_id)
-          task_obj.result
+          result = poll_task_until_steady_state(task_id).result
+          # make sure that it is an array, even singletun
+          result.kind_of?(Array) ? result : [result]
         end
       end
 
@@ -141,10 +157,18 @@ module DTK
       end
 
       def wrap_response
+       # some results cannot be parsed e.g. log outputs
         begin
-          result = yield
-          # some results cannot be parsed e.g. log outputs
-          JSON.parse yield rescue { output: result }
+          json_lines = yield
+          begin
+            ret = []
+            json_lines.each_line do |json_string|
+              ret << JSON.parse(json_string)
+            end
+            ret.size == 1 ? ret.first : ret
+           rescue 
+              { output: json_lines }
+            end
         rescue ::RestClient::Exception => e
           # there are cases where 301, 302 are returned for long running processes
           # these are success responses, as explained https://bosh.io/docs/director-api-v1.html#long-running-ops

@@ -35,10 +35,18 @@ module DTK
       end
 
       def get_and_update_node_state!(node, attribute_names)
-        pp [:get_and_update_node_state, node, attribute_names]
-        node_info = Client.new.vm_info(node)
-        pp [:node_info, node_info]
-        {host_addresses_ipv4: '0.0.0.1'}
+        ret = {}
+        if attribute_names.include?(:host_addresses_ipv4)
+          if host_addresses_ipv4 = Client.new.vm_info(node).host_addresses_ipv4
+            Log.info("Info from BOSH Director: node '#{node.get_field?(:display_name)}' with id '#{node.id}' has host addresses: #{host_addresses_ipv4.join(', ')}")
+          end
+          ret.merge!(host_addresses_ipv4: Client.new.vm_info(node).host_addresses_ipv4)
+        end
+        other =  attribute_names - [:host_addresses_ipv4]
+        unless other.empty?
+          Log.error("Not treating update of BOSH node attributes: #{other.join(', ')}")
+        end
+        ret        
       end
 
        def pbuilderid(node)

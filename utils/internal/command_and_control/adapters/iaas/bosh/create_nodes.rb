@@ -20,22 +20,28 @@ module DTK; class CommandAndControl::IAAS
     class CreateNodes
       r8_nested_require('create_nodes', 'deployment_manifest')
 
-      def self.get_or_create(top_task_id, target)
-        (@@active_tasks ||= {})[top_task_id] || @@active_tasks[top_task_id] = new(top_task_id, target)
+      def self.get_or_create(top_task, target)
+        top_task_list_add!(top_task, target)
       end
 
-      def remove!(top_task_id)
-        @@active_tasks.delete(top_task_id)
-      end
-
+      attr_accessor :count 
       NodeInfo = Struct.new(:node, :index, :base_node)
-      def initialize(top_task_id, target)
-        @top_task_id = top_task_id
-        @target      = target 
-        @bosh_client      = Bosh::Client.new('52.71.180.183')
-        @node_objects       = [] # Array of NodeInfo
+      def initialize(top_task, target)
+        @total_bosh_count = 3
+        @count        = 1
+        @top_task     = top_task
+        @target       = target 
+        @bosh_client  = Bosh::Client.new('52.71.180.183')
+        @node_objects = [] # Array of NodeInfo
       end
       private :initialize
+
+      def execute_if_last_bosh_create_subtask?(task_action)
+        if @total_bosh_count == @count
+          dispatch_bosh_deployment
+          top_task_list_remove!
+        end
+      end
 
       def queue(task_action)
         base_node = task_action.base_node()
@@ -45,7 +51,10 @@ module DTK; class CommandAndControl::IAAS
         end
       end
 
-      def execute
+      private
+
+
+      def dispatch_bosh_deployment
         deployment_name = 'dtk'
         release_name = 'dtk-agent'
         unless version_obj = @bosh_client.latest_release_version?(release_name)
@@ -77,6 +86,24 @@ module DTK; class CommandAndControl::IAAS
         pp [:group_name, group_name, node_obj.index]
         instance_id = InstanceId.compute_instance_id(group_name, node_obj.index, deployment_name)
         Bosh.update_node_from_create_node!(node, 'bosh_instance', instance_id, update_params) # TODO: use a constant rather than 'bosh_instance'
+      end
+
+      def self.top_task_list_add!(top_task, target)
+        top_task_id = top_task.id
+        if create_nodes_obj = (@@active_tasks ||= {})[top_task_id]
+          create_nodes_obj.count = create_nodes_obj.count + 1
+        else
+          create_nodes_obj = @@active_tasks[top_task_id] = new(top_task, target)
+        end
+        create_nodes_obj
+      end
+
+      def top_task_list_remove!
+        (@@active_tasks ||= {}).delete(top_task_id)
+      end
+
+      def top_task_id
+        @top_task.id
       end
     end
   end

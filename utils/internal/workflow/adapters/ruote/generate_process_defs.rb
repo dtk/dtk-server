@@ -80,11 +80,56 @@ module DTK
           when :sequential
             compute_process_body_sequential(task.subtasks, context)
           when :concurrent
-            compute_process_body_concurrent(task.subtasks, context)
+            # TODO: hack for DTK-2471 that needs to be cleaned up
+            # Does not allow mxied bosh and non bosh
+            # This intercepts a create node stages subtask and makes into one queue tasks
+            bulked_up_create_nodes?(task, context) || compute_process_body_concurrent(task.subtasks, context)
           else
             Log.error('do not have rules to process task')
         end
       end
+
+      # TODO: DTK-2471: begin: ============================================
+      def bulked_up_create_nodes?(task, context)
+        subtasks = task[:subtasks] || []
+        unless subtasks.empty?
+          if subtasks.find { |subtask| bosh_create_node?(subtask) }
+            if subtasks.find { |subtask| ! bosh_create_node?(subtask) }
+              fail ErrorUsage.new("Not Handling create nodes with mixed BOSH and non-BOSH nodes")
+            end
+            compute_process_body_reformatted_bulked_up_create_nodes(task, context)
+          end
+        end
+      end
+
+      def bosh_create_node?(subtask)
+        if executable_action = subtask[:executable_action]
+          if executable_action.kind_of?(Task::Action::CreateNode)
+            if external_ref = (executable_action[:node] || {})[:external_ref]
+              external_ref[:type] == 'bosh_instance'
+            end
+          end
+        end
+      end
+      
+      def compute_process_body_reformatted_bulked_up_create_nodes(task, context)
+        queue_tasks = task.subasks do |task|
+          participant_executable_action(:create_node, task, context, task_start: true)
+        end
+        # mark last queue task to trigger deployment
+        mark_trigger_deployment!(queue_tasks)
+        detect_created_tasks = task.subasks do |task|
+          participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
+        end
+        sequence(*(queue_tasks + concurrence(*detect_created_tasks)))
+      end
+
+      def mark_trigger_deployment!(queue_tasks)
+        last_task = queue_tasks.last
+        last_task[:executable_action].merge!(trigger_deployment: true)
+      end
+  
+      # TODO: DTK-2471: end: ============================================
 
       def compute_process_body_sequential(subtasks, context)
         sts = subtasks.map do |t|

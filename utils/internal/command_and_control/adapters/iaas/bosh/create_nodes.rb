@@ -24,36 +24,37 @@ module DTK; class CommandAndControl::IAAS
         top_task_list_add!(top_task, target)
       end
 
-      NodeInfo = Struct.new(:node, :index, :base_node)
+      NodeInfo = Struct.new(:node, :base_node)
       def initialize(top_task_idh, target)
         @top_task_idh  = top_task_idh
         @target       = target 
-        @bosh_client  = Bosh::Client.new('52.71.180.183')
+        @bosh_client  = Bosh::Client.new
         @node_objects = [] # Array of NodeInfo
       end
       private :initialize
 
       def queue(task_action)
         base_node = task_action.base_node()
-        nodes = task_action.nodes.each_with_index do |node, index|
+        nodes = task_action.nodes.each do |node|
           node.update_object!(:external_ref, :assembly_id)
-          @node_objects << NodeInfo.new(node, index, base_node)
+          @node_objects << NodeInfo.new(node, base_node)
         end
       end
 
+      ReleaseName = 'dtk-agent'
       def dispatch_bosh_deployment
+        # TODO: stub; nailed deployment_name
         deployment_name = 'dtk'
-        release_name = 'dtk-agent'
-        unless version_obj = @bosh_client.latest_release_version?(release_name)
-          fail ErrorUsage.new("BOSH release '#{release_name}' does not exist")
+        unless version_obj = @bosh_client.latest_release_version?(ReleaseName)
+          fail ErrorUsage.new("BOSH release '#{ReleaseName}' does not exist")
         end
         version = version_obj.version
         Log.info("Using BOSH release '#{version}'")
         deployment_params = {
           director_uuid: @bosh_client.director_uuid,
-          release: { name: release_name, version: version },
+          release: { name: ReleaseName, version: version },
           deployment_name: deployment_name,
-          instances: @node_objects.size,
+          job_objects: job_objects,
         }
         manifest_yaml = DeploymentManifest.generate_yaml(deployment_params)
         deploy_task = @bosh_client.deploy(manifest_yaml)
@@ -63,6 +64,7 @@ module DTK; class CommandAndControl::IAAS
         @node_objects.each { |node_obj| update_node_from_create_node!(node_obj, deployment_name) }
         top_task_list_remove!
         fail ErrorUsage.new("got here")
+
       end
 
       private
@@ -74,12 +76,23 @@ module DTK; class CommandAndControl::IAAS
           base_node: base_node,
           external_ref: node.get_field?(:external_ref)
         }
-        group_name = node.get_field?(:display_name).gsub(/:[0-9]+$/,'') # TODO: use standard fns to do this
-        pp [:group_name, group_name, node_obj.index]
-        instance_id = InstanceId.compute_instance_id(group_name, node_obj.index, deployment_name)
+        instance_id = InstanceId.compute_instance_id(node, deployment_name)
 #        Bosh.update_node_from_create_node!(node, 'bosh_instance', instance_id, update_params) # TODO: use a constant rather than 'bosh_instance'
       end
 
+      JobObject = Struct.new(:name, :instances)
+      def job_objects
+        ndx_job_instances = {}
+        @node_objects.each do |node_obj|
+          node = node_obj.node
+          job, index = InstanceId.bosh_job_and_index(node)
+          count = ndx_job_instances[job] ||= 1
+          ndx_job_instances[job] = index + 1 if index >= count 
+        end
+        ret = []
+        ndx_job_instances.each_pair { |name, instances| ret << JobObject.new(name, instances) }
+        ret
+      end
 
       def self.top_task_list_add!(top_task, target)
         top_task_id = top_task.id

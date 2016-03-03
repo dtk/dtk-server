@@ -20,8 +20,15 @@ module DTK
         password: 'admin'
       }
 
+      # TODO: temp
+      def director_host_address
+        R8::Config[:bosh][:director][:host_address] ||
+          fail(Error.new("BOSH director host address is not set"))
+      end
+
       attr_reader :director_uuid
-      def initialize(director_host, options = {})
+      def initialize(director_host = nil, options = {})
+        director_host         ||= director_host_address
         @uri                  = Addressable::URI.new(ClientDefaults.merge(host: director_host).merge(options))
         @director_uuid        = director_uuid # most be called after uri set
         @default_post_headers = { headers: { 'Content-Type' => 'text/yaml' }}

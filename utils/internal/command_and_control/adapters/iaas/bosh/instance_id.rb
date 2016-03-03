@@ -29,8 +29,22 @@ module DTK
         (node.get_field?(:external_ref) || {})[:instance_id]
       end
 
-      # BOSH job is equiavlent of node group name
-      def self.compute_instance_id(bosh_job, index, deployment_name)
+      # returns [bosh_job, index]
+      def self.bosh_job_and_index(node)
+        index = 0
+        node_name = node.get_field?(:display_name)
+        if node_name =~ Regexp.new("(^.+)#{GroupNameDelim}([0-9]+$)")
+          bosh_job, index = [$1, $2.to_i - 1]
+        else
+          bosh_job = node_name
+        end
+        [bosh_job, index]
+      end
+      # TODO: get from encapsulated place
+      GroupNameDelim = ':'
+
+      def self.compute_instance_id(node, deployment_name)
+        bosh_job, index = bosh_job_and_index(node)
         [deployment_name, bosh_job, index].join(Delimiter)
       end
       Delimiter = '--'

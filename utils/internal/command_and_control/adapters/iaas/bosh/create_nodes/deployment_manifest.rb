@@ -7,8 +7,8 @@ module DTK
     # API information can be found here: https://bosh.io/docs/director-api-v1.html
     #
     class DeploymentManifest
-      def self.generate_yaml(create_nodes_proc)
-        new(create_nodes_proc).generate_yaml
+      def self.generate_yaml(params)
+        new(params).generate_yaml
       end
 
       def initialize(params)
@@ -24,12 +24,12 @@ module DTK
 
       def erb_values
         {
-          dtk_server_host: '10.0.0.253',
+          dtk_server_host: R8::Config[:stomp][:host], 
           arbiter_ssh_private_key: arbiter_ssh_private_key,
           director_uuid: required_param(:director_uuid),
           release: required_param(:release),
           deployment_name: required_param(:deployment_name),
-          instances: param(:instances) || 1,
+          job_objects: required_param(:job_objects),
         }
       end
 
@@ -86,13 +86,15 @@ releases:
   version: <%= release[:version] %>
 
 jobs:
-- name: master
-  instances: <%= instances %>
+<% job_objects.each do |job_obj| -%>
+- name: <%= job_obj.name %>
+  instances: <%= job_obj.instances %>
   templates:
   - name: dtk-agent
   resource_pool: default
   networks:
   - name: default
+<% end -%>
 
 update:
   canaries: 1

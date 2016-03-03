@@ -36,7 +36,7 @@ module DTK
 
       def get_and_update_node_state!(node, attribute_names)
         pp [:get_and_update_node_state, node, attribute_names]
-        node_info = Client.new('52.71.180.183').vm_info(node)
+        node_info = Client.new.vm_info(node)
         pp [:node_info, node_info]
         fail ErrorUsage.new("got to get_and_update_node_state!")
       end

@@ -52,7 +52,7 @@ module DTK
         ImageInfoCache.get_or_set(:image_get, conn, id, mutex: true) do
           begin
             hash_form(conn.images.get(id))
-          rescue e
+          rescue Exception => e
             unless defined?(PhusionPassenger)
               # DEBUG SNIPPET >>> REMOVE <<<
               require (RUBY_VERSION.match(/1\.8\..*/) ? 'ruby-debug' : 'debugger');Debugger.start; Debugger

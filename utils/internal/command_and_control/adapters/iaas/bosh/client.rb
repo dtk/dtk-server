@@ -64,7 +64,7 @@ module DTK
       end
 
       def vm_info(node)
-        deployment_vms(NodeId.new(node).deployment_name, full_format: true)
+        deployment_vms(InstanceId.new(node).deployment_name, full_format: true)
       end
 
       # opts can have

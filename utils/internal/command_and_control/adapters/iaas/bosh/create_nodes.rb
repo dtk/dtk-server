@@ -28,20 +28,20 @@ module DTK; class CommandAndControl::IAAS
         @@active_tasks.delete(top_task_id)
       end
 
-      NodeInfo = Struct.new(:node, :base_node)
+      NodeInfo = Struct.new(:node, :index, :base_node)
       def initialize(top_task_id, target)
         @top_task_id = top_task_id
         @target      = target 
         @bosh_client      = Bosh::Client.new('52.71.180.183')
-        @nodes       = [] # Array of NodeInfo
+        @node_objects       = [] # Array of NodeInfo
       end
       private :initialize
 
       def queue(task_action)
         base_node = task_action.base_node()
-        nodes = task_action.nodes.each do |node|
+        nodes = task_action.nodes.each_with_index do |node, index|
           node.update_object!(:external_ref, :assembly_id)
-          @nodes << NodeInfo.new(node, base_node)
+          @node_objects << NodeInfo.new(node, index, base_node)
         end
       end
 
@@ -55,23 +55,28 @@ module DTK; class CommandAndControl::IAAS
         deployment_params = {
           director_uuid: @bosh_client.director_uuid,
           release: { name: release_name, version: version_obj.version },
-          deployment_name: deployment_name
+          deployment_name: deployment_name,
+          instances: @node_objects.size,
         }
         manifest_yaml = DeploymentManifest.generate_yaml(deployment_params)
         deploy_task = @bosh_client.deploy(manifest_yaml)
         if error_msg = deploy_task.error?
           fail ErrorUsage.new(error_msg)
         end
-        @nodes.each { |n| update_node_from_create_node!(n.node, n.base_node) }
+        @node_objects.each { |node_obj| update_node_from_create_node!(node_obj, deployment_name) }
       end
 
-      def update_node_from_create_node!(node, base_node)
+      def update_node_from_create_node!(node_obj, deployment_name)
+        node = node_obj.node
+        base_node = node_obj.base_node
         update_params = {
           base_node: base_node,
           external_ref: node.get_field?(:external_ref)
         }
-        instance_id = NodeId.compute_node_id(node)
-        Bosh.update_node_from_create_node!(node, 'bosh_instance', instance_id, update_params)
+        group_name = node.get_field?(:display_name).gsub(/:[0-9]+$/,'') # TODO: use standard fns to do this
+        pp [:group_name, group_name, node_obj.index]
+        instance_id = InstanceId.compute_instance_id(group_name, node_obj.index, deployment_name)
+        Bosh.update_node_from_create_node!(node, 'bosh_instance', instance_id, update_params) # TODO: use a constant rather than 'bosh_instance'
       end
     end
   end

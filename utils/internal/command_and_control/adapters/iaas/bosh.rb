@@ -20,7 +20,7 @@ module DTK
     class Bosh < self
       r8_nested_require('bosh', 'client')
       r8_nested_require('bosh', 'create_nodes')
-      r8_nested_require('bosh', 'node_id')
+      r8_nested_require('bosh', 'instance_id')
 
       def execute(_task_idh, top_task_idh, task_action)
         top_task_id = top_task_idh.get_id
@@ -48,7 +48,7 @@ module DTK
       end
 
       def pbuilderid(node)
-        NodeId.node_id(node)
+        InstanceId.node_id(node)
       end
 
       def destroy_node?(node, _opts = {})

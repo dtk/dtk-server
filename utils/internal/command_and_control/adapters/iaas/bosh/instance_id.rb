@@ -17,7 +17,7 @@
 #
 module DTK
   class CommandAndControl::IAAS::Bosh
-    class NodeId
+    class InstanceId
       attr_reader :deployment_name, :job, :index
       def initialize(node)
         @node = node
@@ -29,10 +29,9 @@ module DTK
         (node.get_field?(:external_ref) || {})[:instance_id]
       end
 
-      def self.compute_node_id(node)
-        # TODO: stub
-        node_id_info = ['dtk', 'master', '0']
-         node_id_info.join(Delimiter)
+      # BOSH job is equiavlent of node group name
+      def self.compute_instance_id(bosh_job, index, deployment_name)
+        [deployment_name, bosh_job, index].join(Delimiter)
       end
       Delimiter = '--'
 

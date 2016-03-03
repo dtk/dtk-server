@@ -17,7 +17,9 @@ module DTK
       private :initialize
 
       def generate_yaml
-        ManifestTemplate.result(erb_values)
+        ret = ManifestTemplate.result(erb_values)
+STDOUT << ret
+ret
       end
       
       private

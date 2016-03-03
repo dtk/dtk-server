@@ -38,7 +38,7 @@ module DTK
         pp [:get_and_update_node_state, node, attribute_names]
         node_info = Client.new.vm_info(node)
         pp [:node_info, node_info]
-        fail ErrorUsage.new("got to get_and_update_node_state!")
+        {host_addresses_ipv4: '0.0.0.1'}
       end
 
        def pbuilderid(node)

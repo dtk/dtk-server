@@ -63,8 +63,6 @@ module DTK; class CommandAndControl::IAAS
         end
         @node_objects.each { |node_obj| update_node_from_create_node!(node_obj, deployment_name) }
         top_task_list_remove!
-        fail ErrorUsage.new("got here")
-
       end
 
       private
@@ -77,7 +75,7 @@ module DTK; class CommandAndControl::IAAS
           external_ref: node.get_field?(:external_ref)
         }
         instance_id = InstanceId.compute_instance_id(node, deployment_name)
-#        Bosh.update_node_from_create_node!(node, 'bosh_instance', instance_id, update_params) # TODO: use a constant rather than 'bosh_instance'
+        Bosh.update_node_from_create_node!(node, 'bosh_instance', instance_id, update_params) # TODO: use a constant rather than 'bosh_instance'
       end
 
       JobObject = Struct.new(:name, :instances)

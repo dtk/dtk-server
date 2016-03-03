@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module XYZ
+module DTK
   class TaskEvent < Model
     def self.create_event?(event_type, task, result)
       action = task[:executable_action]

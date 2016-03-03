@@ -54,10 +54,12 @@ module DTK
         get('/releases')
       end
 
-      # @returns (Hash)
-      #  Hash contains :task_url, :task_id
+      # @returns Task object
       def deploy(manifest_yaml)
-        post('/deployments', manifest_yaml)
+        task = post('/deployments', manifest_yaml)
+        # TODO: Distingusih between tasks taht are processing from tasks that are done in message
+        Log.info("Launching BOSH Task '#{task.task_id}'")
+        task
       end
 
       def delete_deployment(deployment_name)

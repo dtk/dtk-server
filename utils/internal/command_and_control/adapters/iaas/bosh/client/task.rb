@@ -26,13 +26,13 @@ module DTK; class CommandAndControl::IAAS::Bosh
       end
       private :initialize
 
+      # Returns Task object
       def self.poll_task_until_steady_state(client, task_id)
         process = true
         count = 0
         while process
           count += 1
           task_result_hash = client.task(task_id)
-pp [:task_result_hash, task_result_hash]
           sleep SleepInterval
           process = false if count > NumTimesToPoll or States::SteadyState.include?(task_state(task_result_hash))
         end
@@ -53,11 +53,11 @@ pp [:task_result_hash, task_result_hash]
         result_field.empty? ? @client.task(task_id, 'result') : result_field
       end
 
-      private
-
       def task_id
         @task_result_hash['id']
       end
+
+      private
 
       def task_result_field
         @task_result_hash['result']

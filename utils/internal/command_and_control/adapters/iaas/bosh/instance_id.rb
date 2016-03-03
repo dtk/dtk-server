@@ -54,7 +54,6 @@ module DTK
       # returns [deployment_name, job, index]
       def parsed_node_id
         ret = node_id.split(Delimiter)
-        pp [:node_id_split, ret]
         unless ret.size == 3 and ret[2] =~ /^[0-9]+$/
           fail Error.new("Node id '#{node_id}' has unexpected form")
         end

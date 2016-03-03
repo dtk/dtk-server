@@ -115,21 +115,21 @@ module DTK
         # mark last subtask to initiate create nodes
         mark_initiate_create_nodes!(subtasks)
         queue_tasks = subtasks.map do |task|
-          sequence([participant_executable_action(:create_node, task, context, task_start: true)])
+          participant_executable_action(:create_node, task, context, task_start: true)
         end
-Log.error("Need to format right way the detect_created_tasks")
-return sequence(queue_tasks)
         detect_created_tasks = subtasks.map do |task|
-          sequence([participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)])
+          participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
         end
-        sequence(queue_tasks + concurrence(detect_created_tasks))
+        # TODO: double check this logic; but since the detect_created_tasks doing same thing; we can make them sequential and then
+        # have first one cache results for rest
+        sequence(queue_tasks + detect_created_tasks)
       end
 
       def mark_initiate_create_nodes!(subtasks)
         last_task = subtasks.last
         last_task[:executable_action].merge!(initiate_create_nodes: true)
       end
-  
+
       # TODO: DTK-2471: end: ============================================
 
       def compute_process_body_sequential(subtasks, context)

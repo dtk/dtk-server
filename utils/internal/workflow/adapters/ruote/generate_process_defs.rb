@@ -37,6 +37,7 @@ module DTK
       ####semantic processing
       def decomposition(task, context)
         action = task[:executable_action]
+        # Task::Action::PowerOnNode must be tested before Task::Action::CreateNode
         if action.is_a?(Task::Action::PowerOnNode)
           detect_when_ready = participant_executable_action(:power_on_node, task, context, task_type: 'power_on_node', task_end: true, task_start: true)
           sequence([detect_when_ready])
@@ -103,7 +104,7 @@ module DTK
 
       def bosh_create_node?(subtask)
         if executable_action = subtask[:executable_action]
-          if executable_action.kind_of?(Task::Action::CreateNode)
+          if executable_action.kind_of?(Task::Action::CreateNode) and ! executable_action.kind_of?(Task::Action::PowerOnNode)
             if external_ref = (executable_action[:node] || {})[:external_ref]
               external_ref[:type] == 'bosh_instance'
             end

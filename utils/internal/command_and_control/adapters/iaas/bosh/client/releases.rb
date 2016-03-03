@@ -48,8 +48,20 @@ module DTK; class CommandAndControl::IAAS::Bosh
       end
 
       def version_relation(version_struct1, version_struct2)
-        # TODO: right now just alpha sort; need to distingusih between dev and final
-        version_struct1.version <=> version_struct2.version
+        v1 = version_struct1.version
+        v2 = version_struct2.version
+        if dev_num?(v1) and dev_num?(v2)
+          dev_num?(v1) <=> dev_num?(v2)
+        else
+          # default
+          # TODO: right now just alpha sort; need to distingusih between dev and final
+          v1 <=> v2
+        end
+      end
+
+      def dev_num?(version)
+        #TODO: just looking for '0+dev.NUM
+        $1.to_i if version =~ /^0\+dev\.([0-9]+$)/
       end
     end
   end

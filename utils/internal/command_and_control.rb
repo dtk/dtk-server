@@ -156,8 +156,7 @@ module DTK
     end
 
     def self.get_node_operational_status(node)
-      adapter_name = R8::Config[:command_and_control][:iaas][:type]
-      klass = load_for_aux(:iaas, adapter_name)
+      klass = load_iaas_for(node: node)
       klass.get_node_operational_status(node)
     end
 

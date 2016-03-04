@@ -1,7 +1,7 @@
 require 'erubis'
 
-module DTK
-  class CommandAndControl::IAAS::Bosh::CreateNodes
+module DTK; class CommandAndControl::IAAS; class Bosh
+  class CreateNodes
     ##
     # Methods to generate the BOSH deployment manifest
     # API information can be found here: https://bosh.io/docs/director-api-v1.html
@@ -31,7 +31,8 @@ module DTK
           deployment_name: required_param(:deployment_name),
           job_objects: required_param(:job_objects),
           repo_user: R8::Config[:repo][:git][:server_username],
-          ec2_vpc_subnet: R8::Config[:bosh][:ec2][:vpc_subnet],
+          vpc_subnet: Bosh::Param.vpc_subnet,
+          ec2_size: 'm3.large',
         }
       end
 
@@ -61,7 +62,7 @@ networks:
 - name: default
   subnets:
   - cloud_properties:
-      subnet: <%= ec2_vpc_subnet %>
+      subnet: <%= vpc_subnet %>
     # This is ignored since dynamic
     range: 10.0.0.0/24
   type: dynamic
@@ -73,7 +74,7 @@ resource_pools:
     version: latest
   network: default
   cloud_properties:
-    instance_type: m1.small
+    instance_type: <%= ec2_size %>
     availability_zone: us-east-1a
 
 compilation:
@@ -119,4 +120,4 @@ properties:
 eos
     end
   end
-end
+end; end; end

@@ -1,8 +1,8 @@
 require 'addressable/uri'
 require 'rest-client'
 
-module DTK
-  class CommandAndControl::IAAS::Bosh
+module DTK; class CommandAndControl::IAAS
+  class Bosh
     ##
     # HTTP Client for Bosh Director.
     # API information can be found here: https://bosh.io/docs/director-api-v1.html
@@ -22,8 +22,7 @@ module DTK
 
       # TODO: temp
       def director_host_address
-        R8::Config[:bosh][:director][:host_address] ||
-          fail(Error.new("BOSH director host address is not set"))
+        Bosh::Param.director
       end
 
       attr_reader :director_uuid
@@ -198,4 +197,4 @@ module DTK
       end
     end
   end
-end
+end; end

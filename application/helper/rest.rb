@@ -24,7 +24,7 @@ module Ramaze::Helper
 
       begin
         JSON.generate(@ctrl_results)
-      rescue Execption => ex
+      rescue Exception => ex
         Log.warn "Encoding error has occured, trying to fix it. Error #{ex.class} #{ex.message}"
         JSON.generate DTK::ActionResultsQueue::Result.normalize_data_to_utf8_output!(@ctrl_results)
       end

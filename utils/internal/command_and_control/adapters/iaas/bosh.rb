@@ -68,6 +68,10 @@ module DTK
           get_bosh_param(:vpc_subnet)
         end
 
+        def ec2_availability_zone
+          get_bosh_param(:ec2_availability_zone)
+        end
+
         private
 
         def self.get_bosh_param(param)

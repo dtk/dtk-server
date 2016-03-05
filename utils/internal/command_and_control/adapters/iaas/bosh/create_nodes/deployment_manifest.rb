@@ -32,6 +32,7 @@ module DTK; class CommandAndControl::IAAS; class Bosh
           job_objects: required_param(:job_objects),
           repo_user: R8::Config[:repo][:git][:server_username],
           vpc_subnet: Bosh::Param.vpc_subnet,
+          availability_zone: Bosh::Param.ec2_availability_zone,
           ec2_size: 'm3.large',
         }
       end
@@ -75,14 +76,14 @@ resource_pools:
   network: default
   cloud_properties:
     instance_type: <%= ec2_size %>
-    availability_zone: us-east-1a
+    availability_zone: <%= availability_zone %>
 
 compilation:
   workers: 2
   network: default
   reuse_compilation_vms: true
   cloud_properties:
-    availability_zone: us-east-1a
+    availability_zone: <%= availability_zone %>
     instance_type: m3.large
 
 releases:

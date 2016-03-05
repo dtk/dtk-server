@@ -80,8 +80,8 @@ module DTK
 
         ConfigFilePath = '/host_volume/dtk.config'
         def self.get_params!
-          return @params if @params
-          @params = File.open('/host_volume/dtk.config').inject({}) do |h, line| 
+          # Not caching so can dynamically read
+          File.open('/host_volume/dtk.config').inject({}) do |h, line| 
             if line =~ /(^.+)=(.+$)/
               h.merge($1.downcase => $2) 
             else

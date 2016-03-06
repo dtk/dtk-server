@@ -34,6 +34,11 @@ module DTK
         return_status_ok
       end
 
+      def get_node_operational_status(_node)
+        # TODO: stub
+        'running'
+      end
+
       def get_and_update_node_state!(node, attribute_names)
         ret = {}
         if attribute_names.include?(:host_addresses_ipv4)

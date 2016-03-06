@@ -25,6 +25,8 @@ module DTK; class CommandAndControl::IAAS; class Bosh
       def erb_values
         {
           dtk_server_host: R8::Config[:stomp][:host], 
+          stomp_port: R8::Config[:stomp][:port], 
+          repo_git_port: R8::Config[:repo][:git][:port], 
           arbiter_ssh_private_key: arbiter_ssh_private_key,
           director_uuid: required_param(:director_uuid),
           release: required_param(:release),
@@ -110,14 +112,14 @@ update:
 properties:
   dtk-agent:
     dtk_server_host: <%= dtk_server_host %>
-    stomp_port: 6163
+    git_server_url: "ssh://<%= repo_user %>@<%= dtk_server_host %>:<%= repo_git_port %>"
+    stomp_port: <%= stomp_port %>
     stomp_username: dtk1
     stomp_password: marionette
     arbiter_topic: /topic/arbiter.dtk1.broadcast
     arbiter_queue: /queue/arbiter.dtk1.reply
     arbiter_ssh_private_key: |
 <%= arbiter_ssh_private_key %>
-    git_server_url: "ssh://<%= repo_user %>@<%= dtk_server_host %>:2222"
 eos
     end
   end

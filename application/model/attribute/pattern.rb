@@ -54,6 +54,7 @@ module DTK; class Attribute
       ambiguous       = []
       attr_properties = opts[:attribute_properties] || {}
       attributes      = base_object.list_attributes(Opts.new(with_assembly_wide_node: true))
+      return_prompt   = nil
 
       av_pairs.each do |av_pair|
         value = av_pair[:value]
@@ -123,6 +124,9 @@ module DTK; class Attribute
       ndx_new_vals = attribute_rows.inject({}) { |h, r| h.merge(r[:id] => r[:value_asserted]) }
       LegalValue.raise_usage_errors?(existing_attrs, ndx_new_vals)
 
+      return_prompt = check_if_cardinality_changed(existing_attrs, ndx_new_vals) unless opts[:cardinality_confirmed]
+      return { cardinality_prompt: true } if return_prompt
+
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
       Attribute.update_and_propagate_attributes(attr_mh, attribute_rows, opts)
       ret
@@ -152,6 +156,20 @@ module DTK; class Attribute
           av_pair[:pattern] = matching_attr.first[:display_name] if matching_attr.size == 1
         end
       end
+    end
+
+    def self.check_if_cardinality_changed(existing_attrs, ndx_new_vals)
+      cardinalities = existing_attrs.select{ |existing| existing[:display_name].eql?("cardinality") }
+      return if cardinalities.empty?
+
+      Log.info("Unexpected that multiple cardinality matches found: \n #{existing_attrs}") if cardinalities.size > 1
+
+      # we assume there is only one cardinality attribute for one node group
+      cardinality = cardinalities.first
+      cardinality.update_object!(:value_asserted)
+      new_value = ndx_new_vals[cardinality[:id]]
+
+      return cardinality[:value_asserted].to_i > new_value.to_i
     end
   end
 end; end

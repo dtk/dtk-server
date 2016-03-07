@@ -77,7 +77,7 @@ module DTK; class ServiceModule
             # we explicitly want to delete from workflow_hash; workflow_action can be nil
             action_under_key = (workflow_hash.kind_of?(Hash) ? workflow_hash.delete(Constant::WorkflowAction) : nil)
             workflow_action = r[:action] || action_under_key
-            parsed_workflow = parse_workflow(workflow_hash, workflow_action, opts)
+            parsed_workflow = parse_workflow(workflow_hash, workflow_action, assembly_hash, opts)
             h.merge(parsed_workflow)
           end
         end
@@ -85,8 +85,9 @@ module DTK; class ServiceModule
         ret
       end
 
-      def self.parse_workflow(workflow_hash, workflow_action, opts = {})
+      def self.parse_workflow(workflow_hash, workflow_action, assembly_hash, opts = {})
         raise_error_if_parsing_error(workflow_hash, workflow_action, opts)
+        check_if_invalid_component_in_workflow(assembly_hash, workflow_hash)
         
         normalized_workflow_action = 
           if opts[:service_module_workflow]
@@ -115,6 +116,40 @@ module DTK; class ServiceModule
       def self.raise_error_if_parsing_error(workflow_hash, workflow_action, opts = {})
         if parse_error = Task::Template::ConfigComponents.find_parse_error?(workflow_hash, {workflow_action: workflow_action}.merge(opts))
           fail parse_error
+        end
+      end
+
+      def self.check_if_invalid_component_in_workflow(assembly_hash, workflow_hash)
+        workflow_components     = []
+        all_assembly_components = []
+
+        (workflow_hash['subtasks']||[]).each do |ws|
+          if ordered_components = ws['ordered_components']
+            workflow_components.concat(ordered_components) unless ordered_components.empty?
+          end
+        end
+
+        if assembly_level_components = assembly_hash['components']
+          all_assembly_components.concat(assembly_level_components) unless assembly_level_components.empty?
+        end
+
+        (assembly_hash['nodes']||{}).each do |name, content|
+          if content_components = content && content['components']
+            content_components.each do |component|
+              if component.is_a?(Hash)
+                all_assembly_components << component.keys.first
+              else
+                all_assembly_components << component
+              end
+            end
+          end
+        end
+
+        invalid_components = workflow_components.select{ |w_cmp| !all_assembly_components.include?(w_cmp) }
+        unless invalid_components.empty?
+          component = (invalid_components.size > 1) ? 'components' : 'component'
+          is        = (invalid_components.size > 1) ? 'are' : 'is'
+          fail ParsingError.new("The following #{component} (#{invalid_components.join(', ')}) that #{is} referenced in assembly workflow #{is} not specified among assembly level or node components and as such cannot be used in workflow.")
         end
       end
 

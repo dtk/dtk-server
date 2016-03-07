@@ -175,9 +175,10 @@ export COOKIE_SALT=`cat ${HOST_VOLUME}/.cookie_salt`
 export PASSWORD_SALT=`cat ${HOST_VOLUME}/.password_salt`
 
 # populate the configuration template
-if [[ ! -f ${HOST_VOLUME}/init_done ]]; then
-  envsubst < /addons/server.conf.template > /etc/dtk/${TENANT_USER}/server.conf
+if [[ ! -f ${HOST_VOLUME}/server.conf ]]; then
+  envsubst < /addons/server.conf.template > ${HOST_VOLUME}/server.conf
 fi
+ln -sf ${HOST_VOLUME}/server.conf /etc/dtk/${TENANT_USER}/server.conf
 
 # if grep '^encryption.cookie_salt.*""' /etc/dtk/${TENANT_USER}/server.conf; then
 #   salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50`

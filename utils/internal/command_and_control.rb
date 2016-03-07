@@ -203,6 +203,7 @@ module DTK
         node = val
         case iaas_type = node.get_iaas_type()
          when :ec2_instance then :ec2
+         when :ec2_image then :ec2
          when :bosh_instance then :bosh
          when :physical then :physical
          else fail Error.new("iaas type (#{iaas_type}) not treated")
@@ -256,11 +257,11 @@ module DTK
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
         r8_nested_require('command_and_control', "adapters/#{adapter_type}/#{adapter_name}")
-        if base_class = base_class_when_instance_style_adapter?(adapter_name) 
+        if base_class = base_class_when_instance_style_adapter?(adapter_name)
           klass = base_class.const_get adapter_name.to_s.capitalize
           Adapters[adapter_type][adapter_name] = klass.create_without_task()
         else
-          Adapters[adapter_type][adapter_name] = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize 
+          Adapters[adapter_type][adapter_name] = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
         end
        rescue LoadError => e
         raise ErrorUsage.new("IAAS type ('#{adapter_name}') not supported! Reason #{e.message}!")

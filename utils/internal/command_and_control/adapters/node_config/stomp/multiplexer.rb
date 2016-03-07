@@ -31,6 +31,8 @@ module DTK
       @@callback_registry = {}
       @@callback_heartbeat_registry = {}
 
+      HeartbeatLock = Mutex.new
+
       def self.create(stomp_client)
         instance.set(stomp_client)
       end
@@ -49,8 +51,10 @@ module DTK
       end
 
       def register_with_heartbeat_listener(pbuilderid, request_id)
-        @@callback_heartbeat_registry[pbuilderid] = request_id
-        Log.info("Stomp heartbeat message with pbuilderid '#{pbuilderid}' has been registered to request id '#{request_id}'. Waiting for callback.")
+        HeartbeatLock.synchronize do
+          @@callback_heartbeat_registry[pbuilderid] = request_id
+          Log.info("Stomp heartbeat message with pbuilderid '#{pbuilderid}' has been registered to request id '#{request_id}'. Waiting for callback.")
+        end
       end
 
       def register_with_listener(request_id, callbacks)
@@ -67,7 +71,9 @@ module DTK
       end
 
       def self.heartbeat_registry_entry(pbuilder_id)
-        @@callback_heartbeat_registry.delete(pbuilder_id)
+        HeartbeatLock.synchronize do
+          @@callback_heartbeat_registry.delete(pbuilder_id)
+        end
       end
 
       def send_ping_request

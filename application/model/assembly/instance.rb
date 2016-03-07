@@ -240,7 +240,7 @@ module DTK; class  Assembly
         attr_patterns = super
 
         # return if ambiguous attributes (component and node have same name and attribute)
-        return attr_patterns if attr_patterns.is_a?(Hash) && attr_patterns[:ambiguous]
+        return attr_patterns if attr_patterns.is_a?(Hash) && (attr_patterns[:ambiguous] || attr_patterns[:cardinality_prompt])
 
         if opts[:update_meta]
           created_cmp_level_attrs = attr_patterns.select { |r| r.type == :component_level && r.created?() }

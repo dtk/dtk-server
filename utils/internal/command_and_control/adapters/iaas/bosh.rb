@@ -39,22 +39,30 @@ module DTK
         'running'
       end
 
+      # TODO: unify with ec2's et_and_update_node_state! method
       def get_and_update_node_state!(node, attribute_names)
         ret = {}
+        external_ref = node[:external_ref]
+        external_ref_changed = false
         if attribute_names.include?(:host_addresses_ipv4)
           if host_addresses_ipv4 = Client.new.vm_info(node).host_addresses_ipv4
             Log.info("Info from BOSH Director: node '#{node.get_field?(:display_name)}' with id '#{node.id}' has host addresses: #{host_addresses_ipv4.join(', ')}")
           end
-          ret.merge!(host_addresses_ipv4: Client.new.vm_info(node).host_addresses_ipv4)
+          host_addresses_ipv4 = Client.new.vm_info(node).host_addresses_ipv4
+          # TODO: need to get away from using ec2_public_address
+          external_ref[:ec2_public_address] = external_ref[:dns_name] = host_addresses_ipv4
+          ret.merge!(host_addresses_ipv4: host_addresses_ipv4)
+          external_ref_changed = true
         end
-        other =  attribute_names - [:host_addresses_ipv4]
-        unless other.empty?
-          Log.error("Not treating update of BOSH node attributes: #{other.join(', ')}")
-        end
+#        other =  attribute_names - [:host_addresses_ipv4]
+#        unless other.empty?
+#          Log.error("Not treating update of BOSH node attributes: #{other.join(', ')}")
+#        end
+        node.update(external_ref: external_ref) if external_ref_changed
         ret        
       end
 
-       def pbuilderid(node)
+      def pbuilderid(node)
         InstanceId.node_id(node)
       end
 

@@ -130,18 +130,12 @@ module DTK; class ServiceModule
         end
 
         if assembly_level_components = assembly_hash['components']
-          all_assembly_components.concat(assembly_level_components) unless assembly_level_components.empty?
+          parse_and_add_components(all_assembly_components, assembly_level_components)
         end
 
         (assembly_hash['nodes']||{}).each do |name, content|
           if content_components = content && content['components']
-            content_components.each do |component|
-              if component.is_a?(Hash)
-                all_assembly_components << component.keys.first
-              else
-                all_assembly_components << component
-              end
-            end
+            parse_and_add_components(all_assembly_components, content_components)
           end
         end
 
@@ -151,6 +145,32 @@ module DTK; class ServiceModule
           is        = (invalid_components.size > 1) ? 'are' : 'is'
           fail ParsingError.new("The following #{component} (#{invalid_components.join(', ')}) that #{is} referenced in assembly workflow #{is} not specified among assembly level or node components and as such cannot be used in workflow.")
         end
+      end
+
+      def self.parse_and_add_components(all_assembly_components, components)
+        components.each do |component|
+          if component.is_a?(Hash)
+            cmp_name = append_name_attribute?(component)
+            all_assembly_components << cmp_name
+          else
+            all_assembly_components << component
+          end
+        end
+      end
+
+      def self.append_name_attribute?(component)
+        cmp_name = component.keys.first
+        value = component.values.first
+
+        return cmp_name if cmp_name.include?('[') && cmp_name.include?(']')
+
+        if attributes = value['attributes']
+          if name = attributes['name']
+            cmp_name = "#{cmp_name}[#{name}]"
+          end
+        end
+
+        cmp_name
       end
 
       def self.normalized_service_module_action(workflow_hash, workflow_action)

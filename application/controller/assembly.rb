@@ -590,6 +590,8 @@ module DTK
     def rest__stage
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
       target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
+      is_silent_fail = ret_request_param_boolean(:silent_fail) || false
+      is_created = true
 
       service_module_id = nil
 
@@ -638,12 +640,22 @@ module DTK
         opts[:os_type] = os_type
       end
 
-      new_assembly_obj = assembly_template.stage(target, opts)
+      begin
+        new_assembly_obj = assembly_template.stage(target, opts)
+      rescue DTK::ErrorUsage => e
+        raise e unless is_silent_fail
+        # in case we are using silent fail we wont response evne if there was an error
+        new_assembly_obj = Assembly::Instance.find_by_name?(target, opts[:assembly_name])
+        is_created = false
+        # in case there is still no assembly raise error
+        raise e unless new_assembly_obj
+      end
 
       response = {
         new_service_instance: {
           name: new_assembly_obj.display_name_print_form,
-          id: new_assembly_obj.id()
+          id: new_assembly_obj.id(),
+          is_created: is_created
         }
       }
       rest_ok_response(response, encode_into: :yaml)

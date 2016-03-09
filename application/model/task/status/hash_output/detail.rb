@@ -47,28 +47,53 @@ module DTK; class Task::Status
         end
       end
       ActionResultFields = [:status, :stdout, :stderr, :description]
-      
+
+      ErrorFields = [:message, :type]
       def errors?
         if errors = @task[:errors]
           ret = errors.map do |e|
             if e.kind_of?(String)
-              { message: e }
+              { message: sanitize_message(e) }
             elsif e.kind_of?(Hash)
               err_hash = Aux.hash_subset(e, ErrorFields)
+              if msg = err_hash[:message]
+                err_hash[:message] = sanitize_message(msg) 
+              end
               err_hash.empty? ? nil : err_hash
             end
           end.compact
           ret.empty? ? nil : ret
         end
       end
-      ErrorFields = [:message, :type]
 
       def set?(key, value)
         unless value.nil?
           @hash_output[key] = value
         end
       end
-      
+
+      require 'iconv'
+      IC = Iconv.new('UTF-8//IGNORE', 'UTF-8')
+      def sanitize_message(msg)
+        sanitize_message_aux(IC.iconv(msg))
+      end
+
+      RegexpMatch = /\[1\;31m/
+      def sanitize_message_aux(msg)
+        if pos = msg =~ RegexpMatch
+          msg.sub!(RegexpMatch, "\n")
+          # remove garbage charcter
+          msg[pos - 1] = ''
+          sanitize_message_aux(msg)
+        else
+          msg
+        end
+      end
+
+      def sanitize_message2(msg)
+        ret = IC.iconv(msg)
+        ret.gsub(RegexpMatch, "\n")
+      end
     end
   end
 end; end

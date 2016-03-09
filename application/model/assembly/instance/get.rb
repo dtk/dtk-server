@@ -148,11 +148,16 @@ module DTK; class Assembly; class Instance
 
     def get_nodes__expand_node_groups(opts = {})
       cols = opts[:cols] || Node.common_columns()
+
       node_or_ngs = get_nodes(*cols)
       if opts[:remove_assembly_wide_node]
         node_or_ngs.reject!{ |n| n.is_assembly_wide_node? }
       end
-      ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs, opts)
+
+      nodes = ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs, opts)
+      nodes.each{ |node| node.update_object!(:ng_member_deleted) }
+
+      nodes
     end
 
     def get_node_groups(opts = {})

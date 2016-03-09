@@ -55,6 +55,10 @@ module DTK
         service_node_group(raise_errors: false)
       end
 
+      def soft_delete()
+        self.update(:ng_member_deleted => true)
+      end
+
       private
 
       def service_node_group(opts = {})

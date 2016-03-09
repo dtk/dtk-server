@@ -67,7 +67,7 @@ module DTK
       new_tr_idhs
     end
 
-    def delete_group_members(new_cardinality)
+    def delete_group_members(new_cardinality, soft_delete = false)
       node_members = get_node_group_members()
       num_to_delete = node_members.size - new_cardinality
       # to find ones to delete;
@@ -84,7 +84,12 @@ module DTK
         end
       end
       to_delete = (0...num_to_delete).map { |i| sorted[i] }
-      to_delete.each(&:destroy_and_delete)
+
+      if soft_delete
+        to_delete.each(&:soft_delete)
+      else
+        to_delete.each(&:destroy_and_delete)
+      end
     end
 
     def bump_down_cardinality(amount = 1)

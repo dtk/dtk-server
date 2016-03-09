@@ -77,7 +77,7 @@ module DTK; class Task
         # if soft-deleted node group member we want to delete it from database and aws
         if node[:ng_member_deleted]
           assembly_nodes.delete(node)
-          node.destroy_and_delete()
+          node.destroy_and_delete(dont_change_cardinality: true)
           next
         end
 

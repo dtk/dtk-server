@@ -32,6 +32,14 @@ module DTK; class Node
         end
       end
 
+      # only for node group members
+      def soft_delete(opts = {})
+        return unless is_target_ref?
+
+        node_group_member = ServiceNodeGroup::NodeGroupMember.create_as(self)
+        node_group_member.soft_delete()
+      end
+
       def destroy_and_reset(target_idh)
          fail ErrorUsage.new('Command Not Supperetd')
 # TODO: DTK-1857

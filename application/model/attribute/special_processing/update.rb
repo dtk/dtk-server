@@ -46,10 +46,25 @@ module DTK; class Attribute
             fail ErrorUsage.new("Value set equals existing value (#{existing_val})")
           end
           node_group = @attr.get_service_node_group(cols: [:id, :group_id, :display_name, :datacenter_datacenter_id, :assembly_id])
+          ng_members = node_group.get_node_group_members()
+
+          # existing_val is value of cardinality attributes, and in some cases can be different than node_group_members.size
+          # because node_group_members can be marked for deletion (not actually deleted) and will be deleted on converge
           if @new_val > existing_val
-            node_group.add_group_members(@new_val)
-          else @new_val < existing_val
-            node_group.delete_group_members(@new_val)
+            if @new_val == ng_members.size
+              ng_members.each{ |ngm| ngm.update(:ng_member_deleted => false) }
+            elsif @new_val > ng_members.size
+              ng_members.each{ |ngm| ngm.update(:ng_member_deleted => false) }
+              node_group.add_group_members(@new_val)
+            else
+              sorted = ng_members.sort_by { |ngm| ngm[:index] }
+              ng_members_reuse = sorted.first(@new_val)
+              ng_members_reuse.each{ |ngm| ngm.update(:ng_member_deleted => false) }
+            end
+          elsif @new_val < existing_val
+            node_group.delete_group_members(@new_val, true)
+          else
+            ng_members.each{ |ngm| ngm.update(:ng_member_deleted => false) }
           end
         end
       end

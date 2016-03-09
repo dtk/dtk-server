@@ -65,7 +65,9 @@ end
         if is_target_ref?()
           # This wil be a node group member; need to bump down is assocaited node groups cardinality
           node_group_member = ServiceNodeGroup::NodeGroupMember.create_as(self)
-          node_group_member.bump_down_associated_node_group_cardinality()
+          unless opts[:dont_change_cardinality]
+            node_group_member.bump_down_associated_node_group_cardinality()
+          end
         end
 
         if opts[:update_task_template]

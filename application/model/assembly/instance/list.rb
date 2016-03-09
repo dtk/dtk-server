@@ -164,11 +164,10 @@ module DTK; class  Assembly
         opts.merge!(remove_node_groups: false)
         nodes = get_nodes__expand_node_groups(opts)
 
-        nodes.each do |node|
-          # we don't want to show soft-deleted node group members
-          node.update_object!(:ng_member_deleted)
-          nodes.delete(node) if node[:ng_member_deleted]
+        # we don't want to show soft-deleted node group members
+        nodes.delete_if{ |node| node[:ng_member_deleted]}
 
+        nodes.each do |node|
           set_node_display_name!(node)
           set_node_admin_op_status!(node)
           if external_ref = node[:external_ref]

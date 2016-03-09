@@ -175,9 +175,10 @@ export COOKIE_SALT=`cat ${HOST_VOLUME}/.cookie_salt`
 export PASSWORD_SALT=`cat ${HOST_VOLUME}/.password_salt`
 
 # populate the configuration template
-if [[ ! -f ${HOST_VOLUME}/init_done ]]; then
-  envsubst < /addons/server.conf.template > /etc/dtk/${TENANT_USER}/server.conf
+if [[ ! -f ${HOST_VOLUME}/server.conf ]]; then
+  envsubst < /addons/server.conf.template > ${HOST_VOLUME}/server.conf
 fi
+ln -sf ${HOST_VOLUME}/server.conf /etc/dtk/${TENANT_USER}/server.conf
 
 # if grep '^encryption.cookie_salt.*""' /etc/dtk/${TENANT_USER}/server.conf; then
 #   salt=`cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 50`
@@ -214,6 +215,13 @@ if [[ ! -L /home/${TENANT_USER}/.ssh/authorized_keys ]]; then
   ln -s ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
 fi
 
+# persist client data
+if [[ -d /home/dtk-client ]]; then
+  mkdir -p ${HOST_VOLUME}/client
+  chown dtk-client:dtk-client ${HOST_VOLUME}/client
+  ln -sfn ${HOST_VOLUME}/client /home/dtk-client/dtk
+fi
+
 /usr/sbin/nginx -g 'daemon off;'
 
-su - ${TENANT_USER} -c "touch server/current/application/tmp/restart.txr"
+su - ${TENANT_USER} -c "touch server/current/application/tmp/restart.txt"

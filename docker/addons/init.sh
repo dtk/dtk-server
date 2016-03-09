@@ -215,6 +215,13 @@ if [[ ! -L /home/${TENANT_USER}/.ssh/authorized_keys ]]; then
   ln -s ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
 fi
 
+# persist client data
+if [[ -d /home/dtk-client ]]; then
+  mkdir -p ${HOST_VOLUME}/client
+  chown dtk-client:dtk-client ${HOST_VOLUME}/client
+  ln -sfn ${HOST_VOLUME}/client /home/dtk-client/dtk
+fi
+
 /usr/sbin/nginx -g 'daemon off;'
 
-su - ${TENANT_USER} -c "touch server/current/application/tmp/restart.txr"
+su - ${TENANT_USER} -c "touch server/current/application/tmp/restart.txt"

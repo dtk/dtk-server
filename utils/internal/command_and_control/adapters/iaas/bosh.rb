@@ -21,6 +21,8 @@ module DTK
       r8_nested_require('bosh', 'client')
       r8_nested_require('bosh', 'create_nodes')
       r8_nested_require('bosh', 'instance_id')
+      r8_nested_require('bosh', 'bosh_subnet')
+      r8_nested_require('bosh', 'param')
 
       def execute(_task_idh, top_task_idh, task_action)
         top_task = top_task_idh.create_object()
@@ -69,43 +71,6 @@ module DTK
       def destroy_node?(node, _opts = {})
         Log.info_pp(["Need to write Bosh#destroy_node?", node])
         true 
-      end
-
-     # TODO: this is just temp and only works in docker container
-      class Param
-        def self.director
-          get_bosh_param(:director)
-        end
-
-        def self.vpc_subnet
-          get_bosh_param(:vpc_subnet)
-        end
-
-        def self.ec2_availability_zone
-          get_bosh_param(:ec2_availability_zone)
-        end
-
-        private
-
-        def self.get_bosh_param(param)
-          get("bosh_#{param}")
-        end
-
-        def self.get(param)
-          get_params![param.to_s] || fail(Error.new("Docker param '#{param}' is not set"))
-        end
-
-        ConfigFilePath = '/host_volume/dtk.config'
-        def self.get_params!
-          # Not caching so can dynamically read
-          File.open('/host_volume/dtk.config').inject({}) do |h, line| 
-            if line =~ /(^.+)=(.+$)/
-              h.merge($1.downcase => $2) 
-            else
-              h
-            end
-          end
-        end
       end
 
     end

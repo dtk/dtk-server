@@ -124,9 +124,6 @@ module DTK; class Attribute
       ndx_new_vals = attribute_rows.inject({}) { |h, r| h.merge(r[:id] => r[:value_asserted]) }
       LegalValue.raise_usage_errors?(existing_attrs, ndx_new_vals)
 
-      return_prompt = check_if_cardinality_changed(existing_attrs, ndx_new_vals) unless opts[:cardinality_confirmed]
-      return { cardinality_prompt: true } if return_prompt
-
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
       Attribute.update_and_propagate_attributes(attr_mh, attribute_rows, opts)
       ret

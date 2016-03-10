@@ -1,17 +1,17 @@
 GIT
   remote: git://github.com/dtk/dtk-common-core.git
-  revision: d5c250f5b8d40c905da379fe063135263cdbd22e
+  revision: 9a24da8ee44c9b5f962c6e1cf4703e01221ec270
   specs:
-    dtk-common-core (0.8.0)
+    dtk-common-core (0.9.0)
       rest-client (= 1.6.7)
 
 GIT
   remote: git://github.com/dtk/dtk-common.git
-  revision: 68c9128a0c7bf83d00e0a2323080bb153f5e2b6b
+  revision: 10077e3f7e98ece1cc72ce2d031fc7aa1feb2001
   specs:
-    dtk-common (0.8.0)
+    dtk-common (0.9.0)
       colorize (~> 0.5.8)
-      dtk-common-core (= 0.8.0)
+      dtk-common-core (= 0.9.0)
       rugged (~> 0.17.0.b7)
 
 GEM

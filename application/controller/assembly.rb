@@ -497,10 +497,9 @@ module DTK
 
       opts.merge!(node_attribute: true) if ret_request_params(:node_attribute)
       opts.merge!(component_attribute: true) if ret_request_params(:component_attribute)
-      opts.merge!(cardinality_confirmed: true) if ret_request_params(:cardinality_confirmed)
 
       attr_ret = assembly.set_attributes(av_pairs, opts)
-      response = (attr_ret.is_a?(Hash) && (attr_ret.key?(:ambiguous) || attr_ret.key?(:cardinality_prompt))) ? attr_ret : nil
+      response = (attr_ret.is_a?(Hash) && attr_ret.key?(:ambiguous)) ? attr_ret : nil
 
       rest_ok_response response
     end

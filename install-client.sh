@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
  
-usage_config() { 
-  echo $1 
-  echo -e "\nUsage:\n$0 configuration_path [user] \n" 
+usage_config() {
+  echo $1
+  echo -e "\nUsage:\n$0 [-u user] [-p port] configuration_path\n"
   echo    "configuration_path   - location of dtk.config file"
   echo    "user                 - user on which to install and configure dtk-client"
-  echo -e "                       defaults to new user named 'dtk-client\n"
+  echo    "                       defaults to new user named 'dtk-client"
+  echo    "port                 - port where DTK server is listening"
+  echo -e "                       defaults to 8080\n"
 } 
 
 if [[ $# -lt 1 ]]; then 
@@ -13,10 +15,29 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi 
 
+while getopts ":u:p:s:" o; do
+    case "${o}" in
+        u)
+            u=${OPTARG}
+            ;;
+        p)
+            p=${OPTARG}
+            ;;
+        s)
+            s=true
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
 # set default value for user
-user=${2-dtk-client}
+user=${u-dtk-client}
 config_path=$1
 confdir=/home/${user}/dtk
+port=${p-8080}
 
 if [[ "${user}" != "$(whoami)" ]] && [[ "$(whoami)" != "root" ]]; then
   usage_config "This script requires super-user privileges."
@@ -31,17 +52,19 @@ else
   sudo='sudo'
 fi
 
-if [[ ! -f ${config_path}/dtk.config ]]; then
+if [[ ! -f ${config_path}/dtk.config ]] && [[ "$s" != true ]]; then
   usage_config "Cannot find the config file at ${config_path}/dtk.config"
   exit 1
 fi
 
-# load the config file
-. ${config_path}/dtk.config
+if [[ "$s" != true ]]; then
+  # load the config file
+  . ${config_path}/dtk.config
 
-if ([[ -z ${USERNAME} ]] || [[ -z ${PASSWORD} ]] || [[ -z ${PUBLIC_ADDRESS} ]]); then
-  usage_config "Plase make sure ${config_path}/dtk.config is correctly populated"
-  exit 1
+  if ([[ -z ${USERNAME} ]] || [[ -z ${PASSWORD} ]] || [[ -z ${PUBLIC_ADDRESS} ]]); then
+    usage_config "Plase make sure ${config_path}/dtk.config is correctly populated"
+    exit 1
+  fi
 fi
 
 echo -e "This script will do the following:\n"
@@ -49,15 +72,25 @@ echo    "* Install the dtk-client gem"
 echo    "* Add the '${user}' user if it does not already exist"
 echo -e "* Genereate an SSH keypair for the selected user (if it does not exist)\n"
 
+if [[ "$s" != true ]]; then
 read -n1 -rsp $'Press any key to continue or Ctrl+C to exit...\n'
+fi
 
 if [[ "${user}" != "$(whoami)" ]]; then
   useradd -m $user
 fi
 
-echo "Installing dtk-client gem"
-$sudo gem install dtk-client --no-rdoc --no-ri
+if [[ -f /usr/local/rvm/wrappers/default/gem ]]; then
+  gem_path=/usr/local/rvm/wrappers/default/gem
+else
+  gem_path=$(which gem)
+fi
 
+echo "Installing dtk-client gem"
+$sudo $gem_path install dtk-client --no-rdoc --no-ri
+
+
+if [[ "$s" != true ]]; then
 $su_c "mkdir -p /home/${user}/dtk"
 cat <<EOF | $su_c "tee /home/${user}/dtk/client.conf > /dev/null"
 development_mode=false
@@ -77,7 +110,7 @@ test_module_location=test_modules
 backups_location=backups
 
 # server connection details
-server_port=8080
+server_port=${port}
 secure_connection_server_port=443
 secure_connection=false
 server_host=localhost
@@ -91,7 +124,8 @@ EOF
 # generate ssh keys
 if [[ ! -f /home/${user}/.ssh/id_rsa ]]; then
   $su_c "ssh-keygen -t rsa -f /home/${user}/.ssh/id_rsa -P ''"
-fi;
+fi
+fi
 
 if [[ -n $GIT_USER ]] && [[ -n $GIT_EMAIL ]]; then
 cat <<EOF | $su_c "tee /home/${user}/.gitconfig > /dev/null"

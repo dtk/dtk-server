@@ -56,6 +56,8 @@ REMOTE_REPO_REST_PORT=${REMOTE_REPO_REST_PORT-7001}
 MCOLLECTIVE_PORT=${MCOLLECTIVE_PORT-6163}
 # set instance name to default
 INSTANCE_NAME=${INSTANCE_NAME-dtk1}
+# install dtk-client
+INSTALL_CLIENT=${INSTALL_CLIENT-true}
 
 # set arbiter topic and queue
 ARBITER_TOPIC="/topic/arbiter.${TENANT_USER}.broadcast"
@@ -215,6 +217,18 @@ if [[ ! -L /home/${TENANT_USER}/.ssh/authorized_keys ]]; then
   ln -s ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
 fi
 
+if [[ "$INSTALL_CLIENT" == true ]] && [[ ! -L /home/dtk-client/dtk ]]; then
+  # install dtk-client
+  /home/${TENANT_USER}/server/current/install-client.sh -p 80 /host_volume
+  mv /home/dtk-client/dtk ${HOST_VOLUME}/client
+fi
+
+# persist client data
+if [[ -d /home/dtk-client ]]; then
+  chown dtk-client:dtk-client ${HOST_VOLUME}/client
+  ln -sfn ${HOST_VOLUME}/client /home/dtk-client/dtk
+fi
+
 /usr/sbin/nginx -g 'daemon off;'
 
-su - ${TENANT_USER} -c "touch server/current/application/tmp/restart.txr"
+su - ${TENANT_USER} -c "touch server/current/application/tmp/restart.txt"

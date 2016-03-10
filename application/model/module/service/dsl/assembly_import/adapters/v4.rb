@@ -150,7 +150,14 @@ module DTK; class ServiceModule
       def self.parse_and_add_components(all_assembly_components, components)
         components.each do |component|
           if component.is_a?(Hash)
-            cmp_name = append_name_attribute?(component)
+            name_without_title = component.keys.first
+            cmp_name           = append_name_attribute?(component)
+
+            # special case when using puppet definitions where name_attribute is not used as title
+            unless cmp_name.eql?(name_without_title)
+              all_assembly_components << name_without_title
+            end
+
             all_assembly_components << cmp_name
           else
             all_assembly_components << component

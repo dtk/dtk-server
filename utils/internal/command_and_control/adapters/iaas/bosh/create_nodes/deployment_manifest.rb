@@ -34,7 +34,9 @@ module DTK; class CommandAndControl::IAAS; class Bosh
           job_objects: required_param(:job_objects),
           repo_user: R8::Config[:repo][:git][:server_username],
           bosh_subnet: required_param(:bosh_subnet),
+          # TODO: remove gard coded
           ec2_size: 'm3.large',
+          max_in_flight: 10
         }
       end
 
@@ -113,7 +115,7 @@ update:
   canaries: 1
   canary_watch_time: 60000
   update_watch_time: 60000
-  max_in_flight: 2
+  max_in_flight: <%= max_in_flight %>
 
 properties:
   dtk-agent:

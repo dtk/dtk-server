@@ -33,8 +33,7 @@ module DTK; class CommandAndControl::IAAS; class Bosh
           deployment_name: required_param(:deployment_name),
           job_objects: required_param(:job_objects),
           repo_user: R8::Config[:repo][:git][:server_username],
-          vpc_subnet: Bosh::Param.vpc_subnet,
-          availability_zone: Bosh::Param.ec2_availability_zone,
+          subnet_object: required_param(:subnet_object)
           ec2_size: 'm3.large',
         }
       end
@@ -63,12 +62,14 @@ director_uuid: <%= director_uuid %>
 
 networks:
 - name: default
+  type: manual
   subnets:
-  - cloud_properties:
-      subnet: <%= vpc_subnet %>
-    # This is ignored since dynamic
-    range: 10.0.0.0/24
-  type: dynamic
+  - range: <%= subnet_object.range %>
+    gateway: <%= subnet_object.gateway %>
+    reserved: <%= subnet_object.reserved_addresses %>
+    static: <%= subnet_object.static_addresses %>
+    cloud_properties:
+      subnet: <%= subnet_object.aws_id %>
 
 resource_pools:
 - name: default
@@ -78,14 +79,14 @@ resource_pools:
   network: default
   cloud_properties:
     instance_type: <%= ec2_size %>
-    availability_zone: <%= availability_zone %>
+    availability_zone: <%= subnet_object.availability_zone %>
 
 compilation:
   workers: 2
   network: default
   reuse_compilation_vms: true
   cloud_properties:
-    availability_zone: <%= availability_zone %>
+    availability_zone: <%= subnet_object.availability_zone %>
     instance_type: m3.large
 
 releases:

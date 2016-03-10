@@ -19,35 +19,33 @@ module DTK
   class CommandAndControl::IAAS::Bosh
     class Param
      # TODO: this is just temp and only works in docker container
-      class Param
-        Keys = [:director, :vpc_subnet, :ec2_availability_zone, :subnet_range]
-        def self.method_missing(name)
-          get_bosh_param(name)
-        end
-        
-        def self.respond_to?(name)
-          Keys.include?(name) || super
-        end
-
-        private
-
-        def self.get_bosh_param(param)
-          get("bosh_#{param}")
-        end
-
-        def self.get(param)
-          get_params![param.to_s] || fail(Error.new("Docker param '#{param}' is not set"))
-        end
-
-        ConfigFilePath = '/host_volume/dtk.config'
-        def self.get_params!
-          # Not caching so can dynamically read
-          File.open('/host_volume/dtk.config').inject({}) do |h, line| 
-            if line =~ /(^.+)=(.+$)/
-              h.merge($1.downcase => $2) 
-            else
-              h
-            end
+      Keys = [:director, :vpc_subnet, :ec2_availability_zone, :subnet_range]
+      def self.method_missing(name)
+        get_bosh_param(name)
+      end
+      
+      def self.respond_to?(name)
+        Keys.include?(name) || super
+      end
+      
+      private
+      
+      def self.get_bosh_param(param)
+        get("bosh_#{param}")
+      end
+      
+      def self.get(param)
+        get_params![param.to_s] || fail(Error.new("Docker param '#{param}' is not set"))
+      end
+      
+      ConfigFilePath = '/host_volume/dtk.config'
+      def self.get_params!
+        # Not caching so can dynamically read
+        File.open('/host_volume/dtk.config').inject({}) do |h, line| 
+          if line =~ /(^.+)=(.+$)/
+            h.merge($1.downcase => $2) 
+          else
+            h
           end
         end
       end

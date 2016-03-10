@@ -50,13 +50,13 @@ module DTK; class CommandAndControl::IAAS
         end
         version = version_obj.version
         Log.info("Using BOSH release '#{version}'")
-        bosh_subnet = BoshSubnet.new
+        job_objects = job_objects()
         deployment_params = {
           director_uuid: @bosh_client.director_uuid,
           release: { name: ReleaseName, version: version },
           deployment_name: deployment_name,
-          bosh_subnet: bosh_subnet   
-          job_objects: job_objects(bosh_subnet),
+          bosh_subnet: BoshSubnet.new(job_objects),
+          job_objects: job_objects
         }
         manifest_yaml = DeploymentManifest.generate_yaml(deployment_params)
         deploy_task = @bosh_client.deploy(manifest_yaml)
@@ -80,34 +80,20 @@ module DTK; class CommandAndControl::IAAS
         Bosh.update_node_from_create_node!(node, 'bosh_instance', instance_id, update_params) # TODO: use a constant rather than 'bosh_instance'
       end
 
-      JobObject = Struct.new(:name, :instances, :static_ips)
-      def job_objects(bosh_subnet)
+      def job_objects
         ndx_job_info = {}
         @node_objects.each do |node_obj|
           node = node_obj.node
           job, index = InstanceId.bosh_job_and_index(node)
           job_info = ndx_job_info[job] ||= { count: 1, static_ip_count: 0 }
-          job_info[:static_ip_count] += 1 if needs_static_ip?(node) 
           job_info[:count] = index + 1 if index >= job_info[:count] 
         end
         ret = []
-        iter = bosh_subnet.static_ips_iterator
-        ndx_job_info.each_pair do |name, job_info| 
-          ret << JobObject.new(name, job_info[:count], iter.allocate(job_info[:static_ip_count]))
+        ndx_job_info.each_pair do |job_name, job_info| 
+          ret << BoshJob.new(job_name, job_info[:count])
         end
         ret
       end
-
-      # TODO: temp hack
-      def needs_static_ip?(node)
-        name = node.get_field?(:display_name)
-        if name =~ /master/
-          true
-        else
-          nil
-        end
-      end
-
 
       def self.top_task_list_add!(top_task, target)
         top_task_id = top_task.id

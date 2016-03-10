@@ -33,7 +33,7 @@ module DTK; class CommandAndControl::IAAS; class Bosh
           deployment_name: required_param(:deployment_name),
           job_objects: required_param(:job_objects),
           repo_user: R8::Config[:repo][:git][:server_username],
-          bosh_subnet: required_param(:bosh_subnet)
+          bosh_subnet: required_param(:bosh_subnet),
           ec2_size: 'm3.large',
         }
       end
@@ -67,7 +67,9 @@ networks:
   - range: <%= bosh_subnet.range %>
     gateway: <%= bosh_subnet.gateway %>
     reserved: <%= bosh_subnet.reserved_addresses %>
-    static: <%= bosh_subnet.static_addresses %>
+<% if bosh_subnet.static_addresses? -%>
+    static: <%= bosh_subnet.static_addresses? %>
+<% end -%>
     cloud_properties:
       subnet: <%= bosh_subnet.vpc_subnet %>
 
@@ -96,14 +98,15 @@ releases:
 jobs:
 <% job_objects.each do |job_obj| -%>
 - name: <%= job_obj.name %>
-  instances: <%= job_obj.instances %>
+  instances: <%= job_obj.num_instances %>
   templates:
-  - name: dtk-agent
+  - name: <%= release[:name] %>
   resource_pool: default
   networks:
   - name: default
-<% if job_obj.static_ips  -%>
-    static_ips: <%= job_obj.static_ips %>
+<% if job_obj.static_ips?  -%>
+    static_ips: <%= job_obj.static_ips? %>
+<% end -%>
 <% end -%>
 
 update:

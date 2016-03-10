@@ -21,8 +21,9 @@ module DTK
       r8_nested_require('bosh', 'client')
       r8_nested_require('bosh', 'create_nodes')
       r8_nested_require('bosh', 'instance_id')
-      r8_nested_require('bosh', 'bosh_subnet')
       r8_nested_require('bosh', 'param')
+      r8_nested_require('bosh', 'bosh_subnet')
+      r8_nested_require('bosh', 'bosh_job')
 
       def execute(_task_idh, top_task_idh, task_action)
         top_task = top_task_idh.create_object()

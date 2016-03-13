@@ -19,6 +19,12 @@ module DTK; class Clone
   class ChildContext
     class AssemblyNode < self
       r8_nested_require('assembly_node', 'match_target_refs')
+      r8_nested_require('assembly_node', 'node_match')
+
+      # TODO: see if can remove reference so this does not have to be public
+      def hash_el_when_match(node, target_ref, extra_fields = {})
+        NodeMatch.hash__when_match(self, node, target_ref, extra_fields)
+      end
 
       private
 
@@ -29,7 +35,6 @@ module DTK; class Clone
       def initialize(clone_proc, hash)
         super
         assembly_template_idh = model_handle.createIDH(model_name: :component, id: hash[:ancestor_id])
-        sao_node_bindings = clone_proc.service_add_on_node_bindings()
         target = hash[:target_idh].create_object(model_name: :target_instance)
         matches =
           unless target.iaas_properties.supports_create_image?()
@@ -37,7 +42,7 @@ module DTK; class Clone
           else
             # can either be node templates, meaning spinning up node, or
             #  a match to an existing node in which case the existing node target ref is returned
-            find_matches_for_nodes(target, assembly_template_idh, sao_node_bindings)
+            find_matches_for_nodes(target, assembly_template_idh)
           end
         merge!(matches: matches) if matches
       end
@@ -62,40 +67,36 @@ module DTK; class Clone
 
         # mapping from node stub to node template and overriding appropriate node template columns
         unless matches.empty?
-          ndx_matches = {}
-          ndx_mapping_rows = matches.inject({}) do |h, m|
-            display_name = m[:instance_display_name]
-            ndx_matches.merge!(display_name => m)
-            node_template_id = m[:node_template_idh].get_id()
-            el = {
-              type: m[:instance_type],
-              ancestor_id: m[:node_stub_idh].get_id(),
-              canonical_template_node_id: node_template_id,
-              node_template_id: node_template_id,
-              display_name: display_name,
-              ref: m[:instance_ref]
-            }
-            h.merge(display_name => el)
-          end
-          mapping_ds = array_dataset(ndx_mapping_rows.values, :mapping)
+          ndx_node_matches = NodeMatch.ndx_node_matches(matches)
+          mappings = ndx_node_matches.values.map{ |m| m.mapping}
+          mapping_ds = array_dataset(mappings, :mapping)
 
           select_ds = ancestor_rel_ds.join_table(:inner, node_template_ds).join_table(:inner, mapping_ds, [:node_template_id])
           ret = Model.create_from_select(model_handle, field_set_to_copy, select_ds, create_override_attrs, create_opts)
 
+          # update any external refs if any are set in ndx_node_matches
+          update_external_refs!(ret, ndx_node_matches)
           ret.each do |r|
-            display_name = r[:display_name]
-            r[:node_template_id] = (ndx_mapping_rows[display_name] || {})[:node_template_id]
-            match = ndx_matches[display_name]
-            r.merge!(Aux.hash_subset(match, [:donot_clone, :target_refs_to_link, :target_refs_exist]))
+            if node_match = ndx_node_matches[r[:display_name]]
+              r[:node_template_id] = node_match.mapping[:node_template_id]
+              r.merge!(Aux.hash_subset(node_match.node, [:donot_clone, :target_refs_to_link, :target_refs_exist]))
+            end
           end
         end
-
-        # add to ret rows for each service add node binding
-        service_add_additions = @clone_proc.get_service_add_on_mapped_nodes(create_override_attrs, create_opts)
-        unless service_add_additions.empty?
-          ret += service_add_additions
-        end
         ret
+      end
+
+      def update_external_refs!(ret, ndx_node_matches)
+        ndx_id = ret.inject({}) { |h, r| h.merge(r[:display_name] => r[:id]) }
+        external_ref_rows = []
+        ndx_node_matches.each_pair do |ndx, node_match|
+          if external_ref = node_match.external_ref
+            external_ref_rows << { id: ndx_id[ndx], external_ref: external_ref }
+          end
+        end
+        unless external_ref_rows.empty?
+          Model.update_from_rows(model_handle, external_ref_rows, partial_value: true)
+        end
       end
 
       def find_target_ref_matches(target, assembly_template_idh)
@@ -115,39 +116,35 @@ module DTK; class Clone
         end
       end
 
-      def find_matches_for_nodes(target, assembly_template_idh, sao_node_bindings = nil)
+      def find_matches_for_nodes(target, assembly_template_idh)
         # find the assembly's stub nodes and then use the node binding to find the node templates
-        # as will as using, if non-empty, service_add_on_node_bindings to
         # see what nodes mapping to existing ones and thus shoudl be omitted in clone
         sp_hash = {
           cols: [:id, :display_name, :type, :node_binding_ruleset],
           filter: [:eq, :assembly_id, assembly_template_idh.get_id()]
         }
         node_info = Model.get_objs(assembly_template_idh.createMH(:node), sp_hash)
-        unless sao_node_bindings.empty?
-          stubs_to_omit = sao_node_bindings.map { |r| r[:sub_assembly_node_id] }
-          unless stubs_to_omit.empty?
-            node_info.reject! { |n| stubs_to_omit.include?(n[:id]) }
-          end
-        end
 
         node_bindings = NodeBindings.get_node_bindings(assembly_template_idh)
         node_mh = target.model_handle(:node)
+        target_service = Service::Target.create_from_target(target)
+
         node_info.map do |node|
           nb_ruleset = node[:node_binding_ruleset]
           node_target = node_bindings && node_bindings.has_node_target?(node.get_field?(:display_name))
           case match_or_create_node?(target, node, node_target, nb_ruleset)
             when :create
-              opts_fm = { node_binding_ruleset: nb_ruleset, node_target: node_target }
-              node_template = Node::Template.find_matching_node_template(target, opts_fm)
-              hash_el_when_create(node, node_template)
+              node_template = node_target ?
+                target_service.find_matching_node_template(node_target) :
+                Node::Template.find_matching_node_template(target, node_binding_ruleset: nb_ruleset)
+              NodeMatch.hash__when_creating_node(self, node, node_template, node_target: node_target)
             when :match
               if target_ref = NodeBindings.create_linked_target_ref?(target, node, node_target)
-                hash_el_when_match(node, target_ref)
+                NodeMatch.hash__when_match(self, node, target_ref)
               else
                 Log.error('Temp logic as default if cannot find_matching_target_ref then create')
                 node_template = Node::Template.find_matching_node_template(target, node_binding_ruleset: nb_ruleset)
-                hash_el_when_create(node, node_template)
+                NodeMatch.hash__when_creating_node(self, node, node_template)
               end
             else
              fail Error.new('Unexpected return value from match_or_create_node')
@@ -163,39 +160,6 @@ module DTK; class Clone
         else
           :create
         end
-      end
-
-      def hash_el_when_create(node, node_template)
-        instance_type = node.is_assembly_wide_node?() ? node_class(node).assembly_wide : node_class(node).staged
-        {
-          instance_type: instance_type,
-          node_stub_idh: node.id_handle,
-          instance_display_name: node[:display_name],
-          instance_ref: instance_ref(node[:display_name]),
-          node_template_idh: node_template.id_handle()
-        }
-      end
-
-      def hash_el_when_match(node, target_ref, extra_fields = {})
-        ret = {
-          instance_type: node_class(node).instance,
-          node_stub_idh: node.id_handle,
-          instance_display_name: node[:display_name],
-          instance_ref: instance_ref(node[:display_name]),
-          node_template_idh: target_ref.id_handle(),
-          donot_clone: [:attribute]
-        }
-        ret.merge!(extra_fields) unless extra_fields.empty?
-        ret
-      end
-      public :hash_el_when_match
-
-      def node_class(node)
-        node.is_node_group?() ? Node::Type::NodeGroup : Node::Type::Node
-      end
-
-      def instance_ref(node_ref_part)
-        "assembly--#{self[:assembly_obj_info][:display_name]}--#{node_ref_part}"
       end
 
       def cleanup_after_error

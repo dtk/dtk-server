@@ -15,9 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 module DTK
   module CommandAndControlAdapter
-    class Ec2 < CommandAndControlIAAS
+    class Ec2 < CommandAndControl::IAAS
       r8_nested_require('ec2', 'client_token')
       r8_nested_require('ec2', 'node_state')
       r8_nested_require('ec2', 'address_management')
@@ -189,7 +190,7 @@ module DTK
       end
       PerisistentIds =
         [
-         'i-23666703' #dtk router
+         'i-23666703' # dtk router
         ]
 
       def self.reset_node(node)
@@ -225,12 +226,6 @@ module DTK
       end
 
       private
-
-      def self.update_node!(node, update_hash)
-        node.merge!(update_hash)
-        node.update(update_hash)
-        node
-      end
 
       def self.external_ref(node)
         node.get_field?(:external_ref) || {}

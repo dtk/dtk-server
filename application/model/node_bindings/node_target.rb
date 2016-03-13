@@ -26,6 +26,10 @@ module DTK
         @type = type
       end
 
+      def hash_form
+        { type: type().to_s }
+      end
+
       def self.parse_and_reify(parse_input)
         AssemblyNode.parse_and_reify(parse_input, donot_raise_error: true) ||
         Image.parse_and_reify(parse_input, donot_raise_error: true) ||
@@ -34,6 +38,11 @@ module DTK
 
       def match_or_create_node?(_target)
         :match
+      end
+
+      # This can be overwritten
+      def node_external_ref?
+        nil
       end
     end
   end

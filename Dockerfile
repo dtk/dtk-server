@@ -17,8 +17,6 @@ RUN chown -R ${tenant_user}:${tenant_user} /home/${tenant_user}
 RUN apt-get update
 RUN puppet apply --debug /tmp/manifests/stage3.pp
 
-RUN /home/${tenant_user}/server/current/install-client.sh -s true -p 80 /host_volume
-
 RUN apt-get clean && apt-get autoclean && apt-get -y autoremove
 
 RUN rm -rf /etc/puppet/modules /tmp/* /var/lib/postgresql/ /var/lib/apt/lists/* /var/tmp/*

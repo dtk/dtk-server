@@ -29,6 +29,7 @@ module DTK
         get_these_objs(target_mh, sp_hash)
       end
 
+      # if iaas_type is nil means create a generic provider
       def self.create_provider?(project_idh, iaas_type, provider_name, iaas_properties_hash, params_hash = {}, opts = {})
         if existing_provider = provider_exists?(project_idh, provider_name)
           if opts[:raise_error_if_exists]
@@ -38,20 +39,22 @@ module DTK
           end
         end
 
-        iaas_properties = IAASProperties.check(iaas_type, iaas_properties_hash)
-
         target_mh = project_idh.createMH(:target)
         display_name = provider_display_name(provider_name)
         ref = display_name.downcase.gsub(/ /, '-')
         create_row = {
-          iaas_type: iaas_type.to_s,
           project_id: project_idh.get_id(),
           type: 'template',
           ref: ref,
           display_name: display_name,
           description: params_hash[:description],
-          iaas_properties: iaas_properties
         }
+        if iaas_type
+          iaas_properties = IAASProperties.check(iaas_type, iaas_properties_hash)
+          create_row.merge!(iaas_type: iaas_type.to_s, iaas_properties: iaas_properties)
+        else
+          create_row.merge!(iaas_type: IAASProperties::Type::Generic.to_s)
+        end
         create_opts = { convert: true, ret_obj: { model_name: :target_template } }
         create_from_row(target_mh, create_row, create_opts)
       end
@@ -101,7 +104,7 @@ module DTK
         common_iaas_properties.delete_if { |k, _v| [:key, :secret].include?(k) }
 
         iaas_properties_list = regions.map do |region|
-          name = default_target_name(region: region)
+          name = default_target_name(:ec2, region: region)
           properties = common_iaas_properties.merge(region: region)
           IAASProperties.new(name: name, iaas_properties: properties)
         end
@@ -136,12 +139,17 @@ module DTK
         Target::Instance.get_objs(model_handle(:target_instance), sp_hash)
       end
 
-      # TODO: move to be processed by IAAS specfic
-      def default_target_name(hash_params)
-        if Aux.has_just_these_keys?(hash_params, [:region])
-          "#{base_name()}-#{hash_params[:region]}"
+      def default_target_name(iaas_type = nil, hash_params = {})
+        if iaas_type.nil?
+          base_name()
+        elsif iaas_type == :ec2
+          if Aux.has_just_these_keys?(hash_params, [:region])
+            "#{base_name()}-#{hash_params[:region]}"
+          else
+            fail Error.new("Not implemented when hash_parsm keys are: #{hash_params.keys.join(',')}")
+          end
         else
-          fail Error.new("Not implemented when hash_parsm keys are: #{hash_params.keys.join(',')}")
+          fail Error.new("type '#{iaas_type}' not supported")
         end
       end
 

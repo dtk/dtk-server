@@ -497,10 +497,9 @@ module DTK
 
       opts.merge!(node_attribute: true) if ret_request_params(:node_attribute)
       opts.merge!(component_attribute: true) if ret_request_params(:component_attribute)
-      opts.merge!(cardinality_confirmed: true) if ret_request_params(:cardinality_confirmed)
 
       attr_ret = assembly.set_attributes(av_pairs, opts)
-      response = (attr_ret.is_a?(Hash) && (attr_ret.key?(:ambiguous) || attr_ret.key?(:cardinality_prompt))) ? attr_ret : nil
+      response = (attr_ret.is_a?(Hash) && attr_ret.key?(:ambiguous)) ? attr_ret : nil
 
       rest_ok_response response
     end
@@ -590,10 +589,20 @@ module DTK
     def rest__stage
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
       target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
+      is_silent_fail = ret_request_param_boolean(:silent_fail) || false
+      is_created = true
+
+      service_module_id = nil
+
+      unless service_module_id = ret_request_params(:service_module_id)
+        if ret_request_params(:service_module_name)
+          service_module_id = create_obj(:service_module_name, ServiceModule).id
+        end
+      end
 
       # Special case to support Jenikins CLI orders, since we are not using shell we do not have access
       # to element IDs. This "workaround" helps with that.
-      if service_module_id = ret_request_params(:service_module_id)
+      if service_module_id
         # this is name of assembly template
         assembly_id        = ret_request_params(:assembly_id)
         version            = ret_request_params(:version)
@@ -630,12 +639,22 @@ module DTK
         opts[:os_type] = os_type
       end
 
-      new_assembly_obj = assembly_template.stage(target, opts)
+      begin
+        new_assembly_obj = assembly_template.stage(target, opts)
+      rescue DTK::ErrorUsage => e
+        raise e unless is_silent_fail
+        # in case we are using silent fail we wont response evne if there was an error
+        new_assembly_obj = Assembly::Instance.find_by_name?(target, opts[:assembly_name])
+        is_created = false
+        # in case there is still no assembly raise error
+        raise e unless new_assembly_obj
+      end
 
       response = {
         new_service_instance: {
           name: new_assembly_obj.display_name_print_form,
-          id: new_assembly_obj.id()
+          id: new_assembly_obj.id(),
+          is_created: is_created
         }
       }
       rest_ok_response(response, encode_into: :yaml)
@@ -758,6 +777,8 @@ module DTK
     def rest__exec
       assembly    = ret_assembly_instance_object()
       params_hash = ret_params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
+
+      params_hash[:task_params] = params_hash[:task_params].is_a?(String) ? Hash.new : params_hash[:task_params]
       rest_ok_response assembly.exec(params_hash)
     end
 

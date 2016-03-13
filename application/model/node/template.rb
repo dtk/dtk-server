@@ -80,11 +80,6 @@ module DTK
         "#{target.iaas_properties.type()}_image"
       end
 
-      def self.get_public_library(model_handle)
-        Library.get_public_library(model_handle.createMH(:library))
-      end
-      private_class_method :get_public_library
-
       def self.legal_os_identifiers(model_handle)
         public_library = get_public_library(model_handle)
         sp_hash = {
@@ -94,15 +89,6 @@ module DTK
         get_images(model_handle).map { |r| r[:os_identifier] }.compact.uniq
       end
 
-      def self.get_images(model_handle)
-        public_library = Library.get_public_library(model_handle.createMH(:library))
-        sp_hash = {
-          cols: [:id, :group_id, :os_identifier, :external_ref],
-          filter: [:and, [:eq, :type, 'image'], [:eq, :library_library_id, public_library[:id]]]
-        }
-        get_objs(model_handle.createMH(:node), sp_hash)
-      end
-      private_class_method :get_images
 
       # returns [image_id, os_type]
       def self.find_image_id_and_os_type(os_identifier, target)
@@ -129,20 +115,6 @@ module DTK
         ret
       end
 
-      def self.get_node_binding_rulesets(target, opts = {})
-        public_library = Library.get_public_library(target.model_handle(:library))
-        filter = [:eq, :library_library_id, public_library.id()]
-        if opts[:filter]
-          filter = [:and, filter, opts[:filter]]
-        end
-        sp_hash = {
-          cols: opts[:cols] || (NodeBindingRuleset.common_columns + [:ref]),
-          filter: filter
-        }
-        get_objs(target.model_handle(:node_binding_ruleset), sp_hash, keep_ref_cols: true)
-      end
-      private_class_method :get_node_binding_rulesets
-
       def self.legal_instance_sizes(model_handle)
         public_library = Library.get_public_library(model_handle.createMH(:library))
         sp_hash = {
@@ -157,25 +129,9 @@ module DTK
       end
 
       def self.find_matching_node_template(target, opts = {})
-        if node_target = opts[:node_target]
-          pp [:node_target, node_target]
-          fail Error.new('here need to write code that uses node_target to return results')
-        end
-
         node_binding_rs = opts[:node_binding_ruleset]
-        ret = node_binding_rs && node_binding_rs.find_matching_node_template(target)
-        ret || null_node_template(target.model_handle(:node))
+        (node_binding_rs && node_binding_rs.find_matching_node_template(target)) || null_node_template(target.model_handle(:node))
       end
-
-      def self.null_node_template(model_handle)
-        sp_hash = {
-          cols: [:id, :group_id, :display_name],
-          filter: [:eq, :display_name, 'null-node-template']
-        }
-        node_mh = model_handle.createMH(:node)
-        get_obj(node_mh, sp_hash)
-      end
-      private_class_method :null_node_template
 
       def self.image_upgrade(model_handle, old_image_id, new_image_id)
         nb_mh = model_handle.createMH(:node_binding_ruleset)
@@ -217,6 +173,44 @@ module DTK
           matching_images.each { |r| r[:external_ref][:image_id] = new_image_id }
           update_from_rows(model_handle, matching_images)
         end
+      end
+
+      # TODO: make private
+      def self.null_node_template(model_handle)
+        sp_hash = {
+          cols: [:id, :group_id, :display_name],
+          filter: [:eq, :display_name, 'null-node-template']
+        }
+        node_mh = model_handle.createMH(:node)
+        get_obj(node_mh, sp_hash)
+      end
+      
+      private
+
+      def self.get_public_library(model_handle)
+        Library.get_public_library(model_handle.createMH(:library))
+      end
+
+      def self.get_images(model_handle)
+        public_library = Library.get_public_library(model_handle.createMH(:library))
+        sp_hash = {
+          cols: [:id, :group_id, :os_identifier, :external_ref],
+          filter: [:and, [:eq, :type, 'image'], [:eq, :library_library_id, public_library[:id]]]
+        }
+        get_objs(model_handle.createMH(:node), sp_hash)
+      end
+
+      def self.get_node_binding_rulesets(target, opts = {})
+        public_library = Library.get_public_library(target.model_handle(:library))
+        filter = [:eq, :library_library_id, public_library.id()]
+        if opts[:filter]
+          filter = [:and, filter, opts[:filter]]
+        end
+        sp_hash = {
+          cols: opts[:cols] || (NodeBindingRuleset.common_columns + [:ref]),
+          filter: filter
+        }
+        get_objs(target.model_handle(:node_binding_ruleset), sp_hash, keep_ref_cols: true)
       end
     end
   end

@@ -22,7 +22,12 @@ module Ramaze::Helper
         fail Error.new("controller results are in wrong form; it should have 'rest' form")
       end
 
-      JSON.generate(@ctrl_results)
+      begin
+        JSON.generate(@ctrl_results)
+      rescue Exception => ex
+        ::DTK::Log.warn "Encoding error has occured, trying to fix it. Error #{ex.class} #{ex.message}"
+        JSON.generate DTK::ActionResultsQueue::Result.normalize_data_to_utf8_output!(@ctrl_results)
+      end
     end
 
     def rest_ok_response(data = nil, opts = {})

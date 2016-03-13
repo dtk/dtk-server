@@ -17,7 +17,7 @@
 #
 module DTK
   module CommandAndControlAdapter
-    class Server < CommandAndControlNodeConfig
+    class Server < CommandAndControl::NodeConfig
       def self.execute(_task_idh, _top_task_idh, task_action)
         response = nil
         config_agent_type = task_action.config_agent_type

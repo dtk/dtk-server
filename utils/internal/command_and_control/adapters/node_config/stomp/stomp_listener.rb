@@ -61,7 +61,12 @@ module DTK
          @stomp_rdy = true
         raise "Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ..."
       else
-        original_msg = decode(msg.body)
+        begin
+          original_msg = decode(msg.body)
+        rescue Exception => ex
+          Log.fatal("Error decrypting STOMP message, will have to ignore this message. Error: #{ex.message}")
+          return
+        end
 
         msg_request_id = original_msg[:requestid]
         pbuilder_id    = original_msg[:pbuilderid]
@@ -115,10 +120,17 @@ module DTK
         tries -= 1
       end
 
+      begin
+        encoded_message = encode(message)
+      rescue Exception => ex
+        Log.fatal("Error encrypting STOMP message, will have to ignore this message. Error: #{ex.message}")
+        return
+      end
+
       if defined?(PhusionPassenger)
-        @backup_client.publish(R8::Config[:arbiter][:topic], encode(message))
+        @backup_client.publish(R8::Config[:arbiter][:topic], encoded_message)
       else
-        send(R8::Config[:arbiter][:topic], encode(message))
+        send(R8::Config[:arbiter][:topic], encoded_message)
       end
     end
 

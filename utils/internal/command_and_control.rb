@@ -16,14 +16,18 @@
 # limitations under the License.
 #
 module DTK
+  # TODO: remove CommandAndControlAdapter module
   module CommandAndControlAdapter
   end
   class CommandAndControl
+    r8_nested_require('command_and_control', 'adapters/iaas')
+    r8_nested_require('command_and_control', 'adapters/node_config')
     r8_nested_require('command_and_control', 'install_script')
 
     def self.create_without_task
       new()
     end
+
     def initialize(task = nil, top_task_idh = nil)
       @top_task_idh = top_task_idh
       if task
@@ -147,15 +151,12 @@ module DTK
     end
 
     def self.get_and_update_node_state!(node, attribute_names)
-      # TODO: Haris - Test more this change
-      adapter_name = node.get_target_iaas_type() || R8::Config[:command_and_control][:iaas][:type]
-      klass = load_for_aux(:iaas, adapter_name)
+      klass = load_iaas_for(node: node)
       klass.get_and_update_node_state!(node, attribute_names)
     end
 
     def self.get_node_operational_status(node)
-      adapter_name = R8::Config[:command_and_control][:iaas][:type]
-      klass = load_for_aux(:iaas, adapter_name)
+      klass = load_iaas_for(node: node)
       klass.get_node_operational_status(node)
     end
 
@@ -194,46 +195,48 @@ module DTK
       klass.poll_to_detect_node_ready(node, opts)
     end
 
+    def self.iaas_adapter_name(key_val)
+      key = key_val.keys.first
+      val = key_val.values.first
+      case key
+       when :node
+        node = val
+        case iaas_type = node.get_iaas_type()
+         when :ec2_instance then :ec2
+         when :ec2_image then :ec2
+         when :bosh_instance then :bosh
+         when :physical then :physical
+         else fail Error.new("iaas type (#{iaas_type}) not treated")
+        end
+       when :target
+        target =  val
+        iaas_type = target.get_field?(:iaas_type)
+        case iaas_type
+         when 'ec2' then :ec2
+         when 'physical' then :physical
+         else fail Error.new("iaas type (#{iaas_type}) not treated")
+        end
+       when :image_type
+        image_type = val
+        case image_type
+         when :ec2_image then :ec2
+         else fail Error.new("image type (#{key_val[:image_type]}) not treated")
+        end
+       else
+        fail Error.new("#{key_val.inspect} not treated")
+      end
+    end
+
     private
+
+    def self.load_iaas_for(key_val)
+      load_for_aux(:iaas, iaas_adapter_name(key_val))
+    end
 
     def self.load_for_node_config(protocol_type = nil)
       adapter_name = protocol_type || R8::Config[:command_and_control][:node_config][:type]
       Log.debug("Node config adapter chosen: #{adapter_name}")
       load_for_aux(:node_config, adapter_name)
-    end
-
-    def self.load_iaas_for(key_val)
-      key = key_val.keys.first
-      val = key_val.values.first
-      adapter_name =
-        case key
-          when :node
-            node = val
-            case iaas_type = node.get_iaas_type()
-              when :ec2_instance then :ec2
-              when :ec2_image then :ec2 #TODO: kept in because staged node has this type, which should be changed
-              when :physical then :physical
-              else fail Error.new("iaas type (#{iaas_type}) not treated")
-            end
-          when :target
-            target =  val
-            iaas_type = target.get_field?(:iaas_type)
-            case iaas_type
-              when 'ec2' then :ec2
-              when 'physical' then :physical
-              else fail Error.new("iaas type (#{iaas_type}) not treated")
-            end
-          when :image_type
-            image_type = val
-            case image_type
-              when :ec2_image then :ec2
-              else fail Error.new("image type (#{key_val[:image_type]}) not treated")
-            end
-          else
-            fail Error.new("#{key_val.inspect} not treated")
-        end
-      adapter_type = :iaas
-      load_for_aux(adapter_type, adapter_name)
     end
 
     def self.load_config_node_adapter
@@ -253,11 +256,13 @@ module DTK
       Adapters[adapter_type] ||= {}
       return Adapters[adapter_type][adapter_name] if Adapters[adapter_type][adapter_name]
       begin
-
         r8_nested_require('command_and_control', "adapters/#{adapter_type}/#{adapter_name}")
-        klass = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
-        klass_or_instance = (instance_style_adapter?(adapter_type, adapter_name) ? klass.create_without_task() : klass)
-        Adapters[adapter_type][adapter_name] =  klass_or_instance
+        if base_class = base_class_when_instance_style_adapter?(adapter_name)
+          klass = base_class.const_get adapter_name.to_s.capitalize
+          Adapters[adapter_type][adapter_name] = klass.create_without_task()
+        else
+          Adapters[adapter_type][adapter_name] = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
+        end
        rescue LoadError => e
         raise ErrorUsage.new("IAAS type ('#{adapter_name}') not supported! Reason #{e.message}!")
        rescue Exception => e
@@ -283,15 +288,16 @@ module DTK
     Lock = Mutex.new
 
     # TODO: want to convert all adapters to new style to avoid setting stack error when adapter method not defined to have CommandAndControlAdapter self call instance
-    def self.instance_style_adapter?(adapter_type, adapter_name)
-      (InstanceStyleAdapters[adapter_type.to_sym] || []).include?(adapter_name.to_sym)
+    def self.base_class_when_instance_style_adapter?(adapter_name)
+      InstanceStyleAdapters[adapter_name]
     end
     InstanceStyleAdapters = {
-      iaas: [:physical]
+      physical: IAAS,
+      bosh: IAAS
     }
 
     #### Error classes
-    class Error < XYZ::Error
+    class Error < DTK::Error
       def to_hash
         { error_type: Aux.demodulize(self.class.to_s) }
       end
@@ -318,23 +324,5 @@ module DTK
       class WhileCreatingNode < Error
       end
     end
-  end
-
-  class CommandAndControlNodeConfig < CommandAndControl
-
-    def self.mc_info_for_config_agent(config_agent)
-      type = config_agent.type()
-      ConfigAgentTypeToMCInfo[type] || fail(Error.new("unexpected config adapter: #{type}"))
-    end
-
-    ConfigAgentTypeToMCInfo = {
-      puppet: { agent: 'puppet_apply', action: 'run' },
-      dtk_provider: { agent: 'action_agent', action: 'run_command' },
-      chef: { agent: 'chef_solo', action: 'run' }
-    }
-
-  end
-
-  class CommandAndControlIAAS < CommandAndControl
   end
 end

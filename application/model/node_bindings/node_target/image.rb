@@ -18,11 +18,29 @@
 module DTK; class NodeBindings
   class NodeTarget
     class Image < self
+      r8_nested_require('image', 'term')
+      r8_nested_require('image', 'with_iaas_properties')
+
+      NodeTargetType = :image
+
       attr_reader :image
       def initialize(hash)
-        super(Type)
-        @image = hash[:image]
-        @size = hash[:size]
+        super(NodeTargetType)
+        @image_type = hash[:image_type]
+        @image      = hash[:image]
+        @size       = hash[:size]
+      end
+
+      def hash_form
+        super.merge(image_type: @image_type, image: @image, size: @size)
+      end
+
+      def node_external_ref?
+        Term.node_external_ref?(@image_type)
+      end
+      
+      def self.default_node_external_ref
+        Term.default_node_external_ref
       end
 
       # returns a TargetSpecificObject
@@ -43,43 +61,20 @@ module DTK; class NodeBindings
         ret
       end
 
-      def hash_form
-        { type: type().to_s, image: @image, size: @size }
+      def match_or_create_node?(_target)
+        :create
       end
 
-      Type = :image
-      Fields = {
-        image: {
-          key: 'image',
-          required: true
-        },
-        size: {
-          key: 'size'
-        }
-      }
-      InputFormToInternal = Fields.inject({}) { |h, (k, v)| h.merge(v[:key] => k) }
-      Allkeys = Fields.values.map { |f| f[:key] }
-      RequiredKeys =  Fields.values.select { |f| f[:required] }.map { |f| f[:key] }
-
       def self.parse_and_reify(parse_input, _opts = {})
-        ret = nil
         if parse_input.type?(ContentField)
           input = parse_input.input
-          if input[:type].to_sym == Type
-            ret = new(input)
+          if input[:type].to_sym == NodeTargetType
+            WithIAASProperties.create_if_matches?(input) || new(input)
           end
         elsif parse_input.type?(Hash)
           input = parse_input.input
-          if Aux.has_only_these_keys?(input, Allkeys) && !RequiredKeys.find { |k| !input.key?(k) }
-            internal_form_hash = input.inject({}) { |h, (k, v)| h.merge(InputFormToInternal[k] => v) }
-            ret = new(internal_form_hash)
-          end
+          Term.create_if_matches?(input) || WithIAASProperties.create_if_matches?(input)
         end
-        ret
-      end
-
-      def match_or_create_node?(_target)
-        :create
       end
     end
   end

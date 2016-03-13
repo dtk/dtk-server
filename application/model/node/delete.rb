@@ -32,6 +32,14 @@ module DTK; class Node
         end
       end
 
+      # only for node group members
+      def soft_delete(opts = {})
+        return unless is_target_ref?
+
+        node_group_member = ServiceNodeGroup::NodeGroupMember.create_as(self)
+        node_group_member.soft_delete()
+      end
+
       def destroy_and_reset(target_idh)
          fail ErrorUsage.new('Command Not Supperetd')
 # TODO: DTK-1857
@@ -57,7 +65,11 @@ end
         if is_target_ref?()
           # This wil be a node group member; need to bump down is assocaited node groups cardinality
           node_group_member = ServiceNodeGroup::NodeGroupMember.create_as(self)
-          node_group_member.bump_down_associated_node_group_cardinality()
+
+          unless opts[:dont_change_cardinality]
+            node_group_member.update_object!(:ng_member_deleted)
+            node_group_member.bump_down_associated_node_group_cardinality() unless node_group_member[:ng_member_deleted]
+          end
         end
 
         if opts[:update_task_template]

@@ -657,6 +657,10 @@ module DTK
         opts[:parent_service] = parent_service
       end
 
+      if is_target = ret_request_params(:is_target)
+        opts[:is_target] = is_target
+      end
+
       project = get_default_project()
       opts.merge!(project: project)
 

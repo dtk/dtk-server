@@ -55,6 +55,11 @@ module DTK; class Assembly
         override_attrs[:display_name] = assembly_name
       end
 
+      # only if called from stage-target; we set specific_type field to 'target'
+      if is_target = opts[:is_target]
+        override_attrs[:specific_type] = 'target'
+      end
+
       clone_opts = { ret_new_obj_with_cols: [:id, :type] }
       if settings = opts[:service_settings]
         clone_opts.merge!(service_settings: settings)

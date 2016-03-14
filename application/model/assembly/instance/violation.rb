@@ -18,6 +18,8 @@
 module DTK
   class Assembly::Instance
     TARGET_BUILTIN_NODE_LIMIT = R8::Config[:dtk][:target][:builtin][:node_limit].to_i
+    PROVIDER_COMP_NAME = 'iaas::ec2_account'
+    TARGET_CMP_NAME    = 'iaas::ec2_vpc'
 
     module ViolationMixin
       def find_violations
@@ -30,8 +32,9 @@ module DTK
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_refs_viols = find_violations__module_refs(cmps)
         num_of_target_nodes = find_violations__num_of_target_nodes()
+        target_provider_viols = find_violations__target_and_provider(cmps)
 
-        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes
+        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + target_provider_viols
       end
 
       private
@@ -162,6 +165,27 @@ module DTK
         ret
       end
 
+      def find_violations__target_and_provider(cmps)
+        # ap cmps.first.get_component_with_attributes_unraveled
+        ret = []
+        if target = self.get_target
+          return ret
+        else
+          missing_cmps = []
+          provider_cmp = cmps.find{ |cmp| cmp[:display_name].eql?(PROVIDER_COMP_NAME.gsub('::', '__')) }
+          target_cmp   = cmps.find{ |cmp| cmp[:display_name].eql?(TARGET_CMP_NAME.gsub('::', '__')) }
+
+          missing_cmps << provider_cmp unless provider_cmp
+          missing_cmps << target_cmp unless target_cmp
+
+          unless missing_cmps.empty?
+            ret << Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)
+          end
+        end
+
+        ret
+      end
+
       def get_parsed_info(module_branch_id, type)
         ret = nil
         cols = [:id, :type, :component_id, :service_id, :dsl_parsed]
@@ -212,6 +236,7 @@ module DTK
           "Attribute (#{@attr_display_name}) is required, but unset"
         end
       end
+
       class ComponentConstraint < self
         def initialize(constraint, node)
           @constraint = constraint
@@ -226,6 +251,7 @@ module DTK
           "On assembly node (#{@node[:display_name]}): #{@constraint[:description]}"
         end
       end
+
       class UnconnReqServiceRef < self
         def initialize(aug_port)
           @augmented_port = aug_port
@@ -239,6 +265,7 @@ module DTK
           "Component (#{@augmented_port.display_name_print_form()}) has an unmet dependency"
         end
       end
+
       class ComponentParsingError < self
         def initialize(component, type)
           @component = component
@@ -253,6 +280,7 @@ module DTK
           "#{@type} module '#{@component}' has one or more parsing errors."
         end
       end
+
       class MissingIncludedModule < self
         def initialize(included_module, namespace, version = nil)
           @included_module = included_module
@@ -269,6 +297,7 @@ module DTK
           "Module '#{full_name}#{@version.nil? ? '' : '-' + @version}' is included in dsl, but not installed. Use 'print-includes' to see more details."
         end
       end
+
       class MultipleNamespacesIncluded < self
         def initialize(included_module, namespaces)
           @included_module = included_module
@@ -283,6 +312,7 @@ module DTK
           "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}. Use 'print-includes' to see more details."
         end
       end
+
       class HasItselfAsDependency < self
         def initialize(message)
           @message = message
@@ -309,6 +339,21 @@ module DTK
 
         def description
           "There are #{@running} nodes currently running in builtin target. Unable to create #{@new} new nodes because it will exceed number of nodes allowed in builtin target (#{TARGET_BUILTIN_NODE_LIMIT})"
+        end
+      end
+
+      class ProviderOrTargetCmpsMissing < self
+        def initialize(cmps)
+          @cmps = cmps
+        end
+
+        def type
+          :provider_or_target_cmps_missing
+        end
+
+        def description
+          is = (@cmps.size == 1) ? 'is' : 'are'
+          "Component(s) '#{@cmps.join(', ')}' required for setting up provider or target #{is} not included in the service instance"
         end
       end
     end

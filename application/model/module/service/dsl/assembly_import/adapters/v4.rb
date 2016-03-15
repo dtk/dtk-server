@@ -148,6 +148,9 @@ module DTK; class ServiceModule
       end
 
       def self.parse_and_add_components(all_assembly_components, components)
+        # in specific cases only one component can be sent as components params
+        components = [components] if components.is_a?(String)
+
         components.each do |component|
           if component.is_a?(Hash)
             name_without_title = component.keys.first

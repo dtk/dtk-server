@@ -73,14 +73,11 @@ module DTK; class Task
       node_cols = [:id, :display_name, :type, :external_ref, :admin_op_status]
       assembly_nodes = assembly.get_leaf_nodes(remove_assembly_wide_node: true, cols: node_cols)
 
-      assembly_nodes.each do |node|
-        # if soft-deleted node group member we want to delete it from database and aws
-        if node[:ng_member_deleted]
-          assembly_nodes.delete(node)
-          node.destroy_and_delete(dont_change_cardinality: true)
-          next
-        end
+      ng_members_to_delete = assembly_nodes.select{ |node| node[:ng_member_deleted] }
+      ng_members_to_delete.each{ |node| node.destroy_and_delete(dont_change_cardinality: true) }
+      assembly_nodes.reject!{ |node| ng_members_to_delete.include?(node) }
 
+      assembly_nodes.each do |node|
         external_ref = node.external_ref
         if !external_ref.created?
           nodes_to_create << node

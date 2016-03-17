@@ -59,7 +59,7 @@ module DTK
         create_from_row(target_mh, create_row, create_opts)
       end
 
-      def self.create_provider_from_converge(provider_cmp, s_group_cmp, project)
+      def self.create_provider_from_converge(provider_cmp, s_group_cmp, project, service_instance)
         provider_attributes    = provider_cmp.get_component_with_attributes_unraveled({})[:attributes]
         s_group_cmp_attributes = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
 
@@ -87,7 +87,7 @@ module DTK
 
         project_idh = project.id_handle()
         iaas_type   = 'ec2'
-        provider_name = 'target_test'
+        provider_name = service_instance[:display_name]
 
         iaas_properties = {
           :keypair => keypair,
@@ -193,6 +193,15 @@ module DTK
         end
       end
 
+      def self.provider_exists?(project_idh, provider_name)
+        sp_hash = {
+          cols: [:id],
+          filter: [:and, [:eq, :display_name, provider_display_name(provider_name)],
+                   [:eq, :project_id, project_idh.get_id()]]
+        }
+        get_obj(project_idh.createMH(:target_template), sp_hash)
+      end
+
       private
 
       def base_name
@@ -210,15 +219,6 @@ module DTK
       end
       # removed '-template' from provider display_name (ticket DTK-1480)
       # DisplayNameSufix = '-template'
-
-      def self.provider_exists?(project_idh, provider_name)
-        sp_hash = {
-          cols: [:id],
-          filter: [:and, [:eq, :display_name, provider_display_name(provider_name)],
-                   [:eq, :project_id, project_idh.get_id()]]
-        }
-        get_obj(project_idh.createMH(:target_template), sp_hash)
-      end
     end
   end
 end

@@ -168,11 +168,14 @@ module DTK
       end
 
       def find_violations__target_and_provider(cmps, project)
-        ret = []
+        ret           = []
+        specific_type = self.get_field?(:specific_type)
 
-        if target = self.get_target
-          return ret
-        else
+        if specific_type && specific_type.eql?('target')
+          project_idh   = project.id_handle()
+          target        = self.get_target
+          provider      = Target::Template.provider_exists?(project_idh, self[:display_name])
+
           missing_cmps   = []
           provider_cmp   = cmps.find{ |cmp| cmp[:display_name].eql?(PROVIDER_COMP_NAME.gsub('::', '__')) }
           vpc_cmp        = cmps.find{ |cmp| cmp[:display_name].eql?(VPC_CMP_NAME.gsub('::', '__')) }
@@ -187,9 +190,16 @@ module DTK
             return Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)
           end
 
-          provider = Target::Template.create_provider_from_converge(provider_cmp, s_group_cmp, project)
-          target   = Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, self)
+          provider = Target::Template.create_provider_from_converge(provider_cmp, s_group_cmp, project, self) unless provider
+          if target
+            Target::Instance.update_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, target)
+          else
+            target = Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, self)
+          end
         end
+
+        # provider = Target::Template.create_provider_from_converge(provider_cmp, s_group_cmp, project)
+        # target   = Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, self)
 
         ret
       end

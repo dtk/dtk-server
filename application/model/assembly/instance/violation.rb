@@ -18,11 +18,13 @@
 module DTK
   class Assembly::Instance
     TARGET_BUILTIN_NODE_LIMIT = R8::Config[:dtk][:target][:builtin][:node_limit].to_i
-    PROVIDER_COMP_NAME = 'iaas::ec2_account'
-    TARGET_CMP_NAME    = 'iaas::ec2_vpc'
+    PROVIDER_COMP_NAME  = 'aws::iam_user'
+    VPC_CMP_NAME        = 'aws::vpc'
+    VPC_SUBNET_CMP_NAME = 'aws::vpc_subnet'
+    SECURITY_GROUP_CMP  = 'aws::security_group'
 
     module ViolationMixin
-      def find_violations
+      def find_violations(project = nil)
         nodes_and_cmps = get_info__flat_list(detail_level: 'components').select { |r| r[:nested_component] }
         cmps = nodes_and_cmps.map { |r| r[:nested_component] }
 
@@ -32,7 +34,7 @@ module DTK
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_refs_viols = find_violations__module_refs(cmps)
         num_of_target_nodes = find_violations__num_of_target_nodes()
-        target_provider_viols = find_violations__target_and_provider(cmps)
+        target_provider_viols = find_violations__target_and_provider(cmps, project)
 
         unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + target_provider_viols
       end
@@ -165,22 +167,28 @@ module DTK
         ret
       end
 
-      def find_violations__target_and_provider(cmps)
-        # ap cmps.first.get_component_with_attributes_unraveled
+      def find_violations__target_and_provider(cmps, project)
         ret = []
+
         if target = self.get_target
           return ret
         else
-          missing_cmps = []
-          provider_cmp = cmps.find{ |cmp| cmp[:display_name].eql?(PROVIDER_COMP_NAME.gsub('::', '__')) }
-          target_cmp   = cmps.find{ |cmp| cmp[:display_name].eql?(TARGET_CMP_NAME.gsub('::', '__')) }
+          missing_cmps   = []
+          provider_cmp   = cmps.find{ |cmp| cmp[:display_name].eql?(PROVIDER_COMP_NAME.gsub('::', '__')) }
+          vpc_cmp        = cmps.find{ |cmp| cmp[:display_name].eql?(VPC_CMP_NAME.gsub('::', '__')) }
+          vpc_subnet_cmp = cmps.find{ |cmp| cmp[:display_name].eql?(VPC_SUBNET_CMP_NAME.gsub('::', '__')) }
+          s_group_cmp    = cmps.find{ |cmp| cmp[:display_name].eql?(SECURITY_GROUP_CMP.gsub('::', '__')) }
 
           missing_cmps << provider_cmp unless provider_cmp
-          missing_cmps << target_cmp unless target_cmp
+          missing_cmps << vpc_cmp unless vpc_cmp
+          missing_cmps << vpc_subnet_cmp unless vpc_subnet_cmp
 
           unless missing_cmps.empty?
-            ret << Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)
+            return Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)
           end
+
+          provider = Target::Template.create_provider_from_converge(provider_cmp, s_group_cmp, project)
+          target   = Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
         end
 
         ret

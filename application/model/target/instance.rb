@@ -58,6 +58,7 @@ module DTK
             fail ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")
           end
           target_name ||= provider.default_target_name(:ec2, region: region)
+          ap "TARGET NAME #{target_name}"
           # raises errors if problems with any params
           iaas_properties_array = IAASProperties::Ec2.check_and_compute_needed_iaas_properties(target_name, target_type, provider, property_hash)
         else
@@ -68,6 +69,52 @@ module DTK
         provider.update_obj!(*InheritedProperties)
 
         create_targets?(project_idh, provider, iaas_properties_array, raise_error_if_exists: true).first
+      end
+
+      def self.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
+        region            = ''
+        key               = ''
+        secret            = ''
+        security_group    = ''
+        availability_zone = ''
+        target_type       = :ec2_vpc
+
+        vpc_cmp_attributes        = vpc_cmp.get_component_with_attributes_unraveled({})[:attributes]
+        vpc_subnet_cmp_attributes = vpc_subnet_cmp.get_component_with_attributes_unraveled({})[:attributes]
+        s_group_cmp_attributes    = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
+
+        vpc_cmp_attributes.each do |attribute|
+          if attribute[:display_name].eql?('reqion')
+            region = attribute[:value_asserted] || attribute[:value_derived] || region
+          elsif attribute[:display_name].eql?('aws_access_key_id')
+            key = attribute[:value_asserted] || attribute[:value_derived] || key
+          elsif attribute[:display_name].eql?('aws_secret_access_key')
+            secret = attribute[:value_asserted] || attribute[:value_derived] || secret
+          end
+        end
+
+        vpc_subnet_cmp_attributes.each do |attribute|
+          if attribute[:display_name].eql?('availability_zone')
+            availability_zone = attribute[:value_asserted] || attribute[:value_derived] || availability_zone
+          end
+        end
+
+        s_group_cmp_attributes.each do |sgcmp|
+          if sgcmp[:display_name].eql?('group_name')
+            security_group = sgcmp[:value_asserted] || sgcmp[:value_derived] || security_group
+            break
+          end
+        end
+
+        iaas_properties = {
+          :region => region,
+          :key => key,
+          :secret => secret,
+          :security_group => security_group,
+          :availability_zone => availability_zone
+        }
+
+        create_target(target_type, project.id_handle(), provider, iaas_properties)
       end
 
       def self.create_targets?(project_idh, provider, iaas_properties_array, opts = {})

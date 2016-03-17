@@ -59,6 +59,46 @@ module DTK
         create_from_row(target_mh, create_row, create_opts)
       end
 
+      def self.create_provider_from_converge(provider_cmp, s_group_cmp, project)
+        provider_attributes    = provider_cmp.get_component_with_attributes_unraveled({})[:attributes]
+        s_group_cmp_attributes = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
+
+        keypair        = ''
+        key            = ''
+        secret         = ''
+        security_group = ''
+
+        provider_attributes.each do |attribute|
+          if attribute[:display_name].eql?('default_key_pair')
+            keypair = attribute[:value_asserted] || attribute[:value_derived]
+          elsif attribute[:display_name].eql?('aws_access_key_id')
+            key = attribute[:value_asserted] || attribute[:value_derived]
+          elsif attribute[:display_name].eql?('aws_secret_access_key')
+            secret = attribute[:value_asserted] || attribute[:value_derived]
+          end
+        end
+
+        s_group_cmp_attributes.each do |sgcmp|
+          if sgcmp[:display_name].eql?('group_name')
+            security_group = sgcmp[:value_asserted] || sgcmp[:value_derived]
+            break
+          end
+        end
+
+        project_idh = project.id_handle()
+        iaas_type   = 'ec2'
+        provider_name = 'target_test'
+
+        iaas_properties = {
+          :keypair => keypair,
+          :key => key,
+          :secret => secret,
+          :security_group => security_group
+        }
+
+        Target::Template.create_provider?(project_idh, iaas_type, provider_name, iaas_properties)
+      end
+
       class DeleteResponse < Hash
         def add_target_response(hash)
           hash.each_pair do |msg_type, msg_array|

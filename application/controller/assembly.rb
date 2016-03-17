@@ -599,7 +599,6 @@ module DTK
         opts.merge!(parent_service_instance: service_instance)
       end
 
-      target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
       is_silent_fail = ret_request_param_boolean(:silent_fail) || false
       is_created = true
 
@@ -664,15 +663,31 @@ module DTK
       project = get_default_project()
       opts.merge!(project: project)
 
+      target =
+        if is_target
+          target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
+          Target::Instance.create_target_mock_for_service_instance(target_name, project.id_handle()).first
+        else
+          target_idh_with_default(target_id).create_object(model_name: :target_instance)
+        end
+
       begin
         new_assembly_obj = assembly_template.stage(target, opts)
       rescue DTK::ErrorUsage => e
+        # delete mocked target service instance created above
+        Target::Instance.delete_and_destroy(target) if is_target
         raise e unless is_silent_fail
         # in case we are using silent fail we wont response evne if there was an error
         new_assembly_obj = Assembly::Instance.find_by_name?(target, opts[:assembly_name])
         is_created = false
         # in case there is still no assembly raise error
         raise e unless new_assembly_obj
+      end
+
+      if is_target
+        display_name = new_assembly_obj.get_field?(:display_name)
+        ref          = display_name.downcase.gsub(/ /, '-')
+        target.update(display_name: display_name, ref: ref)
       end
 
       response = {

@@ -174,8 +174,10 @@ module DTK; class  Assembly
             external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
           end
           if target = node[:target]
-            target[:iaas_properties][:security_group] ||=
-              target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
+            if target[:iaas_properties]
+              target[:iaas_properties][:security_group] ||=
+                target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
+            end
           end
           node.sanitize!()
 

@@ -126,8 +126,10 @@ module DTK
           end
 
           if target = r[:target]
-            sec_group_set = target[:iaas_properties][:security_group_set]
-            target[:iaas_properties][:security_group] ||= sec_group_set.join(',') if sec_group_set
+            if target[:iaas_properties]
+              sec_group_set = target[:iaas_properties][:security_group_set]
+              target[:iaas_properties][:security_group] ||= sec_group_set.join(',') if sec_group_set
+            end
             pntr[:target] ||= target[:display_name]
             opts.merge!(target: target)
           end

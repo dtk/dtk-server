@@ -58,7 +58,6 @@ module DTK
             fail ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")
           end
           target_name ||= provider.default_target_name(:ec2, region: region)
-          ap "TARGET NAME #{target_name}"
           # raises errors if problems with any params
           iaas_properties_array = IAASProperties::Ec2.check_and_compute_needed_iaas_properties(target_name, target_type, provider, property_hash)
         else
@@ -71,13 +70,15 @@ module DTK
         create_targets?(project_idh, provider, iaas_properties_array, raise_error_if_exists: true).first
       end
 
-      def self.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
+      def self.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, service_instance)
         region            = ''
         key               = ''
         secret            = ''
         security_group    = ''
         availability_zone = ''
         target_type       = :ec2_vpc
+        project_idh       = project.id_handle()
+        target            = nil
 
         vpc_cmp_attributes        = vpc_cmp.get_component_with_attributes_unraveled({})[:attributes]
         vpc_subnet_cmp_attributes = vpc_subnet_cmp.get_component_with_attributes_unraveled({})[:attributes]
@@ -113,8 +114,21 @@ module DTK
           :security_group => security_group,
           :availability_zone => availability_zone
         }
+# [:and, [:eq, :parent_id, r[:parent_id]],
+#            [:eq, :display_name, r[:display_name]]]
+        sp_hash = {
+          cols: [:id, :display_name, :ref],
+          filter: [:and, [:eq, :ref, service_instance.get_field?(:ref)], [:eq, :display_name, service_instance.get_field?(:display_name)]]
+        }
+        target_mh = project_idh.createMH(:target)
+        if existing_target = get_obj(target_mh, sp_hash)
+          existing_target.update_from_row(target_mh, iaas_properties)
+          target = existing_target
+        else
+        target = create_target(target_type, project_idh, provider, iaas_properties)
+        end
 
-        create_target(target_type, project.id_handle(), provider, iaas_properties)
+        target
       end
 
       def self.create_targets?(project_idh, provider, iaas_properties_array, opts = {})
@@ -165,6 +179,20 @@ module DTK
         return ret if create_rows.empty?
         create_opts = { convert: true, ret_obj: { model_name: :target_instance } }
         create_from_rows(target_mh, create_rows, create_opts)
+      end
+
+      def self.create_target_mock_for_service_instance(target_name, project_idh)
+        target_mh = project_idh.createMH(:target)
+        ref = target_name.downcase.gsub(/ /, '-')
+        create_rows = {
+          ref: ref,
+          display_name: target_name,
+          type: 'instance',
+          iaas_type: 'ec2',
+          iaas_properties: {}
+        }
+        create_opts = { convert: true, ret_obj: { model_name: :target_instance } }
+        create_from_rows(target_mh, [create_rows], create_opts)
       end
 
       class DeleteResponseObject

@@ -82,11 +82,11 @@ module DTK
         # This intercepts a create node stages subtask and bulks it up so taht it is a set of queue node tasks with last being dispatch
         case task.temporal_type()
           when :leaf
-            self.class::BulkCreate::Node.create?(task, context) || compute_process_executable_action(task, context)
+            BulkCreate.create_node?(task, context, self) || compute_process_executable_action(task, context)
           when :sequential
             compute_process_body_sequential(task.subtasks, context)
           when :concurrent
-            self.class::BulkCreate::Nodes.create?(task.subtasks, context) || compute_process_body_concurrent(task.subtasks, context)
+            BulkCreate.create_nodes?(task.subtasks, context, self) || compute_process_body_concurrent(task.subtasks, context)
           else
             Log.error('do not have rules to process task')
         end
@@ -126,6 +126,7 @@ module DTK
         )
         participant(name, participant_params)
       end
+      public :participant_executable_action
 
       # formatting fns
       def participant(name, opts = {})
@@ -147,6 +148,7 @@ module DTK
         subtask_array = subtask_array_x.size == 1 ? subtask_array_x.first : subtask_array_x
         ['sequence', {}, subtask_array]
       end
+      public :sequence
 
       def concurrence(*subtask_array_x)
         subtask_array = subtask_array_x.size == 1 ? subtask_array_x.first : subtask_array_x

@@ -15,43 +15,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module WorkflowAdapter
-  class Ruote
+module DTK
+  module WorkflowAdapter
     class BulkCreate
-      class Node < self
-        def self.create?(task, context)
-          if should_be_bulked?(task) 
-            compute_process_body_reformatted([task], context)
-          end
-        end
-      end
-
-      class Nodes < self
-        def self.create?(subtasks, context)
-          unless subtasks.empty?
-            if subtasks.find { |subtask| should_be_bulked?(subtask) }
-              if subtasks.find { |subtask| ! should_be_bulked?(subtask) }
-                # TODO: DTK-2471: enhance
-                fail ErrorUsage.new("Not Handling create nodes with mixed BOSH and non-BOSH nodes")
-              end
-              compute_process_body_reformatted(subtasks, context)
+      def self.create_nodes?(subtasks, context, parent)
+        unless subtasks.empty?
+          if subtasks.find { |subtask| should_be_bulked?(subtask) }
+            if subtasks.find { |subtask| ! should_be_bulked?(subtask) }
+              # TODO: DTK-2471: enhance
+              fail ErrorUsage.new("Not Handling create nodes with mixed BOSH and non-BOSH nodes")
             end
+            compute_process_body_reformatted(subtasks, context, parent)
           end
         end
-
-        private
-
-        def self.mark_initiate_create_nodes!(subtasks)
-          last_task = subtasks.last
-          mark_initiate!(last_task)
-        end
       end
 
-      private
+      def self.create_node?(task, context, parent)
+        create_nodes?([task], context, parent)
+      end
       
-      def self.mark_initiate!(task)
-        task[:executable_action].merge!(initiate_create_nodes: true)
-      end
+      private
       
       def self.should_be_bulked?(task)
         if executable_action = task[:executable_action]
@@ -63,28 +46,26 @@ module DTK; module WorkflowAdapter
         end
       end
       
-      def self.compute_process_body_reformatted(subtasks, context)
+      def self.compute_process_body_reformatted(subtasks, context, parent)
         # mark last subtask to initiate create nodes
-        mark_initiate_create_nodes!(subtasks)
+        mark_initiate!(subtasks)
         queue_tasks = subtasks.map do |task|
-          participant_executable_action(:create_node, task, context, task_start: true)
+          parent.participant_executable_action(:create_node, task, context, task_start: true)
         end
         detect_created_tasks = subtasks.map do |task|
-          participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
+          parent.participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
         end
         # TODO: double check this logic; but since the detect_created_tasks doing same thing; we can make them sequential and then
         # have first one cache results for rest
-        sequence(queue_tasks + detect_created_tasks)
+        parent.sequence(queue_tasks + detect_created_tasks)
       end
       
-      def self.participant_executable_action(*args)
-        Ruote.participant_executable_action(*args)
-      end
-      
-      def self.sequence(*args)
-        Route.sequence(*args)
+      def self.mark_initiate!(subtasks)
+        last_task = subtasks.last
+        last_task[:executable_action].merge!(initiate_create_nodes: true)
       end
     end
   end
-end; end
+end
+
       

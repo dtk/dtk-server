@@ -80,7 +80,7 @@ module DTK
         if b_op != a_op
           b_op <=> a_op
         else
-          (b[:index] || 0) <=> (a[:index] || 0)
+          (b[:index] || 0).to_i <=> (a[:index] || 0).to_i
         end
       end
       to_delete = (0...num_to_delete).map { |i| sorted[i] }

@@ -414,6 +414,17 @@ module DTK; class  Assembly
       end
     end
 
+    def set_as_default_target()
+      fail ErrorUsage.new("Service instance '#{self.get_field?(:display_name)}' is not a target service instance and cannot be set as default target!") unless is_target_service_instance?
+      target = self.get_target
+      Target::Instance.set_default_target(target, update_workspace_target: true)
+    end
+
+    def is_target_service_instance?
+      specific_type = self.get_field?(:specific_type)
+      return (specific_type && specific_type.eql?('target'))
+    end
+
     def self.exists?(target, display_name)
       !!find_by_name?(target, display_name)
     end

@@ -702,6 +702,11 @@ module DTK
       rest_ok_response(response, encode_into: :yaml)
     end
 
+    def rest__set_default_target
+      service_instance = ret_assembly_instance_object()
+      rest_ok_response service_instance.set_as_default_target()
+    end
+
     def rest__deploy
       # stage assembly template
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)

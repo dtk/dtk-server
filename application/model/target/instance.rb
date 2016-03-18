@@ -222,10 +222,17 @@ module DTK
           type: 'instance',
           iaas_type: 'ec2',
           iaas_properties: {},
-          project_id: project_idh.id()
+          project_id: project_idh.get_id()
         }
         create_opts = { convert: true, ret_obj: { model_name: :target_instance } }
         create_from_rows(target_mh, [create_rows], create_opts)
+      end
+
+      def self.validate_if_target_converged(target)
+        return unless target
+        target_parent = target.get_field?(:parent_id)
+
+        fail ErrorUsage.new("You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and try 'stage' again.")
       end
 
       class DeleteResponseObject

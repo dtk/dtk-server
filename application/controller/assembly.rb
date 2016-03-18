@@ -671,6 +671,8 @@ module DTK
           target_idh_with_default(target_id).create_object(model_name: :target_instance)
         end
 
+      Target::Instance.validate_if_target_converged(target) unless is_target
+
       begin
         new_assembly_obj = assembly_template.stage(target, opts)
       rescue DTK::ErrorUsage => e

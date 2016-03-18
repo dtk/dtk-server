@@ -76,7 +76,8 @@ module Ramaze::Helper
         if default_target = Target::Instance.get_default_target(model_handle(:target))
           default_target.id_handle()
         else
-          fail DTK::ErrorUsage.new("If an explicit target is not given (with option '-t TARGET'), this command uses the default target, but a default target has not been set")
+          # fail DTK::ErrorUsage.new("If an explicit target is not given (with option '-t TARGET'), this command uses the default target, but a default target has not been set")
+          fail DTK::ErrorUsage.new("If an explicit target service instance is not given (with option '-p PARENT'), this command uses the default target, but a default target has not been set. You can set default target from 'service' context with 'set-default-target TARGET-NAME'")
         end
       end
     end

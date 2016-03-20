@@ -81,16 +81,24 @@ module DTK
           end
         end
 
+        # fqdn is a hash of form {WHAT_IS_RETURNED-FOR-host_addresses_ipv4 => FQDN}
         def self.update_fqdn!(ret, external_ref, node)
           if host_addresses_ipv4 = host_addresses_ipv4?(node)
             if host_addresses_ipv4.size > 1
               Log.info("Unexpected that node '#{node.get_field?(:display_name)}' has host_addresses_ipv4 with size greater than 1: #{host_addresses_ipv4.join(', ')}")
             end
             host_address = host_addresses_ipv4.first
-            # TODO: no external address so same
-            fqdn = { host_address => host_address }
-            external_ref[:fqdn] = fqdn
-            ret.merge!(fqdn: fqdn)
+            fqdn = 
+              if host_address =~ /^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$/
+                # TODO: hard-coded that it is BOSH over AWS
+                "ip-#{host_address.gsub(/[.]/,'-')}.ec2.internal"
+              else
+                Log.error("Unexpected form for BOSH host_address '#{host_address}'")
+                host_address
+              end
+            fqdn_hash = { host_address => fqdn }
+            external_ref[:fqdn] = fqdn_hash
+            ret.merge!(fqdn: fqdn_hash)
             true
           end
         end

@@ -28,8 +28,16 @@ module DTK; class  Assembly
         if workspace = assembly_idhs.find { |idh| Workspace.is_workspace?(idh.create_object()) }
           fail ErrorUsage.new('Cannot delete a workspace')
         end
-        Delete.contents(assembly_idhs, opts)
+
+        service_instance = Delete.contents(assembly_idhs, opts)
         delete_instances(assembly_idhs)
+
+        # check if target service instance; and delete target object if no service instances staged in it
+        if assembly_idhs.size == 1
+          if specific_type = service_instance[:specific_type]
+            Delete.delete_target(service_instance, opts) if specific_type.eql?('target')
+          end
+        end
       end
 
       def delete_contents(assembly_idhs, opts = {})
@@ -126,12 +134,18 @@ module DTK; class  Assembly
       def self.contents(assembly_idhs, opts = {})
         return if assembly_idhs.empty?
         delete(get_sub_assemblies(assembly_idhs).map(&:id_handle))
-        assembly_ids = assembly_idhs.map(&:get_id)
-        idh = assembly_idhs.first
+
+        assembly_ids     = assembly_idhs.map(&:get_id)
+        idh              = assembly_idhs.first
+        service_instance = idh.create_object().copy_as_assembly_instance
+
+        safe_to_delete_target_service?(service_instance, opts)
+
         Delete.assembly_modules?(assembly_idhs, opts)
-        # Delete.assembly_modules? needs to be done before Delete.assembly_nodes
         Delete.assembly_nodes(idh.createMH(:node), assembly_ids, opts)
         Delete.task_templates(idh.createMH(:task_template), assembly_ids)
+
+        service_instance
       end
 
       def self.get_nodes_simple(node_mh, assembly_ids)
@@ -178,6 +192,26 @@ module DTK; class  Assembly
             end
         end
         ret
+      end
+
+      def self.safe_to_delete_target_service?(service_instance, opts = {})
+        service_instance.update_object!(:specific_type)
+        specific_type = service_instance[:specific_type]
+
+        if specific_type && specific_type.eql?('target')
+          target        = service_instance.get_target()
+          opts[:target] = target
+          assemblies    = Assembly::Instance.get(target.model_handle(:assembly_instance), target_idh: target.id_handle())
+
+          fail ErrorUsage.new('You are not allowed to delete target service instance because there are other service instances staged into it.') if assemblies.size > 1
+        end
+      end
+
+      def self.delete_target(service_instance, opts = {})
+        if target = opts[:target]
+          target_instance = target.model_handle().createIDH(model_name: :target_instance, id: target.id()).create_object()
+          delete_instance(target_instance.id_handle())
+        end
       end
     end
   end

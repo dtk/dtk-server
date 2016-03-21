@@ -222,7 +222,9 @@ module DTK
             email: email,
             password: password,
             first_name: first_name,
-            last_name: last_name
+            last_name: last_name,
+            tenant_username: current_tenant_username,
+            dtk_instance_name: dtk_instance_repo_username
           },
           raise_error: true
         )
@@ -243,7 +245,7 @@ module DTK
     def create_tenant_user(username, rsa_pub_key, rsa_key_name)
       # Create Tenant
       route = '/v1/users/tenant'
-      body = user_params(username, rsa_pub_key, rsa_key_name)
+      body = user_params(username, rsa_pub_key, rsa_key_name, catalog_username: CurrentSession.catalog_username)
 
       tenant_response = post_rest_request_data(route, body, raise_error: true)
 
@@ -492,7 +494,7 @@ module DTK
     end
 
     def user_params(username, rsa_pub_key = nil, rsa_key_name = nil, additional_params = {})
-      ret = { username: username, dtk_instance_name: dtk_instance_repo_username() }
+      ret = { username: username, dtk_instance_name: dtk_instance_repo_username, tenant_name: current_tenant_username }
 
       rsa_pub_key ? ret.merge!(rsa_pub_key: rsa_pub_key) : ret
       rsa_key_name ? ret.merge!(rsa_key_name: rsa_key_name) : ret
@@ -501,6 +503,14 @@ module DTK
       ret.merge!(additional_params)
 
       ret
+    end
+
+    def current_tenant_username
+      "#{dtk_instance_prefix()}-dtk-instance"
+    end
+
+    def dtk_instance_prefix
+      ::R8::Config[:repo][:remote][:tenant_name] || ::DTK::Common::Aux.running_process_user()
     end
 
     def user_params_with_fingerprint(username, client_rsa_pub_key)

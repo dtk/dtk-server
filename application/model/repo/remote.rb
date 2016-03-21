@@ -42,13 +42,20 @@ module DTK
       end
 
       def register_catalog_user(username, email, password, first_name = nil, last_name = nil)
+        # we also make sure that tenant user is created
+        create_tenant_user()
+
+        # than we register catalog user
         client.register_catalog_user(username, email, password, first_name, last_name)
       end
 
       def add_client_access(client_rsa_pub_key, client_rsa_key_name, force_access = false)
-        response = client.add_client_access(client_rsa_pub_key, client_rsa_key_name, force_access)
         # we also make sure that tenant user is created
         create_tenant_user()
+
+        # we add user or his key to reponan
+        response = client.add_client_access(client_rsa_pub_key, client_rsa_key_name, force_access)
+
         response
       end
 
@@ -61,7 +68,7 @@ module DTK
       end
 
       def create_tenant_user
-        username        = dtk_instance_remote_repo_username()
+        username        = current_tenant_username()
         rsa_pub_key     = dtk_instance_rsa_pub_key()
         rsa_key_name    = dtk_instance_remote_repo_key_name()
 
@@ -69,7 +76,7 @@ module DTK
       end
 
       def publish_to_remote(client_rsa_pub_key, module_refs_content = nil)
-        username = dtk_instance_remote_repo_username()
+        username = current_tenant_username()
 
         unless namespace = remote.namespace
           namespace = CurrentSession.new.get_user_object().get_namespace()
@@ -94,7 +101,7 @@ module DTK
       def delete_remote_module(client_rsa_pub_key, force_delete = false)
         raise_error_if_module_is_not_accessible(client_rsa_pub_key)
         params = {
-          username: dtk_instance_remote_repo_username(),
+          username: current_tenant_username(),
           name: remote.module_name,
           namespace: remote.namespace,
           type: type_for_remote_module(remote.module_type),
@@ -303,7 +310,7 @@ module DTK
         @dtk_instance_rsa_pub_key ||= Common::Aux.get_ssh_rsa_pub_key()
       end
 
-      def dtk_instance_remote_repo_username
+      def current_tenant_username
         "#{dtk_instance_prefix()}-dtk-instance"
       end
 

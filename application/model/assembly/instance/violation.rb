@@ -17,13 +17,13 @@
 #
 module DTK
   class Assembly::Instance
-    TARGET_BUILTIN_NODE_LIMIT = R8::Config[:dtk][:target][:builtin][:node_limit].to_i
-    PROVIDER_COMP_NAME  = 'aws::iam_user'
-    VPC_CMP_NAME        = 'aws::vpc'
-    VPC_SUBNET_CMP_NAME = 'aws::vpc_subnet'
-    SECURITY_GROUP_CMP  = 'aws::security_group'
+    class Violation
+    end
+    r8_nested_require('violation', 'iaas_component')
 
     module ViolationMixin
+      TARGET_BUILTIN_NODE_LIMIT = R8::Config[:dtk][:target][:builtin][:node_limit].to_i
+
       def find_violations(project = nil)
         nodes_and_cmps = get_info__flat_list(detail_level: 'components').select { |r| r[:nested_component] }
         cmps = nodes_and_cmps.map { |r| r[:nested_component] }
@@ -34,9 +34,9 @@ module DTK
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_refs_viols = find_violations__module_refs(cmps)
         num_of_target_nodes = find_violations__num_of_target_nodes()
-        target_provider_viols = find_violations__target_and_provider(cmps, project)
+        iaas_component_viols = IaasComponent.find_violations(self, cmps, project)
 
-        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + target_provider_viols
+        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + iaas_component_viols
       end
 
       private
@@ -163,43 +163,6 @@ module DTK
           current_nodes_size = current_nodes.size
           ret << Violation::NodesLimitExceeded.new(new_nodes_size, current_nodes_size) if (current_nodes_size + new_nodes_size) > TARGET_BUILTIN_NODE_LIMIT
         end
-
-        ret
-      end
-
-      def find_violations__target_and_provider(cmps, project)
-        ret           = []
-        specific_type = self.get_field?(:specific_type)
-
-        if specific_type && specific_type.eql?('target')
-          project_idh   = project.id_handle()
-          target        = self.get_target
-          provider      = Target::Template.provider_exists?(project_idh, self[:display_name])
-
-          missing_cmps   = []
-          provider_cmp   = cmps.find{ |cmp| cmp[:display_name].eql?(PROVIDER_COMP_NAME.gsub('::', '__')) }
-          vpc_cmp        = cmps.find{ |cmp| cmp[:display_name].eql?(VPC_CMP_NAME.gsub('::', '__')) }
-          vpc_subnet_cmp = cmps.find{ |cmp| cmp[:display_name].eql?(VPC_SUBNET_CMP_NAME.gsub('::', '__')) }
-          s_group_cmp    = cmps.find{ |cmp| cmp[:display_name].eql?(SECURITY_GROUP_CMP.gsub('::', '__')) }
-
-          missing_cmps << provider_cmp unless provider_cmp
-          missing_cmps << vpc_cmp unless vpc_cmp
-          missing_cmps << vpc_subnet_cmp unless vpc_subnet_cmp
-
-          unless missing_cmps.empty?
-            return Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)
-          end
-
-          provider = Target::Template.create_provider_from_converge(provider_cmp, s_group_cmp, project, self) unless provider
-          if target
-            Target::Instance.update_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, target)
-          else
-            target = Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, self)
-          end
-        end
-
-        # provider = Target::Template.create_provider_from_converge(provider_cmp, s_group_cmp, project)
-        # target   = Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, self)
 
         ret
       end
@@ -360,20 +323,6 @@ module DTK
         end
       end
 
-      class ProviderOrTargetCmpsMissing < self
-        def initialize(cmps)
-          @cmps = cmps
-        end
-
-        def type
-          :provider_or_target_cmps_missing
-        end
-
-        def description
-          is = (@cmps.size == 1) ? 'is' : 'are'
-          "Component(s) '#{@cmps.join(', ')}' required for setting up provider or target #{is} not included in the service instance"
-        end
-      end
     end
   end
 end

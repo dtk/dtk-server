@@ -18,33 +18,39 @@
 module DTK
   class Assembly::Instance
     module IaasComponent
-      PROVIDER_COMP_NAME  = 'aws::iam_user'
-      VPC_CMP_NAME        = 'aws::vpc'
-      VPC_SUBNET_CMP_NAME = 'aws::vpc_subnet'
-      SECURITY_GROUP_CMP  = 'aws::security_group'
+      # TODO: need to abstract so applies to other IAAS
+      AWS_CMP_NAME = {
+        :provider   => 'aws::iam_user',
+        :vpc        => 'aws::vpc',
+        :vpc_subnet => 'aws::vpc_subnet',
+        :security_group => 'aws::security_group'
+      }
+      AWS_CMP_TYPE = AWS_CMP_NAME.inject({}) { |h, (type, cmp_name)| h.merge(type => cmp_name.gsub('::', '__')) }
 
       def self.find_violations(target_service, cmps, project)
         ret           = []
         specific_type = target_service.get_field?(:specific_type)
-
+        
         if specific_type && specific_type.eql?('target')
           project_idh   = project.id_handle()
           target        = target_service.get_target
           provider      = Target::Template.provider_exists?(project_idh, target_service[:display_name])
-
+          
           # TODO: DTK-2948: Aldin these can be multiple provider_cmps, and the other component types
           # We can start with treating just single ones
+          # When there are multiple isnatnces we need to start with provider object and then trace links to 
+          # see what is associated with it
+          # Provider wil indicate whether AWS or ...
           missing_cmps   = []
-          provider_cmp   = cmps.find{ |cmp| cmp[:display_name].eql?(PROVIDER_COMP_NAME.gsub('::', '__')) }
-          vpc_cmp        = cmps.find{ |cmp| cmp[:display_name].eql?(VPC_CMP_NAME.gsub('::', '__')) }
-          vpc_subnet_cmp = cmps.find{ |cmp| cmp[:display_name].eql?(VPC_SUBNET_CMP_NAME.gsub('::', '__')) }
-          s_group_cmp    = cmps.find{ |cmp| cmp[:display_name].eql?(SECURITY_GROUP_CMP.gsub('::', '__')) }
-
+          provider_cmp   = cmps.find{ |cmp| cmp[:component_type].eql?(AWS_CMP_TYPE[:provider]) }
+          vpc_cmp        = cmps.find{ |cmp| cmp[:component_type].eql?(AWS_CMP_TYPE[:vpc]) }
+          vpc_subnet_cmp = cmps.find{ |cmp| cmp[:component_type].eql?(AWS_CMP_TYPE[:vpc_subnet]) }
+          s_group_cmp    = cmps.find{ |cmp| cmp[:component_type].eql?(AWS_CMP_TYPE[:security_group]) }
 
           # Should put in names of missing components
-          missing_cmps << PROVIDER_COMP_NAME unless provider_cmp
-          missing_cmps << VPC_CMP_NAME unless vpc_cmp
-          missing_cmps << VPC_SUBNET_CMP_NAME unless vpc_subnet_cmp
+          missing_cmps << AWS_CMP_NAME[:provider] unless provider_cmp
+          missing_cmps << AWS_CMP_NAME[:vpc] unless vpc_cmp
+          missing_cmps << AWS_CMP_NAME[:vpc_subnet] unless vpc_subnet_cmp
 
           unless missing_cmps.empty?
             return [Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)]

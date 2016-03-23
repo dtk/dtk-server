@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2010-2016 dtk contributors
 #
 # This file is part of the dtk project.
@@ -197,7 +196,8 @@ module DTK
         sp_hash = {
           cols: [:id],
           filter: [:and, [:eq, :display_name, provider_display_name(provider_name)],
-                   [:eq, :project_id, project_idh.get_id()]]
+                   [:eq, :project_id, project_idh.get_id()],
+                   [:eq, :type, 'template']]
         }
         get_obj(project_idh.createMH(:target_template), sp_hash)
       end

@@ -59,24 +59,28 @@ module DTK
       end
 
       def self.create_provider_from_converge(provider_cmp, s_group_cmp, project, service_instance)
-        provider_attributes    = provider_cmp.get_component_with_attributes_unraveled({})[:attributes]
-        s_group_cmp_attributes = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
-
-        keypair        = ''
-        key            = ''
-        secret         = ''
-        security_group = ''
-
+        provider_name = keypair = key = secret = nil
+        provider_attributes  = provider_cmp.get_component_with_attributes_unraveled({})[:attributes]
         provider_attributes.each do |attribute|
-          if attribute[:display_name].eql?('default_key_pair')
-            keypair = attribute[:value_asserted] || attribute[:value_derived]
+          if attribute[:display_name].eql?('name')
+            provider_name = attribute[:attribute_value]
+          elsif attribute[:display_name].eql?('default_key_pair')
+            keypair = attribute[:attribute_value]
           elsif attribute[:display_name].eql?('aws_access_key_id')
-            key = attribute[:value_asserted] || attribute[:value_derived]
+            key = attribute[:attribute_value]
           elsif attribute[:display_name].eql?('aws_secret_access_key')
-            secret = attribute[:value_asserted] || attribute[:value_derived]
+            secret = attribute[:attribute_value]
           end
         end
 
+        # provider_name will be definately set
+        { aws_access_key_id: key, aws_secret_access_key: secret }.each_pair do |name, val|
+          # This is an internal logic error, not a user error
+          fail Error.new("This function should not be called if '#{name}' is nil") if val.nil?
+        end  
+
+        security_group = nil
+        s_group_cmp_attributes = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
         s_group_cmp_attributes.each do |sgcmp|
           if sgcmp[:display_name].eql?('group_name')
             security_group = sgcmp[:value_asserted] || sgcmp[:value_derived]
@@ -86,7 +90,6 @@ module DTK
 
         project_idh = project.id_handle()
         iaas_type   = 'ec2'
-        provider_name = service_instance[:display_name]
 
         iaas_properties = {
           :keypair => keypair,

@@ -28,6 +28,51 @@ module DTK
         get_these_objs(target_mh, sp_hash)
       end
 
+      def self.update_provider_from_converge(provider_cmp, s_group_cmp, project, provider)
+        provider_name = keypair = key = secret = nil
+        provider_attributes  = provider_cmp.get_component_with_attributes_unraveled({})[:attributes]
+        provider_attributes.each do |attribute|
+          case attribute[:display_name]
+            when 'name'
+              provider_name = attribute[:attribute_value]
+            when 'default_key_pair'
+              keypair = attribute[:attribute_value]
+            when 'aws_access_key_id'
+              key = attribute[:attribute_value]
+            when 'aws_secret_access_key'
+              secret = attribute[:attribute_value]
+          end
+        end
+
+        # provider_name will be definately set
+        { aws_access_key_id: key, aws_secret_access_key: secret }.each_pair do |name, val|
+          # This is an internal logic error, not a user error
+          fail Error.new("This function should not be called if '#{name}' is nil") if val.nil?
+        end
+
+        security_group = nil
+        s_group_cmp_attributes = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
+        s_group_cmp_attributes.each do |sgcmp|
+          if sgcmp[:display_name].eql?('group_name')
+            security_group = sgcmp[:value_asserted] || sgcmp[:value_derived]
+            break
+          end
+        end
+
+        project_idh  = project.id_handle()
+        iaas_type    = 'ec2'
+        display_name = provider_display_name(provider_name)
+
+        iaas_properties = {
+          :keypair => keypair,
+          :key => key,
+          :secret => secret,
+          :security_group => security_group
+        }
+
+        provider.update({iaas_properties: iaas_properties, display_name: display_name})
+      end
+
       # if iaas_type is nil means create a generic provider
       def self.create_provider?(project_idh, iaas_type, provider_name, iaas_properties_hash, params_hash = {}, opts = {})
         if existing_provider = provider_exists?(project_idh, provider_name)
@@ -58,7 +103,7 @@ module DTK
         create_from_row(target_mh, create_row, create_opts)
       end
 
-      def self.create_provider_from_converge(provider_cmp, s_group_cmp, project, service_instance)
+      def self.create_provider_from_converge(provider_cmp, s_group_cmp, project)
         provider_name = keypair = key = secret = nil
         provider_attributes  = provider_cmp.get_component_with_attributes_unraveled({})[:attributes]
         provider_attributes.each do |attribute|
@@ -67,7 +112,7 @@ module DTK
               provider_name = attribute[:attribute_value]
             when 'default_key_pair'
               keypair = attribute[:attribute_value]
-            when 'aws_access_key_id'  
+            when 'aws_access_key_id'
               key = attribute[:attribute_value]
             when 'aws_secret_access_key'
               secret = attribute[:attribute_value]

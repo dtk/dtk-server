@@ -66,16 +66,16 @@ module DTK
           # The methods below should only be called if no unset attributes
           return ret if any_unset_attributes
 
-          if provider 
-            # TODO: DTK-2489: think might want update_provider_from_converge
+          if provider
+            Target::Template.update_provider_from_converge(provider_cmp, s_group_cmp, project, provider) 
           else
-            provider = Target::Template.create_provider_from_converge(provider_cmp, s_group_cmp, project, target_service) 
+            provider = Target::Template.create_provider_from_converge(provider_cmp, s_group_cmp, project) 
           end
 
           if target
             Target::Instance.update_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, target)
           else
-            target = Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, target_service)
+            target = Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
           end
         end
 

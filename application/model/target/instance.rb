@@ -119,7 +119,7 @@ module DTK
         create_targets?(project_idh, provider, iaas_properties_array, raise_error_if_exists: true).first
       end
 
-      def self.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, service_instance)
+      def self.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
         region = key = secret = nil
         vpc_cmp_attributes = vpc_cmp.get_component_with_attributes_unraveled({})[:attributes]
         vpc_cmp_attributes.each do |attribute|

@@ -47,20 +47,16 @@ module DTK
         ret = {}
         external_ref = node[:external_ref]
         external_ref_changed = false
-        if attribute_names.include?(:host_addresses_ipv4)
-          if host_addresses_ipv4 = Client.new.vm_info(node).host_addresses_ipv4
-            Log.info("Info from BOSH Director: node '#{node.get_field?(:display_name)}' with id '#{node.id}' has host addresses: #{host_addresses_ipv4.join(', ')}")
+        attribute_names.each do |attribute_name|
+          case attribute_name
+            when :host_addresses_ipv4
+              external_ref_changed = true if NodeState.update_host_addresses_ipv4!(ret, external_ref, node) 
+            when :fqdn
+              external_ref_changed = true if NodeState.update_fqdn!(ret, external_ref, node) 
+            else
+              Log.error("Not treating update of BOSH node attribute '#{attribute_name}'")
           end
-          host_addresses_ipv4 = Client.new.vm_info(node).host_addresses_ipv4
-          # TODO: need to get away from using ec2_public_address
-          external_ref[:ec2_public_address] = external_ref[:dns_name] = host_addresses_ipv4
-          ret.merge!(host_addresses_ipv4: host_addresses_ipv4)
-          external_ref_changed = true
         end
-#        other =  attribute_names - [:host_addresses_ipv4]
-#        unless other.empty?
-#          Log.error("Not treating update of BOSH node attributes: #{other.join(', ')}")
-#        end
         node.update(external_ref: external_ref) if external_ref_changed
         ret        
       end
@@ -74,6 +70,45 @@ module DTK
         true 
       end
 
+      module NodeState
+        def self.update_host_addresses_ipv4!(ret, external_ref, node)
+          if host_addresses_ipv4 = host_addresses_ipv4?(node)
+            Log.info("Info from BOSH Director: node '#{node.get_field?(:display_name)}' with id '#{node.id}' has host addresses: #{host_addresses_ipv4.join(', ')}")
+            # TODO: need to get away from using ec2_public_address
+            external_ref[:ec2_public_address] = external_ref[:dns_name] = host_addresses_ipv4
+            ret.merge!(host_addresses_ipv4: host_addresses_ipv4)
+            true
+          end
+        end
+
+        # fqdn is a hash of form {WHAT_IS_RETURNED-FOR-host_addresses_ipv4 => FQDN}
+        def self.update_fqdn!(ret, external_ref, node)
+          if host_addresses_ipv4 = host_addresses_ipv4?(node)
+            if host_addresses_ipv4.size > 1
+              Log.info("Unexpected that node '#{node.get_field?(:display_name)}' has host_addresses_ipv4 with size greater than 1: #{host_addresses_ipv4.join(', ')}")
+            end
+            host_address = host_addresses_ipv4.first
+            fqdn = 
+              if host_address =~ /^[0-9]+[.][0-9]+[.][0-9]+[.][0-9]+$/
+                # TODO: hard-coded that it is BOSH over AWS
+                "ip-#{host_address.gsub(/[.]/,'-')}.ec2.internal"
+              else
+                Log.error("Unexpected form for BOSH host_address '#{host_address}'")
+                host_address
+              end
+            fqdn_hash = { host_address => fqdn }
+            external_ref[:fqdn] = fqdn_hash
+            ret.merge!(fqdn: fqdn_hash)
+            true
+          end
+        end
+
+        private
+
+        def self.host_addresses_ipv4?(node)
+          Bosh::Client.new.vm_info(node).host_addresses_ipv4
+        end
+      end
     end
   end
 end

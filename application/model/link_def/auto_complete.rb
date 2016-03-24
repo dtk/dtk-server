@@ -17,6 +17,22 @@
 #
 module DTK; class LinkDef
   class AutoComplete
+    def self.autocomplete_component_links(assembly, link_def_components, opts = {})
+      aug_cmps = assembly.get_augmented_components(opts)
+
+      # if service instance is staged into service instance target,
+      # find matching components from parent target as well
+      if parent_service_instance = opts[:parent_service_instance]
+        parent_cmps = parent_service_instance.get_augmented_components(opts)
+        aug_cmps.concat(parent_cmps)
+      end
+
+      link_def_components.each do |link_def_cmp|
+        input_cmp_idh = link_def_cmp.id_handle()
+        link_matching_components(assembly, input_cmp_idh, aug_cmps)
+      end
+    end
+
     # TODO: AUTO-COMPLETE-LINKS: this needs to be enhanced to be a general mechanism to auto complete links
     def self.create_internal_links(_node, component, node_link_defs_info)
       # get link_defs in node_link_defs_info that relate to internal links not linked already that connect to component
@@ -41,6 +57,68 @@ module DTK; class LinkDef
     end
 
     private
+
+    def self.link_matching_components(assembly, input_cmp_idh, aug_cmps)
+      components = aug_cmps.select{ |cmp| cmp[:id] == input_cmp_idh[:guid] }
+
+      return if components.empty?
+
+      if components.size > 1
+        Log.info('WARNING: Unexpected that components size is more than one')
+        return
+      end
+
+      component = components.first
+      if dependencies = component[:dependencies]
+        unlinked_link_defs = get_unlinked_link_defs(dependencies)
+        Log.info("Auto-linking components output:")
+        Log.info("#{component[:id]} => nil") if unlinked_link_defs.empty?
+
+        unlinked_link_defs.each do |link_def|
+          matching_cmps = check_if_matching_cmps(link_def, aug_cmps)
+          if matching_cmps.empty?
+            Log.info("#{component[:id]} => { #{link_def} => [] }")
+          elsif matching_cmps.size > 1
+            Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
+          else
+            Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
+            matching_cmp = matching_cmps.first
+            output_cmp_idh = matching_cmp.id_handle()
+            assembly.add_service_link?(input_cmp_idh, output_cmp_idh)
+          end
+        end
+      end
+    end
+
+    def self.get_unlinked_link_defs(dependencies)
+      ret_link_defs = []
+
+      dependencies.each do |dep|
+        if link_def = dep.link_def
+          ret_link_defs << link_def if dep.satisfied_by_component_ids.empty?
+        end
+      end
+
+      ret_link_defs
+    end
+
+    def self.check_if_matching_cmps(link_def, aug_cmps)
+      matching_cmps = []
+
+      if link_type = link_def[:link_type]
+        aug_cmps.each do |cmp|
+          cmp_name = cmp[:component_type].gsub('__','::')
+
+          if node = link_type.include?('/') && cmp[:node]
+            cmp_name = "#{node[:display_name]}/#{cmp_name}"
+          end
+
+          matching_cmps << cmp if link_type.eql?(cmp_name)
+        end
+      end
+
+      matching_cmps
+    end
 
     def self.choose_internal_link(_link_def, possible_links, link_base_cmp, strategy)
       # TODO: mostly stubbed fn

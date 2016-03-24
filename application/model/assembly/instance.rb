@@ -176,10 +176,12 @@ module DTK; class  Assembly
       end
 
       cmp_instance_idh = nil
+      opts.merge!(detail_to_include: [:component_dependencies])
 
       Transaction do
         # add the component
         cmp_instance_idh = node.add_component(aug_cmp_template, opts.merge(component_title: component_title))
+        component = cmp_instance_idh.create_object()
 
         # update the mnodule refs
         add_component__update_component_module_refs?(aug_cmp_template[:component_module], aug_cmp_template[:namespace], aug_cmp_template[:version])
@@ -188,9 +190,14 @@ module DTK; class  Assembly
         ModuleRefs::Lock.create_or_update(self)
 
         unless opts[:donot_update_workflow]
-          Task::Template::ConfigComponents.update_when_added_component?(self, node, cmp_instance_idh.create_object(), component_title, skip_if_not_found: true)
+          Task::Template::ConfigComponents.update_when_added_component?(self, node, component, component_title, skip_if_not_found: true)
+        end
+
+        if opts[:auto_complete_links]
+          LinkDef::AutoComplete.autocomplete_component_links(self, [component])
         end
       end
+
       cmp_instance_idh
     end
 

@@ -18,8 +18,10 @@
 require 'json'
 module DTK
   module WorkflowAdapter
+    # TODO: reformat so this is not mixin but class
     module RuoteGenerateProcessDefs
       r8_nested_require('generate_process_defs', 'context')
+      r8_nested_require('generate_process_defs', 'bulk_create')
       include ContextMixin
 
       @@count = 0
@@ -73,65 +75,22 @@ module DTK
         end
       end
 
-      ####synactic processing
+      #### synactic processing
       def compute_process_body(task, context)
+        # TODO: below put in hack for DTK-2471 that needs to be cleaned up
+        # Does not allow mixed bosh and non bosh
+        # This intercepts a create node stages subtask and bulks it up so taht it is a set of queue node tasks with last being dispatch
         case task.temporal_type()
           when :leaf
-            compute_process_executable_action(task, context)
+            BulkCreate.create_node?(task, context, self) || compute_process_executable_action(task, context)
           when :sequential
             compute_process_body_sequential(task.subtasks, context)
           when :concurrent
-            # TODO: hack for DTK-2471 that needs to be cleaned up
-            # Does not allow mxied bosh and non bosh
-            # This intercepts a create node stages subtask and makes into one queue tasks
-            bulked_up_create_nodes?(task.subtasks, context) || compute_process_body_concurrent(task.subtasks, context)
+            BulkCreate.create_nodes?(task.subtasks, context, self) || compute_process_body_concurrent(task.subtasks, context)
           else
             Log.error('do not have rules to process task')
         end
       end
-
-      # TODO: DTK-2471: begin: ============================================
-      def bulked_up_create_nodes?(subtasks, context)
-        unless subtasks.empty?
-          if subtasks.find { |subtask| bosh_create_node?(subtask) }
-            if subtasks.find { |subtask| ! bosh_create_node?(subtask) }
-              fail ErrorUsage.new("Not Handling create nodes with mixed BOSH and non-BOSH nodes")
-            end
-            compute_process_body_reformatted_bulked_up_create_nodes(subtasks, context)
-          end
-        end
-      end
-
-      def bosh_create_node?(subtask)
-        if executable_action = subtask[:executable_action]
-          if executable_action.kind_of?(Task::Action::CreateNode) and ! executable_action.kind_of?(Task::Action::PowerOnNode)
-            if external_ref = (executable_action[:node] || {})[:external_ref]
-              external_ref[:type] == 'bosh_instance'
-            end
-          end
-        end
-      end
-      
-      def compute_process_body_reformatted_bulked_up_create_nodes(subtasks, context)
-        # mark last subtask to initiate create nodes
-        mark_initiate_create_nodes!(subtasks)
-        queue_tasks = subtasks.map do |task|
-          participant_executable_action(:create_node, task, context, task_start: true)
-        end
-        detect_created_tasks = subtasks.map do |task|
-          participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
-        end
-        # TODO: double check this logic; but since the detect_created_tasks doing same thing; we can make them sequential and then
-        # have first one cache results for rest
-        sequence(queue_tasks + detect_created_tasks)
-      end
-
-      def mark_initiate_create_nodes!(subtasks)
-        last_task = subtasks.last
-        last_task[:executable_action].merge!(initiate_create_nodes: true)
-      end
-
-      # TODO: DTK-2471: end: ============================================
 
       def compute_process_body_sequential(subtasks, context)
         sts = subtasks.map do |t|
@@ -167,6 +126,7 @@ module DTK
         )
         participant(name, participant_params)
       end
+      public :participant_executable_action
 
       # formatting fns
       def participant(name, opts = {})
@@ -188,6 +148,7 @@ module DTK
         subtask_array = subtask_array_x.size == 1 ? subtask_array_x.first : subtask_array_x
         ['sequence', {}, subtask_array]
       end
+      public :sequence
 
       def concurrence(*subtask_array_x)
         subtask_array = subtask_array_x.size == 1 ? subtask_array_x.first : subtask_array_x

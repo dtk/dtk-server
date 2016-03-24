@@ -17,6 +17,7 @@
 #
 module DTK; class Assembly
   class Template < self
+    r8_require('../service_associations')
     r8_nested_require('template', 'factory')
     r8_nested_require('template', 'list')
     r8_nested_require('template', 'pretty_print')
@@ -54,6 +55,11 @@ module DTK; class Assembly
         override_attrs[:display_name] = assembly_name
       end
 
+      # only if called from stage-target; we set specific_type field to 'target'
+      if is_target = opts[:is_target]
+        override_attrs[:specific_type] = 'target'
+      end
+
       clone_opts = { ret_new_obj_with_cols: [:id, :type] }
       if settings = opts[:service_settings]
         clone_opts.merge!(service_settings: settings)
@@ -71,6 +77,16 @@ module DTK; class Assembly
 
         # user can provide custom node-size and os-type attribute, we proccess them here and assign to nodes
         set_custom_node_attributes(assembly_instance, opts) if opts[:node_size] || opts[:os_type]
+      end
+
+      if parent_service_instance = opts[:parent_service_instance]
+        ServiceAssociations.create(opts[:project], assembly_instance, parent_service_instance) if assembly_instance
+      end
+
+      opts.merge!(detail_to_include: [:component_dependencies])
+      if opts[:auto_complete_links]
+        aug_cmps = assembly_instance.get_augmented_components(opts)
+        LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, opts)
       end
 
       assembly_instance

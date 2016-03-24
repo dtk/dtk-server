@@ -572,7 +572,7 @@ module DTK
 
       component_title = ret_component_title?(cmp_name)
       node_id         = ret_request_params(:node_id)
-      opts            = ret_boolean_params_hash(:idempotent, :donot_update_workflow)
+      opts            = Opts.new(ret_boolean_params_hash(:idempotent, :donot_update_workflow, :auto_complete_links))
       node_idh        = node_id.empty? ? nil : ret_node_id_handle(:node_id, assembly)
 
       new_component_idh = assembly.add_component(node_idh, aug_component_template, component_title, opts)
@@ -588,6 +588,17 @@ module DTK
 
     def rest__stage
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
+      opts      = Opts.new
+
+      # when using stage -p parent-service, stage assembly into parent service target
+      if service_instance_id = ret_request_param_id_optional(:parent_service, Assembly::Instance)
+        service_instance = ret_id_handle_from_value(service_instance_id, Assembly::Instance).create_object(model_name: :assembly_instance)
+        service_instance.update_object!(:datacenter_datacenter_id)
+        parent_target_id = service_instance[:datacenter_datacenter_id]
+        target_id = parent_target_id if parent_target_id
+        opts.merge!(parent_service_instance: service_instance)
+      end
+
       target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
       is_silent_fail = ret_request_param_boolean(:silent_fail) || false
       is_created = true
@@ -622,7 +633,6 @@ module DTK
         assembly_template = ret_assembly_template_object()
       end
 
-      opts = {}
       if assembly_name = ret_request_params(:name)
         opts[:assembly_name] = assembly_name
       end
@@ -638,6 +648,21 @@ module DTK
       if os_type = ret_request_params(:os_type)
         opts[:os_type] = os_type
       end
+
+      if auto_complete_links = ret_request_params(:auto_complete_links)
+        opts[:auto_complete_links] = auto_complete_links
+      end
+
+      if parent_service = ret_request_params(:parent_service)
+        opts[:parent_service] = parent_service
+      end
+
+      if is_target = ret_request_params(:is_target)
+        opts[:is_target] = is_target
+      end
+
+      project = get_default_project()
+      opts.merge!(project: project)
 
       begin
         new_assembly_obj = assembly_template.stage(target, opts)

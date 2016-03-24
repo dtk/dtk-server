@@ -86,7 +86,9 @@ resource_pools:
   cloud_properties:
     instance_type: <%= ec2_size %>
     availability_zone: <%= bosh_subnet.ec2_availability_zone %>
-
+    root_disk:
+      size: 20000
+      type: gp2
 compilation:
   workers: 2
   network: default

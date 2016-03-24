@@ -21,7 +21,7 @@ module R8
 
   class Mapper
 
-    VALUE_PLACEHOLDER = '([\w\.:\[\]]+)'
+    VALUE_PLACEHOLDER = '([\w\.:\[\]\-]+)'
 
     def initialize
       @routes = {}

@@ -17,5 +17,7 @@
 #
 module DTK
   module Network
+    class Iaas
+    end
   end
 end

@@ -17,5 +17,7 @@
 #
 module DTK
   module Network
+    class Logical
+    end
   end
 end

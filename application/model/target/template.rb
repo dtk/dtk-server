@@ -62,14 +62,15 @@ module DTK
         provider_name = keypair = key = secret = nil
         provider_attributes  = provider_cmp.get_component_with_attributes_unraveled({})[:attributes]
         provider_attributes.each do |attribute|
-          if attribute[:display_name].eql?('name')
-            provider_name = attribute[:attribute_value]
-          elsif attribute[:display_name].eql?('default_key_pair')
-            keypair = attribute[:attribute_value]
-          elsif attribute[:display_name].eql?('aws_access_key_id')
-            key = attribute[:attribute_value]
-          elsif attribute[:display_name].eql?('aws_secret_access_key')
-            secret = attribute[:attribute_value]
+          case attribute[:display_name]
+            when 'name'
+              provider_name = attribute[:attribute_value]
+            when 'default_key_pair'
+              keypair = attribute[:attribute_value]
+            when 'aws_access_key_id'  
+              key = attribute[:attribute_value]
+            when 'aws_secret_access_key'
+              secret = attribute[:attribute_value]
           end
         end
 

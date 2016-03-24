@@ -43,6 +43,8 @@ module DTK
         Node::TargetRef.get_target_running_nodes(self)
       end
 
+      # TODO: DTK-2489; Aldin rewrite this and create_target_from_converge using same form that used for
+      #  Template.create_provider_from_converge
       def self.update_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, target)
         region            = ''
         key               = ''

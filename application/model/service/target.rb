@@ -27,7 +27,7 @@ module DTK
         @target = target
       end
 
-      # This function is used toi help bridge between using targets and service insatnces
+      # This function is used to help bridge between using targets and service insatnces
       # There are places in code where target is referenced, but we want to get a handle on a service isnatnce that has
       def self.create_from_target(target)
         # TODO: stub

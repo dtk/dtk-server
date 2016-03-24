@@ -19,6 +19,7 @@
 module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControl::IAAS
+      r8_nested_require('ec2', 'target_service')
       r8_nested_require('ec2', 'client_token')
       r8_nested_require('ec2', 'node_state')
       r8_nested_require('ec2', 'address_management')
@@ -26,12 +27,17 @@ module DTK
       #create_node must be below above three
       r8_nested_require('ec2', 'create_node')
 
+      # TODO: can remove these mixins and put directly in this file
       extend NodeStateClassMixin
       extend AddressManagementClassMixin
       extend ImageClassMixin
 
       def self.execute(_task_idh, _top_task_idh, task_action)
         CreateNode.run(task_action)
+      end
+
+      def self.find_violations_in_target_service(target_service, cmps, project, params = {})
+        TargetService.find_violations(target_service, cmps, project, params)
       end
 
       def self.find_matching_node_binding_rule(node_binding_rules, target)

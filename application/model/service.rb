@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  # TODO: wil use this to start to migrate logic for service insatnce
+  # New class for Service instances
   class Service
     r8_nested_require('service', 'target')
   end

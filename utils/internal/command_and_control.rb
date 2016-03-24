@@ -90,6 +90,11 @@ module DTK
       klass.pbuilderid(node)
     end
 
+    def self.find_violations_in_target_service(iaas_type, target_service, cmps, project, params = {})
+      klass = load_for_aux(:iaas, iaas_type.to_s)
+      klass.find_violations_in_target_service(target_service, cmps, project, params)
+    end
+
     def self.raise_error_if_invalid_image?(image_id, target)
       klass = load_iaas_for(target: target)
       klass.raise_error_if_invalid_image?(image_id, target)

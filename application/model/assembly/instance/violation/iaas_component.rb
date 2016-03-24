@@ -26,5 +26,24 @@ module DTK
         end
       end
     end
+
+    class Violation
+      class ProviderOrTargetCmpsMissing < self
+        def initialize(component_types)
+          @component_types = component_types
+        end
+        
+        def type
+          :provider_or_target_cmps_missing
+        end
+        
+        def description
+          cmp_or_cmps = (@component_types.size == 1) ? 'Component' : 'Components'
+          is_are = (@component_types.size == 1) ? 'is' : 'are'
+          
+          "#{cmp_or_cmps} of type (#{@component_types.join(', ')}) #{is_are} missing and #{is_are} required for a target service instance"
+        end
+      end
+    end
   end
 end

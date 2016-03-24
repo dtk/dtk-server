@@ -54,7 +54,7 @@ module DTK; module CommandAndControlAdapter
           missing_cmps << Component::Name.security_group unless s_group_cmp
 
           unless missing_cmps.empty?
-            return [Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)]
+            return [Assembly::Instance::Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)]
           end
 
           # The methods below should only be called if no unset attributes

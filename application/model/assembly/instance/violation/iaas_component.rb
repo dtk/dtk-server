@@ -79,8 +79,6 @@ module DTK
           end
         end
 
-        # provider = Target::Template.create_provider_from_converge(provider_cmp, s_group_cmp, project)
-        # target   = Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, target_service)
         ret
       end
     end

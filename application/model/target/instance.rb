@@ -46,32 +46,34 @@ module DTK
       # TODO: DTK-2489; Aldin rewrite this and create_target_from_converge using same form that used for
       #  Template.create_provider_from_converge
       def self.update_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, target)
-        region            = ''
-        key               = ''
-        secret            = ''
-        security_group    = ''
-        availability_zone = ''
-
-        vpc_cmp_attributes        = vpc_cmp.get_component_with_attributes_unraveled({})[:attributes]
-        vpc_subnet_cmp_attributes = vpc_subnet_cmp.get_component_with_attributes_unraveled({})[:attributes]
-        s_group_cmp_attributes    = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
-
+        region = key = secret = nil
+        vpc_cmp_attributes = vpc_cmp.get_component_with_attributes_unraveled({})[:attributes]
         vpc_cmp_attributes.each do |attribute|
-          if attribute[:display_name].eql?('reqion')
-            region = attribute[:value_asserted] || attribute[:value_derived] || region
-          elsif attribute[:display_name].eql?('aws_access_key_id')
-            key = attribute[:value_asserted] || attribute[:value_derived] || key
-          elsif attribute[:display_name].eql?('aws_secret_access_key')
-            secret = attribute[:value_asserted] || attribute[:value_derived] || secret
+          case attribute[:display_name]
+            when 'reqion'
+              region = attribute[:attribute_value]
+            when 'aws_access_key_id'
+              key = attribute[:attribute_value]
+            when 'aws_secret_access_key'
+              secret = attribute[:attribute_value]
           end
         end
 
+        { aws_access_key_id: key, aws_secret_access_key: secret, region: region }.each_pair do |name, val|
+          # This is an internal logic error, not a user error
+          fail Error.new("This function should not be called if '#{name}' is nil") if val.nil?
+        end
+
+        availability_zone         = nil
+        vpc_subnet_cmp_attributes = vpc_subnet_cmp.get_component_with_attributes_unraveled({})[:attributes]
         vpc_subnet_cmp_attributes.each do |attribute|
           if attribute[:display_name].eql?('availability_zone')
-            availability_zone = attribute[:value_asserted] || attribute[:value_derived] || availability_zone
+            availability_zone = attribute[:value_asserted] || attribute[:value_derived]
           end
         end
 
+        security_group         = nil
+        s_group_cmp_attributes = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
         s_group_cmp_attributes.each do |sgcmp|
           if sgcmp[:display_name].eql?('group_name')
             security_group = sgcmp[:value_asserted] || sgcmp[:value_derived] || security_group
@@ -118,42 +120,43 @@ module DTK
       end
 
       def self.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, service_instance)
-        region            = ''
-        key               = ''
-        secret            = ''
-        security_group    = ''
-        availability_zone = ''
-        target_type       = :ec2_vpc
-        project_idh       = project.id_handle()
-        target            = nil
-
-        vpc_cmp_attributes        = vpc_cmp.get_component_with_attributes_unraveled({})[:attributes]
-        vpc_subnet_cmp_attributes = vpc_subnet_cmp.get_component_with_attributes_unraveled({})[:attributes]
-        s_group_cmp_attributes    = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
-
+        region = key = secret = nil
+        vpc_cmp_attributes = vpc_cmp.get_component_with_attributes_unraveled({})[:attributes]
         vpc_cmp_attributes.each do |attribute|
-          if attribute[:display_name].eql?('reqion')
-            region = attribute[:value_asserted] || attribute[:value_derived] || region
-          elsif attribute[:display_name].eql?('aws_access_key_id')
-            key = attribute[:value_asserted] || attribute[:value_derived] || key
-          elsif attribute[:display_name].eql?('aws_secret_access_key')
-            secret = attribute[:value_asserted] || attribute[:value_derived] || secret
+          case attribute[:display_name]
+            when 'region'
+              region = attribute[:attribute_value]
+            when 'aws_access_key_id'
+              key = attribute[:attribute_value]
+            when 'aws_secret_access_key'
+              secret = attribute[:attribute_value]
           end
         end
 
-        vpc_subnet_cmp_attributes.each do |attribute|
+        { aws_access_key_id: key, aws_secret_access_key: secret, region: region }.each_pair do |name, val|
+          # This is an internal logic error, not a user error
+          fail Error.new("This function should not be called if '#{name}' is nil") if val.nil?
+        end
+
+        availability_zone     = nil
+        subnet_cmp_attributes = vpc_subnet_cmp.get_component_with_attributes_unraveled({})[:attributes]
+        subnet_cmp_attributes.each do |attribute|
           if attribute[:display_name].eql?('availability_zone')
-            availability_zone = attribute[:value_asserted] || attribute[:value_derived] || availability_zone
+            availability_zone = attribute[:value_asserted] || attribute[:value_derived]
           end
         end
 
-        s_group_cmp_attributes.each do |sgcmp|
+        security_group       = nil
+        group_cmp_attributes = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
+        group_cmp_attributes.each do |sgcmp|
           if sgcmp[:display_name].eql?('group_name')
-            security_group = sgcmp[:value_asserted] || sgcmp[:value_derived] || security_group
+            security_group = sgcmp[:value_asserted] || sgcmp[:value_derived]
             break
           end
         end
 
+        target_type     = :ec2_vpc
+        project_idh     = project.id_handle()
         iaas_properties = {
           :region => region,
           :key => key,

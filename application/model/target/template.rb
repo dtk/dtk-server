@@ -78,7 +78,7 @@ module DTK
         { aws_access_key_id: key, aws_secret_access_key: secret }.each_pair do |name, val|
           # This is an internal logic error, not a user error
           fail Error.new("This function should not be called if '#{name}' is nil") if val.nil?
-        end  
+        end
 
         security_group = nil
         s_group_cmp_attributes = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]

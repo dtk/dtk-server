@@ -17,7 +17,8 @@
 #
 module DTK; class LinkDef
   class AutoComplete
-    def self.autocomplete_component_links(assembly, link_def_components, opts = {})
+    def self.autocomplete_component_links(assembly, link_def_components, opts = Opts.new)
+      opts = add_detail_to_include_component_dependencies?(opts)
       aug_cmps = assembly.get_augmented_components(opts)
 
       # if service instance is staged into service instance target,
@@ -57,6 +58,16 @@ module DTK; class LinkDef
     end
 
     private
+
+    def self.add_detail_to_include_component_dependencies?(opts)
+      detail_to_include = opts[:detail_to_include] || []
+      if detail_to_include.include?(:component_dependencies)
+        opts
+      else
+        detail_to_include = detail_to_include + [:component_dependencies] 
+        opts.merge(detail_to_include: detail_to_include)
+      end
+    end
 
     def self.link_matching_components(assembly, input_cmp_idh, aug_cmps)
       components = aug_cmps.select{ |cmp| cmp[:id] == input_cmp_idh[:guid] }

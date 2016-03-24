@@ -83,7 +83,6 @@ module DTK; class Assembly
         ServiceAssociations.create(opts[:project], assembly_instance, parent_service_instance) if assembly_instance
       end
 
-      opts.merge!(detail_to_include: [:component_dependencies])
       if opts[:auto_complete_links]
         aug_cmps = assembly_instance.get_augmented_components(opts)
         LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, opts)

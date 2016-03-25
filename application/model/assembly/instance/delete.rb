@@ -29,9 +29,12 @@ module DTK; class  Assembly
           fail ErrorUsage.new('Cannot delete a workspace')
         end
 
-        Delete.targets_when_target_assembly_instance?(assembly_idhs)
         Delete.contents(assembly_idhs, opts)
-        delete_instances(assembly_idhs)
+
+        target_idhs_to_delete = Delete.target_idhs_to_delete?(assembly_idhs)
+        ret = delete_instances(assembly_idhs)
+        delete_instances(target_idhs_to_delete) unless target_idhs_to_delete.empty?
+        ret
       end
 
       def delete_contents(assembly_idhs, opts = {})
@@ -182,7 +185,8 @@ module DTK; class  Assembly
         ret
       end
 
-      def self.targets_when_target_assembly_instance?(assembly_idhs)
+      # Returns the target_ids to delete
+      def self.target_idhs_to_delete?(assembly_idhs)
         ndx_targets_to_delete = {}
         assembly_idhs.each do |assembly_idh|
           assembly    = assembly_idh.create_object
@@ -196,8 +200,8 @@ module DTK; class  Assembly
             end
             ndx_targets_to_delete[target.id] ||= target
           end
-          delete_instances(ndx_targets_to_delete.values.map(&:id_handle)) unless ndx_targets_to_delete.empty?
         end
+        ndx_targets_to_delete.values.map(&:id_handle)
       end
     end
   end

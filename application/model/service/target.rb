@@ -50,6 +50,10 @@ module DTK
         new(find_assembly_instance_from_target(target), target)
       end
 
+      def self.target_when_target_assembly_instance?(assembly)
+        assembly.copy_as_assembly_instance.get_target() if isa_target_assembly_instance?(assembly)
+      end
+
       private
 
       def self.isa_target_assembly_instance?(assembly_instance)

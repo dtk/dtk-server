@@ -86,7 +86,7 @@ module DTK; class LinkDef
         Log.info("#{component[:id]} => nil") if unlinked_link_defs.empty?
 
         unlinked_link_defs.each do |link_def|
-          matching_cmps = check_if_matching_cmps(link_def, aug_cmps)
+          matching_cmps = check_if_matching_cmps(link_def, aug_cmps, component)
           if matching_cmps.empty?
             Log.info("#{component[:id]} => { #{link_def} => [] }")
           elsif matching_cmps.size > 1
@@ -113,8 +113,15 @@ module DTK; class LinkDef
       ret_link_defs
     end
 
-    def self.check_if_matching_cmps(link_def, aug_cmps)
-      matching_cmps = []
+    def self.check_if_matching_cmps(link_def, aug_cmps, this_cmp)
+      matching_cmps  = []
+      constraints    = nil
+      link_def_links = LinkDef.get_link_def_links([link_def.id_handle()], cols: [:id, :display_name, :content, :link_def_id])
+
+      # get constraints from link_def dsl content and use them later to match link_defs on auto-complete
+      if link_def_content = !link_def_links.empty? && link_def_links.first[:content]
+        constraints = link_def_content[:constraints] unless link_def_content.empty?
+      end
 
       if link_type = link_def[:link_type]
         aug_cmps.each do |cmp|
@@ -124,7 +131,14 @@ module DTK; class LinkDef
             cmp_name = "#{node[:display_name]}/#{cmp_name}"
           end
 
-          matching_cmps << cmp if link_type.eql?(cmp_name)
+          if link_type.eql?(cmp_name)
+            if constraints
+              constraint_match = process_constraints(constraints, cmp, this_cmp)
+              # if there is constraint and it's not matched skip this component ko to next one
+              next unless constraint_match
+            end
+            matching_cmps << cmp
+          end
         end
       end
 
@@ -199,6 +213,69 @@ module DTK; class LinkDef
       # relevant link defs are ones that are in ndx_relevant_link_defs_info and have a possible link
       ret = ndx_relevant_link_defs.reject { |_k, v| not v.key?(:possible_links) }.values
       ret
+    end
+
+    private
+
+    def self.process_constraints(constraints, dep_cmp, this_cmp)
+      constraints_matched = true
+
+      constraints.each do |constraint|
+        begin
+          # using $SAFE = 4 to stop users from executing malicious code in lambda scripts
+          evaluated_fn = proc do
+            $SAFE = 4
+            eval(constraint)
+          end.call
+
+          raise Error.new('Currently only lambda functions are supported!') unless evaluated_fn.is_a?(Proc) && evaluated_fn.lambda?
+
+          attributes          = parse_constraint_attributes(evaluated_fn, dep_cmp, this_cmp)
+          constraints_matched = evaluated_fn.call(*attributes)
+
+          # if multiple constrains, all must be met;
+          # if one of constrains not met, we exit the loop and return false
+          break unless constraints_matched
+        rescue SecurityError => e
+          pp [e, e.backtrace[0..5]]
+          raise e
+        end
+      end
+
+      constraints_matched
+    end
+
+    def self.parse_constraint_attributes(evaluated_fn, dep_cmp, this_cmp)
+      attributes = []
+      lambda_params = evaluated_fn.parameters
+
+      dep_cmp_attrs  = dep_cmp.get_component_with_attributes_unraveled({})
+      this_cmp_attrs = this_cmp.get_component_with_attributes_unraveled({})
+
+      lambda_params.each do |param|
+        attributes << get_lambda_param_attribute_value(param[1].to_s, dep_cmp_attrs, this_cmp_attrs, '__')
+      end
+
+      attributes
+    end
+
+    def self.get_lambda_param_attribute_value(param, dep_cmp_attrs, this_cmp_attrs, delimiter)
+      param_cmp, param_attr = param.split(delimiter)
+
+      match_attr =
+        if param_cmp.eql?(pretify_cmp_name(dep_cmp_attrs[:component_type]))
+          dep_cmp_attrs[:attributes].find{ |attr| (attr[:root_display_name]||attr[:display_name]).eql?(param_attr) }
+        elsif param_cmp.eql?('this')
+          this_cmp_attrs[:attributes].find{ |attr| (attr[:root_display_name]||attr[:display_name]).eql?(param_attr) }
+        else
+          fail Error.new("Invalid lambda param specification '#{param}'!")
+        end
+
+      match_attr ? match_attr[:value_asserted] : nil
+    end
+
+    def self.pretify_cmp_name(cmp_name)
+      cmp_name.gsub('__', '_')
     end
   end
 end; end

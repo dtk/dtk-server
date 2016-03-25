@@ -51,9 +51,7 @@ module DTK
         return ret if any_unset_attributes
 
         provider = update_or_create_provider(target_service, provider_cmp, s_group_cmp, project)
-
         update_or_create_target(target_service, vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
-
         ret
       end
 
@@ -61,10 +59,11 @@ module DTK
       
       ######## TODO: will remove create/update provider and target #############
       def self.update_or_create_provider(target_service, provider_cmp, s_group_cmp, project)
-        provider_attributes  = provider_attributes(provider_cmp)
+        provider_attributes  = get_component_attributes(provider_cmp)
         iaas_properties      = provider_iaas_properties(provider_attributes, s_group_cmp)
         provider_name        = provider_name(provider_attributes)
         project_idh          = project.id_handle
+
         if provider = Target::Template.provider_exists?(project_idh, target_service.display_name)
           provider.update({iaas_properties: iaas_properties, display_name: provider_name})
         else
@@ -75,15 +74,15 @@ module DTK
       end
 
       def self.update_or_create_target(target_service, vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
-        if target = target_service.target
-          Target::Instance.update_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project, target)
-        else
-          Target::Instance.create_target_from_converge(vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
-        end
-      end
+        iaas_properties = target_iaas_attributes(vpc_cmp, vpc_subnet_cmp, s_group_cmp)
 
-      def self.provider_attributes(provider_cmp)
-        provider_cmp.get_component_with_attributes_unraveled({})[:attributes]
+        if target = target_service.target
+          target.update({iaas_properties: iaas_properties, parent_id: provider.id()})
+        else
+          target_type = :ec2_vpc
+          target = Target::Instance.create_target(target_type, project.id_handle, provider, iaas_properties)
+        end
+        target
       end
 
       def self.provider_name(provider_attributes)
@@ -91,32 +90,17 @@ module DTK
         Target::Template.provider_display_name(name_attribute[:attribute_value])
       end
 
+      ProviderAttributeNames = ['default_key_pair', 'aws_access_key_id', 'aws_secret_access_key']
       def self.provider_iaas_properties(provider_attributes, s_group_cmp)
-        keypair = key = secret = nil
-        provider_attributes.each do |attribute|
-          case attribute[:display_name]
-            when 'default_key_pair'
-              keypair = attribute[:attribute_value]
-            when 'aws_access_key_id'
-              key = attribute[:attribute_value]
-            when 'aws_secret_access_key'
-              secret = attribute[:attribute_value]
-          end
-        end
+        keypair, key, secret = get_attribute_values(ProviderAttributeNames, provider_attributes)
 
         { aws_access_key_id: key, aws_secret_access_key: secret }.each_pair do |name, val|
           # This is an internal logic error, not a user error
           fail Error.new("This function should not be called if '#{name}' is nil") if val.nil?
         end
 
-        security_group = nil
-        s_group_cmp_attributes = s_group_cmp.get_component_with_attributes_unraveled({})[:attributes]
-        s_group_cmp_attributes.each do |sgcmp|
-          if sgcmp[:display_name].eql?('group_name')
-            security_group = sgcmp[:value_asserted] || sgcmp[:value_derived]
-            break
-          end
-        end
+        s_group_cmp_attributes = get_component_attributes(s_group_cmp)
+        security_group = get_attribute_value?('group_name', s_group_cmp_attributes)
 
         {
           :keypair => keypair,
@@ -125,9 +109,47 @@ module DTK
           :security_group => security_group
         }
       end
+
+      TargetAttributeNames = ['reqion', 'aws_access_key_id', 'aws_secret_access_key']
+      def self.target_iaas_attributes(vpc_cmp, vpc_subnet_cmp, s_group_cmp)
+        vpc_cmp_attributes = get_component_attributes(vpc_cmp)
+        region, key, secret = get_attribute_values(TargetAttributeNames, vpc_cmp_attributes)
+
+        { aws_access_key_id: key, aws_secret_access_key: secret, region: region }.each_pair do |name, val|
+          # This is an internal logic error, not a user error
+          fail Error.new("This function should not be called if '#{name}' is nil") if val.nil?
+        end
+
+        vpc_subnet_cmp_attributes = get_component_attributes(vpc_subnet_cmp)
+        availability_zone = get_attribute_value?('availability_zone', vpc_subnet_cmp_attributes)
+        
+        s_group_cmp_attributes = get_component_attributes(s_group_cmp)
+        security_group = get_attribute_value?('group_name', s_group_cmp_attributes)
+
+        {
+          :region => region,
+          :key => key,
+          :secret => secret,
+          :security_group => security_group,
+          :availability_zone => availability_zone
+        }
+      end
       ######## end: will remove create/update provider and target #############
+
+      # returns array with same length as names with values for each name it finds
+      def self.get_attribute_values(names, attributes)
+        av_pairs = attributes.inject({}) { |h, attr| h.merge(attr[:display_name] => attr[:attribute_value]) }
+        names.map { |name| av_pairs[name] }
+      end
+
+      def self.get_attribute_value?(name, attributes)
+        get_attribute_values([name], attributes).first
+      end
+
+      def self.get_component_attributes(component)
+        component.get_component_with_attributes_unraveled({})[:attributes]
+      end
     end
   end
 end
-
 

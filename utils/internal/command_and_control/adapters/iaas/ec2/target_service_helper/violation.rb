@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  class CommandAndControlAdapter::Ec2::TargetService
+  class CommandAndControlAdapter::Ec2::TargetServiceHelper
     module Violation
       def self.find_violations(target_service, cmps, project, params = {})
         ret = []

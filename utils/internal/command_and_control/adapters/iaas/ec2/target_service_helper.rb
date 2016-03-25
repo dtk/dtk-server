@@ -18,12 +18,21 @@
 module DTK
   class CommandAndControlAdapter::Ec2
     # For interpreting AWS target service instances
-    class TargetService
-      r8_nested_require('target_service', 'component')
-      r8_nested_require('target_service', 'violation')
+    class TargetServiceHelper
+      r8_nested_require('target_service_helper', 'component')
+      r8_nested_require('target_service_helper', 'violation')
+
+      def initialize(node)
+        @target_service = Service::Target.create_from_node(node)
+      end
 
       def self.find_violations(target_service, cmps, project, params = {})
         Violation.find_violations(target_service, cmps, project, params)
+      end
+
+      def get_credentials(_node)
+        # TODO: stub
+        @target_service.target.get_aws_compute_params
       end
     end
   end

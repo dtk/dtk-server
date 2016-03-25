@@ -29,14 +29,10 @@ module DTK
       end
       private :initialize
 
-      def target
-        Log.error("Unexepcetd that @target is nil") unless @target
-        @target
+      def self.create_from_node(node)
+        create_from_target(node.get_target)
       end
 
-      def display_name
-        @assembly_instance.get_field?(:display_name)
-      end
 
       # Creates a Service::Target object if assembly_instance represents a target service instance
       def self.create_from_assembly_instance?(assembly_instance)
@@ -46,9 +42,18 @@ module DTK
       # This function is used to help bridge between using targets and service instances
       # There are places in code where target is referenced, but we want to get a handle on a service isnatnce that has
       def self.create_from_target(target)
-        # TODO: stub
         new(find_assembly_instance_from_target(target), target)
       end
+
+      def target
+        Log.error("Unexepcetd that @target is nil") unless @target
+        @target
+      end
+
+      def display_name
+        @assembly_instance.get_field?(:display_name)
+      end
+
 
       def self.target_when_target_assembly_instance?(assembly)
         assembly.copy_as_assembly_instance.get_target() if isa_target_assembly_instance?(assembly)
@@ -67,9 +72,8 @@ module DTK
         sp_hash = {
           cols: [:id, :group_id, :display_name],
           filter: [:and, 
-                   [:eq, :project_id, target.get_project.id],
-                   [:eq, :display_name, target.get_field?(:display_name)],
-                   [:eq, :specific_type, 'target']]
+                   [:eq, :datacenter_datacenter_id, target.id],
+                   [:eq, :display_name, target.get_field?(:display_name)]]
         }
         unless ret = Assembly::Instance.get_obj(target.model_handle(:assembly_instance), sp_hash)
           Log.error("Unexpected that find_assembly_instance_from_target returns nil")

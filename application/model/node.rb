@@ -212,11 +212,6 @@ module DTK
       get_target().get_iaas_type()
     end
 
-    def get_target_iaas_credentials
-      # TODO: Haris - When we support multiple IAAS we will need to modify logic here
-      get_target().get_aws_compute_params()
-    end
-
     def self.get_violations(id_handles)
       get_objs_in_set(id_handles, cols: [:violations]).map { |r| r[:violation] }
     end

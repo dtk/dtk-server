@@ -43,6 +43,10 @@ module DTK; module CommandAndControlAdapter
         run_aux()
       end
 
+      def target
+        @target_service.target
+      end
+
       private
 
       def self.create_node_object_per_node(task_action)
@@ -51,7 +55,6 @@ module DTK; module CommandAndControlAdapter
           node.update_object!(:os_type, :external_ref, :hostname_external_ref, :display_name, :assembly_id)
         end
         target_service = task_action.target_service
-        pp [:target_service, target_service]
 
         base_node = task_action.base_node()
         nodes.map { |node| new(base_node, node, target_service) }
@@ -132,7 +135,7 @@ module DTK; module CommandAndControlAdapter
           fail ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
         end
 
-        conn = Ec2.conn(@node.get_target_iaas_credentials())
+        conn = Ec2.conn_from_node(@node)
 
         # primary_nic will be non nil only if explicit nic component is configured
         primary_nic = Component::Domain::NIC.get_primary_nic?(@node)
@@ -160,7 +163,7 @@ module DTK; module CommandAndControlAdapter
       def get_node_status(instance_id)
         ret = nil
         begin
-          target_aws_creds = node.get_target_iaas_credentials()
+          target_aws_creds = Ec2.get_target_credentials(node)
           response = Ec2.conn(target_aws_creds).get_instance_status(instance_id)
           ret = response[:status] && response[:status].to_sym
         rescue => e

@@ -17,7 +17,7 @@
 #
 module DTK; module CommandAndControlAdapter
   class Ec2
-    class TargetService
+    class TargetServiceHelper
       class Component
         MAPPINGS_NAME = {
           :provider       => 'aws::iam_user',

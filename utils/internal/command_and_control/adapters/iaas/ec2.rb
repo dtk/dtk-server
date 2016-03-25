@@ -19,7 +19,7 @@
 module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControl::IAAS
-      r8_nested_require('ec2', 'target_service')
+      r8_nested_require('ec2', 'target_service_helper')
       r8_nested_require('ec2', 'client_token')
       r8_nested_require('ec2', 'node_state')
       r8_nested_require('ec2', 'address_management')
@@ -71,7 +71,7 @@ module DTK
 
       def self.start_instances(nodes)
         nodes.each do |node|
-          conn(node.get_target_iaas_credentials()).server_start(node.instance_id())
+          conn_from_node(node).server_start(node.instance_id())
           node.update_admin_op_status!(:pending)
           Log.debug "Starting instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
@@ -85,7 +85,7 @@ module DTK
         end
 
         nodes.each do |node|
-          conn(node.get_target_iaas_credentials()).server_stop(node.instance_id())
+          conn_from_node(node).server_stop(node.instance_id())
           node.update_admin_op_status!(:stopped)
           # we remove dns if it is not persistent dns
           unless node.persistent_hostname?
@@ -101,6 +101,8 @@ module DTK
         fail ErrorUsage.new('Unable to retreive availability zones!') unless response.status == 200
         response.body['availabilityZoneInfo'].map { |z| z['zoneName'] } || []
       end
+
+      DefaultRegion = 'us-east-1'
 
       def self.check_iaas_properties(iaas_properties, opts = {})
         ret = iaas_properties
@@ -124,13 +126,6 @@ module DTK
         end
         ret
       end
-      DefaultRegion = 'us-east-1'
-
-      def self.get_connection_from_iaas_properties(iaas_properties, region)
-        ec2_creds = get_ec2_credentials(iaas_properties)
-        conn(ec2_creds.merge(region: region))
-      end
-      private_class_method :get_connection_from_iaas_properties
 
       class RaiseErrorIf
         def initialize(iaas_properties, region, connection)
@@ -171,7 +166,7 @@ module DTK
           return true
         end
 
-        target_aws_creds = node.get_target_iaas_credentials()
+        target_aws_creds = get_target_credentials(node)
 
         response = conn(target_aws_creds).server_destroy(instance_id)
         Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response}")
@@ -223,18 +218,27 @@ module DTK
 
       # we can provide this methods set of aws_creds that will be used. We will not use this
       # EC2 client as member, since this is only for this specific call
-      def self.conn(target_aws_creds = nil)
-        if target_aws_creds
-          return CloudConnect::EC2.new(target_aws_creds)
-        end
+      def self.conn(target_aws_creds)
+        CloudConnect::EC2.new(target_aws_creds)
+      end
 
-        @conn ||= CloudConnect::EC2.new
+      def self.conn_from_node(node)
+        conn(get_target_credentials(node))
       end
 
       private
 
+      def self.get_target_credentials(node)
+        TargetServiceHelper.new(node).get_credentials(node)
+      end
+
       def self.external_ref(node)
         node.get_field?(:external_ref) || {}
+      end
+
+      def self.get_connection_from_iaas_properties(iaas_properties, region)
+        ec2_creds = get_ec2_credentials(iaas_properties)
+        conn(ec2_creds.merge(region: region))
       end
     end
   end

@@ -18,13 +18,29 @@
 module DTK
   class Service
     # Class for target service instances
+    # Wraps older objectsL Assembly::Instance and Target
     class Target < self
       r8_nested_require('target', 'node_template')
       include NodeTemplate
 
-      def initialize(target_assembly_instance, target)
-        @service_instance = target_assembly_instance
-        @target = target
+      def initialize(target_assembly_instance, target = nil)
+        @assembly_instance = target_assembly_instance
+        @target = target || target_assembly_instance.get_target
+      end
+      private :initialize
+
+      def target
+        Log.error("Unexepcetd that @target is nil") unless @target
+        @target
+      end
+
+      def display_name
+        @assembly_instance.get_field?(:display_name)
+      end
+
+      # Creates a Service::Target object if assembly_instance represents a target service instance
+      def self.create_from_assembly_instance?(assembly_instance)
+        new(assembly_instance) if isa_target_assembly_instance?(assembly_instance)
       end
 
       # This function is used to help bridge between using targets and service insatnces
@@ -36,7 +52,14 @@ module DTK
 
       private
 
+      def self.isa_target_assembly_instance?(assembly_instance)
+        if specific_type = assembly_instance.get_field?(:specific_type)
+          specific_type.eql?('target')
+        end
+      end
+
       def self.find_assembly_instance_from_target(target)
+        Log.error("Need to write find_assembly_instance_from_target")
         # TODO: stub
       end
 

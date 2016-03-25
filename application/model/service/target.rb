@@ -43,7 +43,7 @@ module DTK
         new(assembly_instance) if isa_target_assembly_instance?(assembly_instance)
       end
 
-      # This function is used to help bridge between using targets and service insatnces
+      # This function is used to help bridge between using targets and service instances
       # There are places in code where target is referenced, but we want to get a handle on a service isnatnce that has
       def self.create_from_target(target)
         # TODO: stub
@@ -59,10 +59,19 @@ module DTK
       end
 
       def self.find_assembly_instance_from_target(target)
-        Log.error("Need to write find_assembly_instance_from_target")
-        # TODO: stub
+        # Assumption taht target name and assembly instance that corresponds to target have the same name
+        sp_hash = {
+          cols: [:id, :group_id, :display_name],
+          filter: [:and, 
+                   [:eq, :project_id, target.get_project.id],
+                   [:eq, :display_name, target.get_field?(:display_name)],
+                   [:eq, :specific_type, 'target']]
+        }
+        unless ret = Assembly::Instance.get_obj(target.model_handle(:assembly_instance), sp_hash)
+          Log.error("Unexpected that find_assembly_instance_from_target returns nil")
+        end
+        ret
       end
-
     end
   end
 end

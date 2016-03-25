@@ -30,13 +30,13 @@ module DTK; module CommandAndControlAdapter
         aggregate_responses(single_run_responses)
       end
 
-      attr_reader :base_node, :node, :target, :flavor_id, :external_ref
-      def initialize(base_node, node, target)
-        @base_node    = base_node
-        @node         = node
-        @target       = target
-        @external_ref = node[:external_ref] || {}
-        @flavor_id    = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
+      attr_reader :base_node, :node, :target_service, :flavor_id, :external_ref
+      def initialize(base_node, node, target_service)
+        @base_node      = base_node
+        @node           = node
+        @target_service = target_service
+        @external_ref   = node[:external_ref] || {}
+        @flavor_id      = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
       end
 
       def run
@@ -50,9 +50,11 @@ module DTK; module CommandAndControlAdapter
         nodes.each do |node|
           node.update_object!(:os_type, :external_ref, :hostname_external_ref, :display_name, :assembly_id)
         end
-        target = task_action.target()
+        target_service = task_action.target_service
+        pp [:target_service, target_service]
+
         base_node = task_action.base_node()
-        nodes.map { |node| new(base_node, node, target) }
+        nodes.map { |node| new(base_node, node, target_service) }
       end
 
       def self.aggregate_responses(single_run_responses)

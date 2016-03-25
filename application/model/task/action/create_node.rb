@@ -43,6 +43,11 @@ module DTK; class Task
         self[:node]
       end
 
+      def target_service
+        Service::Target.create_from_target(target)
+      end
+      
+      # TODO: DTK-2489 will deprecate below for above
       def target
         target_hash_or_obj = self[:datacenter]
         if target_hash_or_obj.is_a?(Target)
@@ -53,6 +58,7 @@ module DTK; class Task
           target_idh.create_object(target_hash)
         end
       end
+      private :target
 
       def self.stage_display_name
         'create_nodes_stage'

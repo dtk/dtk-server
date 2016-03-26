@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 module DTK
-  class CommandAndControlAdapter::Ec2::TargetServiceHelper
-    module Violation
+  class CommandAndControlAdapter::Ec2
+    module TargetServiceViolation
       def self.find_violations(target_service, cmps, project, params = {})
         ret = []
         any_unset_attributes = params[:any_unset_attributes]
@@ -32,8 +32,8 @@ module DTK
         # will form for each provider and obejcts under it an object that has its substructure
         # As an example for a AWS object would have nested under it a vpc which in turn has
         # security group and subnet objects under it
-        ndx_matching_cmps = Service::Target.ndx_matching_components?(cmps, Component::Type::All)
-        missing_cmps = Component::Type::All.select do |cmp_type|
+        ndx_matching_cmps = Service::Target.ndx_matching_components?(cmps, TargetServiceComponent::Type::All)
+        missing_cmps = TargetServiceComponent::Type::All.select do |cmp_type|
           ndx_matching_cmps[cmp_type].empty?
         end        
         unless missing_cmps.empty?
@@ -131,19 +131,19 @@ module DTK
       end
 
       def self.provider_component(ndx_matching_cmps)
-        single_element(Component::Type.provider, ndx_matching_cmps)
+        single_element(TargetServiceComponent::Type.provider, ndx_matching_cmps)
       end
 
       def self.security_group_component(ndx_matching_cmps)
-        single_element(Component::Type.security_group, ndx_matching_cmps)
+        single_element(TargetServiceComponent::Type.security_group, ndx_matching_cmps)
       end
 
       def self.vpc_component(ndx_matching_cmps)
-        single_element(Component::Type.vpc, ndx_matching_cmps)
+        single_element(TargetServiceComponent::Type.vpc, ndx_matching_cmps)
       end
 
       def self.vpc_subnet_component(ndx_matching_cmps)
-        single_element(Component::Type.vpc_subnet, ndx_matching_cmps)
+        single_element(TargetServiceComponent::Type.vpc_subnet, ndx_matching_cmps)
       end
 
 

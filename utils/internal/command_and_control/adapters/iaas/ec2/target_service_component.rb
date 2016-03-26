@@ -17,27 +17,25 @@
 #
 module DTK
   class CommandAndControlAdapter::Ec2
-    class TargetServiceHelper
-      module Component
-        class Type 
-          Mappings = {
-            :provider       => 'aws::iam_user',
-            :vpc            => 'aws::vpc',
-            :vpc_subnet     => 'aws::vpc_subnet',
-            :security_group => 'aws::security_group'
-          }
-          All = Mappings.values
-          Methods = Mappings.keys
-
-          class << self
-            def method_missing(method)
-              Mappings[method] || super
-            end
+    module TargetServiceComponent
+      class Type 
+        Mappings = {
+          :provider       => 'aws::iam_user',
+          :vpc            => 'aws::vpc',
+          :vpc_subnet     => 'aws::vpc_subnet',
+          :security_group => 'aws::security_group'
+        }
+        All = Mappings.values
+        Methods = Mappings.keys
+        
+        class << self
+          def method_missing(method)
+            Mappings[method] || super
           end
-
-          def respond_to?(method)
-            Methods.include?(method)
-          end
+        end
+        
+        def respond_to?(method)
+          Methods.include?(method)
         end
       end
     end

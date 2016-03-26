@@ -43,11 +43,11 @@ module DTK; module CommandAndControlAdapter
         run_aux()
       end
 
+      private
+
       def target
         @target_service.target
       end
-
-      private
 
       def self.create_node_object_per_node(task_action)
         nodes = task_action.nodes()

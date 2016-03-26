@@ -19,7 +19,8 @@
 module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControl::IAAS
-      r8_nested_require('ec2', 'target_service_helper')
+      r8_nested_require('ec2', 'target_service_violation')
+      r8_nested_require('ec2', 'target_service_component')
       r8_nested_require('ec2', 'client_token')
       r8_nested_require('ec2', 'node_state')
       r8_nested_require('ec2', 'address_management')
@@ -37,7 +38,7 @@ module DTK
       end
 
       def self.find_violations_in_target_service(target_service, cmps, project, params = {})
-        TargetServiceHelper.find_violations(target_service, cmps, project, params)
+        TargetServiceViolation.find_violations(target_service, cmps, project, params)
       end
 
       def self.find_matching_node_binding_rule(node_binding_rules, target)
@@ -229,7 +230,9 @@ module DTK
       private
 
       def self.get_target_credentials(node)
-        TargetServiceHelper.new(node).get_credentials(node)
+        target_service = Service::Target.create_from_node(node)
+        # TODO: stub; using target_service.target
+        target_service.target.get_aws_compute_params
       end
 
       def self.external_ref(node)

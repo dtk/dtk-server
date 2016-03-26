@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommandAndControlAdapter
-  class Ec2::CreateNode
+module DTK; class CommandAndControlAdapter::Ec2
+  class CreateNode
     class CreateOptions < ::Hash
       # opts can have keys
       #   :primary_nic 
@@ -24,12 +24,12 @@ module DTK; module CommandAndControlAdapter
         super()
         replace(image_id: image.image_id, flavor_id: parent.flavor_id)
 
-        @conn         = conn
-        @target       = parent.target
-        @node         = parent.node
-        @external_ref = parent.external_ref 
-        @image        = image
-        @primary_nic  = opts[:primary_nic]
+        @conn           = conn
+        @target_service = parent.target_service
+        @node           = parent.node
+        @external_ref   = parent.external_ref 
+        @image          = image
+        @primary_nic    = opts[:primary_nic]
 
         finalize!
       end
@@ -48,12 +48,15 @@ module DTK; module CommandAndControlAdapter
       end
 
       def update_security_group!
-        security_group = security_groups_on_primary_nic_component? ||
-          @target.get_security_group_set() ||
-          @target.get_security_group() ||
-          @external_ref[:security_group_set] ||
-          [R8::Config[:ec2][:security_group]] ||
-          'default'
+        security_group_components = @target_service.matching_components?(TargetServiceComponent::Type.security_group)
+        pp [:security_group_components, security_group_components]
+        # TODO: DTK-2489: old being taken out
+        # security_group = security_groups_on_primary_nic_component? ||
+        #  @target.get_security_group_set() ||
+        #  @target.get_security_group() ||
+        #  @external_ref[:security_group_set] ||
+        #  [R8::Config[:ec2][:security_group]] ||
+        #  'default'
 
         security_group_ids = get_security_group_ids(security_group)
         merge!(security_group_ids: security_group_ids) unless security_group_ids.empty?

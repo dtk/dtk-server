@@ -19,10 +19,12 @@ module DTK
   # New class for Service instances
   class Service
     r8_nested_require('service', 'target')
+    r8_nested_require('service', 'component')
 
     def initialize(assembly_instance)
       @assembly_instance = assembly_instance
-      @components        = nil
+      # @components is computed on demand and is an array with Service::Component elements
+      @components = nil
     end
     private :initialize
 
@@ -30,18 +32,21 @@ module DTK
       self.class.ndx_matching_components?(components, [component_type]).first
     end
     # Returns a hash that has key for each component_types and whose value is an array (possibly empty) matching type
+    # components is array with Service::Component elements
     def self.ndx_matching_components?(components, component_types)
       ret = {}
-      ndx_component_types = {} 
-      component_types.each do |cmp_type| 
-        ret[cmp_type] = [] 
-        ndx_component_types.merge!(cmp_type.gsub('::', '__') => cmp_type) 
+      if components.empty?
+        return ret
       end
-
+      if components.first.kind_of?(DTK::Component)
+        components = components_from_dtk_components(components)
+      else
+        fail(Error, "Unexpected component type '#{components.first.class}'") unless components.first.kind_of?(Component)
+      end
+      ret = component_types.inject({}) { |h, cmp_type| h.merge(cmp_type => []) }
       components.each do |cmp| 
-        if cmp_type = ndx_component_types[cmp.get_field?(:component_type)]
-          ret[cmp_type] << cmp
-        end
+        type = cmp.type
+        ret[type] << cmp if component_types.include?(type)
       end
       ret
     end
@@ -49,7 +54,17 @@ module DTK
     private
 
     def components
-      @components ||= @assembly_instance.get_info__flat_list(detail_level: 'components').select { |r| r[:nested_component] }.map { |r| r[:nested_component] }
+      return @components if @components
+      dtk_components = @assembly_instance.get_info__flat_list(detail_level: 'components').map { |r| r[:nested_component] }
+      @components = components_from_dtk_components(dtk_components)
+    end
+
+    def components_from_dtk_components(dtk_components)
+      self.class.components_from_dtk_components(dtk_components)
+    end
+
+    def self.components_from_dtk_components(dtk_components)
+      dtk_components.map { |dtk_component| Component.new(dtk_component) }
     end
   end
 end

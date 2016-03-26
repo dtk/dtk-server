@@ -24,7 +24,7 @@ module DTK
       include NodeTemplate
 
       def initialize(target_assembly_instance, target = nil)
-        @assembly_instance = target_assembly_instance
+        super(target_assembly_instance)
         @target = target || target_assembly_instance.get_target
       end
       private :initialize

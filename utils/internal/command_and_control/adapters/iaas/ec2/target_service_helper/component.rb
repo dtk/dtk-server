@@ -15,41 +15,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommandAndControlAdapter
-  class Ec2
+module DTK
+  class CommandAndControlAdapter::Ec2
     class TargetServiceHelper
-      class Component
-        MAPPINGS_NAME = {
-          :provider       => 'aws::iam_user',
-          :vpc            => 'aws::vpc',
-          :vpc_subnet     => 'aws::vpc_subnet',
-          :security_group => 'aws::security_group'
-        }
-        MAPPINGS_TYPE = MAPPINGS_NAME.inject({}) { |h, (type, cmp_name)| h.merge(type => cmp_name.gsub('::', '__')) }
-        METHODS = MAPPINGS_NAME.keys
+      module Component
+        class Type 
+          Mappings = {
+            :provider       => 'aws::iam_user',
+            :vpc            => 'aws::vpc',
+            :vpc_subnet     => 'aws::vpc_subnet',
+            :security_group => 'aws::security_group'
+          }
+          All = Mappings.values
+          Methods = Mappings.keys
 
-        class Name < self
           class << self
             def method_missing(method)
-              MAPPINGS_NAME[method] || super
+              Mappings[method] || super
             end
           end
-        end
 
-        class Type < self
-          class << self
-            def method_missing(method)
-              MAPPINGS_TYPE[method] || super
-            end
-          end
-        end
-
-        class << self
           def respond_to?(method)
-            METHODS.include?(method)
+            Methods.include?(method)
           end
         end
       end
     end
   end
-end; end
+end
+

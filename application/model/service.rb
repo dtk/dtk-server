@@ -19,5 +19,34 @@ module DTK
   # New class for Service instances
   class Service
     r8_nested_require('service', 'target')
+
+    def initialize(assembly_instance)
+      @assembly_instance = assembly_instance
+      @components        = nil
+    end
+    private :initialize
+
+    # Returns a hash that has key for each component_types and whose value is an array (possibly empty) matching type
+    def self.ndx_matching_components?(components, component_types)
+      ret = {}
+      ndx_component_types = {} 
+      component_types.each do |cmp_type| 
+        ret[cmp_type] = [] 
+        ndx_component_types.merge!(cmp_type.gsub('::', '__') => cmp_type) 
+      end
+
+      components.each do |cmp| 
+        if cmp_type = ndx_component_types[cmp.get_field?(:component_type)]
+          ret[cmp_type] << cmp
+        end
+      end
+      ret
+    end
+
+    private
+
+    def components
+      @components ||= @assembly_instance.get_info__flat_list(detail_level: 'components').select { |r| r[:nested_component] }.map { |r| r[:nested_component] }
+    end
   end
 end

@@ -32,17 +32,10 @@ module DTK
         # will form for each provider and obejcts under it an object that has its substructure
         # As an example for a AWS object would have nested under it a vpc which in turn has
         # security group and subnet objects under it
-        missing_cmps   = []
-        provider_cmp   = cmps.find{ |cmp| cmp[:component_type].eql?(Component::Type.provider) }
-        vpc_cmp        = cmps.find{ |cmp| cmp[:component_type].eql?(Component::Type.vpc) }
-        vpc_subnet_cmp = cmps.find{ |cmp| cmp[:component_type].eql?(Component::Type.vpc_subnet) }
-        s_group_cmp    = cmps.find{ |cmp| cmp[:component_type].eql?(Component::Type.security_group) }
-        
-        missing_cmps << Component::Name.provider unless provider_cmp
-        missing_cmps << Component::Name.vpc unless vpc_cmp
-        missing_cmps << Component::Name.vpc_subnet unless vpc_subnet_cmp
-        missing_cmps << Component::Name.security_group unless s_group_cmp
-        
+        ndx_matching_cmps = Service::Target.ndx_matching_components?(cmps, Component::Type::All)
+        missing_cmps = Component::Type::All.select do |cmp_type|
+          ndx_matching_cmps[cmp_type].empty?
+        end        
         unless missing_cmps.empty?
           return [Assembly::Instance::Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)]
         end
@@ -50,17 +43,17 @@ module DTK
         # The methods below should only be called if no unset attributes
         return ret if any_unset_attributes
 
-        provider = update_or_create_provider(target_service, provider_cmp, s_group_cmp, project)
-        update_or_create_target(target_service, vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
+        provider = update_or_create_provider(target_service, ndx_matching_cmps, project)
+        update_or_create_target(target_service, ndx_matching_cmps, provider, project)
         ret
       end
 
       private
       
       ######## TODO: will remove create/update provider and target #############
-      def self.update_or_create_provider(target_service, provider_cmp, s_group_cmp, project)
-        provider_attributes  = get_component_attributes(provider_cmp)
-        iaas_properties      = provider_iaas_properties(provider_attributes, s_group_cmp)
+      def self.update_or_create_provider(target_service, ndx_matching_cmps, project)
+        provider_attributes  = get_component_attributes(provider_component(ndx_matching_cmps))
+        iaas_properties      = provider_iaas_properties(provider_attributes, security_group_component(ndx_matching_cmps))
         provider_name        = provider_name(provider_attributes)
         project_idh          = project.id_handle
 
@@ -73,8 +66,8 @@ module DTK
         provider
       end
 
-      def self.update_or_create_target(target_service, vpc_cmp, vpc_subnet_cmp, s_group_cmp, provider, project)
-        iaas_properties = target_iaas_attributes(vpc_cmp, vpc_subnet_cmp, s_group_cmp)
+      def self.update_or_create_target(target_service, ndx_matching_cmps, provider, project)
+        iaas_properties = target_iaas_attributes(ndx_matching_cmps)
 
         if target = target_service.target
           target.update({iaas_properties: iaas_properties, parent_id: provider.id()})
@@ -84,6 +77,8 @@ module DTK
         end
         target
       end
+
+      ######## end: will remove create/update provider and target #############
 
       def self.provider_name(provider_attributes)
         name_attribute = provider_attributes.find{ |attribute| attribute[:display_name] == 'name'}
@@ -111,8 +106,8 @@ module DTK
       end
 
       TargetAttributeNames = ['reqion', 'aws_access_key_id', 'aws_secret_access_key']
-      def self.target_iaas_attributes(vpc_cmp, vpc_subnet_cmp, s_group_cmp)
-        vpc_cmp_attributes = get_component_attributes(vpc_cmp)
+      def self.target_iaas_attributes(ndx_matching_cmps)
+        vpc_cmp_attributes = get_component_attributes(vpc_component(ndx_matching_cmps))
         region, key, secret = get_attribute_values(TargetAttributeNames, vpc_cmp_attributes)
 
         { aws_access_key_id: key, aws_secret_access_key: secret, region: region }.each_pair do |name, val|
@@ -120,10 +115,10 @@ module DTK
           fail Error.new("This function should not be called if '#{name}' is nil") if val.nil?
         end
 
-        vpc_subnet_cmp_attributes = get_component_attributes(vpc_subnet_cmp)
+        vpc_subnet_cmp_attributes = get_component_attributes(vpc_subnet_component(ndx_matching_cmps))
         availability_zone = get_attribute_value?('availability_zone', vpc_subnet_cmp_attributes)
         
-        s_group_cmp_attributes = get_component_attributes(s_group_cmp)
+        s_group_cmp_attributes = get_component_attributes(security_group_component(ndx_matching_cmps))
         security_group = get_attribute_value?('group_name', s_group_cmp_attributes)
 
         {
@@ -134,8 +129,34 @@ module DTK
           :availability_zone => availability_zone
         }
       end
-      ######## end: will remove create/update provider and target #############
 
+      def self.provider_component(ndx_matching_cmps)
+        single_element(Component::Type.provider, ndx_matching_cmps)
+      end
+
+      def self.security_group_component(ndx_matching_cmps)
+        single_element(Component::Type.security_group, ndx_matching_cmps)
+      end
+
+      def self.vpc_component(ndx_matching_cmps)
+        single_element(Component::Type.vpc, ndx_matching_cmps)
+      end
+
+      def self.vpc_subnet_component(ndx_matching_cmps)
+        single_element(Component::Type.vpc_subnet, ndx_matching_cmps)
+      end
+
+
+      def self.single_element(component_type, ndx_matching_cmps)
+        matches = ndx_matching_cmps[component_type]
+        if matches.size > 1
+          Log.error("Current not treating multiple elements. Got multiple elements of type '#{component_type}'")
+          matches.first
+        else
+          matches.first
+        end
+      end
+      
       # returns array with same length as names with values for each name it finds
       def self.get_attribute_values(names, attributes)
         av_pairs = attributes.inject({}) { |h, attr| h.merge(attr[:display_name] => attr[:attribute_value]) }

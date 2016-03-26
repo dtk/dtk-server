@@ -37,7 +37,7 @@ module DTK
       end
 
       def self.find_violations_in_target_service(target_service, cmps, project, params = {})
-        TargetService.find_violations(target_service, cmps, project, params)
+        TargetServiceHelper.find_violations(target_service, cmps, project, params)
       end
 
       def self.find_matching_node_binding_rule(node_binding_rules, target)

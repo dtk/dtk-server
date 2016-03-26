@@ -19,6 +19,7 @@
 module DTK
   module CommandAndControlAdapter
     class Ec2 < CommandAndControl::IAAS
+      r8_nested_require('ec2', 'reified')
       r8_nested_require('ec2', 'target_service_violation')
       r8_nested_require('ec2', 'target_service_component')
       r8_nested_require('ec2', 'client_token')

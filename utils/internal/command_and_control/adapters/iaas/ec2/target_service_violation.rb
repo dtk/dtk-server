@@ -81,8 +81,8 @@ module DTK
       ######## end: will remove create/update provider and target #############
 
       def self.provider_name(provider_attributes)
-        name_attribute = provider_attributes.find{ |attribute| attribute[:display_name] == 'name'}
-        Target::Template.provider_display_name(name_attribute[:attribute_value])
+        name_attribute = provider_attributes.find{ |attribute| attribute.name == 'name'}
+        Target::Template.provider_display_name(name_attribute.value)
       end
 
       ProviderAttributeNames = ['default_key_pair', 'aws_access_key_id', 'aws_secret_access_key']
@@ -159,7 +159,7 @@ module DTK
       
       # returns array with same length as names with values for each name it finds
       def self.get_attribute_values(names, attributes)
-        av_pairs = attributes.inject({}) { |h, attr| h.merge(attr[:display_name] => attr[:attribute_value]) }
+        av_pairs = attributes.inject({}) { |h, attr| h.merge(attr.name => attr.value) }
         names.map { |name| av_pairs[name] }
       end
 
@@ -168,7 +168,7 @@ module DTK
       end
 
       def self.get_component_attributes(component)
-        component.get_component_with_attributes_unraveled({})[:attributes]
+        component.get_attributes
       end
     end
   end

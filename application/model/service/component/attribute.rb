@@ -16,28 +16,20 @@
 # limitations under the License.
 #
 module DTK
-  class Service
-    class Component
-      r8_nested_require('component', 'attribute')
+  class Service::Component
+    class Attribute
 
-      attr_reader :type
-
-      # Argument dtk_component is of type DTK::Component
-      def initialize(dtk_component)
-        @dtk_component = dtk_component
-        @type = ret_type(dtk_component)
-        # @attributes is computed on demand
-        @attributes = nil
+      attr_reader :name, :value
+      # Argument dtk_attribute is of type DTK::Attribute
+      def initialize(dtk_attribute)
+        @dtk_attribute = dtk_attribute
+        dtk_attribute.update_object!(:display_name, :attribute_value)
+        @name =  dtk_attribute[:display_name]
+        @value = dtk_attribute[:attribute_value]
       end
 
-      def self.create_components_from_dtk_components(dtk_components)
-        dtk_components.map { |dtk_component| new(dtk_component) }
-      end
-
-      def get_attributes
-        return @attributes if @attributes 
-        dtk_attributes = @dtk_component.get_component_with_attributes_unraveled({})[:attributes]
-        @attributes = Attribute.create_attributes_from_dtk_attributes(dtk_attributes)
+      def self.create_attributes_from_dtk_attributes(dtk_attributes)
+        dtk_attributes.map { |dtk_attribute| new(dtk_attribute) }
       end
 
       private

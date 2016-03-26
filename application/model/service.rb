@@ -39,7 +39,7 @@ module DTK
         return ret
       end
       if components.first.kind_of?(DTK::Component)
-        components = components_from_dtk_components(components)
+        components = Component.create_components_from_dtk_components(components)
       else
         fail(Error, "Unexpected component type '#{components.first.class}'") unless components.first.kind_of?(Component)
       end
@@ -56,7 +56,7 @@ module DTK
     def components
       return @components if @components
       dtk_components = @assembly_instance.get_info__flat_list(detail_level: 'components').map { |r| r[:nested_component] }
-      @components = components_from_dtk_components(dtk_components)
+      @components = Component.create_components_from_dtk_components(dtk_components)
     end
 
     def components_from_dtk_components(dtk_components)

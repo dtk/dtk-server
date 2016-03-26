@@ -18,7 +18,9 @@
 module DTK
   class Service
     # Class for target service instances
-    # Wraps older objectsL Assembly::Instance and Target
+    # Wraps older objectsL DTK::Assembly::Instance and DTK::Target
+    # TODO: DTK-2489: after we move verything off of DTK::Target we can remove this class or make it
+    # a very simple root abstract class
     class Target < self
       r8_nested_require('target', 'node_template')
       include NodeTemplate
@@ -68,7 +70,7 @@ module DTK
       end
 
       def self.find_assembly_instance_from_target(target)
-        # Assumption taht target name and assembly instance that corresponds to target have the same name
+        # Assumption that target name and assembly instance that corresponds to target have the same name
         sp_hash = {
           cols: [:id, :group_id, :display_name],
           filter: [:and, 

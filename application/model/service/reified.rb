@@ -15,32 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-# TODO: move this under reified/components/target_service/
 module DTK
-  class CommandAndControlAdapter::Ec2
-    module TargetServiceComponent
-      class Type 
-        Mappings = {
-          :provider       => 'aws::iam_user',
-          :vpc            => 'aws::vpc',
-          :vpc_subnet     => 'aws::vpc_subnet',
-          :security_group => 'aws::security_group'
-        }
-        All = Mappings.values
-        Methods = Mappings.keys
-        
-        class << self
-          def method_missing(method)
-            Mappings[method] || super
-          end
-        end
-        
-        def respond_to?(method)
-          Methods.include?(method)
-        end
-      end
+  class Service
+    module Reified
+      r8_nested_require('reified', 'component')
+      r8_nested_require('reified', 'components')
     end
   end
 end
-

@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# TODO: move this under reified/components/target_service/
 module DTK
   class CommandAndControlAdapter::Ec2
     module TargetServiceViolation

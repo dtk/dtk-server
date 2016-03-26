@@ -20,6 +20,7 @@ module DTK
   class Service
     r8_nested_require('service', 'target')
     r8_nested_require('service', 'component')
+    r8_nested_require('service', 'reified')
 
     def initialize(assembly_instance)
       @assembly_instance = assembly_instance

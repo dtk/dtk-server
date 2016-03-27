@@ -19,34 +19,31 @@ module DTK; module CommandAndControlAdapter
   class Ec2
     class CreateNode
       r8_nested_require('create_node', 'create_options')
-
+      
       #using include on class mixins because this class is instance based, not class based
       include NodeStateClassMixin
       include AddressManagementClassMixin
       include ImageClassMixin
-
+      
       def self.run(task_action)
         single_run_responses = create_node_object_per_node(task_action).map(&:run)
         aggregate_responses(single_run_responses)
       end
-
-      attr_reader :base_node, :node, :target_service, :flavor_id, :external_ref
-      def initialize(base_node, node, target_service)
-        @base_node      = base_node
-        @node           = node
-        @target_service = target_service
-        @external_ref   = node[:external_ref] || {}
-        @flavor_id      = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
-      end
-
+      
       def run
         run_aux()
       end
-
+      
       private
+      
+      def initialize(base_node, node, reified_target)
+        @reified_node = Reified::LogicalNode.new(node, reified_target: reified_target)
+        @base_node    = base_node
+        @node         = node
 
-      def target
-        @target_service.target
+        # TODO: DTK-2489 These attributes below wil be deprecated when move info to target service
+        @external_ref = node[:external_ref] || {}
+        @flavor_id    = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
       end
 
       def self.create_node_object_per_node(task_action)
@@ -54,12 +51,12 @@ module DTK; module CommandAndControlAdapter
         nodes.each do |node|
           node.update_object!(:os_type, :external_ref, :hostname_external_ref, :display_name, :assembly_id)
         end
-        target_service = task_action.target_service
+        reified_target = Reified::Target.new(task_action.target_service)
 
         base_node = task_action.base_node()
-        nodes.map { |node| new(base_node, node, target_service) }
+        nodes.map { |node| new(base_node, node, reified_target) }
       end
-
+      
       def self.aggregate_responses(single_run_responses)
         if single_run_responses.size == 1
           single_run_responses.first
@@ -73,7 +70,7 @@ module DTK; module CommandAndControlAdapter
           end
         end
       end
-
+      
       def run_aux
         create_node = true
         if instance_id = @external_ref[:instance_id]
@@ -85,41 +82,41 @@ module DTK; module CommandAndControlAdapter
             Log.info("node already created with instance id #{instance_id}; waiting for it to be available")
           end
         end
-
+        
         if create_node
           generate_client_token?()
-
+          
           response = create_ec2_instance()
           if response[:status] == 'failed'
             return response
           end
-
+          
           instance_id = response[:id]
           state = response[:state]
-
+          
           update_params = {
-            base_node: base_node,
-            iaas_specfic_params: { size: flavor_id},
+            base_node: @base_node,
+            iaas_specfic_params: { size: @flavor_id},
             external_ref: @external_ref
           }
           Ec2.update_node_from_create_node!(node, 'ec2_instance', instance_id, update_params)
         end
-
+        
         process_addresses__first_boot?(@node)
-
+        
         Ec2.return_status_ok.merge(node: {external_ref: @external_ref})
       end
-
+      
       def generate_client_token?
         unless @external_ref[:client_token]
           # generate client token
           client_token = @external_ref[:client_token] = Ec2::ClientToken.generate()
           Log.info("Generated client token '#{client_token}' for node '#{node_print_form}'")
-          updated_external_ref = external_ref.merge(client_token: client_token)
+          updated_external_ref = @external_ref.merge(client_token: client_token)
           update_node!(external_ref: updated_external_ref)
         end
       end
-
+      
       def update_node!(node_update_hash)
         Ec2.update_node!(@node, node_update_hash)
         if er = node_update_hash[:external_ref]
@@ -128,20 +125,20 @@ module DTK; module CommandAndControlAdapter
         # TODO: no sure if '.merge!(node_update_hash)' needed
         @node.merge!(node_update_hash)
       end
-
+      
       def create_ec2_instance
         response = nil
         unless ami = @external_ref[:image_id]
           fail ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
         end
-
+        
         conn = Ec2.conn_from_node(@node)
-
+        
         # primary_nic will be non nil only if explicit nic component is configured
         primary_nic = Component::Domain::NIC.get_primary_nic?(@node)
         image       = image(ami, target: @node.get_target)
         opts = (primary_nic ? { primary_nic: primary_nic} : {})
-
+        
         begin
           create_options = CreateOptions.new(self, conn, image, opts)
           pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id])]

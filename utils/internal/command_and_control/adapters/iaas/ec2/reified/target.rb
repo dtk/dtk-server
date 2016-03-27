@@ -16,12 +16,13 @@
 # limitations under the License.
 #
 
-# TODO: move this under reified/components/target_service/
 module DTK
-  class CommandAndControlAdapter::Ec2
-    module Reified
-      r8_nested_require('reified','logical_node')
-      r8_nested_require('reified','target')
+  module CommandAndControlAdapter::Ec2::Reified
+    class Target < DTK::Service::Reified::Components
+      r8_nested_require('target', 'component')
+      def initialize(target_service)
+        @target_service = target_service
+      end
     end
   end
 end

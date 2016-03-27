@@ -231,9 +231,7 @@ module DTK
       private
 
       def self.get_target_credentials(node)
-        target_service = Service::Target.create_from_node(node)
-        # TODO: stub; using target_service.target
-        target_service.target.get_aws_compute_params
+        Reified::LogicalNode.new(node).get_credentials
       end
 
       def self.external_ref(node)

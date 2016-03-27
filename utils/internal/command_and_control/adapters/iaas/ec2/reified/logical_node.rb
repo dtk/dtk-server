@@ -16,11 +16,23 @@
 # limitations under the License.
 #
 
-# TODO: move this under reified/components/target_service/
 module DTK
-  module CommandAndControlAdapter::Ec2::Reified
-    module LogicalNode
+  class CommandAndControlAdapter::Ec2
+    module Reified
+      class LogicalNode < DTK::Service::Reified::Component
+        # opts can have keys
+        # :reified_target
+        # :dtk_base_node
+        def initialize(dtk_node, opts = {})
+          @dtk_node       = dtk_node
+          @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
+          @dtk_base_node  = opts[:dtk_base_node]
+          # These get set on demand
+          @credentials = nil
+        end
+      end
     end
   end
 end
+
 

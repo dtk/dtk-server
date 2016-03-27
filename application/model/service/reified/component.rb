@@ -19,6 +19,11 @@ module DTK
   module Service::Reified
     # Reified::Component is an abstract class that roots classes that reify a set of related service components 
     class Component
+      # returns array with same length as names with values for each name it finds
+      def self.get_attribute_values(names, service_component)
+        av_pairs = service_component.get_attributes.inject({}) { |h, attr| h.merge(attr.name => attr.value) }
+        names.map { |name| av_pairs[name] }
+      end
     end
   end
 end

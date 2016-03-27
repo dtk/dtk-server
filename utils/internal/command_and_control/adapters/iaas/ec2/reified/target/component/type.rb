@@ -16,11 +16,29 @@
 # limitations under the License.
 #
 
-# TODO: move this under reified/components/target_service/
 module DTK
-  module CommandAndControlAdapter::Ec2::Reified
-    module TargetService
+  class CommandAndControlAdapter::Ec2::Reified::Target::Component
+    class Type 
+      Mapping = {
+#        :provider       => 'aws::iam_user',
+        :vpc            => 'aws::vpc',
+        :vpc_subnet     => 'aws::vpc_subnet',
+        :security_group => 'aws::security_group'
+      }
+      Names = Mapping.values
+      All = Mapping.keys
+
+      class << self
+        def method_missing(method)
+          Mapping[method] || super
+        end
+      end
+      
+      def respond_to?(method)
+        All.include?(method)
+      end
     end
   end
 end
+
 

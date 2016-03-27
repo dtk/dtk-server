@@ -21,15 +21,20 @@ module DTK
     class Component < DTK::Service::Reified::Component
       r8_nested_require('component', 'type')
 
-      def validate_an_converge!
-        Log.error("Absract method that should be overwritten for class '#{self.class}'")
+      def initialize(reified_target)
+        @reified_target = reified_target
+      end
+
+      def validate_and_converge!
+        Log.error("Abstract method that should be overwritten for class '#{self.class}'")
         []
       end
 
       class Vpc < self
         DefaultRegion = 'us-east-1'
         AttributeNames = ['reqion', 'aws_access_key_id', 'aws_secret_access_key']
-        def initialize(vpc_service_component)
+        def initialize(reified_target, vpc_service_component)
+          super(reified_target)
           @vpc_service_component = vpc_service_component
           @reqion, @aws_access_key_id, @aws_secret_access_key = get_attribute_values(AttributeNames, vpc_service_component)
           @region ||= DefaultRegion
@@ -45,7 +50,8 @@ module DTK
       end
 
       class VpcSubnet < self
-        def initialize(vpc_subnet_service_component)
+        def initialize(reified_target, vpc_subnet_service_component)
+          super(reified_target)
           @vpc_subnet_service_component = vpc_subnet_service_component
         end
       end
@@ -54,7 +60,8 @@ module DTK
         attr_reader :group_name
 
         AttributeNames = ['name']
-        def initialize(sg_service_component)
+        def initialize(reified_target, sg_service_component)
+          super(reified_target)
           @sg_service_component = sg_service_component
           @group_name = get_attribute_values(AttributeNames, sg_service_component)
         end 

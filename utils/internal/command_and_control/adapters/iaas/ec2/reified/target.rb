@@ -45,7 +45,7 @@ module DTK
       def get_all(component_type)
         component_type_name = Component::Type.send(component_type)
         service_components = @target_service.matching_components?(component_type_name) || []
-        service_components.map { |sc| component_class(component_type).new(sc) }
+        service_components.map { |sc| component_class(component_type).new(self, sc) }
       end
 
       private

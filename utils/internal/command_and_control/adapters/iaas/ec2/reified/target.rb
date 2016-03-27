@@ -20,6 +20,7 @@ module DTK
   module CommandAndControlAdapter::Ec2::Reified
     class Target < DTK::Service::Reified::Components
       r8_nested_require('target', 'component')
+      r8_nested_require('target', 'violation_processor')
       r8_nested_require('target', 'violation')
 
       def initialize(target_service)

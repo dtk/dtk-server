@@ -38,7 +38,7 @@ module DTK
       end
 
       def self.find_violations_in_target_service(target_service, project, params = {})
-        Reified::Target::Violation.find_violations(target_service, project, params)
+        Reified::Target::ViolationProcessor.find_violations(target_service, project, params)
       end
 
       def self.find_matching_node_binding_rule(node_binding_rules, target)

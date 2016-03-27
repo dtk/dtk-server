@@ -21,6 +21,11 @@ module DTK
     class Component < DTK::Service::Reified::Component
       r8_nested_require('component', 'type')
 
+      def validate_an_converge!
+        Log.error("Absract method that should be overwritten for class '#{self.class}'")
+        []
+      end
+
       class Vpc < self
         DefaultRegion = 'us-east-1'
         AttributeNames = ['reqion', 'aws_access_key_id', 'aws_secret_access_key']

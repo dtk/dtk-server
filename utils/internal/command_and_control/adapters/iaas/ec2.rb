@@ -32,7 +32,6 @@ module DTK
       # TODO: can remove these mixins and put directly in this file
       extend NodeStateClassMixin
       extend AddressManagementClassMixin
-      extend ImageClassMixin
 
       def self.execute(_task_idh, _top_task_idh, task_action)
         CreateNode.run(task_action)

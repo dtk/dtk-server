@@ -19,11 +19,11 @@ module DTK; module CommandAndControlAdapter
   class Ec2
     class CreateNode
       r8_nested_require('create_node', 'create_options')
-      
+
+      # TODO: can remove these mixins and put directly in this file      
       #using include on class mixins because this class is instance based, not class based
       include NodeStateClassMixin
       include AddressManagementClassMixin
-      include ImageClassMixin
       
       def self.run(task_action)
         single_run_responses = create_node_object_per_node(task_action).map(&:run)
@@ -128,15 +128,15 @@ module DTK; module CommandAndControlAdapter
       
       def create_ec2_instance
         response = nil
+
+        conn = Ec2.conn_from_node(@node)
         unless ami = @external_ref[:image_id]
           fail ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
         end
-        
-        conn = Ec2.conn_from_node(@node)
+        image = Image.new(ami, conn)
         
         # primary_nic will be non nil only if explicit nic component is configured
         primary_nic = Component::Domain::NIC.get_primary_nic?(@node)
-        image       = image(ami, target: @node.get_target)
         opts = (primary_nic ? { primary_nic: primary_nic} : {})
         
         begin

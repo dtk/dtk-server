@@ -17,21 +17,11 @@
 #
 module DTK; module CommandAndControlAdapter
   class Ec2
-    module ImageClassMixin
-      def image(image_id, opts = {})
-        Image.new(image_id, opts)
-      end
-    end
-
     class Image
       attr_reader :image_id
-      def initialize(image_id, opts = {})
+      def initialize(image_id, conn)
         @image_id = image_id
-        aws_creds = nil
-        if target = opts[:target]
-          aws_creds = Ec2.target_non_default_aws_creds?(target)
-        end
-        @ami = Ec2.conn(aws_creds).image_get(image_id)
+        @ami      = conn.image_get(image_id)
       end
 
       def exists?

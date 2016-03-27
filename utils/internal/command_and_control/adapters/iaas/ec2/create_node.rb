@@ -24,6 +24,18 @@ module DTK; module CommandAndControlAdapter
       #using include on class mixins because this class is instance based, not class based
       include NodeStateClassMixin
       include AddressManagementClassMixin
+
+      attr_reader :reified_node, :node, :flavor_id, :external_ref
+      def initialize(base_node, node, reified_target)
+        @reified_node = Reified::LogicalNode.new(node, reified_target: reified_target)
+        @base_node    = base_node
+        @node         = node
+
+        # TODO: DTK-2489 These attributes below wil be deprecated when move info to target service
+        @external_ref = node[:external_ref] || {}
+        @flavor_id    = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
+      end
+      private :initialize
       
       def self.run(task_action)
         single_run_responses = create_node_object_per_node(task_action).map(&:run)
@@ -36,16 +48,6 @@ module DTK; module CommandAndControlAdapter
       
       private
       
-      def initialize(base_node, node, reified_target)
-        @reified_node = Reified::LogicalNode.new(node, reified_target: reified_target)
-        @base_node    = base_node
-        @node         = node
-
-        # TODO: DTK-2489 These attributes below wil be deprecated when move info to target service
-        @external_ref = node[:external_ref] || {}
-        @flavor_id    = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
-      end
-
       def self.create_node_object_per_node(task_action)
         nodes = task_action.nodes()
         nodes.each do |node|
@@ -148,7 +150,7 @@ module DTK; module CommandAndControlAdapter
           response[:status] ||= 'succeeded'
         rescue => e
           # append region to error message
-          region = target.get_region() if target
+          region = @reified_node.region
           e.message << ". Region: '#{region}'." if region
 
           Log.error_pp([e, e.backtrace[0..10]])

@@ -153,7 +153,7 @@ module DTK
           return true
         end
 
-        target_aws_creds = get_target_credentials(node)
+        target_aws_creds = get_target_credentials_with_region(node)
 
         response = conn(target_aws_creds).server_destroy(instance_id)
         Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response}")
@@ -210,13 +210,13 @@ module DTK
       end
 
       def self.conn_from_node(node)
-        conn(get_target_credentials(node))
+        conn(get_target_credentials_with_region(node))
       end
 
       private
 
-      def self.get_target_credentials(node)
-        Reified::LogicalNode.new(node).credentials
+      def self.get_target_credentials_with_region(node)
+        Reified::LogicalNode.new(node).credentials_with_region
       end
 
       def self.external_ref(node)

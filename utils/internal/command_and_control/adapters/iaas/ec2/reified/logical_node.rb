@@ -25,29 +25,50 @@ module DTK
         def initialize(dtk_node, opts = {})
           @dtk_node       = dtk_node
           @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
-          # These get set on demand
-          @credentials = nil
+          # These elemnts of this hash get set on demand
+          @cached_attributes = {}
         end
 
-        def credentials
-          @credentials ||= get_credentials
+        def credentials_with_region
+          @cached_attributes[:credentials_with_region] ||= get_credentials_with_region
         end
         
-        private
-
-        def get_credentials
-          vpcs = @reified_target.vpcs
-
-          if vpcs.empty?
-            fail ErrorUsage, "No VPCs are in the target service"
-          elsif vpcs.size > 2
-            # TODO: need to use link from node for his
-            fail Error, "Not implemented: A target service with multiple VPCS"
-          end
-
-          vpcs.first.credentials
+        def region
+          (credentials_with_region || {})[:region]
         end
 
+        def security_group_names
+          @cached_attributes[:security_group_names] ||= get_security_group_names
+        end
+
+        private
+
+        def get_credentials_with_region
+          vpc_reified_component = raise_error_if_not_singleton('vpc', @reified_target.vpcs)
+          vpc_reified_component.credentials_with_region
+        end
+
+        def get_security_group_names
+          # TODO: ifmultiple security grop find ones associated with node
+          sg_reified_component = raise_error_if_not_singleton('security group', @reified_target.security_groups)
+          sg_reified_component.group_name
+        end
+
+        def raise_error_if_empty(type, reified_components)
+          if reified_components.empty?
+            fail ErrorUsage, "No '#{type}' components in the target service"
+          end
+        end
+
+        # Returns the reified_component if singleton, otehrwise raises error
+        def raise_error_if_not_singleton(type, reified_components)
+          raise_error_if_empty(type, reified_components)
+          if reified_components.size > 2
+            # TODO: need to use link from node for his
+            fail Error, "Not implemented: A target service with multiple '#{type}' components"
+          end
+          reified_components.first
+        end
       end
     end
   end

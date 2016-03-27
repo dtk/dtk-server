@@ -24,12 +24,12 @@ module DTK; class CommandAndControlAdapter::Ec2
         super()
         replace(image_id: image.image_id, flavor_id: parent.flavor_id)
 
-        @conn           = conn
-        @target_service = parent.target_service
-        @node           = parent.node
-        @external_ref   = parent.external_ref 
-        @image          = image
-        @primary_nic    = opts[:primary_nic]
+        @conn         = conn
+        @reified_node = parent.reified_node
+        @node         = parent.node
+        @external_ref = parent.external_ref 
+        @image        = image
+        @primary_nic  = opts[:primary_nic]
 
         finalize!
       end
@@ -48,8 +48,7 @@ module DTK; class CommandAndControlAdapter::Ec2
       end
 
       def update_security_group!
-        security_group_components = @target_service.matching_components?(TargetServiceComponent::Type.security_group)
-        pp [:security_group_components, security_group_components]
+        security_group_names = @reified_node.security_group_names
         # TODO: DTK-2489: old being taken out
         # security_group = security_groups_on_primary_nic_component? ||
         #  @target.get_security_group_set() ||
@@ -58,15 +57,13 @@ module DTK; class CommandAndControlAdapter::Ec2
         #  [R8::Config[:ec2][:security_group]] ||
         #  'default'
 
-        security_group_ids = get_security_group_ids(security_group)
+        # TODO: move get_security_group_ids raesoning into reified component
+        #  because group names can be ambiguous
+        security_group_ids = get_security_group_ids(security_group_names)
         merge!(security_group_ids: security_group_ids) unless security_group_ids.empty?
 
         # TODO DTK-2231 Aldin check if groups needed when security_group_ids are available
         merge!(groups: security_group.is_a?(Array) ? security_group : [security_group])
-      end
-
-      def security_groups_on_primary_nic_component?
-        @primary_nic && @primary_nic.security_groups
       end
 
       def update_tags!

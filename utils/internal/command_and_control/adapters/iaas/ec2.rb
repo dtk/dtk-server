@@ -231,7 +231,7 @@ module DTK
       private
 
       def self.get_target_credentials(node)
-        Reified::LogicalNode.new(node).get_credentials
+        Reified::LogicalNode.new(node).credentials
       end
 
       def self.external_ref(node)

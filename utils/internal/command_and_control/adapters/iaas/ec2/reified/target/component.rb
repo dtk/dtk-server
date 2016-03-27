@@ -22,21 +22,26 @@ module DTK
       r8_nested_require('component', 'type')
 
       class Vpc < self
-        attr_reader :aws_access_key_id, :aws_secret_access_key, :region
         AttributeNames = ['reqion', 'aws_access_key_id', 'aws_secret_access_key']
         DefaultRegion = 'us-east-1'
         def initialize(vpc_service_component)
           @reqion, @aws_access_key_id, @aws_secret_access_key = get_attribute_values(AttributeNames, vpc_service_component)
           @region ||= DefaultRegion
         end 
+
+        def credentials 
+          { 
+            aws_access_key_id: @aws_access_key_id,
+            aws_secret_access_key: @aws_secret_access_key,
+            region: @region
+          }
+        end
       end
 
       class VpcSubnet < self
       end
       class SecurityGroup < self
       end
-      # Must go after class definitions
-      ClassMapping = Type::All.inject({}) { |h, k| h.merge(k => const_get(Aux.camelize(k))) }
     end
   end
 end

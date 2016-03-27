@@ -22,14 +22,32 @@ module DTK
       class LogicalNode < DTK::Service::Reified::Component
         # opts can have keys
         # :reified_target
-        # :dtk_base_node
         def initialize(dtk_node, opts = {})
           @dtk_node       = dtk_node
           @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
-          @dtk_base_node  = opts[:dtk_base_node]
           # These get set on demand
           @credentials = nil
         end
+
+        def credentials
+          @credentials ||= get_credentials
+        end
+        
+        private
+
+        def get_credentials
+          vpcs = @reified_target.vpcs
+
+          if vpcs.empty?
+            fail ErrorUsage, "No VPCs are in the target service"
+          elsif vpcs.size > 2
+            # TODO: need to use link from node for his
+            fail Error, "Not implemented: A target service with multiple VPCS"
+          end
+
+          vpcs.first.credentials
+        end
+
       end
     end
   end

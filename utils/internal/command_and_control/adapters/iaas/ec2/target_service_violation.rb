@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# TODO: move this under reified/components/target_service/
+# TODO: move this under ec2/reified/target
 module DTK
   class CommandAndControlAdapter::Ec2
     module TargetServiceViolation

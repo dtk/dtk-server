@@ -20,8 +20,21 @@ module DTK
   module CommandAndControlAdapter::Ec2::Reified
     class Target < DTK::Service::Reified::Components
       r8_nested_require('target', 'component')
+
       def initialize(target_service)
         @target_service = target_service
+        # The elements in this hash get set on demand
+        # They correspond to all the component types in a target service
+        @components = {}
+      end
+      
+      def vpcs
+        @components[:vpcs] ||= get_vpcs
+      end
+
+      def get_vpcs
+        vpc_service_components = @target_service.matching_components?(Component::Type.vpc) || []
+        vpc_service_components.map { |vpc_service_component| Component::Vpc.new(vpc_service_component) }
       end
     end
   end

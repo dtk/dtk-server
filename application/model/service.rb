@@ -30,8 +30,10 @@ module DTK
     private :initialize
 
     def matching_components?(component_type)
-      self.class.ndx_matching_components?(components, [component_type]).first
+      ndx_ret = self.class.ndx_matching_components?(components, [component_type])
+      ndx_ret.values.first
     end
+
     # Returns a hash that has key for each component_types and whose value is an array (possibly empty) matching type
     # components is array with Service::Component elements
     def self.ndx_matching_components?(components, component_types)

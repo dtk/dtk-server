@@ -25,6 +25,7 @@ module DTK
         DefaultRegion = 'us-east-1'
         AttributeNames = ['reqion', 'aws_access_key_id', 'aws_secret_access_key']
         def initialize(vpc_service_component)
+          @vpc_service_component = vpc_service_component
           @reqion, @aws_access_key_id, @aws_secret_access_key = get_attribute_values(AttributeNames, vpc_service_component)
           @region ||= DefaultRegion
         end 
@@ -39,6 +40,9 @@ module DTK
       end
 
       class VpcSubnet < self
+        def initialize(vpc_subnet_service_component)
+          @vpc_subnet_service_component = vpc_subnet_service_component
+        end
       end
 
       class SecurityGroup < self
@@ -46,6 +50,7 @@ module DTK
 
         AttributeNames = ['name']
         def initialize(sg_service_component)
+          @sg_service_component = sg_service_component
           @group_name = get_attribute_values(AttributeNames, sg_service_component)
         end 
       end

@@ -25,9 +25,12 @@ module DTK
       r8_nested_require('target', 'node_template')
       include NodeTemplate
 
-      def initialize(target_assembly_instance, target = nil)
-        super(target_assembly_instance)
-        @target = target || target_assembly_instance.get_target
+      # opts can have keys
+      #  :target
+      #  :components
+      def initialize(target_assembly_instance, opts = {})
+        super(target_assembly_instance, components: opts[:components])
+        @target = opts[:target] || target_assembly_instance.get_target
       end
       private :initialize
 
@@ -37,14 +40,16 @@ module DTK
 
 
       # Creates a Service::Target object if assembly_instance represents a target service instance
-      def self.create_from_assembly_instance?(assembly_instance)
-        new(assembly_instance) if isa_target_assembly_instance?(assembly_instance)
+      # opts can have keys
+      #  :components
+      def self.create_from_assembly_instance?(assembly_instance, opts = {})
+        new(assembly_instance, components: opts[:components]) if isa_target_assembly_instance?(assembly_instance)
       end
 
       # This function is used to help bridge between using targets and service instances
       # There are places in code where target is referenced, but we want to get a handle on a service isnatnce that has
       def self.create_from_target(target)
-        new(find_assembly_instance_from_target(target), target)
+        new(find_assembly_instance_from_target(target), target: target)
       end
 
       def target

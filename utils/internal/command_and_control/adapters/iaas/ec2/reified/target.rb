@@ -20,6 +20,7 @@ module DTK
   module CommandAndControlAdapter::Ec2::Reified
     class Target < DTK::Service::Reified::Components
       r8_nested_require('target', 'component')
+      r8_nested_require('target', 'violation')
 
       def initialize(target_service)
         @target_service = target_service
@@ -27,23 +28,29 @@ module DTK
         # They correspond to all the component types in a target service
         @cache_components = {}
       end
-      
+
       def vpcs
-        @cache_components[:vpcs] ||= get_vpcs
+        @cache_components[:vpcs] ||= get_all(:vpc)
+      end
+
+      def vpc_subnets
+        @cache_components[:vpc_subnets] ||= get_all(:vpc_subnet)
       end
 
       def security_groups
-        @cache_components[:security_groups] ||= get_security_groups
+        @cache_components[:security_groups] ||= get_all(:security_groups)
       end
 
-      def get_vpcs
-        vpc_service_components = @target_service.matching_components?(Component::Type.vpc) || []
-        vpc_service_components.map { |vpc_service_component| Component::Vpc.new(vpc_service_component) }
+      def get_all(component_type)
+        component_type_name = Component::Type.send(component_type)
+        service_components = @target_service.matching_components?(component_type_name) || []
+        service_components.map { |sc| component_class(component_type).new(sc) }
       end
 
-      def get_security_groups
-        sg_service_components = @target_service.matching_components?(Component::Type.security_group) || []
-        sg_service_components.map { |sg_service_component| Component::SecurityGroup.new(sg_service_component) }
+      private
+
+      def component_class(component_type)
+        Component.const_get(Aux.camelize(component_type.to_s))
       end
     end
   end

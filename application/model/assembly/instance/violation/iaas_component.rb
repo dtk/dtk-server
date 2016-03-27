@@ -22,9 +22,9 @@ module DTK
       IAAS_TYPES = [:ec2]
       def self.find_violations(target_assembly_instance, cmps, project, params = {})
         ret = []
-        if target_service = Service::Target.create_from_assembly_instance?(target_assembly_instance)
+        if target_service = Service::Target.create_from_assembly_instance?(target_assembly_instance, components: cmps)
           IAAS_TYPES.each do |iaas_type|
-            ret += CommandAndControl.find_violations_in_target_service(iaas_type, target_service, cmps, project, params) 
+            ret += CommandAndControl.find_violations_in_target_service(iaas_type, target_service, project, params) 
           end
         end
         ret
@@ -32,13 +32,13 @@ module DTK
     end
 
     class Violation
-      class ProviderOrTargetCmpsMissing < self
+      class TargetServiceCmpsMissing < self
         def initialize(component_types)
           @component_types = component_types
         end
         
         def type
-          :provider_or_target_cmps_missing
+          :target_service_cmps_missing
         end
         
         def description

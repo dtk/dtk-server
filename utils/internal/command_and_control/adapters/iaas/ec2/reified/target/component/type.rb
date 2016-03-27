@@ -20,7 +20,8 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target::Component
     class Type 
       Mapping = {
-#        :provider       => 'aws::iam_user',
+        # TODO: not sure if need to check provider since its attributes are pushed to VPC
+        # :provider       => 'aws::iam_user',
         :vpc            => 'aws::vpc',
         :vpc_subnet     => 'aws::vpc_subnet',
         :security_group => 'aws::security_group'
@@ -29,6 +30,11 @@ module DTK
       All = Mapping.keys
 
       class << self
+
+        def name(cmp_type)
+          Mapping[cmp_type]
+        end
+
         def method_missing(method)
           Mapping[method] || super
         end

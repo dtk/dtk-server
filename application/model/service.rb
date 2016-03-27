@@ -22,10 +22,13 @@ module DTK
     r8_nested_require('service', 'component')
     r8_nested_require('service', 'reified')
 
-    def initialize(assembly_instance)
+    # opts can have keys
+    #  :components
+    def initialize(assembly_instance, opts = {})
       @assembly_instance = assembly_instance
-      # @components is computed on demand and is an array with Service::Component elements
-      @components = nil
+      # @components is computed on demand or passed in through opts
+      # It is an array with Service::Component elements
+      @components = opts[:components]
     end
     private :initialize
 

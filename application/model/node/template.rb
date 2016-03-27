@@ -144,13 +144,7 @@ module DTK
 
         image_type = matching_node_bindings.first[:rules].first[:node_template][:type].to_sym
 
-        # TODO: commented out below until can use new signature where pass in target to
-        # get context, which includes image_type and if ec2 region
-        # unless CommandAndControl.existing_image?(new_image_id,image_type)
-        #  raise ErrorUsage.new("Image id (#{new_image_id}) does not exist")
-        # end
-
-        # update daatstructute than model
+        # update data structure then model
         matching_node_bindings.each do |nb|
           nb[:rules].each do |r|
             nt = r[:node_template]

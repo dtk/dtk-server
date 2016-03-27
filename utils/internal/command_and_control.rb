@@ -95,15 +95,6 @@ module DTK
       klass.find_violations_in_target_service(target_service, cmps, project, params)
     end
 
-    def self.raise_error_if_invalid_image?(image_id, target)
-      klass = load_iaas_for(target: target)
-      klass.raise_error_if_invalid_image?(image_id, target)
-    end
-    def self.existing_image?(image_id, target)
-      klass = load_iaas_for(target: target)
-      klass.existing_image?(image_id, target)
-    end
-
     def self.references_image?(target, node_external_ref)
       klass = load_iaas_for(target: target)
       klass.references_image?(node_external_ref)

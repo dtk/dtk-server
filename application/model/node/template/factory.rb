@@ -19,7 +19,8 @@ module DTK; class Node
   class Template
     class Factory < self
       def self.create_or_update(target, node_template_name, image_id, opts = {})
-        raise_error_if_invalid_image(image_id, target)
+        # TODO: DTK-2489: removed after move to target service instance
+        # raise_error_if_invalid_image(image_id, target)
         raise_error_if_invalid_os(opts[:operating_system])
         size_array = raise_error_if_invalid_size_array(opts[:size_array])
 
@@ -73,11 +74,6 @@ module DTK; class Node
 
       private
 
-      def self.raise_error_if_invalid_image(image_id, target)
-        CommandAndControl.raise_error_if_invalid_image?(image_id, target)
-        image_id
-      end
-
       def self.raise_error_if_invalid_os(os)
         if os.nil?
           fail ErrorUsage.new('Operating system must be given')
@@ -96,7 +92,6 @@ module DTK; class Node
         if size_array.nil?
           fail ErrorUsage.new('One or more image sizes must be given')
         end
-        # size_array.each{|image_size|CommandAndControl.raise_error_if_invalid_image_size(image_size,target)}
         size_array
       end
 

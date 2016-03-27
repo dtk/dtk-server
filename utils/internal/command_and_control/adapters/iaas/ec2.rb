@@ -53,20 +53,6 @@ module DTK
         node_external_ref[:type] == 'ec2_image' && node_external_ref[:image_id]
       end
 
-      def self.existing_image?(image_id, target)
-        image(image_id, target: target).exists?()
-      end
-
-      def self.raise_error_if_invalid_image?(image_id, target)
-        unless existing_image?(image_id, target)
-          err_msg = "Image (#{image_id}) is not accessible from target #{target.get_field?(:display_name)}"
-          if region = target.iaas_properties.hash()[:region]
-            err_msg << " (ec2: #{region})"
-          end
-          fail ErrorUsage.new(err_msg)
-        end
-      end
-
       def self.pbuilderid(node)
         node.get_external_ref()[:instance_id]
       end

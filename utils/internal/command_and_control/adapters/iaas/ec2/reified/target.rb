@@ -39,7 +39,7 @@ module DTK
       end
 
       def security_groups
-        @cache_components[:security_groups] ||= get_all(:security_groups)
+        @cache_components[:security_groups] ||= get_all(:security_group)
       end
 
       def get_all(component_type)

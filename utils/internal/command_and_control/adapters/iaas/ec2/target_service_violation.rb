@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-# TODO: move this under ec2/reified/target
+# TODO: this wil be deprecated and logic distributed into the reified target components
 module DTK
   class CommandAndControlAdapter::Ec2
     module TargetServiceViolation

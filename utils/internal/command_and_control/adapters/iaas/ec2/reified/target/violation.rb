@@ -24,6 +24,12 @@ module DTK
           super(aug_attrs, :component)
         end
       end
+
+      class ReqUnsetAttr < Assembly::Instance::Violation::ReqUnsetAttr
+        def initialize(aug_attr)
+          super(aug_attr, :component)
+        end
+      end
     end
   end
 end

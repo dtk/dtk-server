@@ -22,8 +22,35 @@ module DTK
       class VpcSubnet < self
         def initialize(reified_target, vpc_subnet_service_component)
           super(reified_target, vpc_subnet_service_component)
-          @id = get_attribute_values(:id)
+          @id, @vpc_id = get_attribute_values(:id, :vpc_id)
+          @cached_connected_components = {} #cache connected objects
         end
+
+        # Returns an array of violations; if no violations [] is returned
+        def validate_and_converge!
+          if @id.nil?
+            aug_attr = get_dtk_aug_attributes(:id).first
+            [Violation::ReqUnsetAttr.new(aug_attr)]
+          elsif @vpc_id
+            # TODO: could validate @id and @vpc_id
+            []
+          else
+            validate_id_and_get_and_propagate_vpc_id!
+            []
+          end
+        end
+
+        private
+
+        def vpc_component
+          @cached_connected_components[:vpc] ||= get_connected_component(:vpc)
+        end
+
+        def validate_id_and_get_and_propagate_vpc_id!
+          # TODO: stub
+          vpc_component
+        end
+
       end
     end
   end

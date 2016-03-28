@@ -31,6 +31,7 @@ module DTK
       # @components is computed on demand or passed in through opts
       # It is an array with Service::Component elements
       @components = opts[:components]
+      @links_added_to_components = false
     end
     private :initialize
 
@@ -57,6 +58,14 @@ module DTK
         ret[type] << cmp if component_types.include?(type)
       end
       ret
+    end
+
+    def add_links_to_components!
+      unless @links_added_to_components
+        Dependency::Link.augment_component_instances!(@assembly_instance, components, ret_statisfied_by: true)
+      end
+      @links_added_to_components = true
+      self
     end
 
     private

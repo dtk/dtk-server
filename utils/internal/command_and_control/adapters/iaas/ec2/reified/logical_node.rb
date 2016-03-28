@@ -27,7 +27,7 @@ module DTK
           @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
           # These elemnets of this hash get set on demand
           @cached_attributes = {}
-          @cached_connected_objs = {} #cache connected objects
+          @cached_connected_components = {} #cache connected objects
         end
 
         def credentials_with_region
@@ -44,22 +44,22 @@ module DTK
 
         private
 
-        def vpc
-          @cached_connected_objs[:vpc] ||= get_vpc
+        def vpc_component
+          @cached_connected_components[:vpc] ||= get_vpc_component
         end
 
-        def get_vpc
-          ret_singleton_or_raise_error('vpc', @reified_target.vpcs)
+        def get_vpc_component
+          ret_singleton_or_raise_error('vpc', @reified_target.vpc_components)
         end
 
         def get_credentials_with_region
-          vpc.credentials_with_region
+          vpc_component.credentials_with_region
         end
 
         def get_security_groups
           # TODO: if multiple security groups find ones associated with node
           # Below finds all associated with the vpc that the security group is connected to
-          matching_sg_reified_components = @reified_target.get_matching_security_groups(vpc.id)
+          matching_sg_reified_components = @reified_target.get_matching_security_groups(vpc_component.id)
           raise_error_if_empty('security group',matching_sg_reified_components)
           matching_sg_reified_components.map(&:security_group_struct)
         end

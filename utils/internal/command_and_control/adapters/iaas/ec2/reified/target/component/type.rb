@@ -30,7 +30,6 @@ module DTK
       All = Mapping.keys
 
       class << self
-
         def name(cmp_type)
           Mapping[cmp_type]
         end

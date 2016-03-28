@@ -27,13 +27,13 @@ module DTK
           @group_name, @group_id, @vpc_id = get_attribute_values(:group_name, :id, :vpc_id)
         end 
 
-        # Returns an array off violations; if no violations [] is returned
+        # Returns an array of violations; if no violations [] is returned
         def validate_and_converge!
           if @group_id
             ret = violation_group_id?
             if ret.empty?
               set_group_name! unless @group_name
-              # TODO: if @group_name could also check if valid group name
+              # TODO: if @group_name is set could also if it is a valid security_group name
             end
             ret
           elsif @group_name
@@ -53,8 +53,8 @@ module DTK
         end
         
         def get_vpc
-          vpcs = @reified_target.get_all(:vpc).select{ |vpc| vpc.id == @vpc_id }
-          unless vpcs.size == 1
+          vpc_components = @reified_target.get_all(:vpc).select{ |vpc| vpc.id == @vpc_id }
+          unless vpc_components.size == 1
             fail Error, "Unexpected that the matching vpc is not found" 
           end
         end

@@ -24,22 +24,22 @@ module DTK
       r8_nested_require('target', 'violation')
 
       def initialize(target_service)
-        @target_service = target_service
+        @target_service = target_service.add_links_to_components!
         # The elements in this hash get set on demand
         # They correspond to all the component types in a target service
-        @cache_components = {}
+        @cached_components = {}
       end
 
-      def vpcs
-        @cache_components[:vpcs] ||= get_all(:vpc)
+      def vpc_components
+        @cached_components[:vpc] ||= get_all(:vpc)
       end
 
-      def vpc_subnets
-        @cache_components[:vpc_subnets] ||= get_all(:vpc_subnet)
+      def vpc_subnet_components
+        @cached_components[:vpc_subnet] ||= get_all(:vpc_subnet)
       end
 
-      def security_groups
-        @cache_components[:security_groups] ||= get_all(:security_group)
+      def security_group_components
+        @cached_components[:security_group] ||= get_all(:security_group)
       end
 
       def get_all(component_type)

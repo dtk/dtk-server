@@ -20,13 +20,24 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component
       class Vpc < self
+
+        attr_reader :id
+
         DefaultRegion = 'us-east-1'
         def initialize(reified_target, vpc_service_component)
           super(reified_target, vpc_service_component)
-          @reqion, @aws_access_key_id, @aws_secret_access_key = get_attribute_values(:reqion, :aws_access_key_id, :aws_secret_access_key)
+          @id, @reqion, @aws_access_key_id, @aws_secret_access_key = get_attribute_values(:id, :reqion, :aws_access_key_id, :aws_secret_access_key)
           @region ||= DefaultRegion
         end 
-        
+
+        # Returns an array of violations; if no violations [] is returned
+        def validate_and_converge!
+          if @id
+          # TODO: if @id is set could also validate if it is a valid vpc id
+          end
+          []
+        end
+
         def credentials_with_region 
           { 
             aws_access_key_id: @aws_access_key_id,
@@ -34,6 +45,7 @@ module DTK
             region: @region
           }
         end
+        
       end
     end
   end

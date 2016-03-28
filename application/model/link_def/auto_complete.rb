@@ -137,32 +137,23 @@ module DTK; class LinkDef
           end
 
           if link_type.eql?(cmp_name)
-            if constraints
-              # if there is constraint and it's not matched skip this component ko to next one
-              if matching_constraints?(constraints, cmp, this_cmp)
-                matching_cmps << cmp
-              else
-                next unless preferences
-              end
+            matching_cmps << cmp if constraints.nil? && preferences.nil?
+
+            if constraints && matching_constraints?(constraints, cmp, this_cmp)
+              matching_cmps << cmp
             end
-            if preferences
-              next unless matching_constraints?(preferences, cmp, this_cmp, { preferences: true })
+
+            if preferences && matching_constraints?(preferences, cmp, this_cmp, { preferences: true })
               preferences_matching_cmps << cmp
-            else
-              matching_cmps << cmp unless constraints
             end
           end
         end
       end
 
+      return matching_cmps if matching_cmps.size == 1
+
       unless preferences_matching_cmps.empty?
-        if matching_cmps.size == 0
-          return [preferences_matching_cmps.first]
-        elsif matching_cmps.size > 1
-          preferences_matching_cmps.each do |pref|
-            return [pref] if matching_cmps.include?(pref)
-          end
-        end
+        return get_matching_by_preferences(preferences_matching_cmps, matching_cmps)
       end
 
       matching_cmps
@@ -274,6 +265,16 @@ module DTK; class LinkDef
       end
 
       return opts[:preferences] ? false : constraints_matched
+    end
+
+    def self.get_matching_by_preferences(preferences_matching_cmps, matching_cmps)
+      if matching_cmps.size > 1
+        preferences_matching_cmps.each do |pref|
+          return [pref] if matching_cmps.include?(pref)
+        end
+      else
+        return [preferences_matching_cmps.first]
+      end
     end
 
     def self.parse_constraint_attributes(evaluated_fn, dep_cmp, this_cmp)

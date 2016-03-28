@@ -22,7 +22,8 @@ ENV.delete('http_proxy') if ENV.key?('http_proxy') && ENV['http_proxy'].empty?
 require ::File.expand_path('../app', __FILE__)
 
 unless  R8::Config[:log][:mode] == 'off'
-  rotating_logger = Logger.new("log/#{ENV['RACK_ENV']}.log", 'weekly', 5)
+  log_path = "#{R8::Config[:log][:path]}/#{ENV['RACK_ENV']}.log"
+  rotating_logger = Logger.new(log_path, 'weekly', 5)
   Ramaze::Log.loggers = [rotating_logger]
   Ramaze::Log.level = Logger.const_get(R8::Config[:log][:level].upcase)
 end

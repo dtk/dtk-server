@@ -25,8 +25,9 @@ module DTK
         def initialize(dtk_node, opts = {})
           @dtk_node       = dtk_node
           @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
-          # These elemnts of this hash get set on demand
+          # These elemnets of this hash get set on demand
           @cached_attributes = {}
+          @cached_connected_objs = {} #cache connected objects
         end
 
         def credentials_with_region
@@ -37,21 +38,30 @@ module DTK
           (credentials_with_region || {})[:region]
         end
 
-        def security_group_names
-          @cached_attributes[:security_group_names] ||= get_security_group_names
+        def security_groups
+          @cached_attributes[:security_groups] ||= get_security_groups
         end
 
         private
 
-        def get_credentials_with_region
-          vpc_reified_component = raise_error_if_not_singleton('vpc', @reified_target.vpcs)
-          vpc_reified_component.credentials_with_region
+        def vpc
+          @cached_connected_objs[:vpc] ||= get_vpc
         end
 
-        def get_security_group_names
-          # TODO: ifmultiple security grop find ones associated with node
-          sg_reified_component = raise_error_if_not_singleton('security group', @reified_target.security_groups)
-          sg_reified_component.group_name
+        def get_vpc
+          ret_singleton_or_raise_error('vpc', @reified_target.vpcs)
+        end
+
+        def get_credentials_with_region
+          vpc.credentials_with_region
+        end
+
+        def get_security_groups
+          # TODO: if multiple security groups find ones associated with node
+          # Below finds all associated with the vpc that the security group is connected to
+          matching_sg_reified_components = @reified_target.get_matching_security_groups(vpc.id)
+          raise_error_if_empty('security group',matching_sg_reified_components)
+          matching_sg_reified_components.map(&:security_group_struct)
         end
 
         def raise_error_if_empty(type, reified_components)
@@ -60,8 +70,8 @@ module DTK
           end
         end
 
-        # Returns the reified_component if singleton, otehrwise raises error
-        def raise_error_if_not_singleton(type, reified_components)
+        # Returns the reified_component if singleton, otherwise raises error
+        def ret_singleton_or_raise_error(type, reified_components)
           raise_error_if_empty(type, reified_components)
           if reified_components.size > 2
             # TODO: need to use link from node for his

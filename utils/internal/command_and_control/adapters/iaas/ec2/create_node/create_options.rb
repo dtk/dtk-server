@@ -48,22 +48,8 @@ module DTK; class CommandAndControlAdapter::Ec2
       end
 
       def update_security_group!
-        security_group_names = @reified_node.security_group_names
-        # TODO: DTK-2489: old being taken out
-        # security_group = security_groups_on_primary_nic_component? ||
-        #  @target.get_security_group_set() ||
-        #  @target.get_security_group() ||
-        #  @external_ref[:security_group_set] ||
-        #  [R8::Config[:ec2][:security_group]] ||
-        #  'default'
-
-        # TODO: move get_security_group_ids raesoning into reified component
-        #  because group names can be ambiguous
-        security_group_ids = get_security_group_ids(security_group_names)
-        merge!(security_group_ids: security_group_ids) unless security_group_ids.empty?
-
-        # TODO DTK-2231 Aldin check if groups needed when security_group_ids are available
-        merge!(groups: security_group.is_a?(Array) ? security_group : [security_group])
+        security_groups = @reified_node.security_groups
+        merge!(security_group_ids: security_groups.map(&:id), groups: security_groups.map(&:name))
       end
 
       def update_tags!

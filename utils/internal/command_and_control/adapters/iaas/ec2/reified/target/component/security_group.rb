@@ -26,19 +26,27 @@ module DTK
           super(reified_target, sg_service_component)
           @group_name, @group_id, @vpc_id = get_attribute_values(:group_name, :id, :vpc_id)
         end 
-        
+
+        # Returns an array off violations; if no violations [] is returned
         def validate_and_converge!
-          ret = []
-          # check that either group_name or group_id is set
-          if @group_name.nil? and @group_id.nil?
+          if @group_id
+            ret = violation_group_id?
+            if ret.empty?
+              set_group_name! unless @group_name
+              # TODO: if @group_name could also check if valid group name
+            end
+            ret
+          elsif @group_name
+            validate_group_name_and_set_group_id!
+          else
+            # Violation since one of group_name or group_id must be set
             aug_attrs = get_dtk_aug_attributes(:group_name, :id)
-            return [Violation::ReqUnsetAttrs.new(aug_attrs)]
+            [Violation::ReqUnsetAttrs.new(aug_attrs)]
           end
-          ret
         end
         
         private
-        
+
         # connected vpc
         def vpc
           @vpc ||= get_vpc
@@ -49,6 +57,10 @@ module DTK
           unless vpcs.size == 1
             fail Error, "Unexpected that the matching vpc is not found" 
           end
+        end
+        
+        def validate_group_name_and_set_group_id!
+          []
         end
       end
     end

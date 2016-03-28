@@ -17,14 +17,14 @@
 #
 
 module DTK
-  class CommandAndControlAdapter::Ec2::Reified::Target
-    class Violation < Assembly::Instance::Violation
-      class ReqUnsetAttrs < Assembly::Instance::Violation::ReqUnsetAttrs
-        def initialize(aug_attrs)
-          super(aug_attrs, :component)
-        end
+  class CommandAndControlAdapter::Ec2::Reified::Target::Component
+    class VpcSubnet < self
+      def initialize(reified_target, vpc_subnet_service_component)
+        super(reified_target, vpc_subnet_service_component)
+        @id = get_attribute_values(:id)
       end
     end
   end
 end
+
 

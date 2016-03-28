@@ -18,21 +18,6 @@
 # TODO: remove or cleanup; determine if we need to persist these
 module DTK
   class Violation < Model
-    def self.find_missing_required_attributes(_level, commit_task)
-      component_actions = commit_task.component_actions
-      errors = []
-      component_actions.each do |action|
-        AttributeComplexType.flatten_attribute_list(action[:attributes], flatten_nil_value: true).each do |attr|
-          # TODO: need to distingusih between legitimate nil value and unset
-          if attr[:required] && attr[:attribute_value].nil? && (not attr[:port_type] == 'input') && (not attr[:dynamic])
-            aug_attr = attr.merge(nested_component: action[:component], node: action[:node])
-            errors << MissingRequiredAttribute.new(aug_attr)
-          end
-        end
-      end
-      errors.empty? ? nil : ErrorViolations.new(errors)
-    end
-
     def self.save(parent, violation_expression, opts = {})
       expression_list = ret_expression_list(violation_expression)
       save_list(parent, expression_list, opts)
@@ -150,23 +135,6 @@ module DTK
           end
           (r[:severity] == sv[:severity]) && (c1[:id] == c2[:id]) && (c1[:target_id] = c2[:target_id])
         end
-      end
-    end
-
-    public
-
-    class ErrorViolation < ErrorUsage
-    end
-    class MissingRequiredAttribute < ErrorViolation
-      def initialize(aug_attr)
-        @aug_attr = aug_attr
-        super(error_msg(aug_attr))
-      end
-
-      private
-
-      def error_msg(aug_attr)
-        "The attribute (#{aug_attr.print_form()[:display_name]}) is required, but missing"
       end
     end
 

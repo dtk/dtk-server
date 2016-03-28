@@ -24,6 +24,11 @@ module DTK
         av_pairs = service_component.get_attributes.inject({}) { |h, attr| h.merge(attr.name => attr.value) }
         names.map { |name| av_pairs[name] }
       end
+
+      def get_dtk_attributes(names, service_component)
+        ndx_attrs = service_component.get_attributes.inject({}) { |h, attr| h.merge(attr.name => attr) }
+        names.map { |name| ndx_attrs[name] && ndx_attrs[name].dtk_attribute }
+      end
     end
   end
 end

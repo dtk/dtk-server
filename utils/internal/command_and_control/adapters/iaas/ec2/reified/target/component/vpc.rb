@@ -17,14 +17,25 @@
 #
 
 module DTK
-  class CommandAndControlAdapter::Ec2::Reified::Target
-    class Violation < Assembly::Instance::Violation
-      class ReqUnsetAttrs < Assembly::Instance::Violation::ReqUnsetAttrs
-        def initialize(aug_attrs)
-          super(aug_attrs, :component)
-        end
+  class CommandAndControlAdapter::Ec2::Reified::Target::Component
+    class Vpc < self
+      DefaultRegion = 'us-east-1'
+      def initialize(reified_target, vpc_service_component)
+        super(reified_target, vpc_service_component)
+        @reqion, @aws_access_key_id, @aws_secret_access_key = get_attribute_values(:reqion, :aws_access_key_id, :aws_secret_access_key)
+        @region ||= DefaultRegion
+      end 
+      
+      def credentials_with_region 
+        { 
+          aws_access_key_id: @aws_access_key_id,
+          aws_secret_access_key: @aws_secret_access_key,
+          region: @region
+        }
       end
     end
   end
 end
+
+
 

@@ -20,7 +20,7 @@ module DTK
     class Component
       r8_nested_require('component', 'attribute')
 
-      attr_reader :type
+      attr_reader :type, :dtk_component
 
       # Argument dtk_component is of type DTK::Component
       def initialize(dtk_component)

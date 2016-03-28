@@ -48,6 +48,10 @@ module DTK
         service_components.map { |sc| component_class(component_type).new(self, sc) }
       end
 
+      def assembly_instance
+        @target_service.assembly_instance
+      end
+
       private
 
       def component_class(component_type)

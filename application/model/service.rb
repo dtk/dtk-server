@@ -22,6 +22,8 @@ module DTK
     r8_nested_require('service', 'component')
     r8_nested_require('service', 'reified')
 
+    attr_reader :assembly_instance
+
     # opts can have keys
     #  :components
     def initialize(assembly_instance, opts = {})

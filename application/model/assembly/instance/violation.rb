@@ -206,8 +206,8 @@ module DTK
 
     class Violation
       class ReqUnsetAttr < self
-        def initialize(attr, type)
-          @attr_display_name = attr.print_form(Opts.new(level: type))[:display_name]
+        def initialize(attr, print_level)
+          @attr_display_name = attr.print_form(Opts.new(level: print_level))[:display_name]
         end
 
         def type
@@ -216,6 +216,22 @@ module DTK
 
         def description
           "Attribute (#{@attr_display_name}) is required, but unset"
+        end
+      end
+
+      class ReqUnsetAttrs < self
+        def initialize(attrs, print_level)
+          opts_print = Opts.new(level: print_level)
+          @attr_display_names = attrs.map { |attr| attr.print_form(opts_print)[:display_name] }
+        end
+
+        def type
+          :required_unset_attributes
+        end
+
+        def description
+          aug_attrs_print_form = @attr_display_names.join(', ')
+          "At least one of the attributes (#{aug_attrs_print_form}) is required to be set"
         end
       end
 

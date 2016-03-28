@@ -19,7 +19,7 @@ module DTK
   class Service::Component
     class Attribute
 
-      attr_reader :name, :value
+      attr_reader :name, :value, :dtk_attribute
       # Argument dtk_attribute is of type DTK::Attribute
       def initialize(dtk_attribute)
         @dtk_attribute = dtk_attribute

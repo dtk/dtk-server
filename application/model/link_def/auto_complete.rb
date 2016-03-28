@@ -116,13 +116,18 @@ module DTK; class LinkDef
     def self.check_if_matching_cmps(link_def, aug_cmps, this_cmp)
       matching_cmps  = []
       constraints    = nil
+      preferences    = nil
       link_def_links = LinkDef.get_link_def_links([link_def.id_handle()], cols: [:id, :display_name, :content, :link_def_id])
 
       # get constraints from link_def dsl content and use them later to match link_defs on auto-complete
       if link_def_content = !link_def_links.empty? && link_def_links.first[:content]
-        constraints = link_def_content[:constraints] unless link_def_content.empty?
+        unless link_def_content.empty?
+          constraints = link_def_content[:constraints]
+          preferences = link_def_content[:preferences]
+        end
       end
 
+      preferences_matching_cmps = []
       if link_type = link_def[:link_type]
         aug_cmps.each do |cmp|
           cmp_name = cmp[:component_type].gsub('__','::')
@@ -133,11 +138,29 @@ module DTK; class LinkDef
 
           if link_type.eql?(cmp_name)
             if constraints
-              constraint_match = process_constraints(constraints, cmp, this_cmp)
               # if there is constraint and it's not matched skip this component ko to next one
-              next unless constraint_match
+              if matching_constraints?(constraints, cmp, this_cmp)
+                matching_cmps << cmp
+              else
+                next unless preferences
+              end
             end
-            matching_cmps << cmp
+            if preferences
+              next unless matching_constraints?(preferences, cmp, this_cmp, { preferences: true })
+              preferences_matching_cmps << cmp
+            else
+              matching_cmps << cmp unless constraints
+            end
+          end
+        end
+      end
+
+      unless preferences_matching_cmps.empty?
+        if matching_cmps.size == 0
+          return [preferences_matching_cmps.first]
+        elsif matching_cmps.size > 1
+          preferences_matching_cmps.each do |pref|
+            return [pref] if matching_cmps.include?(pref)
           end
         end
       end
@@ -217,10 +240,10 @@ module DTK; class LinkDef
 
     private
 
-    def self.process_constraints(constraints, dep_cmp, this_cmp)
+    def self.matching_constraints?(constraints_or_preferences, dep_cmp, this_cmp, opts = {})
       constraints_matched = true
 
-      constraints.each do |constraint|
+      constraints_or_preferences.each do |constraint|
         begin
           # using $SAFE = 4 to stop users from executing malicious code in lambda scripts
           evaluated_fn = proc do
@@ -233,8 +256,16 @@ module DTK; class LinkDef
           attributes          = parse_constraint_attributes(evaluated_fn, dep_cmp, this_cmp)
           constraints_matched = evaluated_fn.call(*attributes)
 
-          # if multiple constrains, all must be met;
-          # if one of constrains not met, we exit the loop and return false
+          # if checking preferences, validate each of them
+          if opts[:preferences]
+            if constraints_matched
+              return true
+            else
+              next
+            end
+          end
+
+          # if checking constraints (not preferences) one of constrains not met, we exit the loop and return false
           break unless constraints_matched
         rescue SecurityError => e
           pp [e, e.backtrace[0..5]]
@@ -242,7 +273,7 @@ module DTK; class LinkDef
         end
       end
 
-      constraints_matched
+      return opts[:preferences] ? false : constraints_matched
     end
 
     def self.parse_constraint_attributes(evaluated_fn, dep_cmp, this_cmp)

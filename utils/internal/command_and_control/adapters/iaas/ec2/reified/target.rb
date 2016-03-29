@@ -54,22 +54,30 @@ module DTK
         @target_service.assembly_instance
       end
 
+      def clear_all_attribute_caches!
+        apply_to_all_components { |reified_cmp| reified_cmp.clear_attribute_cache! }
+      end
+
       def matching_components(dtk_component_ids)
         ret = []
         return ret if dtk_component_ids.empty?
         # TODO: can make more efficient by passing in type of dtk_component_ids
         # so dont have to iterate over all types
-        Component::Type::All.each do |cmp_type|
-          get_all(cmp_type).each do |reified_target_cmp|
-            if dtk_component_ids.include?(reified_target_cmp.dtk_component.id)
-              ret << reified_target_cmp
-            end
+        apply_to_all_components do |reified_cmp|
+          if dtk_component_ids.include?(reified_cmp.dtk_component.id)
+            ret << reified_cmp
           end
         end
         ret
       end
 
       private
+      # applfies body to all reified components in target
+      def apply_to_all_components(&body)
+        Component::Type::All.each do |cmp_type|
+          get_all(cmp_type).each { |reified_cmp| body.call(reified_cmp) }
+        end
+      end
 
       def get_all_aux(component_type)
         component_type_name = Component::Type.send(component_type)

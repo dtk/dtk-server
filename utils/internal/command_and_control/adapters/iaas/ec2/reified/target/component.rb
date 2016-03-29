@@ -39,6 +39,10 @@ module DTK
 
       private
 
+      def clear_all_attribute_caches!
+        @reified_target.clear_all_attribute_caches!
+      end
+
       def get_connected_component(component_type)
         link_def_type = Type.name(component_type)
         dtk_component_ids = get_connected_dtk_component_ids(link_def_type)

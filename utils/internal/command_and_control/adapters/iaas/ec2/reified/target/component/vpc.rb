@@ -46,6 +46,9 @@ module DTK; module CommandAndControlAdapter
 
         def id=(vpc_id)
           @id_validated = true
+          # clear_all_attribute_caches! is needed to avoid having component dependending on vpc_id having
+          # cached value
+          clear_all_attribute_caches!
           update_and_propagate_dtk_attribute(Attr.id, vpc_id)
         end
 
@@ -55,6 +58,8 @@ module DTK; module CommandAndControlAdapter
 
         def aws_conn
           # TODO: make sure this does not get set if bad credentilas
+          #       Right now raises a lower level error -> server error about aws credentials
+          #       want to handle by tra[[ing error and putting in a violation about bad credentails
           @conn ||= Ec2.conn(credentials_with_region)
         end
       end

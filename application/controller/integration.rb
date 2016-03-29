@@ -21,6 +21,12 @@ module XYZ
   class IntegrationController < Controller
 
     def rest__docker_execute
+      require 'debugger'; debugger
+      docker_image, docker_command, puppet_manifest, execution_type, dockerfile = ret_request_params(:docker_image, :docker_command, :puppet_manifest, :execution_type, :dockerfile) 
+       
+      commander = Docker::Commander.new(docker_image, docker_command, puppet_manifest, execution_type, dockerfile)
+
+      commander.run()
       rest_ok_response
     end
 

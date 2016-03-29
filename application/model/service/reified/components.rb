@@ -19,8 +19,14 @@ module DTK
   module Service::Reified
     # Reified::Components holds a set of relataed refined components that relate to each other
     class Components
-      def initialize(reified_component_array)
-        @reified_components = reified_component_array
+      def initialize
+        # The elements in this hash get set on demand
+        # They correspond to all the component types
+        @cached_components = {}
+      end
+
+      def use_and_set_cache(component_type, &body)
+        @cached_components[component_type] ||= yield
       end
     end
   end

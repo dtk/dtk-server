@@ -35,6 +35,10 @@ module DTK
         []
       end
 
+      def dtk_component_id
+        @service_component.dtk_component.id
+      end
+
       private
 
       def get_connected_component(component_type)
@@ -42,9 +46,9 @@ module DTK
         dtk_component_ids = @service_component.get_connected_dtk_component_ids(link_def_type)
         components = @reified_target.matching_components(dtk_component_ids)
         if components.size === 0
-          # TODO: change to return violation or tarp this to return violation
+          # TODO: change to return violation or trap this to return violation
           fail ErrorUsage, "No matching components for '#{component_type}'"
-        else components.size > 1
+        elsif components.size > 1
           # TODO: change to return violation or tarp this to return violation
           fail ErrorUsage, "Multiple matching components  for '#{component_type}'"
         end

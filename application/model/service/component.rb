@@ -40,6 +40,18 @@ module DTK
         @attributes = Attribute.create_attributes_from_dtk_attributes(dtk_attributes)
       end
 
+      # Returns dtk component ids that are linked from this by link_def_type
+      def get_connected_dtk_component_ids(link_def_type)
+        ret = []
+        # It is assumed that the dependencies have been added to @dtk_component
+        unless dependencies = @dtk_component[:dependencies]
+          Log.error("Unexpected that no dependencies in #{@dtk_componen.inspect}") 
+          return ret
+        end
+        matching_deps = dependencies.select { |dep| (dep.link_def || {})[:link_type] == link_def_type }
+        matching_deps.map { |dep| dep.satisfied_by_component_ids }.flatten(1)
+      end
+
       private
 
       def ret_type(dtk_component)

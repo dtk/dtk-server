@@ -24,35 +24,58 @@ module DTK
       r8_nested_require('target', 'violation')
 
       def initialize(target_service)
+        super()
         @target_service = target_service.add_links_to_components!
-        # The elements in this hash get set on demand
-        # They correspond to all the component types in a target service
-        @cached_components = {}
       end
 
       def vpc_components
-        @cached_components[:vpc] ||= get_all(:vpc)
+        get_all(:vpc)
       end
 
       def vpc_subnet_components
-        @cached_components[:vpc_subnet] ||= get_all(:vpc_subnet)
+        get_all(:vpc_subnet)
       end
 
       def security_group_components
-        @cached_components[:security_group] ||= get_all(:security_group)
+        get_all(:security_group)
       end
 
-      def get_all(component_type)
-        component_type_name = Component::Type.send(component_type)
-        service_components = @target_service.matching_components?(component_type_name) || []
-        service_components.map { |sc| component_class(component_type).new(self, sc) }
+      # opts can have keys
+      #  :use_and_set_cache - Boolean (default true)
+      def get_all(component_type, opts = {})
+        if "#{opts[:use_and_set_cache]}" == 'false'
+          get_all_aux(component_type)
+        else
+          use_and_set_cache(component_type) { get_all_aux(component_type) }
+        end
       end
 
       def assembly_instance
         @target_service.assembly_instance
       end
 
+      def matching_components(dtk_component_ids)
+        ret = []
+        return ret if dtk_component_ids.empty?
+        # TODO: can make more efficient by passing in type of dtk_component_ids
+        # so dont have to iterate over all types
+        Component::Type::All.each do |cmp_type|
+          get_all(cmp_type).each do |reified_target_cmp|
+            if dtk_component_ids.include?(reified_target_cmp.dtk_component_id)
+              ret << reified_target_cmp
+            end
+          end
+        end
+        ret
+      end
+
       private
+
+      def get_all_aux(component_type)
+        component_type_name = Component::Type.send(component_type)
+        service_components = @target_service.matching_components?(component_type_name) || []
+        service_components.map { |sc| component_class(component_type).new(self, sc) }
+      end
 
       def component_class(component_type)
         Component.const_get(Aux.camelize(component_type.to_s))

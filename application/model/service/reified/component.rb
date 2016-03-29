@@ -17,12 +17,18 @@
 #
 module DTK
   module Service::Reified
-    # Reified::Component is an abstract class that roots classes that reify a set of related service components 
+    # Reified::Component is an abstract class that roots reified service components
     class Component
+      r8_nested_require('component', 'with_service_component')
+
       def initialize
         # These elemnets of this hash get set on demand
         @cached_attributes = {}
         @cached_connected_components = {} #cache connected objects
+      end
+
+      def clear_attribute_cache!
+        @cached_attributes = {}
       end
 
       def use_and_set_attribute_cache(attribute_name, &body)
@@ -33,16 +39,6 @@ module DTK
         @cached_connected_components[conn_component_type] ||= yield
       end
 
-      # returns array with same length as names with values for each name it finds
-      def get_attribute_values(names, service_component)
-        av_pairs = service_component.get_attributes.inject({}) { |h, attr| h.merge(attr.name => attr.value) }
-        names.map { |name| av_pairs[name] }
-      end
-
-      def get_dtk_attributes(names, service_component)
-        ndx_attrs = service_component.get_attributes.inject({}) { |h, attr| h.merge(attr.name => attr) }
-        names.map { |name| ndx_attrs[name] && ndx_attrs[name].dtk_attribute }
-      end
     end
   end
 end

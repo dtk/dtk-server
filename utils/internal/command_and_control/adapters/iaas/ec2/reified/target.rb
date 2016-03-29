@@ -61,7 +61,7 @@ module DTK
         # so dont have to iterate over all types
         Component::Type::All.each do |cmp_type|
           get_all(cmp_type).each do |reified_target_cmp|
-            if dtk_component_ids.include?(reified_target_cmp.dtk_component_id)
+            if dtk_component_ids.include?(reified_target_cmp.dtk_component.id)
               ret << reified_target_cmp
             end
           end

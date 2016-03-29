@@ -40,6 +40,10 @@ module DTK
         @attributes = Attribute.create_attributes_from_dtk_attributes(dtk_attributes)
       end
 
+      def clear_attribute_cache!
+        @attributes = nil
+      end
+      
       # Returns dtk component ids that are linked from this by link_def_type
       def get_connected_dtk_component_ids(link_def_type)
         ret = []

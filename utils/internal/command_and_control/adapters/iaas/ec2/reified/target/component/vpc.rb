@@ -46,9 +46,7 @@ module DTK; module CommandAndControlAdapter
 
         def id=(vpc_id)
           @id_validated = true
-          # TODO: need to update the refiend attribute cache of anything this propagates to
-          Log.info("TODO: set and propagate the dtk id attribute '#{vpc_id}]")
-          @id = vpc_id
+          @id = update_and_propagate_dtk_attribute(:id, vpc_id)
         end
 
         def credentials_with_region 

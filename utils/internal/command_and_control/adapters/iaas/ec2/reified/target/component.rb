@@ -18,16 +18,15 @@
 
 module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
-    class Component < DTK::Service::Reified::Component
+    class Component < DTK::Service::Reified::Component::WithServiceComponent
       r8_nested_require('component', 'type')
       r8_nested_require('component', 'vpc')
       r8_nested_require('component', 'vpc_subnet')
       r8_nested_require('component', 'security_group')
 
       def initialize(reified_target, service_component)
-        super()
-        @reified_target    = reified_target
-        @service_component = service_component
+        super(service_component)
+        @reified_target = reified_target
       end
 
       # Returns an array of Violation objects
@@ -36,15 +35,11 @@ module DTK
         []
       end
 
-      def dtk_component_id
-        @service_component.dtk_component.id
-      end
-
       private
 
       def get_connected_component(component_type)
         link_def_type = Type.name(component_type)
-        dtk_component_ids = @service_component.get_connected_dtk_component_ids(link_def_type)
+        dtk_component_ids = get_connected_dtk_component_ids(link_def_type)
         components = @reified_target.matching_components(dtk_component_ids)
         if components.size === 0
           # TODO: change to return violation or trap this to return violation
@@ -56,14 +51,11 @@ module DTK
         components.first
       end
 
-      def get_attribute_values(*attribute_names)
-        super(attribute_names.map(&:to_s), @service_component)
-      end
-
       def get_dtk_aug_attributes(*attribute_names)
-        # TODO: this is an expensive calculation, but only done when an error
+        # TODO: this is an expensive calculation, but only done when need to generate qualified names
+        # used in violation descriptions
         attribute_names = attribute_names.map(&:to_s)
-        dtk_component_name = @service_component.dtk_component.get_field?(:display_name)
+        dtk_component_name = dtk_component.get_field?(:display_name)
         filter_proc = lambda do |assembly_instance| 
           assembly_instance[:nested_component][:display_name] == dtk_component_name and  
             attribute_names.include?(assembly_instance[:attribute][:display_name]) 

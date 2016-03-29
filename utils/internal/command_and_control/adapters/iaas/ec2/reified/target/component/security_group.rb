@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+# TODO: rewrite to use style of vpc_subnet for validate and converge
 module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component
@@ -24,6 +24,7 @@ module DTK
       
         def initialize(reified_target, sg_service_component)
           super(reified_target, sg_service_component)
+          # TODO: might not have vpc_id since can get this from component link
           @group_name, @group_id, @vpc_id = get_attribute_values(:group_name, :id, :vpc_id)
         end 
 
@@ -37,6 +38,7 @@ module DTK
             end
             ret
           elsif @group_name
+            # TODO: rewrite to use style of vpc_subnet for validate and converge
             validate_group_name_and_set_group_id!
           else
             # Violation since one of group_name or group_id must be set
@@ -47,19 +49,13 @@ module DTK
         
         private
 
-        # connected vpc
-        def vpc
-          @vpc ||= get_vpc
+        def vpc_component
+          use_and_set_connected_component_cache(:vpc) { get_connected_component(:vpc) }
         end
-        
-        def get_vpc
-          vpc_components = @reified_target.get_all(:vpc).select{ |vpc| vpc.id == @vpc_id }
-          unless vpc_components.size == 1
-            fail Error, "Unexpected that the matching vpc is not found" 
-          end
-        end
-        
+
         def validate_group_name_and_set_group_id!
+          # TODO: stub
+          # use vpc_component.aws_conn
           []
         end
       end

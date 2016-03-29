@@ -19,6 +19,20 @@ module DTK
   module Service::Reified
     # Reified::Component is an abstract class that roots classes that reify a set of related service components 
     class Component
+      def initialize
+        # These elemnets of this hash get set on demand
+        @cached_attributes = {}
+        @cached_connected_components = {} #cache connected objects
+      end
+
+      def use_and_set_attribute_cache(attribute_name, &body)
+        @cached_attributes[attribute_name] ||= yield
+      end
+
+      def use_and_set_connected_component_cache(conn_component_type, &body)
+        @cached_connected_components[conn_component_type] ||= yield
+      end
+
       # returns array with same length as names with values for each name it finds
       def get_attribute_values(names, service_component)
         av_pairs = service_component.get_attributes.inject({}) { |h, attr| h.merge(attr.name => attr.value) }

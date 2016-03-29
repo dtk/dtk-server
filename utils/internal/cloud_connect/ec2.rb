@@ -168,6 +168,13 @@ module DTK
         key_pair
       end
 
+      def subnet?(subnet_id)
+        if subnet = conn.subnets.get(subnet_id)
+          hash_form(subnet)
+        end
+      end
+
+      # TOD: DTK-2489; deprecate below
       def check_for_subnet(subnet_id)
         subnets = conn.subnets
         unless subnet_obj = subnets.get(subnet_id)

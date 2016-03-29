@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 
-module DTK
-  class CommandAndControlAdapter::Ec2::Reified::Target
+module DTK; module CommandAndControlAdapter
+  class Ec2::Reified::Target
     class Component
       class Vpc < self
 
@@ -28,14 +28,27 @@ module DTK
           super(reified_target, vpc_service_component)
           @id, @reqion, @aws_access_key_id, @aws_secret_access_key = get_attribute_values(:id, :reqion, :aws_access_key_id, :aws_secret_access_key)
           @region ||= DefaultRegion
+          @id_validated = false
         end 
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_converge!
           if @id
-          # TODO: if @id is set could also validate if it is a valid vpc id
+            Log.info("vpc id = '#{@id}'")
+            unless @id_validated
+              # TODO: validate if @id is a valid vpc id
+              # validate_vpc id(@id)
+              # @id_validated = true
+            end
           end
           []
+        end
+
+        def id=(vpc_id)
+          @id_validated = true
+          # TODO: need to update the refiend attribute cache of anything this propagates to
+          Log.info("TODO: set and propagate the dtk id attribute '#{vpc_id}]")
+          @id = vpc_id
         end
 
         def credentials_with_region 
@@ -45,11 +58,14 @@ module DTK
             region: @region
           }
         end
-        
+
+        def aws_conn
+          @conn ||= Ec2.conn(credentials_with_region)
+        end
       end
     end
   end
-end
+end; end
 
 
 

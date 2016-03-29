@@ -25,6 +25,7 @@ module DTK
       r8_nested_require('component', 'security_group')
 
       def initialize(reified_target, service_component)
+        super()
         @reified_target    = reified_target
         @service_component = service_component
       end

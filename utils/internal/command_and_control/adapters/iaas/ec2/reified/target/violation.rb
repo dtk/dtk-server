@@ -30,6 +30,20 @@ module DTK
           super(aug_attr, :component)
         end
       end
+
+      class InvalidVpcSubnetId < self
+        def initialize(vpc_subnet_id)
+          @vpc_subnet_id = vpc_subnet_id
+        end
+         def type
+          :invalid_vpc_subnet_id
+        end
+
+        def description
+          "The id '#{@vpc_subnet_id}' is an invalid vpc subnet id"
+        end
+      end
+      
     end
   end
 end

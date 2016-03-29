@@ -23,15 +23,13 @@ module DTK
         # opts can have keys
         # :reified_target
         def initialize(dtk_node, opts = {})
+          super()
           @dtk_node       = dtk_node
           @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
-          # These elemnets of this hash get set on demand
-          @cached_attributes = {}
-          @cached_connected_components = {} #cache connected objects
         end
 
         def credentials_with_region
-          @cached_attributes[:credentials_with_region] ||= get_credentials_with_region
+          use_and_set_attribute_cache(:credentials_with_region) { get_credentials_with_region }
         end
         
         def region
@@ -39,13 +37,13 @@ module DTK
         end
 
         def security_groups
-          @cached_attributes[:security_groups] ||= get_security_groups
+          use_and_set_attribute_cache(:security_groups) { get_security_groups }
         end
 
         private
 
         def vpc_component
-          @cached_connected_components[:vpc] ||= get_vpc_component
+          use_and_set_connected_component_cache(:vpc) { get_vpc_component }
         end
 
         def get_vpc_component

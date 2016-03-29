@@ -22,33 +22,37 @@ module DTK
       class VpcSubnet < self
         def initialize(reified_target, vpc_subnet_service_component)
           super(reified_target, vpc_subnet_service_component)
+          # TODO: might not have vpc_id since can get this from component link
           @id, @vpc_id = get_attribute_values(:id, :vpc_id)
-          @cached_connected_components = {} #cache connected objects
         end
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_converge!
-          if @id.nil?
+          unless @id
             aug_attr = get_dtk_aug_attributes(:id).first
-            [Violation::ReqUnsetAttr.new(aug_attr)]
-          elsif @vpc_id
-            # TODO: could validate @id and @vpc_id
-            []
-          else
-            validate_id_and_get_and_propagate_vpc_id!
-            []
+            return [Violation::ReqUnsetAttr.new(aug_attr)]
           end
+
+          unless aws_vpc_subnet = aws_vpc_subnet?(@id)
+            return [Violation::InvalidVpcSubnetId.new(@id)]
+          end
+
+          @vpc_id ||= get_and_propagate_vpc_id(aws_vpc_subnet)
+          []
         end
 
         private
 
         def vpc_component
-          @cached_connected_components[:vpc] ||= get_connected_component(:vpc)
+          use_and_set_connected_component_cache(:vpc) { get_connected_component(:vpc) }
         end
 
-        def validate_id_and_get_and_propagate_vpc_id!
-          # TODO: stub
-          vpc_component
+        def aws_vpc_subnet?(vpc_subnet_id)
+          vpc_component.aws_conn.subnet?(vpc_subnet_id)
+        end
+
+        def get_and_propagate_vpc_id(aws_vpc_subnet)
+          vpc_component.id = aws_vpc_subnet[:vpc_id]
         end
 
       end

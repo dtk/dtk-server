@@ -143,8 +143,8 @@ module DTK; class LinkDef
               matching_cmps << cmp
             end
 
-            if preferences && matching_constraints?(preferences, cmp, this_cmp, { preferences: true })
-              preferences_matching_cmps << cmp
+            if index = preferences && matching_constraints?(preferences, cmp, this_cmp, { preferences: true })
+              preferences_matching_cmps[index] = cmp
             end
           end
         end
@@ -234,7 +234,7 @@ module DTK; class LinkDef
     def self.matching_constraints?(constraints_or_preferences, dep_cmp, this_cmp, opts = {})
       constraints_matched = true
 
-      constraints_or_preferences.each do |constraint|
+      constraints_or_preferences.each_with_index do |constraint, index|
         begin
           # using $SAFE = 4 to stop users from executing malicious code in lambda scripts
           evaluated_fn = proc do
@@ -250,7 +250,7 @@ module DTK; class LinkDef
           # if checking preferences, validate each of them
           if opts[:preferences]
             if constraints_matched
-              return true
+              return index
             else
               next
             end
@@ -268,6 +268,7 @@ module DTK; class LinkDef
     end
 
     def self.get_matching_by_preferences(preferences_matching_cmps, matching_cmps)
+      preferences_matching_cmps.delete_if{ |pref| pref.nil? }
       if matching_cmps.size > 1
         preferences_matching_cmps.each do |pref|
           return [pref] if matching_cmps.include?(pref)

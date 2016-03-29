@@ -19,6 +19,11 @@ require 'ap'
 
 module XYZ
   class IntegrationController < Controller
+
+    def rest__docker_execute
+      rest_ok_response
+    end
+
     def rest__spin_tenant
       username, password, email = ret_non_null_request_params(:username, :password, :email)
 

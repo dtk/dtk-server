@@ -45,7 +45,8 @@ R8::ReactorRoute.draw do
   get 'messages/retrieve'       => 'messages#retrieve'
 
   # INTEGRATION
-  post 'integration/spin_tenant' => 'integration#spin_tenant'
+  post 'integration/spin_tenant'    => 'integration#spin_tenant'
+  post 'integration/docker_execute' => 'integration#docker_execute'
 
   # DEVELOPER
   post 'developer/run_agent' => 'developer#run_agent'

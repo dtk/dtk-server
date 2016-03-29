@@ -20,8 +20,6 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component < DTK::Service::Reified::Component::WithServiceComponent
       r8_nested_require('component', 'type')
-      r8_nested_require('component', 'attribute')
-      # attribute must be required before the files below
       r8_nested_require('component', 'vpc')
       r8_nested_require('component', 'vpc_subnet')
       r8_nested_require('component', 'security_group')
@@ -37,7 +35,24 @@ module DTK
         []
       end
 
+      # For handling Attributes as methods
+      def method_missing(attribute_method, *args, &body)
+        if legal_attribute_method?(attribute_method) 
+          use_and_set_attribute_cache(attribute_method) { get_attribute_value(attribute_method) }
+        else
+          super
+        end
+      end
+
+      def respond_to?(attribute_method)
+        legal_attribute_method?(attribute_method)
+      end
+
       private
+
+      def legal_attribute_method?(attribute_method)
+        self.class::Attributes.include?(attribute_method)
+      end
 
       def clear_all_attribute_caches!
         @reified_target.clear_all_attribute_caches!
@@ -71,6 +86,12 @@ module DTK
         ndx_unordered_ret = unordered_ret.inject({}) { |h, a| h.merge(a[:display_name] => a) }
         attribute_names.map { |n| ndx_unordered_ret[n] }
       end
+      
+      def connected_component(conn_cmp_type)
+        use_and_set_connected_component_cache(conn_cmp_type) { get_connected_component(conn_cmp_type) }
+      end
+
+
     end
   end
 end

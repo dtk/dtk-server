@@ -34,7 +34,7 @@ module DTK
           Mapping[cmp_type]
         end
 
-        def method_missing(method)
+        def method_missing(method, *args, &body)
           Mapping[method] || super
         end
       end

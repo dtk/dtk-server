@@ -50,11 +50,26 @@ module DTK
         end
 
         def update_and_propagate_dtk_attribute(attribute_name, attribute_value)
-          dtk_attribute = get_dtk_attribute(attribute_name)
-          attr_mh = dtk_attribute.model_handle
-          attribute_rows = [{ id: dtk_attribute.id, value_asserted: attribute_value }]
-          Attribute.update_and_propagate_attributes(attr_mh, attribute_rows)
-          attribute_value
+          update_and_propagate_dtk_attributes({ attribute_name => attribute_value}).first
+        end
+
+        # opts can have keys
+        #  :prune_nil_values - Boolean (default false)
+        def update_and_propagate_dtk_attributes(name_value_pairs, opts = {})
+          ret = name_value_pairs.values
+          name_value_pairs = name_value_pairs.reject{ |a, v| v.nil? } if opts[:prune_nil_values]
+          return ret if name_value_pairs.empty?
+
+          attr_rows_to_prop = []
+          dtk_attributes    = get_dtk_attributes(*name_value_pairs.keys)
+          values            = name_value_pairs.values
+          dtk_attributes.each_with_index do |dtk_attribute, i|
+            value = values[i]
+            attr_rows_to_prop << { id: dtk_attribute.id, value_asserted: value }
+          end
+          attr_mh = dtk_attributes.first.model_handle
+          Attribute.update_and_propagate_attributes(attr_mh, attr_rows_to_prop)
+          ret
         end
 
         def get_connected_dtk_component_ids(link_def_type)

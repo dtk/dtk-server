@@ -20,9 +20,7 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component
       class VpcSubnet < self
-        class Attr < Component::Attribute
-          Names = [:id, :vpc_id]
-        end
+        Attributes = [:id, :vpc_id, :cidr_block, :availability_zone]
 
         def initialize(reified_target, vpc_subnet_service_component)
           super(reified_target, vpc_subnet_service_component)
@@ -30,10 +28,8 @@ module DTK
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_converge!
-          id, vpc_id = get_attribute_values(Attr.id, Attr.vpc_id)
-
           unless id
-            aug_attr = get_dtk_aug_attributes(Attr.id).first
+            aug_attr = get_dtk_aug_attributes(:id).first
             return [Violation::ReqUnsetAttr.new(aug_attr)]
           end
 
@@ -42,14 +38,19 @@ module DTK
           end
 
           get_and_propagate_vpc_id(aws_vpc_subnet)
+          set_attributes_from_aws!(aws_vpc_subnet)
           []
         end
 
         private
 
+        def set_attributes_from_aws!(aws_vpc_subnet)
+          name_value_pairs = Aux.hash_subset(aws_vpc_subnet, [:cidr_block, :availability_zone])
+          update_and_propagate_dtk_attributes(name_value_pairs, prune_nil_values: true)
+        end
+
         def vpc_component
-          # TODO: might use same for as attribute for component and use Component.vpc
-          use_and_set_connected_component_cache(:vpc) { get_connected_component(:vpc) }
+          connected_component(:vpc)
         end
 
         def aws_vpc_subnet?(vpc_subnet_id)
@@ -59,7 +60,6 @@ module DTK
         def get_and_propagate_vpc_id(aws_vpc_subnet)
           vpc_component.id = aws_vpc_subnet[:vpc_id]
         end
-
       end
     end
   end

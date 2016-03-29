@@ -20,9 +20,7 @@ module DTK; module CommandAndControlAdapter
   class Ec2::Reified::Target
     class Component
       class Vpc < self
-        class Attr < Component::Attribute
-          Names = [:id, :region, :aws_access_key_id, :aws_secret_access_key]
-        end
+        Attributes = [:id, :region, :aws_access_key_id, :aws_secret_access_key]
 
         DefaultRegion = 'us-east-1'
         def initialize(reified_target, vpc_service_component)
@@ -32,7 +30,6 @@ module DTK; module CommandAndControlAdapter
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_converge!
-          id = get_attribute_value(Attr.id)
           if id
             Log.info("vpc id = '#{id}'")
             unless @id_validated
@@ -49,11 +46,15 @@ module DTK; module CommandAndControlAdapter
           # clear_all_attribute_caches! is needed to avoid having component dependending on vpc_id having
           # cached value
           clear_all_attribute_caches!
-          update_and_propagate_dtk_attribute(Attr.id, vpc_id)
+          update_and_propagate_dtk_attribute(:id, vpc_id)
         end
 
         def credentials_with_region 
-          get_ndx_attribute_values(Attr.aws_access_key_id, Attr.aws_secret_access_key, Attr.region)
+          { 
+            aws_access_key_id: aws_access_key_id,
+            aws_secret_access_key: aws_secret_access_key,
+            region: region
+          }
         end
 
         def aws_conn

@@ -20,30 +20,35 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component
       class VpcSubnet < self
+        class Attr < Component::Attribute
+          Names = [:id, :vpc_id]
+        end
+
         def initialize(reified_target, vpc_subnet_service_component)
           super(reified_target, vpc_subnet_service_component)
-          # TODO: might not have vpc_id since can get this from component link
-          @id, @vpc_id = get_attribute_values(:id, :vpc_id)
         end
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_converge!
-          unless @id
-            aug_attr = get_dtk_aug_attributes(:id).first
+          id, vpc_id = get_attribute_values(Attr.id, Attr.vpc_id)
+
+          unless id
+            aug_attr = get_dtk_aug_attributes(Attr.id).first
             return [Violation::ReqUnsetAttr.new(aug_attr)]
           end
 
-          unless aws_vpc_subnet = aws_vpc_subnet?(@id)
-            return [Violation::InvalidVpcSubnetId.new(@id)]
+          unless aws_vpc_subnet = aws_vpc_subnet?(id)
+            return [Violation::InvalidVpcSubnetId.new(id)]
           end
 
-          @vpc_id ||= get_and_propagate_vpc_id(aws_vpc_subnet)
+          get_and_propagate_vpc_id(aws_vpc_subnet)
           []
         end
 
         private
 
         def vpc_component
+          # TODO: might use same for as attribute for component and use Component.vpc
           use_and_set_connected_component_cache(:vpc) { get_connected_component(:vpc) }
         end
 

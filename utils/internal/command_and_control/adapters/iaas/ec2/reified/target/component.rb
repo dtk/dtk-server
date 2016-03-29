@@ -20,6 +20,8 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component < DTK::Service::Reified::Component::WithServiceComponent
       r8_nested_require('component', 'type')
+      r8_nested_require('component', 'attribute')
+      # attribute must be required before the files below
       r8_nested_require('component', 'vpc')
       r8_nested_require('component', 'vpc_subnet')
       r8_nested_require('component', 'security_group')

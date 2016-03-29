@@ -25,15 +25,28 @@ module DTK
           super()
           @service_component = service_component
         end
-
+        
         def clear_attribute_cache!
           super
           @service_component.clear_attribute_cache!
         end
+        
+        def get_attribute_value(attribute_name)
+          get_attribute_values(attribute_name).first
+        end
 
         # returns array with same length as names with values for each name it finds
         def get_attribute_values(*attribute_names)
-          get_service_component_attributes(*attribute_names).map(&:value)
+          ndx_values = get_ndx_attribute_values(*attribute_names)
+          attribute_names.map { |name| ndx_values[name] }
+        end
+        
+        def get_ndx_attribute_values(*attribute_names)
+          ndx_attrs = get_ndx_service_component_attributes
+          attribute_names.inject({}) do |h, name| 
+            attr = ndx_attrs[name]
+            attr ? h.merge(name => attr.value) : h
+          end
         end
 
         def update_and_propagate_dtk_attribute(attribute_name, attribute_value)
@@ -63,11 +76,13 @@ module DTK
         end
 
         def get_service_component_attributes(*attribute_names)
-          names = attribute_names.map(&:to_s)
-          ndx_attrs = @service_component.get_attributes.inject({}) { |h, attr| h.merge(attr.name => attr) }
-          names.map { |name| ndx_attrs[name] }
+          ndx_attrs = get_ndx_service_component_attributes
+          attribute_names.map { |name| ndx_attrs[name] }          
         end
 
+        def get_ndx_service_component_attributes
+          @service_component.get_attributes.inject({}) { |h, attr| h.merge(attr.name.to_sym => attr) }
+        end
       end
     end
   end

@@ -20,21 +20,21 @@ module DTK; module CommandAndControlAdapter
   class Ec2::Reified::Target
     class Component
       class Vpc < self
-
-        attr_reader :id
+        class Attr < Component::Attribute
+          Names = [:id, :region, :aws_access_key_id, :aws_secret_access_key]
+        end
 
         DefaultRegion = 'us-east-1'
         def initialize(reified_target, vpc_service_component)
           super(reified_target, vpc_service_component)
-          @id, @reqion, @aws_access_key_id, @aws_secret_access_key = get_attribute_values(:id, :reqion, :aws_access_key_id, :aws_secret_access_key)
-          @region ||= DefaultRegion
           @id_validated = false
         end 
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_converge!
-          if @id
-            Log.info("vpc id = '#{@id}'")
+          id = get_attribute_value(Attr.id)
+          if id
+            Log.info("vpc id = '#{id}'")
             unless @id_validated
               # TODO: validate if @id is a valid vpc id
               # validate_vpc id(@id)
@@ -46,18 +46,15 @@ module DTK; module CommandAndControlAdapter
 
         def id=(vpc_id)
           @id_validated = true
-          @id = update_and_propagate_dtk_attribute(:id, vpc_id)
+          update_and_propagate_dtk_attribute(Attr.id, vpc_id)
         end
 
         def credentials_with_region 
-          { 
-            aws_access_key_id: @aws_access_key_id,
-            aws_secret_access_key: @aws_secret_access_key,
-            region: @region
-          }
+          get_ndx_attribute_values(Attr.aws_access_key_id, Attr.aws_secret_access_key, Attr.region)
         end
 
         def aws_conn
+          # TODO: make sure this does not get set if bad credentilas
           @conn ||= Ec2.conn(credentials_with_region)
         end
       end

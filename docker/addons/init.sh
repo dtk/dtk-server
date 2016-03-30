@@ -75,7 +75,7 @@ mkdir -p ${HOST_VOLUME}/logs/nginx
 rm -rf /var/log/nginx
 ln -s ${HOST_VOLUME}/logs/nginx /var/log/nginx
 mkdir -p ${HOST_VOLUME}/logs/app
-rm -rf /home/${TENANT_USER}/server/current/application/log
+rm -rf /var/log/dtk/${TENANT_USER}
 chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/logs/app
 ln -s ${HOST_VOLUME}/logs/app /var/log/dtk/${TENANT_USER}
 

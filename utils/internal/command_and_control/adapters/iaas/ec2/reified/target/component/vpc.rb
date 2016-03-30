@@ -28,6 +28,10 @@ module DTK; module CommandAndControlAdapter
           @id_validated = false
         end 
 
+        def region
+          super || DefaultRegion
+        end
+
         # Returns an array of violations; if no violations [] is returned
         def validate_and_converge!
           if id
@@ -49,12 +53,15 @@ module DTK; module CommandAndControlAdapter
           update_and_propagate_dtk_attribute(:id, vpc_id)
         end
 
-        def credentials_with_region 
+        def credentials
           { 
             aws_access_key_id: aws_access_key_id,
-            aws_secret_access_key: aws_secret_access_key,
-            region: region
+            aws_secret_access_key: aws_secret_access_key
           }
+        end
+
+        def credentials_with_region 
+          credentials.merge(region: region)
         end
 
         def aws_conn

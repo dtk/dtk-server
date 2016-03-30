@@ -23,6 +23,8 @@ module DTK
       r8_nested_require('target', 'violation_processor')
       r8_nested_require('target', 'violation')
 
+      attr_reader :target_service
+
       def initialize(target_service)
         super()
         @target_service = target_service.add_links_to_components!

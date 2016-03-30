@@ -58,7 +58,7 @@ module DTK
             end
           end
 
-          DtkTargetAndProvider.new(@reified_target).update_or_create if ret.empty?
+          DtkTargetAndProvider.new(@reified_target, ndx_components, project).update_or_create if ret.empty?
           ret
         end
       end

@@ -53,7 +53,7 @@ module DTK
       end
 
       def target
-        Log.error("Unexepcetd that @target is nil") unless @target
+        Log.error("Unexpected that @target is nil") unless @target
         @target
       end
 
@@ -64,6 +64,12 @@ module DTK
 
       def self.target_when_target_assembly_instance?(assembly)
         assembly.copy_as_assembly_instance.get_target() if isa_target_assembly_instance?(assembly)
+      end
+
+      def is_converged?
+        if status = @assembly_instance.get_last_task_run_status?
+          status == 'succeeded'
+        end
       end
 
       private

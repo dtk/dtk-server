@@ -656,28 +656,31 @@ module DTK
         opts[:parent_service] = parent_service
       end
 
-      if is_target = ret_request_params(:is_target)
-        opts[:is_target] = is_target
+      if is_target_service = ret_request_params(:is_target)
+        opts[:is_target_service] = is_target_service
       end
 
       project = get_default_project()
       opts.merge!(project: project)
 
       target =
-        if is_target
+        if is_target_service
           target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
+          # TODO: 2489: move Target::Instance.create_target_mock_for_service_instance to Service::Target
           Target::Instance.create_target_mock_for_service_instance(target_name, project.id_handle()).first
         else
           target_idh_with_default(target_id).create_object(model_name: :target_instance)
         end
 
-      Target::Instance.validate_if_target_converged(target) unless is_target
+      if !is_target_service and !Service::Target.create_from_target(target).is_converged? 
+        fail ErrorUsage.new("You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and try 'stage' again.") 
+      end
 
       begin
         new_assembly_obj = assembly_template.stage(target, opts)
       rescue DTK::ErrorUsage => e
         # delete mocked target service instance created above
-        Target::Instance.delete_and_destroy(target) if is_target
+        Target::Instance.delete_and_destroy(target) if is_target_service
         raise e unless is_silent_fail
         # in case we are using silent fail we wont response evne if there was an error
         new_assembly_obj = Assembly::Instance.find_by_name?(target, opts[:assembly_name])
@@ -686,7 +689,7 @@ module DTK
         raise e unless new_assembly_obj
       end
 
-      if is_target
+      if is_target_service
         display_name = new_assembly_obj.get_field?(:display_name)
         ref          = display_name.downcase.gsub(/ /, '-')
         target.update(display_name: display_name, ref: ref)

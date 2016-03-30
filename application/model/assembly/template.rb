@@ -56,7 +56,7 @@ module DTK; class Assembly
       end
 
       # only if called from stage-target; we set specific_type field to 'target'
-      if is_target = opts[:is_target]
+      if opts[:is_target_service]
         override_attrs[:specific_type] = 'target'
       end
 

@@ -22,8 +22,6 @@ module DTK
       # TODO: DTK-2489 bridge of using violations to trigger converge of components until have a component implementation
       # that can handle Rest calls 
       class ViolationProcessor
-        r8_nested_require('violation_processor', 'dtk_target_and_provider')
-        
         def self.find_violations(target_service, project, params = {})
           new(target_service).find_violations(project, params)
         end
@@ -57,8 +55,6 @@ module DTK
               ret += reified_component.validate_and_converge!
             end
           end
-
-          DtkTargetAndProvider.new(@reified_target, ndx_components, project).update_or_create if ret.empty?
           ret
         end
       end

@@ -29,24 +29,24 @@ module DTK
       end
 
       def vpc_components
-        get_all(:vpc)
+        get_all_components_of_type(:vpc)
       end
 
       def vpc_subnet_components
-        get_all(:vpc_subnet)
+        get_all_components_of_type(:vpc_subnet)
       end
 
       def security_group_components
-        get_all(:security_group)
+        get_all_components_of_type(:security_group)
       end
 
       # opts can have keys
       #  :use_and_set_cache - Boolean (default true)
-      def get_all(component_type, opts = {})
+      def get_all_components_of_type(component_type, opts = {})
         if "#{opts[:use_and_set_cache]}" == 'false'
-          get_all_aux(component_type)
+          get_all_components_of_type_aux(component_type)
         else
-          use_and_set_cache(component_type) { get_all_aux(component_type) }
+          use_and_set_cache(component_type) { get_all_components_of_type_aux(component_type) }
         end
       end
 
@@ -75,11 +75,11 @@ module DTK
       # applfies body to all reified components in target
       def apply_to_all_components(&body)
         Component::Type::All.each do |cmp_type|
-          get_all(cmp_type).each { |reified_cmp| body.call(reified_cmp) }
+          get_all_components_of_type(cmp_type).each { |reified_cmp| body.call(reified_cmp) }
         end
       end
 
-      def get_all_aux(component_type)
+      def get_all_components_of_type_aux(component_type)
         component_type_name = Component::Type.send(component_type)
         service_components = @target_service.matching_components?(component_type_name) || []
         service_components.map { |sc| component_class(component_type).new(self, sc) }

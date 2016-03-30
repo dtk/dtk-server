@@ -38,7 +38,7 @@ module DTK
           
           # Get all relevant components
           ndx_components = Component::Type::All.inject({}) do |h, cmp_type|
-            h.merge(cmp_type => @reified_target.get_all(cmp_type))
+            h.merge(cmp_type => @reified_target.get_all_components_of_type(cmp_type))
           end
           
           missing_cmp_types = Component::Type::All.select { |cmp_type| ndx_components[cmp_type].empty? }

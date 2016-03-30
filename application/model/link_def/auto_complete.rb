@@ -105,7 +105,7 @@ module DTK; class LinkDef
       ret_link_defs = []
 
       dependencies.each do |dep|
-        if link_def = dep.link_def
+        if link_def = dep.respond_to?(:link_def) && dep.link_def
           ret_link_defs << link_def if dep.satisfied_by_component_ids.empty?
         end
       end

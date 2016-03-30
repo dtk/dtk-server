@@ -49,7 +49,8 @@ module DTK
 
           # validate_and_converge each reified_component
           # Need to do this in following order due to using earlier in oredr components to fil in gaps of ;ater ones
-          ordered_cmp_type = [:vpc_subnet, :vpc, :security_group]
+          # TODO: if did this in an assembly above would reflect order of components in workflow
+          ordered_cmp_type = [:iam_user, :vpc_subnet, :vpc, :security_group]
           ordered_cmp_type.each do |cmp_type|
             ndx_components[cmp_type].each do |reified_component|
               ret += reified_component.validate_and_converge!

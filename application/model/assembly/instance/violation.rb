@@ -18,6 +18,10 @@
 module DTK
   class Assembly::Instance
     class Violation
+      # could be overwritten
+      def type
+        Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
+      end
     end
     r8_nested_require('violation', 'iaas_component')
 

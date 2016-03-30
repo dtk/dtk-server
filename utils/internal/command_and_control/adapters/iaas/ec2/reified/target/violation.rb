@@ -35,15 +35,27 @@ module DTK
         def initialize(vpc_subnet_id)
           @vpc_subnet_id = vpc_subnet_id
         end
-         def type
-          :invalid_vpc_subnet_id
-        end
 
         def description
           "The id '#{@vpc_subnet_id}' is an invalid vpc subnet id"
         end
       end
       
+      class InvalidKeypair < self
+        def initialize(keypair, region, legal_keypairs)
+          @keypair        = keypair
+          @region         = region
+          @legal_keypairs = legal_keypairs
+        end
+        
+        def description
+          if @legal_keypairs.empty?
+            "There are no keypairs configured in region '#{@region}'"
+          else
+            "The name '#{@keypair}' is not a legal keypair in region '#{@region}'; legal values are: #{@legal_keypairs.join(', ')}" 
+          end
+        end
+      end
     end
   end
 end

@@ -20,6 +20,7 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component < DTK::Service::Reified::Component::WithServiceComponent
       r8_nested_require('component', 'type')
+      r8_nested_require('component', 'iam_user')
       r8_nested_require('component', 'vpc')
       r8_nested_require('component', 'vpc_subnet')
       r8_nested_require('component', 'security_group')

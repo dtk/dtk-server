@@ -160,6 +160,21 @@ module DTK
         end
       end
 
+      def vpc?(vpc_id)
+        if aws_vpc = conn.vpcs.get(vpc_id)
+           hash_form(aws_vpc)
+        end
+      end
+
+      def keypairs
+        conn.key_pairs.map { |key_pair| hash_form(key_pair) }
+      end
+      def keypair?(keypair_name)
+        if aws_key_pair = conn.key_pairs.get(keypair_name)
+          hash_form(aws_key_pair)
+        end
+      end
+      # TODO: DTK-2489: deprecate below fro two above
       def check_for_key_pair(name)
         unless key_pair = conn.key_pairs.get(name)
           fail ErrorUsage.new("Not able to find IAAS keypair with name '#{name}' aborting action, please create necessery keypair")

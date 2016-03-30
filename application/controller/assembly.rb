@@ -699,7 +699,12 @@ module DTK
           is_created: is_created
         }
       }
-      rest_ok_response(response, encode_into: :yaml)
+
+      if ret_request_params(:do_not_encode)
+        rest_ok_response(response)
+      else
+        rest_ok_response(response, encode_into: :yaml)
+      end
     end
 
     def rest__set_default_target

@@ -23,7 +23,7 @@ module DTK
     # a very simple root abstract class
     class Target < self
       r8_nested_require('target', 'node_template')
-      include NodeTemplate
+      include NodeTemplateMixin
 
       # opts can have keys
       #  :target

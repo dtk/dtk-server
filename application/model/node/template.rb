@@ -128,6 +128,7 @@ module DTK
         end.compact.uniq
       end
 
+      # ODO: DTK-2489: find_matching_node_template will be deprecated
       def self.find_matching_node_template(target, opts = {})
         node_binding_rs = opts[:node_binding_ruleset]
         (node_binding_rs && node_binding_rs.find_matching_node_template(target)) || null_node_template(target.model_handle(:node))
@@ -169,7 +170,6 @@ module DTK
         end
       end
 
-      # TODO: make private
       def self.null_node_template(model_handle)
         sp_hash = {
           cols: [:id, :group_id, :display_name],

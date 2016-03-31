@@ -135,8 +135,8 @@ module DTK; class Clone
           case match_or_create_node?(target, node, node_target, nb_ruleset)
             when :create
               node_template = node_target ?
-                target_service.find_matching_node_template(node_target) :
-                Node::Template.find_matching_node_template(target, node_binding_ruleset: nb_ruleset)
+                target_service.find_node_template_from_node_target(node_target) :
+                target_service.find_node_template_from_node_binding_ruleset(nb_ruleset)
               NodeMatch.hash__when_creating_node(self, node, node_template, node_target: node_target)
             when :match
               if target_ref = NodeBindings.create_linked_target_ref?(target, node, node_target)

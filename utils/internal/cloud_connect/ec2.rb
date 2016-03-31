@@ -142,8 +142,39 @@ module DTK
         end
       end
 
-      def security_groups_all
-        conn.security_groups.all.map { |x| hash_form(x) }
+      # filter is attribute value pairs to match againts
+      def security_groups(filter = {})
+        ret = conn.security_groups.all.map { |aws_sg| hash_form(aws_sg) }
+        ret.select { |hash_form_sg| filter_security_group?(hash_form_sg, filter) }
+      end
+      def security_group_by_id?(security_group_id, filter = {})
+        if aws_sg = conn.security_groups.get_by_id(security_group_id)
+          filter_security_group?(hash_form(aws_sg), filter)
+        end
+      end
+      def security_group_by_name?(security_group_name, filter = {})
+        if aws_sg = conn.security_groups.get(security_group_name)
+          filter_security_group?(hash_form(aws_sg), filter)
+        end
+      end
+      def filter_security_group?(hash_form_sg, filter)
+        hash_form_sg unless filter.find { |k, v| hash_form_sg[k] != v }
+      end
+      private :filter_security_group?
+      # TODO: DTK-2489: deprecate below fro two above
+      def check_for_security_group(name, _description = nil)
+        s_group = nil
+        return unless conn.respond_to?(:security_groups)
+
+        security_groups = conn.security_groups
+        unless s_group = security_groups.get(name)
+          # if does not found by group name try search by group_id as well
+          unless s_group = security_groups.get_by_id(name)
+            fail ErrorUsage.new("Not able to find IAAS security group with name or id '#{name}' aborting action, please create necessery security group")
+          end
+        end
+
+        s_group
       end
 
       def describe_availability_zones
@@ -203,21 +234,6 @@ module DTK
           fail ErrorUsage.new(err_msg)
         end
         subnet_obj.subnet_id
-      end
-
-      def check_for_security_group(name, _description = nil)
-        s_group = nil
-        return unless conn.respond_to?(:security_groups)
-
-        security_groups = conn.security_groups
-        unless s_group = security_groups.get(name)
-          # if does not found by group name try search by group_id as well
-          unless s_group = security_groups.get_by_id(name)
-            fail ErrorUsage.new("Not able to find IAAS security group with name or id '#{name}' aborting action, please create necessery security group")
-          end
-        end
-
-        s_group
       end
 
       def allocate_elastic_ip

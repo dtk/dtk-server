@@ -20,37 +20,81 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component
       class SecurityGroup < self
-        attr_reader :group_name, :group_id
+        Attributes = [:group_name, :id, :vpc_id]
       
         def initialize(reified_target, sg_service_component)
           super(reified_target, sg_service_component)
-          # TODO: might not have vpc_id since can get this from component link
-          @group_name, @group_id, @vpc_id = get_attribute_values(:group_name, :id, :vpc_id)
         end 
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_converge!
-          if @group_id
-            ret = violation_group_id?
-            if ret.empty?
-              set_group_name! unless @group_name
-              # TODO: if @group_name is set could also if it is a valid security_group name
-            end
-            ret
-          elsif @group_name
-            # TODO: rewrite to use style of vpc_subnet for validate and converge
-            validate_group_name_and_set_group_id!
-          else
-            # Violation since one of group_name or group_id must be set
+          ret = []
+          if !id and !group_name
             aug_attrs = get_dtk_aug_attributes(:group_name, :id)
-            [Violation::ReqUnsetAttrs.new(aug_attrs)]
+            return [Violation::ReqUnsetAttrs.new(aug_attrs)]
           end
+          validate_and_converge_name_and_id!
         end
-        
+
         private
 
+        def validate_and_converge_name_and_id!
+          ret = []
+          aws_sg_from_id = aws_sg_from_name = nil
+          if id
+            aws_sg_from_id, violations = validate_group_id
+            ret += violations
+            if aws_sg_from_id and !group_name
+              update_and_propagate_dtk_attributes({group_name: aws_sg_from_id[:name]} , prune_nil_values: true)
+            end
+          end
+
+          if group_name
+            aws_sg_from_name, violations = validate_group_name
+            ret += violations
+            if aws_sg_from_name and !id
+              update_and_propagate_dtk_attributes({id: aws_sg_from_name[:group_id]} , prune_nil_values: true)
+            end
+          end
+
+          if aws_sg_from_id and aws_sg_from_name
+            if aws_sg_from_id[:group_id] != aws_sg_from_name[:group_id]
+              # TODO: raise error about conflicting id and name refs
+            end
+          end
+          ret
+        end
+
+        # returns [aws_security_group, violations]
+        def validate_group_id
+          violations = []
+          unless aws_security_group = aws_conn.security_group_by_id?(id)
+            legal_ids = security_groups_in_vpc.map { |sg| sg[:group_id] }
+            violations = [Violation::InvalidSecurityGroup::Id.new(group_id, vpc_id, legal_ids)]
+          end
+          [aws_security_group, violations]
+        end
+
+        # returns [aws_security_group, violations]
+        def validate_group_name
+          violations = []
+          unless aws_security_group = aws_conn.security_group_by_name?(group_name)
+            legal_names = security_groups_in_vpc.map { |sg| sg[:name] }
+            violations = [Violation::InvalidSecurityGroup::Name.new(group_name, vpc_id, legal_names)]
+          end
+          [aws_security_group, violations]
+        end
+
+        def security_groups_in_vpc
+          aws_conn.security_groups(vpc_id: vpc_id)
+        end
+
         def vpc_component
-          use_and_set_connected_component_cache(:vpc) { get_connected_component(:vpc) }
+          connected_component(:vpc)
+        end
+
+        def aws_conn
+          vpc_component.aws_conn
         end
 
         def validate_group_name_and_set_group_id!

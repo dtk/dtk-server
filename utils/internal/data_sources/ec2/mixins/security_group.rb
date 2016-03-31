@@ -61,7 +61,7 @@ module XYZ
         # determines whether security group allows unfettered connectivity between its members
         # TODO: factor this in
         def get_unfettered_security_groups
-          security_groups = conn().security_groups_all()
+          security_groups = conn().security_groups
           security_groups.reject { |sg| not is_unfettered_security_group?(sg) }
         end
 

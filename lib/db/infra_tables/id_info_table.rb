@@ -463,13 +463,13 @@ module DTK
         def get_row_from_guid(guid, opts = {})
           # NOTE: contingent on id scheme where guid uniquely picks out row
           ds = ds().where(ID_INFO_TABLE[:id] => db_id_from_guid(guid))
-     if ds.empty?
-            fail Error::NotFound.new(:guid, guid) if opts[:raise_error]
+          if ds.empty?
+            fail Error.new("Object id '#{guid}' is illegal") if opts[:raise_error]
             return nil
           end
-    return nil if ds.empty?
-    unformated_row = ds.first
-    format_row(unformated_row)
+          return nil if ds.empty?
+          unformated_row = ds.first
+          format_row(unformated_row)
         end
 
         def get_id_from_id_handle(id_handle)

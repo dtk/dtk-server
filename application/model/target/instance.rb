@@ -273,9 +273,10 @@ module DTK
       end
 
       DefaultTargetMark = '*'
-
+      BuiltinTargetName = 'DTK_Test_Target'
       def is_builtin_target?
-        get_field?(:parent_id).nil?
+        update_object!(:parent_id, :display_name)
+        self[:parent_id].nil? and self[:display_name] == BuiltinTargetName
       end
 
       def self.import_nodes(target, inventory_data)

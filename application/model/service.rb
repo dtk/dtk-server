@@ -30,7 +30,10 @@ module DTK
       @assembly_instance = assembly_instance
       # @components is computed on demand or passed in through opts
       # It is an array with Service::Component elements
-      @components = opts[:components]
+      @components = nil
+      if dtk_components = opts[:components]
+        @components = Component.create_components_from_dtk_components(dtk_components)
+      end
       @links_added_to_components = false
     end
     private :initialize
@@ -62,7 +65,8 @@ module DTK
 
     def add_links_to_components!
       unless @links_added_to_components
-        Dependency::Link.augment_component_instances!(@assembly_instance, components, ret_statisfied_by: true)
+        dtk_components = components.map(&:dtk_component)
+        Dependency::Link.augment_component_instances!(@assembly_instance, dtk_components, ret_statisfied_by: true)
       end
       @links_added_to_components = true
       self

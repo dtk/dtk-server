@@ -590,15 +590,6 @@ module DTK
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
       opts      = Opts.new
 
-      # when using stage -p parent-service, stage assembly into parent service target
-      if service_instance_id = ret_request_param_id_optional(:parent_service, Assembly::Instance)
-        service_instance = ret_id_handle_from_value(service_instance_id, Assembly::Instance).create_object(model_name: :assembly_instance)
-        service_instance.update_object!(:datacenter_datacenter_id)
-        parent_target_id = service_instance[:datacenter_datacenter_id]
-        target_id = parent_target_id if parent_target_id
-        opts.merge!(parent_service_instance: service_instance)
-      end
-
       is_silent_fail = ret_request_param_boolean(:silent_fail) || false
       is_created = true
 
@@ -632,10 +623,6 @@ module DTK
         assembly_template = ret_assembly_template_object()
       end
 
-      if assembly_name = ret_request_params(:name)
-        opts[:assembly_name] = assembly_name
-      end
-
       if service_settings = ret_settings_objects(assembly_template)
         opts[:service_settings] = service_settings
       end
@@ -652,28 +639,37 @@ module DTK
         opts[:auto_complete_links] = auto_complete_links
       end
 
-      if parent_service = ret_request_params(:parent_service)
-        opts[:parent_service] = parent_service
-      end
-
-      if is_target_service = ret_request_params(:is_target)
-        opts[:is_target_service] = is_target_service
-      end
-
       project = get_default_project()
       opts.merge!(project: project)
 
-      target =
-        if is_target_service
-          target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
-          # TODO: 2489: move Target::Instance.create_target_mock_for_service_instance to Service::Target
-          Target::Instance.create_target_mock_for_service_instance(target_name, project.id_handle()).first
-        else
-          target_idh_with_default(target_id).create_object(model_name: :target_instance)
-        end
+      if assembly_name = ret_request_params(:name)
+        opts[:assembly_name] = assembly_name
+      end
 
-      if !is_target_service and !Service::Target.create_from_target(target).is_converged? 
-        fail ErrorUsage.new("You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and try 'stage' again.") 
+      target = nil
+      if is_target_service = ret_request_params(:is_target)
+        opts[:is_target_service] = true
+        target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
+        target = Service::Target.create_target_mock(target_name, project)
+      else
+        # this case is for service instance which are staged against a target service instance
+        # which is giving  parameter 'parent-service' or getting default target 
+        if target_assembly_instance = ret_assembly_instance_object?(:parent_service)
+          opts.merge!(parent_service_instance: target_assembly_instance)
+          if target_service = Service::Target::create_from_assembly_instance?(target_assembly_instance)
+            target = target_service.target
+          end
+        else
+          target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
+          target_assembly_instance = Service::Target.create_from_target(target).assembly_instance
+        end
+        opts.merge!(parent_service_instance: target_assembly_instance) 
+        if target
+          target_id = target.id
+          unless Service::Target.create_from_target(target).is_converged? 
+            fail ErrorUsage.new("You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and try 'stage' again.") 
+          end
+        end
       end
 
       begin

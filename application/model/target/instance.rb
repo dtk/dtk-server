@@ -120,21 +120,6 @@ module DTK
         create_from_rows(target_mh, create_rows, create_opts)
       end
 
-      def self.create_target_mock_for_service_instance(target_name, project_idh)
-        target_mh = project_idh.createMH(:target)
-        ref = target_name.downcase.gsub(/ /, '-')
-        create_rows = {
-          ref: ref,
-          display_name: target_name,
-          type: 'instance',
-          iaas_type: 'ec2',
-          iaas_properties: {},
-          project_id: project_idh.get_id()
-        }
-        create_opts = { convert: true, ret_obj: { model_name: :target_instance } }
-        create_from_rows(target_mh, [create_rows], create_opts)
-      end
-
       class DeleteResponseObject
         def initialize(target)
           @target_name = target.get_field?(:display_name)

@@ -87,11 +87,13 @@ module DTK
       ServerCreateMutex = Mutex.new
 
       def server_create(options)
-
+require 'debugger'; debugger
         # we add tag to identify it as slave service instance
         service_instance_ttl = R8::Config[:ec2][:service_instance][:ttl] || R8::Config[:idle][:up_time_hours]
         options[:tags] = options.fetch(:tags, Hash.new).merge('service.instance.ttl' => service_instance_ttl)
-        options[:block_device_mapping] = [  {:DeviceName => '/dev/sda1', 'Ebs.VolumeType' => 'gp2' } ]
+        #options[:block_device_mapping] = [  {:DeviceName => '/dev/sda1', 'Ebs.VolumeType' => 'gp2' } ]
+        # make root disk GP2 by default
+        options[:block_device_mapping].first["Ebs.VolumeType"] = 'gp2'
 
         tries = SERVER_CREATE_RETRIES
         ret = nil

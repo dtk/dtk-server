@@ -163,7 +163,7 @@ module XYZ
       def add_filter_post_processing(filter)
         fail ErrorPostProcFilterNotImpl.new(:filter, filter) unless (filter.is_a?(Array) && filter.first == :and)
         filter_fn = filter[1..filter.size - 1].map { |expr| parse_expression(expr) }.join(' and ')
-        @filter_post_processing = lambda { |_obj| eval(filter_fn) }
+        @filter_post_processing = lambda { |obj| eval(filter_fn) }
       end
 
       private

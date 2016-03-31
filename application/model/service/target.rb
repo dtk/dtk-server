@@ -66,7 +66,7 @@ module DTK
       end
 
       def is_converged?
-        if status = @assembly_instance.get_last_task_run_status?
+        if status = @assembly_instance && @assembly_instance.get_last_task_run_status?
           status == 'succeeded'
         end
       end

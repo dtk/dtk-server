@@ -195,13 +195,21 @@ module DTK; class  Assembly
             dep_assemblies = Assembly::Instance.get(target.model_handle(:assembly_instance), target_idh: target.id_handle)
             dep_assemblies.reject!{ |a| a.id == assembly_id }
 
-            if dep_assemblies.size == 1
-              handle_workspace_target(dep_assemblies, target)
-            end
+            # pull out workspace assembly if it is in dep_assemblies
+            workspace = nil
+            dep_assemblies.reject! { |a| workspace = Workspace.workspace?(a) }
 
             unless dep_assemblies.empty?
               dep_assembly_names = dep_assemblies.map{ |a| a.get_field?(:display_name) }.join(', ')
               fail ErrorUsage.new("The target service '#{assembly.get_field?(:display_name)}' cannot be deleted because the service instance(s) (#{dep_assembly_names}) are dependent on it")
+            end
+            if deleted_target_is_default?(target)
+              # make builtin target the default
+              if builtin_target = Target::Instance.get_builtin_target(target.model_handle)
+                Target::Instance.set_default_target(builtin_target)
+              end
+              # purge workspace and reset its target if workspace is non null meaning it is dependent on target
+              purge_workspace(workspace, builtin_target) if workspace
             end
             ndx_targets_to_delete[target.id] ||= target
           end
@@ -209,25 +217,17 @@ module DTK; class  Assembly
         ndx_targets_to_delete.values.map(&:id_handle)
       end
 
-      def self.handle_workspace_target(dep_assemblies, target)
-        workspace_obj          = dep_assemblies.first
-        target_mh              = target.model_handle()
-        builtin_target         = Target::Instance.get_builtin_target(target_mh)
-        current_default_target = Target::Instance.get_default_target(target_mh)
-
-        if current_default_target && current_default_target.id == target.id
-          Target::Instance.set_default_target(builtin_target)
-        end
-
-        if workspace = Workspace.workspace?(workspace_obj)
-          if current_workspace_target = workspace.get_target()
-            if current_workspace_target.id == target.id
-              workspace.set_target(builtin_target, mode: :from_delete_target)
-            end
+      def self.deleted_target_is_default?(target)
+        current_default_target = Target::Instance.get_default_target(target.model_handle)
+        current_default_target && current_default_target.id == target.id
+      end        
+    
+      def self.purge_workspace(workspace, new_default_target)
+        if current_workspace_target = workspace.get_target()
+          if current_workspace_target.id == target.id
+            workspace.set_target(new_default_target, mode: :from_delete_target) if new_default_target
+            workspace.purge(destroy_nodes: true)
           end
-          workspace.purge(destroy_nodes: true)
-
-          dep_assemblies.delete(workspace_obj)
         end
       end
     end

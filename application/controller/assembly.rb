@@ -660,7 +660,7 @@ module DTK
             target = target_service.target
           end
         else
-          target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
+          target = target_with_default(target_id, prune_builtin_target: true)
           target_assembly_instance = Service::Target.create_from_target(target).assembly_instance
         end
         opts.merge!(parent_service_instance: target_assembly_instance) 

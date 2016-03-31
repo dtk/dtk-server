@@ -61,7 +61,6 @@ module DTK
         @assembly_instance.get_field?(:display_name)
       end
 
-
       def self.target_when_target_assembly_instance?(assembly)
         assembly.copy_as_assembly_instance.get_target() if isa_target_assembly_instance?(assembly)
       end
@@ -70,6 +69,20 @@ module DTK
         if status = @assembly_instance.get_last_task_run_status?
           status == 'succeeded'
         end
+      end
+
+      def self.create_target_mock(target_name, project)
+        ref = target_name.downcase.gsub(/ /, '-')
+        create_row = {
+          ref: ref,
+          display_name: target_name,
+          type: 'instance',
+          iaas_type: 'ec2',
+          iaas_properties: {},
+          project_id: project.id
+        }
+        create_opts = { convert: true, ret_obj: { model_name: :target_instance } }
+        Model.create_from_row(project.model_handle(:target), create_row, create_opts)
       end
 
       private

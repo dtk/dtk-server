@@ -39,32 +39,48 @@ module DTK
       private
       
       def self.images_attribute_value(node_info)
+        # top level is region, followed by logical name of image
+        unordered_ret = {}
+        node_info.each_pair do |ami, info|
+          region_info = unordered_ret[info['region']] ||= {}
+          logical_name = info['type']
+          region_info[logical_name] = {
+            'ami' => ami,
+            'os_type' => info['os_type']
+          }
+        end
+
+        # sort regions and logical names
+        unordered_ret.keys.sort.inject({}) do |h, region_name|
+          unordered_region = unordered_ret[region_name]
+          sorted_region_info = unordered_region.keys.sort.inject({}) { |h2, logical_name| h2.merge(logical_name => unordered_region[logical_name]) }
+          h.merge(region_name => sorted_region_info)
+        end
       end
 
-      def self.hash_content(images_attribute_value)
-        ComponentModuleHeader 
-      end
-        
       ComponentModuleName = 'image_aws'
       DslVersion = '1.0.0' 
       ImagesAttributeName = 'images'
-      ComponentModuleHeader = {
-        'module' => ComponentModuleName,
-        'dsl_version' => DslVersion,
-        'components' => {
-          ComponentModuleName => {
-            'attributes' =>  {
-              ImagesAttributeName => {
-                'description'  =>  'Mapping of logical image names to amis',
-                'type'  =>  'hash'
+
+      def self.hash_content(images_attribute_value)
+        {
+          'module' => ComponentModuleName,
+          'dsl_version' => DslVersion,
+          'components' => {
+            ComponentModuleName => {
+              'attributes' =>  {
+                ImagesAttributeName => {
+                  'description'  =>  'Mapping of logical image names to amis',
+                  'type'  =>  'hash',
+                  'default' => images_attribute_value
+                }
               }
             }
           }
         }
-      }
-      
-
+      end
     end
   end
 end
+
 DTK::Utility::CreateNodeTemplateModule.create(output_file)

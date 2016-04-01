@@ -19,11 +19,12 @@
 module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target::Component
     class Type 
+      module_name = 'network_aws'
       Mapping = {
-        :iam_user       => 'aws::iam_user',
-        :vpc            => 'aws::vpc',
-        :vpc_subnet     => 'aws::vpc_subnet',
-        :security_group => 'aws::security_group'
+        :iam_user       => "#{module_name}::iam_user",
+        :vpc            => "#{module_name}::vpc",
+        :vpc_subnet     => "#{module_name}::vpc_subnet",
+        :security_group => "#{module_name}::security_group"
       }
       Names = Mapping.values
       All = Mapping.keys

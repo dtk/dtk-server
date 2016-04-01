@@ -22,10 +22,9 @@ module DTK
       helper :assembly_helper
       helper :task_helper
 
-
       def rest__create
         target_id = ret_request_param_id_optional(:target_id, Target::Instance)
-        target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
+        target = target_with_default(target_id)
 
         service_module_obj = create_obj(:service_module_name, ServiceModule)
 

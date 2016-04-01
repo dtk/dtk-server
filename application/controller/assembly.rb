@@ -660,14 +660,14 @@ module DTK
             target = target_service.target
           end
         else
-          target = target_with_default(target_id, prune_builtin_target: true)
+          target = target_with_default(target_id)
           target_assembly_instance = Service::Target.create_from_target(target).assembly_instance
         end
         opts.merge!(parent_service_instance: target_assembly_instance) 
         if target
           target_id = target.id
           unless Service::Target.create_from_target(target).is_converged? 
-            fail ErrorUsage.new("You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and try 'stage' again.") 
+            fail ErrorUsage.new("You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and then retry this command") 
           end
         end
       end
@@ -714,7 +714,7 @@ module DTK
     def rest__deploy
       # stage assembly template
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
-      target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
+      target = target_with_default(target_id)
 
       # Special case to support Jenikins CLI orders, since we are not using shell we do not have access
       # to element IDs. This "workaround" helps with that.

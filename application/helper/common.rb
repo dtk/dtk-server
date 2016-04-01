@@ -61,29 +61,11 @@ module Ramaze::Helper
     end
 
     # looks for default if no target is given
-    def create_target_instance_with_default(target_id_field = :target_id, _model_class = nil)
-      if target_id = ret_request_params(target_id_field)
-        create_obj(target_id_field, Target::Instance)
-      else
-        Target::Instance.get_default_target(model_handle(:target))
-      end
-    end
-
-    def target_idh_with_default(target_id)
-      target_with_default(target_id).id_handle
-    end
-
-    # opts can have  keys
-    # :prune_builtin_target
-    def target_with_default(target_id, opts = {})
+    def target_with_default(target_id)
       target = target_id ?
-          id_handle(target_id, :target).create_object(model_name: :target_instance) :
-          Target::Instance.get_default_target(model_handle(:target))
-      target = nil if opts[:prune_builtin_target] and target and target.is_builtin_target?
-      unless target
-        fail DTK::ErrorUsage.new("The command was called without  '-p TARGET-NAME' option and no default target has been set. You can set default target from 'service' context with 'set-default-target TARGET-NAME'")
-      end
-      target
+        id_handle(target_id, :target).create_object(model_name: :target_instance) :
+        Target::Instance.get_default_target(model_handle(:target), ret_singleton_target: true, prune_builtin_target: true)
+      target || fail(DTK::ErrorUsage, "The command was called without  '-p TARGET-NAME' option and no default target has been set. You can set default target from 'service' context with 'set-default-target TARGET-NAME'")
     end
 
     def get_default_project

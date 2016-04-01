@@ -44,9 +44,11 @@ module DTK
         node_info.each_pair do |ami, info|
           region_info = unordered_ret[info['region']] ||= {}
           logical_name = info['type']
+          sizes_hash = info['sizes'].sort.inject({}) { |h, ec2_size| h.merge(size_logical_name(ec2_size) => ec2_size) }
           region_info[logical_name] = {
             'ami' => ami,
-            'os_type' => info['os_type']
+            'os_type' => info['os_type'],
+            'sizes' => sizes_hash
           }
         end
 
@@ -56,6 +58,10 @@ module DTK
           sorted_region_info = unordered_region.keys.sort.inject({}) { |h2, logical_name| h2.merge(logical_name => unordered_region[logical_name]) }
           h.merge(region_name => sorted_region_info)
         end
+      end
+
+      def self.size_logical_name(ec2_size)
+        ec2_size.split('.').last
       end
 
       ComponentModuleName = 'image_aws'

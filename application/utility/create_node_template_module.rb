@@ -78,6 +78,7 @@ module DTK
                 ImagesAttributeName => {
                   'description'  =>  'Mapping of logical image names to amis',
                   'type'  =>  'hash',
+                  'hidden' => true,
                   'default' => images_attribute_value
                 }
               }

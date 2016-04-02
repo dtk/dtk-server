@@ -20,29 +20,38 @@ module DTK
   class CommandAndControlAdapter::Ec2
     module Reified
       class LogicalNode < DTK::Service::Reified::Component::WithServiceComponent
+        include ConnectedComponentMixin
         # opts can have keys
         # :reified_target
         def initialize(dtk_node, opts = {})
-          super(dtk_component_ec2_properties(dtk_node))
+          reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
+          super(dtk_component_ec2_properties(dtk_node, reified_target.target_service))
           @dtk_node = dtk_node
-          @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
+          @reified_target = reified_target
         end
 
+        def connected_component(conn_cmp_type)
+          connected_component_aux(conn_cmp_type, @reified_target)
+        end
         private
 
+        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id]
         def self.legal_attributes
-          # TODO: stub
-          [:security_group]
+          Attributes
         end
 
         Ec2PropertiesInternalType = 'ec2__properties'
         ComponentTypeFilter = {filter: [:eq, :component_type, Ec2PropertiesInternalType]}
 
-        def dtk_component_ec2_properties(dtk_node)
-          dtk_node.get_components(ComponentTypeFilter).first || fail(Error, "Unexpected that no ec2 properties component on node")
+        def dtk_component_ec2_properties(dtk_node, target_service)
+          ret = 
+            if dtk_component = dtk_node.get_components(ComponentTypeFilter).first 
+              Service::Component.new(dtk_component).add_link_to_component!(target_service)
+            end
+          ret || fail(Error, "Unexpected that no ec2 properties component on node")
         end
         
-        # TODO: below shoudl be replaced
+        # TODO: below should be replaced
         public
 
         def credentials_with_region
@@ -54,7 +63,8 @@ module DTK
         end
 
         def vpc_component
-          use_and_set_connected_component_cache(:vpc) { get_vpc_component }
+          connected_component(:vpc_subnet).connected_component(:vpc)
+          # use_and_set_connected_component_cache(:vpc) { get_vpc_component }
         end
 
         def get_vpc_component

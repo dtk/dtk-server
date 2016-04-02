@@ -26,8 +26,11 @@ module DTK
       def initialize(dtk_component)
         @dtk_component = dtk_component
         @type = ret_type(dtk_component)
-        # @attributes is computed on demand
+
+
+        # attributes and links added on demand 
         @attributes = nil
+        @link_added = false 
       end
 
       def self.create_components_from_dtk_components(dtk_components)
@@ -43,13 +46,21 @@ module DTK
       def clear_attribute_cache!
         @attributes = nil
       end
+
+      def add_link_to_component!(service)
+        unless @link_added
+          Dependency::Link.augment_component_instances!(service.assembly_instance, [@dtk_component], ret_statisfied_by: true)
+          @link_added = true
+        end
+        self
+      end
       
       # Returns dtk component ids that are linked from this by link_def_type
       def get_connected_dtk_component_ids(link_def_type)
         ret = []
         # It is assumed that the dependencies have been added to @dtk_component
         unless dependencies = @dtk_component[:dependencies]
-          Log.error("Unexpected that no dependencies in #{@dtk_componen.inspect}") 
+          Log.error("Unexpected that no dependencies in #{@dtk_component.inspect}") 
           return ret
         end
         matching_deps = dependencies.select { |dep| (dep.link_def || {})[:link_type] == link_def_type }

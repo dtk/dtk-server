@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 
-module DTK
-  class CommandAndControlAdapter::Ec2::Reified::Target
+module DTK; module CommandAndControlAdapter::Ec2::Reified
+  class Target
     class Component < DTK::Service::Reified::Component::WithServiceComponent
       r8_nested_require('component', 'type')
       r8_nested_require('component', 'iam_user')
@@ -41,7 +41,7 @@ module DTK
       end
 
       def get_connected_component(component_type)
-        link_def_type = Type.name(component_type)
+        link_def_type = Target::Component::Type.name(component_type)
         dtk_component_ids = get_connected_dtk_component_ids(link_def_type)
         components = @reified_target.matching_components(dtk_component_ids)
         if components.size === 0
@@ -80,5 +80,5 @@ module DTK
       end
     end
   end
-end
+end; end
 

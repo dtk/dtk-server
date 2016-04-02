@@ -39,6 +39,28 @@ module DTK
         @cached_connected_components[conn_component_type] ||= yield
       end
 
+      # For handling Attributes as methods
+      def method_missing(attribute_method, *args, &body)
+        if legal_attribute_method?(attribute_method) 
+          use_and_set_attribute_cache(attribute_method) { get_attribute_value(attribute_method) }
+        else
+          super
+        end
+      end
+      def respond_to?(attribute_method)
+        legal_attribute_method?(attribute_method)
+      end
+
+      private
+
+      def legal_attribute_method?(attribute_method)
+        self.class.legal_attributes.include?(attribute_method)
+      end
+
+      def self.legal_attributes
+        Log.error("Abstract method that should be overwritten for class '#{self}'")
+        []
+      end
     end
   end
 end

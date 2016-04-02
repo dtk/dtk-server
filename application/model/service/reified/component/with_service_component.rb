@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# TODO: might make this mixin instead and collapse this into Service::Reified::Component
 module DTK
   module Service::Reified
     class Component

@@ -534,7 +534,7 @@ module DTK
         opts.merge!(local_clone_dir_exists: local_clone_dir_exists)
       end
 
-      # push-assembly-updates always update master branch
+      # push-assembly-updates always updates master branch
       service_module = Assembly::Template.create_or_update_from_instance(project, assembly, service_module_name, assembly_template_name, opts.merge!(version: 'master'))
       rest_ok_response service_module.ret_clone_update_info()
     end

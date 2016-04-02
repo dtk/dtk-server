@@ -47,9 +47,9 @@ module DTK
         @attributes = nil
       end
 
-      def add_link_to_component!(service)
+      def add_link_to_component!
         unless @link_added
-          Dependency::Link.augment_component_instances!(service.assembly_instance, [@dtk_component], ret_statisfied_by: true)
+          Dependency::Link.augment_component_instances!(@dtk_component.get_assembly_instance, [@dtk_component], ret_statisfied_by: true)
           @link_added = true
         end
         self

@@ -24,15 +24,15 @@ module DTK
         # opts can have keys
         # :reified_target
         def initialize(dtk_node, opts = {})
-          reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
-          super(dtk_component_ec2_properties(dtk_node, reified_target.target_service))
-          @dtk_node = dtk_node
-          @reified_target = reified_target
+          super(dtk_component_ec2_properties(dtk_node))
+          @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
+          @dtk_node       = dtk_node
         end
 
         def connected_component(conn_cmp_type)
           connected_component_aux(conn_cmp_type, @reified_target)
         end
+
         private
 
         Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id]
@@ -43,10 +43,10 @@ module DTK
         Ec2PropertiesInternalType = 'ec2__properties'
         ComponentTypeFilter = {filter: [:eq, :component_type, Ec2PropertiesInternalType]}
 
-        def dtk_component_ec2_properties(dtk_node, target_service)
+        def dtk_component_ec2_properties(dtk_node)
           ret = 
             if dtk_component = dtk_node.get_components(ComponentTypeFilter).first 
-              Service::Component.new(dtk_component).add_link_to_component!(target_service)
+              Service::Component.new(dtk_component).add_link_to_component!
             end
           ret || fail(Error, "Unexpected that no ec2 properties component on node")
         end
@@ -64,7 +64,6 @@ module DTK
 
         def vpc_component
           connected_component(:vpc_subnet).connected_component(:vpc)
-          # use_and_set_connected_component_cache(:vpc) { get_vpc_component }
         end
 
         def get_vpc_component
@@ -73,22 +72,6 @@ module DTK
 
         def get_credentials_with_region
           vpc_component.credentials_with_region
-        end
-
-        def raise_error_if_empty(type, reified_components)
-          if reified_components.empty?
-            fail ErrorUsage, "No '#{type}' components in the target service"
-          end
-        end
-
-        # Returns the reified_component if singleton, otherwise raises error
-        def ret_singleton_or_raise_error(type, reified_components)
-          raise_error_if_empty(type, reified_components)
-          if reified_components.size > 2
-            # TODO: need to use link from node for his
-            fail Error, "Not implemented: A target service with multiple '#{type}' components"
-          end
-          reified_components.first
         end
 
       end

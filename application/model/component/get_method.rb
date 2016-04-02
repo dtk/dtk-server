@@ -34,6 +34,19 @@ module DTK; class Component
       def get_node
         get_obj_helper(:node)
       end
+
+      # Only for component instances
+      def get_assembly_instance(cols = nil)
+        ret = nil
+        if assembly_id = get_field?(:assembly_id)
+          sp_hash = {
+            cols: cols || [:id, :group_id, :display_name],
+            filter: [:eq, :id, assembly_id]
+          }
+          ret = Assembly::Instance.get_objs(model_handle(:assembly_instance), sp_hash).first
+        end
+        ret || fail(Error, "Unexpected that no assembly associated with component: #{dtk_node.inspect}")
+      end
     end
 
     module ClassMixin

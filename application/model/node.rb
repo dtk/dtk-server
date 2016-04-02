@@ -107,7 +107,7 @@ module DTK
       end
 
       sp_hash = {
-        cols:   opts[:cols] || [:id, :group_id, :display_name, :component_type],
+        cols:   opts[:cols] || [:id, :group_id, :display_name, :component_type, :assembly_id],
         filter: filter
       }
       components = Model.get_objs(model_handle(:component), sp_hash)

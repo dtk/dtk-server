@@ -25,6 +25,8 @@ module DTK; module CommandAndControlAdapter::Ec2::Reified
       r8_nested_require('component', 'vpc_subnet')
       r8_nested_require('component', 'security_group')
 
+      include ConnectedComponentMixin
+
       def initialize(reified_target, service_component)
         super(service_component)
         @reified_target = reified_target
@@ -40,18 +42,8 @@ module DTK; module CommandAndControlAdapter::Ec2::Reified
         @reified_target.clear_all_attribute_caches!
       end
 
-      def get_connected_component(component_type)
-        link_def_type = Target::Component::Type.name(component_type)
-        dtk_component_ids = get_connected_dtk_component_ids(link_def_type)
-        components = @reified_target.matching_components(dtk_component_ids)
-        if components.size === 0
-          # TODO: change to return violation or trap this to return violation
-          fail ErrorUsage, "No matching components for '#{component_type}'"
-        elsif components.size > 1
-          # TODO: change to return violation or tarp this to return violation
-          fail ErrorUsage, "Multiple matching components  for '#{component_type}'"
-        end
-        components.first
+      def connected_component(conn_cmp_type)
+        connected_component_aux(conn_cmp_type, @reified_target)
       end
 
       def get_dtk_aug_attributes(*attribute_names)
@@ -67,10 +59,6 @@ module DTK; module CommandAndControlAdapter::Ec2::Reified
         # Want to order in same order as names
         ndx_unordered_ret = unordered_ret.inject({}) { |h, a| h.merge(a[:display_name] => a) }
         attribute_names.map { |n| ndx_unordered_ret[n] }
-      end
-      
-      def connected_component(conn_cmp_type)
-        use_and_set_connected_component_cache(conn_cmp_type) { get_connected_component(conn_cmp_type) }
       end
 
       private

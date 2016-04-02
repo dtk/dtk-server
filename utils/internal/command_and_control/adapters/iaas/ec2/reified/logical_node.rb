@@ -21,6 +21,8 @@ module DTK
     module Reified
       class LogicalNode < DTK::Service::Reified::Component::WithServiceComponent
         include ConnectedComponentMixin
+        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name]
+
         # opts can have keys
         # :reified_target
         def initialize(dtk_node, opts = {})
@@ -29,13 +31,30 @@ module DTK
           @dtk_node       = dtk_node
         end
 
+        def security_group_names
+          # TODO: not treating multiple security groups
+          [security_group_name]
+        end
+
+        def security_group_ids
+          # TODO: not treating multiple security groups
+          [security_group_id]
+        end
+
         def connected_component(conn_cmp_type)
           connected_component_aux(conn_cmp_type, @reified_target)
         end
 
+        def credentials_with_region
+          use_and_set_attribute_cache(:credentials_with_region) { get_credentials_with_region }
+        end
+
+        def region
+          (credentials_with_region || {})[:region]
+        end
+
         private
 
-        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id]
         def self.legal_attributes
           Attributes
         end
@@ -51,17 +70,6 @@ module DTK
           ret || fail(Error, "Unexpected that no ec2 properties component on node")
         end
         
-        # TODO: below should be replaced
-        public
-
-        def credentials_with_region
-          use_and_set_attribute_cache(:credentials_with_region) { get_credentials_with_region }
-        end
-        
-        def region
-          (credentials_with_region || {})[:region]
-        end
-
         def vpc_component
           connected_component(:vpc_subnet).connected_component(:vpc)
         end
@@ -79,40 +87,5 @@ module DTK
   end
 end
 
-=begin
-old
-module DTK
-  class CommandAndControlAdapter::Ec2
-    module Reified
-      class LogicalNode < DTK::Service::Reified::Component::WithServiceComponent
-        # opts can have keys
-        # :reified_target
-        def initialize(dtk_node, opts = {})
-          
-          super()
-          @dtk_node       = dtk_node
-          @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
-        end
 
-
-        def security_groups
-          use_and_set_attribute_cache(:security_groups) { get_security_groups }
-        end
-
-        private
-
-        def get_security_groups
-          # TODO: if multiple security groups find ones associated with node
-          # Below finds all associated with the vpc that the security group is connected to
-          matching_sg_reified_components = @reified_target.get_matching_security_groups(vpc_component.id)
-          raise_error_if_empty('security group',matching_sg_reified_components)
-          matching_sg_reified_components.map(&:security_group_struct)
-        end
-
-
-      end
-    end
-  end
-end
-=end
 

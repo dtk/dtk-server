@@ -48,8 +48,7 @@ module DTK; class CommandAndControlAdapter::Ec2
       end
 
       def update_security_group!
-        security_groups = @reified_node.security_groups
-        merge!(security_group_ids: security_groups.map(&:id), groups: security_groups.map(&:name))
+        merge!(security_group_ids: @reified_node.security_group_ids, groups: @reified_node.security_group_names)
       end
 
       def update_tags!

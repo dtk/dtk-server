@@ -95,6 +95,9 @@ module DTK; module CommandAndControlAdapter
 =end
         end
 
+        def get_dtk_aug_attributes(*attribute_names)
+          super(@reified_target, *attribute_names)
+        end
 
         private
 

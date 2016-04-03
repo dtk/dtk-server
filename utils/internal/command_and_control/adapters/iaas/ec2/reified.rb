@@ -21,7 +21,8 @@ module DTK
     module Reified
       r8_nested_require('reified','connected_component_mixin')
       r8_nested_require('reified','component_type')
-      # connected_component_mixin and component_type must go before below
+      r8_nested_require('reified','violation')
+      # violation, connected_component_mixin and component_type must go before below
       r8_nested_require('reified','node')
       r8_nested_require('reified','target')
     end

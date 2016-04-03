@@ -28,10 +28,7 @@ module DTK
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_fill_in_values!
-          unless id
-            aug_attr = get_dtk_aug_attributes(:id).first
-            return [Violation::ReqUnsetAttr.new(aug_attr)]
-          end
+          return([Violation::ReqUnsetAttr.new(self, :id)]) unless id
 
           unless aws_vpc_subnet = aws_vpc_subnet?(id)
             return [Violation::InvalidVpcSubnetId.new(id)]

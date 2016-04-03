@@ -16,21 +16,13 @@
 # limitations under the License.
 #
 
-module DTK
-  class CommandAndControlAdapter::Ec2::Reified::Node
-    class Violation < Assembly::Instance::Violation
-      class ReqUnsetAttrs < Assembly::Instance::Violation::ReqUnsetAttrs
-        def initialize(aug_attrs)
-          super(aug_attrs, :component)
-        end
-      end
-
-      class ReqUnsetAttr < Assembly::Instance::Violation::ReqUnsetAttr
-        def initialize(aug_attr)
-          super(aug_attr, :component)
-        end
+module DTK; class CommandAndControlAdapter::Ec2
+  module Reified
+    class Node
+      class Violation < Reified::Violation
       end
     end
   end
-end
+end; end
+
 

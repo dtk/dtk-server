@@ -46,18 +46,7 @@ module DTK module CommandAndControlAdapter::Ec2::Reified
       end
 
       def get_dtk_aug_attributes(*attribute_names)
-        # TODO: this is an expensive calculation, but only done when need to generate qualified names
-        # used in violation descriptions
-        attribute_names = attribute_names.map(&:to_s)
-        dtk_component_name = dtk_component.get_field?(:display_name)
-        filter_proc = lambda do |assembly_instance| 
-          assembly_instance[:nested_component][:display_name] == dtk_component_name and  
-            attribute_names.include?(assembly_instance[:attribute][:display_name]) 
-        end
-        unordered_ret = @reified_target.assembly_instance.get_augmented_nested_component_attributes(filter_proc)
-        # Want to order in same order as names
-        ndx_unordered_ret = unordered_ret.inject({}) { |h, a| h.merge(a[:display_name] => a) }
-        attribute_names.map { |n| ndx_unordered_ret[n] }
+        super(@reified_target, *attribute_names)
       end
 
       private

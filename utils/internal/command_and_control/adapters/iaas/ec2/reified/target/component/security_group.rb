@@ -28,11 +28,7 @@ module DTK
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_fill_in_values!
-          ret = []
-          if !id and !group_name
-            aug_attrs = get_dtk_aug_attributes(:group_name, :id)
-            return [Violation::ReqUnsetAttrs.new(aug_attrs)]
-          end
+          return [Violation::ReqUnsetAttrs.new(self, :group_name, :id)] if !id and !group_name
           validate_and_fill_in_values_name_and_id!
         end
 

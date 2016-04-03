@@ -89,7 +89,6 @@ module DTK
         @service_component.dtk_component
       end
 
-
       # For handling Attributes as methods
       def method_missing(attribute_method, *args, &body)
         if legal_attribute_method?(attribute_method) 
@@ -101,9 +100,9 @@ module DTK
       def respond_to?(attribute_method)
         legal_attribute_method?(attribute_method)
       end
-      
+
       private
-      
+
       def legal_attribute_method?(attribute_method)
         self.class.legal_attributes.include?(attribute_method)
       end
@@ -112,6 +111,8 @@ module DTK
         Log.error("Abstract method that should be overwritten for class '#{self}'")
         []
       end
+      
+      ##### Methods related to getting attributes
       
       def get_dtk_attribute(attribute_name)
         get_dtk_attributes(attribute_name).first
@@ -129,7 +130,23 @@ module DTK
       def get_ndx_service_component_attributes
         @service_component.get_attributes.inject({}) { |h, attr| h.merge(attr.name.to_sym => attr) }
       end
-      
+
+      def get_dtk_aug_attributes(reified_target, *attribute_names)
+        # TODO: this is an expensive calculation, but only done when need to generate qualified names
+        # used in violation descriptions
+        attribute_names = attribute_names.map(&:to_s)
+        dtk_component_name = dtk_component.get_field?(:display_name)
+        filter_proc = lambda do |assembly_instance| 
+          assembly_instance[:nested_component][:display_name] == dtk_component_name and  
+            attribute_names.include?(assembly_instance[:attribute][:display_name]) 
+        end
+        unordered_ret = reified_target.assembly_instance.get_augmented_nested_component_attributes(filter_proc)
+        # Want to order in same order as names
+        ndx_unordered_ret = unordered_ret.inject({}) { |h, a| h.merge(a[:display_name] => a) }
+        attribute_names.map { |n| ndx_unordered_ret[n] }
+      end
+
+      #### end Methods related to getting attributes
     end
   end
 end

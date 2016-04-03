@@ -48,10 +48,12 @@ module DTK
         hash_form(conn.flavors.get(id))
       end
 
-      def image_get(id)
+      def image_get?(id)
         ImageInfoCache.get_or_set(:image_get, conn, id, mutex: true) do
           begin
-            hash_form(conn.images.get(id))
+            if aws_image = conn.images.get(id)
+              hash_form(aws_image)
+            end
           rescue Exception => e
             unless defined?(PhusionPassenger)
               # DEBUG SNIPPET >>> REMOVE <<<

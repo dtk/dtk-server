@@ -16,10 +16,12 @@
 # limitations under the License.
 #
 
-module DTK
-  class CommandAndControlAdapter::Ec2
+module DTK; module CommandAndControlAdapter
+  class Ec2
     module Reified
-      class LogicalNode < DTK::Service::Reified::Component::WithServiceComponent
+      class Node < DTK::Service::Reified::Component::WithServiceComponent
+        r8_nested_require('node', 'image')
+
         include ConnectedComponentMixin
         Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name]
 
@@ -29,6 +31,26 @@ module DTK
           super(dtk_component_ec2_properties(dtk_node))
           @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
           @dtk_node       = dtk_node
+          # aws_conn gets dynamically set
+          @aws_conn = nil
+
+          # TODO: these will be eventually removed
+          @external_ref = opts[:external_ref]
+        end
+
+        def ami
+          # TODO: remove @external_ref[:image_id]
+          super || @external_ref[:image_id] || fail(ErrorUsage, "Cannot find ami for node '#{@dtk_node.get_field?(:display_name)}'")
+        end
+
+        def instance_type
+          # TODO: remove @external_ref[:size] and default
+          super || @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]  
+          #fail(ErrorUsage, "Cannot find instance type for node '#{@dtk_node.get_field?(:display_name)}'")
+        end
+
+        def image
+          @image ||= Image.validate_and_create_object(ami, self)
         end
 
         def security_group_names
@@ -45,12 +67,12 @@ module DTK
           connected_component_aux(conn_cmp_type, @reified_target)
         end
 
-        def credentials_with_region
-          use_and_set_attribute_cache(:credentials_with_region) { get_credentials_with_region }
+        def region
+          vpc_component.region
         end
 
-        def region
-          (credentials_with_region || {})[:region]
+        def aws_conn
+          @aws_conn ||= get_aws_conn
         end
 
         private
@@ -78,14 +100,18 @@ module DTK
           ret_singleton_or_raise_error('vpc', @reified_target.vpc_components)
         end
 
-        def get_credentials_with_region
+        def credentials_with_region
           vpc_component.credentials_with_region
         end
 
+        def get_aws_conn
+          Ec2.conn(credentials_with_region)
+        end
       end
     end
   end
-end
+end; end
+
 
 
 

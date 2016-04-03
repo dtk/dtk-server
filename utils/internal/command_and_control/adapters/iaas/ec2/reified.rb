@@ -22,7 +22,7 @@ module DTK
     module Reified
       r8_nested_require('reified','connected_component_mixin')
       # connected_component_mixin must go first
-      r8_nested_require('reified','logical_node')
+      r8_nested_require('reified','node')
       r8_nested_require('reified','target')
     end
   end

@@ -16,13 +16,22 @@
 # limitations under the License.
 #
 module DTK; module CommandAndControlAdapter
-  class Ec2
+  class Ec2::Reified::Node
     class Image
-      attr_reader :image_id
-      def initialize(image_id, conn)
-        @image_id = image_id
-        @ami      = conn.image_get(image_id)
+      def self.validate_and_create_object(image_id, reified_node)
+        if ami_hash = reified_node.aws_conn.image_get?(image_id)
+          new(image_id, ami_hash)
+        else
+          fail ErrorUsage, "The ami '#{image_id}' is invalid"
+        end
       end
+
+      attr_reader :id
+      def initialize(image_id, ami_obj)
+        @id = image_id
+        @ami      = ami_obj
+      end
+      private :initialize
 
       def exists?
         !!@ami

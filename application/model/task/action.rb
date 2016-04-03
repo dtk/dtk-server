@@ -69,13 +69,20 @@ module DTK; class Task
         self[:node].is_node_group?()
       end
 
-      def nodes
+      # opts can have keys
+        # :cols - columns to return in teh node objects
+      def nodes(opts = {})
         node_or_ng = self[:node]
-        if node_or_ng.is_node_group?()
-          node_or_ng.get_node_group_members()
-        else
-          [node_or_ng]
+        nodes = 
+          if node_or_ng.is_node_group?()
+            node_or_ng.get_node_group_members()
+          else
+            [node_or_ng]
+          end
+        if cols = opts[:cols]
+          nodes.each { |node| node.update_object!(*cols) }
         end
+        nodes
       end
 
       def node_id

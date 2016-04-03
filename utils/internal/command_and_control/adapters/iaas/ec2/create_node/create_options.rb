@@ -18,25 +18,18 @@
 module DTK; class CommandAndControlAdapter::Ec2
   class CreateNode
     class CreateOptions < ::Hash
-      # opts can have keys
-      #   :primary_nic 
-      def initialize(parent, conn, image, opts ={})
+      def initialize(parent)
         super()
-        replace(image_id: image.image_id, flavor_id: parent.flavor_id)
-
-        @conn         = conn
         @reified_node = parent.reified_node
         @node         = parent.node
         @external_ref = parent.external_ref 
-        @image        = image
-        @primary_nic  = opts[:primary_nic]
-
         finalize!
       end
 
       private
 
       def finalize!
+        update_image!
         update_security_group!
         update_tags!
         update_key_name
@@ -45,6 +38,10 @@ module DTK; class CommandAndControlAdapter::Ec2
         update_block_device_mapping!
         update_user_data!
         update_client_token?
+      end
+
+      def update_image!
+        merge!(image_id: @reified_node.image.id, flavor_id: @reified_node.instance_type)
       end
 
       def update_security_group!

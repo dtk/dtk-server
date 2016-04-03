@@ -43,7 +43,7 @@ module XYZ
         servers.each do |server|
           image_id = server[:image_id]
           unless images[image_id]
-            image = conn().image_get(image_id)
+            image = conn().image_get?(image_id)
             images[image_id] = image if image #to take care of case where image no longer exists
           end
         end

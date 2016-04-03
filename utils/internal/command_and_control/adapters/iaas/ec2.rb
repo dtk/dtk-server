@@ -23,7 +23,6 @@ module DTK
       r8_nested_require('ec2', 'client_token')
       r8_nested_require('ec2', 'node_state')
       r8_nested_require('ec2', 'address_management')
-      r8_nested_require('ec2', 'image')
       #create_node must be below above three
       r8_nested_require('ec2', 'create_node')
 
@@ -214,7 +213,7 @@ module DTK
       private
 
       def self.get_target_credentials_with_region(node)
-        Reified::LogicalNode.new(node).credentials_with_region
+        Reified::Node.new(node).credentials_with_region
       end
 
       def self.external_ref(node)

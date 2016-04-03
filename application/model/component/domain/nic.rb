@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# TODO: curremty noyt used; wil be put back in as reified nic object
 module DTK; class Component
   class Domain
     class NIC < self

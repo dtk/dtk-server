@@ -25,15 +25,12 @@ module DTK; module CommandAndControlAdapter
       include NodeStateClassMixin
       include AddressManagementClassMixin
 
-      attr_reader :reified_node, :node, :flavor_id, :external_ref
+      attr_reader :reified_node, :node, :external_ref
       def initialize(base_node, node, reified_target)
-        @reified_node = Reified::LogicalNode.new(node, reified_target: reified_target)
+        @external_ref = node[:external_ref] || {} # TODO: wil eventually remove 
         @base_node    = base_node
         @node         = node
-
-        # TODO: DTK-2489 These attributes below wil be deprecated when move info to target service
-        @external_ref = node[:external_ref] || {}
-        @flavor_id    = @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]
+        @reified_node = Reified::Node.new(node, reified_target: reified_target, external_ref: @external_ref)
       end
       private :initialize
       
@@ -48,13 +45,29 @@ module DTK; module CommandAndControlAdapter
       
       private
       
-      def self.create_node_object_per_node(task_action)
-        nodes = task_action.nodes()
-        nodes.each do |node|
-          node.update_object!(:os_type, :external_ref, :hostname_external_ref, :display_name, :assembly_id)
+      def create_ec2_instance
+        response = nil
+        begin
+          create_options = CreateOptions.new(self)
+          Log.info_pp(create_options: Aux.hash_subset(create_options, AttributesForLogInfo))
+          response = conn.server_create(create_options)
+          response[:status] ||= 'succeeded'
+        rescue => e
+          # append region to error message
+          region = @reified_node.region
+          e.message << ". Region: '#{region}'." if region
+          Log.error_pp([e, e.backtrace[0..10]])
+          return { status: 'failed', error_object: e, type: 'user_error' }
         end
+        response
+      end
+      
+      AttributesForLogInfo = [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id]
+      
+      NodeCols = [:os_type, :external_ref, :hostname_external_ref, :display_name, :assembly_id]
+      def self.create_node_object_per_node(task_action)
+        nodes = task_action.nodes(cols: NodeCols)
         reified_target = Reified::Target.new(task_action.target_service)
-
         base_node = task_action.base_node()
         nodes.map { |node| new(base_node, node, reified_target) }
       end
@@ -98,7 +111,7 @@ module DTK; module CommandAndControlAdapter
           
           update_params = {
             base_node: @base_node,
-            iaas_specfic_params: { size: @flavor_id},
+            iaas_specfic_params: { size: @reified_node.instance_type },
             external_ref: @external_ref
           }
           Ec2.update_node_from_create_node!(node, 'ec2_instance', instance_id, update_params)
@@ -128,37 +141,6 @@ module DTK; module CommandAndControlAdapter
         @node.merge!(node_update_hash)
       end
       
-      def create_ec2_instance
-        response = nil
-
-        conn = Ec2.conn_from_node(@node)
-        unless ami = @external_ref[:image_id]
-          fail ErrorUsage.new("Cannot find ami for node (#{@node[:display_name]})")
-        end
-        image = Image.new(ami, conn)
-        
-        # primary_nic will be non nil only if explicit nic component is configured
-        primary_nic = Component::Domain::NIC.get_primary_nic?(@node)
-        opts = (primary_nic ? { primary_nic: primary_nic} : {})
-        
-        begin
-          create_options = CreateOptions.new(self, conn, image, opts)
-          pp [:debug_create_options, Aux.hash_subset(create_options, [:image_id, :flavor_id, :security_group_ids, :groups, :tags, :key_name, :subnet_id])]
-
-
-          response = conn.server_create(create_options)
-          response[:status] ||= 'succeeded'
-        rescue => e
-          # append region to error message
-          region = @reified_node.region
-          e.message << ". Region: '#{region}'." if region
-
-          Log.error_pp([e, e.backtrace[0..10]])
-          return { status: 'failed', error_object: e, type: 'user_error' }
-        end
-        response
-      end
-
       def get_node_status(instance_id)
         ret = nil
         begin

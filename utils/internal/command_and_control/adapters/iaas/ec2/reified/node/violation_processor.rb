@@ -17,33 +17,26 @@
 #
 
 module DTK
-  class CommandAndControlAdapter::Ec2::Reified::Target::Component
-    class Type 
-      module_name = 'network_aws'
-      Mapping = {
-        :iam_user       => "#{module_name}::iam_user",
-        :vpc            => "#{module_name}::vpc",
-        :vpc_subnet     => "#{module_name}::vpc_subnet",
-        :security_group => "#{module_name}::security_group"
-      }
-      Names = Mapping.values
-      All = Mapping.keys
-
-      class << self
-        def name(cmp_type)
-          Mapping[cmp_type]
+  module CommandAndControlAdapter::Ec2::Reified
+    class Node
+      # Using violations to fill in values of target components and validate them
+      class ViolationProcessor
+        def self.find_violations(target_service, project, params = {})
+          new(target_service).find_violations(project, params)
+        end
+        
+        def initialize(target_service)
+          @reified_target = Target.new(target_service)
         end
 
-        def method_missing(method, *args, &body)
-          Mapping[method] || super
+        def find_violations(project, params = {})
+          ret = []
+          any_unset_attributes = params[:any_unset_attributes]
+          # TODO: stub
+          ret
         end
-      end
-      
-      def respond_to?(method)
-        All.include?(method)
       end
     end
   end
 end
-
 

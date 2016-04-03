@@ -33,12 +33,12 @@ module DTK; module CommandAndControlAdapter
         end
 
         # Returns an array of violations; if no violations [] is returned
-        def validate_and_converge!
+        def validate_and_fill_in_values!
           ret = []
           if id
             unless @id
               # TODO: validate if @id is a valid vpc id
-              # validate_vpc id(@id)
+              # validate_vpc id
               # @id = ..
             end
           end

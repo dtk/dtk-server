@@ -39,6 +39,7 @@ module DTK
         mod_refs_viols = find_violations__module_refs(cmps)
         num_of_target_nodes = find_violations__num_of_target_nodes()
         any_unset_attributes = ! unset_attr_viols.empty?
+        # TODO: might make below more general to look for seamntic violations; also add checks on attribute value constraints
         iaas_component_viols = IaasComponent.find_violations(self, cmps, project, any_unset_attributes: any_unset_attributes)
 
         unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + iaas_component_viols

@@ -16,10 +16,9 @@
 # limitations under the License.
 #
 
-module DTK; module CommandAndControlAdapter::Ec2::Reified
+module DTK module CommandAndControlAdapter::Ec2::Reified
   class Target
-    class Component < DTK::Service::Reified::Component::WithServiceComponent
-      r8_nested_require('component', 'type')
+    class Component < DTK::Service::Reified::Component
       r8_nested_require('component', 'iam_user')
       r8_nested_require('component', 'vpc')
       r8_nested_require('component', 'vpc_subnet')
@@ -33,7 +32,7 @@ module DTK; module CommandAndControlAdapter::Ec2::Reified
       end
 
       # Returns an array of Violation objects
-      def validate_and_converge!
+      def validate_and_fill_in_values!
         Log.error("Abstract method that should be overwritten for class '#{self.class}'")
         []
       end

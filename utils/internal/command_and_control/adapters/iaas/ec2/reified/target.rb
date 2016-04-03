@@ -16,12 +16,22 @@
 # limitations under the License.
 #
 
-module DTK
-  module CommandAndControlAdapter::Ec2::Reified
+module DTK; class CommandAndControlAdapter::Ec2
+  module Reified
     class Target < DTK::Service::Reified::Components
       r8_nested_require('target', 'component')
       r8_nested_require('target', 'violation_processor')
       r8_nested_require('target', 'violation')
+
+      class ComponentType < Reified::ComponentType  
+        module_name = 'network_aws'
+        Mapping = {
+          :iam_user       => "#{module_name}::iam_user",
+          :vpc            => "#{module_name}::vpc",
+          :vpc_subnet     => "#{module_name}::vpc_subnet",
+          :security_group => "#{module_name}::security_group"
+        }
+      end
 
       attr_reader :target_service
 
@@ -76,13 +86,13 @@ module DTK
       private
       # applfies body to all reified components in target
       def apply_to_all_components(&body)
-        Component::Type::All.each do |cmp_type|
+        ComponentType.all.each do |cmp_type|
           get_all_components_of_type(cmp_type).each { |reified_cmp| body.call(reified_cmp) }
         end
       end
 
       def get_all_components_of_type_aux(component_type)
-        component_type_name = Component::Type.send(component_type)
+        component_type_name = ComponentType.send(component_type)
         service_components = @target_service.matching_components?(component_type_name) || []
         service_components.map { |sc| component_class(component_type).new(self, sc) }
       end
@@ -92,5 +102,5 @@ module DTK
       end
     end
   end
-end
+end; end
 

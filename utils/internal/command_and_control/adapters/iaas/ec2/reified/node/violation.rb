@@ -16,24 +16,21 @@
 # limitations under the License.
 #
 
-module DTK; module CommandAndControlAdapter
-  class Ec2::Reified::Target
-    class Component
-      class IamUser < self
-        Attributes = [:aws_access_key_id, :aws_secret_access_key, :default_keypair]
-        def initialize(reified_target, vpc_service_component)
-          super(reified_target, vpc_service_component)
-        end 
+module DTK
+  class CommandAndControlAdapter::Ec2::Reified::Node
+    class Violation < Assembly::Instance::Violation
+      class ReqUnsetAttrs < Assembly::Instance::Violation::ReqUnsetAttrs
+        def initialize(aug_attrs)
+          super(aug_attrs, :component)
+        end
+      end
 
-        # Returns an array of violations; if no violations [] is returned
-        def validate_and_fill_in_values!
-          # TODO: validate credentials are ok
-          []
+      class ReqUnsetAttr < Assembly::Instance::Violation::ReqUnsetAttr
+        def initialize(aug_attr)
+          super(aug_attr, :component)
         end
       end
     end
   end
-end; end
-
-
+end
 

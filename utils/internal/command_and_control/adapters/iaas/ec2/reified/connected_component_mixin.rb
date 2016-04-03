@@ -26,7 +26,7 @@ module DTK
       end
 
       def get_connected_component(component_type, reified_target)
-        link_def_type = Target::Component::Type.name(component_type)
+        link_def_type = Target::ComponentType.name(component_type)
         dtk_component_ids = get_connected_dtk_component_ids(link_def_type)
         components = reified_target.matching_components(dtk_component_ids)
         if components.size === 0

@@ -19,10 +19,20 @@
 module DTK; module CommandAndControlAdapter
   class Ec2
     module Reified
-      class Node < DTK::Service::Reified::Component::WithServiceComponent
+      class Node < DTK::Service::Reified::Component
         r8_nested_require('node', 'image')
+        r8_nested_require('node', 'violation')
+        r8_nested_require('node', 'violation_processor')
 
         include ConnectedComponentMixin
+
+        class ComponentType < Reified::ComponentType  
+          module_name = 'ec2'
+          Mapping = {
+            :node_properties => "#{module_name}::properties",
+          }
+        end
+
         Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name]
 
         # opts can have keys
@@ -74,6 +84,17 @@ module DTK; module CommandAndControlAdapter
         def aws_conn
           @aws_conn ||= get_aws_conn
         end
+
+        def validate_and_fill_in_values!
+          ret = []
+=begin
+
+          ret += validate_default_keypair
+          
+          ret
+=end
+        end
+
 
         private
 

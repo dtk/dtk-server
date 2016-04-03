@@ -16,12 +16,12 @@
 # limitations under the License.
 #
 
-# TODO: move this under reified/components/target_service/
 module DTK
   class CommandAndControlAdapter::Ec2
     module Reified
       r8_nested_require('reified','connected_component_mixin')
-      # connected_component_mixin must go first
+      r8_nested_require('reified','component_type')
+      # connected_component_mixin and component_type must go before below
       r8_nested_require('reified','node')
       r8_nested_require('reified','target')
     end

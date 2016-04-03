@@ -27,18 +27,18 @@ module DTK
         end 
 
         # Returns an array of violations; if no violations [] is returned
-        def validate_and_converge!
+        def validate_and_fill_in_values!
           ret = []
           if !id and !group_name
             aug_attrs = get_dtk_aug_attributes(:group_name, :id)
             return [Violation::ReqUnsetAttrs.new(aug_attrs)]
           end
-          validate_and_converge_name_and_id!
+          validate_and_fill_in_values_name_and_id!
         end
 
         private
 
-        def validate_and_converge_name_and_id!
+        def validate_and_fill_in_values_name_and_id!
           ret = []
           aws_sg_from_id = aws_sg_from_name = nil
           if id

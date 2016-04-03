@@ -19,8 +19,7 @@
 module DTK
   module CommandAndControlAdapter::Ec2::Reified
     class Target
-      # TODO: DTK-2489 bridge of using violations to trigger converge of components until have a component implementation
-      # that can handle Rest calls 
+      # Using violations to fill in values of target components and validate them
       class ViolationProcessor
         def self.find_violations(target_service, project, params = {})
           new(target_service).find_violations(project, params)
@@ -35,25 +34,25 @@ module DTK
           any_unset_attributes = params[:any_unset_attributes]
           
           # Get all relevant components
-          ndx_components = Component::Type::All.inject({}) do |h, cmp_type|
+          ndx_components = ComponentType.all.inject({}) do |h, cmp_type|
             h.merge(cmp_type => @reified_target.get_all_components_of_type(cmp_type))
           end
           
-          missing_cmp_types = Component::Type::All.select { |cmp_type| ndx_components[cmp_type].empty? }
+          missing_cmp_types = ComponentType.all.select { |cmp_type| ndx_components[cmp_type].empty? }
           unless missing_cmp_types.empty?
-            missing_cmp_names = missing_cmp_types.map{ |cmp_type| Component::Type.name(cmp_type) }
+            missing_cmp_names = missing_cmp_types.map{ |cmp_type| ComponentType.name(cmp_type) }
             return [Violation::TargetServiceCmpsMissing.new(missing_cmp_names)]
           end        
           
           return ret if any_unset_attributes
 
-          # validate_and_converge each reified_component
+          # validate_and_fill_in_values each reified_component
           # Need to do this in following order due to using earlier in oredr components to fil in gaps of ;ater ones
           # TODO: if did this in an assembly above would reflect order of components in workflow
           ordered_cmp_type = [:iam_user, :vpc_subnet, :vpc, :security_group]
           ordered_cmp_type.each do |cmp_type|
             ndx_components[cmp_type].each do |reified_component|
-              ret += reified_component.validate_and_converge!
+              ret += reified_component.validate_and_fill_in_values!
             end
           end
           ret

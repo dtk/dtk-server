@@ -27,7 +27,7 @@ module DTK
         end
 
         # Returns an array of violations; if no violations [] is returned
-        def validate_and_converge!
+        def validate_and_fill_in_values!
           unless id
             aug_attr = get_dtk_aug_attributes(:id).first
             return [Violation::ReqUnsetAttr.new(aug_attr)]

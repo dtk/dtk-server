@@ -95,6 +95,11 @@ module DTK
       klass.find_violations_in_target_service(target_service, project, params)
     end
 
+    def self.find_violations_in_node_components(iaas_type, service, project, params = {})
+      klass = load_for_aux(:iaas, iaas_type.to_s)
+      klass.find_violations_in_node_components(service, project, params)
+    end
+
     def self.references_image?(target, node_external_ref)
       klass = load_iaas_for(target: target)
       klass.references_image?(node_external_ref)

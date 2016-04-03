@@ -16,24 +16,35 @@
 # limitations under the License.
 #
 
-module DTK; module CommandAndControlAdapter
-  class Ec2::Reified::Target
-    class Component
-      class IamUser < self
-        Attributes = [:aws_access_key_id, :aws_secret_access_key, :default_keypair]
-        def initialize(reified_target, vpc_service_component)
-          super(reified_target, vpc_service_component)
-        end 
+module DTK
+  module CommandAndControlAdapter::Ec2::Reified
+    class ComponentType 
+      class << self
+        def all
+          mapping.keys
+        end
 
-        # Returns an array of violations; if no violations [] is returned
-        def validate_and_fill_in_values!
-          # TODO: validate credentials are ok
-          []
+        def name(cmp_type)
+          mapping[cmp_type]
+        end
+
+        def method_missing(method, *args, &body)
+          mapping[method] || super
+        end
+      
+        def respond_to?(method)
+          all.include?(method)
+        end
+        
+        private
+        
+        def mapping
+          self::Mapping
         end
       end
     end
   end
-end; end
+end
 
 
 

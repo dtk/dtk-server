@@ -23,7 +23,7 @@ module DTK; module CommandAndControlAdapter
         r8_nested_require('node', 'image')
         r8_nested_require('node', 'violation')
         r8_nested_require('node', 'violation_processor')
-        extend ViolationProcessorClassMixin
+        include ViolationProcessor::Mixin
         include ConnectedComponentMixin
 
         class ComponentType < Reified::ComponentType  
@@ -33,42 +33,43 @@ module DTK; module CommandAndControlAdapter
           }
 
         end
-        # TODO: replace below using above
-        Ec2PropertiesInternalType = 'ec2__properties'
-
         Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name, :image_label]
 
         # opts can have keys
+        # :dtk_node
+        # :node_service_component
         # :reified_target
         # :no_reified_target - Boolean (default false) 
-        def initialize(dtk_node, opts = {})
-          super(dtk_component_ec2_properties(dtk_node))
-          @reified_target = 
-            if opts[:no_reified_target] then nil
-            else
-              opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
-            end
-          @dtk_node  = dtk_node
+        def initialize(opts = {})
+          node_service_component = opts[:node_service_component] || node_service_component(opts[:dtk_node])
+          super(node_service_component.add_link_to_component!)
+          @reified_target = opts[:no_reified_target] ? nil : ( opts[:reified_target] || reified_target_from_node(opts[:dtk_node]))
           # aws_conn gets dynamically set
           @aws_conn = nil
-
           # TODO: this will be eventually removed
           @external_ref = opts[:external_ref]
         end
         private :initialize
 
         def self.create_with_reified_target(dtk_node, reified_target, opts = {})
-          new(dtk_node, opts.merge(reified_target: reified_target))
+          new(opts.merge(reified_target: reified_target, dtk_node: dtk_node))
         end
 
-        def self.create_without_reified_target(dtk_node, opts = {})
-          new(dtk_node, opts.merge(no_reified_target: true))
+        def self.create_from_service?(service, opts = {})
+          node_service_components = service.matching_components?(ComponentType.node) || []
+          Log.error("Unexpected that node_service_components.size > 1") if node_service_components.size > 1
+          if  node_service_component = node_service_components.first 
+            new(opts.merge(node_service_component: node_service_component, no_reified_target: true))
+          end
+        end
+
+        def self.find_violations(service, params = {})
+          ViolationProcessor.validate_and_fill_in_values(service, params)
         end
 
         def instance_type
           # TODO: remove @external_ref[:size] and default
           super || @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]  
-          #fail(ErrorUsage, "Cannot find instance type for node '#{@dtk_node.get_field?(:display_name)}'")
         end
 
         def image
@@ -97,62 +98,14 @@ module DTK; module CommandAndControlAdapter
           @aws_conn ||= get_aws_conn
         end
 
-        def validate_and_fill_in_values!
-          ret = []
-          return ret unless ami # validating ami when doing create node
-
-          if image_label
-            computed_ami, violations = validate_image_label_and_compute_ami 
-            if violations
-              ret += violations
-            else
-              #computed_ ami wil be non null
-              update_and_propagate_dtk_attributes(ami: computed_ami)
-            end
-          else
-            # TODO: temp (use of external_ref[:image_id]
-            unless computed_ami = @external_ref[:image_id]
-              ret << Violation::ReqUnsetAttrs.new(self, :ami, :image_label)
-            else
-              update_and_propagate_dtk_attributes(ami: computed_ami)
-            end
-          end
-          ret
-        end
-
         def get_dtk_aug_attributes(*attribute_names)
           super(@reified_target, *attribute_names)
         end
 
         private
 
-        # returns [computed_ami, violations]
-        def validate_image_label_and_compute_ami 
-          violations = []
-          computed_ami = nil
-          if vpc_images
-            unless computed_ami = vpc_images[image_label]
-              legal_labels = vpc_images.keys
-              violations << Violation::InvalidImageLabel.new(image_label, legal_labels) 
-            end
-          else
-            violations << Violation::ReqUnsetAttr.new(self, :vpc_images)
-          end
-          [computed_ami, violations]
-        end
-
         def self.legal_attributes
           Attributes
-        end
-
-        ComponentTypeFilter = {filter: [:eq, :component_type, Ec2PropertiesInternalType]}
-
-        def dtk_component_ec2_properties(dtk_node)
-          ret = 
-            if dtk_component = dtk_node.get_components(ComponentTypeFilter).first 
-              Service::Component.new(dtk_component).add_link_to_component!
-            end
-          ret || fail(Error, "Unexpected that no ec2 properties component on node")
         end
         
         def vpc_component
@@ -170,6 +123,23 @@ module DTK; module CommandAndControlAdapter
         def get_aws_conn
           Ec2.conn(credentials_with_region)
         end
+
+        def node_service_component(dtk_node)
+          fail Error, "Unexpected that dtk_node is nil" unless dtk_node
+
+          filter = [:eq, :component_type, ComponentType.node.gsub(/::/,'__')]
+          if dtk_component = dtk_node.get_components(filter: filter).first 
+            Service::Component.new(dtk_component)
+          else
+            fail(Error, "Unexpected that no ec2 properties component on node")  
+          end
+        end
+
+        def reified_target_from_node(dtk_node)
+          fail(Error, "Unexpected that dtk_node is nil") unless dtk_node
+          Target.new(Service::Target.create_from_node(dtk_node))
+        end
+
       end
     end
   end

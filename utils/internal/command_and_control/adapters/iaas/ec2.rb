@@ -34,12 +34,12 @@ module DTK
         CreateNode.run(task_action)
       end
 
-      def self.find_violations_in_target_service(target_service, project, params = {})
-        Reified::Target.find_violations(target_service, project, params)
+      def self.find_violations_in_target_service(target_service, _project, params = {})
+        Reified::Target.find_violations(target_service, params)
       end
 
-      def self.find_violations_in_node_components(service, project, params = {})
-        Reified::Node.find_violations(service, project, params)
+      def self.find_violations_in_node_components(service, _project, params = {})
+        Reified::Node.find_violations(service, params)
       end
 
       def self.find_matching_node_binding_rule(node_binding_rules, target)

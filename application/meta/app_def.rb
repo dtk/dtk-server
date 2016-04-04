@@ -21,7 +21,6 @@
     :attribute_link,
     :attribute,
     :component,
-    :data_source,
     :datacenter,
     :library,
     :monitoring_item,

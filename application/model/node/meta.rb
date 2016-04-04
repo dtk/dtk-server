@@ -31,7 +31,6 @@ module DTK
 
   module NodeMetaClassMixin
     def up
-      ds_column_defs :ds_attributes, :ds_key, :data_source, :ds_source_obj_type
       external_ref_column_defs()
       virtual_column :name, type: :varchar, local_dependencies: [:display_name]
       column :tags, :json
@@ -686,7 +685,6 @@ module DTK
          }
         ]
 
-      foreign_key :data_source_id, :data_source, FK_SET_NULL_OPT
       many_to_one :library, :datacenter, :project
       one_to_many :attribute, :port, :attribute_link, :component, :component_ref, :node_interface, :address_access_point, :monitoring_item
 

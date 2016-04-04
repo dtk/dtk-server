@@ -54,7 +54,6 @@
     }
   },
   one_to_many:   [
-   :data_source,
    :node,
    :state_change,
    :node_group_relation,

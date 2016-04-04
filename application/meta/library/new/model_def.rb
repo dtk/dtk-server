@@ -36,7 +36,6 @@
    :attribute_link,
    :port_link, #MOD_RESTRUCT: may remove
    :region,
-   :data_source,
    :constraints,
    :component_relation,
    :implementation,

@@ -132,18 +132,6 @@ module DTK; class Node
         { attribute: hash_values }
       end
 
-      ################
-      # TODO: may be aqble to deprecate most or all of below
-      ### helpers
-      def ds_attributes(_attr_list)
-        [:ds_attributes]
-      end
-      # TODO: rename subobject to sub_object
-      def is_ds_subobject?(_relation_type)
-        false
-      end
-      ##########
-
       private
 
       def check_and_ret_title_attribute_name?(component_template, component_title)

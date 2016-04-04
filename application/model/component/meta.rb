@@ -19,7 +19,6 @@
 module DTK
   module ComponentMetaClassMixin
     def up
-      ds_column_defs :ds_attributes, :ds_key
       external_ref_column_defs()
       virtual_column :name, type: :varchar, local_dependencies: [:display_name]
       virtual_column :config_agent_type, type: :string, local_dependencies: [:external_ref]

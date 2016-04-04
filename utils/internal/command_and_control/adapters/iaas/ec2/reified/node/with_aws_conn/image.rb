@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK; module CommandAndControlAdapter
-  class Ec2::Reified::Node
+  class Ec2::Reified::Node::WithAwsConn
     class Image
       def self.validate_and_create_object(image_id, reified_node)
         if ami_hash = reified_node.aws_conn.image_get?(image_id)

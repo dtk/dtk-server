@@ -20,7 +20,6 @@ module DTK; module CommandAndControlAdapter
   class Ec2
     module Reified
       class Node < DTK::Service::Reified::Component
-        r8_nested_require('node', 'image')
         r8_nested_require('node', 'violation')
         r8_nested_require('node', 'violation_processor')
         include ViolationProcessor::Mixin
@@ -33,33 +32,32 @@ module DTK; module CommandAndControlAdapter
           }
 
         end
-        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name, :image_label]
+        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name, :image_label, :vpc_images]
 
         # opts can have keys
+        # :service
         # :dtk_node
         # :node_service_component
-        # :reified_target
-        # :no_reified_target - Boolean (default false) 
+        # :external_ref
         def initialize(opts = {})
           node_service_component = opts[:node_service_component] || node_service_component(opts[:dtk_node])
           super(node_service_component.add_link_to_component!)
-          @reified_target = opts[:no_reified_target] ? nil : ( opts[:reified_target] || reified_target_from_node(opts[:dtk_node]))
-          # aws_conn gets dynamically set
-          @aws_conn = nil
+          @service = opts[:service]
+          
           # TODO: this will be eventually removed
           @external_ref = opts[:external_ref]
         end
         private :initialize
 
-        def self.create_with_reified_target(dtk_node, reified_target, opts = {})
-          new(opts.merge(reified_target: reified_target, dtk_node: dtk_node))
+        def self.create_with_aws_conn(dtk_node, reified_target, opts = {})
+          WithAwsConn.new(opts.merge(reified_target: reified_target, dtk_node: dtk_node))
         end
 
         def self.create_from_service?(service, opts = {})
           node_service_components = service.matching_components?(ComponentType.node) || []
           Log.error("Unexpected that node_service_components.size > 1") if node_service_components.size > 1
           if  node_service_component = node_service_components.first 
-            new(opts.merge(node_service_component: node_service_component, no_reified_target: true))
+            new(opts.merge(service: service, node_service_component: node_service_component, no_reified_target: true))
           end
         end
 
@@ -72,10 +70,6 @@ module DTK; module CommandAndControlAdapter
           super || @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]  
         end
 
-        def image
-          @image ||= Image.validate_and_create_object(ami, self)
-        end
-
         def security_group_names
           # TODO: not treating multiple security groups
           [security_group_name]
@@ -86,20 +80,8 @@ module DTK; module CommandAndControlAdapter
           [security_group_id]
         end
 
-        def connected_component(conn_cmp_type)
-          connected_component_aux(conn_cmp_type, @reified_target)
-        end
-
-        def region
-          vpc_component.region
-        end
-
-        def aws_conn
-          @aws_conn ||= get_aws_conn
-        end
-
         def get_dtk_aug_attributes(*attribute_names)
-          super(@reified_target, *attribute_names)
+          super(assembly_instance, *attribute_names)
         end
 
         private
@@ -108,22 +90,6 @@ module DTK; module CommandAndControlAdapter
           Attributes
         end
         
-        def vpc_component
-          connected_component(:vpc_subnet).connected_component(:vpc)
-        end
-
-        def get_vpc_component
-          ret_singleton_or_raise_error('vpc', @reified_target.vpc_components)
-        end
-
-        def credentials_with_region
-          vpc_component.credentials_with_region
-        end
-
-        def get_aws_conn
-          Ec2.conn(credentials_with_region)
-        end
-
         def node_service_component(dtk_node)
           fail Error, "Unexpected that dtk_node is nil" unless dtk_node
 
@@ -135,11 +101,10 @@ module DTK; module CommandAndControlAdapter
           end
         end
 
-        def reified_target_from_node(dtk_node)
-          fail(Error, "Unexpected that dtk_node is nil") unless dtk_node
-          Target.new(Service::Target.create_from_node(dtk_node))
+        # This get overridedn by With AwsConn where @service can be nil and use reified target to find assembly_insatnce
+        def assembly_instance
+          @service.assembly_instance
         end
-
       end
     end
   end

@@ -20,15 +20,17 @@ module DTK
     class Node
       module ViolationProcessor
         def self.validate_and_fill_in_values(service, opts = {})
+          ret = []
           if reified_node = Node.create_from_service?(service, opts)
-            reified_node.validate_and_fill_in_values!
+            ret += reified_node.validate_and_fill_in_values!
           end
+          ret
         end
 
         module Mixin
           def validate_and_fill_in_values!
             ret = []
-            return ret unless ami # validating ami when doing create node
+            return ret if ami # validating ami when doing create node
             
             if image_label
               computed_ami, violations = validate_image_label_and_compute_ami 
@@ -40,7 +42,7 @@ module DTK
               end
             else
               # TODO: temp (use of external_ref[:image_id]
-              unless computed_ami = @external_ref[:image_id]
+              unless computed_ami = (@external_ref || {})[:image_id]
                 ret << Violation::ReqUnsetAttrs.new(self, :ami, :image_label)
               else
                 update_and_propagate_dtk_attributes(ami: computed_ami)

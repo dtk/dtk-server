@@ -21,15 +21,15 @@ module DTK
     class Target
       # Using violations to fill in values of target components and validate them
       class ViolationProcessor
-        def self.find_violations(target_service, project, params = {})
-          new(target_service).find_violations(project, params)
+        def self.validate_and_fill_in_values(target_service, project, params = {})
+          new(target_service).validate_and_fill_in_values!(project, params)
         end
         
         def initialize(target_service)
           @reified_target = Target.new(target_service)
         end
 
-        def find_violations(project, params = {})
+        def validate_and_fill_in_values!(project, params = {})
           ret = []
           any_unset_attributes = params[:any_unset_attributes]
           

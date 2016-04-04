@@ -30,7 +30,7 @@ module DTK; module CommandAndControlAdapter
         @external_ref = node[:external_ref] || {} # TODO: wil eventually remove 
         @base_node    = base_node
         @node         = node
-        @reified_node = Reified::Node.new(node, reified_target: reified_target, external_ref: @external_ref)
+        @reified_node = Reified::Node.create_with_reified_target(node, reified_target, external_ref: @external_ref)
       end
       private :initialize
       

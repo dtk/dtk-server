@@ -52,6 +52,10 @@ module DTK; class CommandAndControlAdapter::Ec2
         get_all_components_of_type(:security_group)
       end
 
+      def self.find_violations(target_service, project, params = {})
+        ViolationProcessor.validate_and_fill_in_values(target_service, project, params)
+      end
+
       # opts can have keys
       #  :use_and_set_cache - Boolean (default true)
       def get_all_components_of_type(component_type, opts = {})

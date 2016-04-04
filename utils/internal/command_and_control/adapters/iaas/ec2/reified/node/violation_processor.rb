@@ -19,22 +19,23 @@
 module DTK
   module CommandAndControlAdapter::Ec2::Reified
     class Node
-      # Using violations to fill in values of target components and validate them
-      class ViolationProcessor
-        def self.find_violations(target_service, project, params = {})
-          new(target_service).find_violations(project, params)
-        end
-        
-        def initialize(target_service)
-          @reified_target = Target.new(target_service)
+      module ViolationProcessorClassMixin
+        def find_violations(service, project, params = {})
+          pp get_all_components_of_type(service, component_type)
         end
 
-        def find_violations(project, params = {})
-          ret = []
-          any_unset_attributes = params[:any_unset_attributes]
-          # TODO: stub
-          ret
+        private
+        
+        def get_all_components_of_type(service, component_type)
+          component_type_name = ComponentType.send(component_type)
+          service_components = service.matching_components?(component_type_name) || []
+          service_components.map { |sc| component_class(component_type).new(self, sc) }
         end
+
+        def component_class(component_type)
+          const_get(Aux.camelize(component_type.to_s))
+        end
+
       end
     end
   end

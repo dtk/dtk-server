@@ -23,34 +23,46 @@ module DTK; module CommandAndControlAdapter
         r8_nested_require('node', 'image')
         r8_nested_require('node', 'violation')
         r8_nested_require('node', 'violation_processor')
-
+        extend ViolationProcessorClassMixin
         include ConnectedComponentMixin
 
         class ComponentType < Reified::ComponentType  
           module_name = 'ec2'
           Mapping = {
-            :node_properties => "#{module_name}::properties",
+            :node => "#{module_name}::properties",
           }
-        end
 
-        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name]
+        end
+        # TODO: replace below using above
+        Ec2PropertiesInternalType = 'ec2__properties'
+
+        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name, :image_label]
 
         # opts can have keys
         # :reified_target
+        # :no_reified_target - Boolean (default false) 
         def initialize(dtk_node, opts = {})
           super(dtk_component_ec2_properties(dtk_node))
-          @reified_target = opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
-          @dtk_node       = dtk_node
+          @reified_target = 
+            if opts[:no_reified_target] then nil
+            else
+              opts[:reified_target] || Target.new(Service::Target.create_from_node(dtk_node))
+            end
+          @dtk_node  = dtk_node
           # aws_conn gets dynamically set
           @aws_conn = nil
 
-          # TODO: these will be eventually removed
+          # TODO: this will be eventually removed
           @external_ref = opts[:external_ref]
         end
+        private :initialize
 
-        def ami
-          # TODO: remove @external_ref[:image_id]
-          super || @external_ref[:image_id] || fail(ErrorUsage, "Cannot find ami for node '#{@dtk_node.get_field?(:display_name)}'")
+        def self.create_with_reified_target(dtk_node, reified_target, opts = {})
+          new(dtk_node, opts.merge(reified_target: reified_target))
+        end
+
+        def self.create_without_reified_target(dtk_node, opts = {})
+          new(dtk_node, opts.merge(no_reified_target: true))
         end
 
         def instance_type
@@ -87,12 +99,25 @@ module DTK; module CommandAndControlAdapter
 
         def validate_and_fill_in_values!
           ret = []
-=begin
+          return ret unless ami # validating ami when doing create node
 
-          ret += validate_default_keypair
-          
+          if image_label
+            computed_ami, violations = validate_image_label_and_compute_ami 
+            if violations
+              ret += violations
+            else
+              #computed_ ami wil be non null
+              update_and_propagate_dtk_attributes(ami: computed_ami)
+            end
+          else
+            # TODO: temp (use of external_ref[:image_id]
+            unless computed_ami = @external_ref[:image_id]
+              ret << Violation::ReqUnsetAttrs.new(self, :ami, :image_label)
+            else
+              update_and_propagate_dtk_attributes(ami: computed_ami)
+            end
+          end
           ret
-=end
         end
 
         def get_dtk_aug_attributes(*attribute_names)
@@ -101,11 +126,25 @@ module DTK; module CommandAndControlAdapter
 
         private
 
+        # returns [computed_ami, violations]
+        def validate_image_label_and_compute_ami 
+          violations = []
+          computed_ami = nil
+          if vpc_images
+            unless computed_ami = vpc_images[image_label]
+              legal_labels = vpc_images.keys
+              violations << Violation::InvalidImageLabel.new(image_label, legal_labels) 
+            end
+          else
+            violations << Violation::ReqUnsetAttr.new(self, :vpc_images)
+          end
+          [computed_ami, violations]
+        end
+
         def self.legal_attributes
           Attributes
         end
 
-        Ec2PropertiesInternalType = 'ec2__properties'
         ComponentTypeFilter = {filter: [:eq, :component_type, Ec2PropertiesInternalType]}
 
         def dtk_component_ec2_properties(dtk_node)

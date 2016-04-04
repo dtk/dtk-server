@@ -20,11 +20,9 @@ module DTK
     class Node
       module ViolationProcessor
         def self.validate_and_fill_in_values(service, opts = {})
-          ret = []
-          if reified_node = Node.create_from_service?(service, opts)
-            ret += reified_node.validate_and_fill_in_values!
+          Node.create_nodes_from_service(service, opts).inject([]) do |a, reified_node|
+            a += reified_node.validate_and_fill_in_values!
           end
-          ret
         end
 
         module Mixin

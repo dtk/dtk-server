@@ -53,10 +53,8 @@ module DTK; module CommandAndControlAdapter
           WithAwsConn.new(opts.merge(reified_target: reified_target, dtk_node: dtk_node))
         end
 
-        def self.create_from_service?(service, opts = {})
-          node_service_components = service.matching_components?(ComponentType.node) || []
-          Log.error("Unexpected that node_service_components.size > 1") if node_service_components.size > 1
-          if  node_service_component = node_service_components.first 
+        def self.create_nodes_from_service(service, opts = {})
+          (service.matching_components?(ComponentType.node) || []).map do |node_service_component|
             new(opts.merge(service: service, node_service_component: node_service_component, no_reified_target: true))
           end
         end

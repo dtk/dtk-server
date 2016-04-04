@@ -635,8 +635,8 @@ module DTK
         opts[:os_type] = os_type
       end
 
-      if auto_complete_links = ret_request_params(:auto_complete_links)
-        opts[:auto_complete_links] = auto_complete_links
+      if no_auto_complete = ret_request_params(:no_auto_complete)
+        opts[:no_auto_complete] = no_auto_complete
       end
 
       project = get_default_project()
@@ -651,6 +651,8 @@ module DTK
         opts[:is_target_service] = true
         target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
         target = Service::Target.create_target_mock(target_name, project)
+        target_assembly_instance = ret_assembly_instance_object?(:parent_service)
+        opts.merge!(parent_service_instance: target_assembly_instance) if target_assembly_instance
       else
         # this case is for service instance which are staged against a target service instance
         # which is giving  parameter 'parent-service' or getting default target 
@@ -663,7 +665,7 @@ module DTK
           target = target_with_default(target_id)
           target_assembly_instance = Service::Target.create_from_target(target).assembly_instance
         end
-        opts.merge!(parent_service_instance: target_assembly_instance) 
+        opts.merge!(parent_service_instance: target_assembly_instance)
         if target
           target_id = target.id
           unless Service::Target.create_from_target(target).is_converged? 

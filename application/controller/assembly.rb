@@ -868,6 +868,11 @@ module DTK
       end
       task.save!()
 
+      # update assembly_wide_node admin_op_status to 'running' on converge
+      if assembly_wide_node = assembly.has_assembly_wide_node?
+        assembly_wide_node.update_admin_op_status!(:running)
+      end
+
       # TODO: clean up this part since this is doing more than creating task
       # This triggres start while in task have particpants that look for completion
       unless (opts[:ret_nodes_to_start]||[]).empty?

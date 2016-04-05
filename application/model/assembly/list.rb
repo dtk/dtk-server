@@ -172,7 +172,7 @@ module DTK
           nodes = r[:ndx_nodes].values
           nodes.reject! { |n| Node.is_assembly_wide_node?(n) } if opts[:remove_assembly_wide_node]
           # TODO: this is misleading since admin not op status returned
-          summary_node_status = (summary_node_status(:admin,nodes) if respond_to?(:summary_node_status))
+          summary_node_status = (summary_node_status(:admin, nodes, r[:last_task_run_status]) if respond_to?(:summary_node_status))
           r.merge(op_status: summary_node_status, nodes: nodes).slice(:id, :display_name, :op_status, :last_task_run_status, :execution_status, :module_branch_id, :version, :assembly_template, :target, :nodes, :created_at, :keypair, :security_groups)
         end
 

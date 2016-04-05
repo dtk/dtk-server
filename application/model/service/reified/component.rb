@@ -75,10 +75,10 @@ module DTK
         values            = name_value_pairs.values
         dtk_attributes.each_with_index do |dtk_attribute, i|
           value = values[i]
-          attr_rows_to_prop << { id: dtk_attribute.id, value_asserted: value }
+          attr_rows_to_prop << { id: dtk_attribute.id, attribute_value: value }
         end
         attr_mh = dtk_attributes.first.model_handle
-        Attribute.update_and_propagate_attributes(attr_mh, attr_rows_to_prop)
+        Attribute.update_and_propagate_dynamic_attributes(attr_mh, attr_rows_to_prop)
         ret
       end
       

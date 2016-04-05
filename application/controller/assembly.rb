@@ -510,7 +510,10 @@ module DTK
 
       unless (ret_request_params(:assembly_template_name) && ret_request_params(:service_module_name))
         assembly.update_object!(:version)
-        fail ErrorUsage.new("You are not allow to push updates to service module versions!") unless assembly[:version].eql?('master')
+        # TODO: see how assembly[:version] can be set to nil and fix there
+        unless assembly[:version].eql?('master') or assembly[:version].nil?
+          fail ErrorUsage.new("You are not allow to push updates to service module versions!") 
+        end
       end
 
       assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(assembly, check_frozen_branches: true)

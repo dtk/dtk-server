@@ -27,7 +27,6 @@ module DTK
         @dtk_component = dtk_component
         @type = ret_type(dtk_component)
 
-
         # attributes and links added on demand 
         @attributes = nil
         @link_added = false 
@@ -65,6 +64,17 @@ module DTK
         end
         matching_deps = dependencies.select { |dep| (dep.link_def || {})[:link_type] == link_def_type }
         matching_deps.map { |dep| dep.satisfied_by_component_ids }.flatten(1)
+      end
+
+      def get_dtk_aug_attributes(*attribute_names)
+        attribute_names = attribute_names.map(&:to_s)
+        dtk_component.update_object!(:display_name, :node_node_id)
+        nested_component = dtk_component
+        node = dtk_component.get_node
+        dtk_component.get_attributes.inject([]) do |a, attr|
+          attribute_names.include?(attr[:display_name]) ? 
+           a + [attr.merge(node: node, nested_component: nested_component)] : a
+        end
       end
 
       private

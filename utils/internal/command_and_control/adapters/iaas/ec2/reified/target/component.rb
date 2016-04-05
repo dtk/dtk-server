@@ -45,10 +45,6 @@ module DTK module CommandAndControlAdapter::Ec2::Reified
         connected_component_aux(conn_cmp_type, @reified_target)
       end
 
-      def get_dtk_aug_attributes(*attribute_names)
-        super(@reified_target.assembly_instance, *attribute_names)
-      end
-
       private
 
       def self.legal_attributes

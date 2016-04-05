@@ -19,23 +19,35 @@
 module DTK
   module CommandAndControlAdapter::Ec2::Reified
     class Violation < Assembly::Instance::Violation
+      module CommonMixin
+        def get_sorted_dtk_aug_attributes(reified_component, *attribute_names)
+          attribute_names = attribute_names.map(&:to_s)
+          unordered_ret = reified_component.service_component.get_dtk_aug_attributes(*attribute_names)
+          # Want to order in same order as names
+          ndx_unordered_ret = unordered_ret.inject({}) { |h, a| h.merge(a[:display_name] => a) }
+          attribute_names.map { |n| ndx_unordered_ret[n] }
+        end
+      end
       class ReqUnsetAttr < Assembly::Instance::Violation::ReqUnsetAttr
+        include CommonMixin
         def initialize(reified_component, attribute_name)
-          aug_attr = reified_component.get_dtk_aug_attributes(attribute_name).first      
+          aug_attr = get_sorted_dtk_aug_attributes(reified_component, attribute_name).first      
           super(aug_attr, :component)
         end
       end      
       
       class ReqUnsetAttrs < Assembly::Instance::Violation::ReqUnsetAttrs
+        include CommonMixin
         def initialize(reified_component, *attribute_names)
-          aug_attrs = reified_component.get_dtk_aug_attributes(*attribute_names)
+          aug_attrs = get_sorted_dtk_aug_attributes(reified_component, *attribute_names)
           super(aug_attrs, :component)
         end
       end
 
       class IllegalAttrValue < Assembly::Instance::Violation::IllegalAttrValue
+        include CommonMixin
         def initialize(reified_component, attribute_name, value, opts = {})
-          aug_attr = reified_component.get_dtk_aug_attributes(attribute_name).first      
+          aug_attr = get_sorted_dtk_aug_attributes(reified_component, attribute_name).first      
           super(aug_attr, value, opts)
         end
       end      

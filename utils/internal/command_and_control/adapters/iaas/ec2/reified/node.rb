@@ -80,10 +80,6 @@ module DTK; module CommandAndControlAdapter
           [security_group_id]
         end
 
-        def get_dtk_aug_attributes(*attribute_names)
-          super(assembly_instance, *attribute_names)
-        end
-
         private
 
         def self.legal_attributes

@@ -47,6 +47,11 @@ module DTK; class Component
         end
         ret || fail(Error, "Unexpected that no assembly associated with component: #{dtk_node.inspect}")
       end
+
+      def get_attributes(opts = {})
+        self.class.get_attributes([id_handle], opts)
+      end
+
     end
 
     module ClassMixin

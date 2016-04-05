@@ -39,7 +39,7 @@ module DTK
 
       def get_attributes
         return @attributes if @attributes 
-        dtk_attributes = @dtk_component.get_component_with_attributes_unraveled({})[:attributes]
+        dtk_attributes = @dtk_component.get_attributes
         @attributes = Attribute.create_attributes_from_dtk_attributes(dtk_attributes)
       end
 

@@ -240,6 +240,26 @@ module DTK
         end
       end
 
+      class IllegalAttrValue < self
+        # opts can have keys
+        #  legal_values
+        def initialize(attr, value, opts = {})
+          @attr_display_name = attr.print_form(Opts.new(level: :component))[:display_name]
+          @value             = value
+          @legal_values      = opts[:legal_values]
+        end
+
+        def type
+          :illegal_attribute_value
+        end
+
+        def description
+          ret = "Attribute '#{@attr_display_name}' has illegal value '#{@value}'"
+          ret << "; legal values are: #{@legal_values.join(', ')}" if @legal_values
+          ret
+        end
+      end
+
       class ComponentConstraint < self
         def initialize(constraint, node)
           @constraint = constraint

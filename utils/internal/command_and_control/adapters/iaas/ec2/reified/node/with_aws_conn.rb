@@ -43,10 +43,6 @@ module DTK; module CommandAndControlAdapter
           connected_component_aux(conn_cmp_type, @reified_target)
         end
 
-        def region
-          vpc_component.region
-        end
-
         private
 
         def assembly_instance

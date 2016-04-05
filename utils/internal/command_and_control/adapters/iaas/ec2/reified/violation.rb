@@ -32,6 +32,14 @@ module DTK
           super(aug_attrs, :component)
         end
       end
+
+      class IllegalAttrValue < Assembly::Instance::Violation::IllegalAttrValue
+        def initialize(reified_component, attribute_name, value, opts = {})
+          aug_attr = reified_component.get_dtk_aug_attributes(attribute_name).first      
+          super(aug_attr, value, opts)
+        end
+      end      
+
     end
   end
 end

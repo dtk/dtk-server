@@ -19,6 +19,8 @@ module DTK
   module CommandAndControlAdapter::Ec2::Reified
     class Node
       module ViolationProcessor
+        r8_nested_require('violation_processor', 'ami_info')
+
         def self.validate_and_fill_in_values(service, opts = {})
           Node.create_nodes_from_service(service, opts).inject([]) do |a, reified_node|
             a += reified_node.validate_and_fill_in_values!
@@ -27,44 +29,38 @@ module DTK
 
         module Mixin
           def validate_and_fill_in_values!
-            ret = []
-            return ret if ami # validating ami when doing create node
+            ami_info, violations = AmiInfo.compute?(self)
+
+            # TODO: temp
+            # ami = ami() || (@external_ref || {})[:image_id]
+
+            validate_and_fill_in_values__ami!(ami_info, violations)
+            validate_and_fill_in_values__os_type!(ami_info, violations)
+            validate_and_fill_in_values__instance_type!(ami_info, violations)
             
-            if image_label
-              computed_ami, violations = validate_image_label_and_compute_ami 
-              if violations
-                ret += violations
-              else
-                #computed_ ami wil be non null
-                update_and_propagate_dtk_attributes(ami: computed_ami)
-              end
-            else
-              # TODO: temp (use of external_ref[:image_id]
-              unless computed_ami = (@external_ref || {})[:image_id]
-                ret << Violation::ReqUnsetAttrs.new(self, :ami, :image_label)
-              else
-                update_and_propagate_dtk_attributes(ami: computed_ami)
-              end
-            end
-            ret
+            violations
           end
 
           private
-
-        # returns [computed_ami, violations]
-          def validate_image_label_and_compute_ami 
-            violations = []
-            computed_ami = nil
-            if vpc_images
-              unless computed_ami = vpc_images[image_label]
-                legal_labels = vpc_images.keys
-                violations << Violation::InvalidImageLabel.new(image_label, legal_labels) 
+          
+          def validate_and_fill_in_values__ami!(ami_info, violations)
+            unless ami # ami value wil be valiadted when create node
+              if ami_info
+                update_and_propagate_dtk_attributes(ami: ami_info.ami)
+              else
+                violations << Violation::ReqUnsetAttrs.new(self, :ami, :image_label)
               end
-            else
-              violations << Violation::ReqUnsetAttr.new(self, :vpc_images)
             end
-            [computed_ami, violations]
           end
+
+          def validate_and_fill_in_values__os_type!(ami_info, violations)
+            if os_type
+              # TODO: may validate os_type
+            elsif ami_info
+              update_and_propagate_dtk_attributes(os_type: ami_info.os_type)
+            end
+          end
+
         end
       end
     end

@@ -22,6 +22,8 @@ module DTK; module CommandAndControlAdapter
       class Node < DTK::Service::Reified::Component
         r8_nested_require('node', 'violation')
         r8_nested_require('node', 'violation_processor')
+        r8_nested_require('node', 'with_aws_conn')
+
         include ViolationProcessor::Mixin
         include ConnectedComponentMixin
 

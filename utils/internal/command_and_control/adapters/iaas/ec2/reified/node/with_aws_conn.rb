@@ -19,7 +19,7 @@
 module DTK; module CommandAndControlAdapter
   class Ec2
     class Reified::Node
-      class WithAwsConn
+      class WithAwsConn < self
         r8_nested_require('with_aws_conn', 'image')
 
         def initialize(opts = {})

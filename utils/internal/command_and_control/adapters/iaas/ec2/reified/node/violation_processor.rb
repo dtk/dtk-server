@@ -34,31 +34,30 @@ module DTK
             # TODO: temp
             # ami = ami() || (@external_ref || {})[:image_id]
 
-            validate_and_fill_in_values__ami!(ami_info, violations)
-            validate_and_fill_in_values__os_type!(ami_info, violations)
-            validate_and_fill_in_values__instance_type!(ami_info, violations)
-            
-            violations
-          end
-
-          private
-          
-          def validate_and_fill_in_values__ami!(ami_info, violations)
-            unless ami # ami value wil be valiadted when create node
-              if ami_info
-                update_and_propagate_dtk_attributes(ami: ami_info.ami)
-              else
-                violations << Violation::ReqUnsetAttrs.new(self, :ami, :image_label)
-              end
+            if ami.nil? and ami_info.nil?
+              violations << Violation::ReqUnsetAttrs.new(self, :ami, :image_label)
+              return violations
             end
-          end
 
-          def validate_and_fill_in_values__os_type!(ami_info, violations)
+            unless ami # ami value wil be validated during create node
+              update_and_propagate_dtk_attributes(ami: ami_info.ami) 
+            end
+
             if os_type
               # TODO: may validate os_type
-            elsif ami_info
+            else
               update_and_propagate_dtk_attributes(os_type: ami_info.os_type)
             end
+
+            unless instance_type # instance_type value wil be validated when create node
+              calculated_instance_type, more_violations = ami_info.instance_type?
+              violations += more_violations
+              if calculated_instance_type  
+                update_and_propagate_dtk_attributes(instance_type: calculated_instance_type)
+              end
+            end
+            
+            violations
           end
 
         end

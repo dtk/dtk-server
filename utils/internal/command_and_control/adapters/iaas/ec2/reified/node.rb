@@ -65,7 +65,7 @@ module DTK; module CommandAndControlAdapter
 
         def instance_type
           # TODO: remove @external_ref[:size] and default
-          super || @external_ref[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]  
+          super || (@external_ref || {})[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]  
         end
 
         def security_group_names

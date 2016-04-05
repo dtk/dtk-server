@@ -34,7 +34,7 @@ module DTK; module CommandAndControlAdapter
           }
 
         end
-        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name, :image_label, :vpc_images, :region, :os_type]
+        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :kepair, :security_group_id, :security_group_name, :vpc_images, :region, :os_type, :size, :image_label]
 
         # opts can have keys
         # :service
@@ -63,11 +63,6 @@ module DTK; module CommandAndControlAdapter
 
         def self.find_violations(service, params = {})
           ViolationProcessor.validate_and_fill_in_values(service, params)
-        end
-
-        def instance_type
-          # TODO: remove @external_ref[:size] and default
-          super || (@external_ref || {})[:size] || R8::Config[:command_and_control][:iaas][:ec2][:default_image_size]  
         end
 
         def security_group_names

@@ -51,18 +51,12 @@ module DTK
         end
 
         # returns [instance_type, violations]; instance_type could be nil and violations can be []
-        def instance_type?
+        def instance_type?(size)
           violations    = []
           instance_type = nil
-
-          if size = @reified_node.size
-            unless instance_type = @sizes[size]
-              legal_sizes = @sizes.keys
-              violations << Violation::IllegalAttrValue.new(@reified_node, :size, size, legal_values: legal_sizes) 
-            end
-          else
-            # assumed this is only called if instance_type not set
-            violations << Violation::ReqUnsetAttrs.new(self, :size, :instance_type)
+          unless instance_type = @sizes[size]
+            legal_sizes = @sizes.keys
+            violations << Violation::IllegalAttrValue.new(@reified_node, :size, size, legal_values: legal_sizes) 
           end
           [instance_type, violations]
         end

@@ -47,9 +47,10 @@ module DTK
 
           private
 
+          # ami_info can be nil
           def validate_and_fill_in_values__ami!(ami_info)
             violations = []
-            unless ami # ami value wil be validated during create node
+            unless ami # ami value will be validated during create node
               unless ami_info
                 violations << Violation::ReqUnsetAttrs.new(self, :ami, :image_label)
               else
@@ -58,7 +59,8 @@ module DTK
             end
             violations
           end
-          
+
+          # ami_info will not be nil
           def validate_and_fill_in_values__os_type(ami_info)
             violations = []
             if os_type
@@ -69,13 +71,14 @@ module DTK
             violations
           end
 
+          # ami_info will not be nil
           def validate_and_fill_in_values__instance_type(ami_info)
             violations = []
-            unless instance_type # instance_type value wil be validated when create node
-              unless ami_info
+            unless instance_type # instance_type value will be validated when create node
+              unless size
                 violations << Violation::ReqUnsetAttrs.new(self, :size, :instance_type)
               else
-                calculated_instance_type, more_violations = ami_info.instance_type?
+                calculated_instance_type, more_violations = ami_info.instance_type?(size)
                 violations += more_violations
                 if calculated_instance_type  
                   update_and_propagate_dtk_attributes(instance_type: calculated_instance_type)

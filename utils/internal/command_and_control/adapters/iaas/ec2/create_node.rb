@@ -25,6 +25,12 @@ module DTK; module CommandAndControlAdapter
       include NodeStateClassMixin
       include AddressManagementClassMixin
 
+      def self.run(task_action)
+        single_run_responses = create_node_object_per_node(task_action).map(&:run)
+        aggregate_responses(single_run_responses)
+      end
+      
+
       attr_reader :reified_node, :node, :external_ref, :reified_target
       def initialize(base_node, node, reified_target)
         @reified_target = reified_target
@@ -34,11 +40,6 @@ module DTK; module CommandAndControlAdapter
         @reified_node   = Reified::Node.create_with_aws_conn(node, reified_target, external_ref: @external_ref)
       end
       private :initialize
-      
-      def self.run(task_action)
-        single_run_responses = create_node_object_per_node(task_action).map(&:run)
-        aggregate_responses(single_run_responses)
-      end
       
       def run
         run_aux()

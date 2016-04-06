@@ -40,6 +40,10 @@ module DTK; class CommandAndControlAdapter::Ec2
         @target_service = target_service.add_links_to_components!
       end
 
+      def self.create_from_node(node)
+        new(Service::Target.create_from_node(node))
+      end
+
       def display_name
         @target_service.target.get_field?(:display_name)
       end

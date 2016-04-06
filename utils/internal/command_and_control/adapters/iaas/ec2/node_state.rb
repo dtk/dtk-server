@@ -87,7 +87,7 @@ module DTK
 
       def get_node_state(node)
         if instance_id = get_instance_id_from_object(node)
-          conn_from_node(node).server_get(instance_id)
+          aws_conn_from_node(node).server_get(instance_id)
         end
       end
 

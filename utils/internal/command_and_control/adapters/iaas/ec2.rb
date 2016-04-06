@@ -59,7 +59,7 @@ module DTK
 
       def self.start_instances(nodes)
         nodes.each do |node|
-          conn_from_node(node).server_start(node.instance_id())
+          aws_conn_from_node(node).server_start(node.instance_id())
           node.update_admin_op_status!(:pending)
           Log.debug "Starting instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
@@ -73,7 +73,7 @@ module DTK
         end
 
         nodes.each do |node|
-          conn_from_node(node).server_stop(node.instance_id())
+          aws_conn_from_node(node).server_stop(node.instance_id())
           node.update_admin_op_status!(:stopped)
           # we remove dns if it is not persistent dns
           unless node.persistent_hostname?
@@ -82,6 +82,78 @@ module DTK
           Log.debug "Stopping instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
       end
+
+      # destroys the node if it exists
+      def self.destroy_node?(node, opts = {})
+        node.update_obj!(:external_ref, :hostname_external_ref)
+        instance_id = external_ref(node)[:instance_id]
+        return true unless instance_id #return if instance does not exist
+
+        if marked_donot_delete?(node)
+          return true
+        end
+
+        response = aws_conn_from_node(node).server_destroy(instance_id)
+        Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response}")
+        process_addresses__terminate?(node)
+
+        if opts[:reset]
+          if response
+            reset_node(node)
+          end
+        end
+        response
+      end
+
+      # TODO: hacks to make sure dont delete or stop the router in multi temnant deploy
+      def self.marked_donot_delete?(node)
+        if instance_id = external_ref(node)[:instance_id]
+          PerisistentIds.include?(instance_id)
+        end
+      end
+      def self.marked_donot_stop?(node)
+        marked_donot_delete?(node)
+      end
+      PerisistentIds =
+        [
+         'i-23666703' # dtk router
+        ]
+
+      def self.reset_node(node)
+        update_hash = {
+          external_ref: Aux.hash_subset(external_ref(node), ExternalRefPendingCols),
+          type: 'staged',
+          admin_op_status: 'pending',
+          hostname_external_ref: nil
+        }
+        update_node!(node, update_hash)
+      end
+      private_class_method :reset_node
+      ExternalRefPendingCols = [:image_id, :type, :size, :region]
+
+      # we can provide this methods set of aws_creds that will be used. We will not use this
+      # EC2 client as member, since this is only for this specific call
+      def self.conn(target_aws_creds)
+        CloudConnect::EC2.new(target_aws_creds)
+      end
+
+      private
+
+      # opts can have keys
+      #  :reified_target
+      def self.aws_conn_from_node(node, opts = {})
+        reified_target = opts[:reified_target] || Reified::Target.create_from_node(node)
+        Reified::Node.create_with_aws_conn(node, reified_target).aws_conn
+      end
+
+
+      def self.external_ref(node)
+        node.get_field?(:external_ref) || {}
+      end
+
+      #########################
+      # TODO: deprecate these below
+      public
 
       def self.get_availability_zones(iaas_properties, region, opts = {})
         connection = opts[:connection] || get_connection_from_iaas_properties(iaas_properties, region)
@@ -133,92 +205,12 @@ module DTK
         end
       end
 
+      private
+
       def self.get_ec2_credentials(iaas_credentials)
         if iaas_credentials && (aws_key = iaas_credentials['key'] || aws_key = iaas_credentials[:key]) && (aws_secret = iaas_credentials['secret'] || aws_secret = iaas_credentials[:secret])
           { aws_access_key_id: aws_key, aws_secret_access_key: aws_secret }
         end
-      end
-
-      private_class_method :get_ec2_credentials
-
-      # destroys the node if it exists
-      def self.destroy_node?(node, opts = {})
-        node.update_obj!(:external_ref, :hostname_external_ref)
-        instance_id = external_ref(node)[:instance_id]
-        return true unless instance_id #return if instance does not exist
-
-        if marked_donot_delete?(node)
-          return true
-        end
-
-        target_aws_creds = get_target_credentials_with_region(node)
-
-        response = conn(target_aws_creds).server_destroy(instance_id)
-        Log.info("operation to destroy ec2 instance #{instance_id} had response: #{response}")
-        process_addresses__terminate?(node)
-
-        if opts[:reset]
-          if response
-            reset_node(node)
-          end
-        end
-        response
-      end
-
-      # TODO: hacks to make sure dont delete or stop the router in multi temnant deploy
-      def self.marked_donot_delete?(node)
-        if instance_id = external_ref(node)[:instance_id]
-          PerisistentIds.include?(instance_id)
-        end
-      end
-      def self.marked_donot_stop?(node)
-        marked_donot_delete?(node)
-      end
-      PerisistentIds =
-        [
-         'i-23666703' # dtk router
-        ]
-
-      def self.reset_node(node)
-        update_hash = {
-          external_ref: Aux.hash_subset(external_ref(node), ExternalRefPendingCols),
-          type: 'staged',
-          admin_op_status: 'pending',
-          hostname_external_ref: nil
-        }
-        update_node!(node, update_hash)
-      end
-      private_class_method :reset_node
-      ExternalRefPendingCols = [:image_id, :type, :size, :region]
-
-      def self.target_non_default_aws_creds?(target)
-        iaas_prop_hash = target.iaas_properties
-        iaas_prop_hash = iaas_prop_hash.is_a?(Hash) ? iaas_prop_hash : iaas_prop_hash.hash()
-        region = iaas_prop_hash[:region]
-
-        params = target.get_aws_compute_params
-        params.merge!(region: region) if params
-        params
-      end
-
-      # we can provide this methods set of aws_creds that will be used. We will not use this
-      # EC2 client as member, since this is only for this specific call
-      def self.conn(target_aws_creds)
-        CloudConnect::EC2.new(target_aws_creds)
-      end
-
-      def self.conn_from_node(node)
-        conn(get_target_credentials_with_region(node))
-      end
-
-      private
-
-      def self.get_target_credentials_with_region(node)
-        Reified::Node.new(node).credentials_with_region
-      end
-
-      def self.external_ref(node)
-        node.get_field?(:external_ref) || {}
       end
 
       def self.get_connection_from_iaas_properties(iaas_properties, region)

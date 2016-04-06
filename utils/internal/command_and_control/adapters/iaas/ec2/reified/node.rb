@@ -51,6 +51,9 @@ module DTK; module CommandAndControlAdapter
         end
         private :initialize
 
+        # opts can have keys
+        #  :reified_target,
+        #  :external_ref
         def self.create_with_aws_conn(dtk_node_or_node_group_member, reified_target, opts = {})
           # if dtk_node_or_node_group_member is a node_group_member we want is node group
           # otherwise it is a node and it is returned

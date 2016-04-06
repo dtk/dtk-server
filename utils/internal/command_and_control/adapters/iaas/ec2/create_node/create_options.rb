@@ -79,7 +79,7 @@ module DTK; class CommandAndControlAdapter::Ec2
       end
 
       def update_user_data!
-        self[:user_data] ||= CommandAndControl.install_script(@node)
+        self[:user_data] ||= CommandAndControl.install_script(@node, os_type: @reified_node.os_type)
         self
       end
 

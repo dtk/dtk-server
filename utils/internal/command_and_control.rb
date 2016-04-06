@@ -60,8 +60,8 @@ module DTK
       end
     end
 
-    def self.install_script(node)
-      InstallScript.install_script(node)
+    def self.install_script(node, opts={})
+      InstallScript.install_script(node, opts)
     end
 
     def self.discover(filter, timeout, limit, client)

@@ -66,32 +66,7 @@ module XYZ
        end
        ret
      end
-     #      def self.ret_node_bindings_from_config_file()
-     #        unless content = ret_nodes_info_content_from_config_file()
-     #          return nil
-     #        end
-     #        ret = Hash.new
-     #        content.each do |ami,info|
-     #          info["sizes"].each do |ec2_size|
-     #            size = ec2_size.split(".").last
-     #            ref = "#{info["type"]}-#{size}"
-     #            ret[ref] = {
-     #              :type=>"clone",
-     #              :os_type=>info["os_type"],
-     #              :os_identifier=>info["type"],
-     #              :rules=>
-     #              [{:conditions=>{:type=>"ec2_image", :region=>info["region"]},
-     #                 :node_template=>{
-     #                   :type=>"ec2_image",:image_id=>ami,
-     #                   :size=>ec2_size,
-     #                   :region=>info["region"]
-     #                 }
-     #               }]
-     #            }
-     #          end
-     #        end
-     #        ret
-     #      end
+
      def self.ret_node_bindings_from_config_file
        unless content = ret_nodes_info_content_from_config_file()
          return nil
@@ -163,6 +138,43 @@ module XYZ
      end
 
    def self.node_info(info, opts = {})
+     attributes = {
+       'host_addresses_ipv4' => { 
+         'required' => false,
+         'read_only' => true,
+         'is_port' => true,
+         'cannot_change' => false,
+         'data_type' => 'json',
+         'value_derived' => [nil],
+         'semantic_type_summary' => 'host_address_ipv4',
+         'display_name' => 'host_addresses_ipv4',
+         'dynamic' => true,
+         'hidden' => true,
+         'semantic_type' => { ':array' => 'host_address_ipv4' }
+       },
+       'fqdn' => { 
+         'required' => false,
+         'read_only' => true,
+         'is_port' => true,
+         'cannot_change' => false,
+         'data_type' => 'string',
+         'display_name' => 'fqdn',
+         'dynamic' => true,
+         'hidden' => true
+       },
+       'node_components' => {
+         'required' => false,
+         'read_only' => true,
+         'is_port' => true,
+         'cannot_change' => false,
+         'data_type' => 'json',
+         'display_name' => 'node_components',
+         'dynamic' => true,
+         'hidden' => true
+       }
+     }
+
+
      ret = {
        'os_type' => info[:os_type],
        'os_identifier' => info[:os_identifier],
@@ -171,40 +183,10 @@ module XYZ
        'external_ref' => {
          'image_id' => info[:ami],
          'type' => 'ec2_image' }.merge(info[:ami] ? { 'size' => info[:size] } : {}),
-       'ui' =>           { 'images' =>             { 'tiny' => '', 'tnail' => info[:png], 'display' => info[:png] } },
-       'attribute' => {
-          'host_addresses_ipv4' =>             { 'required' => false,
-                                                 'read_only' => true,
-                                                 'is_port' => true,
-                                                 'cannot_change' => false,
-                                                 'data_type' => 'json',
-                                                 'value_derived' => [nil],
-                                                 'semantic_type_summary' => 'host_address_ipv4',
-                                                 'display_name' => 'host_addresses_ipv4',
-                                                 'dynamic' => true,
-                                                 'hidden' => true,
-                                                 'semantic_type' => { ':array' => 'host_address_ipv4' }
-          },
-          'fqdn' =>             { 'required' => false,
-                                  'read_only' => true,
-                                  'is_port' => true,
-                                  'cannot_change' => false,
-                                  'data_type' => 'string',
-                                  'display_name' => 'fqdn',
-                                  'dynamic' => true,
-                                  'hidden' => true
-          },
-          'node_components' =>             { 'required' => false,
-                                             'read_only' => true,
-                                             'is_port' => true,
-                                             'cannot_change' => false,
-                                             'data_type' => 'json',
-                                             'display_name' => 'node_components',
-                                             'dynamic' => true,
-                                             'hidden' => true
-          }
-       },
-       'node_interface' =>        { 'eth0' => { 'type' => 'ethernet', 'display_name' => 'eth0' } }
+       'ui' =>  { 'images' => { 'tiny' => '', 'tnail' => info[:png], 'display' => info[:png] } },
+       # TODO: should mark other levels as complete
+       'attribute' => DataSourceUpdateHash.new(attributes).mark_as_complete,
+       'node_interface' => { 'eth0' => { 'type' => 'ethernet', 'display_name' => 'eth0' } }
      }
 
      if node_binding_rs_id = node_info_binding_ruleset_id(info, opts)
@@ -214,24 +196,7 @@ module XYZ
    end
 
    def self.null_node_info(opts = {})
-     ret = node_info({ display_name: 'null-node-template' }, opts)
-     (ret['attribute'] ||= {}).merge!(null_node_info_attributes(opts))
-     ret
-   end
-
-   def self.null_node_info_attributes(_opts = {})
-     {
-       'os_identifier' => {
-         'required' => true,
-         'data_type' => 'string',
-         'display_name' => 'os_identifier'
-       },
-       'instance_size' => {
-         'required' => false,
-         'data_type' => 'string',
-         'display_name' => 'instance_size'
-       }
-     }
+     node_info({ display_name: 'null-node-template' }, opts)
    end
 
    def self.node_info_binding_ruleset_id(info, opts = {})

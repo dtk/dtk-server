@@ -35,8 +35,8 @@ module DTK; class CommandAndControlAdapter::Ec2
         update_tags!
         update_key_name
         update_availability_zone!
-        update_vpc_info?
-        update_block_device_mapping!
+        update_vpc_info!
+        update_block_device_mapping?
         update_user_data!
         update_client_token?
       end
@@ -61,12 +61,12 @@ module DTK; class CommandAndControlAdapter::Ec2
         # nothing needs to be set since teh subnet is tied to an availability zone
       end
       
-      def update_vpc_info?
+      def update_vpc_info!
         associate_public_ip = true #TODO: DTK-2489 stub value; needs fixing
         merge!(subnet_id: @reified_node.eth0_vpc_subnet_id, associate_public_ip: associate_public_ip)
       end
 
-      def update_block_device_mapping!
+      def update_block_device_mapping?
         root_device_override_attrs = { 'Ebs.DeleteOnTermination' => 'true' }
         # TODO: DTK-2489: put root_device_size in reified node
         if root_device_size = @node.attribute.root_device_size

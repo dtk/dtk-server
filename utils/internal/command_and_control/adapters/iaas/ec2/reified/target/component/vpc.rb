@@ -20,12 +20,12 @@ module DTK; module CommandAndControlAdapter
   class Ec2::Reified::Target
     class Component
       class Vpc < self
-        Attributes = [:id, :region, :aws_access_key_id, :aws_secret_access_key, :default_keypair, :cidr_block]
+        Attributes = [:vpc_id, :region, :aws_access_key_id, :aws_secret_access_key, :default_keypair, :cidr_block]
 
         DefaultRegion = 'us-east-1'
         def initialize(reified_target, vpc_service_component)
           super(reified_target, vpc_service_component)
-          @id = nil # for when id gets propagated from vpc_subnet
+          @vpc_id = nil # for when vpc_id gets propagated from vpc_subnet
         end 
 
         def region
@@ -35,11 +35,10 @@ module DTK; module CommandAndControlAdapter
         # Returns an array of violations; if no violations [] is returned
         def validate_and_fill_in_values!
           ret = []
-          if id
-            unless @id
-              # TODO: validate if @id is a valid vpc id
-              # validate_vpc id
-              # @id = ..
+          if vpc_id
+            unless @vpc_id
+              # TODO: validate if @vpc_id is a valid vpc id
+              # @vpc_id = ..
             end
           end
           ret += validate_default_keypair
@@ -49,16 +48,16 @@ module DTK; module CommandAndControlAdapter
           ret
         end
 
-        #once @id is set dont want clear_all_attribute_caches! to change it
+        #once @vpc_id is set dont want clear_all_attribute_caches! to change it
         def id
-          @id || super
+          @vpc_id || super
         end
-        def id=(vpc_id)
-          @id = update_and_propagate_dtk_attribute(:id, vpc_id) 
+        def vpc_id=(vpc_id)
+          @vpc_id = update_and_propagate_dtk_attribute(:vpc_id, vpc_id) 
           # clear_all_attribute_caches! is needed to avoid having component dependending on vpc_id having
           # cached value
           clear_all_attribute_caches!
-          @id
+          @vpc_id
         end
 
         def credentials_with_region
@@ -80,11 +79,11 @@ module DTK; module CommandAndControlAdapter
 
         def set_attributes_from_aws!
           unless cidr_block
-            unless id
-              Log.error("Unexpected that id is not set")
+            unless vpc_id
+              Log.error("Unexpected that vpc_id is not set")
               return
             end
-            unless aws_vpc = aws_conn.vpc?(id)
+            unless aws_vpc = aws_conn.vpc?(vpc_id)
               Log.error("Unexpected that cannot find aws_vpc")
               return
             end

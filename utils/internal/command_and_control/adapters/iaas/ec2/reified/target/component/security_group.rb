@@ -20,7 +20,7 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component
       class SecurityGroup < self
-        Attributes = [:group_name, :id, :vpc_id]
+        Attributes = [:group_name, :group_id, :vpc_id]
       
         def initialize(reified_target, sg_service_component)
           super(reified_target, sg_service_component)
@@ -28,7 +28,7 @@ module DTK
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_fill_in_values!
-          return [Violation::ReqUnsetAttrs.new(self, :group_name, :id)] if !id and !group_name
+          return [Violation::ReqUnsetAttrs.new(self, :group_name, :group_id)] if !group_id and !group_name
           validate_and_fill_in_values_name_and_id!
         end
 
@@ -37,7 +37,7 @@ module DTK
         def validate_and_fill_in_values_name_and_id!
           ret = []
           aws_sg_from_id = aws_sg_from_name = nil
-          if id
+          if group_id
             aws_sg_from_id, violations = validate_group_id
             ret += violations
             if aws_sg_from_id and !group_name
@@ -48,8 +48,8 @@ module DTK
           if group_name
             aws_sg_from_name, violations = validate_group_name
             ret += violations
-            if aws_sg_from_name and !id
-              update_and_propagate_dtk_attributes({id: aws_sg_from_name[:group_id]} , prune_nil_values: true)
+            if aws_sg_from_name and !group_id
+              update_and_propagate_dtk_attributes({group_id: aws_sg_from_name[:group_id]} , prune_nil_values: true)
             end
           end
 
@@ -64,7 +64,7 @@ module DTK
         # returns [aws_security_group, violations]
         def validate_group_id
           violations = []
-          unless aws_security_group = aws_conn.security_group_by_id?(id)
+          unless aws_security_group = aws_conn.security_group_by_id?(group_id)
             legal_ids = security_groups_in_vpc.map { |sg| sg[:group_id] }
             violations = [Violation::InvalidSecurityGroup::Id.new(group_id, vpc_id, legal_ids)]
           end

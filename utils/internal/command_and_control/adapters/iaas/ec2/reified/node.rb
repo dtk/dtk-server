@@ -34,7 +34,7 @@ module DTK; module CommandAndControlAdapter
           }
 
         end
-        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :keypair, :security_group_id, :security_group_name, :vpc_images, :region, :os_type, :size, :image_label]
+        Attributes = [:ami, :eth0_vpc_subnet_id, :instance_type, :keypair, :security_group_id, :security_group_name, :vpc_images, :region, :os_type, :size, :image]
 
         # opts can have keys
         # :service

@@ -35,17 +35,17 @@ module DTK
           violations = []
           ami_info   = nil
           
-          image_label = reified_node.image_label
+          image = reified_node.image
           vpc_images  = reified_node.vpc_images
-          unless image_label and vpc_images
+          unless image and vpc_images
             return [ami_info, violations] 
           end
 
-          if ami_info_hash = vpc_images[image_label]
+          if ami_info_hash = vpc_images[image]
             ami_info = new(reified_node, ami_info_hash)
           else
-            legal_labels = vpc_images.keys
-            violations << Violation::IllegalAttrValue.new(reified_node, :image_label, image_label, legal_values: legal_labels) 
+            legal_images = vpc_images.keys
+            violations << Violation::IllegalAttrValue.new(reified_node, :image, image, legal_values: legal_images) 
           end
           [ami_info, violations]
         end

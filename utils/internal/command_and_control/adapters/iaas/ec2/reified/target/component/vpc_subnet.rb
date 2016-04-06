@@ -20,7 +20,7 @@ module DTK
   class CommandAndControlAdapter::Ec2::Reified::Target
     class Component
       class VpcSubnet < self
-        Attributes = [:id, :vpc_id, :cidr_block, :availability_zone]
+        Attributes = [:subnet_id, :vpc_id, :cidr_block, :availability_zone]
 
         def initialize(reified_target, vpc_subnet_service_component)
           super(reified_target, vpc_subnet_service_component)
@@ -28,10 +28,10 @@ module DTK
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_fill_in_values!
-          return([Violation::ReqUnsetAttr.new(self, :id)]) unless id
+          return([Violation::ReqUnsetAttr.new(self, :subnet_id)]) unless subnet_id
 
-          unless aws_vpc_subnet = aws_vpc_subnet?(id)
-            return [Violation::InvalidVpcSubnetId.new(id)]
+          unless aws_vpc_subnet = aws_vpc_subnet?(subnet_id)
+            return [Violation::InvalidVpcSubnetId.new(subnet_id)]
           end
 
           get_and_propagate_vpc_id(aws_vpc_subnet)
@@ -55,7 +55,7 @@ module DTK
         end
 
         def get_and_propagate_vpc_id(aws_vpc_subnet)
-          vpc_component.id = aws_vpc_subnet[:vpc_id]
+          vpc_component.vpc_id = aws_vpc_subnet[:vpc_id]
         end
       end
     end

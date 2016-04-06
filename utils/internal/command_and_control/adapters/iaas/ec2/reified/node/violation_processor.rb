@@ -52,7 +52,7 @@ module DTK
             violations = []
             unless ami # ami value will be validated during create node
               unless ami_info
-                violations << Violation::ReqUnsetAttrs.new(self, :ami, :image_label)
+                violations << Violation::ReqUnsetAttrs.new(self, :ami, :image)
               else
                 update_and_propagate_dtk_attributes(ami: ami_info.ami) 
               end

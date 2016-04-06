@@ -65,7 +65,7 @@ module Ramaze::Helper
       target = target_id ?
         id_handle(target_id, :target).create_object(model_name: :target_instance) :
         Target::Instance.get_default_target(model_handle(:target), ret_singleton_target: true, prune_builtin_target: true)
-      target || fail(DTK::ErrorUsage, "The command was called without  '-p TARGET-NAME' option and no default target has been set. You can set default target from 'service' context with 'set-default-target TARGET-NAME'")
+      target || fail(DTK::ErrorUsage, "The command was called without  '-t TARGET-NAME' option and no default target has been set. You can set default target from 'service' context with 'set-default-target TARGET-NAME'")
     end
 
     def get_default_project

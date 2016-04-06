@@ -25,12 +25,13 @@ module DTK; module CommandAndControlAdapter
       include NodeStateClassMixin
       include AddressManagementClassMixin
 
-      attr_reader :reified_node, :node, :external_ref
+      attr_reader :reified_node, :node, :external_ref, :reified_target
       def initialize(base_node, node, reified_target)
-        @external_ref = node[:external_ref] || {} # TODO: wil eventually remove 
-        @base_node    = base_node
-        @node         = node
-        @reified_node = Reified::Node.create_with_aws_conn(node, reified_target, external_ref: @external_ref)
+        @reified_target = reified_target
+        @external_ref   = node[:external_ref] || {} # TODO: wil eventually remove 
+        @base_node      = base_node
+        @node           = node
+        @reified_node   = Reified::Node.create_with_aws_conn(node, reified_target, external_ref: @external_ref)
       end
       private :initialize
       
@@ -50,7 +51,7 @@ module DTK; module CommandAndControlAdapter
         begin
           create_options = CreateOptions.new(self)
           Log.info_pp(create_options: Aux.hash_subset(create_options, AttributesForLogInfo))
-          response = conn.server_create(create_options)
+          response = @reified_node.aws_conn.server_create(create_options)
           response[:status] ||= 'succeeded'
         rescue => e
           # append region to error message
@@ -141,6 +142,7 @@ module DTK; module CommandAndControlAdapter
         @node.merge!(node_update_hash)
       end
       
+      # TODO: DTK-2489: convert below to use reified node
       def get_node_status(instance_id)
         ret = nil
         begin

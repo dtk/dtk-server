@@ -25,7 +25,7 @@ module DTK
 
       # TODO: find cleaner way than having multiple @conn objects
       def initialize(override_of_aws_params = nil)
-        Log.info("AWS credentials are provided by #{override_of_aws_params ? 'target' : 'fog credentials'}, setting up AWS connection ...")
+        Log.info("Setting up AWS connection ...")
         base_params = override_of_aws_params || get_compute_params()
         @conn = Fog::Compute::AWS.new(base_params)
         @override_conns = OverrideConnectionOptions.inject({}) do |h, (k, conn_opts)|
@@ -163,21 +163,6 @@ module DTK
         hash_form_sg unless filter.find { |k, v| hash_form_sg[k] != v }
       end
       private :filter_security_group?
-      # TODO: DTK-2489: deprecate below fro two above
-      def check_for_security_group(name, _description = nil)
-        s_group = nil
-        return unless conn.respond_to?(:security_groups)
-
-        security_groups = conn.security_groups
-        unless s_group = security_groups.get(name)
-          # if does not found by group name try search by group_id as well
-          unless s_group = security_groups.get_by_id(name)
-            fail ErrorUsage.new("Not able to find IAAS security group with name or id '#{name}' aborting action, please create necessery security group")
-          end
-        end
-
-        s_group
-      end
 
       def describe_availability_zones
         conn.describe_availability_zones()
@@ -207,35 +192,11 @@ module DTK
           hash_form(aws_key_pair)
         end
       end
-      # TODO: DTK-2489: deprecate below fro two above
-      def check_for_key_pair(name)
-        unless key_pair = conn.key_pairs.get(name)
-          fail ErrorUsage.new("Not able to find IAAS keypair with name '#{name}' aborting action, please create necessery keypair")
-          # key_pair = conn.key_pairs.create(:name => name)
-        end
-        key_pair
-      end
 
       def subnet?(subnet_id)
         if subnet = conn.subnets.get(subnet_id)
           hash_form(subnet)
         end
-      end
-
-      # TOD: DTK-2489; deprecate below
-      def check_for_subnet(subnet_id)
-        subnets = conn.subnets
-        unless subnet_obj = subnets.get(subnet_id)
-          err_msg = "Not able to find IAAS subnet with id '#{subnet_id}'"
-          if subnets.empty?
-            err_msg << '; there are no subnets created in the vpc'
-          else
-            avail_subnets = subnets.map { |s| hash_form(s)[:subnet_id] }
-            err_msg << "; set the target to use one of the available subnets: #{avail_subnets.join(', ')}"
-          end
-          fail ErrorUsage.new(err_msg)
-        end
-        subnet_obj.subnet_id
       end
 
       def allocate_elastic_ip

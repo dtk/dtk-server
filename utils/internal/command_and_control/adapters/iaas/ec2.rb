@@ -92,6 +92,7 @@ module DTK
 
       DefaultRegion = 'us-east-1'
 
+      # TODO: wil remove this
       def self.check_iaas_properties(iaas_properties, opts = {})
         ret = iaas_properties
         specified_region = iaas_properties[:region]
@@ -107,7 +108,9 @@ module DTK
         end
         (opts[:properties_to_check] || []).each do |property|
           case property
-            when :subnet then raise_error_if.invalid_subnet(iaas_properties[:subnet])
+            when :subnet 
+            # so can remove invalid_subnet
+            # raise_error_if.invalid_subnet(iaas_properties[:subnet])
             else
             Log.error("Not supporting check of property '#{property}'")
           end
@@ -127,12 +130,6 @@ module DTK
          rescue => e
           Log.info_pp(['Error_from get_availability_zones', e])
           raise ErrorUsage.new('Invalid EC2 credentials')
-        end
-
-        def invalid_subnet(subnet)
-          if subnet
-            @connection.check_for_subnet(subnet)
-          end
         end
       end
 
@@ -168,7 +165,7 @@ module DTK
         response
       end
 
-      # TODO: hacks to make sure dont delete or stop the router
+      # TODO: hacks to make sure dont delete or stop the router in multi temnant deploy
       def self.marked_donot_delete?(node)
         if instance_id = external_ref(node)[:instance_id]
           PerisistentIds.include?(instance_id)

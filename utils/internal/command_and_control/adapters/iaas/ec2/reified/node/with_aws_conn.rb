@@ -35,12 +35,12 @@ module DTK; module CommandAndControlAdapter
         end
         private :initialize
 
-        def aws_conn
-          @aws_conn ||= get_aws_conn
-        end
-
         def image
           @image ||= Image.validate_and_create_object(ami, self)
+        end
+
+        def aws_conn
+          @aws_conn ||= get_aws_conn
         end
 
         def connected_component(conn_cmp_type)

@@ -22,9 +22,13 @@ module DTK; module CommandAndControlAdapter
       class WithAwsConn < self
         r8_nested_require('with_aws_conn', 'image')
 
-        def initialize(opts = {})
+        # opts will have keys
+        #  :reified_target
+        #  :dtk_node_or_node_group
+        def initialize(opts)
+          @reified_target = opts[:reified_target]
           super(opts)
-          @reified_target = opts[:reified_target] || reified_target_from_node(opts[:dtk_node])
+
           # The attributes below get dynamically set
           @aws_conn = nil
           @image    = nil
@@ -45,10 +49,6 @@ module DTK; module CommandAndControlAdapter
 
         private
 
-        def assembly_instance
-          @reified_target.assembly_instance
-        end
-        
         def vpc_component
           connected_component(:vpc_subnet).connected_component(:vpc)
         end
@@ -64,12 +64,6 @@ module DTK; module CommandAndControlAdapter
         def get_aws_conn
           Ec2.conn(credentials_with_region)
         end
-
-        def reified_target_from_node(dtk_node)
-          fail(Error, "Unexpected that dtk_node is nil") unless dtk_node
-          Target.new(Service::Target.create_from_node(dtk_node))
-        end
-
       end
     end
   end

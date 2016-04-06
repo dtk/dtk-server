@@ -35,7 +35,7 @@
          join_type: :inner,
          convert: true,
          join_cond: { node_group_id: :node__id },
-         cols: [:id, :group_id, :display_name, :node_id, :datacenter_datacenter_id]
+         cols: [:id, :group_id, :display_name, :node_id, :datacenter_datacenter_id, :assembly_id]
        },
                                   {
                                     model_name: :node,

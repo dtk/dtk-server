@@ -518,7 +518,7 @@ module DTK; class  Assembly
       end
     end
 
-    #rturns a node group object if node_idh is a node group member of this assembly instance
+    #returns a node group object if node_idh is a node group member of this assembly instance
     def is_node_group_member?(node_idh)
       sp_hash = {
         cols: [:id, :display_name, :group_id, :node_members],

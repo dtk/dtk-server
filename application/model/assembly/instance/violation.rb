@@ -209,9 +209,10 @@ module DTK
     end
 
     class Violation
+
       class ReqUnsetAttr < self
         def initialize(attr, print_level)
-          @attr_display_name = attr.print_form(Opts.new(level: print_level))[:display_name]
+          @attr_display_name = attr_display_name(attr, print_level)
         end
 
         def type
@@ -226,7 +227,7 @@ module DTK
       class ReqUnsetAttrs < self
         def initialize(attrs, print_level)
           opts_print = Opts.new(level: print_level)
-          @attr_display_names = attrs.map { |attr| attr.print_form(opts_print)[:display_name] }
+          @attr_display_names = attrs.map { |attr| attr_display_name(attr, print_level) }
         end
 
         def type
@@ -243,7 +244,7 @@ module DTK
         # opts can have keys
         #  legal_values
         def initialize(attr, value, opts = {})
-          @attr_display_name = attr.print_form(Opts.new(level: :component))[:display_name]
+          @attr_display_name = attr_display_name(attr)
           @value             = value
           @legal_values      = opts[:legal_values]
         end
@@ -363,7 +364,12 @@ module DTK
           "There are #{@running} nodes currently running in builtin target. Unable to create #{@new} new nodes because it will exceed number of nodes allowed in builtin target (#{TARGET_BUILTIN_NODE_LIMIT})"
         end
       end
+      private
 
+      def attr_display_name(attr, print_level = :component)
+        attr.print_form(Opts.new(level: print_level, convert_node_component: true))[:display_name]
+      end
+      
     end
   end
 end

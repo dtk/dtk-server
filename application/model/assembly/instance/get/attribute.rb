@@ -66,6 +66,7 @@ module DTK; class Assembly; class Instance; module Get
 
     # moves component_attrs that are node property components to node_attrs
     def move_node_components_to_node_attrs!(node_attrs, component_attrs)
+      # TODO: unify with Attribute::PrintForm.convert_if_node_component!
       node_cmp_types = CommandAndControl.node_property_component_names.map { |n| n.gsub(/::/,'__') }
       component_attrs.reject! do |aug_attr|
         if node_cmp_types.include?(aug_attr[:nested_component][:component_type])

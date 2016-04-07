@@ -38,31 +38,47 @@ module DTK; class Assembly; class Instance; module Get
     end
 
     def get_attributes_all_levels
-      assembly_attrs = get_assembly_level_attributes()
-      component_attrs = get_augmented_nested_component_attributes()
-      node_attrs = get_augmented_node_attributes()
+      assembly_attrs = get_assembly_level_attributes
+      node_attrs, component_attrs = get_augmented_node_and_component_attributes
       assembly_attrs + component_attrs + node_attrs
     end
 
     AttributesAllLevels = Struct.new(:assembly_attrs, :component_attrs, :node_attrs)
     def get_attributes_all_levels_struct(filter_proc = nil)
       assembly_attrs = get_assembly_level_attributes(filter_proc)
-      component_atttrs = get_augmented_nested_component_attributes(filter_proc).reject do |attr|
+      node_attrs, component_attrs = get_augmented_node_and_component_attributes(filter_proc)
+      # TODO: The pruning below might go in get_augmented_node_and_component_attributes
+      component_attrs.reject! do |attr|
         (not attr[:nested_component].get_field?(:only_one_per_node)) && attr.is_title_attribute?()
       end
-      node_attrs = get_augmented_node_attributes(filter_proc)
-      AttributesAllLevels.new(assembly_attrs, component_atttrs, node_attrs)
+      AttributesAllLevels.new(assembly_attrs, component_attrs, node_attrs)
     end
 
-    def get_augmented_nested_component_attributes(filter_proc = nil)
-      get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true)
-    end
-
-    def get_augmented_node_attributes(filter_proc = nil)
-      get_objs_helper(:node_attributes, :attribute, filter_proc: filter_proc, augmented: true)
+    # returns [node_attrs, component_attrs]
+    def get_augmented_node_and_component_attributes(filter_proc = nil)
+      node_attrs = get_objs_helper(:node_attributes, :attribute, filter_proc: filter_proc, augmented: true)
+      cmp_with_iaas_node_attrs = get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
+      node_attrs += split_out_node_property_components!(cmp_with_iaas_node_attrs)
+      component_attrs = cmp_with_iaas_node_attrs # after applying split_out_node_property_components! the iaas attributes are split out
+      [node_attrs, component_attrs]
     end
 
     private
+
+    # returns node_attrs which it removes from component_attrs 
+    def split_out_node_property_components!(component_attrs)
+      node_attrs = []
+      node_cmp_types = CommandAndControl.node_property_component_names.map { |n| n.gsub(/::/,'__') }
+      component_attrs.reject! do |aug_attr|
+        if node_cmp_types.include?(aug_attr[:nested_component][:component_type])
+          # delete :nested_component key to make this a node attribute and put in noe attribute list
+          aug_attr.delete(:nested_component) 
+          node_attrs << aug_attr
+          true
+        end
+      end
+      node_attrs
+    end
 
     def get_attributes_print_form_aux(opts = Opts.new)
       filter_proc = opts[:filter_proc]

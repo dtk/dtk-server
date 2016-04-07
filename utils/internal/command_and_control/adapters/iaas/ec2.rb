@@ -42,6 +42,10 @@ module DTK
         Reified::Node.find_violations(service, params)
       end
 
+      def self.node_property_component_names
+        Reified::Node::ComponentType.names
+      end
+
       def self.find_matching_node_binding_rule(node_binding_rules, target)
         node_binding_rules.find do |r|
           conditions = r[:conditions]

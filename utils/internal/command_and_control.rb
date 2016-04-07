@@ -90,14 +90,24 @@ module DTK
       klass.pbuilderid(node)
     end
 
-    def self.find_violations_in_target_service(iaas_type, target_service, project, params = {})
-      klass = load_for_aux(:iaas, iaas_type.to_s)
-      klass.find_violations_in_target_service(target_service, project, params)
+    # Types that have Iaas service properties
+    TypesWithIaasProperties = [:ec2] # TODO: DTK-2948; need to iterate over all
+
+    def self.find_violations_in_target_service(target_service, project, params = {})
+      TypesWithIaasProperties.inject([]) do |a, iaas_type|
+        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_target_service(target_service, project, params)
+      end
     end
 
-    def self.find_violations_in_node_components(iaas_type, service, project, params = {})
-      klass = load_for_aux(:iaas, iaas_type.to_s)
-      klass.find_violations_in_node_components(service, project, params)
+    def self.find_violations_in_node_components(service, project, params = {})
+      TypesWithIaasProperties.inject([]) do |a, iaas_type|
+        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_node_components(service, project, params)
+      end
+    end
+
+    # returns name of all components that capture the node property
+    def self.node_property_component_names
+      TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_component_names }
     end
 
     def self.references_image?(target, node_external_ref)

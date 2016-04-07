@@ -28,6 +28,10 @@ module DTK
           mapping[cmp_type]
         end
 
+        def names
+          mapping.values
+        end
+
         def method_missing(method, *args, &body)
           mapping[method] || super
         end
@@ -35,7 +39,7 @@ module DTK
         def respond_to?(method)
           all.include?(method)
         end
-        
+
         private
         
         def mapping

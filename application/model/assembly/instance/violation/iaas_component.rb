@@ -18,20 +18,13 @@
 module DTK
   class Assembly::Instance
     module IaasComponent
-      IAAS_TYPES = [:ec2]  # TODO: DTK-2948; need to iterate over all
       def self.find_violations(assembly_instance, components, project, params = {})
-        ret = []
         if target_service = Service::Target.create_from_assembly_instance?(assembly_instance, components: components)
-          IAAS_TYPES.each do |iaas_type|
-            ret += CommandAndControl.find_violations_in_target_service(iaas_type, target_service, project, params) 
-          end
+          CommandAndControl.find_violations_in_target_service(target_service, project, params) 
         else
           service = Service.new(assembly_instance, components: components)
-          IAAS_TYPES.each do |iaas_type|
-            ret += CommandAndControl.find_violations_in_node_components(iaas_type, service, project, params) 
-          end
+          CommandAndControl.find_violations_in_node_components(service, project, params) 
         end
-        ret
       end
     end
 

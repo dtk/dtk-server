@@ -57,27 +57,30 @@ module DTK; class Assembly; class Instance; module Get
     # returns [node_attrs, component_attrs]
     def get_augmented_node_and_component_attributes(filter_proc = nil)
       node_attrs = get_objs_helper(:node_attributes, :attribute, filter_proc: filter_proc, augmented: true)
-      cmp_with_iaas_node_attrs = get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
-      node_attrs += split_out_node_property_components!(cmp_with_iaas_node_attrs)
-      component_attrs = cmp_with_iaas_node_attrs # after applying split_out_node_property_components! the iaas attributes are split out
+      component_attrs = get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
+      move_node_components_to_node_attrs!(node_attrs, component_attrs)
       [node_attrs, component_attrs]
     end
 
     private
 
-    # returns node_attrs which it removes from component_attrs 
-    def split_out_node_property_components!(component_attrs)
-      node_attrs = []
+    # moves component_attrs that are node property components to node_attrs
+    def move_node_components_to_node_attrs!(node_attrs, component_attrs)
       node_cmp_types = CommandAndControl.node_property_component_names.map { |n| n.gsub(/::/,'__') }
       component_attrs.reject! do |aug_attr|
         if node_cmp_types.include?(aug_attr[:nested_component][:component_type])
-          # delete :nested_component key to make this a node attribute and put in noe attribute list
-          aug_attr.delete(:nested_component) 
-          node_attrs << aug_attr
-          true
+          # check if this attribute is already a node attribute
+          # TODO: DTK-2489: donthave these in two places
+          name = aug_attr[:display_name]
+          node_id = aug_attr[:node][:id]
+          unless node_attrs.find { |node_attr| node_attr[:display_name] == name and node_attr[:node][:id] == node_id }
+            # delete :nested_component key to make this a node attribute and put in noe attribute list
+            aug_attr.delete(:nested_component) 
+            node_attrs << aug_attr
+          end
+          true # true so gets deleted if node_cmp_types contains aug_attr
         end
       end
-      node_attrs
     end
 
     def get_attributes_print_form_aux(opts = Opts.new)

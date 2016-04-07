@@ -110,6 +110,18 @@ module DTK
       TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_component_names }
     end
 
+    def self.node_property_legal_attributes
+      TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_legal_attributes }
+    end
+
+    def self.node_property_component
+      if node_property_component_names.size == 1
+        node_property_component_names.first
+      else
+        fail Error.new("Currently not supported to have multiple node components!")
+      end
+    end
+
     def self.references_image?(target, node_external_ref)
       klass = load_iaas_for(target: target)
       klass.references_image?(node_external_ref)

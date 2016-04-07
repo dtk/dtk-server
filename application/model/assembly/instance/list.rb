@@ -194,6 +194,9 @@ module DTK; class  Assembly
         aug_cmps      = get_augmented_components(opts)
         node_cmp_name = opts[:node_cmp_name]
 
+        # DTK-2535 1. In service instance, hide the 'node property components'
+        list_components__remove_node_property_components!(aug_cmps)
+
         cmps_print_form = aug_cmps.map do |r|
           namespace      = r[:namespace]
           node_name      = "#{r[:node][:display_name]}/"
@@ -404,6 +407,11 @@ module DTK; class  Assembly
           end
         end
         OutputTable.join(cmps_print_form, join_columns, &main_table_sort)
+      end
+
+      def list_components__remove_node_property_components!(aug_cmps)
+        node_property_cmps = CommandAndControl.node_property_component_names
+        aug_cmps.reject!{ |cmp| node_property_cmps.include?(cmp[:component_type].gsub('__', '::')) }
       end
 
       def ret_ndx_component_print_form(aug_cmps, cmps_with_print_form)

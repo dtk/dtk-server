@@ -80,7 +80,7 @@ module DTK
       private
 
       def ret_type(dtk_component)
-        dtk_component.get_field?(:component_type).gsub('__', '::') if dtk_component
+        dtk_component.get_field?(:component_type).gsub('__', '::')
       end
     end
   end

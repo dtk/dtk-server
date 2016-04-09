@@ -316,7 +316,7 @@ module DTK
       end
 
       module_dsl_info = service_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
-      response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs)
+      response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs, :pull_changes)
       # the possible keys in response are (with the subkeys) are
       #  :dsl_parse_error:
       #  :dsl_updated_info:

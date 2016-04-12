@@ -290,6 +290,9 @@ module DTK; class Task
           fail Error.new("Unexpected that nil is in config_agent_types: #{ca_types.inspect}")
         end
 
+        # remove no_op
+        ca_types = ca_types - ['no_op']
+
         if ca_types.size == 1
           ca_types.first
         elsif ca_types.empty?

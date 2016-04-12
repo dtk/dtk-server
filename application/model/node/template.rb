@@ -128,6 +128,7 @@ module DTK
         end.compact.uniq
       end
 
+      # ODO: DTK-2489: find_matching_node_template will be deprecated
       def self.find_matching_node_template(target, opts = {})
         node_binding_rs = opts[:node_binding_ruleset]
         (node_binding_rs && node_binding_rs.find_matching_node_template(target)) || null_node_template(target.model_handle(:node))
@@ -144,13 +145,7 @@ module DTK
 
         image_type = matching_node_bindings.first[:rules].first[:node_template][:type].to_sym
 
-        # TODO: commented out below until can use new signature where pass in target to
-        # get context, which includes image_type and if ec2 region
-        # unless CommandAndControl.existing_image?(new_image_id,image_type)
-        #  raise ErrorUsage.new("Image id (#{new_image_id}) does not exist")
-        # end
-
-        # update daatstructute than model
+        # update data structure then model
         matching_node_bindings.each do |nb|
           nb[:rules].each do |r|
             nt = r[:node_template]
@@ -175,7 +170,6 @@ module DTK
         end
       end
 
-      # TODO: make private
       def self.null_node_template(model_handle)
         sp_hash = {
           cols: [:id, :group_id, :display_name],

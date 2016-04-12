@@ -40,9 +40,20 @@ module DTK
       'node template'
     end
 
+    def node_template_from_match_hash?(match_hash)
+      if match = get_field?(:rules).find { |rule| rule_matches_condition?(rule, match_hash) }
+        get_node_template(match[:node_template])
+      end
+    end
+    def rule_matches_condition?(rule, match_hash)
+      ! rule[:conditions].find { |k, v| match_hash[k] != v }
+    end
+    private :rule_matches_condition?
+    # TODO: DTK-2489: deperacet below for above
     def find_matching_node_template(target)
-      match = CommandAndControl.find_matching_node_binding_rule(get_field?(:rules), target)
-      match && get_node_template(match[:node_template])
+      if match = CommandAndControl.find_matching_node_binding_rule(get_field?(:rules), target)
+        get_node_template(match[:node_template])
+      end
     end
 
     def clone_or_match(target, opts = {})

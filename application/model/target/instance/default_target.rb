@@ -18,14 +18,30 @@
 module DTK; class Target
   class Instance
     module DefaultTarget
-      def self.get(target_mh, cols = [])
-        cols = [:id, :display_name, :group_id] if cols.empty?
+      # opts can have keys
+      #   :ret_singleton_target - Boolean (default: false); if true means if no default_target
+      #                           it looks to see if there is a singleton target 
+      #   :prune_builtin_target - Boolean (default: false; if true means prune out  builtin target
+      def self.get(target_mh, opts = {})
+        cols = [:id, :display_name, :group_id, :parent_id]
         sp_hash = {
           cols: cols,
           filter: [:eq, :is_default_target, true]
         }
-        ret = Target::Instance.get_obj(target_mh, sp_hash)
-        ret && ret.create_subclass_obj(:target_instance)
+        targets = Target::Instance.get(target_mh, sp_hash)
+        if opts[:prune_builtin_target]
+          targets.reject!(&:is_builtin_target?) 
+        end
+        if opts[:ret_singleton_target] and targets.size == 0
+          targets = Target::Instance.get(target_mh, cols: cols)
+          targets.reject!(&:is_builtin_target?) if opts[:prune_builtin_target]
+        end
+        if targets.size < 2
+          targets.first
+        else
+          Log.error("Unexpected that more than 1 target is returned") unless opts[:ret_singleton_target]
+          nil
+        end
       end
 
       # returns current_default_target
@@ -33,7 +49,7 @@ module DTK; class Target
       #   :current_default_target (computed already)
       #   :update_workspace_target
       def self.set(target, opts = {})
-        ret = current_default_target = opts[:current_default_target] || get(target.model_handle(), [:display_name])
+        ret = current_default_target = opts[:current_default_target] || get(target.model_handle())
         return ret unless target
 
         if current_default_target && (current_default_target.id == target.id)

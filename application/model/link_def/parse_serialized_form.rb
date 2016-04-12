@@ -113,10 +113,23 @@ module DTK; class LinkDef
         parsed_evs = parse_possible_link_on_create_events(evs)
         (ret[:events] ||= {}).merge!(parsed_evs) if parsed_evs
       end
+
       attribute_mappings = possible_link['attribute_mappings'] || []
+      constraints = possible_link['constraints'] || []
+      preferences = possible_link['preferences'] || []
+
       unless attribute_mappings.empty?
         ret[:attribute_mappings] = attribute_mappings.map { |am| parse_possible_link_attribute_mapping(am) }
       end
+
+      unless constraints.empty?
+        ret[:constraints] = constraints
+      end
+
+      unless preferences.empty?
+        ret[:preferences] = preferences
+      end
+
       ret
     end
 

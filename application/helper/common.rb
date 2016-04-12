@@ -61,24 +61,11 @@ module Ramaze::Helper
     end
 
     # looks for default if no target is given
-    def create_target_instance_with_default(target_id_field = :target_id, _model_class = nil)
-      if target_id = ret_request_params(target_id_field)
-        create_obj(target_id_field, Target::Instance)
-      else
-        Target::Instance.get_default_target(model_handle(:target))
-      end
-    end
-
-    def target_idh_with_default(target_id = nil)
-      if target_id
-        id_handle(target_id, :target)
-      else
-        if default_target = Target::Instance.get_default_target(model_handle(:target))
-          default_target.id_handle()
-        else
-          fail DTK::ErrorUsage.new("If an explicit target is not given (with option '-t TARGET'), this command uses the default target, but a default target has not been set")
-        end
-      end
+    def target_with_default(target_id)
+      target = target_id ?
+        id_handle(target_id, :target).create_object(model_name: :target_instance) :
+        Target::Instance.get_default_target(model_handle(:target), ret_singleton_target: true, prune_builtin_target: true)
+      target || fail(DTK::ErrorUsage, "The command was called without  '-t TARGET-NAME' option and no default target has been set. You can set default target from 'service' context with 'set-default-target TARGET-NAME'")
     end
 
     def get_default_project

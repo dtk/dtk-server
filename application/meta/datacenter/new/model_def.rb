@@ -47,14 +47,11 @@
     }
   },
   one_to_many:   [
-   :data_source,
    :node,
    :state_change,
    :node_group_relation,
    :attribute_link,
    :port_link,
-   :network_partition,
-   :network_gateway,
    :component,
    :violation
   ],

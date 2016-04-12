@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2010-2016 dtk contributors
 #
 # This file is part of the dtk project.
@@ -153,6 +152,23 @@ module DTK
         end
       end
 
+      def self.provider_exists?(project_idh, provider_name)
+        sp_hash = {
+          cols: [:id],
+          filter: [:and, [:eq, :display_name, provider_display_name(provider_name)],
+                   [:eq, :project_id, project_idh.get_id()],
+                   [:eq, :type, 'template']]
+        }
+        get_obj(project_idh.createMH(:target_template), sp_hash)
+      end
+
+      def self.provider_display_name(provider_name)
+        # "#{provider_name}#{DisplayNameSufix}"
+        provider_name
+      end
+      # removed '-template' from provider display_name (ticket DTK-1480)
+      # DisplayNameSufix = '-template'
+
       private
 
       def base_name
@@ -164,21 +180,6 @@ module DTK
         [:eq, :type, 'template']
       end
 
-      def self.provider_display_name(provider_name)
-        # "#{provider_name}#{DisplayNameSufix}"
-        provider_name
-      end
-      # removed '-template' from provider display_name (ticket DTK-1480)
-      # DisplayNameSufix = '-template'
-
-      def self.provider_exists?(project_idh, provider_name)
-        sp_hash = {
-          cols: [:id],
-          filter: [:and, [:eq, :display_name, provider_display_name(provider_name)],
-                   [:eq, :project_id, project_idh.get_id()]]
-        }
-        get_obj(project_idh.createMH(:target_template), sp_hash)
-      end
     end
   end
 end

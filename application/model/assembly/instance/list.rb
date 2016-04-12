@@ -49,32 +49,11 @@ module DTK; class  Assembly
         assembly.get_field?(:display_name)
       end
 
-      def get_last_task_run_status(assembly_rows, assembly_mh)
-        add_last_task_run_status!(assembly_rows, assembly_mh)
-      end
-
       def add_last_task_run_status!(assembly_rows, assembly_mh)
-        sp_hash = {
-          cols: [:id, :started_at, :assembly_id, :status],
-          filter: [:oneof, :assembly_id, assembly_rows.map { |r| r[:id] }]
-        }
-        ndx_task_rows = {}
-        get_objs(assembly_mh.createMH(:task), sp_hash).each do |task|
-          next unless task[:started_at]
-          assembly_id = task[:assembly_id]
-          if pntr = ndx_task_rows[assembly_id]
-            if task[:started_at] > pntr[:started_at]
-              ndx_task_rows[assembly_id] =  task.slice(:status, :started_at)
-            end
-          else
-            ndx_task_rows[assembly_id] = task.slice(:status, :started_at)
-          end
-        end
-        assembly_rows.each do |r|
-          if node = r[:node]
-            if last_task_run_status = ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status]
-              r[:last_task_run_status] = last_task_run_status
-            end
+        ndx_status = get_ndx_last_task_run_status(assembly_rows, assembly_mh)
+        assembly_rows.each do |r| 
+          if last_task_run_status = ndx_status[r.id]
+            r[:last_task_run_status] = last_task_run_status
           end
         end
         assembly_rows
@@ -174,8 +153,10 @@ module DTK; class  Assembly
             external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
           end
           if target = node[:target]
-            target[:iaas_properties][:security_group] ||=
-              target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
+            if target[:iaas_properties]
+              target[:iaas_properties][:security_group] ||=
+                target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
+            end
           end
           node.sanitize!()
 
@@ -212,6 +193,9 @@ module DTK; class  Assembly
       def list_components(opts = Opts.new)
         aug_cmps      = get_augmented_components(opts)
         node_cmp_name = opts[:node_cmp_name]
+
+        # DTK-2535 1. In service instance, hide the 'node property components'
+        list_components__remove_node_property_components!(aug_cmps)
 
         cmps_print_form = aug_cmps.map do |r|
           namespace      = r[:namespace]
@@ -423,6 +407,11 @@ module DTK; class  Assembly
           end
         end
         OutputTable.join(cmps_print_form, join_columns, &main_table_sort)
+      end
+
+      def list_components__remove_node_property_components!(aug_cmps)
+        node_property_cmps = CommandAndControl.node_property_component_names
+        aug_cmps.reject!{ |cmp| node_property_cmps.include?(cmp[:component_type].gsub('__', '::')) }
       end
 
       def ret_ndx_component_print_form(aug_cmps, cmps_with_print_form)

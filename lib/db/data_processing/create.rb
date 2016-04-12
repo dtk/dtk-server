@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 # TODO: need to refactor to make more efficient
-module XYZ
+module DTK
   class DB
     module DataProcessingCreate
       # creates a new instance w/ref_num bumped if needed
@@ -26,12 +26,12 @@ module XYZ
         if id_handle.is_top?()
           id_handle
         end
-  id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: true
-
+        id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: true
+        
         #check if instance or factory
         if id_info[:is_factory]
           factory_idh = id_handle.createIDH(uri: id_info[:uri], is_factory: true)
-    create_from_hash_with_factory(factory_idh, hash, opts)
+          create_from_hash_with_factory(factory_idh, hash, opts)
         else
           hash.map do|relation_type, child_hash|
             factory_info = IDInfoTable.get_factory_id_handle(id_handle, relation_type)
@@ -40,13 +40,13 @@ module XYZ
           end.flatten
         end
       end
-
+      
       # TODO: this can be optimized and simplified
       def create_from_select(model_handle, field_set, select_ds, override_attrs = {}, opts = {})
         # TODO: temp for debugging; there are top level objects that can mistakenly trigger this
         unless model_handle[:parent_model_name]
           unless  (not Model.has_group_id_col?(model_handle)) ||
-              [:repo, :datacenter, :library, :task, :repo_user, :repo_user_acl, :repo_remote, :namespace].include?(model_handle[:model_name])
+              [:repo, :target, :datacenter, :library, :task, :repo_user, :repo_user_acl, :repo_remote, :namespace].include?(model_handle[:model_name])
             Log.info_pp(['missing :parent_model_name in create_from_select', model_handle, caller[0..10]])
           end
         end

@@ -126,17 +126,15 @@ module XYZ
       ret_global_fks = nil
       fks.each_pair do |fk_rel_uri_x, info|
         fk_rel_uri = ret_rebased_uri(fk_rel_uri_x, prefixes, container_uri)
-  fk_rel_id_handle = IDHandle[c: c, uri: fk_rel_uri]
-  info.each_pair do |col, ref_uri_x|
+        fk_rel_id_handle = IDHandle[c: c, uri: fk_rel_uri]
+        info.each_pair do |col, ref_uri_x|
           ref_uri = ret_rebased_uri(ref_uri_x, prefixes, container_uri)
-    ref_id_info = get_row_from_id_handle(IDHandle[c: c, uri: ref_uri])
+          ref_id_info = get_row_from_id_handle(IDHandle[c: c, uri: ref_uri])
           unless ref_id_info && ref_id_info[:id]
             if col.create_ref_object
-              # TODO: check whether should also populate ds_key; may not be needed because
-              # of relation between ds_key and relative distinguished name
               idh = IDHandle[c: c, uri: ref_uri]
               create_simple_instance?(idh, set_display_name: true)
-        ref_id_info = get_row_from_id_handle(idh)
+              ref_id_info = get_row_from_id_handle(idh)
             else
               unless opts[:ret_global_fks]
                 Log.error("In import_into_model cannot find object with uri #{ref_uri}")
@@ -149,7 +147,7 @@ module XYZ
               next
             end
           end
-    update_instance(fk_rel_id_handle, col.to_sym =>  ref_id_info[:id])
+          update_instance(fk_rel_id_handle, col.to_sym =>  ref_id_info[:id])
         end
       end
       ret_global_fks
@@ -162,8 +160,6 @@ module XYZ
         ref_id_info = get_row_from_id_handle(IDHandle[c: c, uri: ref_uri])
           unless ref_id_info && ref_id_info[:id]
             if col.create_ref_object
-              # TODO: check whether should also populate ds_key; may not be needed because
-              # of relation between ds_key and relative distinguished name
               idh = IDHandle[c: c, uri: ref_uri]
               create_simple_instance?(idh, set_display_name: true)
               ref_id_info = get_row_from_id_handle(idh)

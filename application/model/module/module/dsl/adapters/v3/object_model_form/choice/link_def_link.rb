@@ -33,10 +33,15 @@ module DTK; class ModuleDSL; class V3
 
       def convert(link_def_link, opts = {})
         in_attr_mappings = link_def_link['attribute_mappings']
-        if in_attr_mappings.nil?
+        constraints = link_def_link['constraints']
+        preferences = link_def_link['preferences']
+
+        if in_attr_mappings.nil? && constraints.nil? && preferences.nil?
           err_msg_fragment = 'is missing the attribute mappings section'
           raise_error(link_def_link, err_msg_fragment)
-        elsif !in_attr_mappings.is_a?(Array)
+        end
+
+        if in_attr_mappings && !in_attr_mappings.is_a?(Array)
           err_msg_fragment = 'is ill-formed'
           raise_error(link_def_link, err_msg_fragment)
         end
@@ -57,14 +62,26 @@ module DTK; class ModuleDSL; class V3
           ret_info['order'] = order
         end
 
-        ret_info['attribute_mappings'] = in_attr_mappings.map { |in_am| convert_attribute_mapping(in_am, base_cmp(), dep_cmp(), opts) }
+        if in_attr_mappings
+          ret_info['attribute_mappings'] = in_attr_mappings.map { |in_am| convert_attribute_mapping(in_am, base_cmp(), dep_cmp(), opts) }
+        end
+
+        if constraints
+          ret_info['constraints'] = constraints
+        end
+
+        if preferences
+          ret_info['preferences'] = preferences
+        end
 
         set_single_possible_link!(dep_cmp(), ret_info)
+
         if @dependency_name = link_def_link['dependency_name']
           @explicit_dependency_ref = true
         else
           @dependency_name = link_def_link['name']
         end
+
         [self]
       end
 

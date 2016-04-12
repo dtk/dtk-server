@@ -35,11 +35,7 @@
    :node_group_relation,
    :attribute_link,
    :port_link, #MOD_RESTRUCT: may remove
-   :network_partition,
-   :network_gateway,
    :region,
-   :assoc_region_network,
-   :data_source,
    :constraints,
    :component_relation,
    :implementation,

@@ -17,12 +17,18 @@
 #
 module DTK
   class Assembly::Instance
-    TARGET_BUILTIN_NODE_LIMIT = R8::Config[:dtk][:target][:builtin][:node_limit].to_i
-    PROVIDER_COMP_NAME = 'iaas::ec2_account'
-    TARGET_CMP_NAME    = 'iaas::ec2_vpc'
+    class Violation
+      # could be overwritten
+      def type
+        Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
+      end
+    end
+    r8_nested_require('violation', 'iaas_component')
 
     module ViolationMixin
-      def find_violations
+      TARGET_BUILTIN_NODE_LIMIT = R8::Config[:dtk][:target][:builtin][:node_limit].to_i
+
+      def find_violations(project = nil)
         nodes_and_cmps = get_info__flat_list(detail_level: 'components').select { |r| r[:nested_component] }
         cmps = nodes_and_cmps.map { |r| r[:nested_component] }
 
@@ -32,9 +38,11 @@ module DTK
         unconn_req_service_refs = find_violations__unconn_req_service_refs()
         mod_refs_viols = find_violations__module_refs(cmps)
         num_of_target_nodes = find_violations__num_of_target_nodes()
-        target_provider_viols = find_violations__target_and_provider(cmps)
+        any_unset_attributes = ! unset_attr_viols.empty?
+        # TODO: might make below more general to look for seamntic violations; also add checks on attribute value constraints
+        iaas_component_viols = IaasComponent.find_violations(self, cmps, project, any_unset_attributes: any_unset_attributes)
 
-        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + target_provider_viols
+        unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + iaas_component_viols
       end
 
       private
@@ -43,16 +51,15 @@ module DTK
         filter_proc = lambda { |a| a.required_unset_attribute?() }
         assembly_attr_viols = get_assembly_level_attributes(filter_proc).map { |a| Violation::ReqUnsetAttr.new(a, :assembly) }
         filter_proc = lambda { |r| r[:attribute].required_unset_attribute?() }
-        component_attr_viols = get_augmented_nested_component_attributes(filter_proc).map { |a| Violation::ReqUnsetAttr.new(a, :component) }
-
-        node_attributes = get_augmented_node_attributes(filter_proc)
+        node_attrs, component_attrs = get_augmented_node_and_component_attributes(filter_proc)
+        component_attr_viols = component_attrs.map { |a| Violation::ReqUnsetAttr.new(a, :component) }
         # remove attribute violations if assembly wide node
-        node_attributes.delete_if do |n_attr|
+        node_attrs.delete_if do |n_attr|
           if node = n_attr[:node]
             Node.is_assembly_wide_node?(node)
           end
         end
-        node_attr_viols = node_attributes.map { |a| Violation::ReqUnsetAttr.new(a, :node) }
+        node_attr_viols = node_attrs.map { |a| Violation::ReqUnsetAttr.new(a, :node) }
 
         assembly_attr_viols + component_attr_viols + node_attr_viols
       end
@@ -165,27 +172,6 @@ module DTK
         ret
       end
 
-      def find_violations__target_and_provider(cmps)
-        # ap cmps.first.get_component_with_attributes_unraveled
-        ret = []
-        if target = self.get_target
-          return ret
-        else
-          missing_cmps = []
-          provider_cmp = cmps.find{ |cmp| cmp[:display_name].eql?(PROVIDER_COMP_NAME.gsub('::', '__')) }
-          target_cmp   = cmps.find{ |cmp| cmp[:display_name].eql?(TARGET_CMP_NAME.gsub('::', '__')) }
-
-          missing_cmps << provider_cmp unless provider_cmp
-          missing_cmps << target_cmp unless target_cmp
-
-          unless missing_cmps.empty?
-            ret << Violation::ProviderOrTargetCmpsMissing.new(missing_cmps)
-          end
-        end
-
-        ret
-      end
-
       def get_parsed_info(module_branch_id, type)
         ret = nil
         cols = [:id, :type, :component_id, :service_id, :dsl_parsed]
@@ -223,9 +209,10 @@ module DTK
     end
 
     class Violation
+
       class ReqUnsetAttr < self
-        def initialize(attr, type)
-          @attr_display_name = attr.print_form(Opts.new(level: type))[:display_name]
+        def initialize(attr, print_level)
+          @attr_display_name = attr_display_name(attr, print_level)
         end
 
         def type
@@ -234,6 +221,42 @@ module DTK
 
         def description
           "Attribute (#{@attr_display_name}) is required, but unset"
+        end
+      end
+
+      class ReqUnsetAttrs < self
+        def initialize(attrs, print_level)
+          opts_print = Opts.new(level: print_level)
+          @attr_display_names = attrs.map { |attr| attr_display_name(attr, print_level) }
+        end
+
+        def type
+          :required_unset_attributes
+        end
+
+        def description
+          aug_attrs_print_form = @attr_display_names.join(', ')
+          "At least one of the attributes (#{aug_attrs_print_form}) is required to be set"
+        end
+      end
+
+      class IllegalAttrValue < self
+        # opts can have keys
+        #  legal_values
+        def initialize(attr, value, opts = {})
+          @attr_display_name = attr_display_name(attr)
+          @value             = value
+          @legal_values      = opts[:legal_values]
+        end
+
+        def type
+          :illegal_attribute_value
+        end
+
+        def description
+          ret = "Attribute '#{@attr_display_name}' has illegal value '#{@value}'"
+          ret << "; legal values are: #{@legal_values.join(', ')}" if @legal_values
+          ret
         end
       end
 
@@ -341,21 +364,12 @@ module DTK
           "There are #{@running} nodes currently running in builtin target. Unable to create #{@new} new nodes because it will exceed number of nodes allowed in builtin target (#{TARGET_BUILTIN_NODE_LIMIT})"
         end
       end
+      private
 
-      class ProviderOrTargetCmpsMissing < self
-        def initialize(cmps)
-          @cmps = cmps
-        end
-
-        def type
-          :provider_or_target_cmps_missing
-        end
-
-        def description
-          is = (@cmps.size == 1) ? 'is' : 'are'
-          "Component(s) '#{@cmps.join(', ')}' required for setting up provider or target #{is} not included in the service instance"
-        end
+      def attr_display_name(attr, print_level = :component)
+        attr.print_form(Opts.new(level: print_level, convert_node_component: true))[:display_name]
       end
+      
     end
   end
 end

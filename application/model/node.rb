@@ -107,7 +107,7 @@ module DTK
       end
 
       sp_hash = {
-        cols:   opts[:cols] || [:id, :group_id, :display_name, :component_type],
+        cols:   opts[:cols] || [:id, :group_id, :display_name, :component_type, :assembly_id],
         filter: filter
       }
       components = Model.get_objs(model_handle(:component), sp_hash)
@@ -210,11 +210,6 @@ module DTK
 
     def get_target_iaas_type
       get_target().get_iaas_type()
-    end
-
-    def get_target_iaas_credentials
-      # TODO: Haris - When we support multiple IAAS we will need to modify logic here
-      get_target().get_aws_compute_params()
     end
 
     def self.get_violations(id_handles)

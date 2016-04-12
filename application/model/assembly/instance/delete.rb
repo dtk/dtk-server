@@ -28,8 +28,15 @@ module DTK; class  Assembly
         if workspace = assembly_idhs.find { |idh| Workspace.is_workspace?(idh.create_object()) }
           fail ErrorUsage.new('Cannot delete a workspace')
         end
+
+        # first check if target with service instances, then Delete.contents
+        target_idhs_to_delete = Delete.target_idhs_to_delete?(assembly_idhs)
+
         Delete.contents(assembly_idhs, opts)
-        delete_instances(assembly_idhs)
+
+        ret = delete_instances(assembly_idhs)
+        delete_instances(target_idhs_to_delete) unless target_idhs_to_delete.empty?
+        ret
       end
 
       def delete_contents(assembly_idhs, opts = {})
@@ -126,10 +133,10 @@ module DTK; class  Assembly
       def self.contents(assembly_idhs, opts = {})
         return if assembly_idhs.empty?
         delete(get_sub_assemblies(assembly_idhs).map(&:id_handle))
-        assembly_ids = assembly_idhs.map(&:get_id)
-        idh = assembly_idhs.first
+        assembly_ids     = assembly_idhs.map(&:get_id)
+        idh              = assembly_idhs.first
+        
         Delete.assembly_modules?(assembly_idhs, opts)
-        # Delete.assembly_modules? needs to be done before Delete.assembly_nodes
         Delete.assembly_nodes(idh.createMH(:node), assembly_ids, opts)
         Delete.task_templates(idh.createMH(:task_template), assembly_ids)
       end
@@ -178,6 +185,52 @@ module DTK; class  Assembly
             end
         end
         ret
+      end
+
+      # Returns the target_ids to delete
+      def self.target_idhs_to_delete?(assembly_idhs)
+        ndx_targets_to_delete = {}
+        assembly_idhs.each do |assembly_idh|
+          assembly    = assembly_idh.create_object
+          assembly_id = assembly.id
+          if target = Service::Target.target_when_target_assembly_instance?(assembly)
+            dep_assemblies = Assembly::Instance.get(target.model_handle(:assembly_instance), target_idh: target.id_handle)
+            dep_assemblies.reject!{ |a| a.id == assembly_id }
+
+            # pull out workspace assembly if it is in dep_assemblies
+            workspace = nil
+            dep_assemblies.reject! { |a| workspace = Workspace.workspace?(a) }
+
+            unless dep_assemblies.empty?
+              dep_assembly_names = dep_assemblies.map{ |a| a.get_field?(:display_name) }.join(', ')
+              fail ErrorUsage.new("The target service '#{assembly.get_field?(:display_name)}' cannot be deleted because the service instance(s) (#{dep_assembly_names}) are dependent on it")
+            end
+            if deleted_target_is_default?(target)
+              # make builtin target the default
+              if builtin_target = Target::Instance.get_builtin_target(target.model_handle)
+                Target::Instance.set_default_target(builtin_target)
+              end
+              # purge workspace and reset its target if workspace is non null meaning it is dependent on target
+              purge_workspace(workspace, builtin_target) if workspace
+            end
+            ndx_targets_to_delete[target.id] ||= target
+          end
+        end
+        ndx_targets_to_delete.values.map(&:id_handle)
+      end
+
+      def self.deleted_target_is_default?(target)
+        current_default_target = Target::Instance.get_default_target(target.model_handle)
+        current_default_target && current_default_target.id == target.id
+      end        
+    
+      def self.purge_workspace(workspace, new_default_target)
+        if current_workspace_target = workspace.get_target()
+          if current_workspace_target.id == target.id
+            workspace.set_target(new_default_target, mode: :from_delete_target) if new_default_target
+            workspace.purge(destroy_nodes: true)
+          end
+        end
       end
     end
   end

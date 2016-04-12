@@ -39,8 +39,8 @@ module DTK; class  Assembly; class Instance
   end
 
   module NodeStatusClassMixin
-    def summary_node_status(type,assembly_nodes)
-      NodeStatus.summary_node_status(type,assembly_nodes)
+    def summary_node_status(type,assembly_nodes, last_task_run = nil)
+      NodeStatus.summary_node_status(type, assembly_nodes, last_task_run)
     end
   end
 
@@ -51,12 +51,16 @@ module DTK; class  Assembly; class Instance
     #   'pending' - if all nodes are pending or no nodes
     #    nil - if cant tell
     # type will be :op or :admin
-    def self.summary_node_status(type,assembly_nodes)
+    def self.summary_node_status(type, assembly_nodes, last_task_run = nil)
       unless [:op,:admin].include?(type)
         raise Error.new("Illegal type (#{type})")
       end
-      
-      return 'pending' if assembly_nodes.empty?
+
+      # DTK-2523 - show running if converged and has only assembly wide node
+      if assembly_nodes.empty?
+        return last_task_run ? 'running' : 'pending'
+      end
+
       stop_found = false
       assembly_nodes.each do |node|
         case node_status(type,node)

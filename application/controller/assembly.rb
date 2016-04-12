@@ -510,7 +510,10 @@ module DTK
 
       unless (ret_request_params(:assembly_template_name) && ret_request_params(:service_module_name))
         assembly.update_object!(:version)
-        fail ErrorUsage.new("You are not allow to push updates to service module versions!") unless assembly[:version].eql?('master')
+        # TODO: see how assembly[:version] can be set to nil and fix there
+        unless assembly[:version].eql?('master') or assembly[:version].nil?
+          fail ErrorUsage.new("You are not allow to push updates to service module versions!") 
+        end
       end
 
       assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(assembly, check_frozen_branches: true)
@@ -534,7 +537,7 @@ module DTK
         opts.merge!(local_clone_dir_exists: local_clone_dir_exists)
       end
 
-      # push-assembly-updates always update master branch
+      # push-assembly-updates always updates master branch
       service_module = Assembly::Template.create_or_update_from_instance(project, assembly, service_module_name, assembly_template_name, opts.merge!(version: 'master'))
       rest_ok_response service_module.ret_clone_update_info()
     end
@@ -590,16 +593,6 @@ module DTK
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
       opts      = Opts.new
 
-      # when using stage -p parent-service, stage assembly into parent service target
-      if service_instance_id = ret_request_param_id_optional(:parent_service, Assembly::Instance)
-        service_instance = ret_id_handle_from_value(service_instance_id, Assembly::Instance).create_object(model_name: :assembly_instance)
-        service_instance.update_object!(:datacenter_datacenter_id)
-        parent_target_id = service_instance[:datacenter_datacenter_id]
-        target_id = parent_target_id if parent_target_id
-        opts.merge!(parent_service_instance: service_instance)
-      end
-
-      target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
       is_silent_fail = ret_request_param_boolean(:silent_fail) || false
       is_created = true
 
@@ -633,10 +626,6 @@ module DTK
         assembly_template = ret_assembly_template_object()
       end
 
-      if assembly_name = ret_request_params(:name)
-        opts[:assembly_name] = assembly_name
-      end
-
       if service_settings = ret_settings_objects(assembly_template)
         opts[:service_settings] = service_settings
       end
@@ -649,30 +638,62 @@ module DTK
         opts[:os_type] = os_type
       end
 
-      if auto_complete_links = ret_request_params(:auto_complete_links)
-        opts[:auto_complete_links] = auto_complete_links
-      end
-
-      if parent_service = ret_request_params(:parent_service)
-        opts[:parent_service] = parent_service
-      end
-
-      if is_target = ret_request_params(:is_target)
-        opts[:is_target] = is_target
+      if no_auto_complete = ret_request_params(:no_auto_complete)
+        opts[:no_auto_complete] = no_auto_complete
       end
 
       project = get_default_project()
       opts.merge!(project: project)
 
+      if assembly_name = ret_request_params(:name)
+        opts[:assembly_name] = assembly_name
+      end
+
+      target = nil
+      if is_target_service = ret_request_params(:is_target)
+        opts[:is_target_service] = true
+        target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
+        target = Service::Target.create_target_mock(target_name, project)
+        target_assembly_instance = ret_assembly_instance_object?(:parent_service)
+        opts.merge!(parent_service_instance: target_assembly_instance) if target_assembly_instance
+      else
+        # this case is for service instance which are staged against a target service instance
+        # which is giving  parameter 'parent-service' or getting default target 
+        if target_assembly_instance = ret_assembly_instance_object?(:parent_service)
+          opts.merge!(parent_service_instance: target_assembly_instance)
+          if target_service = Service::Target::create_from_assembly_instance?(target_assembly_instance)
+            target = target_service.target
+          end
+        else
+          target = target_with_default(target_id)
+          target_assembly_instance = Service::Target.create_from_target(target).assembly_instance
+        end
+        opts.merge!(parent_service_instance: target_assembly_instance)
+        if target
+          target_id = target.id
+          unless Service::Target.create_from_target(target).is_converged? 
+            fail ErrorUsage.new("You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and then retry this command") 
+          end
+        end
+      end
+
       begin
         new_assembly_obj = assembly_template.stage(target, opts)
       rescue DTK::ErrorUsage => e
+        # delete mocked target service instance created above
+        Target::Instance.delete_and_destroy(target) if is_target_service
         raise e unless is_silent_fail
         # in case we are using silent fail we wont response evne if there was an error
         new_assembly_obj = Assembly::Instance.find_by_name?(target, opts[:assembly_name])
         is_created = false
         # in case there is still no assembly raise error
         raise e unless new_assembly_obj
+      end
+
+      if is_target_service
+        display_name = new_assembly_obj.get_field?(:display_name)
+        ref          = display_name.downcase.gsub(/ /, '-')
+        target.update(display_name: display_name, ref: ref)
       end
 
       response = {
@@ -682,13 +703,23 @@ module DTK
           is_created: is_created
         }
       }
-      rest_ok_response(response, encode_into: :yaml)
+
+      if ret_request_params(:do_not_encode)
+        rest_ok_response(response)
+      else
+        rest_ok_response(response, encode_into: :yaml)
+      end
+    end
+
+    def rest__set_default_target
+      service_instance = ret_assembly_instance_object()
+      rest_ok_response service_instance.set_as_default_target()
     end
 
     def rest__deploy
       # stage assembly template
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)
-      target = target_idh_with_default(target_id).create_object(model_name: :target_instance)
+      target = target_with_default(target_id)
 
       # Special case to support Jenikins CLI orders, since we are not using shell we do not have access
       # to element IDs. This "workaround" helps with that.
@@ -753,7 +784,8 @@ module DTK
     #### creates tasks to execute/converge assemblies and monitor status
     def rest__find_violations
       assembly = ret_assembly_instance_object()
-      violation_objects = assembly.find_violations()
+      project  = get_default_project()
+      violation_objects = assembly.find_violations(project)
 
       violation_table = violation_objects.map do |v|
         { type: v.type(), description: v.description() }
@@ -838,6 +870,11 @@ module DTK
         return rest_ok_response(message)
       end
       task.save!()
+
+      # update assembly_wide_node admin_op_status to 'running' on converge
+      if assembly_wide_node = assembly.has_assembly_wide_node?
+        assembly_wide_node.update_admin_op_status!(:running)
+      end
 
       # TODO: clean up this part since this is doing more than creating task
       # This triggres start while in task have particpants that look for completion

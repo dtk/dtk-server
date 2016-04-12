@@ -255,6 +255,13 @@ module DTK; class Assembly; class Instance
 
     #### end: get methods around task templates
 
+    #### get methods around tasks
+    def get_last_task_run_status?
+      self.class.get_ndx_last_task_run_status([self], model_handle).values.first
+    end
+
+    #### end: get methods around tasks
+
     def get_sub_assemblies
       self.class.get_sub_assemblies([id_handle()])
     end
@@ -346,6 +353,37 @@ module DTK; class Assembly; class Instance
       end
     end
     #### end: get methods around nodes
+
+    #### get methods around tasks
+
+    # indexed by assembly id
+    def get_ndx_last_task_run_status(assembly_rows, assembly_mh)
+      ret = {}
+      sp_hash = {
+        cols: [:id, :started_at, :assembly_id, :status],
+        filter: [:oneof, :assembly_id, assembly_rows.map { |r| r[:id] }]
+      }
+      ndx_task_rows = {}
+      get_objs(assembly_mh.createMH(:task), sp_hash).each do |task|
+        next unless task[:started_at]
+        assembly_id = task[:assembly_id]
+        if pntr = ndx_task_rows[assembly_id]
+          if task[:started_at] > pntr[:started_at]
+            ndx_task_rows[assembly_id] =  task.slice(:status, :started_at)
+          end
+        else
+          ndx_task_rows[assembly_id] = task.slice(:status, :started_at)
+        end
+      end
+      assembly_rows.each do |r|
+        if last_task_run_status = ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status]
+          ret[r.id] = last_task_run_status
+        end
+      end
+      ret
+    end
+
+    #### end: get methods around tasks
 
     def get_sub_assemblies(assembly_idhs)
       ret = []

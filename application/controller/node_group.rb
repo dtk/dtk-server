@@ -22,10 +22,10 @@ module DTK
     def rest__create
       display_name = ret_non_null_request_params(:display_name)
       target_id, spans_target = ret_request_params(:target_id, :spans_target)
-      target_idh = target_idh_with_default(target_id)
+      target = target_with_default(target_id)
       opts = {}
       opts[:spans_target] = true if spans_target
-      new_ng_idh = NodeGroup.create_instance(target_idh, display_name, opts)
+      new_ng_idh = NodeGroup.create_instance(target.id_handle, display_name, opts)
       rest_ok_response(node_group_id: new_ng_idh.get_id())
     end
 

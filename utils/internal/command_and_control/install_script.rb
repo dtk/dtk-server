@@ -18,12 +18,14 @@
 module DTK
   class CommandAndControl
     class InstallScript
-      def self.install_script(node)
-        new(node).install_script()
+      # opts can have keys:
+      #  :os_type
+      def self.install_script(node, opts = {})
+        new(node, opts).install_script
       end
-      def initialize(node)
+      def initialize(node, opts = {})
         @node = node
-        @os_type = os_type()
+        @os_type = (opts[:os_type] || os_type).to_sym
       end
 
       def install_script
@@ -43,24 +45,8 @@ module DTK
 
       private
 
-      def os_type
-        unless os_type = @node.get_field?(:os_type)
-          fail Error.new("#{node_name_and_id()} does not have an OS type specified")
-        end
-        os_type = os_type.to_sym
-        unless SupportedOSList.include?(os_type)
-          supported_list = SupportedOSList.join(', ')
-          fail ErrorUsage.new("#{node_name_and_id()} has an unsupported OS type (#{os_type}); supported types are: #{supported_list}")
-        end
-        os_type
-      end
-
-      def node_name_and_id
-        @node.pp_name_and_id(capitalize: true)
-      end
-
       def embed_in_os_specific_wrapper(install_script)
-        header =  OSTemplates[@os_type]
+        raise_error_unsupported_os(@os_type) unless header =  OSTemplates[@os_type]
         header + install_script + "\n"
       end
       OSTemplateDefault = <<eos
@@ -78,6 +64,28 @@ eos
         'amazon-linux'.to_sym => OSTemplateDefault
       }
       SupportedOSList = OSTemplates.keys
+
+      def raise_error_unsupported_os(os_type)
+          supported_list = SupportedOSList.join(', ')
+          fail ErrorUsage.new("#{node_name_and_id()} has an unsupported OS type (#{os_type}); supported types are: #{supported_list}")
+      end
+
+      def node_name_and_id
+        @node.pp_name_and_id(capitalize: true)
+      end
+
+      # TODO:: DTK-2489: deprecate
+      def os_type
+        unless os_type = @node.get_field?(:os_type)
+          fail Error.new("#{node_name_and_id()} does not have an OS type specified")
+        end
+        os_type = os_type.to_sym
+        unless SupportedOSList.include?(os_type)
+          raise_error_unsupported_os(os_type)
+        end
+        os_type
+      end
+
     end
   end
 end

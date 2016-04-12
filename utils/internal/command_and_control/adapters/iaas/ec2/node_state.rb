@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommandAndControlAdapter
-  class Ec2
+module DTK
+  class CommandAndControlAdapter::Ec2
     module NodeStateClassMixin
       # assumed that node[:external_ref] and  node[:hostname_external_ref] are up to date
       def get_and_update_node_state!(node, attribute_names)
@@ -87,7 +87,7 @@ module DTK; module CommandAndControlAdapter
 
       def get_node_state(node)
         if instance_id = get_instance_id_from_object(node)
-          conn(node.get_target_iaas_credentials()).server_get(instance_id)
+          aws_conn_from_node(node).server_get(instance_id)
         end
       end
 
@@ -106,4 +106,5 @@ module DTK; module CommandAndControlAdapter
       end
     end
   end
-end; end
+end
+

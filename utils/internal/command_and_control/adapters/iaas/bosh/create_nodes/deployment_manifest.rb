@@ -34,8 +34,10 @@ module DTK; class CommandAndControl::IAAS; class Bosh
           job_objects: required_param(:job_objects),
           repo_user: R8::Config[:repo][:git][:server_username],
           bosh_subnet: required_param(:bosh_subnet),
-          # TODO: remove gard coded
+          # TODO: remove hard coded
           ec2_size: 'm3.large',
+          # stemcell: { name: 'bosh-aws-xen-hvm-centos-7-go_agent', version: 'latest' },
+          stemcell: { name: 'bosh-aws-xen-ubuntu-trusty-go_agent', version: 'latest' },
           max_in_flight: 10
         }
       end
@@ -78,8 +80,8 @@ networks:
 resource_pools:
 - name: default
   stemcell:
-    name: bosh-aws-xen-ubuntu-trusty-go_agent
-    version: latest
+    name: <%= stemcell[:name] %>
+    version: <%= stemcell[:version] %>
   network: default
   cloud_properties:
     instance_type: <%= ec2_size %>

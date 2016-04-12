@@ -333,10 +333,6 @@ module DTK
 
     # returns either parsing error object or nil
     def process_dsl_and_ret_parsing_errors(repo, module_branch, local, opts = {})
-      # think we do not need this because now we can install service/component module versions
-      # unless local.version.nil?
-      #   fail Error.new('Not implemented yet ServiceModule#process_dsl_and_ret_parsing_errors with version not equal to nil')
-      # end
       if version = local.version
         opts.merge!(module_version: version)
       end

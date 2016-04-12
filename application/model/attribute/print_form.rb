@@ -38,11 +38,27 @@ module DTK
     end
 
     module Format
-      # possible valeus are [:canonical,:simple]
+      # possible values are [:canonical,:simple]
       Default = :simple
     end
 
     class PrintForm
+      def initialize(aug_attr, opts = Opts.new)
+        if opts[:convert_node_component] 
+          if convert_if_node_component!(aug_attr)
+            opts = opts.merge(level: :node) 
+          end
+        end
+
+        # @aug_attr has to be set before other functions
+        @aug_attr = aug_attr
+        @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format, :with_assembly_wide_node).merge(level: opts[:level] || find_level()))
+        @index_map = opts[:index_map]
+        @truncate_attribute_value = opts[:truncate_attribute_values]
+        @raw_attribute_value = opts[:raw_attribute_value]
+        @mark_unset_required = opts[:mark_unset_required]
+      end
+
       def self.print_form(aug_attr, opts = Opts.new)
         new(aug_attr, opts).print_form()
       end
@@ -102,17 +118,27 @@ module DTK
         ret
       end
 
-      private
-
-      def initialize(aug_attr, opts = Opts.new)
-        @aug_attr = aug_attr #needs to be done first
-        @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format, :with_assembly_wide_node).merge(level: opts[:level] || find_level()))
-        @index_map = opts[:index_map]
-        @truncate_attribute_value = opts[:truncate_attribute_values]
-        @raw_attribute_value = opts[:raw_attribute_value]
-        @mark_unset_required = opts[:mark_unset_required]
+      # if this is node component it converts it to node attribute and returns true
+      def self.convert_if_node_component!(aug_attr)
+        if component_type = (aug_attr[:nested_component] || {})[:component_type]
+          if node_property_component_types.include?(component_type)
+            # delete :nested_component key to make this a node attribute
+            aug_attr.delete(:nested_component)
+            true
+          end
+        end
       end
 
+      private
+
+      def convert_if_node_component!(aug_attr)
+        self.class.convert_if_node_component!(aug_attr)
+      end
+
+      def self.node_property_component_types
+        @node_property_component_types ||= CommandAndControl.node_property_component_names.map { |n| n.gsub(/::/,'__') }
+      end
+      
       def self.linked_to_display_form(linked_to_obj)
         linked_to_obj.map { |r| r[:display_name] }.join(', ')
       end

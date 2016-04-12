@@ -206,8 +206,12 @@ module DTK
                           new_default_target: target)
       end
 
-      def self.get_default_target(target_mh, cols = [])
-        DefaultTarget.get(target_mh, cols)
+      # opts can have keys
+      #   :ret_singleton_target - Boolean (default: false); if true means if no default_target
+      #                           it looks to see if there is a singleton target 
+      #   :prune_builtin_target - Boolean (default: false; if true means prune out  builtin target
+      def self.get_default_target(target_mh, opts = {})
+        DefaultTarget.get(target_mh, opts)
       end
 
       def self.set_properties(target, iaas_properties)
@@ -226,16 +230,20 @@ module DTK
         Model.update_from_hash_assignments(target.id_handle(), hash_assignments)
       end
 
-      def self.list(target_mh, opts = {})
+      def self.get(target_mh, opts = {})
         filter = [:neq, :type, 'template']
         if opts[:filter]
           filter = [:and, filter, opts[:filter]]
         end
         sp_hash = {
-          cols: [:id, :display_name, :iaas_type, :type, :parent_id, :iaas_properties, :provider, :is_default_target],
+          cols: opts[:cols] || [:id, :display_name, :group_id, :iaas_type, :type, :parent_id, :iaas_properties, :provider, :is_default_target],
           filter: filter
         }
-        unsorted_rows = get_these_objs(target_mh, sp_hash)
+        get_these_objs(target_mh, sp_hash)
+      end
+
+      def self.list(target_mh, opts = {})
+        unsorted_rows = get(target_mh, opts)
         unsorted_rows.each do |t|
           if t.is_builtin_target?()
             set_builtin_provider_display_fields!(t)
@@ -258,9 +266,10 @@ module DTK
       end
 
       DefaultTargetMark = '*'
-
+      BuiltinTargetName = 'DTK_Test_Target'
       def is_builtin_target?
-        get_field?(:parent_id).nil?
+        update_object!(:parent_id, :display_name)
+        self[:parent_id].nil? and self[:display_name] == BuiltinTargetName
       end
 
       def self.import_nodes(target, inventory_data)

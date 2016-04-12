@@ -60,8 +60,8 @@ module DTK
       end
     end
 
-    def self.install_script(node)
-      InstallScript.install_script(node)
+    def self.install_script(node, opts={})
+      InstallScript.install_script(node, opts)
     end
 
     def self.discover(filter, timeout, limit, client)
@@ -90,13 +90,36 @@ module DTK
       klass.pbuilderid(node)
     end
 
-    def self.raise_error_if_invalid_image?(image_id, target)
-      klass = load_iaas_for(target: target)
-      klass.raise_error_if_invalid_image?(image_id, target)
+    # Types that have Iaas service properties
+    TypesWithIaasProperties = [:ec2] # TODO: DTK-2948; need to iterate over all
+
+    def self.find_violations_in_target_service(target_service, project, params = {})
+      TypesWithIaasProperties.inject([]) do |a, iaas_type|
+        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_target_service(target_service, project, params)
+      end
     end
-    def self.existing_image?(image_id, target)
-      klass = load_iaas_for(target: target)
-      klass.existing_image?(image_id, target)
+
+    def self.find_violations_in_node_components(service, project, params = {})
+      TypesWithIaasProperties.inject([]) do |a, iaas_type|
+        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_node_components(service, project, params)
+      end
+    end
+
+    # returns name of all components that capture the node property
+    def self.node_property_component_names
+      TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_component_names }
+    end
+
+    def self.node_property_legal_attributes
+      TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_legal_attributes }
+    end
+
+    def self.node_property_component
+      if node_property_component_names.size == 1
+        node_property_component_names.first
+      else
+        fail Error.new("Currently not supported to have multiple node components!")
+      end
     end
 
     def self.references_image?(target, node_external_ref)

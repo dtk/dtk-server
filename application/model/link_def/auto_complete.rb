@@ -17,7 +17,8 @@
 #
 module DTK; class LinkDef
   class AutoComplete
-    def self.autocomplete_component_links(assembly, link_def_components, opts = {})
+    def self.autocomplete_component_links(assembly, link_def_components, opts = Opts.new)
+      opts = add_detail_to_include_component_dependencies?(opts)
       aug_cmps = assembly.get_augmented_components(opts)
 
       # if service instance is staged into service instance target,
@@ -58,6 +59,16 @@ module DTK; class LinkDef
 
     private
 
+    def self.add_detail_to_include_component_dependencies?(opts)
+      detail_to_include = opts[:detail_to_include] || []
+      if detail_to_include.include?(:component_dependencies)
+        opts
+      else
+        detail_to_include = detail_to_include + [:component_dependencies] 
+        opts.merge(detail_to_include: detail_to_include)
+      end
+    end
+
     def self.link_matching_components(assembly, input_cmp_idh, aug_cmps)
       components = aug_cmps.select{ |cmp| cmp[:id] == input_cmp_idh[:guid] }
 
@@ -75,7 +86,7 @@ module DTK; class LinkDef
         Log.info("#{component[:id]} => nil") if unlinked_link_defs.empty?
 
         unlinked_link_defs.each do |link_def|
-          matching_cmps = check_if_matching_cmps(link_def, aug_cmps)
+          matching_cmps = check_if_matching_cmps(link_def, aug_cmps, component)
           if matching_cmps.empty?
             Log.info("#{component[:id]} => { #{link_def} => [] }")
           elsif matching_cmps.size > 1
@@ -94,7 +105,7 @@ module DTK; class LinkDef
       ret_link_defs = []
 
       dependencies.each do |dep|
-        if link_def = dep.link_def
+        if link_def = dep.respond_to?(:link_def) && dep.link_def
           ret_link_defs << link_def if dep.satisfied_by_component_ids.empty?
         end
       end
@@ -102,9 +113,21 @@ module DTK; class LinkDef
       ret_link_defs
     end
 
-    def self.check_if_matching_cmps(link_def, aug_cmps)
-      matching_cmps = []
+    def self.check_if_matching_cmps(link_def, aug_cmps, this_cmp)
+      matching_cmps  = []
+      constraints    = nil
+      preferences    = nil
+      link_def_links = LinkDef.get_link_def_links([link_def.id_handle()], cols: [:id, :display_name, :content, :link_def_id])
 
+      # get constraints from link_def dsl content and use them later to match link_defs on auto-complete
+      if link_def_content = !link_def_links.empty? && link_def_links.first[:content]
+        unless link_def_content.empty?
+          constraints = link_def_content[:constraints]
+          preferences = link_def_content[:preferences]
+        end
+      end
+
+      preferences_matching_cmps = []
       if link_type = link_def[:link_type]
         aug_cmps.each do |cmp|
           cmp_name = cmp[:component_type].gsub('__','::')
@@ -113,8 +136,24 @@ module DTK; class LinkDef
             cmp_name = "#{node[:display_name]}/#{cmp_name}"
           end
 
-          matching_cmps << cmp if link_type.eql?(cmp_name)
+          if link_type.eql?(cmp_name)
+            matching_cmps << cmp if constraints.nil? && preferences.nil?
+
+            if constraints && matching_constraints?(constraints, cmp, this_cmp)
+              matching_cmps << cmp
+            end
+
+            if index = preferences && matching_constraints?(preferences, cmp, this_cmp, { preferences: true })
+              preferences_matching_cmps[index] = cmp
+            end
+          end
         end
+      end
+
+      return matching_cmps if matching_cmps.size == 1
+
+      unless preferences_matching_cmps.empty?
+        return get_matching_by_preferences(preferences_matching_cmps, matching_cmps)
       end
 
       matching_cmps
@@ -188,6 +227,88 @@ module DTK; class LinkDef
       # relevant link defs are ones that are in ndx_relevant_link_defs_info and have a possible link
       ret = ndx_relevant_link_defs.reject { |_k, v| not v.key?(:possible_links) }.values
       ret
+    end
+
+    private
+
+    def self.matching_constraints?(constraints_or_preferences, dep_cmp, this_cmp, opts = {})
+      constraints_matched = true
+
+      constraints_or_preferences.each_with_index do |constraint, index|
+        begin
+          # using $SAFE = 4 to stop users from executing malicious code in lambda scripts
+          evaluated_fn = proc do
+            $SAFE = 4
+            eval(constraint)
+          end.call
+
+          raise Error.new('Currently only lambda functions are supported!') unless evaluated_fn.is_a?(Proc) && evaluated_fn.lambda?
+
+          attributes          = parse_constraint_attributes(evaluated_fn, dep_cmp, this_cmp)
+          constraints_matched = evaluated_fn.call(*attributes)
+
+          # if checking preferences, validate each of them
+          if opts[:preferences]
+            if constraints_matched
+              return index
+            else
+              next
+            end
+          end
+
+          # if checking constraints (not preferences) one of constrains not met, we exit the loop and return false
+          break unless constraints_matched
+        rescue SecurityError => e
+          pp [e, e.backtrace[0..5]]
+          raise e
+        end
+      end
+
+      return opts[:preferences] ? false : constraints_matched
+    end
+
+    def self.get_matching_by_preferences(preferences_matching_cmps, matching_cmps)
+      preferences_matching_cmps.delete_if{ |pref| pref.nil? }
+      if matching_cmps.size > 1
+        preferences_matching_cmps.each do |pref|
+          return [pref] if matching_cmps.include?(pref)
+        end
+      else
+        return [preferences_matching_cmps.first]
+      end
+    end
+
+    def self.parse_constraint_attributes(evaluated_fn, dep_cmp, this_cmp)
+      attributes = []
+      lambda_params = evaluated_fn.parameters
+
+      dep_cmp_attrs  = dep_cmp.get_component_with_attributes_unraveled({})
+      this_cmp_attrs = this_cmp.get_component_with_attributes_unraveled({})
+
+      lambda_params.each do |param|
+        attributes << get_lambda_param_attribute_value(param[1].to_s, dep_cmp_attrs, this_cmp_attrs, '__')
+      end
+
+      attributes
+    end
+
+    def self.get_lambda_param_attribute_value(param, dep_cmp_attrs, this_cmp_attrs, delimiter)
+      param_cmp, param_attr = param.split(delimiter)
+
+      match_attr =
+        if param_cmp.eql?(pretify_cmp_name(dep_cmp_attrs[:component_type]))
+          dep_cmp_attrs[:attributes].find{ |attr| (attr[:root_display_name]||attr[:display_name]).eql?(param_attr) }
+        elsif param_cmp.eql?('this')
+          this_cmp_attrs[:attributes].find{ |attr| (attr[:root_display_name]||attr[:display_name]).eql?(param_attr) }
+        else
+          fail Error.new("Invalid lambda param specification '#{param}'!")
+        end
+
+      match_attr ? match_attr[:value_asserted] : nil
+    end
+
+    def self.pretify_cmp_name(cmp_name)
+      cmp_name.gsub('__', '_')
     end
   end
 end; end

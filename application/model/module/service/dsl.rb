@@ -204,6 +204,8 @@ module DTK
       def update_model_from_dsl(module_branch, opts = {})
         module_branch.set_dsl_parsed!(false)
 
+        add_ec2_properties(module_branch, opts)
+
         module_refs = update_component_module_refs(module_branch, opts)
         return module_refs if ParsingError.is_error?(module_refs)
 
@@ -235,6 +237,8 @@ module DTK
         ret = ModuleDSLInfo.new
         ret.component_module_refs = module_refs.component_modules
         ret.set_parsed_dsl?(parsed_dsl)
+
+        ret[:pull_changes] = true if opts[:pull_changes]
         ret
       end
 
@@ -242,6 +246,27 @@ module DTK
 
       def update_component_module_refs(module_branch, opts = {})
         ModuleRefs::Parse.update_component_module_refs(ServiceModule, module_branch, opts)
+      end
+
+      def add_ec2_properties(module_branch, opts = {})
+        assembly_meta_file_paths(module_branch) do |meta_file, default_assembly_name|
+          file_content = RepoManager.get_file_content(meta_file, module_branch)
+          format_type = meta_file_format_type(meta_file)
+          opts.merge!(file_path: meta_file, default_assembly_name: default_assembly_name)
+
+          hash_content = Aux.convert_to_hash(file_content, format_type, opts) || {}
+          fail hash_content if ParsingError.is_error?(hash_content)
+
+          updated = create_ec2_properties?(hash_content, meta_file, module_branch)
+
+          if updated
+            content = Aux.serialize(hash_content, :yaml)
+            RepoManager.add_file(meta_file, content, module_branch)
+            commit_sha = RepoManager.push_changes(module_branch)
+            module_branch.set_sha(commit_sha)
+            opts[:pull_changes] = true
+          end
+        end
       end
 
       def update_service_module_workflows_from_dsl(module_branch, opts = {})
@@ -469,6 +494,110 @@ module DTK
           hash_content['assembly']['nodes'].merge!('assembly_wide' => { 'components' => assembly_wide_cmps })
         else
           hash_content['assembly']['nodes'] = { 'assembly_wide' => { 'components' => assembly_wide_cmps } }
+        end
+      end
+
+      def create_ec2_properties?(hash_content, meta_file, module_branch)
+        updated = false
+        nodes   = (hash_content['assembly']||{})['nodes']
+
+        return unless nodes
+
+        updated =
+          if node_bindings = hash_content['node_bindings']
+            create_ec2_properties_from_node_bindings(node_bindings, nodes)
+          else
+            create_ec2_properties_from_node_attributes(nodes)
+          end
+
+        updated
+      end
+
+      def get_ec2_properties_from_node_binding(node_binding)
+        image, size = node_binding.split('-')
+        [image, size]
+      end
+
+      def include_property_component?(components)
+        property_component = CommandAndControl.node_property_component()
+        components.each do |component|
+          if component.is_a?(Hash)
+            return components.index(component) if component.keys.first.eql?(property_component)
+          else
+            return components.index(component)  if component.eql?(property_component)
+          end
+        end
+
+        false
+      end
+
+      def create_ec2_properties_from_node_bindings(node_bindings, nodes)
+        updated = false
+
+        node_bindings.each do |node, node_binding|
+          image, size = get_ec2_properties_from_node_binding(node_binding)
+          new_attrs = { 'image' => image, 'size' => size }
+
+          if hash_node = nodes[node]
+            components = hash_node['components']
+            components = components.is_a?(Array) ? components : [components]
+
+            if index = include_property_component?(components)
+              ec2_properties = components[index]
+              if ec2_properties.is_a?(Hash)
+                if attributes = ec2_properties.values.first['attributes']
+                  attributes['image'] = image unless attributes['image']
+                  attributes['size'] = size unless attributes['size']
+                else
+                  ec2_properties.merge!('attributes' => new_attrs)
+                end
+              else
+                components[index] = { ec2_properties => { 'attributes' => new_attrs } }
+              end
+            else
+              components << { CommandAndControl.node_property_component() => { 'attributes' => new_attrs } }
+            end
+            updated = true
+          end
+        end
+
+        updated
+      end
+
+      def create_ec2_properties_from_node_attributes(nodes)
+        updated = false
+
+        nodes.each do |node_name, node_content|
+          if attributes = node_content['attributes']
+            image = attributes['image']
+            size  = attributes['size']
+
+            next if image.nil? && size.nil?
+
+            new_attrs = {}
+            new_attrs.merge!('image' => image) if image
+            new_attrs.merge!('size' => size) if size
+
+            if components = node_content['components']
+              components = components.is_a?(Array) ? components : [components]
+
+              if index = include_property_component?(components)
+                ec2_properties = components[index]
+                if ec2_properties.is_a?(Hash)
+                  if attributes = ec2_properties.values.first['attributes']
+                    attributes['image'] = image if (image && !attributes['image'])
+                    attributes['size'] = size if (size && !attributes['size'])
+                  else
+                    ec2_properties.merge!('attributes' => new_attrs )
+                  end
+                else
+                  components[index] = {  ec2_properties => { 'attributes' => new_attrs } } 
+                end
+              else
+                components << { CommandAndControl.node_property_component() => { 'attributes' => new_attrs } }
+              end
+            end
+          end
         end
       end
 

@@ -70,6 +70,8 @@ module DTK; class Attribute
         # if true then it is ambiguous whether using node or component attribute
         check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?()
 
+        check_if_node_property(av_pair)
+
         # if needed as indicated by opts, create_attr_pattern also creates attribute
         pattern = create_attr_pattern(base_object, av_pair[:pattern], opts)
         ret << pattern
@@ -167,6 +169,21 @@ module DTK; class Attribute
       new_value = ndx_new_vals[cardinality[:id]]
 
       return cardinality[:value_asserted].to_i > new_value.to_i
+    end
+
+    def self.check_if_node_property(av_pair)
+      if pattern = av_pair[:pattern]
+        tokens = pattern.split('/')
+        return unless tokens.size == 2
+
+        node      = tokens[0]
+        attribute = tokens[1]
+
+        np_component = CommandAndControl.node_property_component()
+        legal_attrs  = CommandAndControl.node_property_legal_attributes()
+
+        av_pair[:pattern] = "#{node}/#{np_component}/#{attribute}" if legal_attrs.include?(attribute.to_sym)
+      end
     end
   end
 end; end

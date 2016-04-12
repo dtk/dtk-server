@@ -16,8 +16,76 @@
 # limitations under the License.
 #
 module DTK
-  # TODO: wil use this to start to migrate logic for service insatnce
+  # New class for Service instances
   class Service
     r8_nested_require('service', 'target')
+    r8_nested_require('service', 'component')
+    r8_nested_require('service', 'reified')
+
+    attr_reader :assembly_instance
+
+    # opts can have keys
+    #  :components
+    def initialize(assembly_instance, opts = {})
+      @assembly_instance = assembly_instance
+      # @components is computed on demand or passed in through opts
+      # It is an array with Service::Component elements
+      @components = nil
+      if dtk_components = opts[:components]
+        @components = Component.create_components_from_dtk_components(dtk_components)
+      end
+      @links_added_to_components = false
+    end
+    private :initialize
+
+    def matching_components?(component_type)
+      ndx_ret = self.class.ndx_matching_components?(components, [component_type])
+      ndx_ret.values.first
+    end
+
+    # Returns a hash that has key for each component_types and whose value is an array (possibly empty) matching type
+    # components is array with Service::Component elements
+    def self.ndx_matching_components?(components, component_types)
+      ret = {}
+      if components.empty?
+        return ret
+      end
+      if components.first.kind_of?(DTK::Component)
+        components = Component.create_components_from_dtk_components(components)
+      else
+        fail(Error, "Unexpected component type '#{components.first.class}'") unless components.first.kind_of?(Component)
+      end
+      ret = component_types.inject({}) { |h, cmp_type| h.merge(cmp_type => []) }
+      components.each do |cmp| 
+        type = cmp.type
+        ret[type] << cmp if component_types.include?(type)
+      end
+      ret
+    end
+
+    def add_links_to_components!
+      unless @links_added_to_components
+        dtk_components = components.map(&:dtk_component)
+        Dependency::Link.augment_component_instances!(@assembly_instance, dtk_components, ret_statisfied_by: true)
+      end
+      @links_added_to_components = true
+      self
+    end
+
+    private
+
+    def components
+      return @components if @components
+      dtk_components = @assembly_instance.get_info__flat_list(detail_level: 'components').map { |r| r[:nested_component] }
+      @components = Component.create_components_from_dtk_components(dtk_components)
+    end
+
+    def components_from_dtk_components(dtk_components)
+      self.class.components_from_dtk_components(dtk_components)
+    end
+
+    def self.components_from_dtk_components(dtk_components)
+      dtk_components.map { |dtk_component| Component.new(dtk_component) }
+    end
   end
 end

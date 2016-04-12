@@ -25,7 +25,7 @@ module DTK
 
       # TODO: find cleaner way than having multiple @conn objects
       def initialize(override_of_aws_params = nil)
-        Log.info("AWS credentials are provided by #{override_of_aws_params ? 'target' : 'fog credentials'}, setting up AWS connection ...")
+        Log.info("Setting up AWS connection ...")
         base_params = override_of_aws_params || get_compute_params()
         @conn = Fog::Compute::AWS.new(base_params)
         @override_conns = OverrideConnectionOptions.inject({}) do |h, (k, conn_opts)|
@@ -48,10 +48,12 @@ module DTK
         hash_form(conn.flavors.get(id))
       end
 
-      def image_get(id)
+      def image_get?(id)
         ImageInfoCache.get_or_set(:image_get, conn, id, mutex: true) do
           begin
-            hash_form(conn.images.get(id))
+            if aws_image = conn.images.get(id)
+              hash_form(aws_image)
+            end
           rescue Exception => e
             unless defined?(PhusionPassenger)
               # DEBUG SNIPPET >>> REMOVE <<<
@@ -90,8 +92,11 @@ module DTK
         # we add tag to identify it as slave service instance
         service_instance_ttl = R8::Config[:ec2][:service_instance][:ttl] || R8::Config[:idle][:up_time_hours]
         options[:tags] = options.fetch(:tags, Hash.new).merge('service.instance.ttl' => service_instance_ttl)
-        #options[:block_device_mapping] = [  {:DeviceName => '/dev/sda1', 'Ebs.VolumeType' => 'gp2' } ]
-        # make root disk GP2 by default
+
+        # !!! set root disk to GP2 to override fog default; important performance change
+        if options[:block_device_mapping].size > 1
+          Log.error_pp(["TODO: check if correctly handling case with multiple block devices", options[:block_device_mapping]])
+        end
         options[:block_device_mapping].first["Ebs.VolumeType"] = 'gp2'
 
         tries = SERVER_CREATE_RETRIES
@@ -143,9 +148,25 @@ module DTK
         end
       end
 
-      def security_groups_all
-        conn.security_groups.all.map { |x| hash_form(x) }
+      # filter is attribute value pairs to match againts
+      def security_groups(filter = {})
+        ret = conn.security_groups.all.map { |aws_sg| hash_form(aws_sg) }
+        ret.select { |hash_form_sg| filter_security_group?(hash_form_sg, filter) }
       end
+      def security_group_by_id?(security_group_id, filter = {})
+        if aws_sg = conn.security_groups.get_by_id(security_group_id)
+          filter_security_group?(hash_form(aws_sg), filter)
+        end
+      end
+      def security_group_by_name?(security_group_name, filter = {})
+        if aws_sg = conn.security_groups.get(security_group_name)
+          filter_security_group?(hash_form(aws_sg), filter)
+        end
+      end
+      def filter_security_group?(hash_form_sg, filter)
+        hash_form_sg unless filter.find { |k, v| hash_form_sg[k] != v }
+      end
+      private :filter_security_group?
 
       def describe_availability_zones
         conn.describe_availability_zones()
@@ -161,42 +182,25 @@ module DTK
         end
       end
 
-      def check_for_key_pair(name)
-        unless key_pair = conn.key_pairs.get(name)
-          fail ErrorUsage.new("Not able to find IAAS keypair with name '#{name}' aborting action, please create necessery keypair")
-          # key_pair = conn.key_pairs.create(:name => name)
+      def vpc?(vpc_id)
+        if aws_vpc = conn.vpcs.get(vpc_id)
+           hash_form(aws_vpc)
         end
-        key_pair
       end
 
-      def check_for_subnet(subnet_id)
-        subnets = conn.subnets
-        unless subnet_obj = subnets.get(subnet_id)
-          err_msg = "Not able to find IAAS subnet with id '#{subnet_id}'"
-          if subnets.empty?
-            err_msg << '; there are no subnets created in the vpc'
-          else
-            avail_subnets = subnets.map { |s| hash_form(s)[:subnet_id] }
-            err_msg << "; set the target to use one of the available subnets: #{avail_subnets.join(', ')}"
-          end
-          fail ErrorUsage.new(err_msg)
+      def keypairs
+        conn.key_pairs.map { |key_pair| hash_form(key_pair) }
+      end
+      def keypair?(keypair_name)
+        if aws_key_pair = conn.key_pairs.get(keypair_name)
+          hash_form(aws_key_pair)
         end
-        subnet_obj.subnet_id
       end
 
-      def check_for_security_group(name, _description = nil)
-        s_group = nil
-        return unless conn.respond_to?(:security_groups)
-
-        security_groups = conn.security_groups
-        unless s_group = security_groups.get(name)
-          # if does not found by group name try search by group_id as well
-          unless s_group = security_groups.get_by_id(name)
-            fail ErrorUsage.new("Not able to find IAAS security group with name or id '#{name}' aborting action, please create necessery security group")
-          end
+      def subnet?(subnet_id)
+        if subnet = conn.subnets.get(subnet_id)
+          hash_form(subnet)
         end
-
-        s_group
       end
 
       def allocate_elastic_ip

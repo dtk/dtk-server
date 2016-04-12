@@ -56,7 +56,7 @@ module DTK; class Assembly
       end
 
       # only if called from stage-target; we set specific_type field to 'target'
-      if is_target = opts[:is_target]
+      if opts[:is_target_service]
         override_attrs[:specific_type] = 'target'
       end
 
@@ -83,8 +83,7 @@ module DTK; class Assembly
         ServiceAssociations.create(opts[:project], assembly_instance, parent_service_instance) if assembly_instance
       end
 
-      opts.merge!(detail_to_include: [:component_dependencies])
-      if opts[:auto_complete_links]
+      unless opts[:no_auto_complete]
         aug_cmps = assembly_instance.get_augmented_components(opts)
         LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, opts)
       end

@@ -27,11 +27,6 @@
       on_update: :set_null
     },
     address: { type: :json },
-    network_partition_id: {
-      type: :bigint,
-      foreign_key_rel_type: :network_partition,
-      on_delete: :cascade,
-      on_update: :cascade }
   },
   virtual_columns: {},
   many_to_one: [:node, :node_interface],

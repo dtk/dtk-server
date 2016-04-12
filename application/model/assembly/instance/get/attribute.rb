@@ -38,31 +38,51 @@ module DTK; class Assembly; class Instance; module Get
     end
 
     def get_attributes_all_levels
-      assembly_attrs = get_assembly_level_attributes()
-      component_attrs = get_augmented_nested_component_attributes()
-      node_attrs = get_augmented_node_attributes()
+      assembly_attrs = get_assembly_level_attributes
+      node_attrs, component_attrs = get_augmented_node_and_component_attributes
       assembly_attrs + component_attrs + node_attrs
     end
 
     AttributesAllLevels = Struct.new(:assembly_attrs, :component_attrs, :node_attrs)
     def get_attributes_all_levels_struct(filter_proc = nil)
       assembly_attrs = get_assembly_level_attributes(filter_proc)
-      component_atttrs = get_augmented_nested_component_attributes(filter_proc).reject do |attr|
+      node_attrs, component_attrs = get_augmented_node_and_component_attributes(filter_proc)
+      # TODO: The pruning below might go in get_augmented_node_and_component_attributes
+      component_attrs.reject! do |attr|
         (not attr[:nested_component].get_field?(:only_one_per_node)) && attr.is_title_attribute?()
       end
-      node_attrs = get_augmented_node_attributes(filter_proc)
-      AttributesAllLevels.new(assembly_attrs, component_atttrs, node_attrs)
+      AttributesAllLevels.new(assembly_attrs, component_attrs, node_attrs)
     end
 
-    def get_augmented_nested_component_attributes(filter_proc = nil)
-      get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true)
-    end
-
-    def get_augmented_node_attributes(filter_proc = nil)
-      get_objs_helper(:node_attributes, :attribute, filter_proc: filter_proc, augmented: true)
+    # returns [node_attrs, component_attrs]
+    def get_augmented_node_and_component_attributes(filter_proc = nil)
+      node_attrs = get_objs_helper(:node_attributes, :attribute, filter_proc: filter_proc, augmented: true)
+      component_attrs = get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
+      move_node_components_to_node_attrs!(node_attrs, component_attrs)
+      [node_attrs, component_attrs]
     end
 
     private
+
+    # moves component_attrs that are node property components to node_attrs
+    def move_node_components_to_node_attrs!(node_attrs, component_attrs)
+      # TODO: unify with Attribute::PrintForm.convert_if_node_component!
+      node_cmp_types = CommandAndControl.node_property_component_names.map { |n| n.gsub(/::/,'__') }
+      component_attrs.reject! do |aug_attr|
+        if node_cmp_types.include?(aug_attr[:nested_component][:component_type])
+          # check if this attribute is already a node attribute
+          # TODO: DTK-2489: donthave these in two places
+          name = aug_attr[:display_name]
+          node_id = aug_attr[:node][:id]
+          unless node_attrs.find { |node_attr| node_attr[:display_name] == name and node_attr[:node][:id] == node_id }
+            # delete :nested_component key to make this a node attribute and put in noe attribute list
+            aug_attr.delete(:nested_component) 
+            node_attrs << aug_attr
+          end
+          true # true so gets deleted if node_cmp_types contains aug_attr
+        end
+      end
+    end
 
     def get_attributes_print_form_aux(opts = Opts.new)
       filter_proc = opts[:filter_proc]

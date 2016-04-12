@@ -29,9 +29,11 @@ module DTK; class  Assembly
           fail ErrorUsage.new('Cannot delete a workspace')
         end
 
+        # first check if target with service instances, then Delete.contents
+        target_idhs_to_delete = Delete.target_idhs_to_delete?(assembly_idhs)
+
         Delete.contents(assembly_idhs, opts)
 
-        target_idhs_to_delete = Delete.target_idhs_to_delete?(assembly_idhs)
         ret = delete_instances(assembly_idhs)
         delete_instances(target_idhs_to_delete) unless target_idhs_to_delete.empty?
         ret

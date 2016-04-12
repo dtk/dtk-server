@@ -68,15 +68,11 @@ module DTK
           return
         end
 
+        # note pong messages are also heartbeat messages
         msg_request_id = original_msg[:requestid]
         pbuilder_id    = original_msg[:pbuilderid]
         is_heartbeat   = original_msg[:heartbeat]
         is_pong        = original_msg[:pong]
-
-        if is_pong
-          Log.debug "Received pong response from node with pbuilderid '#{pbuilder_id}' ..."
-          return
-        end
 
         # decode message
         Log.debug "Received message from STOMP, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
@@ -87,7 +83,11 @@ module DTK
           if msg_request_id
             Log.debug("Heartbeat message recived, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
           else
-            Log.debug("Heartbeat message recived from '#{pbuilder_id}', dropping message since it could not be resolved to this tenant")
+            if is_pong
+              Log.debug "Received pong response from node with pbuilderid '#{pbuilder_id}' ..."
+            else
+              Log.debug("Heartbeat message recived from '#{pbuilder_id}', dropping message since it could not be resolved to this tenant")
+            end
             return
           end
         end

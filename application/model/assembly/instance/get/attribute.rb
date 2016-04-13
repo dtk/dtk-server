@@ -57,6 +57,10 @@ module DTK; class Assembly; class Instance; module Get
     # returns [node_attrs, component_attrs]
     def get_augmented_node_and_component_attributes(filter_proc = nil)
       node_attrs = get_objs_helper(:node_attributes, :attribute, filter_proc: filter_proc, augmented: true)
+
+      # DTK-2536; For issues 1 and 2, we should get rid of os_identifier
+      node_attrs.delete_if{|attr| attr[:display_name].eql?('os_identifier')}
+
       component_attrs = get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
       move_node_components_to_node_attrs!(node_attrs, component_attrs)
       [node_attrs, component_attrs]

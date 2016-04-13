@@ -75,10 +75,10 @@ module DTK; class Attribute
           legal_values: lambda { |a| Node::Template.legal_instance_sizes(a.model_handle(:node)) },
           proc: lambda { |a, v| Update::MemorySize.new(a, v).process() }
         },
-        os_identifier: {
-          legal_values: lambda { |a| Node::Template.legal_os_identifiers(a.model_handle(:node)) },
-          proc: lambda { |a, v| Update::OsIdentifier.new(a, v).process() }
-        },
+        # os_identifier: {
+        #   legal_values: lambda { |a| Node::Template.legal_os_identifiers(a.model_handle(:node)) },
+        #   proc: lambda { |a, v| Update::OsIdentifier.new(a, v).process() }
+        # },
         cardinality: {
           legal_value_fn: lambda do |v|
             val =

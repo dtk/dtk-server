@@ -42,16 +42,17 @@ network_component_module_name = 'network_aws'
 network_service_module_name = 'network'
 
 # Target specific properties
-aws_access_key = ARGV[0]
-aws_secret_key = ARGV[1]
+aws_access_key = ENV['AWS_ACCESS_KEY']
+aws_secret_key = ENV['AWS_SECRET_KEY']
 default_keypair = 'testing_use1'
 security_group_name = 'default'
 security_group_id = 'sg-2282f747'
 subnet_id = 'subnet-af44b8d8'
 target_service_name = 'target'
-target_assembly_name = 'single-subnet'
+target_assembly_name = 'network::single-subnet'
+is_target = true
 
-target = Common.new(target_service_name, target_assembly_name)
+target = Common.new(target_service_name, target_assembly_name, is_target)
 dtk_common = Common.new(service_name, assembly_name)
 
 describe "DTK Server smoke test release" do
@@ -85,7 +86,7 @@ describe "DTK Server smoke test release" do
     include_context "Import service module", network_service_module_name
   end
 
-  context "Stage service function on #{target_assembly_name} assembly" do
+  context "Stage target #{target_assembly_name}" do
     include_context "Stage", target
   end
 
@@ -93,12 +94,11 @@ describe "DTK Server smoke test release" do
     include_context "List services after stage", target
   end
 
-  context "Set aws key attribute" do
-    include_context "Set attribute", target, 'network_aws::iam_user[default]/aws_access_key_id', aws_access_key
-  end
-
-  context "Set aws secret attribute" do
-    include_context "Set attribute", target, 'network_aws::iam_user[default]/aws_secret_access_key', aws_secret_key
+  context "Set required attributes" do
+    it "sets all required network attributes" do
+      value = `/usr/bin/printf "${aws_access_key}\n${aws_secret_key}\n${default_keypair}\n${subnet_id}\nyes" | dtk service ${target_service_name} set-required-attributes`
+      puts value
+    end
   end
 
   context "Set security group name attribute" do
@@ -107,14 +107,6 @@ describe "DTK Server smoke test release" do
 
   context "Set security group id attribute" do
     include_context "Set attribute", target, 'network_aws::security_group[vpc1-default]/group_id', security_group_id
-  end
-
-  context "Set default keypair attribute" do
-    include_context "Set attribute", target, 'network_aws::iam_user[default]/default_keypair', default_keypair
-  end
-
-  context "Set subnet id attribute" do
-    include_context "Set attribute", target, 'network_aws::vpc_subnet[vpc1-public]/subnet_id', subnet_id
   end
 
   context "Converge function" do
@@ -161,14 +153,6 @@ describe "DTK Server smoke test release" do
 
     context "List services after stage" do    
       include_context "List services after stage", dtk_common
-    end
-
-    context "Set os attribute function" do
-      include_context "Set attribute", dtk_common, os_attribute, os
-    end
-
-    context "Set memory size attribute function" do
-      include_context "Set attribute", dtk_common, instance_size_attribute, instance_size
     end
 
     context "Converge function" do

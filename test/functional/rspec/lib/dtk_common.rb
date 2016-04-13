@@ -29,7 +29,7 @@ class Common
 	include ServiceModulesVersionMixin
 
 	attr_accessor :server, :port, :endpoint, :username, :password
-	attr_accessor :service_name, :service_id, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace
+	attr_accessor :service_name, :service_id, :is_target, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace
 	attr_accessor :component_module_id_list, :component_module_name_list
 
 	$opts = {
@@ -38,7 +38,7 @@ class Common
 		:cookies => {}
 	}
 
-	def initialize(service_name, assembly_name)
+	def initialize(service_name, assembly_name, is_target=false)
 		config_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), '..', "config/config.yaml")))		
 
 		@service_name = service_name
@@ -51,6 +51,7 @@ class Common
 	  @password = config_yml['r8server']['password']
 	  @server_log = config_yml['r8server']['log']
 	  @ssh_key = config_yml['r8server']['ssh_key']
+	  @is_target = is_target
 
 		#used as placeholders for component ids/names for specific module that are accumulated
 		@component_module_id_list = Array.new()

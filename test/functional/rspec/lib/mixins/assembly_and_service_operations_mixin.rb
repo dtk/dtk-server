@@ -15,7 +15,7 @@ module AssemblyAndServiceOperationsMixin
 			assembly_id = test_template['id']
 			puts "Assembly id: #{assembly_id}"
 
-			stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name})	
+			stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :is_target => @is_target})	
 
 			pretty_print_JSON(stage_service_response)
 

@@ -204,8 +204,6 @@ module DTK
       def update_model_from_dsl(module_branch, opts = {})
         module_branch.set_dsl_parsed!(false)
 
-        add_ec2_properties(module_branch, opts)
-
         module_refs = update_component_module_refs(module_branch, opts)
         return module_refs if ParsingError.is_error?(module_refs)
 
@@ -246,27 +244,6 @@ module DTK
 
       def update_component_module_refs(module_branch, opts = {})
         ModuleRefs::Parse.update_component_module_refs(ServiceModule, module_branch, opts)
-      end
-
-      def add_ec2_properties(module_branch, opts = {})
-        assembly_meta_file_paths(module_branch) do |meta_file, default_assembly_name|
-          file_content = RepoManager.get_file_content(meta_file, module_branch)
-          format_type = meta_file_format_type(meta_file)
-          opts.merge!(file_path: meta_file, default_assembly_name: default_assembly_name)
-
-          hash_content = Aux.convert_to_hash(file_content, format_type, opts) || {}
-          fail hash_content if ParsingError.is_error?(hash_content)
-
-          updated = create_ec2_properties?(hash_content, meta_file, module_branch)
-
-          if updated
-            content = Aux.serialize(hash_content, :yaml)
-            RepoManager.add_file(meta_file, content, module_branch)
-            commit_sha = RepoManager.push_changes(module_branch)
-            module_branch.set_sha(commit_sha)
-            opts[:pull_changes] = true
-          end
-        end
       end
 
       def update_service_module_workflows_from_dsl(module_branch, opts = {})
@@ -319,6 +296,8 @@ module DTK
 
             hash_content = Aux.convert_to_hash(file_content, format_type, opts) || {}
             fail hash_content if ParsingError.is_error?(hash_content)
+
+            create_ec2_properties?(hash_content, meta_file, module_branch)
 
             # check if comp_name.dtk.assembly.yaml matches name in that file
             # only perform check for new service module structure

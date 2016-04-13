@@ -686,7 +686,7 @@ module DTK
         ]
 
       many_to_one :library, :datacenter, :project
-      one_to_many :attribute, :port, :attribute_link, :component, :component_ref, :node_interface, :address_access_point, :monitoring_item
+      one_to_many :attribute, :port, :attribute_link, :component, :component_ref, :node_interface, :monitoring_item
 
       set_submodel(:node_group)
     end

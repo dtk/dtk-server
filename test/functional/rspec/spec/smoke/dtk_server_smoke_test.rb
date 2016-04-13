@@ -13,9 +13,6 @@ require './lib/component_modules_spec'
 service_name = 'smoke_test_instance'
 assembly_name = 'bootstrap::node_with_params'
 os_templates = ['trusty','amazon']
-os_attribute = 'os_identifier'
-instance_size = 't1.micro'
-instance_size_attribute = 'instance_size'
 node_name = 'node1'
 component_module_name = "test_module"
 component_module_namespace = "dtk17"
@@ -49,6 +46,10 @@ describe "DTK Server smoke test" do
 
     context "List services after stage" do    
       include_context "List services after stage", dtk_common
+    end
+
+    context "Set image attribute" do
+      include_context "Set attribute", dtk_common, 'node1/image', os
     end
 
     context "Add components from test module to service node" do

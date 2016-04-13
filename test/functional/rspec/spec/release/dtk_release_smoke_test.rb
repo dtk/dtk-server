@@ -96,8 +96,9 @@ describe "DTK Server smoke test release" do
 
   context "Set required attributes" do
     it "sets all required network attributes" do
-      value = `/usr/bin/printf "${aws_access_key}\n${aws_secret_key}\n${default_keypair}\n${subnet_id}\nyes" | dtk service ${target_service_name} set-required-attributes`
-      puts value
+      value=`/usr/bin/printf "${aws_access_key}\n${aws_secret_key}\n${default_keypair}\n${subnet_id}\nyes" | dtk service ${target_service_name} set-required-attributes`
+      list_attributes=`dtk service ${target_service_name} list-attributes`
+      puts list_attributes
     end
   end
 

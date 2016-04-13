@@ -51,14 +51,6 @@ describe "DTK Server smoke test" do
       include_context "List services after stage", dtk_common
     end
 
-    context "Set os attribute function" do
-      include_context "Set attribute", dtk_common, os_attribute, os
-    end
-
-    context "Set memory size attribute function" do
-      include_context "Set attribute", dtk_common, instance_size_attribute, instance_size
-    end
-
     context "Add components from test module to service node" do
       include_context "Add component to service node", dtk_common, node_name, component_module_name, component_module_namespace
     end

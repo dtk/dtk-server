@@ -357,6 +357,7 @@ module AssemblyAndServiceOperationsMixin
 		puts "Converge service:", "-----------------"
 		service_converged = false
 		puts "Converge process for service with id #{service_id} started!"
+    find_violations = send_request('/rest/assembly/find_violations', {'assembly_id' => service_id})
 		create_task_response = send_request('/rest/assembly/create_task', {'assembly_id' => service_id})
 
 		if (@error_message == "")

@@ -13,6 +13,7 @@ require './lib/component_modules_spec'
 require './lib/component_module_versions_spec'
 require './lib/service_modules_spec'
 require './lib/service_module_versions_spec'
+require './lib/target_spec'
 
 catalog_username = "dtk16"
 catalog_password = "password"
@@ -35,6 +36,22 @@ namespace = 'dtk16'
 local_default_namespace = 'dtk16'
 component_module_filesystem_location = "~/dtk/component_modules"
 
+ec2_component_module_name = 'ec2'
+image_component_module_name = 'image_aws'
+network_component_module_name = 'network_aws'
+network_service_module_name = 'network'
+
+# Target specific properties
+aws_access_key = ARGV[0]
+aws_secret_key = ARGV[0]
+default_keypair = 'testing_use1'
+security_group_name = 'default'
+security_group_id = 'sg-2282f747'
+subnet_id = 'subnet-af44b8d8'
+target_service_name = 'target'
+target_assembly_name = 'single-subnet'
+
+target = Common.new(target_service_name, target_assembly_name)
 dtk_common = Common.new(service_name, assembly_name)
 
 describe "DTK Server smoke test release" do
@@ -51,6 +68,64 @@ describe "DTK Server smoke test release" do
     include_context "Set default namespace", dtk_common, local_default_namespace
   end
 
+  # Part where we set default target
+  context "Import ec2 target component" do
+    include_context "Import component module", ec2_component_module_name
+  end
+
+  context "Import image target component" do
+    include_context "Import component module", image_component_module_name
+  end
+
+  context "Import network target component" do
+    include_context "Import component module", network_component_module_name
+  end
+
+  context "Import network target service module" do
+    include_context "Import service module", network_service_module_name
+  end
+
+  context "Stage service function on #{target_assembly_name} assembly" do
+    include_context "Stage", target
+  end
+
+  context "List services after stage" do    
+    include_context "List services after stage", target
+  end
+
+  context "Set aws key attribute" do
+    include_context "Set attribute", target, 'network_aws::iam_user[default]/aws_access_key_id', aws_access_key
+  end
+
+  context "Set aws secret attribute" do
+    include_context "Set attribute", target, 'network_aws::iam_user[default]/aws_secret_access_key', aws_secret_key
+  end
+
+  context "Set security group name attribute" do
+    include_context "Set attribute", target, 'network_aws::security_group[vpc1-default]/group_name', security_group_name
+  end
+
+  context "Set security group id attribute" do
+    include_context "Set attribute", target, 'network_aws::security_group[vpc1-default]/group_id', security_group_id
+  end
+
+  context "Set default keypair attribute" do
+    include_context "Set attribute", target, 'network_aws::iam_user[default]/default_keypair', default_keypair
+  end
+
+  context "Set subnet id attribute" do
+    include_context "Set attribute", target, 'network_aws::vpc_subnet[vpc1-public]/subnet_id', subnet_id
+  end
+
+  context "Converge function" do
+    include_context "Converge service", target, 30
+  end
+
+  context "Set default target" do
+    include_context "Set default target", target, target_service_name
+  end
+
+  # Part where actual smoke test starts
   context "Import new component module function" do
     include_context "Import component module", component_module_name
   end
@@ -127,6 +202,11 @@ describe "DTK Server smoke test release" do
 
   context "Delete #{service_module_name} service module base version from remote" do
     include_context "Delete service module from remote repo", service_module_name, namespace
+  end
+
+  # Delete target
+  context "Delete and destroy target" do
+    include_context "Delete services", target
   end
 
   after(:all) do

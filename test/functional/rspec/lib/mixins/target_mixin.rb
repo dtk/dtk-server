@@ -1,4 +1,18 @@
 module TargetMixin
+  def set_default_target(target_name)
+    puts 'Set default target:', '--------------------'
+    default_target_set = false
+    response = send_request('/rest/assembly/set_default_target', :assembly_id => target_name)
+    if response['status'] == 'ok'
+      puts "Target #{target_name} has been set as default!"
+      default_target_set = true
+    else
+      puts "Target #{target_name} has not been set as default!"
+    end
+    puts ''
+    default_target_set
+  end
+
   def create_target(provider_name, region)
     puts 'Create target:', '--------------'
     target_created = false

@@ -4,6 +4,13 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 
+shared_context 'Set default target' do |dtk_common, target_name|
+  it "sets #{target_name} as default target" do
+    default_target_set = dtk_common.set_default_target(target_name)
+    default_target_set.should eq(true)
+  end
+end
+
 shared_context 'Create target' do |dtk_common, provider_name, region|
   it "creates new target #{provider_name}-#{region}" do
     target_created = dtk_common.create_target(provider_name, region)

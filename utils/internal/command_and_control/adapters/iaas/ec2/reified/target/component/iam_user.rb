@@ -17,7 +17,7 @@
 #
 
 module DTK; module CommandAndControlAdapter
-  class Ec2::Reified::Target
+  class Ec2; class Reified::Target
     class Component
       class IamUser < self
         Attributes = [:aws_access_key_id, :aws_secret_access_key, :default_keypair]
@@ -27,12 +27,28 @@ module DTK; module CommandAndControlAdapter
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_fill_in_values!
-          # TODO: validate credentials are ok
-          []
+          if Ec2.credentials_ok?(credentials_with_default_region)
+            []
+          else
+            unset_attribute_when_invalid(:aws_access_key_id)
+            unset_attribute_when_invalid(:aws_secret_access_key)
+            [Violation::InvalidCredentials.new]
+          end
         end
+
+        private
+
+        def credentials_with_default_region
+          { 
+            aws_access_key_id: aws_access_key_id,
+            aws_secret_access_key: aws_secret_access_key,
+            region: Ec2::DefaultRegion
+          }
+        end
+
       end
     end
-  end
+  end; end
 end; end
 
 

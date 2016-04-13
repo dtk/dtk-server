@@ -20,6 +20,15 @@ module DTK; class CommandAndControlAdapter::Ec2
   module Reified
     class Target
       class Violation < Reified::Violation
+        class InvalidCredentials < self
+          # TODO: parameterize by component title when have multiple credentials in target
+          def initialize
+          end
+          def description
+            "One or both of the AWS credentials 'aws_access_key_id'/'aws_secret_access_key' is invalid"
+          end
+        end
+
         class InvalidVpcSubnetId < self
           def initialize(vpc_subnet_id)
             @vpc_subnet_id = vpc_subnet_id

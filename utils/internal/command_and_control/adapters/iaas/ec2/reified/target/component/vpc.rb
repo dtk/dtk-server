@@ -22,14 +22,13 @@ module DTK; module CommandAndControlAdapter
       class Vpc < self
         Attributes = [:vpc_id, :region, :aws_access_key_id, :aws_secret_access_key, :default_keypair, :cidr_block]
 
-        DefaultRegion = 'us-east-1'
         def initialize(reified_target, vpc_service_component)
           super(reified_target, vpc_service_component)
           @vpc_id = nil # for when vpc_id gets propagated from vpc_subnet
         end 
 
         def region
-          super || DefaultRegion
+          super || Ec2::DefaultRegion
         end
 
         # Returns an array of violations; if no violations [] is returned
@@ -69,9 +68,7 @@ module DTK; module CommandAndControlAdapter
         end
 
         def aws_conn
-          # TODO: make sure this does not get set if bad credentilas
-          #       Right now raises a lower level error -> server error about aws credentials
-          #       want to handle by treating error and putting in a violation about bad credentails
+          # This should not be reached if bad credentials
           @conn ||= Ec2.conn(credentials_with_region)
         end
         

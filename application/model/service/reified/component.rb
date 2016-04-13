@@ -62,7 +62,11 @@ module DTK
       def update_and_propagate_dtk_attribute(attribute_name, attribute_value)
         update_and_propagate_dtk_attributes({ attribute_name => attribute_value}).first
       end
-      
+
+      def unset_and_propagate_dtk_attribute(attribute_name)
+        update_and_propagate_dtk_attributes({ attribute_name => nil}).first
+      end
+
       # opts can have keys
       #  :prune_nil_values - Boolean (default false)
       def update_and_propagate_dtk_attributes(name_value_pairs, opts = {})

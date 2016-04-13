@@ -50,6 +50,9 @@ module DTK
         Reified::Node.legal_attributes
       end
 
+
+      DefaultRegion = 'us-east-1'
+
       def self.find_matching_node_binding_rule(node_binding_rules, target)
         node_binding_rules.find do |r|
           conditions = r[:conditions]
@@ -141,8 +144,12 @@ module DTK
 
       # we can provide this methods set of aws_creds that will be used. We will not use this
       # EC2 client as member, since this is only for this specific call
-      def self.conn(target_aws_creds)
-        CloudConnect::EC2.new(target_aws_creds)
+      def self.conn(credentials_with_region)
+        CloudConnect::EC2.new(credentials_with_region)
+      end
+
+      def self.credentials_ok?(credentials_with_region)
+        CloudConnect::EC2.credentials_ok?(credentials_with_region)
       end
 
       private
@@ -170,17 +177,15 @@ module DTK
         response.body['availabilityZoneInfo'].map { |z| z['zoneName'] } || []
       end
 
-      DefaultRegion = 'us-east-1'
-
       # TODO: wil remove this
       def self.check_iaas_properties(iaas_properties, opts = {})
         ret = iaas_properties
         specified_region = iaas_properties[:region]
         region = specified_region || DefaultRegion
         connection = get_connection_from_iaas_properties(iaas_properties, region)
-        raise_error_if = RaiseErrorIf.new(iaas_properties, region, connection)
+        # raise_error_if = RaiseErrorIf.new(iaas_properties, region, connection)
 
-        raise_error_if.invalid_credentials()
+        # raise_error_if.invalid_credentials()
 
         # only do these checks if specified region
         unless specified_region
@@ -196,21 +201,6 @@ module DTK
           end
         end
         ret
-      end
-
-      class RaiseErrorIf
-        def initialize(iaas_properties, region, connection)
-          @iaas_properties = iaas_properties
-          @region          = region
-          @connection      = connection
-        end
-
-        def invalid_credentials
-          Ec2.get_availability_zones(@iaas_properties, @region, connection: @connection)
-         rescue => e
-          Log.info_pp(['Error_from get_availability_zones', e])
-          raise ErrorUsage.new('Invalid EC2 credentials')
-        end
       end
 
       private

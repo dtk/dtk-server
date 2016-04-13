@@ -47,6 +47,10 @@ module DTK module CommandAndControlAdapter::Ec2::Reified
 
       private
 
+      def unset_attribute_when_invalid(attribute_name) 
+        unset_and_propagate_dtk_attribute(attribute_name)
+      end
+
       def self.legal_attributes
         self::Attributes
       end

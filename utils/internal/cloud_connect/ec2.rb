@@ -23,13 +23,11 @@ module DTK
 
       WAIT_FOR_NODE = 10 # seconds
 
-      # TODO: find cleaner way than having multiple @conn objects
-      def initialize(override_of_aws_params = nil)
+      def initialize(credentials_with_region)
         Log.info("Setting up AWS connection ...")
-        base_params = override_of_aws_params || get_compute_params()
-        @conn = Fog::Compute::AWS.new(base_params)
+        @conn = Fog::Compute::AWS.new(credentials_with_region)
         @override_conns = OverrideConnectionOptions.inject({}) do |h, (k, conn_opts)|
-          h.merge(k => Fog::Compute::AWS.new(base_params.merge(connection_options: conn_opts)))
+          h.merge(k => Fog::Compute::AWS.new(credentials_with_region.merge(connection_options: conn_opts)))
         end
       end
 
@@ -38,11 +36,16 @@ module DTK
         server_create: { read_timeout: 5, retry_limit: 1 }
       }
 
-      def conn(key = nil)
-        key.nil? ? @conn : (@override_conns[key] || @conn)
+      def self.credentials_ok?(credentials_with_region)
+        # picking arbitrray describe_ method to test
+        ret = true
+        begin 
+          new(credentials_with_region).describe_availability_zones
+        rescue
+          ret = false
+        end
+        ret
       end
-
-      private :conn
 
       def flavor_get(id)
         hash_form(conn.flavors.get(id))
@@ -236,6 +239,10 @@ module DTK
       end
 
       private
+
+      def conn(key = nil)
+        key.nil? ? @conn : (@override_conns[key] || @conn)
+      end
 
       def wrap_servers_get(id)
         conn.servers.get(id)

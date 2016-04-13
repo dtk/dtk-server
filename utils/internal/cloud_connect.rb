@@ -30,7 +30,7 @@ module DTK
     r8_nested_require('cloud_connect', 'ec2')
     r8_nested_require('cloud_connect', 'route53')
 
-    #TODO: this should be moved to ec2 class because referencing R8::Config[:ec2]
+    #TODO: this should be deprecated
     def get_compute_params(opts = {})
       ENV['FOG_RC'] ||= R8::Config[:ec2][:fog_credentials_path]
       ret = Fog.credentials()

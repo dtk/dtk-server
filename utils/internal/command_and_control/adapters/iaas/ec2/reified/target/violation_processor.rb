@@ -48,8 +48,12 @@ module DTK
 
           # validate_and_fill_in_values each reified_component
           # Need to do this in following order due to using earlier in oredr components to fil in gaps of ;ater ones
-          # TODO: if did this in an assembly above would reflect order of components in workflow
-          ordered_cmp_type = [:iam_user, :vpc_subnet, :vpc, :security_group]
+          # Do this first for iam_user and stop theersince error will be invalid credentials
+
+          iam_user_viols = ndx_components[:iam_user].map { |reified_component| reified_component.validate_and_fill_in_values! }.flatten(1)
+          ret += iam_user_viols
+          return ret unless iam_user_viols.empty?
+          ordered_cmp_type = [:vpc_subnet, :vpc, :security_group]
           ordered_cmp_type.each do |cmp_type|
             ndx_components[cmp_type].each do |reified_component|
               ret += reified_component.validate_and_fill_in_values!

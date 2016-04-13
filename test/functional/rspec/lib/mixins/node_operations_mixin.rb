@@ -381,6 +381,7 @@ module NodeOperationsMixin
 		puts "Converge node:", "--------------"
 		node_converged = false
 		puts "Converge process for node with id #{node_id} started!"
+		find_violations = send_request('/rest/assembly/find_violations', {'node_id' => node_id})
 		create_task_response = send_request('/rest/node/create_task', {'node_id' => node_id})
 
 		if (@error_message == "")

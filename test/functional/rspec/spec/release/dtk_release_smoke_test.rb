@@ -43,7 +43,7 @@ network_service_module_name = 'network'
 
 # Target specific properties
 aws_access_key = ARGV[0]
-aws_secret_key = ARGV[0]
+aws_secret_key = ARGV[1]
 default_keypair = 'testing_use1'
 security_group_name = 'default'
 security_group_id = 'sg-2282f747'

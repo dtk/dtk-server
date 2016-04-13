@@ -576,6 +576,17 @@ module DTK
                 components << { CommandAndControl.node_property_component() => { 'attributes' => new_attrs } }
               end
             end
+          else
+            if components = node_content['components']
+              components = components.is_a?(Array) ? components : [components]
+              components << CommandAndControl.node_property_component() unless include_property_component?(components)
+            else
+              if node_content && node_content.is_a?(Hash)
+                node_content['components'] = [CommandAndControl.node_property_component()]
+              else
+                node_content = { 'components' => [CommandAndControl.node_property_component()] }
+              end
+            end
           end
         end
       end

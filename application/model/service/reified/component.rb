@@ -63,10 +63,6 @@ module DTK
         update_and_propagate_dtk_attributes({ attribute_name => attribute_value}).first
       end
 
-      def unset_and_propagate_dtk_attribute(attribute_name)
-        update_and_propagate_dtk_attributes({ attribute_name => nil}).first
-      end
-
       # opts can have keys
       #  :prune_nil_values - Boolean (default false)
       def update_and_propagate_dtk_attributes(name_value_pairs, opts = {})
@@ -84,6 +80,20 @@ module DTK
         attr_mh = dtk_attributes.first.model_handle
         Attribute.update_and_propagate_dynamic_attributes(attr_mh, attr_rows_to_prop)
         ret
+      end
+
+
+      # opts can have keys
+      #  :type - default is 'asserted'; possible value is 'dynamic'
+      def unset_and_propagate_dtk_attributes(attribute_names, opts = {})
+        return if attribute_names.empty?
+        dtk_attributes  = get_dtk_attributes(*attribute_names)
+        value_field = (opts[:type] == :dynamic ? :value_derived : :value_asserted)
+        attr_rows_to_prop = get_dtk_attributes(*attribute_names).map do  |dtk_attribute|
+          { id: dtk_attribute.id, value_field => nil }
+        end
+        attr_mh = dtk_attributes.first.model_handle
+        Attribute.update_and_propagate_attributes(attr_mh, attr_rows_to_prop)
       end
       
       def get_connected_dtk_component_ids(link_def_type)

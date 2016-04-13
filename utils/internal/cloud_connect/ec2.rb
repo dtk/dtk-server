@@ -1,4 +1,4 @@
-#
+
 # Copyright (C) 2010-2016 dtk contributors
 #
 # This file is part of the dtk project.
@@ -189,6 +189,10 @@ module DTK
         if aws_vpc = conn.vpcs.get(vpc_id)
            hash_form(aws_vpc)
         end
+      end
+
+      def subnets
+        conn.subnets.map { |subnet| hash_form(subnet) }
       end
 
       def keypairs

@@ -25,16 +25,21 @@ module DTK; class CommandAndControlAdapter::Ec2
           def initialize
           end
           def description
-            "One or both of the AWS credentials 'aws_access_key_id'/'aws_secret_access_key' is invalid"
+            "One or both of the AWS credentials 'aws_access_key_id'/'aws_secret_access_key' are invalid"
           end
         end
 
         class InvalidVpcSubnetId < self
-          def initialize(vpc_subnet_id)
+          # opts can have keys
+          #  :legal_subnet_ids
+          def initialize(vpc_subnet_id, opts = {})
             @vpc_subnet_id = vpc_subnet_id
+            @legal_subnet_ids = opts[:legal_subnet_ids]
           end
           def description
-            "The id '#{@vpc_subnet_id}' is an invalid vpc subnet id"
+            ret = "The id '#{@vpc_subnet_id}' is an invalid vpc subnet id"
+            ret << "; legal values are: #{@legal_subnet_ids.join(', ')}" if @legal_subnet_ids
+            ret
           end
         end
         

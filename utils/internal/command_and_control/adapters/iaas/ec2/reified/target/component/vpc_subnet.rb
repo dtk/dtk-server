@@ -31,7 +31,9 @@ module DTK
           return([Violation::ReqUnsetAttr.new(self, :subnet_id)]) unless subnet_id
 
           unless aws_vpc_subnet = aws_vpc_subnet?(subnet_id)
-            return [Violation::InvalidVpcSubnetId.new(subnet_id)]
+            legal_subnet_ids = vpc_component.aws_conn.subnets.map { |vpc_subnet| vpc_subnet[:subnet_id] }
+            unset_attribute_when_invalid(:subnet_id)
+            return [Violation::InvalidVpcSubnetId.new(subnet_id, legal_subnet_ids: legal_subnet_ids)]
           end
 
           get_and_propagate_vpc_id(aws_vpc_subnet)

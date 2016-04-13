@@ -98,6 +98,7 @@ module DTK; module CommandAndControlAdapter
           
           unless aws_conn.keypair?(default_keypair)
             keypair_names = aws_conn.keypairs.map { |keypair| keypair[:name] }
+            unset_attribute_when_invalid(:default_keypair)
             ret += [Violation::InvalidKeypair.new(default_keypair, region, keypair_names)]
           end
           ret

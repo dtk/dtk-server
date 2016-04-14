@@ -75,14 +75,14 @@ shared_context 'Add specific component to service instance' do |dtk_common, comp
 end
 
 shared_context 'Set attribute' do |dtk_common, name, value|
-  it "sets value #{value} for attribute #{name}" do
+  it "sets value for attribute #{name}" do
     attribute_value_set = dtk_common.set_attribute(dtk_common.service_id, name, value)
     attribute_value_set.should eq(true)
   end
 end
 
 shared_context 'Set attribute on service level component' do |dtk_common, name, value|
-  it "sets value #{value} for attribute #{name} on service level component" do
+  it "sets value for attribute #{name} on service level component" do
     attribute_value_set = dtk_common.set_attribute_on_service_level_component(dtk_common.service_id, name, value)
     attribute_value_set.should eq(true)
   end

@@ -229,6 +229,10 @@ if [[ -d /home/dtk-client ]]; then
   ln -sfn ${HOST_VOLUME}/client /home/dtk-client/dtk
 fi
 
+# start redis
+/usr/bin/redis-server &
+
+# start nginx
 /usr/sbin/nginx -g 'daemon off;'
 
 su - ${TENANT_USER} -c "touch server/current/application/tmp/restart.txt"

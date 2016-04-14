@@ -117,11 +117,12 @@ module DTK; class ServiceModule
 
     def self.import_nodes(container_idh, _module_branch, assembly_ref, assembly_hash, node_bindings_hash, component_module_refs, opts = {})
       # compute node_to_nb_rs and nb_rs_to_id
-      node_to_nb_rs = node_to_node_binding_rs(assembly_ref, node_bindings_hash, opts)
-      nb_rs_to_id = {}
+      nb_rs_containter = Library.get_public_library(container_idh.createMH(:library))
+      node_to_nb_rs    = node_to_node_binding_rs(assembly_ref, node_bindings_hash, opts)
+      nb_rs_to_id      = {}
+
       unless node_to_nb_rs.empty?
         filter = [:oneof, :ref, node_to_nb_rs.values]
-        nb_rs_containter = Library.get_public_library(container_idh.createMH(:library))
         nb_rs_to_id = nb_rs_containter.get_node_binding_rulesets(filter).inject({}) do |h, r|
           h.merge(r[:ref] => r[:id])
         end
@@ -167,6 +168,13 @@ module DTK; class ServiceModule
             node_output['node_binding_rs_id'] = nil
           end
 
+          # if there are no node bindings use ec2::properties to create bind them to node
+          unless node_output['node_binding_rs_id']
+            if cmps = node_hash['components']
+              node_output['node_binding_rs_id'] = node_binding_from_ec2_component_attributes(cmps, nb_rs_containter)
+            end
+          end
+
           cmps_output = import_component_refs(container_idh, assembly_hash['name'], node_hash['components'], component_module_refs, opts)
           return cmps_output if ParsingError.is_error?(cmps_output)
 
@@ -192,6 +200,28 @@ module DTK; class ServiceModule
     end
 
     private
+
+    def self.node_binding_from_ec2_component_attributes(cmps, nb_rs_containter)
+      nb_name, node_binding = nil, nil
+      cmps.each do |cmp|
+        if cmp.is_a?(Hash) && cmp.keys.first.eql?(CommandAndControl.node_property_component())
+          if attributes = cmp.values.first['attributes']
+            size = attributes['size']
+            image = attributes['image']
+            nb_name = "#{image}-#{size}" if size && image
+          end
+          break
+        end
+      end
+
+      if nb_name
+        filter = [:eq, :ref, nb_name]
+        node_bindings = nb_rs_containter.get_node_binding_rulesets(filter)
+        node_binding = node_bindings.first[:id] unless node_bindings.empty?
+      end
+
+      node_binding
+    end
 
     def determine_integer_version(hash_content, opts = {})
       if version = hash_content['dsl_version']

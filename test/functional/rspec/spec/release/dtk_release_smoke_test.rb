@@ -74,6 +74,10 @@ describe "DTK Server smoke test release" do
     include_context "Import component module", ec2_component_module_name
   end
 
+  context "Create new component module version" do
+    include_context 'Create component module version', dtk_common, local_default_namespace + ":" + ec2_component_module_name, component_module_version
+  end
+
   context "Import image target component" do
     include_context "Import component module", image_component_module_name
   end
@@ -94,12 +98,20 @@ describe "DTK Server smoke test release" do
     include_context "List services after stage", target
   end
 
-  context "Set required attributes" do
-    it "sets all required network attributes" do
-      value=`/usr/bin/printf "${aws_access_key}\n${aws_secret_key}\n${default_keypair}\n${subnet_id}\nyes" | dtk service ${target_service_name} set-required-attributes`
-      list_attributes=`dtk service ${target_service_name} list-attributes`
-      puts list_attributes
-    end
+  context "Set aws key attribute" do
+    include_context "Set attribute", target, 'network_aws::iam_user[default]/aws_access_key_id', aws_access_key
+  end
+
+  context "Set aws secret attribute" do
+    include_context "Set attribute", target, 'network_aws::iam_user[default]/aws_secret_access_key', aws_secret_key
+  end
+
+  context "Set keypair attribute" do
+    include_context "Set attribute", target, 'network_aws::iam_user[default]/default_keypair', default_keypair
+  end
+
+  context "Set subnet id attribute" do
+    include_context "Set attribute", target, 'network_aws::vpc_subnet[vpc1-public]/subnet_id', subnet_id
   end
 
   context "Set security group name attribute" do
@@ -140,6 +152,10 @@ describe "DTK Server smoke test release" do
   end
 
   context "Publish versioned component module to #{namespace} namespace" do
+    include_context "Publish versioned component module", dtk_common, local_default_namespace + ":" + ec2_component_module_name, local_default_namespace + "/" + ec2_component_module_name, component_module_version
+  end
+ 
+  context "Publish versioned service module to #{namespace} namespace" do
     include_context "Publish versioned service module", dtk_common, local_service_module_name, remote_service_module_name, service_module_version
   end
 
@@ -156,6 +172,10 @@ describe "DTK Server smoke test release" do
       include_context "List services after stage", dtk_common
     end
 
+    context 'Set image attribute function' do
+      include_context 'Set attribute', dtk_common, 'node1/image', os
+    end
+
     context "Converge function" do
       include_context "Converge service", dtk_common, 30
     end
@@ -169,8 +189,24 @@ describe "DTK Server smoke test release" do
     include_context 'Delete all service module versions', dtk_common, local_service_module_name
   end
 
+  context "Delete service module function" do
+    include_context 'Delete all service module versions', dtk_common, local_default_namespace + ":" + network_service_module_name
+  end
+
   context "Delete component module function" do
     include_context 'Delete all component module versions', dtk_common, local_component_module_name
+  end
+
+  context "Delete component module function" do
+    include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + ec2_component_module_name
+  end
+
+  context "Delete component module function" do
+    include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + image_component_module_name
+  end
+
+  context "Delete component module function" do
+    include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + network_component_module_name
   end
 
   context "Delete #{component_module_name} component module version #{component_module_version} from remote" do
@@ -181,17 +217,20 @@ describe "DTK Server smoke test release" do
     include_context "Delete component module from remote repo", component_module_name, namespace
   end
 
-    context "Delete #{service_module_name} service module version #{service_module_version} from remote" do
+  context "Delete #{ec2_component_module_name} component module version #{component_module_version} from remote" do
+    include_context "Delete component module from remote repo", ec2_component_module_name, namespace
+  end
+
+  context "Delete #{ec2_component_module_name} component module base version from remote" do
+    include_context "Delete component module from remote repo", ec2_component_module_name, namespace
+  end
+
+  context "Delete #{service_module_name} service module version #{service_module_version} from remote" do
     include_context "Delete service module from remote repo", service_module_name, namespace
   end
 
   context "Delete #{service_module_name} service module base version from remote" do
     include_context "Delete service module from remote repo", service_module_name, namespace
-  end
-
-  # Delete target
-  context "Delete and destroy target" do
-    include_context "Delete services", target
   end
 
   after(:all) do

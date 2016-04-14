@@ -33,44 +33,44 @@ describe '(Use Of Parameters) Test Case 5: Change optional params on existing at
     include_context 'List services after stage', dtk_common
   end
 
-  context 'Set os attribute function' do
-    include_context 'Set attribute', dtk_common, 'os_identifier', os
+  context 'Set image attribute function' do
+    include_context 'Set attribute', dtk_common, 'node1/image', os
   end
 
-  context 'Set instance_size attribute function' do
-    include_context 'Set attribute', dtk_common, 'instance_size', instance_size
+  context 'Set size attribute function' do
+    include_context 'Set attribute', dtk_common, 'node1/size', instance_size
   end
 
   context 'Converge function' do
     include_context 'Converge', dtk_common
   end
 
-  context 'Check os attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'os_identifier', os
+  context 'Check image attribute after converge' do
+    include_context 'Check attribute', dtk_common, node_name, 'image', os
   end
 
-  context 'Check instance_size attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'instance_size', instance_size
+  context 'Check size attribute after converge' do
+    include_context 'Check attribute', dtk_common, node_name, 'size', instance_size
   end
 
-  context "Set os attribute function with different value #{rhel_os}" do
-    include_context 'Set attribute', dtk_common, 'os_identifier', rhel_os
+  context "Set image attribute function with different value #{rhel_os}" do
+    include_context 'Set attribute', dtk_common, 'node1/image', rhel_os
   end
 
-  context "Set instance_size attribute function with different value #{rhel_instance_size}" do
-    include_context 'Set attribute', dtk_common, 'instance_size', rhel_instance_size
+  context "Set size attribute function with different value #{rhel_instance_size}" do
+    include_context 'Set attribute', dtk_common, 'node1/size', rhel_instance_size
   end
 
   context 'Converge function again' do
     include_context 'Converge', dtk_common
   end
 
-  context 'Check changed os attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'os_identifier', rhel_os
+  context 'Check changed image attribute after converge' do
+    include_context 'Check attribute', dtk_common, node_name, 'image', rhel_os
   end
 
-  context 'Check changed instance_size attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'instance_size', rhel_instance_size
+  context 'Check changed size attribute after converge' do
+    include_context 'Check attribute', dtk_common, node_name, 'size', rhel_instance_size
   end
 
   context 'Delete and destroy service function' do

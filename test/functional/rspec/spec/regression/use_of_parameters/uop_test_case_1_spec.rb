@@ -17,11 +17,6 @@ new_assembly = 'uop_test_case_1_temp'
 service_module_name = 'bootstrap'
 local_namespace = 'r8'
 
-os_attribute = 'os_identifier'
-instance_size_attribute = 'instance_size'
-os = 'precise'
-instance_size = 't1.micro'
-
 dtk_common = Common.new(service_name, assembly_name)
 dtk_common2 = Common.new(new_service_name, "#{service_module_name}::#{new_assembly}")
 
@@ -52,14 +47,6 @@ describe '(Use Of Parameters) Test Case 1: Check possibility to create assembly 
 
   context 'List services after stage of new assembly' do
     include_context 'List services after stage', dtk_common2
-  end
-
-  context 'Set os attribute function' do
-    include_context 'Set attribute', dtk_common2, os_attribute, os
-  end
-
-  context 'Set memory size attribute function' do
-    include_context 'Set attribute', dtk_common2, instance_size_attribute, instance_size
   end
 
   context 'Converge function' do

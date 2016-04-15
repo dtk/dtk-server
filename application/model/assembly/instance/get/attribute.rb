@@ -78,7 +78,13 @@ module DTK; class Assembly; class Instance; module Get
           # TODO: DTK-2489: donthave these in two places
           name = aug_attr[:display_name]
           node_id = aug_attr[:node][:id]
-          unless node_attrs.find { |node_attr| node_attr[:display_name] == name and node_attr[:node][:id] == node_id }
+
+          # give precedence to component attributes over node
+          if n_attr = node_attrs.find { |node_attr| node_attr[:display_name] == name and node_attr[:node][:id] == node_id }
+            aug_attr.delete(:nested_component)
+            node_attrs.delete(n_attr)
+            node_attrs << aug_attr
+          else
             # delete :nested_component key to make this a node attribute and put in noe attribute list
             aug_attr.delete(:nested_component) 
             node_attrs << aug_attr

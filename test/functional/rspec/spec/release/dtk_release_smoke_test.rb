@@ -185,6 +185,13 @@ describe "DTK Server smoke test release" do
     end
   end
 
+  context "Delete target #{target_service_name}" do
+    it "deletes target instance" do
+      value=`printf \"yes\" | dtk service delete-and-destroy #{target_service_name}`
+      expect(value).to include("ok")
+    end
+  end
+
   context "Delete service module function" do
     include_context 'Delete all service module versions', dtk_common, local_service_module_name
   end

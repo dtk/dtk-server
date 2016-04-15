@@ -161,6 +161,10 @@ module DTK; class Task
           else #action_types consists of :assembly and :node_centric
             cmp_actions
           end
+
+        # remove no op actions
+        relevant_actions.reject! { |a| a.is_no_op? }
+
         temporal_constraints = TemporalConstraints::ConfigComponents.get(assembly, relevant_actions)
         Content.new(temporal_constraints, relevant_actions, opts)
       end

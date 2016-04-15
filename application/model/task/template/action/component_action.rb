@@ -129,6 +129,11 @@ module DTK; class Task; class Template
       def component_display_name
         @component[:display_name]
       end
+
+      def is_no_op?
+        !!ConfigAgent::Type.is_a?(config_agent_type, :no_op)
+      end
+
     end
   end
 end; end; end

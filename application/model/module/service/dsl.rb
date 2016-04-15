@@ -554,8 +554,8 @@ module DTK
             next if image.nil? && size.nil?
 
             new_attrs = {}
-            new_attrs.merge!('image' => image) if image
-            new_attrs.merge!('size' => size) if size
+            new_attrs.merge!('image' => image)
+            new_attrs.merge!('size' => size)
 
             if components = node_content['components']
               components = components.is_a?(Array) ? components : [components]

@@ -207,7 +207,7 @@ module DTK
             node_components = node_components.is_a?(Array) ? node_components : [node_components]
             if index = includes_property_component?(node_components)
               ec2_properties = node_components.delete_at(index)[CommandAndControl.node_property_component()]
-              if ec2_attributes = ec2_properties[:attributes]
+              if ec2_attributes = ec2_attributes.is_a?(Hash) && ec2_properties[:attributes]
                 if node_attributes
                   node_attributes.merge!(ec2_attributes)
                 else

@@ -41,10 +41,15 @@ module DTK; class Task; class Template
 
     def self.component_list_filter_proc(opts = {})
       if cmp_type_filter = opts[:component_type_filter]
-        lambda { |el| (el[:node].nil? || !el[:node].is_target_ref?) && (el[:nested_component] || {})[:basic_type] == cmp_type_filter.to_s }
+        lambda { |el| !target_ref?(el) and (el[:nested_component] || {})[:basic_type] == cmp_type_filter.to_s }
       else
-        lambda { |el| el[:node].nil? || !el[:node].is_target_ref? }
+        lambda { |el| !target_ref?(el) }
       end
     end
+
+    def self.target_ref?(el)
+      el[:node] and el[:node].is_target_ref? 
+    end
+
   end
 end; end; end

@@ -265,7 +265,6 @@ module DTK; class Task
         cmps_info.each do |cmp_hash|
           cmp = cmp_hash[:component]
           action_method = cmp_hash[:action_method] # can be nil
-          config_agent_type = (action_method || cmp).config_agent_type
           hash = {
             attributes: [],
             component: cmp
@@ -280,28 +279,6 @@ module DTK; class Task
         end
         [actions, config_agent_type]
       end
-      def self.config_agent_type(cmps_info)
-        ca_types = cmps_info.map do |cmp_hash|
-          cmp = cmp_hash[:component]
-          action_method = cmp_hash[:action_method] # can be nil
-          (action_method || cmp).config_agent_type
-        end.uniq
-        if ca_types.find(&:nil?)
-          fail Error.new("Unexpected that nil is in config_agent_types: #{ca_types.inspect}")
-        end
-
-        # remove no_op
-        ca_types = ca_types - ['no_op']
-
-        if ca_types.size == 1
-          ca_types.first
-        elsif ca_types.empty?
-          ConfigAgent::Type.default_symbol()
-        else
-          fail ErrorUsage.new("Actions with different providers (#{ca_types.join(',')}) cannot be in the same workflow stage")
-        end
-      end
-      private_class_method :config_agent_type
 
       def self.create_from_state_change(scs_same_cmp, deps)
         state_change = scs_same_cmp.first
@@ -321,6 +298,28 @@ module DTK; class Task
         end
         new(hash)
       end
+
+      private
+
+      def self.config_agent_type(cmps_info)
+        ca_types = cmps_info.map do |cmp_hash|
+          cmp = cmp_hash[:component]
+          action_method = cmp_hash[:action_method] # can be nil
+          (action_method || cmp).config_agent_type
+        end.uniq
+        if ca_types.find(&:nil?)
+          fail Error.new("Unexpected that nil is in config_agent_types: #{ca_types.inspect}")
+        end
+
+        if ca_types.size == 1
+          ca_types.first
+        elsif ca_types.empty?
+          ConfigAgent::Type.default_symbol()
+        else
+          fail ErrorUsage.new("Actions with different providers (#{ca_types.join(',')}) cannot be in the same workflow stage")
+        end
+      end
+
     end
   end
 end; end

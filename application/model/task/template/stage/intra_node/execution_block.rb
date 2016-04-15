@@ -211,7 +211,7 @@ module DTK; class Task; class Template
 
       def self.find_and_add_action!(ret, serialized_item, node_name, action_list, opts = {})
         if action = Action.find_action_in_list?(serialized_item, node_name, action_list, opts)
-          ret << action
+          ret << action unless action.is_no_op?
         end
       end
 

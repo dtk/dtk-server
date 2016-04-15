@@ -45,10 +45,13 @@ module DTK; module CommandAndControlAdapter
           node_service_component = opts[:node_service_component] || node_service_component(opts[:dtk_node_or_node_group])
           super(node_service_component.add_link_to_component!)
           @service = opts[:service]
-          
+        
+          # Below can be calculated on deman if not explicity set
           # TODO: this will be eventually removed
           @external_ref = opts[:external_ref]
+          @node         = nil
         end
+
         private :initialize
 
         # opts can have keys
@@ -83,6 +86,37 @@ module DTK; module CommandAndControlAdapter
         end
 
         private
+
+        def update_os_type!(os_type, opts = {})
+          node.merge!(os_type: os_type)
+          node.update(os_type: os_type)
+        end
+
+        def update_image_id!(image_id)
+          update_external_ref!(image_id: image_id)
+        end
+
+        def update_instance_type!(instance_type)
+          update_external_ref!(size: instance_type)
+        end
+
+        def node
+          @node ||= @service_component.dtk_component.get_node
+        end
+
+        def external_ref
+          @external_ref ||= node.get_field?(:external_ref)
+        end
+
+        def update_external_ref!(kv_pairs)
+          # first clear any cached values, so can get fresh
+          @node         = nil
+          @external_ref = nil
+          external_ref = external_ref().merge!(kv_pairs)
+          node.merge!(external_ref: external_ref)
+          node.update(external_ref: external_ref)
+          external_ref
+        end
 
         def self.legal_attributes
           Attributes

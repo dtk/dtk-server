@@ -22,8 +22,8 @@ node_param_list << 'ec2_public_address'
 node_param_list << 'private_dns_name'
 
 attr_param_list = []
-attr_param_list << 'instance_size'
-attr_param_list << 'os_identifier'
+attr_param_list << 'node1/size'
+attr_param_list << 'node1/image'
 
 dtk_common = Common.new(service_name, assembly_name)
 
@@ -88,12 +88,12 @@ describe '(Use Of Parameters) Test Case 6: Check possibility to query list of no
     include_context 'List services after stage', dtk_common
   end
 
-  context 'Set os attribute function' do
-    include_context 'Set attribute', dtk_common, 'os_identifier', os
+  context 'Set image attribute function' do
+    include_context 'Set attribute', dtk_common, 'node1/image', os
   end
 
-  context 'Set instance_size attribute function' do
-    include_context 'Set attribute', dtk_common, 'instance_size', instance_size
+  context 'Set size attribute function' do
+    include_context 'Set attribute', dtk_common, 'node1/size', instance_size
   end
 
   context 'Converge function' do
@@ -126,7 +126,7 @@ describe '(Use Of Parameters) Test Case 6: Check possibility to query list of no
   end
 
   context 'Attribute params check function' do
-    it "checks if all attribute parameters (instance_size, os_identifier) exist on node #{node_name}" do
+    it "checks if all attribute parameters (size, image) exist on node #{node_name}" do
       puts 'Check attribute params', '----------------------'
       param_existance = check_param_existance_on_attribute(dtk_common, node_name, attr_param_list)
       puts ''
@@ -135,11 +135,11 @@ describe '(Use Of Parameters) Test Case 6: Check possibility to query list of no
   end
 
   context 'Check os attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'os_identifier', os
+    include_context 'Check attribute', dtk_common, node_name, 'image', os
   end
 
   context 'Check instance_size attribute after converge' do
-    include_context 'Check attribute', dtk_common, node_name, 'instance_size', instance_size
+    include_context 'Check attribute', dtk_common, node_name, 'size', instance_size
   end
 
   context 'Delete and destroy service function' do

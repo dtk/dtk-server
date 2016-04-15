@@ -264,18 +264,23 @@ module AssemblyAndServiceOperationsMixin
 		puts "Set attribute:", "--------------"
 		is_attributes_set = false
 
-		#Get attribute id for which value will be set
 		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
-		attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['id']
+		attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }
 
-		#Set attribute value for given attribute id
-		set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>service_id, :value=>attribute_value, :pattern=>attribute_id})
-		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
-		extract_attribute_value = service_attributes['data'].select { |x| x['value'] == attribute_value }.first['value']
-
-		if (extract_attribute_value != nil)
-			puts "Setting of attribute #{attribute_name} completed successfully!"
-			is_attributes_set = true
+		if attribute_id.empty?
+		  set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>service_id, :value=>attribute_value, :pattern=>attribute_name})
+		  if set_attribute_value_response['status'] == 'ok'
+        puts "Setting of attribute #{attribute_name} completed successfully!"
+			  is_attributes_set = true
+		  end
+		else
+      set_attribute_value_response = send_request('/rest/assembly/set_attributes', {:assembly_id=>service_id, :value=>attribute_value, :pattern=>attribute_id.first['id']})
+		  service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
+		  extract_attribute_value = service_attributes['data'].select { |x| x['value'] == attribute_value }.first['value']
+		  if extract_attribute_value != nil
+			  puts "Setting of attribute #{attribute_name} completed successfully!"
+			  is_attributes_set = true
+		  end
 		end
 		puts ""
 		return is_attributes_set
@@ -295,7 +300,7 @@ module AssemblyAndServiceOperationsMixin
 		service_attributes = send_request('/rest/assembly/info_about', {:about=>'attributes', :filter=>nil, :subtype=>'instance', :assembly_id=>service_id})
 		extract_attribute_value = attribute_id = service_attributes['data'].select { |x| x['display_name'].include? attribute_name }.first['value']
 
-		if (extract_attribute_value == attribute_value)
+		if extract_attribute_value == attribute_value
 			puts "Setting of attribute #{attribute_name} completed successfully!"
 			is_attributes_set = true
 		end
@@ -311,7 +316,7 @@ module AssemblyAndServiceOperationsMixin
 
 		attributes = service_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name}" }.first
 
-		if (!attributes.nil?)
+		if !attributes.nil?
 			attribute_value = service_attributes['data'].select { |x| x['display_name'] == "#{node_name}/#{component_name}/#{attribute_name}" }.first['value']
 			puts "Attribute value is: #{attribute_value}"
 		else

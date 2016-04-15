@@ -78,14 +78,14 @@ module DTK
         if msg_request_id
           Log.debug "Received STOMP message, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
         else
-          Log.debug "Received STOMP heartbeat/stomp message from pbuilderid '#{pbuilder_id}' ..."
+          Log.debug "Received STOMP heartbeat message from pbuilderid '#{pbuilder_id}' ..."
         end
 
         # we map our heartbeat calls to requst IDs
         if is_heartbeat
           msg_request_id = CommandAndControlAdapter::StompMultiplexer.heartbeat_registry_entry(pbuilder_id)
           if msg_request_id
-            Log.debug("Heartbeat/pong message received, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
+            Log.debug("Heartbeat message received, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
           else
             if is_pong
               Log.debug "Received pong response from node with pbuilderid '#{pbuilder_id}' ..."

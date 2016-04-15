@@ -65,7 +65,11 @@ module DTK
       end
 
       def self.pbuilderid(node)
-        node.get_external_ref()[:instance_id]
+        if node.is_assembly_wide_node?()
+          "docker-executor"
+        else
+          node.get_external_ref()[:instance_id]
+        end
       end
 
       def self.start_instances(nodes)

@@ -75,18 +75,22 @@ module DTK
         is_pong        = original_msg[:pong]
 
         # decode message
-        Log.debug "Received message from STOMP, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
+        if msg_request_id
+          Log.debug "Received STOMP message, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
+        else
+          Log.debug "Received STOMP heartbeat/stomp message from pbuilderid '#{pbuilder_id}' ..."
+        end
 
         # we map our heartbeat calls to requst IDs
         if is_heartbeat
           msg_request_id = CommandAndControlAdapter::StompMultiplexer.heartbeat_registry_entry(pbuilder_id)
           if msg_request_id
-            Log.debug("Heartbeat message recived, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
+            Log.debug("Heartbeat/pong message received, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
           else
             if is_pong
               Log.debug "Received pong response from node with pbuilderid '#{pbuilder_id}' ..."
             else
-              Log.debug("Heartbeat message recived from '#{pbuilder_id}', dropping message since it could not be resolved to this tenant")
+              Log.debug("Heartbeat message received from '#{pbuilder_id}', dropping message since it could not be resolved to this tenant")
             end
             return
           end

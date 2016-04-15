@@ -70,7 +70,12 @@ module DTK; class Attribute
         # if true then it is ambiguous whether using node or component attribute
         check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?()
 
-        check_if_node_property(av_pair)
+        init_av_pair = av_pair.clone
+        check_if_node_property(av_pair) unless opts[:skip_node_property_check]
+
+        unless init_av_pair == av_pair
+          set_attributes(base_object, [init_av_pair], opts.merge(skip_node_property_check: true, do_not_raise: true))
+        end
 
         # if needed as indicated by opts, create_attr_pattern also creates attribute
         pattern = create_attr_pattern(base_object, av_pair[:pattern], opts)
@@ -108,6 +113,7 @@ module DTK; class Attribute
       # attribute_rows can have multiple rows if pattern decomposes into multiple attributes
       # it should have at least one row or there is an error
       if attribute_rows.empty?
+        return if opts[:do_not_raise]
         if opts[:create]
           fail ErrorUsage.new('Unable to create a new attribute')
         else

@@ -56,6 +56,10 @@ module DTK
           end
         end
 
+        # when create assembly we don't want to store ec2::properties component in assembly.yaml
+        # will store ec2::properties attributes as node attributes instead
+        check_for_ec2_attributes(serialized_content)
+
         # Check to determine whether shoudl generate assembly_dsl_path from serialized_content (from fresh)
         # or whether it should use existing file to keep context like comments, spacing
         # it should only use existing file as part of this if
@@ -187,6 +191,45 @@ module DTK
 
       def component_name_output_form(internal_format)
         internal_format.gsub(/__/, Seperators[:module_component])
+      end
+
+      def check_for_ec2_attributes(serialized_content)
+        assembly = serialized_content[:assembly]
+        if assembly_nodes = assembly && assembly[:nodes]
+          use_ec2_properties_as_node_attributes(assembly_nodes)
+        end
+      end
+
+      def use_ec2_properties_as_node_attributes(assembly_nodes)
+        assembly_nodes.each_pair do |node_name, node_content|
+          node_attributes = node_content[:attributes]
+          if node_components = node_content[:components]
+            node_components = node_components.is_a?(Array) ? node_components : [node_components]
+            if index = includes_property_component?(node_components)
+              ec2_properties = node_components.delete_at(index)[CommandAndControl.node_property_component()]
+              if ec2_attributes = ec2_properties[:attributes]
+                if node_attributes
+                  node_attributes.merge!(ec2_attributes)
+                else
+                  node_content[:attributes] = ec2_attributes
+                end
+              end
+            end
+          end
+        end
+      end
+
+      def includes_property_component?(components)
+        property_component = CommandAndControl.node_property_component()
+        components.each do |component|
+          if component.is_a?(Hash)
+            return components.index(component) if component.keys.first.eql?(property_component)
+          else
+            return components.index(component)  if component.eql?(property_component)
+          end
+        end
+
+        false
       end
     end
   end

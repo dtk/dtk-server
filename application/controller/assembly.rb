@@ -771,8 +771,8 @@ module DTK
     def rest__find_violations
       assembly = ret_assembly_instance_object
       opts     = ret_boolean_params_hash(:ret_objects)
+
       violations = assembly.find_violations
-pp [:violations, violations]
       response = opts[:ret_objects] ? violations.hash_form : violations.table_form
       rest_ok_response response
     end

@@ -18,8 +18,8 @@
 module DTK
   class Assembly::Instance
     class Violation
-      def  table_form
-        { type: type, description: description }
+      def table_form
+        type_and_display
       end
 
       # must be overwritten
@@ -37,12 +37,16 @@ module DTK
         attr.print_form(Opts.new(level: print_level, convert_node_component: true))[:display_name]
       end
 
-      def hash_remove_nils(hash)
-        hash.inject({}) { |h, (k, v)| v.nil? ? h : h.merge(k => v) }
+      def hash_form_aux(hash)
+        hash.inject(type_and_display) { |h, (k, v)| v.nil? ? h : h.merge(k => v) }
       end
 
       def attribute_ref
         attr_display_name(@attr, @print_level)
+      end
+
+      def type_and_display
+        { type: type, description: description }
       end
 
       class ReqUnsetAttr < self
@@ -56,7 +60,7 @@ module DTK
         end
 
         def hash_form
-          { attribute_ref: attribute_ref }
+          hash_form_aux(attribute_ref: attribute_ref)
         end
 
         def description
@@ -94,7 +98,7 @@ module DTK
         end
 
         def hash_form
-          hash_remove_nils(attribute_ref: attribute_ref, value: @value, legal_values: @legal_values)
+          hash_form_aux(attribute_ref: attribute_ref, value: @value, legal_values: @legal_values)
         end
 
         def description

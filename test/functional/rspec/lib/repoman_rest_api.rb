@@ -6,12 +6,13 @@ require 'awesome_print'
 require 'yaml'
 
 class RepomanRestApi
-  attr_reader :repoman_url
-  attr_accessor :authorization_token
+  attr_accessor :repoman_url, :authorization_token, :username, :password
 
   def initialize
     config_yml = YAML.load(File.open('./config/config.yaml'))
     @repoman_url = config_yml['r8server']['repoman']
+    @username = config_yml['r8server']['repoman_user']
+    @password = config_yml['r8server']['repoman_password']
   end
 
   def send_request(endpoint, rest_method, args = {}, headers = {})
@@ -41,8 +42,8 @@ class RepomanRestApi
     end
   end
 
-  def login(username, password)
-    response = self.send_request('/v1/auth/login', 'POST', username: username, password: password)
+  def login
+    response = self.send_request('/v1/auth/login', 'POST', username: @username, password: @password)
     self.authorization_token = response['data']['token']
   end
 

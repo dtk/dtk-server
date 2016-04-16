@@ -1,10 +1,5 @@
 require './spec/spec_helper'
 
-login = {
-  username: 'dtk-admin',
-  password: 'r8server'
-}
-
 namespace_info = {
   name: 'dtk17'
 }
@@ -14,7 +9,7 @@ describe '(Repoman Drupal API) Test Case 6: Get namespace and get all modules th
 
   context 'Login' do
     it 'passed successfully' do
-      repoman.login(login[:username], login[:password])
+      repoman.login
       expect(repoman.authorization_token).not_to be_empty
     end
   end

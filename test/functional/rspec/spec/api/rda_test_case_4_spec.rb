@@ -1,10 +1,5 @@
 require './spec/spec_helper'
 
-login = {
-  username: 'dtk-admin',
-  password: 'r8server'
-}
-
 user_info = {
   username: 'test',
   email: 'test@r8network.com',
@@ -19,7 +14,7 @@ describe '(Repoman Drupal API) Test Case 4: Create user and check if it is possi
 
   context 'Login' do
     it 'passed successfully' do
-      repoman.login(login[:username], login[:password])
+      repoman.login
       expect(repoman.authorization_token).not_to be_empty
     end
   end

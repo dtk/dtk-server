@@ -18,22 +18,11 @@
 module DTK
   class Assembly::Instance
     class Violation
-
-      private
-
-      def self.inherited(child_class) 
-        (@klasses ||= []) << child_class
-      end
-
-      def self.impacted_by(*types)
-        pp [self, types]
-      end
-
-      # methods above need to be before including the violation subclasses
+      r8_nested_require('violation', 'sort_order')
+      extend SortOrderClassMixin
+      # above need to be before including the violation subclasses
       r8_nested_require('violation', 'sub_classes')
-    end
 
-    class Violation
       def table_form
         type_and_display
       end
@@ -46,6 +35,11 @@ module DTK
       # could be overwritten
       def self.type
         Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
+      end
+
+      # could be overwritten
+      def self.impacted_by 
+        []
       end
 
       private

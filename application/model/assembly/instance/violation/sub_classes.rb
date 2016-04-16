@@ -20,12 +20,15 @@ module DTK
     class Violation
       ########## Violation classes
       class ReqUnsetAttr < self
-        impacted_by :unmet_dependency
         def initialize(attr, print_level)
           super()
           @attr              = attr
           @print_level       = print_level
           @attr_display_name = attr_display_name(attr, print_level)
+        end
+
+        def self.impacted_by 
+          [UnconnReqServiceRef]
         end
 
         def self.type

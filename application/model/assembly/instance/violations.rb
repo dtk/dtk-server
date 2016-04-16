@@ -26,14 +26,19 @@ module DTK
       end
 
       def table_form
-        map(&:table_form).sort { |a, b| a[:type].to_s <=> b[:type].to_s }
+        sort(map { |viol| [viol, viol.table_form] })
       end
 
       def hash_form
-        map(&:hash_form).sort { |a, b| a[:type].to_s <=> b[:type].to_s }
+        sort(map { |viol| [viol, viol.hash_form] })
       end
 
       private
+
+      def sort(viol_output_pairs)
+        # sort is so that violations that can affect others (i.e., correction of them can cause other to be solved (e.g., component connection for unset attrs)
+        viol_output_pairs.sort { |a, b| Violation.compare_for_sort(a[0], b[0]) }.map { |pairs| pairs[1] }
+      end
 
       def add_uniq_violations!(violations)
         # using description to determine uniqueness

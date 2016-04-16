@@ -26,19 +26,23 @@ module DTK
       def hash_form
         fail Error, "Missing method '#{self.class}#hash_form'"
       end
-      # could be overwritten
-      def type
-        Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
-      end
 
       private
+
+      def initialize(opts = {})
+        # TODO: stub for datatype checking
+        @datatype = opts[:datatype]
+      end
 
       def attr_display_name(attr, print_level = :component)
         attr.print_form(Opts.new(level: print_level, convert_node_component: true))[:display_name]
       end
 
       def hash_form_aux(hash)
-        hash.inject(type_and_display) { |h, (k, v)| v.nil? ? h : h.merge(k => v) }
+        hash.inject(type_and_display.merge(fix_action: fix_action, fix_text: fix_text)) do |h, (k, v)| 
+          # This will remove nil values from hash
+          v.nil? ? h : h.merge(k => v)
+        end
       end
 
       def attribute_ref
@@ -49,10 +53,26 @@ module DTK
         { type: type, description: description }
       end
 
+      # could be overwritten
+      def type
+        Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
+      end
+
+      # must be overwritten
+      def fix_action
+        fail Error, "Missing method '#{self.class}#fix_action'"
+      end
+      def fix_text
+        fail Error, "Missing method '#{self.class}#fix_text'"
+      end
+
+      ########## Violation classes
       class ReqUnsetAttr < self
         def initialize(attr, print_level)
-          @attr        = attr
-          @print_level = print_level
+          super()
+          @attr              = attr
+          @print_level       = print_level
+          @attr_display_name = attr_display_name(attr, print_level)
         end
 
         def type
@@ -63,10 +83,54 @@ module DTK
           hash_form_aux(attribute_ref: attribute_ref)
         end
 
+        def fix_action
+          :set_attribute
+        end
+
+        def fix_text
+          "Enter value for attribute '#{@attr_display_name}'"
+        end
+
         def description
-          "Attribute (#{attr_display_name(@attr, @print_level)}) is required, but unset"
+          "Attribute '#{@attr_display_name}' is required, but unset"
         end
       end
+
+      class IllegalAttrValue < self
+        # opts can have keys
+        #  legal_values
+        def initialize(attr, value, opts = {})
+          super()
+          @attr              = attr
+          @attr_display_name = attr_display_name(attr)
+          @value             = value
+          @legal_values      = opts[:legal_values]
+        end
+
+        def type
+          :illegal_attribute_value
+        end
+
+        def fix_action
+          :set_attribute
+        end
+
+        def fix_text
+          "Enter value for attribute '#{@attr_display_name}'"
+        end
+
+        def hash_form
+          hash_form_aux(attribute_ref: attribute_ref, value: @value, legal_values: @legal_values)
+        end
+
+        def description
+          ret = "Attribute '#{@attr_display_name}' has illegal value '#{@value}'"
+          ret << "; legal values are: #{@legal_values.join(', ')}" if @legal_values
+          ret
+        end
+      end
+
+      # TODO: DTK-2525; got here in refining the violations to work with fix wizard
 
       class ReqUnsetAttrs < self
         def initialize(attrs, print_level)
@@ -81,30 +145,6 @@ module DTK
         def description
           aug_attrs_print_form = @attr_display_names.join(', ')
           "At least one of the attributes (#{aug_attrs_print_form}) is required to be set"
-        end
-      end
-
-      class IllegalAttrValue < self
-        # opts can have keys
-        #  legal_values
-        def initialize(attr, value, opts = {})
-          @attr         = attr
-          @value        = value
-          @legal_values = opts[:legal_values]
-        end
-
-        def type
-          :illegal_attribute_value
-        end
-
-        def hash_form
-          hash_form_aux(attribute_ref: attribute_ref, value: @value, legal_values: @legal_values)
-        end
-
-        def description
-          ret = "Attribute '#{attr_display_name(@attr)}' has illegal value '#{@value}'"
-          ret << "; legal values are: #{@legal_values.join(', ')}" if @legal_values
-          ret
         end
       end
 

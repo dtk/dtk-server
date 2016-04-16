@@ -9,10 +9,10 @@ class RepomanRestApi
   attr_accessor :repoman_url, :authorization_token, :username, :password
 
   def initialize
-    config_yml = YAML.load(File.open('./config/config.yaml'))
-    @repoman_url = config_yml['r8server']['repoman']
-    @username = config_yml['r8server']['repoman_user']
-    @password = config_yml['r8server']['repoman_password']
+    config_yaml = YAML.load(File.open('./config/config.yaml'))
+    @repoman_url = config_yaml['r8server']['repoman']
+    @username = config_yaml['r8server']['repoman_username']
+    @password = config_yaml['r8server']['repoman_password']
   end
 
   def send_request(endpoint, rest_method, args = {}, headers = {})

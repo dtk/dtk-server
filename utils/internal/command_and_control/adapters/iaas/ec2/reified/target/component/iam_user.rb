@@ -30,7 +30,6 @@ module DTK; module CommandAndControlAdapter
           if Ec2.credentials_ok?(credentials_with_default_region)
             []
           else
-            unset_attributes_when_invalid(:aws_access_key_id, :aws_secret_access_key)
             [Violation::InvalidCredentials.new]
           end
         end

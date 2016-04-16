@@ -47,15 +47,6 @@ module DTK module CommandAndControlAdapter::Ec2::Reified
 
       private
 
-      AttrTypes = [:asserted, :dynamic]
-      def unset_attribute_when_invalid(attribute_name) 
-        AttrTypes.map { |type| unset_and_propagate_dtk_attributes([attribute_name], type: type) }
-      end
-
-      def unset_attributes_when_invalid(*attribute_names) 
-        AttrTypes.map { |type| unset_and_propagate_dtk_attributes(attribute_names, type: type) }
-      end
-
       def self.legal_attributes
         self::Attributes
       end

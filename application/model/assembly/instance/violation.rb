@@ -34,7 +34,7 @@ module DTK
 
       # could be overwritten
       def self.type
-        Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
+        Aux.underscore(Aux.demodulize(to_s)).to_sym
       end
 
       # could be overwritten

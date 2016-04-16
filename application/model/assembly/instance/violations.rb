@@ -19,10 +19,11 @@ module DTK
   class Assembly::Instance
     class Violations < ::Array
       # each element of violations_array is an array;
-      def initialize(*violations_array)
+      def initialize(violations)
         super()
-        # for each set of violations in violations_array, only take unqiq violations
-        violations_array.each { |violations| add_uniq_violations!(violations) }
+        # using description to determine uniqueness
+        # TODO: use this as fallback and have each viol type have its own uniq compare fn
+        violations.inject({}) { |h, viol| h.merge( viol.description => viol) }.each_value { |uniq_viol| self << uniq_viol }
       end
 
       def table_form
@@ -38,15 +39,6 @@ module DTK
       def sort(viol_output_pairs)
         # sort is so that violations that can affect others (i.e., correction of them can cause other to be solved (e.g., component connection for unset attrs)
         viol_output_pairs.sort { |a, b| Violation.compare_for_sort(a[0], b[0]) }.map { |pairs| pairs[1] }
-      end
-
-      def add_uniq_violations!(violations)
-        # using description to determine uniqueness
-        # TODO: use this as fallback and have each viol type have its own uniq compare fn
-        violations.inject({}) { |h, viol| h.merge( viol.description => viol) }.each_value do | uniq_viol|
-          self << uniq_viol
-        end
-        self
       end
     end
 
@@ -64,7 +56,7 @@ module DTK
         any_unset_attributes = ! unset_attr_viols.empty?
         semantic_viols = find_violations__semantic(cmps, any_unset_attributes: any_unset_attributes)
 
-        Violations.new(unset_attr_viols, cmp_constraint_viols, unconn_req_service_refs, mod_refs_viols, cmp_parsing_errors, num_of_target_nodes, semantic_viols)
+        Violations.new(unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + semantic_viols)
       end
 
       private

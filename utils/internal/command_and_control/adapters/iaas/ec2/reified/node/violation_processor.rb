@@ -33,8 +33,9 @@ module DTK
             return violations unless violations.empty?
 
             violations = validate_and_fill_in_values__ami!(ami_info)
-            return violations unless violations.empty?
-            
+
+            return violations if ami_info.nil?
+
             violations += validate_and_fill_in_values__os_type(ami_info)
 
             violations += validate_and_fill_in_values__instance_type(ami_info)
@@ -52,7 +53,10 @@ module DTK
               update_image_id!(ami)
             else
               unless ami_info
-                violations << Violation::ReqUnsetAttrs.new(self, :ami, :image)
+                # TODO: right now image is required in ec2::properties; put this back in when
+                # remove that to allow user to give ami rather than an image
+                # violations << Violation::ReqUnsetAttrs.new(self, :ami, :image)
+                violations << Violation::ReqUnsetAttr.new(self, :image)
               else
                 update_image_id!(ami_info.ami)
                 update_and_propagate_dtk_attributes(ami: ami_info.ami) 

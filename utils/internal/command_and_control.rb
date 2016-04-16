@@ -93,15 +93,15 @@ module DTK
     # Types that have Iaas service properties
     TypesWithIaasProperties = [:ec2] # TODO: DTK-2948; need to iterate over all
 
-    def self.find_violations_in_target_service(target_service, project, params = {})
+    def self.find_violations_in_target_service(target_service, params = {})
       TypesWithIaasProperties.inject([]) do |a, iaas_type|
-        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_target_service(target_service, project, params)
+        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_target_service(target_service, params)
       end
     end
 
-    def self.find_violations_in_node_components(service, project, params = {})
+    def self.find_violations_in_node_components(service, params = {})
       TypesWithIaasProperties.inject([]) do |a, iaas_type|
-        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_node_components(service, project, params)
+        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_node_components(service, params)
       end
     end
 

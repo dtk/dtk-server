@@ -21,6 +21,7 @@ module DTK; class  Assembly
     r8_nested_require('instance', 'service_link')
     r8_nested_require('instance', 'action')
     r8_nested_require('instance', 'violation')
+    r8_nested_require('instance', 'violations')
     r8_nested_require('instance', 'update')
     r8_nested_require('instance', 'list')
     r8_nested_require('instance', 'get')
@@ -29,7 +30,7 @@ module DTK; class  Assembly
     r8_nested_require('instance', 'node_status')
     r8_nested_require('instance', 'lock')
     include ServiceLinkMixin
-    include ViolationMixin
+    include ViolationsMixin
     include ListMixin
     extend ListClassMixin
     include DeleteMixin

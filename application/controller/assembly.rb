@@ -742,19 +742,6 @@ module DTK
       end
       assembly_instance = assembly_template.stage(target, opts)
 
-      # see if any violations
-      violation_objects = assembly_instance.find_violations()
-      unless violation_objects.empty?
-        violation_table = violation_objects.map do |v|
-          { type: v.type(), description: v.description() }
-        end
-        error_data = {
-          violations: violation_table.uniq
-        }
-        error_msg = 'Assembly cannot be executed because of violations'
-        #        return rest_notok_response(:code => :assembly_violations, :message => error_msg, :data => error_data)
-      end
-
       # create task
       unless task = Task.create_from_assembly_instance?(assembly_instance, ret_params_hash(:commit_msg))
         fail Error.new("There are no steps in the workflow to execute")
@@ -781,17 +768,13 @@ module DTK
 
     #### end: method(s) related to staging assembly template
 
-    #### creates tasks to execute/converge assemblies and monitor status
     def rest__find_violations
-      assembly = ret_assembly_instance_object()
-      project  = get_default_project()
-      violation_objects = assembly.find_violations(project)
-
-      violation_table = violation_objects.map do |v|
-        { type: v.type(), description: v.description() }
-      end.sort { |a, b| a[:type].to_s <=> b[:type].to_s }
-
-      rest_ok_response violation_table.uniq
+      assembly = ret_assembly_instance_object
+      opts     = ret_boolean_params_hash(:ret_objects)
+      violations = assembly.find_violations
+pp [:violations, violations]
+      response = opts[:ret_objects] ? violations.hash_form : violations.table_form
+      rest_ok_response response
     end
 
     def rest__ad_hoc_action_list

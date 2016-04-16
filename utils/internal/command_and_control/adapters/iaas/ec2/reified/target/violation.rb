@@ -20,6 +20,7 @@ module DTK; class CommandAndControlAdapter::Ec2
   module Reified
     class Target
       class Violation < Reified::Violation
+        
         class InvalidCredentials < self
           # TODO: parameterize by component title when have multiple credentials in target
           def initialize

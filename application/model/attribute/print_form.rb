@@ -43,13 +43,17 @@ module DTK
     end
 
     class PrintForm
-      def initialize(aug_attr, opts = Opts.new)
-        if opts[:convert_node_component] 
-          if convert_if_node_component!(aug_attr)
-            opts = opts.merge(level: :node) 
+      def self.create(aug_attr, opts = Opts.new)
+        if opts[:convert_node_component] and opts[:level] != :node 
+          if node_aug_attr = convert_if_node_component?(aug_attr)
+            return new(node_aug_attr, opts.merge(level: :node))
           end
         end
+        new(aug_attr, opts)
+      end
+      private_class_method :create
 
+      def initialize(aug_attr, opts = Opts.new)
         # @aug_attr has to be set before other functions
         @aug_attr = aug_attr
         @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format, :with_assembly_wide_node).merge(level: opts[:level] || find_level()))
@@ -58,9 +62,10 @@ module DTK
         @raw_attribute_value = opts[:raw_attribute_value]
         @mark_unset_required = opts[:mark_unset_required]
       end
+      private :initialize
 
       def self.print_form(aug_attr, opts = Opts.new)
-        new(aug_attr, opts).print_form()
+        create(aug_attr, opts).print_form
       end
 
       def print_form
@@ -118,21 +123,15 @@ module DTK
         ret
       end
 
-      # if this is node component it converts it to node attribute and returns true
-      def self.convert_if_node_component!(aug_attr)
-        if component_type = (aug_attr[:nested_component] || {})[:component_type]
-          if node_property_component_types.include?(component_type)
-            # delete :nested_component key to make this a node attribute
-            aug_attr.delete(:nested_component)
-            true
-          end
-        end
-      end
-
       private
 
-      def convert_if_node_component!(aug_attr)
-        self.class.convert_if_node_component!(aug_attr)
+      # if this is node component it returns an aug component that is converted to node component
+      def self.convert_if_node_component?(aug_attr)
+        if component_type = (aug_attr[:nested_component] || {})[:component_type]
+          if node_property_component_types.include?(component_type)
+            aug_attr.hash_subset(*(aug_attr.keys - [:nested_component]))
+          end
+        end
       end
 
       def self.node_property_component_types

@@ -37,17 +37,30 @@ module DTK
         attr.print_form(Opts.new(level: print_level, convert_node_component: true))[:display_name]
       end
 
+      def hash_remove_nils(hash)
+        hash.inject({}) { |h, (k, v)| v.nil? ? h : h.merge(k => v) }
+      end
+
+      def attribute_ref
+        attr_display_name(@attr, @print_level)
+      end
+
       class ReqUnsetAttr < self
         def initialize(attr, print_level)
-          @attr_display_name = attr_display_name(attr, print_level)
+          @attr        = attr
+          @print_level = print_level
         end
 
         def type
           :required_unset_attribute
         end
 
+        def hash_form
+          { attribute_ref: attribute_ref }
+        end
+
         def description
-          "Attribute (#{@attr_display_name}) is required, but unset"
+          "Attribute (#{attr_display_name(@attr, @print_level)}) is required, but unset"
         end
       end
 
@@ -71,21 +84,26 @@ module DTK
         # opts can have keys
         #  legal_values
         def initialize(attr, value, opts = {})
-          @attr_display_name = attr_display_name(attr)
-          @value             = value
-          @legal_values      = opts[:legal_values]
+          @attr         = attr
+          @value        = value
+          @legal_values = opts[:legal_values]
         end
 
         def type
           :illegal_attribute_value
         end
 
+        def hash_form
+          hash_remove_nils(attribute_ref: attribute_ref, value: @value, legal_values: @legal_values)
+        end
+
         def description
-          ret = "Attribute '#{@attr_display_name}' has illegal value '#{@value}'"
+          ret = "Attribute '#{attr_display_name(@attr)}' has illegal value '#{@value}'"
           ret << "; legal values are: #{@legal_values.join(', ')}" if @legal_values
           ret
         end
       end
+
 
       class TargetServiceCmpsMissing < self
         def initialize(component_types)

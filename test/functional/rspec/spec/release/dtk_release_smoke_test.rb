@@ -187,7 +187,8 @@ describe "DTK Server smoke test release" do
 
   context "Delete target #{target_service_name}" do
     it "deletes target instance" do
-      value=`printf \"yes\" | dtk service delete-and-destroy #{target_service_name}`
+      value=`echo \"yes\" | dtk service delete-and-destroy #{target_service_name}`
+      puts value
       expect(value).to include("ok")
     end
   end

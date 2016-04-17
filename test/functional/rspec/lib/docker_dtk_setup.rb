@@ -40,7 +40,7 @@ system("dtk component-module install #{target_component_module} --update-none -y
 
 # Stage target service, set attributes and converge
 target_staged = target.stage_service
-if target_staged
+if target.check_if_service_exists(target.service_id)
   puts "Set attributes for staged target..."
   set_attributes_array = []
   set_attributes_array << target.set_attribute(target.service_id, 'network_aws::iam_user[default]/aws_access_key_id', aws_access_key)

@@ -11,7 +11,7 @@ config = YAML::load(File.open("./config/release.yaml"))
 service_module="r8/bootstrap"
 local_module="bootstrap"
 catalog_user="docker-credentials"
-catalog_pass="r8server"
+catalog_pass="password"
 repo_user="dtk17-docker-client"
 namespace="r8"
 
@@ -35,8 +35,8 @@ credentials_status=target.send_request('/rest/account/set_catalog_credentials', 
 ssh_key_status=target.send_request('/rest/account/add_user_direct_access', rsa_pub_key: target.ssh_key, username: repo_user, first_registration: false)
 
 # Install aws:network service module with required component modules
-system("dtk service-module install #{target_service_module} --update-none -y")
-system("dtk component-module install #{target_component_module} --update-none -y")
+system("dtk service-module install #{target_service_module} -y")
+system("dtk component-module install #{target_component_module} -y")
 
 # Stage target service, set attributes and converge
 target_staged = target.stage_service
@@ -65,4 +65,4 @@ else
 end
 
 # Install r8:bootstrap service module with required component modules
-system("dtk service-module install #{service_module} --update-none -y")
+system("dtk service-module install #{service_module} -y")

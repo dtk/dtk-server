@@ -187,8 +187,11 @@ describe "DTK Server smoke test release" do
 
   context "Delete target #{target_service_name}" do
     it "deletes target instance" do
-      service_deleted = target.delete_and_destroy_service(target.service_id)
-      service_deleted.should eq(true)
+      target_service_name = 'target'
+      target_assembly_name = 'network::single-subnet'
+      target_to_delete = Common.new(target_service_name, target_assembly_name)
+      target_deleted = target_to_delete.delete_target(target_name)
+      target_deleted.should eq(true)
     end
   end
 

@@ -572,6 +572,21 @@ module AssemblyAndServiceOperationsMixin
 		return service_deleted
 	end
 
+	def delete_target(target_name)
+    puts "Delete target:", "-----------------"
+    target_deleted = false
+    delete_target_service_response = send_request('/rest/assembly/delete', {:assembly_id=>target_name})
+
+		if (delete_target_service_response['status'] == "ok")
+			puts "Target service deleted successfully!"
+			target_deleted = true
+		else
+			puts "Target service was not deleted successfully!"
+		end
+		puts ""
+		return target_deleted
+	end
+
 	def push_assembly_updates(service_id, service_module)
 		puts "Push assembly updates:", "---------------------"
 		assembly_updated = false

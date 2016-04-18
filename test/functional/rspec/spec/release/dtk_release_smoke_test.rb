@@ -190,7 +190,7 @@ describe "DTK Server smoke test release" do
       target_service_name = 'target'
       target_assembly_name = 'network::single-subnet'
       target_to_delete = Common.new(target_service_name, target_assembly_name)
-      target_deleted = target_to_delete.delete_target(target_name)
+      target_deleted = target_to_delete.delete_target(target_service_name)
       target_deleted.should eq(true)
     end
   end

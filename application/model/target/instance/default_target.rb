@@ -39,8 +39,12 @@ module DTK; class Target
         if targets.size < 2
           targets.first
         else
-          Log.error("Unexpected that more than 1 target is returned") unless opts[:ret_singleton_target]
-          nil
+          if opts[:return_all]
+            targets
+          else
+            Log.error("Unexpected that more than 1 target is returned") unless opts[:ret_singleton_target]
+            nil
+          end
         end
       end
 
@@ -56,8 +60,13 @@ module DTK; class Target
           fail ErrorUsage::Warning.new("Default target is already set to #{current_default_target[:display_name]}")
         end
 
+        all_default = get(target.model_handle(), { return_all: true })
+        all_default = all_default.is_a?(Array) ? all_default : [all_default]
+
         Model.Transaction do
-          current_default_target.update(is_default_target: false) if current_default_target
+          all_default.each do |default|
+            default.update(is_default_target: false)
+          end
           target.update(is_default_target: true)
           if opts[:update_workspace_target]
             # also set the workspace with this target

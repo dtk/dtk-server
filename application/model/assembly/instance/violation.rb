@@ -44,6 +44,11 @@ module DTK
 
       private
 
+      # must be overwritten
+      def fix_text
+        fail Error, "Missing method '#{self.class}#fix_text'"
+      end
+
       def type 
         self.class.type
       end
@@ -53,30 +58,31 @@ module DTK
       end
 
       def hash_form_aux(hash)
-        hash.inject(type_and_display.merge(fix_text: fix_text)) do |h, (k, v)| 
-          # This will remove nil values from hash
-          v.nil? ? h : h.merge(k => v)
-        end
+        remove_nil_values(hash, seed: type_and_display.merge(fix_text: fix_text))
       end
 
-      def attribute_info
+      # opts can have keys
+      #  :legal_values
+      def attribute_info(opts = {})
         @attr.update_object!(:data_type, :hidden)
-        { 
-          attribute: {
+         attribute_info = remove_nil_values(
             ref: attr_display_name(@attr, @print_level),
             datatype: @attr[:data_type],
-            hidden: @attr[:hidden]
-          }
-        }
+            hidden: @attr[:hidden],
+            legal_values: opts[:legal_values]
+         )
+
+        { attribute: attribute_info }
       end
 
       def type_and_display
         { type: type, description: description }
       end
 
-      # must be overwritten
-      def fix_text
-        fail Error, "Missing method '#{self.class}#fix_text'"
+      # opts can have keys
+      #   :seed 
+      def remove_nil_values(hash, opts = {})
+        hash.inject(opts[:seed] || {}) { |h, (k, v)| v.nil? ? h : h.merge(k => v) }
       end
     end
   end

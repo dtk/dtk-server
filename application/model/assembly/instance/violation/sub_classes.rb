@@ -68,7 +68,7 @@ module DTK
         end
 
         def hash_form
-          hash_form_aux(attribute_info.merge(value: @value, legal_values: @legal_values))
+          hash_form_aux(attribute_info(legal_values: @legal_values).merge(value: @value))
         end
 
         def description

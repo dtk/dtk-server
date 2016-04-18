@@ -7,11 +7,14 @@ GIT
 
 GIT
   remote: git://github.com/dtk/dtk-common.git
-  revision: 10077e3f7e98ece1cc72ce2d031fc7aa1feb2001
+  revision: 93d50c4a6b32376a2b4b503e8284a1e2bd64f671
   specs:
-    dtk-common (0.9.0)
+    dtk-common (0.9.1)
       colorize (~> 0.5.8)
+      docker-api (~> 1.26)
       dtk-common-core (= 0.9.0)
+      erubis (~> 2.7)
+      grit (~> 2.5)
       rugged (~> 0.17.0.b7)
 
 GEM
@@ -50,6 +53,9 @@ GEM
     debugger-ruby_core_source (1.3.5)
     diff-lcs (1.2.5)
     docile (1.1.3)
+    docker-api (1.28.0)
+      excon (>= 0.38.0)
+      json
     em-ssh (0.6.5)
       eventmachine
       net-ssh
@@ -317,3 +323,6 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
+
+BUNDLED WITH
+   1.10.6

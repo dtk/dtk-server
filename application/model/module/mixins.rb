@@ -133,6 +133,18 @@ module DTK
       [{ versions: parsed_versions.flatten }]
     end
 
+    def list_remote_assemblies(project, remote_params, client_rsa_pub_key)
+      remote = remote_params.create_remote(project)
+      response = Repo::Remote.new(remote).list_remote_assemblies(client_rsa_pub_key)
+
+      assemblies = response.map do |assembly|
+        assembly_hash = assembly['assembly']||{}
+        { display_name: assembly_hash['name'], description: assembly_hash['description'] }
+      end
+
+      assemblies
+    end
+
     ##
     # Returns local and remote versions for module
     #

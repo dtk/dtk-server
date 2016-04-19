@@ -336,6 +336,7 @@ R8::ReactorRoute.draw do
   post 'service_module/check_master_branch_exist' => 'service_module#check_master_branch_exist'
   post 'service_module/list_remote_versions' => 'service_module#list_remote_versions'
   post 'service_module/prepare_for_install_module' => 'service_module#prepare_for_install_module'
+  post 'service_module/list_remote_assemblies' => 'service_module#list_remote_assemblies'
 
   # WORK WITH GIT REMOTES
   post 'service_module/info_git_remote'        => 'service_module#info_git_remote'

@@ -39,6 +39,10 @@ module DTK
       response
     end
 
+    def list_service_module_assemblies(username, client_rsa_pub_key)
+      get_rest_request_data('/v1/service_modules/list_assemblies', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
+    end
+
     def list_test_modules(username, client_rsa_pub_key)
       response = get_rest_request_data('/v1/test_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
       response
@@ -66,6 +70,11 @@ module DTK
         end
 
       response
+    end
+
+    def list_module_assemblies(filter = nil, client_rsa_pub_key = nil)
+      repo_user = get_approved_repouser(client_rsa_pub_key)
+      list_service_module_assemblies(CurrentSession.catalog_username, client_rsa_pub_key)
     end
 
     def notify_tenant_ready(tenant_owner_email, tenant_owner_username)
@@ -200,6 +209,11 @@ module DTK
 
     def get_components_info(params_hash, client_rsa_pub_key = nil)
       route = collection_route_from_type(type: params_hash[:type]) + '/component_info'
+      get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash), raise_error: true)
+    end
+
+    def get_module_assemblies_info(params_hash, client_rsa_pub_key = nil)
+      route = collection_route_from_type(type: params_hash[:type]) + '/module_assemblies_info'
       get_rest_request_data(route, user_params_delegated_client(client_rsa_pub_key, params_hash), raise_error: true)
     end
 

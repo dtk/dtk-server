@@ -427,6 +427,16 @@
       "description": "description"
     }
   },
+  "remote_assembly_template_description": {
+    "order": [
+      "assembly_name",
+      "description"
+    ],
+    "mapping": {
+      "assembly_name": "display_name",
+      "description": "description"
+    }
+  },
   "service_link": {
     "order": [
       "id",

@@ -185,6 +185,18 @@ module DTK
         @client.get_components_info(params, client_rsa_pub_key)
       end
 
+      def list_remote_assemblies(client_rsa_pub_key)
+        params = {
+          name: remote.module_name,
+          version: remote.version,
+          namespace: remote.namespace,
+          type: remote.module_type,
+          do_not_raise: true,
+          dependencies_info: true
+        }
+        @client.get_module_assemblies_info(params, client_rsa_pub_key)
+      end
+
       def remote
         unless @remote
           fail Error.new('Should not be called if @remote is nill')
@@ -216,6 +228,31 @@ module DTK
         end
 
         unsorted.sort { |a, b| a[:display_name] <=> b[:display_name] }
+      end
+
+      def list_module_assemblies_info(type = nil, rsa_pub_key = nil, opts = {})
+        new_repo = R8::Config[:repo][:remote][:new_client]
+        filter = type && { type: type_for_remote_module(type) }
+        remote_modules = client.list_module_assemblies(filter, rsa_pub_key)
+
+        # unsorted = remote_modules.map do |r|
+        #   el = {}
+        #   last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime('%Y/%m/%d %H:%M:%S')
+        #   permission_string = "#{r['permission_hash']['user']}/#{r['permission_hash']['user_group']}/#{r['permission_hash']['other']}"
+        #   el.merge!(display_name: r['full_name'], owner: r['owner_name'], group_owners: r['user_group_names'], permissions: permission_string, last_updated: last_updated)
+        #   versions = opts[:ret_versions_array] ? r['versions'] : branch_names_to_versions(r['branches'])
+
+        #   if versions && !versions.empty?
+        #     # substitute base with master
+        #     parsed_versions = []
+        #     versions.each{ |version| parsed_versions << (version.eql?('master') ? 'base' : version) }
+        #     el.merge!(versions: parsed_versions)
+        #   end
+
+        #   el
+        # end
+
+        # unsorted.sort { |a, b| a[:display_name] <=> b[:display_name] }
       end
 
       def branch_names_to_versions(branch_names)

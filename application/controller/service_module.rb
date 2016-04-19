@@ -290,6 +290,20 @@ module DTK
       rest_ok_response resolve_pull_from_remote(:service_module)
     end
 
+    def rest__list_remote_assemblies
+      service_module = create_obj(:service_module_id)
+      opts = Opts.create?(remote_namespace?: ret_request_params(:remote_namespace))
+      module_name, namespace, version = service_module.get_basic_info(opts)
+
+      version = ret_request_params(:version)
+      version = compute_latest_version(service_module) unless version
+
+      remote_params = remote_params_dtkn(:service_module, namespace, module_name, version)
+      client_rsa_pub_key = ret_request_params(:rsa_pub_key)
+
+      rest_ok_response service_module.list_remote_assemblies(get_default_project(), remote_params, client_rsa_pub_key)
+    end
+
     def rest__delete_assembly_template
       assembly_template_idh = ret_assembly_template_idh()
       rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(assembly_template_idh)

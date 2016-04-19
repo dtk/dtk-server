@@ -185,23 +185,23 @@ describe "DTK Server smoke test release" do
     end
   end
 
-  context "Delete target #{target_service_name}" do
-    it "deletes target instance" do
-      target_service_name = 'target'
-      target_assembly_name = 'network::single-subnet'
-      target_to_delete = Common.new(target_service_name, target_assembly_name)
-      target_deleted = target_to_delete.delete_target(target_service_name)
-      target_deleted.should eq(true)
-    end
-  end
+  #context "Delete target #{target_service_name}" do
+  #  it "deletes target instance" do
+  #    target_service_name = 'target'
+  #    target_assembly_name = 'network::single-subnet'
+  #    target_to_delete = Common.new(target_service_name, target_assembly_name)
+  #    target_deleted = target_to_delete.delete_target(target_service_name)
+  #    target_deleted.should eq(true)
+  #  end
+  #end
 
   context "Delete service module function" do
     include_context 'Delete all service module versions', dtk_common, local_service_module_name
   end
 
-  context "Delete service module function" do
-    include_context 'Delete all service module versions', dtk_common, local_default_namespace + ":" + network_service_module_name
-  end
+  #context "Delete service module function" do
+  #  include_context 'Delete all service module versions', dtk_common, local_default_namespace + ":" + network_service_module_name
+  #end
 
   context "Delete component module function" do
     include_context 'Delete all component module versions', dtk_common, local_component_module_name
@@ -211,13 +211,13 @@ describe "DTK Server smoke test release" do
     include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + ec2_component_module_name
   end
 
-  context "Delete component module function" do
-    include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + image_component_module_name
-  end
+  #context "Delete component module function" do
+  #  include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + image_component_module_name
+  #end
 
-  context "Delete component module function" do
-    include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + network_component_module_name
-  end
+  #context "Delete component module function" do
+  #  include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + network_component_module_name
+  #end
 
   context "Delete #{component_module_name} component module version #{component_module_version} from remote" do
     include_context "Delete component module from remote repo", component_module_name, namespace

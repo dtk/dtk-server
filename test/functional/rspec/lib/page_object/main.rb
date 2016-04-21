@@ -11,6 +11,14 @@ class Main < PageContainer
     @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Edit User") 
   end
 
+  def on_create_group_page?
+    @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Create New Group") 
+  end
+
+  def on_edit_group_page?
+    @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Edit User Group") 
+  end
+
   def on_create_namespace_page?
     @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Create New Namespace") 
   end

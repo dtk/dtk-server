@@ -38,7 +38,7 @@ describe "(Admin Panel UI) Usergroup Test Case 2: NEG - Create group with invali
         it "will not create usergroup" do
             group_panel.enter_data(empty_group.get_data)
             group_panel.press_create_button
-            expect(group_panel.on_create_page?).to eql(true)
+            expect(group_panel.on_create_group_page?).to eql(true)
         end
     end
 
@@ -46,7 +46,7 @@ describe "(Admin Panel UI) Usergroup Test Case 2: NEG - Create group with invali
         it "will not create usergroup" do
             group_panel.enter_data(invalid_group.get_data)
             group_panel.press_create_button
-            expect(group_panel.on_create_page?).to eql(true)
+            expect(group_panel.on_create_group_page?).to eql(true)
         end
     end
 
@@ -57,7 +57,7 @@ describe "(Admin Panel UI) Usergroup Test Case 2: NEG - Create group with invali
 
             group_panel.enter_data(long_name_group.get_data)
             group_panel.press_create_button
-            expect(group_panel.on_create_page?).to eql(true)
+            expect(group_panel.on_create_group_page?).to eql(true)
         end
     end
 
@@ -65,7 +65,7 @@ describe "(Admin Panel UI) Usergroup Test Case 2: NEG - Create group with invali
        it "will not create usergroup" do
             group_panel.enter_data(existing_group.get_data)
             group_panel.press_create_button
-            expect(group_panel.on_create_page?).to eql(true)
+            expect(group_panel.on_create_group_page?).to eql(true)
         end
     end
 

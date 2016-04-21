@@ -3,13 +3,24 @@ class Main < PageContainer
   INPUT_SELECTOR="//input[@class='btn btn-success']"
   BUTTON_SELECTOR="//button[@class='btn btn-primary']"
 
-
   def on_create_page?
-    @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Create") 
+    @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Create New User") 
   end
 
   def on_edit_page?
-    @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Edit") 
+    @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Edit User") 
+  end
+
+  def on_create_namespace_page?
+    @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Create New Namespace") 
+  end
+
+  def on_edit_namespace_page?
+    @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Edit Namespace")
+  end
+
+  def on_edit_module_page?
+    @session.has_selector?(INPUT_SELECTOR) && @session.find(INPUT_SELECTOR).value.include?("Edit Module")
   end
 
   def press_create_button
@@ -86,8 +97,6 @@ class Main < PageContainer
   def get_table_row_data(name) 
 
   end
-
-
 
   def get_usergroups
     Usergroups.new(@session)

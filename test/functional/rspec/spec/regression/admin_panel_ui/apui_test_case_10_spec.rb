@@ -61,7 +61,7 @@ describe "(Admin Panel UI) Module Test Case 10: Edit module owner, group and per
     context "Open edit page for Module #{mod.name}" do
     	it "opened #{mod.name} edit page" do
     		module_panel.open_edit_page(mod.search_value)
-    		expect(module_panel.on_edit_page?).to eql(true)
+    		expect(module_panel.on_edit_module_page?).to eql(true)
     	end
     end
 
@@ -75,7 +75,7 @@ describe "(Admin Panel UI) Module Test Case 10: Edit module owner, group and per
     	it "properties selected and module edited" do
     		module_panel.enter_data(edited_mod.get_data)
     		module_panel.press_edit_button
-    		expect(module_panel.on_edit_page?).to eql(false)
+    		expect(module_panel.on_edit_module_page?).to eql(false)
     	end
     end
 
@@ -94,7 +94,7 @@ describe "(Admin Panel UI) Module Test Case 10: Edit module owner, group and per
     		module_panel.deselect_properties(edited_mod.group)
     		module_panel.enter_data(mod.get_data)
     		module_panel.press_edit_button
-    		expect(module_panel.on_edit_page?).to eql(false)
+    		expect(module_panel.on_edit_module_page?).to eql(false)
     	end
     end
 

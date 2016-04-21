@@ -37,7 +37,7 @@ describe "(Admin Panel UI) Module Test Case 11: NEG - Edit deselect module owner
     context "Open edit page for Module #{mod.name}" do
     	it "opened #{mod.name} edit page" do
     		module_panel.open_edit_page(mod.search_value)
-    		expect(module_panel.on_edit_page?).to eql(true)
+    		expect(module_panel.on_edit_module_page?).to eql(true)
     	end
     end
 
@@ -50,7 +50,7 @@ describe "(Admin Panel UI) Module Test Case 11: NEG - Edit deselect module owner
     context "Save edit changes" do
     	it "will not save changes for #{mod.name}" do
     		module_panel.press_edit_button
-    		expect(module_panel.on_edit_page?).to eql(true)
+    		expect(module_panel.on_edit_module_page?).to eql(true)
     	end	
     end
 
@@ -58,7 +58,7 @@ describe "(Admin Panel UI) Module Test Case 11: NEG - Edit deselect module owner
     	it "returned old properties" do
     		module_panel.enter_data(mod.get_data)
     		module_panel.press_edit_button
-    		expect(module_panel.on_edit_page?).to eql(false)
+    		expect(module_panel.on_edit_module_page?).to eql(false)
     	end
     end
 

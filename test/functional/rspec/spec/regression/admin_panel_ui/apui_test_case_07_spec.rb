@@ -76,7 +76,7 @@ describe "(Admin Panel UI) Namespace Test Case 7: Simple create, update and dele
     	it "created namespaces" do
     		ns_panel.enter_data(namespace.get_data)
     		ns_panel.press_create_button
-    		expect(ns_panel.on_create_page?).to eql(false)
+    		expect(ns_panel.on_create_namespace_page?).to eql(false)
     	end 
     end
 
@@ -102,7 +102,7 @@ describe "(Admin Panel UI) Namespace Test Case 7: Simple create, update and dele
 		it "edited namespace" do
 			ns_panel.enter_data(edited_ns.get_data, true)
 			ns_panel.press_edit_button
-			expect(ns_panel.on_edit_page?).to eql(false)
+			expect(ns_panel.on_edit_namespace_page?).to eql(false)
 		end
     end
 

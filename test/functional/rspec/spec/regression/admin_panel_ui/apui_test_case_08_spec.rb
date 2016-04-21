@@ -85,7 +85,7 @@ describe "(Admin Panel UI) User Test Case 8: NEG - Create namespace with invalid
     	it "will not create namespace" do
     		ns_panel.enter_data(namespace.get_data)
     		ns_panel.press_create_button
-    		expect(ns_panel.on_create_page?).to eql(true)
+    		expect(ns_panel.on_create_namespace_page?).to eql(true)
     	end
     end 
 
@@ -93,7 +93,7 @@ describe "(Admin Panel UI) User Test Case 8: NEG - Create namespace with invalid
     	it "will not create namespace" do
     		ns_panel.enter_data(invalid_ns.get_data)
     		ns_panel.press_create_button
-    		expect(ns_panel.on_create_page?).to eql(true)
+    		expect(ns_panel.on_create_namespace_page?).to eql(true)
     	end
     end
 
@@ -102,7 +102,7 @@ describe "(Admin Panel UI) User Test Case 8: NEG - Create namespace with invalid
     		long_ns=Namespace.new(invalid_ns.get_too_long_name+num, 'demo_user1'+num, 'demo_group'+num,'','','')
     		ns_panel.enter_data(long_ns.get_data)
     		ns_panel.press_create_button
-    		expect(ns_panel.on_create_page?).to eql(true)
+    		expect(ns_panel.on_create_namespace_page?).to eql(true)
     	end
     end
 
@@ -110,7 +110,7 @@ describe "(Admin Panel UI) User Test Case 8: NEG - Create namespace with invalid
     	it "will not create namespace" do
     		ns_panel.enter_data(invalid_owner_ns.get_data)
     		ns_panel.press_create_button
-    		expect(ns_panel.on_create_page?).to eql(true)
+    		expect(ns_panel.on_create_namespace_page?).to eql(true)
     	end
     end
 

@@ -72,7 +72,7 @@ describe "(Admin Panel UI) Test Case 9: NEG - Namespace edit textfield validatio
     context "Create Namespace #{second_ns.name}" do
     	it "created namespace" do
     		second_ns.create_object(ns_panel)
-            expect(ns_panel.on_create_page?).to eql(false) 
+            expect(ns_panel.on_create_namespace_page?).to eql(false) 
     	end
     end
 
@@ -92,7 +92,7 @@ describe "(Admin Panel UI) Test Case 9: NEG - Namespace edit textfield validatio
     context "Edit page with unselected user, group and permission" do
     	it "will not edit usergroup" do
     		ns_panel.press_edit_button
-    		expect(ns_panel.on_edit_page?).to eql(true)
+    		expect(ns_panel.on_edit_namespace_page?).to eql(true)
     	end
     end
     
@@ -101,7 +101,7 @@ describe "(Admin Panel UI) Test Case 9: NEG - Namespace edit textfield validatio
     		ns_panel.select_user(ns_max_user.username, ns_panel.select_box_selector)
     		ns_panel.check_usergroup(ns_max_user.group)
     		ns_panel.press_edit_button
-    		expect(ns_panel.on_edit_page?).to eql(true)
+    		expect(ns_panel.on_edit_namespace_page?).to eql(true)
     	end
     end
 

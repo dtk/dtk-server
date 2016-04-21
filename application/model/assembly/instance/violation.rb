@@ -24,7 +24,7 @@ module DTK
       r8_nested_require('violation', 'sub_classes')
 
       def table_form
-        type_and_display
+        type_and_description
       end
 
       # must be overwritten
@@ -57,28 +57,37 @@ module DTK
         attr.print_form(Opts.new(level: print_level, convert_node_component: true))[:display_name]
       end
 
-      def hash_form_aux(hash)
-        remove_nil_values(hash, seed: type_and_display.merge(fix_text: fix_text))
-      end
-
       # opts can have keys
+      #  :attr
       #  :legal_values
       def attribute_info(opts = {})
-        @attr.update_object!(:data_type, :hidden)
-         attribute_info = remove_nil_values(
-            ref: attr_display_name(@attr, @print_level),
-            datatype: @attr[:data_type],
-            hidden: @attr[:hidden],
+        attr = opts[:attr] || @attr
+        attr.update_object!(:data_type, :hidden)
+         remove_nil_values(
+            ref: attr_display_name(attr, @print_level),
+            datatype: attr[:data_type],
+            hidden: attr[:hidden],
             legal_values: opts[:legal_values]
          )
-
-        { attribute: attribute_info }
       end
 
-      def type_and_display
+      def type_and_description
         { type: type, description: description }
       end
 
+      def hash_form_multiple_attrs(attrs, attr_display_names, element_type)
+        fix_hashes = []
+        attrs.each_with_index do |attr, i|
+          fix_hash =  {
+            type: element_type,
+            attribute: attribute_info(attr: attr),
+            fix_text: fix_text(attr_display_names[i])
+          }
+          fix_hashes << fix_hash
+        end
+        type_and_description.merge(fix_hashes: fix_hashes)
+      end
+      
       # opts can have keys
       #   :seed 
       def remove_nil_values(hash, opts = {})

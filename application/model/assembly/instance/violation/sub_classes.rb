@@ -36,7 +36,7 @@ module DTK
         end
 
         def hash_form
-          hash_form_aux(attribute_info)
+          type_and_description.merge(attribute: attribute_info, fix_text: fix_text)
         end
 
         def fix_text
@@ -68,7 +68,8 @@ module DTK
         end
 
         def hash_form
-          hash_form_aux(attribute_info(legal_values: @legal_values).merge(value: @value))
+          attribute_info = attribute_info(legal_values: @legal_values)
+          type_and_description.merge(attribute: attribute_info, fix_text: fix_text, value: @value)
         end
 
         def description
@@ -78,16 +79,24 @@ module DTK
         end
       end
 
-      # TODO: DTK-2525; got here in refining the violations to work with fix wizard
-
-      class ReqUnsetAttrs < self
+      class ReqOneOfUnsetAttrs < self
         def initialize(attrs, print_level)
-          opts_print = Opts.new(level: print_level)
+          super()
+          @attrs              = attrs
+          @print_level        = print_level
           @attr_display_names = attrs.map { |attr| attr_display_name(attr, print_level) }
         end
 
         def self.type
           :required_unset_attributes
+        end
+
+        def fix_text(attr_display_name)
+          "Enter value for attribute '#{attr_display_name}'"
+        end
+
+        def hash_form
+          hash_form_multiple_attrs(@attrs, @attr_display_names, :required_unset_attribute)
         end
 
         def description
@@ -96,6 +105,7 @@ module DTK
         end
       end
 
+      # TODO: DTK-2525; got here in refining the violations to work with fix wizard
 
       class TargetServiceCmpsMissing < self
         def initialize(component_types)

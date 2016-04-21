@@ -36,7 +36,7 @@ module DTK
         end
       end      
       
-      class ReqUnsetAttrs < Assembly::Instance::Violation::ReqUnsetAttrs
+      class ReqOneOfUnsetAttrs < Assembly::Instance::Violation::ReqOneOfUnsetAttrs
         include CommonMixin
         def initialize(reified_component, *attribute_names)
           aug_attrs = get_sorted_dtk_aug_attributes(reified_component, *attribute_names)

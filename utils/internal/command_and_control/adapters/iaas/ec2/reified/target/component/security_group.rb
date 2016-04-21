@@ -28,7 +28,7 @@ module DTK
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_fill_in_values!
-          return [Violation::ReqUnsetAttrs.new(self, :group_name, :group_id)] if !group_id and !group_name
+          return [Violation::ReqOneOfUnsetAttrs.new(self, :group_name, :group_id)] if !group_id and !group_name
           validate_and_fill_in_values_name_and_id!
         end
 

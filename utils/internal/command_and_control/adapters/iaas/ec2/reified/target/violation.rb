@@ -22,13 +22,30 @@ module DTK; class CommandAndControlAdapter::Ec2
       class Violation < Reified::Violation
         
         class InvalidCredentials < self
-          # TODO: parameterize by component title when have multiple credentials in target
-          def initialize
+          include Reified::Violation::CommonMixin
+          def initialize(reified_component, *attribute_names)
+            @attribute_names    = attribute_names
+            @attrs              = get_sorted_dtk_aug_attributes(reified_component, *attribute_names)
+            @print_level        = :node
+            @attr_display_names = @attrs.map { |attr| attr_display_name(attr, @print_level) }
+            # TODO: parameterize by component title when have multiple credentials in target
           end
+
+          def fix_text(attr_display_name)
+            "Enter value for attribute '#{attr_display_name}'"
+          end
+          
+          def hash_form
+            hash_form_multiple_attrs(@attrs, @attr_display_names, :required_unset_attribute)
+          end
+
           def description
-            "One or both of the AWS credentials 'aws_access_key_id'/'aws_secret_access_key' are invalid"
+            attrs_ref = @attribute_names.join(', ')
+            "One or both of the AWS credentials (#{attrs_ref}) are invalid"
           end
         end
+
+        # TODO: DTK-2525; got here in refining the violations to work with fix wizard
 
         class InvalidVpcSubnetId < self
           # opts can have keys

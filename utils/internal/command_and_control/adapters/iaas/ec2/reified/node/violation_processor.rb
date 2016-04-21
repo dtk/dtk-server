@@ -55,7 +55,7 @@ module DTK
               unless ami_info
                 # TODO: right now image is required in ec2::properties; put this back in when
                 # remove that to allow user to give ami rather than an image
-                # violations << Violation::ReqUnsetAttrs.new(self, :ami, :image)
+                # violations << Violation::ReqOneOfUnsetAttrs.new(self, :ami, :image)
                 violations << Violation::ReqUnsetAttr.new(self, :image)
               else
                 update_image_id!(ami_info.ami)
@@ -86,7 +86,7 @@ module DTK
               update_instance_type!(instance_type)
             else
               unless size
-                violations << Violation::ReqUnsetAttrs.new(self, :size, :instance_type)
+                violations << Violation::ReqOneOfUnsetAttrs.new(self, :size, :instance_type)
               else
                 calculated_instance_type, more_violations = ami_info.instance_type?(size)
                 violations += more_violations

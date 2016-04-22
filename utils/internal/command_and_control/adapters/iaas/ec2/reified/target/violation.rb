@@ -26,7 +26,7 @@ module DTK; class CommandAndControlAdapter::Ec2
           def initialize(reified_component, *attribute_names)
             @attribute_names    = attribute_names
             @attrs              = get_sorted_dtk_aug_attributes(reified_component, *attribute_names)
-            @print_level        = :node
+            @print_level        = :component
             @attr_display_names = @attrs.map { |attr| attr_display_name(attr, @print_level) }
             # TODO: parameterize by component title when have multiple credentials in target
           end

@@ -45,36 +45,22 @@ module DTK; class CommandAndControlAdapter::Ec2
           end
         end
 
-        # TODO: DTK-2525; got here in refining the violations to work with fix wizard
-
-        class InvalidVpcSubnetId < self
-          # opts can have keys
-          #  :legal_subnet_ids
-          def initialize(vpc_subnet_id, opts = {})
-            @vpc_subnet_id = vpc_subnet_id
-            @legal_subnet_ids = opts[:legal_subnet_ids]
+        class InvalidKeypair < IllegalAttrValue
+          def initialize(reified_component, attribute_name, value, opts = {})
+            super
+            @region = opts[:region]
           end
           def description
-            ret = "The id '#{@vpc_subnet_id}' is an invalid vpc subnet id"
-            ret << "; legal values are: #{@legal_subnet_ids.join(', ')}" if @legal_subnet_ids
-            ret
-          end
-        end
-        
-        class InvalidKeypair < self
-          def initialize(keypair, region, legal_keypairs)
-            @keypair        = keypair
-            @region         = region
-            @legal_keypairs = legal_keypairs
-          end
-          def description
-            if @legal_keypairs.empty?
+            if @legal_values.empty?
               "There are no keypairs configured in region '#{@region}'"
             else
-              "The name '#{@keypair}' is not a legal keypair in region '#{@region}'; legal values are: #{@legal_keypairs.join(', ')}" 
+              "The name '#{@value}' is not a legal keypair in region '#{@region}'; legal values are: #{@legal_values.join(', ')}" 
             end
           end
         end
+        
+
+        # TODO: DTK-2525; got here in refining the violations to work with fix wizard
         
         class InvalidSecurityGroup < self
           class Id < self

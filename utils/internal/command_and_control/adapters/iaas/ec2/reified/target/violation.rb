@@ -39,7 +39,7 @@ module DTK; class CommandAndControlAdapter::Ec2
             hash_form_multiple_attrs(@attrs, @attr_display_names, :required_unset_attribute)
           end
 
-          def description
+          def description(_opts = {})
             attrs_ref = @attribute_names.join(', ')
             "One or both of the AWS credentials (#{attrs_ref}) are invalid"
           end
@@ -50,11 +50,16 @@ module DTK; class CommandAndControlAdapter::Ec2
             super
             @region = opts[:region]
           end
-          def description
+
+          # opts can have keys
+          #   :summary - Boolean
+          def description(opts = {})
             if @legal_values.empty?
               "There are no keypairs configured in region '#{@region}'"
             else
-              "The name '#{@value}' is not a legal keypair in region '#{@region}'; legal values are: #{@legal_values.join(', ')}" 
+              ret = "The name '#{@value}' is not a legal keypair in region '#{@region}'"
+              ret << "; legal values are: #{@legal_values.join(', ')}" unless opts[:summary]
+              ret
             end
           end
         end

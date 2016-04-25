@@ -297,6 +297,7 @@ module DTK
 
       version = ret_request_params(:version)
       version = compute_latest_version(service_module) unless version
+      version ||= 'master'
 
       remote_params = remote_params_dtkn(:service_module, namespace, module_name, version)
       client_rsa_pub_key = ret_request_params(:rsa_pub_key)

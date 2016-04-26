@@ -716,6 +716,18 @@ module DTK
       rest_ok_response service_instance.set_as_default_target()
     end
 
+    def rest__create_workspace
+      workspace_name = ret_request_params(:workspace_name)
+      builtin_target = Target::Instance.get_builtin_target(model_handle(:target))
+
+      unless workspace_name
+        instance_list = Assembly::Instance.list_with_workspace(model_handle())
+        workspace_name = Workspace.calculate_workspace_name(instance_list)
+      end
+
+      rest_ok_response Workspace.create?(builtin_target.id_handle(), get_default_project.id_handle(), workspace_name)
+    end
+
     def rest__deploy
       # stage assembly template
       target_id = ret_request_param_id_optional(:target_id, Target::Instance)

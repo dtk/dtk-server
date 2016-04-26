@@ -22,12 +22,13 @@ module DTK
     end
 
     # creates both a service, module branch, assembly instance and assembly template for the workspace
-    def self.create?(target_idh, project_idh)
-      Factory.create?(target_idh, project_idh)
+    def self.create?(target_idh, project_idh, workspace_name = nil)
+      Factory.create?(target_idh, project_idh, workspace_name)
     end
 
     def self.is_workspace?(obj)
-      obj.is_a?(self) || (AssemblyFields[:ref] == obj.get_field?(:ref))
+      # obj.is_a?(self) || (AssemblyFields[:ref] == obj.get_field?(:ref))
+      obj.is_a?(self) || (obj.get_field?(:ref).start_with?(AssemblyFields[:ref]))
     end
     # if is workspace it convents to workspace object
     def self.workspace?(obj)
@@ -44,6 +45,11 @@ module DTK
         return nil
       end
       rows.first
+    end
+
+    def self.get_workspaces(workspace_mh, opts = {})
+      opts_get = Aux.hash_subset(opts, :cols).merge(filter: [:eq, :component_type, AssemblyFields[:component_type]])
+      Workspace.get(workspace_mh, opts_get)
     end
 
     def purge(opts = {})
@@ -103,6 +109,33 @@ module DTK
       service_module.get_field?(:display_name) == ServiceModuleFields[:display_name]
     end
 
+    def self.calculate_workspace_name(assembly_list)
+      name = AssemblyFields[:component_type]
+      workspace_list = assembly_list.select{ |assembly| (assembly[:ref]||"").start_with?(AssemblyFields[:ref]) }
+
+      unless workspace_list.empty?
+        numbers = []
+        base_name = nil
+
+        workspace_list.each do |workspace|
+          match = workspace[:display_name].match(/#{name}(-)(\d*)/)
+          base_name = name if name.include?(workspace[:display_name])
+          numbers << match[2].to_i if match
+        end
+
+        if base_name
+          highest = numbers.max||1
+          new_highest = highest + 1
+
+          all = (2..new_highest).to_a
+          nums = all - numbers
+          name = "#{name}-#{nums.first}"
+        end
+      end
+
+      name
+    end
+
     private
 
     def delete_tasks
@@ -130,21 +163,22 @@ module DTK
     }
 
     class Factory < self
-      def self.create?(target_idh, project_idh)
+      def self.create?(target_idh, project_idh, workspace_name = nil)
         factory = new(target_idh, project_idh)
         workspace_template_idh = factory.create_assembly?(:template, project_project_id: project_idh.get_id())
         instance_assigns = {
           datacenter_datacenter_id: target_idh.get_id(),
           ancestor_id: workspace_template_idh.get_id()
         }
-        factory.create_assembly?(:instance, instance_assigns)
+        factory.create_assembly?(:instance, instance_assigns, workspace_name)
       end
 
-      def create_assembly?(type, assigns)
-        ref = AssemblyFields[:ref]
+      def create_assembly?(type, assigns, workspace_name = nil)
+        ref = workspace_name ? "#{AssemblyFields[:ref]}_#{workspace_name}" : AssemblyFields[:ref]
+        display_name = workspace_name ? workspace_name : AssemblyFields[:component_type]
         match_assigns = { ref: ref }.merge(assigns)
         other_assigns = {
-          display_name: AssemblyFields[:component_type],
+          display_name: display_name,
           component_type: AssemblyFields[:component_type],
           version: AssemblyFields[:version],
           description: AssemblyFields[:description],

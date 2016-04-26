@@ -127,6 +127,7 @@ R8::ReactorRoute.draw do
   post 'assembly/exec_sync' => 'assembly#exec_sync'
   post 'assembly/list_actions' => 'assembly#list_actions'
   post 'assembly/set_default_target' => 'assembly#set_default_target'
+  post 'assembly/create_workspace' => 'assembly#create_workspace'
 
   # ATTRIBUTE
   post 'attribute/set' => 'attribute#set'

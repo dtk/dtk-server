@@ -25,9 +25,9 @@ module DTK; class  Assembly
           assembly_idhs = [assembly_idhs]
         end
         # cannot delete workspaces
-        if workspace = assembly_idhs.find { |idh| Workspace.is_workspace?(idh.create_object()) }
-          fail ErrorUsage.new('Cannot delete a workspace')
-        end
+        # if workspace = assembly_idhs.find { |idh| Workspace.is_workspace?(idh.create_object()) }
+          # fail ErrorUsage.new('Cannot delete a workspace')
+        # end
 
         # first check if target with service instances, then Delete.contents
         target_idhs_to_delete = Delete.target_idhs_to_delete?(assembly_idhs)

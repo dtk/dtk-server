@@ -281,7 +281,7 @@ module DTK; class Assembly; class Instance
       target_filter = (target_idhs ? [:oneof, :datacenter_datacenter_id, target_idhs.map(&:get_id)] : [:neq, :datacenter_datacenter_id, nil])
       filter = [:and, [:eq, :type, 'composite'], target_filter, opts[:filter]].compact
       sp_hash = {
-        cols: opts[:cols] || [:id, :group_id, :display_name],
+        cols: opts[:cols] || [:id, :group_id, :display_name, :ref],
         filter: filter
       }
       get_these_objs(assembly_mh, sp_hash, keep_ref_cols: true) #:keep_ref_cols=>true just in case ref col

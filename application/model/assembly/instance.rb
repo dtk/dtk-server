@@ -17,6 +17,7 @@
 #
 module DTK; class  Assembly
   class Instance < self
+    r8_require('../service_associations')
     r8_nested_require('instance', 'service_link_mixin')
     r8_nested_require('instance', 'service_link')
     r8_nested_require('instance', 'action')
@@ -29,6 +30,7 @@ module DTK; class  Assembly
     r8_nested_require('instance', 'service_setting')
     r8_nested_require('instance', 'node_status')
     r8_nested_require('instance', 'lock')
+
     include ServiceLinkMixin
     include ViolationsMixin
     include ListMixin
@@ -195,7 +197,9 @@ module DTK; class  Assembly
         end
 
         if opts[:auto_complete_links]
-          LinkDef::AutoComplete.autocomplete_component_links(self, [component])
+          associations = ServiceAssociations.get_for_child(opts[:project], self)
+          opts[:parent_service_instance] = associations unless associations.empty?
+          LinkDef::AutoComplete.autocomplete_component_links(self, [component], opts)
         end
       end
 

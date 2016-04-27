@@ -80,7 +80,7 @@ module DTK; class Assembly
       end
 
       if parent_service_instance = opts[:parent_service_instance]
-        ServiceAssociations.create(opts[:project], assembly_instance, parent_service_instance) if assembly_instance
+        ServiceAssociations.create_associations(opts[:project], assembly_instance, parent_service_instance) if assembly_instance
       end
 
       unless opts[:no_auto_complete]

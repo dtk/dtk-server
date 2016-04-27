@@ -17,7 +17,7 @@
 #
 module XYZ
   class ServiceAssociations < Model
-    def self.create(project, service_instance, parent_service_instance)
+    def self.create_associations(project, service_instance, parent_service_instance)
       display_name = "#{service_instance[:display_name]}-#{parent_service_instance[:display_name]}"
 
       row = {
@@ -30,6 +30,23 @@ module XYZ
 
       association_mh = project.id_handle().createMH(:service_associations)
       Model.create_from_rows(association_mh, [row], convert: true)
+    end
+
+    def self.get_for_child(project, child_service_instance)
+      sp_hash = {
+        cols: [:dependent_parent_services],
+        filter: [:eq, :service_antecendent_id, child_service_instance[:id]]
+      }
+      associations = Model.get_objs(project.id_handle().createMH(:service_associations), sp_hash)
+
+      service_instances = []
+      associations.each do |association|
+        if service_instance = association[:service_instance]
+          service_instances << service_instance.copy_as_assembly_instance
+        end
+      end
+
+      service_instances
     end
   end
 end

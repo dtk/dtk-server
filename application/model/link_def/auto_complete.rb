@@ -24,8 +24,11 @@ module DTK; class LinkDef
       # if service instance is staged into service instance target,
       # find matching components from parent target as well
       if parent_service_instance = opts[:parent_service_instance]
-        parent_cmps = parent_service_instance.get_augmented_components(opts)
-        aug_cmps.concat(parent_cmps)
+        parent_service_instance = [parent_service_instance] unless parent_service_instance.is_a?(Array)
+        parent_service_instance.each do |service_instance|
+          parent_cmps = service_instance.get_augmented_components(opts)
+          aug_cmps.concat(parent_cmps)
+        end
       end
 
       link_def_components.each do |link_def_cmp|

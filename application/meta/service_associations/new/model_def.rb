@@ -32,5 +32,21 @@
       on_delete: :cascade,
       on_update: :cascade
     }
+  },
+  virtual_columns: {
+    dependent_parent_services: {
+      type: :json,
+      hidden: true,
+      remote_dependencies:[
+        {
+          model_name: :component,
+          join_type: :inner,
+          convert: true,
+          alias: :service_instance,
+          join_cond: { id: :service_dependent_id },
+          cols: [:id, :display_name, :specific_type]
+        }
+      ]
+    }
   }
 }

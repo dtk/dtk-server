@@ -578,7 +578,7 @@ module DTK
       opts            = Opts.new(ret_boolean_params_hash(:idempotent, :donot_update_workflow, :auto_complete_links))
       node_idh        = node_id.empty? ? nil : ret_node_id_handle(:node_id, assembly)
 
-      new_component_idh = assembly.add_component(node_idh, aug_component_template, component_title, opts)
+      new_component_idh = assembly.add_component(node_idh, aug_component_template, component_title, opts.merge!(project: get_default_project()))
       rest_ok_response(component_id: new_component_idh.get_id())
     end
 

@@ -23,8 +23,8 @@ module DTK
       # above need to be before including the violation subclasses
       r8_nested_require('violation', 'sub_classes')
 
-      def table_form
-        type_and_description
+      def table_form(opts = {})
+        type_and_description(opts)
       end
 
       # must be overwritten
@@ -71,8 +71,10 @@ module DTK
          )
       end
 
-      def type_and_description
-        { type: type, description: description }
+      # opts can have keys
+      #   :summary - Boolean
+      def type_and_description(opts = {})
+        { type: type, description: description(opts) }
       end
 
       def hash_form_multiple_attrs(attrs, attr_display_names, element_type)
@@ -85,7 +87,7 @@ module DTK
           }
           fix_hashes << fix_hash
         end
-        type_and_description.merge(fix_hashes: fix_hashes)
+        type_and_description(summary: true).merge(fix_hashes: fix_hashes)
       end
       
       # opts can have keys

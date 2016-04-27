@@ -32,7 +32,7 @@ module DTK
 
           unless aws_vpc_subnet = aws_vpc_subnet?(subnet_id)
             legal_subnet_ids = vpc_component.aws_conn.subnets.map { |vpc_subnet| vpc_subnet[:subnet_id] }
-            return [Violation::InvalidVpcSubnetId.new(subnet_id, legal_subnet_ids: legal_subnet_ids)]
+            return [Violation::IllegalAttrValue.new(self, :subnet_id, subnet_id, legal_values: legal_subnet_ids)]
           end
 
           get_and_propagate_vpc_id(aws_vpc_subnet)

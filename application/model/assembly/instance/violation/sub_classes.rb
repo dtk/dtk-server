@@ -36,7 +36,7 @@ module DTK
         end
 
         def hash_form
-          type_and_description.merge(attribute: attribute_info, fix_text: fix_text)
+          type_and_description(summary: true).merge(attribute: attribute_info, fix_text: fix_text)
         end
 
         def fix_text
@@ -69,12 +69,14 @@ module DTK
 
         def hash_form
           attribute_info = attribute_info(legal_values: @legal_values)
-          type_and_description.merge(attribute: attribute_info, fix_text: fix_text, value: @value)
+          type_and_description(summary: true).merge(attribute: attribute_info, fix_text: fix_text, value: @value)
         end
 
-        def description
+        # opts can have keys
+        #   :summary - Boolean
+        def description(opts= {})
           ret = "Attribute '#{@attr_display_name}' has illegal value '#{@value}'"
-          ret << "; legal values are: #{@legal_values.join(', ')}" if @legal_values
+          ret << "; legal values are: #{@legal_values.join(', ')}" if @legal_values and !opts[:summary]
           ret
         end
       end

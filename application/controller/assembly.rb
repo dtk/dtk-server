@@ -712,11 +712,13 @@ module DTK
         instance_list = Assembly::Instance.list_with_workspace(model_handle())
         workspace_name = Workspace.calculate_workspace_name(instance_list)
       end
-
-      default_target = Target::Instance.get_default_target(model_handle(:target))
-      fail ErrorUsage.new("You are not able to create workspace unless you have default target. You can set default target by staging target service instance and use set-default-target command from service context.") if default_target.respond_to?(:is_builtin_target?) && default_target.is_builtin_target?
-
-      rest_ok_response Workspace.create?(default_target.id_handle(), get_default_project.id_handle(), workspace_name)
+      # this case is for service instance which are staged against a target service instance
+      # which is giving  parameter 'parent-service' or getting default target 
+      target_service = ret_target_service_with_default(:parent_service)
+      raise_error_if_target_not_convereged(target_service)
+      target = target_service.target
+      # TODO: eventually move Workspace.create to take a target_service, rather than target as an argument
+      rest_ok_response Workspace.create?(target.id_handle, get_default_project.id_handle, workspace_name)
     end
 
     def rest__deploy

@@ -718,14 +718,16 @@ module DTK
 
     def rest__create_workspace
       workspace_name = ret_request_params(:workspace_name)
-      builtin_target = Target::Instance.get_builtin_target(model_handle(:target))
 
       unless workspace_name
         instance_list = Assembly::Instance.list_with_workspace(model_handle())
         workspace_name = Workspace.calculate_workspace_name(instance_list)
       end
 
-      rest_ok_response Workspace.create?(builtin_target.id_handle(), get_default_project.id_handle(), workspace_name)
+      default_target = Target::Instance.get_default_target(model_handle(:target))
+      fail ErrorUsage.new("You are not able to create workspace unless you have default target. You can set default target by staging target service instance and use set-default-target command from service context.") if default_target.respond_to?(:is_builtin_target?) && default_target.is_builtin_target?
+
+      rest_ok_response Workspace.create?(default_target.id_handle(), get_default_project.id_handle(), workspace_name)
     end
 
     def rest__deploy

@@ -43,7 +43,7 @@ module DTK
           "Enter value for attribute '#{@attr_display_name}'"
         end
 
-        def description
+        def description(opts = {})
           "Attribute '#{@attr_display_name}' is required, but unset"
         end
       end

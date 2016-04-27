@@ -590,8 +590,7 @@ module DTK
     end
 
     def rest__stage
-      target_id = ret_request_param_id_optional(:target_id, Target::Instance)
-      opts      = Opts.new
+      opts = Opts.new
 
       is_silent_fail = ret_request_param_boolean(:silent_fail) || false
       is_created = true
@@ -650,32 +649,22 @@ module DTK
       end
 
       target = nil
+      target_assembly_instance =  nil
       if is_target_service = ret_request_params(:is_target)
         opts[:is_target_service] = true
         target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
         target = Service::Target.create_target_mock(target_name, project)
         target_assembly_instance = ret_assembly_instance_object?(:parent_service)
-        opts.merge!(parent_service_instance: target_assembly_instance) if target_assembly_instance
       else
         # this case is for service instance which are staged against a target service instance
         # which is giving  parameter 'parent-service' or getting default target 
-        if target_assembly_instance = ret_assembly_instance_object?(:parent_service)
-          opts.merge!(parent_service_instance: target_assembly_instance)
-          if target_service = Service::Target::create_from_assembly_instance?(target_assembly_instance)
-            target = target_service.target
-          end
-        else
-          target = target_with_default(target_id)
-          target_assembly_instance = Service::Target.create_from_target(target).assembly_instance
-        end
-        opts.merge!(parent_service_instance: target_assembly_instance)
-        if target
-          target_id = target.id
-          unless Service::Target.create_from_target(target).is_converged? 
-            fail ErrorUsage.new("You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and then retry this command") 
-          end
-        end
+        target_service = ret_target_service_with_default(:parent_service)
+        raise_error_if_target_not_convereged(target_service)
+        target = target_service.target
+        target_assembly_instance = target_service.assembly_instance
       end
+
+      opts.merge!(parent_service_instance: target_assembly_instance) if target_assembly_instance
 
       begin
         new_assembly_obj = assembly_template.stage(target, opts)

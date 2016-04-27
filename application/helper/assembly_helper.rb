@@ -18,6 +18,7 @@
 module Ramaze::Helper
   module AssemblyHelper
     r8_nested_require('assembly_helper', 'action')
+    include DTK
     include ActionMixin
 
     def ret_assembly_object
@@ -26,7 +27,22 @@ module Ramaze::Helper
     end
 
     def service_object
-      create_obj(:service_id, ::DTK::Assembly::Instance)
+      create_obj(:service_id, Assembly::Instance)
+    end
+
+    def ret_target_service_with_default(parent_service_param = :parent_service)
+      if target_assembly_instance = ret_assembly_instance_object?(parent_service_param)
+        Service::Target::create_from_assembly_instance?(target_assembly_instance)
+      else
+        Service::Target.create_from_target(default_target)
+      end
+    end
+
+    def raise_error_if_target_not_convereged(target_service)
+      target = target_service.target
+      unless Service::Target.create_from_target(target).is_converged? 
+        fail ErrorUsage "You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and then retry this command"
+      end
     end
 
     def ret_assembly_params_object_and_subtype
@@ -41,11 +57,11 @@ module Ramaze::Helper
 
     def ret_assembly_instance_or_workspace_object?(id_param = nil, opts = {})
       assembly_instance = ret_assembly_instance_object(id_param)
-      if ::DTK::Workspace.is_workspace?(assembly_instance)
+      if Workspace.is_workspace?(assembly_instance)
         assembly_instance.id_handle().create_object(model_name: :assembly_workspace)
       else
         if opts[:only_workspace]
-          fail ::DTK::ErrorUsage.new('The command can ony be applied to a workspace')
+          fail ErrorUsage.new('The command can ony be applied to a workspace')
         end
         assembly_instance
       end
@@ -53,26 +69,26 @@ module Ramaze::Helper
 
     def ret_assembly_instance_object?(id_param = nil)
       id_param ||= :assembly_id
-      if assembly_id = ret_request_param_id?(id_param, ::DTK::Assembly::Instance)
+      if assembly_id = ret_request_param_id?(id_param, Assembly::Instance)
         id_handle(assembly_id, :component).create_object(model_name: :assembly_instance)
       end
     end
 
     def ret_assembly_instance_object(id_param = nil)
       id_param ||= :assembly_id
-      assembly_id = ret_request_param_id(id_param, ::DTK::Assembly::Instance)
+      assembly_id = ret_request_param_id(id_param, Assembly::Instance)
       id_handle(assembly_id, :component).create_object(model_name: :assembly_instance)
     end
 
     def ret_assembly_template_object(id_param = nil)
       id_param ||= :assembly_id
-      assembly_id = ret_request_param_id(id_param, ::DTK::Assembly::Template)
+      assembly_id = ret_request_param_id(id_param, Assembly::Template)
       id_handle(assembly_id, :component).create_object(model_name: :assembly_template)
     end
 
     def ret_assembly_params_id_and_subtype
       subtype = (ret_request_params(:subtype) || :instance).to_sym
-      assembly_id = ret_request_param_id(:assembly_id, subtype == :instance ? ::DTK::Assembly::Instance : ::DTK::Assembly::Template)
+      assembly_id = ret_request_param_id(:assembly_id, subtype == :instance ? Assembly::Instance : Assembly::Template)
       [assembly_id, subtype]
     end
 
@@ -82,7 +98,7 @@ module Ramaze::Helper
 
     def ret_port_object(param, assembly_idh, conn_type)
       extra_context = { assembly_idh: assembly_idh, connection_type: conn_type }
-      create_obj(param, ::DTK::Port, extra_context)
+      create_obj(param, Port, extra_context)
     end
 
     ### methods to return components
@@ -100,7 +116,7 @@ module Ramaze::Helper
     # opts can have keys
     #  :allow_external_component (Boolean) - allow component instance that is not in assembly
     def ret_component_id(param, assembly, opts = {})
-      ret_request_param_id(param, ::DTK::Component, opts.merge(assembly_id: assembly.id()))
+      ret_request_param_id(param, Component, opts.merge(assembly_id: assembly.id()))
     end
     private :ret_component_id
 
@@ -118,13 +134,13 @@ module Ramaze::Helper
     end
 
     def ret_node_id_handle(node_name_param, assembly)
-      ret_request_param_id_handle(node_name_param, ::DTK::Node, assembly.id())
+      ret_request_param_id_handle(node_name_param, Node, assembly.id())
     end
 
     def ret_node_or_group_member_id_handle(node_name_param, assembly)
       node_name_or_id = ret_non_null_request_params(:node_id)
       if numeric_id?(node_name_or_id)
-        ret_request_param_id_handle(node_name_param, ::DTK::Node, assembly.id())
+        ret_request_param_id_handle(node_name_param, Node, assembly.id())
       else
         nodes = assembly.info_about(:nodes)
         matching_nodes = nodes.select { |node| node[:display_name].eql?(node_name_or_id) }
@@ -133,9 +149,9 @@ module Ramaze::Helper
           if matching_nodes.size == 1
             matching_nodes.first[:id]
           elsif matching_nodes.size > 2
-            fail ::DTK::ErrorNameAmbiguous.new(node_name_or_id, matching_nodes.map { |r| r[:id] }, :node)
+            fail ErrorNameAmbiguous.new(node_name_or_id, matching_nodes.map { |r| r[:id] }, :node)
           else
-            fail ::DTK::ErrorNameDoesNotExist.new(node_name_or_id, :node)
+            fail ErrorNameDoesNotExist.new(node_name_or_id, :node)
           end
 
         id_handle(matching_id, :node)
@@ -155,7 +171,7 @@ module Ramaze::Helper
       return [] unless target_nodes_str
       # if node names exist, split them and remove extra spaces
       target_nodes = target_nodes_str.split(',').collect do |node_name|
-        ret_id_handle_from_value(node_name.strip, ::DTK::Node, assembly.id())
+        ret_id_handle_from_value(node_name.strip, Node, assembly.id())
       end
 
       target_nodes
@@ -168,7 +184,7 @@ module Ramaze::Helper
     def ret_port_link()
       assembly = ret_assembly_instance_object()
       if ret_request_params(:service_link_id)
-        create_obj(:service_link_id, ::DTK::PortLink, assembly_idh: assembly.id_handle())
+        create_obj(:service_link_id, PortLink, assembly_idh: assembly.id_handle())
       else
         filter =  { input_component_id: ret_component_id(:input_component_id, assembly) }
         if service_type = (ret_request_params(:dependency_name) || ret_request_params(:service_type))
@@ -184,11 +200,11 @@ module Ramaze::Helper
     # validates param_settings and returns array of setting objects
     # order determines order it is applied
     def ret_settings_objects(assembly_template)
-      ret = ::DTK::ServiceSetting::Array.new()
+      ret = ServiceSetting::Array.new()
       unless param_settings_json = ret_request_params(:settings_json_form)
         return ret
       end
-      param_settings = ::DTK::Aux.json_parse(param_settings_json)
+      param_settings = Aux.json_parse(param_settings_json)
 
       # indexed by display_name
       ndx_existing_settings = assembly_template.get_settings().inject({}) do |h, s|
@@ -197,7 +213,7 @@ module Ramaze::Helper
       bad_settings = []
       param_settings.each do |param_setting|
         unless setting_name = param_setting['name']
-          fail ::DTK::ErrorUsage.new('Ill-formed service settings string')
+          fail ErrorUsage.new('Ill-formed service settings string')
         end
         if setting = ndx_existing_settings[setting_name]
           if parameters = param_setting['parameters']
@@ -209,7 +225,7 @@ module Ramaze::Helper
         end
       end
       unless bad_settings.empty?
-        fail ::DTK::ErrorUsage.new("Provided service settings (#{bad_settings.join(',')}) are not defined; legal settings are: #{ndx_existing_settings.keys.join(',')}")
+        fail ErrorUsage.new("Provided service settings (#{bad_settings.join(',')}) are not defined; legal settings are: #{ndx_existing_settings.keys.join(',')}")
       end
       ret
     end
@@ -235,7 +251,7 @@ module Ramaze::Helper
 
   def ret_attribute_settings_hash
     yaml_content = ret_non_null_request_params(:settings_yaml_content)
-    ::DTK::Aux.convert_to_hash(yaml_content, :yaml)
+    Aux.convert_to_hash(yaml_content, :yaml)
   end
 
   # checks element through set of fields

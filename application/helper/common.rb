@@ -35,7 +35,7 @@ module Ramaze::Helper
       if ret.class.nil?
         if R8::Config[:development_test_user]
           c = ret_session_context_id()
-          ret = @test_user ||= XYZ::User.get_user(ModelHandle.new(c, :user), R8::Config[:development_test_user])
+          ret = @test_user ||= User.get_user(ModelHandle.new(c, :user), R8::Config[:development_test_user])
         end
         return nil
       end
@@ -61,11 +61,15 @@ module Ramaze::Helper
     end
 
     # looks for default if no target is given
-    def target_with_default(target_id)
+    def target_with_default(target_id = nil)
       target = target_id ?
         id_handle(target_id, :target).create_object(model_name: :target_instance) :
         Target::Instance.get_default_target(model_handle(:target), ret_singleton_target: true, prune_builtin_target: true)
       target || fail(DTK::ErrorUsage, "The command was called without  '-t TARGET-NAME' option and no default target has been set. You can set default target from 'service' context with 'set-default-target TARGET-NAME'")
+    end
+
+    def default_target
+      target_with_default
     end
 
     def get_default_project

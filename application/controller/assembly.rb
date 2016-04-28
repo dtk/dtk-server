@@ -727,7 +727,19 @@ module DTK
       default_target = Target::Instance.get_default_target(model_handle(:target))
       fail ErrorUsage.new("You are not able to create workspace unless you have default target. You can set default target by staging target service instance and use set-default-target command from service context.") if default_target.respond_to?(:is_builtin_target?) && default_target.is_builtin_target?
 
-      rest_ok_response Workspace.create?(default_target.id_handle(), get_default_project.id_handle(), workspace_name)
+      workspace = Workspace.create?(default_target.id_handle(), get_default_project.id_handle(), workspace_name)
+      response = {
+        new_workspace_instance: {
+          name: workspace[:display_name],
+          id: workspace[:guid]
+        }
+      }
+
+      if ret_request_params(:do_not_encode)
+        rest_ok_response(response)
+      else
+        rest_ok_response(response, encode_into: :yaml)
+      end
     end
 
     def rest__deploy

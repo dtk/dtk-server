@@ -548,9 +548,13 @@ module DTK
       assembly = ret_assembly_instance_object()
       assembly_node_name = ret_non_null_request_params(:assembly_node_name)
       node_binding_rs = node_binding_ruleset?(:node_template_identifier)
-      node_instance_idh = assembly.add_node(assembly_node_name, node_binding_rs)
+      node = assembly.add_node(assembly_node_name, node_binding_rs)
 
-      rest_ok_response node_instance_idh
+      image = ret_request_params(:image)
+      instance_size = ret_request_params(:instance_size)
+      assembly.add_ec2_properties_and_set_attributes(get_default_project(), node, image, instance_size)
+
+      rest_ok_response node
     end
 
     def rest__add_node_group
@@ -718,8 +722,14 @@ module DTK
       target_service = ret_target_service_with_default(:parent_service)
       raise_error_if_target_not_convereged(target_service)
       target = target_service.target
+      target_assembly_instance = target_service.assembly_instance
+
+      opts = Opts.new()
+      opts.merge!(parent_service_instance: target_assembly_instance) if target_assembly_instance
+      opts.merge!(project: get_default_project())
+
       # TODO: eventually move Workspace.create to take a target_service, rather than target as an argument
-      workspace = Workspace.create?(target.id_handle, get_default_project.id_handle, workspace_name)
+      workspace = Workspace.create?(target.id_handle, get_default_project.id_handle, workspace_name, opts)
 
       response = {
         new_workspace_instance: {

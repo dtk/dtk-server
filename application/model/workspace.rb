@@ -17,13 +17,15 @@
 #
 module DTK
   class Workspace < Assembly::Instance
+    r8_require('service_associations')
+
     def self.create_from_id_handle(idh)
       idh.create_object(model_name: :assembly_workspace)
     end
 
     # creates both a service, module branch, assembly instance and assembly template for the workspace
-    def self.create?(target_idh, project_idh, workspace_name = nil)
-      Factory.create?(target_idh, project_idh, workspace_name)
+    def self.create?(target_idh, project_idh, workspace_name = nil, opts = {})
+      Factory.create?(target_idh, project_idh, workspace_name, opts)
     end
 
     def self.is_workspace?(obj)
@@ -163,20 +165,21 @@ module DTK
     }
 
     class Factory < self
-      def self.create?(target_idh, project_idh, workspace_name = nil)
+      def self.create?(target_idh, project_idh, workspace_name = nil, opts = {})
         factory = new(target_idh, project_idh)
         workspace_template_idh = factory.create_assembly?(:template, project_project_id: project_idh.get_id())
         instance_assigns = {
           datacenter_datacenter_id: target_idh.get_id(),
           ancestor_id: workspace_template_idh.get_id()
         }
-        factory.create_assembly?(:instance, instance_assigns, workspace_name)
+        factory.create_assembly?(:instance, instance_assigns, workspace_name, opts)
       end
 
-      def create_assembly?(type, assigns, workspace_name = nil)
+      def create_assembly?(type, assigns, workspace_name = nil, opts = {})
         ref = workspace_name ? "#{AssemblyFields[:ref]}_#{workspace_name}" : AssemblyFields[:ref]
         display_name = workspace_name ? workspace_name : AssemblyFields[:component_type]
         match_assigns = { ref: ref }.merge(assigns)
+
         other_assigns = {
           display_name: display_name,
           component_type: AssemblyFields[:component_type],
@@ -186,7 +189,19 @@ module DTK
           type: (type == :template) ? 'template' : 'composite'
         }
         cmp_mh_with_parent = @component_mh.merge(parent_model_name: (type == :template ? :project : :datacenter))
-        Model.create_from_row?(cmp_mh_with_parent, ref, match_assigns, other_assigns)
+        assembly_idh = Model.create_from_row?(cmp_mh_with_parent, ref, match_assigns, other_assigns)
+        assembly_instance = Assembly::Instance.create_subclass_object(assembly_idh.create_object())
+
+        if parent_service_instance = opts[:parent_service_instance]
+          ServiceAssociations.create_associations(opts[:project], assembly_instance, parent_service_instance) if assembly_instance
+        end
+
+        unless opts[:no_auto_complete]
+          aug_cmps = assembly_instance.get_augmented_components(opts)
+          LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, opts)
+        end
+
+        assembly_idh
       end
 
       private

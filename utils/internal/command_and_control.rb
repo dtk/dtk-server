@@ -105,6 +105,12 @@ module DTK
       end
     end
 
+    def self.create_nodes_from_service(service, params = {})
+      TypesWithIaasProperties.inject([]) do |a, iaas_type|
+        a + load_for_aux(:iaas, iaas_type.to_s).create_nodes_from_service(service, params)
+      end
+    end
+
     # returns name of all components that capture the node property
     def self.node_property_component_names
       TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_component_names }

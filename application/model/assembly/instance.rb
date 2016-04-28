@@ -117,7 +117,7 @@ module DTK; class  Assembly
       override_attrs.merge!(type: 'assembly_wide') if opts[:assembly_wide]
       clone_opts = node_template.source_clone_info_opts()
       new_obj = target.clone_into(node_template, override_attrs, clone_opts)
-      new_obj && new_obj.id_handle()
+      new_obj
     end
 
     def add_node_group(node_group_name, node_binding_rs, cardinality)
@@ -147,6 +147,33 @@ module DTK; class  Assembly
       node_group_obj.add_group_members(cardinality.to_i)
 
       new_obj && new_obj.id_handle()
+    end
+
+    def add_ec2_properties_and_set_attributes(project, node, image, instance_size)
+      cmp_mh = id_handle().createMH(:component)
+      cmp_name, namespace = 'ec2::properties', 'aws'
+
+      unless aug_component_template = Component::Template.get_augmented_component_template(cmp_mh, cmp_name, namespace, self, use_base_template: true)
+        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
+      end
+
+      opts = Opts.new( auto_complete_links: true, project: project)
+      component_title = ::DTK::ComponentTitle.parse_title?(cmp_name)
+      new_component_idh = add_component(node.id_handle(), aug_component_template, component_title, opts)
+
+      node.update_object!(:display_name)
+      node_name = node[:display_name]
+
+      service = Service.new(self, components: [new_component_idh.create_object()])
+      node = (CommandAndControl.create_nodes_from_service(service)||[]).first
+
+      av_pairs = []
+      if vpc_images = node.vpc_images
+        av_pairs = validate_image_and_size(vpc_images, node_name, image, instance_size)
+      end
+      set_attributes(av_pairs) unless av_pairs.empty?
+
+      node.validate_and_fill_in_values!
     end
 
     # aug_cmp_template is a component template augmented with keys having objects
@@ -428,6 +455,31 @@ module DTK; class  Assembly
     def is_target_service_instance?
       specific_type = self.get_field?(:specific_type)
       return (specific_type && specific_type.eql?('target'))
+    end
+
+    def validate_image_and_size(vpc_images, node_name, image, instance_size)
+      av_pairs = []
+      current_image = nil
+
+      return av_pairs if image.nil? && instance_size.nil?
+
+      if image
+        current_image = vpc_images[image]
+        fail ErrorUsage.new("Node '#{node_name}' has been created but image attribute has invalid value '#{image}' and has not been set! You can set image using 'set-attribute' command.") unless current_image
+        av_pairs << { pattern: "#{node_name}/image", value: image }
+      end
+
+      if instance_size
+        if current_image
+          fail ErrorUsage.new("Node '#{node_name}' has been created but size attribute has invalid value '#{instance_size}' for image '#{image}' and has not been set! You can set size using 'set-attribute' command.") unless current_image['sizes'].keys.include?(instance_size)
+        else
+          all_image_sizes = vpc_images.map{ |_k, vpc_image| vpc_image['sizes'].keys }.uniq.flatten
+          fail ErrorUsage.new("Node '#{node_name}' has been created but size attribute has invalid value '#{instance_size}' and has not been set! You can set size using 'set-attribute' command.") unless all_image_sizes.include?(instance_size)
+        end
+        av_pairs << { pattern: "#{node_name}/size", value: instance_size } if instance_size
+      end
+
+      av_pairs
     end
 
     def self.exists?(target, display_name)

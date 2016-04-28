@@ -42,6 +42,10 @@ module DTK
         Reified::Node.find_violations(service, params)
       end
 
+      def self.create_nodes_from_service(service, params = {})
+        Reified::Node.create_nodes_from_service(service, params)
+      end
+
       def self.node_property_component_names
         Reified::Node::ComponentType.names
       end

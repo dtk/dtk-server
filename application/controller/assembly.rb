@@ -562,9 +562,13 @@ module DTK
       node_group_name = ret_non_null_request_params(:node_group_name)
       node_binding_rs = node_binding_ruleset?(:node_template_identifier)
       cardinality     = ret_non_null_request_params(:cardinality)
-      node_group_idh  = assembly.add_node_group(node_group_name, node_binding_rs, cardinality)
+      node_group      = assembly.add_node_group(node_group_name, node_binding_rs, cardinality)
 
-      rest_ok_response node_group_idh
+      image = ret_request_params(:image)
+      instance_size = ret_request_params(:instance_size)
+      assembly.add_ec2_properties_and_set_attributes(get_default_project(), node_group, image, instance_size)
+
+      rest_ok_response node_group.id_handle
     end
 
     def rest__add_component

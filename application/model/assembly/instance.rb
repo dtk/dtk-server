@@ -146,7 +146,13 @@ module DTK; class  Assembly
       node_group_obj = new_obj.create_obj_optional_subclass()
       node_group_obj.add_group_members(cardinality.to_i)
 
-      new_obj && new_obj.id_handle()
+      # TODO: for some reason, node group members targets are populated with wrong target id; fixing that here
+      node_group_members = node_group_obj.get_node_group_members
+      node_group_members.each do |ng_member|
+        ng_member.update(datacenter_datacenter_id: target[:id])
+      end
+
+      new_obj
     end
 
     def add_ec2_properties_and_set_attributes(project, node, image, instance_size)

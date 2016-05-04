@@ -30,6 +30,10 @@ describe '(Workspace) Test Case 8: Create two nodes, add components in both of t
     puts '****************************************************************************************************************************************************', ''
   end
 
+  context 'Create workspace' do
+    include_context 'Create workspace instance', dtk_common, 'w_test_case_8_instance'
+  end
+
   context 'Create node in workspace' do
     include_context 'Create node in workspace', dtk_common, node_name_1, node_template
   end
@@ -58,8 +62,8 @@ describe '(Workspace) Test Case 8: Create two nodes, add components in both of t
     include_context 'Delete assembly', dtk_common, "#{service_module_name}/#{assembly_name}", namespace
   end
 
-  context 'Purge workspace content' do
-    include_context 'Purge workspace content', dtk_common
+  context 'Delete workspace instance' do
+    include_context 'Delete services', dtk_common
   end
 
   after(:all) do

@@ -8,6 +8,7 @@ require 'json'
 require 'awesome_print'
 require './lib/dtk_common'
 require './lib/workspace_spec'
+require './lib/assembly_and_service_operations_spec'
 
 STDOUT.sync = true
 
@@ -22,6 +23,10 @@ dtk_common = Common.new('', '')
 describe '(Workspace) Test Case 14: Create two nodes, add components in it, converge, stop both nodes and then start again' do
   before(:all) do
     puts '****************************************************************************************************************', ''
+  end
+
+  context 'Create workspace' do
+    include_context 'Create workspace instance', dtk_common, 'w_test_case_14_instance'
   end
 
   context 'Create node in workspace' do
@@ -53,8 +58,8 @@ describe '(Workspace) Test Case 14: Create two nodes, add components in it, conv
     include_context 'Start workspace', dtk_common
   end
 
-  context 'Purge workspace content' do
-    include_context 'Purge workspace content', dtk_common
+  context 'Delete workspace instance' do
+    include_context 'Delete services', dtk_common
   end
 
   after(:all) do

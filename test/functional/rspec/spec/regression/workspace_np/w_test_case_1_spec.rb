@@ -19,6 +19,7 @@ component_module_namespace = 'r8'
 info_to_check_1 = 'ec2_public_address'
 info_to_check_2 = 'display_name: test'
 info_to_check_3 = 'stdlib'
+workspace_instance_name = 'w_test_case_1_instance'
 
 dtk_common = Common.new('', '')
 
@@ -28,7 +29,7 @@ describe '(Workspace) Test Case 1: Create one node, add component in it, converg
   end
 
   context 'Create workspace' do
-    include_context 'Create workspace instance', dtk_common, 'w_test_case_1_instance'
+    include_context 'Create workspace instance', dtk_common, workspace_instance_name
   end
 
   context 'Create node in workspace' do

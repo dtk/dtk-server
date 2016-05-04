@@ -29,7 +29,7 @@ class Common
 	include ServiceModulesVersionMixin
 
 	attr_accessor :server, :port, :endpoint, :username, :password
-	attr_accessor :service_name, :service_id, :is_target, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace
+	attr_accessor :service_name, :service_id, :workspace_id, :is_target, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace
 	attr_accessor :component_module_id_list, :component_module_name_list
 
 	$opts = {

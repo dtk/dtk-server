@@ -268,11 +268,13 @@ module NodeOperationsMixin
 
 	def create_node(service_id, node_name, node_template)
 		puts "Create node:","------------"
-		create_node_response = send_request('/rest/assembly/add_node', {:assembly_id=>service_id, :assembly_node_name=>node_name, :node_template_identifier=>node_template})
+		node_params = node_template.split('-')
+		create_node_response = send_request('/rest/assembly/add_node', {:assembly_id=>service_id, :assembly_node_name=>node_name, :image => node_params[0], :size => node_params[1]})
+		pretty_print_JSON(create_node_response)
 		if create_node_response['status'].include? "ok"
 			puts "Node #{node_name} has been created successfully!"
 			puts ""
-			return create_node_response['data']['guid']
+			return create_node_response['data']['group_id']
 		else
 			puts "Node #{node_name} has not been created successfully!"
 			puts ""

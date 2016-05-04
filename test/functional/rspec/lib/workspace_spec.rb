@@ -203,3 +203,17 @@ shared_context 'Create assembly from workspace content' do |dtk_common, service_
     assembly_created.should eq(true)
   end
 end
+
+shared_context 'Create workspace instance' do |dtk_common, workspace_name|
+  it "Creates workspace #{workspace_name} in default target" do
+    workspace_created = dtk_common.create_workspace(workspace_name)
+    expect(workspace_created).to eq(true)
+  end
+end
+
+shared_context 'Create workspace instance with target' do |dtk_common, workspace_name, workspace_target|
+  it "Creates workspace #{workspace_name} in #{workspace_target} target" do
+    workspace_created = dtk_common.create_workspace(workspace_name, workspace_target)
+    expect(workspace_created).to eq(true)
+  end
+end

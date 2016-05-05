@@ -29,6 +29,31 @@ module NodeOperationsMixin
 		return attribute_check
 	end
 
+	def check_node_group_cardinality(service_id, node_group_name, node_cardinality)
+		puts 'Check cardinality value for node group', '--------------------------------------'
+		cardinality_value_checked = false
+
+		puts "List of service attributes:"
+		service_attributes = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'attributes', :subtype=>'instance'})
+		pretty_print_JSON(service_attributes)
+
+		if (service_attributes['data'].select { |x| x['display_name'] == "#{node_group_name}/cardinality" }.first)
+			attribute_name = 'cardinality'
+			attribute_value = service_attributes['data'].select { |x| x['value'] == node_cardinality.to_s }.first
+			pretty_print_JSON(attribute_value)
+			if (!attribute_value.nil?)
+				puts "Cardinality value for #{node_group_name} node group matches the expected value." 
+				cardinality_value_checked = true
+			else
+				puts "Cardinality value for #{node_group_name} node group does not matches the expected value."
+				cardinality_value_checked = false
+			end
+		end
+
+		puts ''
+		return cardinality_value_checked		
+	end
+
 	def check_attribute_presence_in_components(service_id, node_name, component_name, attribute_name_to_check, attribute_value_to_check)
 		puts "Check attribute presence in components:", "---------------------------------------"
 		attribute_check = false
@@ -60,6 +85,23 @@ module NodeOperationsMixin
 		end
 		puts ""
 		return attribute_check
+	end
+
+	def check_node_info(service_id, node_name, info_to_check)
+	puts "Show node info:", "------------------"
+		info_exist = false
+		node_id = get_node_id(service_id, node_name)
+		service_info_response = send_request('/rest/assembly/info', {:assembly_id=>service_id, node_id: node_id, :subtype=>:instance})
+		pretty_print_JSON(service_info_response)
+		if service_info_response['data'].include? info_to_check
+			puts "#{info_to_check} exists in info output!"
+			info_exist = true
+		else
+			puts "#{info_to_check} does not exist in info output!"
+		end
+		puts ""
+		return info_exist
+
 	end
 
 	def check_params_presence_in_nodes(service_id, node_name, param_name_to_check, param_value_to_check)
@@ -282,6 +324,23 @@ module NodeOperationsMixin
 		end
 	end
 
+	def create_node_group(service_id, node_group_name, node_image, node_size, cardinality=1)
+		puts "Create node group", '-----------------'
+		node_group_created = false
+		create_node_group_response = send_request('/rest/assembly/add_node_group', {assembly_id: service_id, node_group_name: node_group_name, image: node_image, size: node_size, cardinality: cardinality})
+		pretty_print_JSON(create_node_group_response)
+
+		if create_node_group_response['status'].include? "ok"
+			puts "Node group #{node_group_name} has been created successfully!"
+			node_group_created = true
+		else
+			puts "Node group #{node_group_name} has not been created successfully!"
+		end
+
+		puts ''
+		return node_group_created
+	end
+
 	def check_if_node_exists_by_node_name(service_id, node_name)
 		puts "Check if node exists by name:", "-----------------------------"
 		node_exists = false
@@ -307,7 +366,8 @@ module NodeOperationsMixin
 		puts "Node list:"
 		pretty_print_JSON(node_list)
 		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
-		component_add_response = send_request('/rest/assembly/add_component', {:assembly_id=>service_id, :node_id=>node_id, :component_template_id=>component_id, :namespace=>namespace})
+		puts "Node id: #{node_id}"
+		component_add_response = send_request('/rest/assembly/add_component', {:assembly_id=>service_id, :node_id=>node_id, :component_template_id=>component_id, :namespace=>namespace, :auto_complete_links => true})
 		pretty_print_JSON(component_add_response)
 		
 		if (component_add_response['status'] == 'ok')
@@ -567,12 +627,15 @@ module NodeOperationsMixin
 		return list_task_info_check
 	end
 
+	def get_node_id(service_id, node_name)
+		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
+		node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+	end
+
 	def netstats_check_for_specific_node(service_id, node_name, port)
 		puts "Netstats check:", "---------------"
 
-		node_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :subtype=>'instance', :about=>'nodes'})
-		pretty_print_JSON(node_list)
-		node_id = node_list['data'].select { |x| x['display_name'] == node_name }.first['id']
+		node_id = get_node_id
  		
  		netstats_check = false
 		end_loop = false

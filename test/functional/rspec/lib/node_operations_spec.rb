@@ -66,3 +66,10 @@ shared_context 'Destroy node' do |dtk_common, staged_node_name|
     node_deleted.should eq(true)
   end
 end
+
+shared_context 'Node info' do |dtk_common, node_name, info_to_check| 
+  it "contains #{info_to_check}" do
+    info_checked = dtk_common.check_node_info(dtk_common.service_id, node_name, info_to_check)
+    info_checked.should eq(true)
+  end
+end

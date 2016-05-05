@@ -12,6 +12,14 @@ shared_context 'Create node in workspace' do |dtk_common, node_name, node_templa
   end
 end
 
+shared_context 'Create node group in workspace' do |dtk_common, node_group_name, node_image, node_size, cardinality|
+  it "creates #{node_group_name} node group with node image #{node_image} and node size #{node_size} nodes" do
+    workspace_id = dtk_common.get_workspace_id
+    node_group_created = dtk_common.create_node_group(workspace_id, node_group_name, node_image, node_size, cardinality)
+    expect(node_group_created).to eq(true)
+  end
+end
+
 shared_context 'Delete node in workspace' do |dtk_common, node_name|
   it "deletes #{node_name} node in workspace context" do
     workspace_id = dtk_common.get_workspace_id
@@ -153,6 +161,14 @@ shared_context 'Start workspace node' do |dtk_common, node_name|
     workspace_id = dtk_common.get_workspace_id
     workspace_node_started = dtk_common.start_running_node(workspace_id, node_name)
     workspace_node_started.should eq(true)
+  end
+end
+
+shared_context 'Check node group cardinality' do |dtk_common, node_group_name, node_cardinality|
+  it "checks if #{node_group_name} node group has the expected cardinality of #{node_cardinality} nodes" do
+    workspace_id = dtk_common.get_workspace_id
+    cardinality_checked = dtk_common.check_node_group_cardinality(workspace_id, node_group_name, node_cardinality)
+    expect(cardinality_checked).to eq(true)
   end
 end
 

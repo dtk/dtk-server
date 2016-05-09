@@ -3,3 +3,4 @@
 --options LINUX_ENV
 --color
 --format documentation
+--require rspec/legacy_formatters

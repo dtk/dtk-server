@@ -37,6 +37,12 @@ R8::ReactorRoute.draw do
   post 'api/v1/auth/login' => 'v1::authorization#login'
   post 'api/v1/auth/logout' => 'v1::authorization#logout'
 
+  # TODO: DTK-2554; temp while initial testing
+  # routes that need to be put on v1
+  post 'api/v1/account/set_catalog_credentials' => 'account#set_catalog_credentials'
+  post 'api/v1/account/add_user_direct_access'  => 'account#add_user_direct_access'
+  post  'api/v1/account/check_catalog_credentials' => 'account#check_catalog_credentials'
+
   # USER
   post 'user/process_login'      => 'user#process_login'
   get 'user/process_logout'     => 'user#process_logout'

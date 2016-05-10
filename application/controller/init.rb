@@ -127,8 +127,8 @@ end
 module DTK
   module V1
     # V1 namespace
-    %w(service authorization).each do |controller_file|
-      require __DIR__("v1/#{controller_file}")
+    %w(service module authorization).each do |controller_file|
+      require_relative("v1/#{controller_file}")
     end
   end
 end

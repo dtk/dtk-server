@@ -57,9 +57,14 @@ Note that if you need to forward GIT SSH port to a different one, you can use th
 ##### Installing DTK Client
 Assuming the docker container was started as described above, DTK Client can be installed and configured automatically running the [install-client.sh](https://raw.githubusercontent.com/dtk/dtk-server/master/install-client.sh) script:
 ```
-./install-client.sh /usr/share/docker/dtk [user]
+./install-client.sh [-u user] [-p port] configuration_path
+
+configuration_path   - location of dtk.config file
+user                 - user on which to install and configure dtk-client
+                       defaults to new user named 'dtk-client
+port                 - port where DTK server is listening
+                       defaults to 8080
 ```
-`/usr/share/docker/dtk` is the path to `dtk.config` file. The optional `user` argument sets the user on your local machine where dtk-client gem will be installed (it defaults to 'dtk-client')
 
 ##### Upgrading the container
 To upgrade DTK container to a newer version, execute the following commands:

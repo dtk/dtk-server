@@ -101,7 +101,7 @@ module DTK
           hash_form_multiple_attrs(@attrs, @attr_display_names, :required_unset_attribute)
         end
 
-        def description
+        def description(opts = {})
           aug_attrs_print_form = @attr_display_names.join(', ')
           "At least one of the attributes (#{aug_attrs_print_form}) is required to be set"
         end
@@ -118,7 +118,7 @@ module DTK
           :target_service_cmps_missing
         end
         
-        def description
+        def description(opts = {})
           cmp_or_cmps = (@component_types.size == 1) ? 'Component' : 'Components'
           is_are = (@component_types.size == 1) ? 'is' : 'are'
           
@@ -136,7 +136,7 @@ module DTK
           :component_constraint
         end
 
-        def description
+        def description(opts = {})
           "On assembly node (#{@node[:display_name]}): #{@constraint[:description]}"
         end
       end
@@ -150,7 +150,7 @@ module DTK
           :unmet_dependency
         end
 
-        def description
+        def description(opts = {})
           "Component (#{@augmented_port.display_name_print_form()}) has an unmet dependency"
         end
       end
@@ -165,7 +165,7 @@ module DTK
           :parsing_error
         end
 
-        def description
+        def description(opts = {})
           "#{@type} module '#{@component}' has one or more parsing errors."
         end
       end
@@ -181,7 +181,7 @@ module DTK
           :missing_included_module
         end
 
-        def description
+        def description(opts = {})
           full_name = "#{@namespace}:#{@included_module}"
           "Module '#{full_name}#{@version.nil? ? '' : '-' + @version}' is included in dsl, but not installed. Use 'print-includes' to see more details."
         end
@@ -197,7 +197,7 @@ module DTK
           :mapped_to_multiple_namespaces
         end
 
-        def description
+        def description(opts = {})
           "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}. Use 'print-includes' to see more details."
         end
       end
@@ -211,7 +211,7 @@ module DTK
           :has_itself_as_dependency
         end
 
-        def description
+        def description(opts = {})
           @message
         end
       end
@@ -227,7 +227,7 @@ module DTK
           :nodes_limit_exceeded
         end
 
-        def description
+        def description(opts = {})
           "There are #{@running} nodes currently running in builtin target. Unable to create #{@new} new nodes because it will exceed number of nodes allowed in builtin target (#{@node_limit})"
         end
       end

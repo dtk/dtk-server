@@ -849,7 +849,7 @@ module DTK
 
     def rest__exec
       assembly    = ret_assembly_instance_object()
-      params_hash = ret_params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
+      params_hash = ret_params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations, :noop_if_no_action)
 
       params_hash[:task_params] = params_hash[:task_params].is_a?(String) ? Hash.new : params_hash[:task_params]
       rest_ok_response assembly.exec(params_hash)

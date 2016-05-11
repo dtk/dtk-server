@@ -303,7 +303,7 @@ module DTK; class  Assembly
       # check if action is called on component or on service instance action
       if task_action
         component_id, method_name = task_action.split(ACTION_DELIMITER)
-        augmented_cmps = check_if_augmented_component(params, component_id)
+        augmented_cmps = check_if_augmented_component(params, component_id, { include_assembly_cmps: true })
 
         # check if component and service level action with same name
         check_if_ambiguous(component_id) unless augmented_cmps.empty?
@@ -376,6 +376,9 @@ module DTK; class  Assembly
       message += " on node '#{node}'" if node
       fail ErrorUsage, "#{message}!" if augmented_cmps.empty?
 
+      # if executing component action but node not sent, it means execute assembly component action
+      node = 'assembly_wide' unless node
+
       opts = {}
       opts.merge!(method_name: method_name) if method_name
       opts.merge!(task_params: task_params) if task_params
@@ -410,31 +413,38 @@ module DTK; class  Assembly
         end
       end
 
-      task = Task.create_for_ad_hoc_action(self, component, opts) if component
-      task = task.save_and_add_ids()
+      ret = {
+        assembly_instance_id: self.id(),
+        assembly_instance_name: self.display_name_print_form
+      }
+
+      begin
+        task = Task.create_for_ad_hoc_action(self, component, opts) if component
+        task = task.save_and_add_ids()
+      rescue Task::Template::ParsingError => e
+        return ret if params[:noop_if_no_action]
+        raise e
+      end
 
       workflow = Workflow.create(task)
       workflow.defer_execution()
 
-      {
-        assembly_instance_id: self.id(),
-        assembly_instance_name: self.display_name_print_form,
-        task_id: task.id()
-      }
+      ret.merge!(task_id: task.id())
+      ret
     end
 
-    def check_if_augmented_component(params, component_id)
+    def check_if_augmented_component(params, component_id, opts = {})
       task_params = params[:task_params]
 
       if cmp_title = task_params && task_params['name']
         component_id = "#{component_id}[#{cmp_title}]"
       end
 
-      opts = Opts.new(filter_component: component_id)
-      augmented_cmps = get_augmented_components(opts)
+      new_opts = Opts.new(filter_component: component_id)
+      augmented_cmps = get_augmented_components(new_opts)
 
       # filter out service instance components
-      augmented_cmps.reject!{ |cmp| cmp[:node][:display_name].eql?('assembly_wide') }
+      augmented_cmps.reject!{ |cmp| cmp[:node][:display_name].eql?('assembly_wide') } unless opts[:include_assembly_cmps]
       augmented_cmps
     end
 

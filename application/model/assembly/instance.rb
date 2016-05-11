@@ -248,7 +248,7 @@ module DTK; class  Assembly
 
       unless node
         node_idh = add_node('assembly_wide', nil, assembly_wide: true)
-        node = node_idh.create_object()
+        node = node_idh.is_a?(Node) ? node_idh : node_idh.create_object()
       end
 
       node

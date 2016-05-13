@@ -17,8 +17,8 @@
 #
 # TODO: clean up
 
-# Base controller
 module DTK
+  # Base controller
   class Controller < ::Ramaze::Controller
     ENCRYPTION_SALT = R8::Config[:encryption][:cookie_salt]
 
@@ -124,11 +124,6 @@ require __DIR__('action_set')
   require __DIR__(controller_file)
 end
 
-module DTK
-  module V1
-    # V1 namespace
-    %w(service module authorization).each do |controller_file|
-      require_relative("v1/#{controller_file}")
-    end
-  end
-end
+# this must be after AuthController
+require_relative('v1')
+

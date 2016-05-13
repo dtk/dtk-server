@@ -184,6 +184,18 @@ module DTK
       end
     end
 
+    def self.get_assembly_templates(model_handle, opts = {})
+      ndx_ret = Assembly::Template.get(model_handle.createMH(:component), opts).inject({}) { |h, r| h.merge(r[:id] => r) }
+      # add nodes
+      Assembly::Template.get_nodes(ndx_ret.values.map(&:id_handle)).each do |node|
+        unless  node.is_assembly_wide_node?()
+          assembly = ndx_ret[node[:assembly_id]]
+          (assembly[:nodes] ||= []) << node
+        end
+      end
+      ndx_ret.values
+    end
+
     def get_assembly_templates(opts = {})
       sp_hash = {
         cols: [:module_branches]
@@ -193,13 +205,12 @@ module DTK
       if project = get_project()
         opts.merge!(project_idh: project.id_handle())
       end
-      ndx_ret = Assembly::Template.get(model_handle(:component), opts).inject({}) { |h, r| h.merge(r[:id] => r) }
-      Assembly::Template.get_nodes(ndx_ret.values.map(&:id_handle)).each do |node|
-        next if node.is_assembly_wide_node?()
-        assembly = ndx_ret[node[:assembly_id]]
-        (assembly[:nodes] ||= []) << node
-      end
-      ndx_ret.values
+      self.class.get_assembly_templates(model_handle, opts)
+    end
+
+    def self.list_assembly_templates(project)
+      # TODO: DTK-2554: put in logic to get only most recent vesions of each module
+      add_nodes_size_to_assembly_templates!(get_assembly_templates(project.model_handle))
     end
 
     def list_assembly_templates(version = 'master')
@@ -209,15 +220,7 @@ module DTK
         else
           [:eq, :version, version]
         end
-      templates_with_nodes = get_assembly_templates({version_filter: version_filter})
-      templates_with_nodes.each do |template|
-        nodes_size = 0
-        (template[:nodes] || []).each do |node|
-          nodes_size += node.is_node_group? ? node.attribute.cardinality : 1
-        end
-        template[:nodes_size] = nodes_size
-      end
-      templates_with_nodes
+      add_nodes_size_to_assembly_templates!(get_assembly_templates(version_filter: version_filter))
     end
 
     def info_about(about)
@@ -341,6 +344,20 @@ module DTK
     end
 
     private
+
+    def add_nodes_size_to_assembly_templates!(assembly_templates_with_nodes)
+      self.class.add_nodes_size_to_assembly_templates!(assembly_templates_with_nodes)
+    end
+    def self.add_nodes_size_to_assembly_templates!(assembly_templates_with_nodes)
+      assembly_templates_with_nodes.each do |template|
+        nodes_size = 0
+        (template[:nodes] || []).each do |node|
+          nodes_size += node.is_node_group? ? node.attribute.cardinality : 1
+        end
+        template[:nodes_size] = nodes_size
+      end
+      assembly_templates_with_nodes
+    end
 
     # returns the new module branch
     def create_new_version__type_specific(repo_for_new_branch, new_version, opts = {})

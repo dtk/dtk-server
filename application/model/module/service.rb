@@ -210,7 +210,16 @@ module DTK
 
     def self.list_assembly_templates(project)
       # TODO: DTK-2554: put in logic to get only most recent vesions of each module
-      add_nodes_size_to_assembly_templates!(get_assembly_templates(project.model_handle))
+      ret = add_nodes_size_to_assembly_templates!(get_assembly_templates(project.model_handle))
+      # Add display colums
+      ret.each do |el|
+        el[:display_version] = el[:version] == 'master' ? '' : el[:version]
+        el[:module_name]     = el[:service_module][:ref]
+      end
+      # sort
+      ret.sort do |a, b|
+        [a[:module_name], a[:display_version], a[:display_name]] <=> [b[:module_name], b[:display_version], b[:display_name]]
+      end
     end
 
     def list_assembly_templates(version = 'master')

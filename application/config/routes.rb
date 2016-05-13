@@ -20,7 +20,17 @@
 r8_require('../../utils/internal/routes/routes')
 
 R8::ReactorRoute.draw do
-  # V1 Namespace
+
+  ############## V1 Namespace
+
+  # Auth
+  post 'api/v1/auth/login' => 'v1::authorization#login'
+  post 'api/v1/auth/logout' => 'v1::authorization#logout'
+
+  # Metadata
+  get 'api/v1/metadata/get_metadata/:metadata_file' => 'v1::metadata#get_metadata'
+
+  # Services
   get    'api/v1/services/:service_id'                 => 'v1::service#info'
   get    'api/v1/services/:service_id/nodes'           => 'v1::service#nodes'
   get    'api/v1/services/:service_id/components'      => 'v1::service#components'
@@ -34,16 +44,16 @@ R8::ReactorRoute.draw do
   post   'api/v1/services/:service_id/:task_action'    => 'v1::service#exec'
   delete 'api/v1/services/:service_id'                 => 'v1::service#delete_destroy'
 
-  post 'api/v1/auth/login' => 'v1::authorization#login'
-  post 'api/v1/auth/logout' => 'v1::authorization#logout'
-
-  get    'api/v1/modules/list_assemblies'   => 'v1::module/list_assemblies'
+  # Modules
+  get 'api/v1/modules/list_assemblies'   => 'v1::module/list_assemblies'
 
   # TODO: DTK-2554; temp while initial testing
   # routes that need to be put on v1
   post 'api/v1/account/set_catalog_credentials' => 'account#set_catalog_credentials'
   post 'api/v1/account/add_user_direct_access'  => 'account#add_user_direct_access'
   post  'api/v1/account/check_catalog_credentials' => 'account#check_catalog_credentials'
+
+  ########### end v1 routes
 
   # USER
   post 'user/process_login'      => 'user#process_login'

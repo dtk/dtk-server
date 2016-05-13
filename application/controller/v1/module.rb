@@ -19,7 +19,8 @@ module DTK
   module V1
     class ModuleController < AuthController
       def rest__list_assemblies
-        rest_ok_response ServiceModule.list_assemblies
+        project = get_default_project
+        rest_ok_response ServiceModule.list_assembly_templates(get_default_project)
       end
     end
   end

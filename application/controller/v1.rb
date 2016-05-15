@@ -17,7 +17,9 @@
 #
 module DTK
   module V1
-    # V1 namespace
+    class Base < Controller
+    end
+
     %w(service module authorization metadata).each do |controller_file|
       require_relative("v1/#{controller_file}")
     end

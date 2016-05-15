@@ -17,7 +17,7 @@
 #
 module DTK
   module V1
-    class ServiceController < AuthController
+    class ServiceController < Base
 
       helper :assembly_helper
       helper :task_helper

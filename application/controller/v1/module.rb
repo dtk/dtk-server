@@ -19,7 +19,7 @@ module DTK
   module V1
     class ModuleController < AuthController
       LIST_ASSEMBLIES_DATATYPE = :assembly_template_with_module
-      def rest__list_assemblies
+      def list_assemblies
         project = get_default_project
         rest_ok_response ServiceModule.list_assembly_templates(get_default_project), datatype: LIST_ASSEMBLIES_DATATYPE
       end

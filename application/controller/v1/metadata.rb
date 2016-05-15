@@ -22,7 +22,7 @@ module DTK
 
       TABLE_METADATA_DIR = File.expand_path('../../meta/tables_metadata', File.dirname(__FILE__))
 
-      def rest__get_metadata
+      def get_metadata
         metadata_file = ret_non_null_request_params(:metadata_file)
         json_file_content = File.open("#{TABLE_METADATA_DIR}/#{metadata_file}.json").read
         rest_ok_response json_file_content

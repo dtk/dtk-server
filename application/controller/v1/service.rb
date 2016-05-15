@@ -22,7 +22,7 @@ module DTK
       helper :assembly_helper
       helper :task_helper
 
-      def rest__create
+      def create
         target_id = ret_request_param_id_optional(:target_id, Target::Instance)
         target = target_with_default(target_id)
 
@@ -71,24 +71,24 @@ module DTK
         rest_ok_response(response)
       end
 
-      def rest__exec
+      def exec
         service    = service_object()
         params_hash = ret_params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
         rest_ok_response service.exec(params_hash)
       end
 
 
-      def rest__info
+      def info
         service = service_object()
         rest_ok_response service.info
       end
 
-      def rest__nodes
+      def nodes
         service = service_object()
         rest_ok_response service.info_about(:nodes)
       end
 
-      def rest__components
+      def components
         service = service_object()
 
         opts = Opts.new(detail_level: nil)
@@ -100,17 +100,17 @@ module DTK
         rest_ok_response service.info_about(:components, opts)
       end
 
-      def rest__tasks
+      def tasks
         service = service_object()
         rest_ok_response service.info_about(:tasks)
       end
 
-      def rest__access_tokens
+      def access_tokens
         service = service_object()
         rest_ok_response
       end
 
-      def rest__converge
+      def converge
         service = service_object()
 
         if running_task = most_recent_task_is_executing?(service)
@@ -132,7 +132,7 @@ module DTK
         rest_ok_response task_id: task.id
       end
 
-      def rest__start
+      def start
         service = service_object()
 
         # filters only stopped nodes for this assembly
@@ -158,7 +158,7 @@ module DTK
         rest_ok_response task_id: task.id
       end
 
-      def rest__stop
+      def stop
         service = service_object()
 
         # cancel task if running on the assembly
@@ -178,7 +178,7 @@ module DTK
         rest_ok_response
       end
 
-      def rest__create_assembly
+      def create_assembly
         service = service_object()
         assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(service)
 
@@ -203,7 +203,7 @@ module DTK
         rest_ok_response service_module.ret_clone_update_info()
       end
 
-      def rest__delete_destroy
+      def delete_destroy
         service = service_object()
 
         Assembly::Instance.delete(service.id_handle(), destroy_nodes: true)

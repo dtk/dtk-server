@@ -15,11 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: figure out how to use routing to select/define specific templates
-#      and action_set's to be used for a given route
-r8_require('../../utils/internal/routes/routes')
+require_relative('../../utils/internal/routes/routes')
 
-R8::ReactorRoute.draw do
+DTK::ReactorRoute.draw do
 
   ############## V1 Namespace
 
@@ -397,4 +395,4 @@ R8::ReactorRoute.draw do
   post 'namespace/default_namespace_name' => 'namespace#default_namespace_name'
 end
 
-R8::Routes.freeze
+DTK::Routes.freeze

@@ -16,8 +16,28 @@
 # limitations under the License.
 #
 
-module R8
-  Routes = XYZ::HashObject::AutoViv.create()
+module DTK
+  Routes = HashObject::AutoViv.create
+
+  class ReactorRoute
+    include Singleton
+
+    def self.draw(&block)
+      instance.mapper.instance_exec(&block)
+    end
+
+    def self.validate_route(rest_type, route)
+     instance.mapper.validate_route(rest_type, route)
+    end
+
+    attr_reader :mapper
+
+    private
+
+    def initialize
+      @mapper = Mapper.new
+    end
+  end
 
   class Mapper
 
@@ -111,27 +131,6 @@ module R8
       # regex that will be used for matching
       key_regex = Regexp.new(entry_values.join('/'))
       { key_regex => { path: entry.values.first.split('#'), params: params_values }}
-    end
-
-  end
-
-  class ReactorRoute
-    include Singleton
-
-    def self.draw(&block)
-      ReactorRoute.instance.mapper.instance_exec(&block)
-    end
-
-    def self.validate_route(rest_type, route)
-      ReactorRoute.instance.mapper.validate_route(rest_type, route)
-    end
-
-    attr_reader :mapper
-
-    private
-
-    def initialize
-      @mapper = Mapper.new
     end
   end
 end

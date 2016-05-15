@@ -25,7 +25,7 @@ module DTK
       route_key = route.join('/')
       action_set_params = []
 
-      route, value_params = R8::ReactorRoute.validate_route(request.request_method, route_key)
+      route, value_params = ReactorRoute.validate_route(request.request_method, route_key)
 
       # return 404 Resource Not Found if route is not valid
       respond("#{route_key}!", 404) unless route
@@ -104,10 +104,10 @@ module DTK
       # seperate route in 'route_key' (e.g., object/action, object) and its params 'action_set_params'
       # first two (or single items make up route_key; the rest are params
 
-      action_set_def = R8::Routes[route_key] || {}
+      action_set_def = Routes[route_key] || {}
       @action_set_param_map = ret_action_set_param_map(action_set_def, action_set_params)
 
-      @layout = (R8::Routes[route_key] ? R8::Routes[route_key][:layout] : nil) || R8::Config[:default_layout]
+      @layout = (Routes[route_key] ? Routes[route_key][:layout] : nil) || R8::Config[:default_layout]
 
       # if a config is defined for route, use values from config
       if action_set_def[:action_set]

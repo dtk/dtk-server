@@ -17,7 +17,7 @@
 #
 module DTK
   module V1
-    class ModuleController < AuthController
+    class ModuleController < Base
       LIST_ASSEMBLIES_DATATYPE = :assembly_template_with_module
       def list_assemblies
         project = get_default_project

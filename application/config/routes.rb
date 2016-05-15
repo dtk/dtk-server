@@ -28,7 +28,7 @@ R8::ReactorRoute.draw do
   post 'api/v1/auth/logout' => 'v1::authorization#logout'
 
   # Metadata
-  get 'api/v1/metadata/get_metadata/:metadata_file' => 'v1::metadata#get_metadata'
+  get 'api/v1/metadata/get/:metadata_file' => 'v1::metadata#get'
 
   # Services
   get    'api/v1/services/:service_id'                 => 'v1::service#info'

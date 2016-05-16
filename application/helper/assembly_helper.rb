@@ -204,7 +204,7 @@ module Ramaze::Helper
       unless param_settings_json = ret_request_params(:settings_json_form)
         return ret
       end
-      param_settings = Aux.json_parse(param_settings_json)
+      param_settings = DTK::Aux.json_parse(param_settings_json)
 
       # indexed by display_name
       ndx_existing_settings = assembly_template.get_settings().inject({}) do |h, s|
@@ -251,7 +251,7 @@ module Ramaze::Helper
 
   def ret_attribute_settings_hash
     yaml_content = ret_non_null_request_params(:settings_yaml_content)
-    Aux.convert_to_hash(yaml_content, :yaml)
+    DTK::Aux.convert_to_hash(yaml_content, :yaml)
   end
 
   # checks element through set of fields

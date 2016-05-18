@@ -22,7 +22,8 @@ module DTK; class Task; class Template
         super()
         hash =  {
           method_name: action_def.get_field?(:method_name),
-          action_def_id: action_def.id()
+          action_def_id: action_def.id(),
+          provider: (action_def.content||{})[:provider]
         }
         replace(hash)
       end
@@ -32,6 +33,7 @@ module DTK; class Task; class Template
       end
 
       def config_agent_type
+        return :puppet if self[:provider].eql?('puppet')
         ConfigAgent::Type::Symbol.dtk_provider
       end
     end

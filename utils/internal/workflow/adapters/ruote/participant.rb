@@ -29,6 +29,7 @@ module DTK
         r8_nested_require('participant', 'execute_smoketest')
         r8_nested_require('participant', 'detect_created_node_is_ready')
         r8_nested_require('participant', 'stomp_debug')
+        r8_nested_require('participant', 'delete_from_database')
 
         include StompDebug
 

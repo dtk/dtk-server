@@ -84,6 +84,38 @@ module DTK
       rest_ok_response assembly.get_nodes__expand_node_groups(remove_node_groups: true)
     end
 
+    # TODO: Aldin - need refactoring
+    def rest__delete_component_using_workflow
+      assembly    = ret_assembly_instance_object()
+      params_hash = ret_params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations, :noop_if_no_action)
+
+      params_hash[:task_params] = params_hash[:task_params].is_a?(String) ? Hash.new : params_hash[:task_params]
+
+      node_id = ret_node_id(:node_id, assembly) if ret_request_params(:node_id)
+
+      component_id = ret_non_null_request_params(:component_id)
+      assembly_id = assembly.id()
+      cmp_full_name = ret_request_params(:cmp_full_name)
+
+      # cmp_name, namespace = ret_non_null_request_params(:component_id, :namespace)
+      cmp_name, namespace = ret_request_params(:component_id, :namespace)
+
+      assembly_idh = assembly.id_handle()
+      cmp_mh = assembly_idh.createMH(:component)
+
+      if cmp_full_name && node_id
+        component = Component.ret_component_with_namespace_for_node(cmp_mh, cmp_name, node_id, namespace, assembly)
+        fail ErrorUsage.new("Component with identifier (#{namespace.nil? ? '' : namespace + ':'}#{cmp_name}) does not exist!") unless component
+
+        cmp_idh = component.id_handle()
+      else
+        cmp_idh = id_handle(component_id, :component)
+      end
+      opts = Opts.new(delete_action: 'delete_component', delete_params: {cmp_idh: cmp_idh, node_id: node_id })
+
+      rest_ok_response assembly.exec__delete_component(params_hash, opts)
+    end
+
     def rest__delete_component
       node_id  = nil
       assembly = ret_assembly_instance_object()

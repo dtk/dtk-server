@@ -21,6 +21,7 @@ module DTK; class Task; class Template
     r8_nested_require('action', 'action_method')
     r8_nested_require('action', 'with_method')
     r8_nested_require('action', 'ad_hoc')
+    r8_nested_require('action', 'delete_from_database')
     
     # opts can have keys
     # :index

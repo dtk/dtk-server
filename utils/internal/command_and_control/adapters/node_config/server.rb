@@ -18,11 +18,13 @@
 module DTK
   module CommandAndControlAdapter
     class Server < CommandAndControl::NodeConfig
-      def self.execute(_task_idh, _top_task_idh, task_action)
+      def self.execute(task_idh, top_task_idh, task_action)
         response = nil
         config_agent_type = task_action.config_agent_type
         if type = ConfigAgent::Type.is_a?(config_agent_type, [:ruby_function, :no_op])
           response = ConfigAgent.load(:ruby_function).execute(task_action)
+        elsif type = ConfigAgent::Type.is_a?(config_agent_type, [:delete_from_database])
+          response = ConfigAgent.load(:delete_from_database).execute(task_action, top_task_idh)
         else
           Log.error("Not treating server execution of config_agent_type '#{config_agent_type}'")
         end

@@ -72,6 +72,9 @@ module DTK
             sequence_tasks = [guards, sync_agent_code, authorize_action, main].compact
             sequence(*sequence_tasks)
           end
+        elsif action.is_a?(Task::Action::DeleteFromDatabase)
+          main = participant_executable_action(:delete_from_database, task, context, task_type: 'delete_from_database', task_start: true, task_end: true)
+          sequence([main])
         end
       end
 

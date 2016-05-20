@@ -44,6 +44,20 @@ module DTK; class Task
     def create_top_level(task_mh, assembly, opts = {})
       Create.create_top_level_task(task_mh, assembly, opts)
     end
+
+    def create_for_delete_from_detabase(assembly, component, node, opts = {})
+      task = Create.create_for_delete_from_detabase(assembly, component, node, opts)
+      ret = NodeGroupProcessing.decompose_node_groups!(task, opts)
+
+      # raise error if any its nodes are not running
+      not_running_nodes = ret.get_associated_nodes().select { |n| n.get_and_update_operational_status!() != 'running' }
+      unless not_running_nodes.empty?
+        node_is = (not_running_nodes.size == 1 ? 'node is' : 'nodes are')
+        node_names = not_running_nodes.map(&:display_name).join(', ')
+        fail ErrorUsage.new("Cannot execute the action because the following #{node_is} not running: #{node_names}")
+      end
+      ret
+    end
   end
 
   class Create
@@ -58,6 +72,16 @@ module DTK; class Task
       task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
       subtasks = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
       create_top_level_task(task_mh, assembly, task_action: task_action_name).add_subtasks(subtasks)
+    end
+
+    def self.create_for_delete_from_detabase(assembly, component, node, opts = {})
+      task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
+      ret = create_top_level_task(task_mh, assembly, task_action: 'delete_from_database')
+      node = assembly.has_assembly_wide_node? if node.eql?('assembly_wide')
+      executable_action = Action::DeleteFromDatabase.create_hash(assembly, component, node, opts)
+      subtask = create_new_task(task_mh, executable_action: executable_action)
+      ret.add_subtask(subtask)
+      ret
     end
 
     def self.create_from_assembly_instance?(assembly, opts = {})

@@ -330,6 +330,78 @@ module DTK; class  Assembly
       execute_service_action(task[:task_id])
     end
 
+    def exec__delete_component(params, opts = {})
+      task_action = params[:task_action]
+      cmp_action  = nil
+      delete_from_database = nil
+
+      task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
+      ret = {
+        assembly_instance_id: self.id(),
+        assembly_instance_name: self.display_name_print_form
+      }
+
+      # check if action is called on component or on service instance action
+      if task_action
+        component_id, method_name = task_action.split(ACTION_DELIMITER)
+        augmented_cmps = check_if_augmented_component(params, component_id, { include_assembly_cmps: true })
+
+        # check if component and service level action with same name
+        check_if_ambiguous(component_id) unless augmented_cmps.empty?
+
+        if task_action.include?(ACTION_DELIMITER) || !augmented_cmps.empty?
+          # return execute_cmp_action(params, component_id, method_name, augmented_cmps)
+          task_params = nil
+          component   = nil
+          node        = nil
+
+          task_params = params[:task_params]
+          node        = (task_params['node'] || task_params['nodes']) if task_params
+
+          message = "There are no components with identifier '#{component_id}'"
+          message += " on node '#{node}'" if node
+          fail ErrorUsage, "#{message}!" if augmented_cmps.empty?
+
+          # if executing component action but node not sent, it means execute assembly component action
+          node = 'assembly_wide' unless node
+
+          opts.merge!(method_name: method_name) if method_name
+          opts.merge!(task_params: task_params) if task_params
+
+          if node
+            # if node has format node:id it means use single node from node group
+            if node_match = node.include?(':') && node.match(/([\w-]+)\:{1}(\d+)/)
+              opts.merge!(node_group_member: node)
+              node, node_id = $1, $2
+            end
+
+            # filter component that belongs to specified node
+            component = augmented_cmps.find{|cmp| cmp[:node][:display_name].eql?(node)}
+            fail ErrorUsage, "#{message}!" unless component
+          end
+
+          begin
+            cmp_action = Task.create_for_ad_hoc_action(self, component, opts) if component
+          rescue Task::Template::ParsingError => e
+            return ret if params[:noop_if_no_action]
+            raise e
+          end
+        end
+      end
+
+      delete_from_database = Task.create_for_delete_from_detabase(self, component, node, opts)
+
+      task.add_subtask(cmp_action) if cmp_action
+      task.add_subtask(delete_from_database) if delete_from_database
+      task = task.save_and_add_ids()
+
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+
+      ret.merge!(task_id: task.id())
+      ret
+    end
+
     def create_task(opts)
       if task_params = opts[:task_params]
         fail ErrorUsage, "Node/nodes params are not supported for service instance actions!" if task_params.key?('node') || task_params.key?('nodes')

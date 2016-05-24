@@ -54,6 +54,7 @@ module XYZ; class Attribute
       # TODO: need to clearly relate these four; may get rid of read_only
       column :read_only, :boolean, default: false
       column :dynamic, :boolean, default: false #means dynamically set by an executable action
+      column :dynamic_input, :boolean, default: false #means dynamic but also passed as input
       column :cannot_change, :boolean, default: false
 
       column :required, :boolean, default: false #whether required for this attribute to have a value inorder to execute actions for parent component; TODO: may be indexed by action
@@ -64,11 +65,17 @@ module XYZ; class Attribute
       column :port_location, :varchar, size: 10 #if set is override for port direction: east | west | south | north
       column :is_port, :boolean, default: false
       column :port_type_asserted, :varchar, size: 10
+
+      # TODO: check if we is_external/port_is_external is used
       column :is_external, :boolean
+      virtual_column :port_is_external, type: :boolean, hidden: true, local_dependencies: [:is_port, :is_external, :semantic_type_summary]
 
       virtual_column :port_type, type: :varchar, hidden: true, local_dependencies: VirtulaDependency.port_type()
 
-      virtual_column :port_is_external, type: :boolean, hidden: true, local_dependencies: [:is_port, :is_external, :semantic_type_summary]
+      
+
+
+
 
       virtual_column :is_unset, type: :boolean, hidden: true, local_dependencies: [:value_asserted, :value_derived, :data_type, :semantic_type]
 

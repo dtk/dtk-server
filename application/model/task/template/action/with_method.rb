@@ -46,6 +46,18 @@ module DTK; class Task; class Template
         @action.respond_to?(name) || super
       end
 
+      def is_no_op?
+        !!ConfigAgent::Type.is_a?(config_agent_type, :no_op)
+      end
+
+      def config_agent_type
+        if @method
+          @method.config_agent_type
+        else
+          @action.config_agent_type
+        end
+      end
+
       ParseStruct = Struct.new(:component_name_ref,:method_name,:params)
       # returns ParseStruct
       #  method_name and params can be nil

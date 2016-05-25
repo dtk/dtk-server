@@ -45,7 +45,7 @@ module DTK; class ModuleDSL; class V2
         
         side_effect_settings.each_pair { |field, value| ret[field] ||= value }
 
-        Default.add_defaults_for_nils!(ret, info)
+        Default.add_base_fields_with_defaults!(ret, info)
 
         ret
       end
@@ -139,10 +139,10 @@ module DTK; class ModuleDSL; class V2
       module Default
         Datatype = 'string'
 
-        def self.add_defaults_for_nils!(ret, info)
+        def self.add_base_fields_with_defaults!(ret, info)
           Fields.each do |field|
             val = info[field.to_s]
-            ret[field] = val.nil? ? default(field) : val
+            ret[field_name(field)] = val.nil? ? default(field) : val
           end
           ret
         end
@@ -151,9 +151,14 @@ module DTK; class ModuleDSL; class V2
           (Info[field] || {})[:default]
         end
 
+        def self.field_name(field)
+           (Info[field] || {})[:field_name] || field
+        end
+
         Info = {
           description: { type: :string,  default: nil },
           dynamic: { type: :boolean, default: false },
+          input: { type: :boolean, default: false, field_name: :dynamic_input},
           required: { type: :boolean, default: false },
           hidden: { type: :boolean, default: false }
         }

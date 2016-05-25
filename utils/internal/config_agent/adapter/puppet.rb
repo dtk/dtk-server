@@ -177,24 +177,12 @@ module DTK
           if var_name_path = ext_ref[:path]
             array_form_path = to_array_form(var_name_path)
             val = ret_value(attr, node_components)
+            no_more_processing = false
             if attr[:dynamic] || ext_ref[:default_variable] #TODO: the disjunct 'ext_ref[..]' can be deprecated
-              if not attr[:value_asserted].nil?
-                # no up; this is case where user overrides the dynamic attribute by asserting a value
-              else
-                dyn_attr = { name: array_form_path[1], id: attr[:id] }
-                if ext_ref[:type] == 'puppet_exported_resource'
-                  type = 'exported_resource'
-                  dyn_attr.merge!(type: 'exported_resource', title_with_vars: ext_ref[:title_with_vars])
-                elsif ext_ref[:default_variable]
-                  dyn_attr.merge!(type: 'default_variable')
-                else
-                  dyn_attr.merge!(type: 'dynamic')
-                end
-                if is_connected_output_attribute?(attr)
-                  dyn_attr.merge!(is_connected: true)
-                end
-                dynamic_attrs << dyn_attr
-              end
+              no_more_processing = processs_dynamic_attribute!(dynamic_attrs, attr, array_form_path, ext_ref)
+            end
+            if no_more_processing 
+              # dont add anything to ndx_attributes
             elsif not val.nil?
               add_attribute!(ndx_attributes, array_form_path, val, ext_ref)
               # info that is used to set the name param for the resource
@@ -213,6 +201,34 @@ module DTK
         ret.merge!('attributes' => ndx_attributes.values) unless ndx_attributes.empty?
         ret.merge!('dynamic_attributes' => dynamic_attrs) unless dynamic_attrs.empty?
         ret
+      end
+
+      # returns no_more_processing
+      def processs_dynamic_attribute!(dynamic_attrs, attr, array_form_path, ext_ref)
+        no_more_processing = true
+        if not attr[:value_asserted].nil? and not attr[:dynamic_input]
+          # no up; this is case where user overrides the dynamic attribute by asserting a value
+          # and it is not a dynamic input
+        else
+          dyn_attr = { name: array_form_path[1], id: attr[:id] }
+          if ext_ref[:type] == 'puppet_exported_resource'
+            type = 'exported_resource'
+            dyn_attr.merge!(type: 'exported_resource', title_with_vars: ext_ref[:title_with_vars])
+          elsif ext_ref[:default_variable]
+            dyn_attr.merge!(type: 'default_variable')
+          elsif attr[:dynamic_input]
+            # only exception to no_more_processing is when dynamic_input
+            no_more_processing = false
+            dyn_attr.merge!(type: 'dynamic')
+          else
+            dyn_attr.merge!(type: 'dynamic')
+          end
+          if is_connected_output_attribute?(attr)
+            dyn_attr.merge!(is_connected: true)
+          end
+          dynamic_attrs << dyn_attr
+        end
+        no_more_processing
       end
 
       # TODO: check if this is the right test for connected output attributes

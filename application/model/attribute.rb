@@ -53,7 +53,7 @@ module DTK
     include DerivationType::Mixin
 
     def self.common_columns
-      [:id, :display_name, :group_id, :hidden, :description, :component_component_id, :value_derived, :value_asserted, :semantic_data_type, :semantic_type, :semantic_type_summary, :data_type, :required, :dynamic, :cannot_change, :port_type_asserted, :is_port, :external_ref, :read_only, :tags]
+      [:id, :display_name, :group_id, :hidden, :description, :component_component_id, :value_derived, :value_asserted, :semantic_data_type, :semantic_type, :semantic_type_summary, :data_type, :required, :dynamic, :dynamic_input, :cannot_change, :port_type_asserted, :is_port, :external_ref, :read_only, :tags]
     end
 
     def self.legal_display_name?(display_name)
@@ -126,7 +126,7 @@ module DTK
       # TODO: may use a method rather than below that is more efficient; below returns alll children rather than filtered search
       Model.modify_children_from_rows(attr_mh, parent.id_handle, [attr_hash], [:ref], update_matching: true, no_delete: true)
     end
-    CreateFields = [:display_name, :data_type, :dynamic, :required, :semantic_data_type].map { |sym| { sym.to_s => sym } } + [{ 'default' => :value_asserted }]
+    CreateFields = [:display_name, :data_type, :dynamic, :dynamic_input, :required, :semantic_data_type].map { |sym| { sym.to_s => sym } } + [{ 'default' => :value_asserted }]
 
     # TODO: collapse this and 4 fields used here
     def is_readonly?
@@ -180,7 +180,7 @@ module DTK
       end
       return ret if ndx_scs.empty?
       sp_hash = {
-        cols: [:id, :group_id, :display_name, :component_component_id, :attribute_value, :required, :dynamic],
+        cols: [:id, :group_id, :display_name, :component_component_id, :attribute_value, :required, :dynamic, :dynamic_input],
         filter: [:oneof, :component_component_id, ndx_scs.keys]
       }
       attr_mh = state_change_list.first.first[:component].model_handle(:attribute)
@@ -222,7 +222,7 @@ module DTK
         end
         node_idhs = ndx_nodes.values.map(&:id_handle)
         add_filter = [:eq, :required, true]
-        cols = [:id, :group_id, :display_name, :node_node_id, :required, :value_derived, :value_asserted, :dynamic, :port_type_asserted, :is_port, :semantic_type_summary]
+        cols = [:id, :group_id, :display_name, :node_node_id, :required, :value_derived, :value_asserted, :dynamic, :dynamic_input, :port_type_asserted, :is_port, :semantic_type_summary]
         Node.get_node_level_attributes(node_idhs, cols: cols, add_filter: add_filter).each do |attr|
           ret << attr.merge(node: ndx_nodes[attr[:node_node_id]], task_id: task[:id])
         end

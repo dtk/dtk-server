@@ -118,7 +118,7 @@ module DTK; class Task
         sp_hash = {
           relation: :attribute,
           filter: [:oneof, parent_field_name, ndx_actions.keys],
-          columns: [:id, :display_name, parent_field_name, :external_ref, :attribute_value, :required, :dynamic, :port_type, :port_is_external, :data_type, :semantic_type, :hidden]
+          columns: [:id, :display_name, parent_field_name, :external_ref, :attribute_value, :required, :dynamic, :dynamic_input, :port_type, :port_is_external, :data_type, :semantic_type, :hidden]
         }
         attrs = Model.get_objs(attr_mh, sp_hash)
 

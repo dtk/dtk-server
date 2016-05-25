@@ -111,7 +111,7 @@ module DTK
       else
         cmp_idh = id_handle(component_id, :component)
       end
-      opts = Opts.new(delete_action: 'delete_component', delete_params: {cmp_idh: cmp_idh, node_id: node_id })
+      opts = Opts.new(delete_action: 'delete_component', delete_params: [cmp_idh, node_id])
 
       rest_ok_response assembly.exec__delete_component(params_hash, opts)
     end

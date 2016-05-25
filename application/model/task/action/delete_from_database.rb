@@ -35,12 +35,14 @@ module DTK; class Task
       end
 
       def execute_delete_action(top_task_idh)
-        case self[:delete_action]
-         when 'delete_component'
-          execute_delete_component(top_task_idh)
-         else
-          fail Error.new("Unsupported action type '#{self[:delete_action]}'!")
-         end
+        top_task = top_task_idh.create_object()
+
+        if assembly = top_task.assembly
+          assembly_instance = assembly.copy_as_assembly_instance
+          assembly_instance.send(self[:delete_action], *self[:delete_params])
+        else
+          fail Error.new("Unexpected that top task does not have assembly!")
+        end
       end
 
       def node_is_node_group?
@@ -70,22 +72,6 @@ module DTK; class Task
         # no op if no associated state change
         if self[:state_change_id]
           update_state_change_status_aux(task_mh, status, [self[:state_change_id]])
-        end
-      end
-
-      private
-
-      def execute_delete_component(top_task_idh)
-        top_task = top_task_idh.create_object()
-        if assembly = top_task.assembly
-          assembly_instance = assembly.copy_as_assembly_instance
-          delete_params = self[:delete_params]
-          cmp_id = delete_params[:cmp_idh][:guid]
-          cmp_idh = top_task.id_handle(model_name: :component, id: cmp_id)
-          node_id = delete_params[:node_id]
-          assembly_instance.delete_component(cmp_idh, node_id)
-        else
-          fail Error.new("Unexpected that top task does not have assembly!")
         end
       end
     end

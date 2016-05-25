@@ -56,6 +56,10 @@ module DTK; class  Assembly
       end
 
       def delete_node(node_idh, opts = {})
+        unless node_idh.is_a?(IDHandle)
+          node_idh = id_handle().createIDH(model_name: :node, id: node_idh[:guid])
+        end
+
         node =  node_idh.create_object()
         # TODO: check if cleaning up dangling links when assembly node deleted
         if node.is_node_group?
@@ -87,6 +91,10 @@ module DTK; class  Assembly
       end
 
       def delete_component(component_idh, node_id = nil)
+        unless component_idh.is_a?(IDHandle)
+          component_idh = id_handle().createIDH(model_name: :component, id: component_idh[:guid])
+        end
+
         component_filter = [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
         node = nil
         # first check that node belongs to this assebmly

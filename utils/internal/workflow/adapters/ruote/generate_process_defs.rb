@@ -75,6 +75,9 @@ module DTK
         elsif action.is_a?(Task::Action::DeleteFromDatabase)
           main = participant_executable_action(:delete_from_database, task, context, task_type: 'delete_from_database', task_start: true, task_end: true)
           sequence([main])
+        elsif action.is_a?(Task::Action::CommandAndControlAction)
+          main = participant_executable_action(:command_and_control_action, task, context, task_type: 'delete_node', task_start: true, task_end: true)
+          sequence([main])
         end
       end
 

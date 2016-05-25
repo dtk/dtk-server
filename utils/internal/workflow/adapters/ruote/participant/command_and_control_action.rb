@@ -18,7 +18,7 @@
 module DTK
   module WorkflowAdapter
     module RuoteParticipant
-      class DeleteFromDatabase < Top
+      class CommandAndControlAction < Top
         # LockforDebug = Mutex.new
         def consume(workitem)
           # LockforDebug.synchronize{pp [:in_consume, Thread.current, Thread.list];STDOUT.flush}
@@ -27,7 +27,7 @@ module DTK
           execution_context(task, workitem, task_start) do
             result = workflow.process_executable_action(task)
             if errors_in_result = errors_in_result?(result)
-              event, errors = task.add_event_and_errors(:initialize_failed, :delete_from_database, errors_in_result)
+              event, errors = task.add_event_and_errors(:initialize_failed, :command_and_control_action, errors_in_result)
               if event
                 log_participant.end(:initialize_failed, task_id: task_id, event: event, errors: errors)
               end

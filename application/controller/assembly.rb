@@ -67,6 +67,13 @@ module DTK
       rest_ok_response
     end
 
+    def rest__delete_node_using_workflow
+      assembly = ret_assembly_instance_object()
+      node_idh = ret_node_or_group_member_id_handle(:node_id, assembly)
+      opts = Opts.new(delete_action: 'delete_node', delete_params: [node_idh])
+      rest_ok_response assembly.exec__delete_node(node_idh, opts)
+    end
+
     def rest__delete_node_group
       assembly = ret_assembly_instance_object()
       node_idh = ret_node_or_group_member_id_handle(:node_id, assembly)

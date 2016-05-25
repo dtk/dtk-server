@@ -21,7 +21,6 @@ module DTK; class Task; class Template
     r8_nested_require('action', 'action_method')
     r8_nested_require('action', 'with_method')
     r8_nested_require('action', 'ad_hoc')
-    r8_nested_require('action', 'delete_from_database')
     
     # opts can have keys
     # :index
@@ -81,7 +80,7 @@ module DTK; class Task; class Template
       ret
     end
 
-  def method_missing(name, *args, &block)
+    def method_missing(name, *args, &block)
       @action.send(name, *args, &block)
     end
 

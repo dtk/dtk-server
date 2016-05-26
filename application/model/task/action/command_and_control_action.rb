@@ -18,7 +18,7 @@
 module DTK; class Task
   class Action
     class CommandAndControlAction < self
-      REPEAT_COUNT = 30
+      REPEAT_COUNT = 60
 
       def initialize(_type, hash, task_idh = nil)
         super(hash)

@@ -383,8 +383,7 @@ module DTK; class  Assembly
           begin
             cmp_action = Task.create_for_ad_hoc_action(self, component, opts) if component
           rescue Task::Template::ParsingError => e
-            return ret if params[:noop_if_no_action]
-            raise e
+            raise e unless params[:noop_if_no_action]
           end
         end
       end
@@ -461,7 +460,13 @@ module DTK; class  Assembly
           node = 'assembly_wide'
           components.each do |component|
             cmp_top_task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
-            cmp_action = Task.create_for_ad_hoc_action(self, component, cmp_opts)
+
+            begin
+             cmp_action = Task.create_for_ad_hoc_action(self, component, cmp_opts)
+            rescue Task::Template::ParsingError => e
+              Log.info("Ignoring component 'delete' action does not exist.")
+            end
+
             delete_cmp_from_database = Task.create_for_delete_from_detabase(self, component, node, opts)
             cmp_top_task.add_subtask(cmp_action) if cmp_action
             cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database

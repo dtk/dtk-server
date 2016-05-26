@@ -78,6 +78,10 @@ module DTK; class  Assembly
       end
 
       def delete_node_group(node_group_idh)
+        unless node_group_idh.is_a?(IDHandle)
+          node_group_idh = id_handle().createIDH(model_name: :node, id: node_group_idh[:guid])
+        end
+
         node_group = node_group_idh.create_object()
 
         unless node_group.is_node_group?

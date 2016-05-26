@@ -47,11 +47,11 @@ module DTK; class Task
 
     def create_for_delete_from_detabase(assembly, component, node, opts = {})
       task = Create.create_for_delete_from_detabase(assembly, component, node, opts)
-      ret = NodeGroupProcessing.decompose_node_groups!(task, opts)
+      # ret = NodeGroupProcessing.decompose_node_groups!(task, opts)
 
       unless opts[:skip_running_check]
         # raise error if any its nodes are not running
-        not_running_nodes = ret.get_associated_nodes().select { |n| n.get_and_update_operational_status!() != 'running' }
+        not_running_nodes = task.get_associated_nodes().select { |n| n.get_and_update_operational_status!() != 'running' }
         unless not_running_nodes.empty?
           node_is = (not_running_nodes.size == 1 ? 'node is' : 'nodes are')
           node_names = not_running_nodes.map(&:display_name).join(', ')
@@ -59,7 +59,7 @@ module DTK; class Task
         end
       end
 
-      ret
+      task
     end
 
     def create_for_command_and_control_action(assembly, action, params, node, opts = {})

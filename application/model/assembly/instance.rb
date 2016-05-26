@@ -424,6 +424,30 @@ module DTK; class  Assembly
       ret
     end
 
+    def exec__delete_node_group(node_idh, opts = {})
+      task = Task.create_top_level(model_handle(:task), self, task_action: 'delete node group')
+      ret = {
+        assembly_instance_id: self.id(),
+        assembly_instance_name: self.display_name_print_form
+      }
+
+      node_group = node_idh.create_object
+      group_members = node_group.get_node_group_members()
+      group_members.each do |node|
+        command_and_control_action = Task.create_for_command_and_control_action(self, 'destroy_node?', node.id(), node, opts)
+        task.add_subtask(command_and_control_action) if command_and_control_action
+      end
+      delete_from_database = Task.create_for_delete_from_detabase(self, nil, node_group, opts.merge!(skip_running_check: true))
+      task.add_subtask(delete_from_database) if delete_from_database
+      task = task.save_and_add_ids()
+
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+
+      ret.merge!(task_id: task.id())
+      ret
+    end
+
     def exec__delete(opts = {})
       task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
       ret = {

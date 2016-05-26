@@ -83,6 +83,28 @@ module DTK; class Task
           update_state_change_status_aux(task_mh, status, [self[:state_change_id]])
         end
       end
+
+      def nodes(opts = {})
+        node_or_ng = self[:node]
+        nodes =
+          if node_or_ng.is_node_group?()
+            node_or_ng.get_node_group_members()
+          else
+            [node_or_ng]
+          end
+        if cols = opts[:cols]
+          nodes.each { |node| node.update_object!(*cols) }
+        end
+        nodes
+      end
+
+      def node_id
+        self[:node][:id]
+      end
+
+      def create_node_group_member(node)
+        self.class.new(:hash, node: node, node_group_member: true)
+      end
     end
   end
 end; end

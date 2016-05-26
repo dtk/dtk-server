@@ -130,6 +130,7 @@ R8::ReactorRoute.draw do
   post 'assembly/create_workspace' => 'assembly#create_workspace'
   post 'assembly/delete_component_using_workflow' => 'assembly#delete_component_using_workflow'
   post 'assembly/delete_node_using_workflow' => 'assembly#delete_node_using_workflow'
+  post 'assembly/delete_using_workflow' => 'assembly#delete_using_workflow'
 
   # ATTRIBUTE
   post 'attribute/set' => 'attribute#set'

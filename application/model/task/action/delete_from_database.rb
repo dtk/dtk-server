@@ -29,23 +29,32 @@ module DTK; class Task
           node: node,
           assembly: assembly,
           delete_action: opts[:delete_action],
-          delete_params: opts[:delete_params]
+          delete_params: opts[:delete_params],
+          opts: opts
         }
         new(:hash, hash)
       end
 
       def execute_delete_action(top_task_idh)
         top_task = top_task_idh.create_object()
+        assembly = top_task.assembly
 
-        if assembly = top_task.assembly
+        if assembly
           assembly_instance = assembly.copy_as_assembly_instance
-          assembly_instance.send(self[:delete_action], *self[:delete_params])
+
+          if self[:node] || self[:component]
+            assembly_instance.send(self[:delete_action], *self[:delete_params])
+          else
+            component_idh = assembly.id_handle.createIDH(id: assembly.id(), model_name: :component)
+            assembly_instance.class.send(self[:delete_action], component_idh, self[:opts])
+          end
         else
           fail Error.new("Unexpected that top task does not have assembly!")
         end
       end
 
       def node_is_node_group?
+        return false unless self[:node]
         self[:node].is_node_group?()
       end
 

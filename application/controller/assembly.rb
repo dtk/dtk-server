@@ -35,6 +35,12 @@ module DTK
       end
     end
 
+    def rest__delete_using_workflow
+      assembly = ret_assembly_instance_object()
+      opts = Opts.new(delete_action: 'delete', delete_params: [assembly.id_handle()])
+      rest_ok_response assembly.exec__delete(opts)
+    end
+
     def rest__purge
       workspace = ret_workspace_object?()
       workspace.purge(destroy_nodes: true)

@@ -403,7 +403,7 @@ module DTK; class  Assembly
     end
 
     def exec__delete_node(node_idh, opts = {})
-      task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
+      task = Task.create_top_level(model_handle(:task), self, task_action: 'delete node')
       ret = {
         assembly_instance_id: self.id(),
         assembly_instance_name: self.display_name_print_form
@@ -415,6 +415,50 @@ module DTK; class  Assembly
 
       task.add_subtask(command_and_control_action) if command_and_control_action
       task.add_subtask(delete_from_database) if delete_from_database
+      task = task.save_and_add_ids()
+
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+
+      ret.merge!(task_id: task.id())
+      ret
+    end
+
+    def exec__delete(opts = {})
+      task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
+      ret = {
+        assembly_instance_id: self.id(),
+        assembly_instance_name: self.display_name_print_form
+      }
+
+      if assembly_wide_node = self.has_assembly_wide_node?
+        if components = assembly_wide_node.get_components
+          cmp_opts = { method_name: 'delete' }
+          node = 'assembly_wide'
+          components.each do |component|
+            cmp_top_task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
+            cmp_action = Task.create_for_ad_hoc_action(self, component, cmp_opts)
+            delete_cmp_from_database = Task.create_for_delete_from_detabase(self, component, node, opts)
+            cmp_top_task.add_subtask(cmp_action) if cmp_action
+            cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
+            task.add_subtask(cmp_top_task)
+          end
+        end
+      end
+
+      if nodes = self.get_leaf_nodes(remove_assembly_wide_node: true)
+        nodes.each do |node|
+          node_top_task = Task.create_top_level(model_handle(:task), self, task_action: 'delete node')
+          command_and_control_action = Task.create_for_command_and_control_action(self, 'destroy_node?', node.id(), node, opts)
+          delete_node_from_database = Task.create_for_delete_from_detabase(self, nil, node.get_field?(:display_name), opts.merge!(skip_running_check: true))
+          node_top_task.add_subtask(command_and_control_action) if command_and_control_action
+          node_top_task.add_subtask(delete_node_from_database) if delete_node_from_database
+          task.add_subtask(node_top_task)
+        end
+      end
+
+      delete_assembly_from_database = Task.create_for_delete_from_detabase(self, nil, nil, opts.merge!(skip_running_check: true))
+      task.add_subtask(delete_assembly_from_database) if delete_assembly_from_database
       task = task.save_and_add_ids()
 
       workflow = Workflow.create(task)

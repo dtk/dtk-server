@@ -411,7 +411,7 @@ module DTK; class  Assembly
 
       node = node_idh.create_object
       command_and_control_action = Task.create_for_command_and_control_action(self, 'destroy_node?', node_idh.get_id(), node, opts)
-      delete_from_database = Task.create_for_delete_from_detabase(self, nil, node.get_field?(:display_name), opts.merge!(skip_running_check: true))
+      delete_from_database = Task.create_for_delete_from_detabase(self, nil, node, opts.merge!(skip_running_check: true))
 
       task.add_subtask(command_and_control_action) if command_and_control_action
       task.add_subtask(delete_from_database) if delete_from_database

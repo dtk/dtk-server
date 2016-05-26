@@ -38,7 +38,10 @@ module DTK; class Task
       def execute_command_and_control_action(top_task_idh, task_idh)
         if assembly = top_task_idh.create_object().assembly
           assembly_instance = assembly.copy_as_assembly_instance
-          node = assembly_instance.get_node?([:eq, :id, self[:node][:id]])
+
+          leaf_nodes = assembly_instance.get_leaf_nodes()
+          node = leaf_nodes.find{|n| n[:id] == self[:node][:id]}
+
           CommandAndControl.send(self[:cc_action], node)
           status = nil
 

@@ -85,7 +85,17 @@ module DTK; class Task
     def self.create_for_delete_from_detabase(assembly, component, node, opts = {})
       task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
       ret = create_top_level_task(task_mh, assembly, task_action: 'delete_from_database')
-      node = node.eql?('assembly_wide') ? assembly.has_assembly_wide_node? : assembly.get_node?([:eq, :display_name, node])
+
+      unless node.is_a?(Node)
+        if node.eql?('assembly_wide')
+          node = assembly.has_assembly_wide_node?
+        else
+          leaf_nodes = assembly.get_leaf_nodes()
+          node = leaf_nodes.find{|n| n[:display_name].eql?(node)}
+        end
+      end
+
+      # node = node.eql?('assembly_wide') ? assembly.has_assembly_wide_node? : assembly.get_node?([:eq, :display_name, node])
       executable_action = Action::DeleteFromDatabase.create_hash(assembly, component, node, opts)
       subtask = create_new_task(task_mh, executable_action: executable_action)
       ret.add_subtask(subtask)

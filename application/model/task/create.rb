@@ -104,7 +104,7 @@ module DTK; class Task
 
     def self.create_for_command_and_control_action(assembly, action, params, node, opts = {})
       task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
-      ret = create_top_level_task(task_mh, assembly, task_action: 'delete_nodes')
+      ret = create_top_level_task(task_mh, assembly, task_action: (opts[:task_action]||'delete_nodes'))
       executable_action = Action::CommandAndControlAction.create_hash(assembly, action, params, node, opts)
       subtask = create_new_task(task_mh, executable_action: executable_action)
       ret.add_subtask(subtask)

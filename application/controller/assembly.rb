@@ -1007,6 +1007,44 @@ module DTK
       rest_ok_response
     end
 
+    def rest__stop_using_workflow
+      assembly = ret_assembly_instance_object()
+      node_pattern = ret_request_params(:node_pattern)
+
+      # cancel task if running on the assembly
+      if running_task = most_recent_task_is_executing?(assembly)
+        cancel_task(running_task.id)
+      end
+
+      nodes, is_valid, error_msg = assembly.nodes_valid_for_stop_or_start(node_pattern, :running)
+
+      unless is_valid
+        Log.info(error_msg)
+        return rest_ok_response(errors: [error_msg])
+      end
+
+      task = Task.create_top_level(assembly.model_handle(:task), assembly, task_action: 'stop nodes', temporal_order: 'concurrent')
+      ret = {
+        assembly_instance_id: assembly.id(),
+        assembly_instance_name: assembly.display_name_print_form
+      }
+
+      nodes.each do |node|
+        command_and_control_action = Task.create_for_command_and_control_action(assembly, 'stop_instances', node.id(), node, { task_action: 'stop node' })
+        task.add_subtask(command_and_control_action) if command_and_control_action
+      end
+      task = task.save_and_add_ids()
+
+      workflow = Workflow.create(task)
+      workflow.defer_execution()
+
+      ret.merge!(task_id: task.id())
+      ret
+
+      # Node.stop_instances(nodes)
+      rest_ok_response ret
+    end
+
     def rest__task_status
       assembly = ret_assembly_instance_object()
       response =

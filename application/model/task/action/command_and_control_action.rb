@@ -41,17 +41,24 @@ module DTK; class Task
 
           leaf_nodes = assembly_instance.get_leaf_nodes()
           node = leaf_nodes.find{|n| n[:id] == self[:node][:id]}
+          expected_status = :terminated
 
-          CommandAndControl.send(self[:cc_action], node)
+          if self[:cc_action].eql?('stop_instances')
+            expected_status = :stopped
+            CommandAndControl.send(self[:cc_action], [node])
+            node.attribute.clear_host_addresses()
+          else
+            CommandAndControl.send(self[:cc_action], node)
+          end
           status = nil
 
           REPEAT_COUNT.times do
             status = CommandAndControl.get_node_operational_status(node)
-            break if status.nil? || status.to_sym == :terminated
+            break if status.nil? || status.to_sym == expected_status
             sleep(1)
           end
 
-          fail Error.new("Timeout reached! Node is not stopped properly!") if status && status.to_sym != :terminated
+          fail Error.new("Timeout reached! Node is not stopped properly!") if status && status.to_sym != expected_status
         else
           fail Error.new("Unexpected that top task does not have assembly!")
         end

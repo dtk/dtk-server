@@ -132,6 +132,7 @@ R8::ReactorRoute.draw do
   post 'assembly/delete_node_using_workflow' => 'assembly#delete_node_using_workflow'
   post 'assembly/delete_using_workflow' => 'assembly#delete_using_workflow'
   post 'assembly/delete_node_group_using_workflow' => 'assembly#delete_node_group_using_workflow'
+  post 'assembly/stop_using_workflow' => 'assembly#stop_using_workflow'
 
   # ATTRIBUTE
   post 'attribute/set' => 'attribute#set'

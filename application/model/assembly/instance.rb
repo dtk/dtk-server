@@ -414,7 +414,7 @@ module DTK; class  Assembly
         assembly_instance_name: self.display_name_print_form
       }
 
-      node = node_idh.create_object
+      node = node_idh.create_object().update_object!(:display_name)
       opts.merge!(skip_running_check: true)
 
       if components = node.get_components

@@ -84,6 +84,10 @@ module DTK; class Task; class Status
           el.merge!(Task::Action::InstallAgent.status(ea, opts)) if ea
           when 'ExecuteSmoketest'
             el.merge!(Task::Action::ExecuteSmoketest.status(ea, opts)) if ea
+          when 'CommandAndControlAction'
+            el.merge!(Task::Action::CommandAndControlAction.status(ea, opts)) if ea
+          when 'DeleteFromDatabase'
+            el.merge!(Task::Action::DeleteFromDatabase.status(ea, opts)) if ea
           end
       end
       ret << el

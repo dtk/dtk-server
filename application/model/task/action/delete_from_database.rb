@@ -105,6 +105,30 @@ module DTK; class Task
       def create_node_group_member(node)
         self.class.new(:hash, node: node, node_group_member: true)
       end
+
+      def self.node_status(object, _opts)
+        ap "222"
+        ap object
+        node = object[:node] || {}
+        ap node
+        ext_ref = node[:external_ref] || {}
+        kv_array =
+          [{ name: node[:display_name] },
+           { id: node[:id] },
+           { type: ext_ref[:type] },
+           { image_id: ext_ref[:image_id] },
+           { size: ext_ref[:size] }
+          ]
+
+        ap "DFD #{kv_array}"
+        PrettyPrintHash.new.set?(*kv_array)
+      end
+
+      def self.status(object, opts)
+        ret = PrettyPrintHash.new
+        ret[:node] = node_status(object, opts)
+        ret
+      end
     end
   end
 end; end

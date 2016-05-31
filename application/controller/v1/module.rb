@@ -23,6 +23,23 @@ module DTK
         project = get_default_project
         rest_ok_response ServiceModule.list_assembly_templates(get_default_project), datatype: LIST_ASSEMBLIES_DATATYPE
       end
+
+      def exists
+        namespace, module_name = ret_non_null_request_params(:namespace, :module_name)
+        version = ret_request_params(:version)
+
+        response = {}
+        # TODO DTK-2583: Aldin
+        # a model method should be called that checks if there is a component module or service module that
+        # matches the namespace, module_name, version;
+        # if service module match then key service_module_id is returned and
+        # if component module match then key component_module_id is returned
+        # want to start carving out new file structure that we can port to. The
+        # method one shoudl delegate to should be under model
+        # and be Module#exists(...)
+        rest_ok_response response
+      end
+
     end
   end
 end

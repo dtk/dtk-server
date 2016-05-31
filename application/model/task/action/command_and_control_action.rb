@@ -104,8 +104,6 @@ module DTK; class Task
            { image_id: ext_ref[:image_id] },
            { size: ext_ref[:size] }
           ]
-
-        ap "CC #{kv_array}"
         PrettyPrintHash.new.set?(*kv_array)
       end
 

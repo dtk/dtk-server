@@ -107,10 +107,7 @@ module DTK; class Task
       end
 
       def self.node_status(object, _opts)
-        ap "222"
-        ap object
         node = object[:node] || {}
-        ap node
         ext_ref = node[:external_ref] || {}
         kv_array =
           [{ name: node[:display_name] },
@@ -119,8 +116,6 @@ module DTK; class Task
            { image_id: ext_ref[:image_id] },
            { size: ext_ref[:size] }
           ]
-
-        ap "DFD #{kv_array}"
         PrettyPrintHash.new.set?(*kv_array)
       end
 

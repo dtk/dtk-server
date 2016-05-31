@@ -488,18 +488,17 @@ module DTK; class  Assembly
       if assembly_wide_node = self.has_assembly_wide_node?
         if components = assembly_wide_node.get_components
           cmp_opts = { method_name: 'delete' }
-          node = 'assembly_wide'
           components.each do |component|
             cmp_top_task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
             cmp_action = nil
 
             begin
-             cmp_action = Task.create_for_ad_hoc_action(self, component, cmp_opts) if node.get_admin_op_status.eql?'running'
+             cmp_action = Task.create_for_ad_hoc_action(self, component, cmp_opts) if assembly_wide_node.get_admin_op_status.eql?'running'
             rescue Task::Template::ParsingError => e
               Log.info("Ignoring component 'delete' action does not exist.")
             end
 
-            delete_cmp_from_database = Task.create_for_delete_from_detabase(self, component, node, opts)
+            delete_cmp_from_database = Task.create_for_delete_from_detabase(self, component, assembly_wide_node, opts)
             cmp_top_task.add_subtask(cmp_action) if cmp_action
             cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
             task.add_subtask(cmp_top_task)

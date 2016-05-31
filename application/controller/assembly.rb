@@ -77,6 +77,11 @@ module DTK
       assembly = ret_assembly_instance_object()
       node_idh = ret_node_or_group_member_id_handle(:node_id, assembly)
       opts = Opts.new(delete_action: 'delete_node', delete_params: [node_idh])
+
+      if running_task = most_recent_task_is_executing?(assembly)
+        fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
+      end
+
       rest_ok_response assembly.exec__delete_node(node_idh, opts)
     end
 
@@ -91,6 +96,11 @@ module DTK
       assembly = ret_assembly_instance_object()
       node_idh = ret_node_or_group_member_id_handle(:node_id, assembly)
       opts = Opts.new(delete_action: 'delete_node_group', delete_params: [node_idh])
+
+      if running_task = most_recent_task_is_executing?(assembly)
+        fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
+      end
+
       rest_ok_response assembly.exec__delete_node_group(node_idh, opts)
     end
 

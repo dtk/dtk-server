@@ -326,10 +326,6 @@ module Ramaze::Helper
       ret.size <= 1 ? ret.first : ret
     end
 
-    def ret_request_param_boolean(param)
-      boolean_form(ret_request_params(param))
-    end
-
     def ret_symbol_params_hash(*params)
       ret_params_hash(*params).inject({}) { |h, (k, v)| h.merge(k => v.to_s.to_sym) }
     end
@@ -337,12 +333,6 @@ module Ramaze::Helper
     def ret_boolean_params_hash(*params)
       ret_params_hash(*params).inject({}) { |h, (k, v)| h.merge(k => boolean_form(v)) }
     end
-
-    def boolean_form(v)
-      v.is_a?(TrueClass) || (v.is_a?(String) && v == 'true')
-    end
-    private :boolean_form
-
 
     # method will use nil where param empty
     def ret_params_hash_with_nil(*params)

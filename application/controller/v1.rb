@@ -18,6 +18,9 @@
 module DTK
   module V1
     class Base < Controller
+      def self.helper_v1(helper)
+        helper("v1_#{helper}".to_sym)
+      end
     end
 
     %w(service module authorization metadata).each do |controller_file|

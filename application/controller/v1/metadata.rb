@@ -17,7 +17,7 @@
 #
 module DTK
   module V1
-    class MetadataController < Base
+    class MetadataController < V1::Base
       helper :common
 
       TABLE_METADATA_DIR = File.expand_path('../../meta/tables_metadata', File.dirname(__FILE__))

@@ -22,58 +22,61 @@ module DTK
       helper :assembly_helper
       helper :task_helper
 
+      ### For creating a service instance from an assembly
+      ## Params are
+      ##   :module_ref
+      ##   :assembly_name
+      ##   :target_id - parent target id
+      ##   :name (optional) - name for new instance
       def create
-        target_id = ret_request_param_id_optional(:target_id, Target::Instance)
+        target_id = request_param_id?(:target_id, Target::Instance)
         target = target_with_default(target_id)
 
-        service_module_obj = create_obj(:service_module_name, ServiceModule)
+        service_module_obj = create_obj(:module_ref, ServiceModule)
 
-        # Special case to support Jenikins CLI orders, since we are not using shell we do not have access
-        # to element IDs. This "workaround" helps with that.
         if service_module_id = service_module_obj.id
           # this is name of assembly template
-          assembly_id = ret_request_params(:assembly_name)
+          assembly_id = required_request_params(:assembly_name)
           service_module = ServiceModule.find(model_handle(:service_module), service_module_id)
           assembly_template = service_module.get_assembly_templates().find { |template| template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i }
           fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
         else
-          assembly_template = ret_assembly_template_object()
+          assembly_template = ret_assembly_template_object
         end
 
         opts = {}
-        if assembly_name = ret_request_params(:name)
+        if assembly_name = request_params(:name)
           opts[:assembly_name] = assembly_name
         end
 
-        if service_settings = ret_settings_objects(assembly_template)
-          opts[:service_settings] = service_settings
-        end
-
-        if node_size = ret_request_params(:node_size)
-          opts[:node_size] = node_size
-        end
-
-        if os_type = ret_request_params(:os_type)
-          opts[:os_type] = os_type
-        end
+        # TODO: may add these back in
+        #if service_settings = ret_settings_objects(assembly_template)
+        #  opts[:service_settings] = service_settings
+        #end
+        #
+        #if node_size = request_params(:node_size)
+        #  opts[:node_size] = node_size
+        #end
+        #
+        #if os_type = request_params(:os_type)
+        #  opts[:os_type] = os_type
+        #end
 
         new_assembly_obj = assembly_template.stage(target, opts)
 
         response = {
-          new_service_instance: {
+          service_instance: {
             name: new_assembly_obj.display_name_print_form,
             id: new_assembly_obj.id()
-          },
-          display_name: new_assembly_obj.display_name,
-          id: new_assembly_obj.id
+          }
         }
 
         rest_ok_response(response)
       end
 
       def exec
-        service    = service_object()
-        params_hash = ret_params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
+        service     = service_object()
+        params_hash = params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
         rest_ok_response service.exec(params_hash)
       end
 
@@ -189,13 +192,13 @@ module DTK
         project = get_default_project()
         opts = { mode: :create, local_clone_dir_exists: false }
 
-        if namespace = ret_request_params(:namespace)
+        if namespace = request_params(:namespace)
           opts.merge!(namespace: namespace)
-        elsif ret_request_params(:use_module_namespace)
+        elsif request_params(:use_module_namespace)
           opts.merge!(namespace: module_namespace)
         end
 
-        if description = ret_request_params(:description)
+        if description = request_params(:description)
           opts.merge!(description: description)
         end
 

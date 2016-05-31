@@ -25,8 +25,8 @@ module DTK
       end
 
       def exists
-        namespace, module_name = ret_non_null_request_params(:namespace, :module_name)
-        version = ret_request_params(:version)
+        namespace, module_name = required_request_params(:namespace, :module_name)
+        version = request_params(:version)
 
         response = {}
         # TODO DTK-2583: Aldin

@@ -18,7 +18,11 @@
 # TODO: needs cleanup including around mechanism to get object associated with ids
 module Ramaze::Helper
   module Common
+    require_relative('common/request_params')
+    include RequestParams
     include DTK
+
+    # TODO: move request param methods to common/request_params, depreacting ones no longer used
 
     def create_object_from_id(id, model_name_or_class = nil, opts = {})
       model_name  =
@@ -282,11 +286,6 @@ module Ramaze::Helper
       end
     end
 
-    def ret_request_param_id(param, model_class = nil, extra_context = nil)
-      id_or_name = ret_non_null_request_params(param)
-      resolve_id_from_name_or_id(id_or_name, model_class, extra_context)
-    end
-
     def numeric_id?(id_or_name)
       if id_or_name.is_a?(Fixnum)
         id_or_name
@@ -311,12 +310,6 @@ module Ramaze::Helper
       end
     end
 
-    # resolve name/id but in this case given request param is not required
-    def ret_request_param_id_optional(param, model_class = nil, extra_context = nil)
-      if ret_request_params(param)
-        ret_request_param_id(param, model_class, extra_context)
-      end
-    end
 
     def ret_module_name_from_class(model_class = nil)
       if model_class
@@ -326,12 +319,6 @@ module Ramaze::Helper
       end
     end
     private :ret_module_name_from_class
-
-    def ret_request_params(*params)
-      return request.params if params.size == 0
-      ret = params.map { |p| request.params[p.to_s] }
-      ret.size == 1 ? ret.first : ret
-    end
 
     def ret_request_params_force_nil(*params)
       ret = ret_request_params(params)
@@ -356,27 +343,6 @@ module Ramaze::Helper
     end
     private :boolean_form
 
-    def ret_non_null_request_params(*params)
-      null_params = []
-      ret = params.map do |p|
-        unless val = request.params[p.to_s]
-          null_params << p
-        else val
-        end
-      end
-      raise_error_null_params?(*null_params)
-      ret.size == 1 ? ret.first : ret
-    end
-
-    def ret_params_hash(*params)
-      ret = {}
-      return ret unless request_method_is_post?()
-      return ret if params.size == 0
-      params.inject({}) do |h, p|
-        val = request.params[p.to_s]
-        (val ? h.merge(p.to_sym => val) : h)
-      end
-    end
 
     # method will use nil where param empty
     def ret_params_hash_with_nil(*params)

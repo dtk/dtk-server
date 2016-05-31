@@ -1056,7 +1056,16 @@ module DTK
     end
 
     def rest__task_status
-      assembly = ret_assembly_instance_object()
+      begin
+        assembly = ret_assembly_instance_object()
+      rescue ErrorIdInvalid => e
+        # if invalid id but sent from client it means this service instance is deleted few moments ago
+        if ret_request_params(:assembly_id)
+          return rest_ok_response [change_context: true]
+        else
+          raise e
+        end
+      end
       response =
         if ret_request_params(:form) == 'stream_form'
           element_detail = ret_request_params(:element_detail)||{}

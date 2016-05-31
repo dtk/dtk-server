@@ -29,5 +29,9 @@ module Ramaze::Helper
         task.has_status?(:executing) && task
       end
     end
+
+    def most_recent_task(assembly)
+      ::DTK::Task.get_top_level_most_recent_task(model_handle(:task), [:eq, :assembly_id, assembly.id()])
+    end
   end
 end

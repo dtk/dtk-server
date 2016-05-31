@@ -17,62 +17,100 @@
 #
 module DTK
   module V1
-    class ServiceController < Base
-
+    class ServiceController < V1::Base
+      helper_v1 :module_ref_helper
       helper :assembly_helper
       helper :task_helper
 
       ### For creating a service instance from an assembly
       ## Params are
-      ##   :module_ref
+      ##   :module_ref - hash 
       ##   :assembly_name
       ##   :target_id - parent target id 
       ##   :name (optional) - name for new instance
-      def create
-        target_id = request_param_id?(:target_id, Target::Instance)
-        target = target_with_default(target_id)
+      ##   :silent_fail (optonal) - Boolean
+    def create
+      service_module
+      opts = Opts.new
+      is_silent_fail = request_param_boolean(:silent_fail) || false
+      is_created = true
 
-        service_module_obj = create_obj(:module_ref, ServiceModule)
-        
-        if service_module_id = service_module_obj.id
-          # this is name of assembly template
-          assembly_id = required_request_params(:assembly_name)
-          service_module = ServiceModule.find(model_handle(:service_module), service_module_id)
-          assembly_template = service_module.get_assembly_templates().find { |template| template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i }
-          fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
-        else
-          assembly_template = ret_assembly_template_object
-        end
 
-        opts = {}
-        if assembly_name = request_params(:name)
-          opts[:assembly_name] = assembly_name
-        end
 
-        # TODO: may add these back in
-        #if service_settings = ret_settings_objects(assembly_template)
-        #  opts[:service_settings] = service_settings
-        #end
-        #
-        #if node_size = request_params(:node_size)
-        #  opts[:node_size] = node_size
-        #end
-        #
-        #if os_type = request_params(:os_type)
-        #  opts[:os_type] = os_type
-        #end
-
-        new_assembly_obj = assembly_template.stage(target, opts)
-
-        response = {
-          service_instance: {
-            name: new_assembly_obj.display_name_print_form,
-            id: new_assembly_obj.id()
-          }
-        }
-
-        rest_ok_response(response)
+      if service_settings = ret_settings_objects(assembly_template)
+        opts[:service_settings] = service_settings
       end
+
+      if node_size = ret_request_params(:node_size)
+        opts[:node_size] = node_size
+      end
+
+      if os_type = ret_request_params(:os_type)
+        opts[:os_type] = os_type
+      end
+
+      if no_auto_complete = ret_request_params(:no_auto_complete)
+        opts[:no_auto_complete] = no_auto_complete
+      end
+
+      project = get_default_project()
+      opts.merge!(project: project)
+
+      if assembly_name = ret_request_params(:name)
+        opts[:assembly_name] = assembly_name
+      end
+
+      target = nil
+      target_assembly_instance =  nil
+      if is_target_service = ret_request_params(:is_target)
+        opts[:is_target_service] = true
+        target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
+        target = Service::Target.create_target_mock(target_name, project)
+        target_assembly_instance = ret_assembly_instance_object?(:parent_service)
+      else
+        # this case is for service instance which are staged against a target service instance
+        # which is giving  parameter 'parent-service' or getting default target 
+        target_service = ret_target_service_with_default(:parent_service)
+        raise_error_if_target_not_convereged(target_service)
+        target = target_service.target
+        target_assembly_instance = target_service.assembly_instance
+      end
+
+      opts.merge!(parent_service_instance: target_assembly_instance) if target_assembly_instance
+
+      begin
+        new_assembly_obj = assembly_template.stage(target, opts)
+      rescue DTK::ErrorUsage => e
+        # delete mocked target service instance created above
+        Target::Instance.delete_and_destroy(target) if is_target_service
+        raise e unless is_silent_fail
+        # in case we are using silent fail we wont response evne if there was an error
+        new_assembly_obj = Assembly::Instance.find_by_name?(target, opts[:assembly_name])
+        is_created = false
+        # in case there is still no assembly raise error
+        raise e unless new_assembly_obj
+      end
+
+      if is_target_service
+        display_name = new_assembly_obj.get_field?(:display_name)
+        ref          = display_name.downcase.gsub(/ /, '-')
+        target.update(display_name: display_name, ref: ref)
+      end
+
+      response = {
+        new_service_instance: {
+          name: new_assembly_obj.display_name_print_form,
+          id: new_assembly_obj.id(),
+          is_created: is_created
+        }
+      }
+
+      if ret_request_params(:do_not_encode)
+        rest_ok_response(response)
+      else
+        rest_ok_response(response, encode_into: :yaml)
+      end
+    end
 
       def exec
         service     = service_object()

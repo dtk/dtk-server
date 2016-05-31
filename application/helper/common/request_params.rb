@@ -55,6 +55,14 @@ module Ramaze::Helper::Common
       end
     end
 
+    def request_param_boolean(param)
+      boolean_form(request_params(param))
+    end
+
+    def boolean_form(v)
+      v.is_a?(TrueClass) || (v.is_a?(String) && v == 'true')
+    end
+
     ###### TODO: deprecate below for above
     def ret_request_params(*args)
       request_params(*args)
@@ -75,5 +83,12 @@ module Ramaze::Helper::Common
     def ret_params_hash(*args)
       params_hash(*args)
     end
+
+    def ret_request_param_boolean(*args)
+      request_param_boolean(*args)
+    end
+
+
+      
   end
 end

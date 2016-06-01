@@ -36,8 +36,6 @@ module DTK
       is_silent_fail = request_param_boolean(:silent_fail) || false
       is_created = true
 
-
-
       if service_settings = ret_settings_objects(assembly_template)
         opts[:service_settings] = service_settings
       end

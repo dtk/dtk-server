@@ -310,6 +310,7 @@ module DTK
       end
     end
 
+    # TODO DTK-2587: deprecate for Module::Service.find_from_id? and Module::Service.find_from_name?
     def self.find(mh, name_or_id, library_idh = nil)
       lib_filter = library_idh && [:and, :library_library_id, library_idh.get_id()]
       sp_hash = {

@@ -28,8 +28,8 @@ module DTK
   require_relative('module/module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output
   require_relative('module/update_module_output')
   require_relative('module/base_module')
-  require_relative('module/component_module')
-  require_relative('module/service_module') # TODO: cleaning up and moving fns from service_module to service (Modulde::Service)
+  require_relative('module/component_module')# TODO DTK-2587: cleaning up and moving fns from  component_module to component (Module::Component)
+  require_relative('module/service_module') # TODO DTK-2587: cleaning up and moving fns from service_module to service (Module::Service)
   require_relative('module/test')
   require_relative('module/node')
   require_relative('module/branch')
@@ -38,5 +38,6 @@ module DTK
 
   module Module
     require_relative('module/service') 
+    require_relative('module/component') 
   end
 end

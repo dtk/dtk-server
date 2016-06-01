@@ -17,53 +17,18 @@
 #
 module Ramaze::Helper
   module V1ModuleRefHelper
-    ModuleRef = Struct.new(:namespace, :module_name)
-
     def ret_service_module
       module_id, module_name, namespace = request_params(:module_id, :module_name, :namespace)
       unless module_id or (module_name and namespace)
-        raise_error_usage "Either 'module_id' or 'module_name and namespace' must be given"
+        raise_error_usage("Either 'module_id' or 'module_name and namespace' must be given")
       end
       if module_id
         ::DTK::Module.service_module_from_id?(model_handle(:service_module), module_id) ||
           raise_error_usage("No module with id '#{module_id}' exists")
       else
-        raise_error 'not written yet'
+        ::DTK::Module.service_module_from_name?(model_handle(:service_module),  namespace, module_name) ||
+          raise_error_usage("The module '#{namespace}/#{module_name}' does not exist")
       end
     end
   end
 end
-=begin
-      service_module_id = nil
-
-      unless service_module_id = ret_request_params(:service_module_id)
-        if ret_request_params(:service_module_name)
-          service_module_id = create_obj(:service_module_name, ServiceModule).id
-        end
-      end
-
-      # Special case to support Jenikins CLI orders, since we are not using shell we do not have access
-      # to element IDs. This "workaround" helps with that.
-      if service_module_id
-        # this is name of assembly template
-        assembly_id        = ret_request_params(:assembly_id)
-        version            = ret_request_params(:version)
-        service_module     =
-
-        raise ErrorUsage.new("Unable to find service module for specified parameters: '#{service_module_id}'") unless service_module
-
-        # if we do not specify version use latest
-        version = compute_latest_version(service_module) unless version
-
-        module_name        = ret_request_params(:service_module_name)
-        assembly_version   = (version.nil? || version.eql?('base')) ? 'master' : version
-        assembly_templates = service_module.get_assembly_templates().select { |template| (template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i) }
-        assembly_template  = assembly_templates.find{ |template| template[:version] == assembly_version }
-        fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{module_name}'" unless assembly_template
-      else
-        assembly_template = ret_assembly_template_object()
-      end
-    end
-  end
-end
-=end

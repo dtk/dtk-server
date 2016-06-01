@@ -40,5 +40,10 @@ module DTK
     def self.service_module_from_id?(model_handle, module_id)
       ServiceModule.find(model_handle, module_id)
     end
+
+    def self.service_module_from_name?(model_handle, namespace, module_name)
+      ServiceModule.find(model_handle, "#{namespace}:#{module_name}")
+    end
+
   end
 end

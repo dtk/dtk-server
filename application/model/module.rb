@@ -22,28 +22,21 @@
 # for the rest the classes used are
 module DTK
   # order is important
-  r8_nested_require('module', 'mixins')
-  r8_nested_require('module', 'dsl_parser')
-  r8_nested_require('module', 'external_dependencies')
-  r8_nested_require('module', 'module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output
-  r8_nested_require('module', 'update_module_output')
-  r8_nested_require('module', 'base_module')
-  r8_nested_require('module', 'component_module')
-  r8_nested_require('module', 'service')
-  r8_nested_require('module', 'test')
-  r8_nested_require('module', 'node')
-  r8_nested_require('module', 'branch')
-  r8_nested_require('module', 'version')
-  r8_nested_require('module', 'assembly_module')
+  require_relative('module/mixins')
+  require_relative('module/dsl_parser')
+  require_relative('module/external_dependencies')
+  require_relative('module/module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output
+  require_relative('module/update_module_output')
+  require_relative('module/base_module')
+  require_relative('module/component_module')
+  require_relative('module/service_module') # TODO: cleaning up and moving fns from service_module to service (Modulde::Service)
+  require_relative('module/test')
+  require_relative('module/node')
+  require_relative('module/branch')
+  require_relative('module/version')
+  require_relative('module/assembly_module')
 
   module Module
-    def self.service_module_from_id?(model_handle, module_id)
-      ServiceModule.find(model_handle, module_id)
-    end
-
-    def self.service_module_from_name?(model_handle, namespace, module_name)
-      ServiceModule.find(model_handle, "#{namespace}:#{module_name}")
-    end
-
+    require_relative('module/service') 
   end
 end

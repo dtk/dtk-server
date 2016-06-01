@@ -16,16 +16,35 @@
 # limitations under the License.
 #
 module DTK
-  module Module
-    class Service < ServiceModule
-      def self.find_from_id?(model_handle, module_id)
-        get_obj(model_handle, sp_filter(:eq, :id, module_id))
+  class Model
+    class SpHash < ::Hash
+      module Mixin
+        def sp_filter(*args)
+          SpHash.new.cols(SpHash.base_cols).filter(*args)
+        end
       end
 
-      NS_MOD_DELIM_IN_REF = ':'
-      def self.find_from_name?(model_handle, namespace, module_name)
-        ref = "#{namespace}#{NS_MOD_DELIM_IN_REF}#{module_name}"
-        get_obj(model_handle, sp_filter(:eq, :ref, ref))
+      def cols(cols)
+        merge(cols: cols)
+      end
+
+      def filter(*args)
+        filter =
+          case args.size
+          when 0
+            nil
+          when 1
+            arg = args.first
+            raise Error.new("Illegal form for args: #{args.inspect}") unless arg.kind_of?(Array)
+            arg
+          else
+            args
+          end
+        filter ? merge(filter: filter) : self
+      end
+
+      def self.base_cols
+        [:id, :group_id, :display_name]
       end
     end
   end

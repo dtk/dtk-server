@@ -18,25 +18,29 @@
 # TODO: needs cleanup and partitioning
 # TODO: model_name and relation_type redundant
 # TODO: move these down under class Model
-r8_nested_require('model', 'input_into_model')
-r8_nested_require('model', 'field_set')
-r8_nested_require('model', 'clone')
-r8_nested_require('model', 'get_items')
+require_relative('model/input_into_model')
+require_relative('model/field_set')
+require_relative('model/clone')
+require_relative('model/get_items')
 
-r8_nested_require('model', 'schema')
-r8_nested_require('model', 'data')
-r8_nested_require('model', 'rails_class')
+require_relative('model/schema')
+require_relative('model/data')
+require_relative('model/rails_class')
 
 module DTK
   class Model < HashObject::Model
-    r8_nested_require('model', 'subclass_processing')
+    require_relative('model/sp_hash')
+    extend SpHash::Mixin
+    include SpHash::Mixin
+
+    require_relative('model/subclass_processing')
     extend SubclassProcessingClassMixin
     include SubclassProcessingMixin
 
-    r8_nested_require('model', 'name_and_id_mixins')
+    require_relative('model/name_and_id_mixins')
     extend NameAndIdClassMixin
 
-    r8_nested_require('model', 'pp_object_type')
+    require_relative('model/pp_object_type')
     extend PPObjectType::ClassMixin
     include PPObjectType::Mixin
 

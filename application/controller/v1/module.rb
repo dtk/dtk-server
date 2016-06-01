@@ -28,7 +28,7 @@ module DTK
         namespace, module_name = required_request_params(:namespace, :module_name)
         version = request_params(:version)
         
-        response = {}
+        response = BaseModule.exists(get_default_project, namespace, module_name, version)
         # TODO DTK-2583: Aldin
         # a model method should be called that checks if there is a component module or service module that
         # matches the namespace, module_name, version;

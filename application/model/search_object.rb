@@ -17,7 +17,7 @@
 #
 require File.expand_path('search_pattern_parser', File.dirname(__FILE__))
 
-module XYZ
+module DTK
   class SearchObject < Model
     def json_search_pattern
       search_pattern ? JSON.generate(search_pattern) : nil
@@ -70,30 +70,6 @@ module XYZ
       return true if save_flag
       not(search_pattern.is_default_view?() or source == :action_set or source == :node_group)
     end
-
-    # Remove
-    #     def save_list_view_in_cache?(user)
-    #       return nil unless should_save?
-    #       view_meta_hash = search_pattern ? search_pattern.create_list_view_meta_hash() : nil
-    #       raise Error.new("cannot create list_view meta hash") unless view_meta_hash
-    #       is_saved_search = true
-    #
-    #       raise Error::NotImplemented.new("when search_pattern.relation is of type #{search_pattern.relation.class}") unless search_pattern.relation.kind_of?(Symbol)
-    #       view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(),user,is_saved_search,view_meta_hash)
-    #       # TODO: this necssarily updates if reaches here; more sophistiacted woudl update cache file only if need to
-    #       view.update_cache_for_saved_search()
-    #     end
-    #
-    #     def self.save_list_view_in_cache(id,hash_assignments,user)
-    #       search_pattern_json = hash_assignments[:search_pattern]
-    #       return nil unless search_pattern_json
-    #       search_pattern = SearchPattern.create(JSON.parse(search_pattern_json))
-    #       view_meta_hash = search_pattern.create_list_view_meta_hash()
-    #       return nil unless search_pattern.relation
-    #       is_saved_search = true
-    #       view = R8Tpl::ViewR8.new(search_pattern.relation,saved_search_ref(id),user,is_saved_search,view_meta_hash)
-    #       view.update_cache_for_saved_search()
-    #     end
 
     def save(model_handle)
       search_pattern_db =  search_pattern.ret_form_for_db()

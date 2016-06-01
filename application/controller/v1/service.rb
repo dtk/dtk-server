@@ -30,7 +30,8 @@ module DTK
       ##   :name (optional) - name for new instance
       ##   :silent_fail (optonal) - Boolean
     def create
-      service_module
+      service_module = ret_service_module
+
       opts = Opts.new
       is_silent_fail = request_param_boolean(:silent_fail) || false
       is_created = true

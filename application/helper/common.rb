@@ -22,6 +22,14 @@ module Ramaze::Helper
     include RequestParams
     include DTK
 
+    def raise_error_usage(msg)
+       raise ::DTK::ErrorUsage, msg
+    end
+
+    def raise_error(msg)
+       raise ::DTK::Error, msg
+    end
+
     # TODO: move request param methods to common/request_params, depreacting ones no longer used
 
     def create_object_from_id(id, model_name_or_class = nil, opts = {})

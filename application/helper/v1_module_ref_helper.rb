@@ -19,10 +19,16 @@ module Ramaze::Helper
   module V1ModuleRefHelper
     ModuleRef = Struct.new(:namespace, :module_name)
     
-    def service_module
+    def ret_service_module
       module_id, module_name, namespace = request_params(:module_id, :module_name, :namespace)
       unless module_id or (module_name and namespace)
-        raise ::DTK::ErrorUsage, "Either 'module_id' or 'module_name and namespace' must be given"
+        raise_error_usage "Either 'module_id' or 'module_name and namespace' must be given"
+      end
+      if module_id
+        ::DTK::Module.service_module_from_id?(model_handle(:service_module), module_id) ||
+          raise_error_usage("No module with id '#{module_id}' exists")
+      else
+        raise_error 'not written yet'
       end
     end
   end
@@ -42,7 +48,7 @@ end
         # this is name of assembly template
         assembly_id        = ret_request_params(:assembly_id)
         version            = ret_request_params(:version)
-        service_module     = ServiceModule.find(model_handle(:service_module), service_module_id)
+        service_module     = 
 
         raise ErrorUsage.new("Unable to find service module for specified parameters: '#{service_module_id}'") unless service_module
 

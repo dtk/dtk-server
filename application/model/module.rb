@@ -35,4 +35,10 @@ module DTK
   r8_nested_require('module', 'branch')
   r8_nested_require('module', 'version')
   r8_nested_require('module', 'assembly_module')
+
+  module Module
+    def self.service_module_from_id?(model_handle, module_id)
+      ServiceModule.find(model_handle, module_id)
+    end
+  end
 end

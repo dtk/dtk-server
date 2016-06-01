@@ -393,7 +393,9 @@ module DTK
 
       def models
         classes = []
-        ObjectSpace.each_object(Module) do |m|
+        # important that ::Class; changed it from 'Module' since jsut ned to look for Classes
+        # but if used Module it shoudl be ::Module to not conflict with DTK::Module
+        ObjectSpace.each_object(::Class) do |m|
           classes << m if m.ancestors.include? self and m != self
         end
 

@@ -39,7 +39,7 @@ module DTK; class ServiceModule
     def ports
       @ndx_ports.values()
     end
-    
+
     # Needed by AssemblyImport::Port
     attr_reader :ndx_assembly_hashes, :container_idh, :ndx_version_proc_classes, :ndx_assembly_file_paths, :ndx_ports
 

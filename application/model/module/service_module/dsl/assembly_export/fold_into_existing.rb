@@ -30,7 +30,7 @@ module DTK; class ServiceModule
         workflow_added = false
         ordered_hash_new_content.each_pair do |section_name, section_content_hash|
           section = { section_name => section_content_hash }
-          text_section = 
+          text_section =
             case section_name
              when :assembly
               assembly_section_proc ||= AssemblySectionProc.new(raw_content_existing)
@@ -56,11 +56,11 @@ module DTK; class ServiceModule
       end
 
       private
-      
+
       def self.convert_to_text(section_content_hash)
         Aux.serialize(section_content_hash, :yaml).gsub("---\n", '')
       end
-      
+
       def self.convert_to_text__assembly_section(assembly_section_proc, assembly_section_hash)
         processed_assembly_hash = assembly_section_proc.parse_and_order_assembly_hash(assembly_section_hash)
         prettify_assembly_string(convert_to_text(processed_assembly_hash))
@@ -78,15 +78,15 @@ module DTK; class ServiceModule
         end
         convert_to_text(new_description)
       end
-      
+
       # add_empty_lines_and_comments
       def self.prettify_assembly_string(assembly_string)
         ret = ''
-        
+
         assembly_string.each_line do |line|
           line.gsub!('assembly_wide/', '') if line.include?('assembly_wide/')
           str_line = line.strip.gsub('- ', '')
-          
+
           if str_line.eql?("''")
             ret << "\n"
           elsif str_line.start_with?('!') && str_line.include?('#')
@@ -95,10 +95,10 @@ module DTK; class ServiceModule
             ret << line
           end
         end
-        
+
         ret
       end
-      
+
     end
   end
 end; end

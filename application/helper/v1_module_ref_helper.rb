@@ -23,10 +23,11 @@ module Ramaze::Helper
         raise_error_usage("Either 'module_id' or 'module_name and namespace' must be given")
       end
       if module_id
-        ::DTK::Module.service_module_from_id?(model_handle(:service_module), module_id) ||
+        module_id = Integer(module_id) rescue raise_error_usage("Ill-formed module id term '#{module_id}'")
+        ::DTK::Module::Service.find_from_id?(model_handle(:service_module), module_id) ||
           raise_error_usage("No module with id '#{module_id}' exists")
       else
-        ::DTK::Module.service_module_from_name?(model_handle(:service_module),  namespace, module_name) ||
+        ::DTK::Module::Service.find_from_name?(model_handle(:service_module),  namespace, module_name) ||
           raise_error_usage("The module '#{namespace}/#{module_name}' does not exist")
       end
     end

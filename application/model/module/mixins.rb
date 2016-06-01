@@ -529,6 +529,20 @@ TODO: remove after incorporating in info above displaying of remotes; this was r
       get_objs(mh, sp_hash)
     end
 
+    def module_exists(project, namespace, name, version = 'master')
+      namespace_obj = Namespace.find_or_create(project.model_handle.createMH(:namespace), namespace)
+
+      opts = Opts.new(filter: [:and, [:eq, :namespace_id, namespace_obj.id()], [:eq, :display_name, name]], project_idh: project.id_handle(), detail_to_include: [:remotes, :versions])
+      cols = [:id, :display_name, :namespace_id, :namespace, :module_branches_with_repos]
+      unsorted_ret = get_all(project.id_handle(), cols: cols, filter: opts[:filter])
+
+      if selected_module = unsorted_ret.find{ |mod| mod[:module_branch][:verion] == version }
+        return selected_module[:id]
+      end
+
+      return nil
+    end
+
     def filter_by_namespace(object_list, namespace)
       return object_list if namespace.nil? || namespace.strip.empty?
 

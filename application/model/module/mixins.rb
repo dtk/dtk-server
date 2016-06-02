@@ -30,6 +30,7 @@ module DTK
   # Instance Mixins
   #
   module ModuleMixin
+
     include ModuleMixins::Remote::Instance
     include ModuleMixins::Create::Instance
     include ModuleMixins::Gitolite
@@ -420,55 +421,6 @@ module DTK
       list(opts).first
     end
 
-=begin
-TODO: remove after incorporating in info above displaying of remotes; this was removed because it processed dsl_parsed incorrectly
-    def info(target_mh, id, opts = {})
-      project_idh  = opts[:project_idh]
-      namespaces = []
-
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :remote_repos],
-        filter: [:eq, :id, id]
-      }
-
-      response = get_objs(target_mh, sp_hash.merge(opts))
-
-      # if there are no remotes just get component info
-      if response.empty?
-        sp_hash = {
-          cols: [:id, :group_id, :display_name],
-          filter: [:eq, :id, id]
-        }
-
-        response = get_objs(target_mh, sp_hash.merge(opts))
-      else
-        # we sort in ascending order, last remote is default one
-        # TODO: need to make more sophisticated so we dont end up comparing a '' to a date
-        response.sort { |a, b| ((b[:repo_remote] || {})[:created_at] || '') <=> ((a[:repo_remote] || {})[:created_at] || '') }
-
-        # we switch to ascending order
-        response.each_with_index do |e, i|
-          display_name = (e[:repo_remote] || {})[:display_name]
-          prefix = (i == 0 ? '*' : ' ')
-          namespaces << { repo_name: "#{prefix} #{display_name}" }
-        end
-      end
-
-      filter_list!(response) if respond_to?(:filter_list!)
-      response.each { |r| r.merge!(type: r.component_type()) if r.respond_to?(:component_type) }
-      response = ModuleUtils::ListMethod.aggregate_detail(response, project_idh, model_type(), Opts.new(include_versions: true))
-
-      ret = response.first || {}
-      ret[:versions] = 'CURRENT' unless ret[:versions]
-      ret.delete_if { |k, _v| [:repo, :module_branch, :repo_remote].include?(k) }
-      # [Haris] Due to join condition with module.branch we can have situations where we have many versions
-      # of module with same remote branch, with 'uniq' we iron that out
-
-      ret.merge!(remote_repos: namespaces.uniq) if namespaces
-      ret
-    end
-=end
-
     def list(opts = opts.new)
       diff               = opts[:diff]
       namespace          = opts[:namespace]
@@ -637,48 +589,6 @@ TODO: remove after incorporating in info above displaying of remotes; this was r
         h[repo[:id]] ||= repo
         h
       end.values
-    end
-  end
-
-  class ModuleRepoInfo < Hash
-    def initialize(repo, module_name, module_idh, branch_obj, opts = {})
-      super()
-      repo_name = repo.get_field?(:repo_name)
-      module_namespace =  opts[:module_namespace]
-      full_module_name = module_namespace ? Namespace.join_namespace(module_namespace, module_name) : nil
-      hash = {
-        repo_id: repo[:id],
-        repo_name: repo_name,
-        module_id: module_idh.get_id(),
-        module_name: module_name,
-        module_namespace: module_namespace,
-        full_module_name: full_module_name,
-        module_branch_idh: branch_obj.id_handle(),
-        repo_url: RepoManager.repo_url(repo_name),
-        workspace_branch: branch_obj.get_field?(:branch),
-        branch_head_sha: RepoManager.branch_head_sha(branch_obj),
-        frozen: branch_obj[:frozen]
-      }
-
-      if version = opts[:version]
-        hash.merge!(version: version)
-        if assembly_name = version.respond_to?(:assembly_name) && version.assembly_name()
-          hash.merge!(assembly_name: assembly_name)
-        end
-      end
-
-      hash.merge!(merge_warning_message: opts[:merge_warning_message]) if opts[:merge_warning_message]
-      replace(hash)
-    end
-  end
-
-  class CloneUpdateInfo < ModuleRepoInfo
-    def initialize(module_obj, version = nil)
-      aug_branch = module_obj.get_augmented_workspace_branch(filter: { version: version })
-      opts = { version: version, module_namespace: module_obj.module_namespace() }
-      opts.merge!(merge_warning_message: module_obj[:merge_warning_message]) if module_obj[:merge_warning_message]
-      super(aug_branch[:repo], aug_branch[:module_name], module_obj.id_handle(), aug_branch, opts)
-      self[:commit_sha] = aug_branch[:current_sha]
     end
   end
 end

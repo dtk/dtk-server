@@ -41,7 +41,7 @@ module DTK
         end
       end
       TreatedVersions = {
-        '2.7' => (14..25).map(&:to_s),
+#        '2.7' => (14..25).map(&:to_s),
         '3.0' => (0..2).map(&:to_s),
         '3.1' => (0..1).map(&:to_s),
         '3.2' => (0..4).map(&:to_s),
@@ -49,7 +49,12 @@ module DTK
         '3.4' => (0..3).map(&:to_s),
         '3.5' => (0..1).map(&:to_s),
         '3.6' => (0..2).map(&:to_s),
-        '3.7' => (0..3).map(&:to_s)
+        '3.7' => (0..3).map(&:to_s),
+        '4.1' => (0..0).map(&:to_s),
+        '4.2' => (0..3).map(&:to_s),
+        '4.3' => (0..2).map(&:to_s),
+        '4.4' => (0..2).map(&:to_s),
+        '4.5' => (0..1).map(&:to_s),
       }
 
       def ret_msg_content(config_node, opts = {})

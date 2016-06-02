@@ -18,6 +18,17 @@
 module DTK
   module Module
     class Component < ComponentModule
+
+      private
+
+      # This causes all get_obj(s) class an insatnce methods to return Module::Component objects, rather than ComponentModule ones
+      def self.get_objs(model_handle, sp_hash, opts = {})
+        if model_handle[:model_name] == :component_module
+          super.map { |component_module| Component.copy_as(component_module) }
+        else
+          super
+        end
+      end
     end
   end
 end

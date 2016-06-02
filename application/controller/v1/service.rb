@@ -24,29 +24,20 @@ module DTK
 
       ### For creating a service instance from an assembly
       ## Params are
-      ##   :module_ref - hash 
       ##   :assembly_name
-      ##   :target_id - parent target id 
+      ##   :module_id, :module_name, :namespace - Either 'module_id' or 'module_name and namespace' must be given
+      ##   :target_id - parent target id (optional) 
       ##   :name (optional) - name for new instance
-      ##   :silent_fail (optonal) - Boolean
     def create
+      assembly_name  = required_request_params(:assembly_name)
       service_module = ret_service_module
+      version        = request_params(:version) || compute_latest_version(service_module)
 
-      opts = Opts.new
-      is_silent_fail = request_param_boolean(:silent_fail) || false
-      is_created = true
-
-      if service_settings = ret_settings_objects(assembly_template)
-        opts[:service_settings] = service_settings
-      end
-
-      if node_size = ret_request_params(:node_size)
-        opts[:node_size] = node_size
-      end
-
-      if os_type = ret_request_params(:os_type)
-        opts[:os_type] = os_type
-      end
+#      unless assembly_template = service_module.assembly_template(assembly_name, version)
+       fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'"
+#      end
+pp assembly_template
+      return rest_ok_response
 
       if no_auto_complete = ret_request_params(:no_auto_complete)
         opts[:no_auto_complete] = no_auto_complete

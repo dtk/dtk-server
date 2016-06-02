@@ -281,9 +281,18 @@ module DTK
       end
     end
 
-    def self.create_from_model_handle(hash_scalar_values, model_handle)
-      self.new(hash_scalar_values, model_handle[:c], model_handle[:model_name])
+    def self.copy_as(model_obj)
+      create_from_model_or_id_handle(model_obj, model_obj.model_handle, model_obj.id_handle)
     end
+
+    def self.create_from_model_handle(hash_scalar_values, model_handle)
+      create_from_model_or_id_handle(hash_scalar_values, model_handle)
+    end
+
+    def self.create_from_model_or_id_handle(hash_scalar_values, model_handle, id_handle = nil)
+      self.new(hash_scalar_values, model_handle[:c], model_handle[:model_name], id_handle)
+    end
+    private_class_method :create_from_model_or_id_handle
 
     def i18n_language
       @id_handle ? @id_handle.i18n_language() : R8::Config[:default_language]

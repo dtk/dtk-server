@@ -22,7 +22,12 @@
 # for the rest the classes used are
 module DTK
   # order is important
+  require_relative('module/module_utils')
+  require_relative('module/module_mixins')
+# TODO: got here in refactoring
+
   require_relative('module/mixins')
+  require_relative('module/module_repo_info')
   require_relative('module/dsl_parser')
   require_relative('module/external_dependencies')
   require_relative('module/module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output

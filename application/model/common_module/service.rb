@@ -31,9 +31,16 @@ module DTK
         get_obj(model_handle, sp_filter(:eq, :ref, ref))
       end
 
+      def assembly_template?(assembly_name, version)
+        assembly_version   = (version.nil? || version.eql?('base')) ? 'master' : version
+        get_assembly_templates.find { |template| template[:display_name] == assembly_name and template[:version] == assembly_version }
+      end
+
       def name_with_namespace
         get_field?(:ref)
       end
+
+
 
       private
 

@@ -90,7 +90,7 @@ module DTK; class ConfigAgent; module Adapter
       end
 
       def generate_stage_statements(size)
-        (1..size).map { |s| "stage{#{s}:}" }.join(' -> ')
+        (1..size).map { |s| "stage{'#{s}':}" }.join(' -> ')
       end
 
       class PuppetStage < self
@@ -174,7 +174,7 @@ module DTK; class ConfigAgent; module Adapter
         end
 
         def stage_assign
-          "stage => #{quote_form(@stage)}"
+          "stage => '#{@stage}'"
         end
 
         def anchor(type)

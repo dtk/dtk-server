@@ -31,32 +31,6 @@ module DTK
       end
       ProviderFolder = 'puppet'
 
-      def treated_version?(_semantic_version)
-        parts = x.split('.')
-        return nil unless parts.size == 2 || parts.size == 3
-        return nil if parts.find { |p| not (p =~ /^[0-9]$/) }
-        first_parts = "#{parts[0]}.#{parts[1]}"
-        if match = TreatedVersions[first_parts]
-          parts[2].nil? || match.include?(parts[2])
-        end
-      end
-      TreatedVersions = {
-#        '2.7' => (14..25).map(&:to_s),
-        '3.0' => (0..2).map(&:to_s),
-        '3.1' => (0..1).map(&:to_s),
-        '3.2' => (0..4).map(&:to_s),
-        '3.3' => (0..2).map(&:to_s),
-        '3.4' => (0..3).map(&:to_s),
-        '3.5' => (0..1).map(&:to_s),
-        '3.6' => (0..2).map(&:to_s),
-        '3.7' => (0..3).map(&:to_s),
-        '4.1' => (0..0).map(&:to_s),
-        '4.2' => (0..3).map(&:to_s),
-        '4.3' => (0..2).map(&:to_s),
-        '4.4' => (0..2).map(&:to_s),
-        '4.5' => (0..1).map(&:to_s),
-      }
-
       def ret_msg_content(config_node, opts = {})
         cmps_with_attrs = components_with_attributes(config_node)
         assembly_attrs = assembly_attributes(config_node)

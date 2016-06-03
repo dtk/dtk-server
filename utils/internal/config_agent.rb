@@ -32,10 +32,6 @@ module DTK
       load(type).parse_given_file_content(file_path, file_content)
     end
 
-    def self.treated_version?(type, semantic_version)
-      load(type).treated_version?(semantic_version)
-    end
-
     def self.parse_provider_specific_dependencies?(type, impl_obj)
       processor = load(type)
       if processor.respond_to?(:parse_provider_specific_dependencies?)

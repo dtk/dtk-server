@@ -24,8 +24,6 @@ module DTK
   # order is important
   require_relative('module/module_utils')
   require_relative('module/module_mixins')
-# TODO: got here in refactoring
-
   require_relative('module/mixins')
   require_relative('module/module_repo_info')
   require_relative('module/dsl_parser')

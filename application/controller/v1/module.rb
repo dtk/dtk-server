@@ -18,7 +18,11 @@
 module DTK
   module V1
     class ModuleController < V1::Base
+      helper :module_helper
+      # helper :remotes_helper
+
       LIST_ASSEMBLIES_DATATYPE = :assembly_template_with_module
+
       def list_assemblies
         project = get_default_project
         rest_ok_response ServiceModule.list_assembly_templates(get_default_project), datatype: LIST_ASSEMBLIES_DATATYPE
@@ -26,20 +30,13 @@ module DTK
 
       def exists
         namespace, module_name = required_request_params(:namespace, :module_name)
-        version = request_params(:version)
-        
-        response = BaseModule.exists(get_default_project, namespace, module_name, version)
-        # TODO DTK-2583: Aldin
-        # a model method should be called that checks if there is a component module or service module that
-        # matches the namespace, module_name, version;
-        # if service module match then key service_module_id is returned and
-        # if component module match then key component_module_id is returned
-        # want to start carving out new file structure that we can port to. The 
-        # method one shoudl delegate to should be under model
-        # and be Module#exists(...)
-        rest_ok_response response
+        version = request_params(:version)||'master'
+        rest_ok_response Module.exists(get_default_project, namespace, module_name, version)
       end
 
+      def install_component_module
+        rest_ok_response install_from_dtkn_helper(:component_module)
+      end
     end
   end
 end

@@ -15,14 +15,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: need to cleanup breaking into  base_module, component_module, service_module and the DSL related classes
-# There is overlap between soem service module and otehr moduel code
-# Right now seems intuitive model is that we have
-# two types of modules: service module and the rest, the prime being the component module, and that for the rest there is much similarity
-# for the rest the classes used are
 module DTK
   module Module
     module ClassMixin
+      def exists(project, namespace, module_name, version)
+        if service = Service.find_from_name_with_version?(project, namespace, module_name, version)
+          { service_module_id: service.id() }
+        elsif component = Component.find_from_name_with_version?(project, namespace, module_name, version)
+          { component_module_id: component.id() }
+        end
+      end
+
+      def find_from_name_with_version?(project, namespace, module_name, version)
+        project_mh = project.model_handle
+        namespace_obj = Namespace.find_by_name(project_mh.createMH(:namespace), namespace)
+
+        sp_hash = {
+          cols: [
+            :id,
+            :display_name,
+            :namespace_id,
+            :namespace,
+            :version_info
+          ],
+          filter: [
+            :and,
+            [:eq, :project_project_id, project.id()],
+            [:eq, :namespace_id, namespace_obj.id()],
+            [:eq, :display_name, module_name]
+          ]
+        }
+
+        get_objs(project_mh.createMH(model_type()), sp_hash).find{ |mod| (mod[:module_branch]||{})[:version] == version }
+      end
     end
   end
 end

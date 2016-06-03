@@ -47,6 +47,10 @@ module DTK
     # Mixins need to go before module/service and module/component
     require_relative('module/mixin')
     require_relative('module/class_mixin')
+
+    # including mixins to allow calls like Module.<classmixin_method>, etc.
+    extend  Module::ClassMixin
+    include Module::Mixin
     
     require_relative('module/service') 
     require_relative('module/component') 

@@ -15,14 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-r8_require('../branch_names')
+require_relative('../branch_names')
 
 module DTK
   class ModuleBranch < Model
-    r8_nested_require('branch', 'location')
+    require_relative('branch/location')
 
-    include BranchNamesMixin
-    extend BranchNamesClassMixin
+    include BranchNames::Mixin
+    extend BranchNames::ClassMixin
 
     def self.common_columns
       [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :frozen]

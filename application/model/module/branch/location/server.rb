@@ -60,7 +60,7 @@ module DTK; class ModuleBranch
             assembly_suffix = "--assembly-#{version.assembly_name}"
             "#{user_prefix}#{assembly_suffix}"
           else
-            version_suffix = ((version && version != VersionFieldDefault) ? "-v#{version}" : '')
+            version_suffix = ((version && version != BranchNames::VersionFieldDefault) ? "-v#{version}" : '')
             "#{user_prefix}#{version_suffix}"
           end
         end

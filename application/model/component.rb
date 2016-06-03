@@ -15,20 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-files =
-  %w(model_def_processor view_meta_processor clone user meta)
-r8_nested_require('component', files)
-r8_require('branch_names')
+%w(model_def_processor view_meta_processor clone user meta).each { |file| require_relative("component/#{file}") }
+require_relative('branch_names')
 module DTK
   class Component < Model
-    r8_nested_require('component', 'get_method')
-    r8_nested_require('component', 'template')
-    r8_nested_require('component', 'instance')
-    r8_nested_require('component', 'dependency')
-    r8_nested_require('component', 'test')
-    r8_nested_require('component', 'resource_matching')
-    r8_nested_require('component', 'include_module')
-    r8_nested_require('component', 'domain')
+    require_relative('component/get_method')
+    require_relative('component/template')
+    require_relative('component/instance')
+    require_relative('component/dependency')
+    require_relative('component/test')
+    require_relative('component/resource_matching')
+    require_relative('component/include_module')
+    require_relative('component/domain')
     include GetMethod::Mixin
     extend GetMethod::ClassMixin
     include Dependency::Mixin
@@ -39,8 +37,8 @@ module DTK
     include ComponentClone
     extend ComponentUserClassMixin
     extend ComponentMetaClassMixin
-    extend BranchNamesClassMixin
-    include BranchNamesMixin
+    extend BranchNames::ClassMixin
+    include BranchNames::Mixin
 
     set_relation_name(:component, :component)
     def self.common_columns

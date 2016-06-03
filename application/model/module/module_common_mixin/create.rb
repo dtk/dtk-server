@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module ModuleMixins
+module DTK; module ModuleCommonMixin
   module Create
   end
   module Create::Class

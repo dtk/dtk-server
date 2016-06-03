@@ -21,7 +21,7 @@
 #
 
 module DTK
-  module ModuleMixins
+  module ModuleCommonMixin
     module Gitolite
       def repo_file_content(module_branch, rel_file_path)
         repo_full_path, branch = RepoManager.repo_full_path_and_branch(module_branch)

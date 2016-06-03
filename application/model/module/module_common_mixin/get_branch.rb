@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module ModuleMixins
+  module ModuleCommonMixin
     module GetBranchMixin
       def get_module_branch_from_local_params(local_params)
         self.class.get_module_branch_from_local(local_params.create_local(get_project()))

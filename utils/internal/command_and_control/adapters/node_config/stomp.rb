@@ -41,7 +41,7 @@ module DTK
         Messaging::Config.install_script(node, bindings)
       end
 
-      def self.cloud_config_options
+      def self.cloud_config_options(node, bindings)
         Messaging::Config.cloud_config_options(node, bindings)
       end
 

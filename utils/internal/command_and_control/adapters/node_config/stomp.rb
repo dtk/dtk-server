@@ -41,6 +41,14 @@ module DTK
         Messaging::Config.install_script(node, bindings)
       end
 
+      def self.cloud_config_options
+        Messaging::Config.cloud_config_options(node, bindings)
+      end
+
+      def self.cloud_config_os_type
+        Messaging::Config.cloud_config_os_type
+      end
+
       def self.get_stomp_client(force_init=false)
         Lock.synchronize do
           @@stomp_client = nil if force_init

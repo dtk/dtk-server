@@ -183,6 +183,7 @@ GEM
       json
       stomp
       systemu
+    mime (0.4.3)
     mime-types (1.25.1)
     mini_portile (0.6.2)
     mixlib-authentication (1.3.0)
@@ -309,6 +310,7 @@ DEPENDENCIES
   json (= 1.5.2)
   looksee
   mcollective-client (= 2.2.3)
+  mime
   mustache (~> 0.99.8)
   pg (= 0.14.1)
   puppet (= 3.4.0)
@@ -323,6 +325,3 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
-
-BUNDLED WITH
-   1.10.6

@@ -183,7 +183,7 @@ eos
 
           CLOUD_CONFIG_ERB = <<eos
 #cloud-config
-repo_upgrade: <%= repo_upgrade %>
+repo_upgrade: <%= cloud_config_repo_upgrade %>
 eos
 
           USER_DATA_SH_ERB = <<eos

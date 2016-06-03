@@ -19,10 +19,10 @@ module DTK
   #
   # Common class and instance mixins
   #
-  module ModuleMixins
-    require_relative('module_mixins/remote')
-    require_relative('module_mixins/create')
-    require_relative('module_mixins/gitolite')
-    require_relative('module_mixins/get_branch')
+  module ModuleCommonMixin
+    require_relative('module_common_mixin/remote')
+    require_relative('module_common_mixin/create')
+    require_relative('module_common_mixin/gitolite')
+    require_relative('module_common_mixin/get_branch')
   end
 end

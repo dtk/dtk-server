@@ -22,10 +22,14 @@
 # for the rest the classes used are
 module DTK
   # order is important
+
+  # TODO DTK-2587: wil be incrementally moving or depracting these to Module::* classes and modules
   require_relative('module/module_utils')
-  require_relative('module/module_mixins')
-  require_relative('module/mixins')
+  require_relative('module/module_common_mixin')
+  require_relative('module/module_mixin')
+  require_relative('module/module_class_mixin')
   require_relative('module/module_repo_info')
+
   require_relative('module/dsl_parser')
   require_relative('module/external_dependencies')
   require_relative('module/module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output

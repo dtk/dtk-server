@@ -42,7 +42,9 @@ module DTK
           fingerprint: fingerprint
         }
         install_script = CommandAndControl.node_config_adapter_install_script(@node, template_bindings)
-        embed_in_os_specific_wrapper(install_script)
+        cloud_config_options = CommandAndControl.node_config_adapter_cloud_config_options(@node, template_bindings)
+        cloud_config_os_type = CommandAndControl.node_config_adapter_cloud_config_os_type
+        embed_in_os_specific_wrapper(install_script, cloud_config_options, cloud_config_os_type)
       end
 
       private
@@ -64,14 +66,12 @@ module DTK
         msg_part
       end
 
-      def embed_in_os_specific_wrapper(install_script)
+      def embed_in_os_specific_wrapper(install_script, cloud_config_options, cloud_config_os_type)
         mime_message = MIME::Multipart::Mixed.new
 
         raise_error_unsupported_os(@os_type) unless header =  OSTemplates[@os_type]
         
         mime_message.inline(create_mime_shell_message(header + install_script + "\n"))
-        cloud_config_options = CommandAndControl.node_config_adapter_cloud_config_options(@node, template_bindings)
-        cloud_config_os_type = CommandAndControl.node_config_adapter_cloud_config_os_type
         mime_message.inline(create_mime_cloud_config_messag(cloud_config_options)) if cloud_config_os_type.include? @os_type
       end
       OSTemplateDefault = <<eos

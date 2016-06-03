@@ -127,8 +127,8 @@ eos
               stomp_port: R8::Config[:stomp][:port],
               stomp_username: R8::Config[:stomp][:username],
               stomp_password: R8::Config[:stomp][:password],
-              cloud_config_repo_upgrade: R8::Config[:cloud_config][:repo_upgrade],
-              cloud_config_os_type: R8::Config[:cloud_config][:repo_upgrade][:os_type]
+              cloud_config_os_type: R8::Config[:cloud_config][:repo_upgrade][:os_type],
+              cloud_config_repo_upgrade: R8::Config[:cloud_config][:repo_upgrade]
             )
           end
 

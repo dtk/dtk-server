@@ -50,7 +50,7 @@ module DTK
       include MIME
       def create_mime_shell_message(script)
         content_subtype = 'x-shellscript'
-        MIME::Text.new(script, content_type)
+        MIME::Text.new(script, content_subtype)
         msg_part.transfer_encoding = '7bit'
         msg_part.disposition = 'attachment'
         msg_part

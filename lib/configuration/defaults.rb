@@ -230,7 +230,7 @@ R8::Config[:arbiter][:update] = true
 R8::Config[:arbiter][:branch] = 'stable'
 R8::Config[:arbiter][:auth_type] = 'ssh'
 
-R8::Config[:cloud_config][:repo_upgrade][:os_type] = 'amazon'
+R8::Config[:cloud_config][:repo_upgrade][:os_type] = 'amazon-linux'
 R8::Config[:cloud_config][:repo_upgrade] = 'false'
 
 R8::Config[:stomp][:host] = ::DTK::Common::Aux.get_ec2_public_dns()

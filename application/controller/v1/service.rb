@@ -33,11 +33,11 @@ module DTK
       service_module = ret_service_module
       version        = request_params(:version) || compute_latest_version(service_module)
 
-#      unless assembly_template = service_module.assembly_template(assembly_name, version)
-       fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'"
-#      end
+      unless assembly_template = service_module.assembly_template?(assembly_name, version)
+        fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'"
+      end
 pp assembly_template
-      return rest_ok_response
+fail Error, "Got here"
 
       if no_auto_complete = ret_request_params(:no_auto_complete)
         opts[:no_auto_complete] = no_auto_complete
@@ -52,7 +52,7 @@ pp assembly_template
 
       target = nil
       target_assembly_instance =  nil
-      if is_target_service = ret_request_params(:is_target)
+      if is_target_service = request_params(:is_target)
         opts[:is_target_service] = true
         target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
         target = Service::Target.create_target_mock(target_name, project)

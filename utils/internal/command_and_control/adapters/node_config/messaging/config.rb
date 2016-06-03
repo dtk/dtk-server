@@ -127,6 +127,7 @@ eos
               stomp_port: R8::Config[:stomp][:port],
               stomp_username: R8::Config[:stomp][:username],
               stomp_password: R8::Config[:stomp][:password]
+              repo_upgrade: R8::Config[:cloud_config][:repo_upgrade]
             )
           end
 
@@ -154,9 +155,18 @@ eos
             USER_DATA_SH_ERB
           end
 
+          def cloud_config_options_erb
+            CLOUD_CONFIG_ERB
+          end
+
           def get_logstash_ca
             File.open(R8::Config[:logstash][:ca_file_path], 'rb') { |f| f.read } if File.exist?(R8::Config[:logstash][:ca_file_path])
           end
+
+          CLOUD_CONFIG_ERB = <<eos
+#cloud-config
+repo_upgrade: <%= repo_upgrade %>
+eos
 
           USER_DATA_SH_ERB = <<eos
 mkdir -p /etc/dtk/ssh

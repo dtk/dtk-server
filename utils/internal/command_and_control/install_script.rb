@@ -45,9 +45,30 @@ module DTK
 
       private
 
+      def create_mime_shell_message(script)
+        content_subtype = 'x-shellscript'
+        MIME::Text.new(script, content_type)
+        msg_part.transfer_encoding = '7bit'
+        msg_part.disposition = 'attachment'
+        msg_part
+      end
+
+      def create_mime_cloud_config_messag(cloud_config)
+        content_subtype = 'cloud-config'
+        msg_part = MIME::Text.new(cloud_config, content_subtype)
+        msg_part.transfer_encoding = '7bit'
+        msg_part.disposition = 'attachment'
+        msg_part
+      end
+
       def embed_in_os_specific_wrapper(install_script)
+        mime_message = MIME::Multipart::Mixed.new
+
         raise_error_unsupported_os(@os_type) unless header =  OSTemplates[@os_type]
-        header + install_script + "\n"
+        
+
+        mime_message.inline = create_mime_shell_message(header + install_script + "\n")
+        mime_message.inline = create_mime_cloud_config_messag(cloud_config_options_erb) if @os_type == 'amazon_linux'.to_sym
       end
       OSTemplateDefault = <<eos
 #!/bin/sh
@@ -56,7 +77,7 @@ eos
       OSTemplateUbuntu = <<eos
 #!/bin/sh
 eos
-      OSTemplates = {
+            OSTemplates = {
         :ubuntu               => OSTemplateUbuntu,
         :redhat               => OSTemplateDefault,
         :centos               => OSTemplateDefault,

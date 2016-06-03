@@ -16,10 +16,10 @@
 # limitations under the License.
 #
 module DTK
-  module Module
+  module CommonModule
     class Service < ServiceModule
-      extend  Module::ClassMixin
-      include Module::Mixin
+      extend  CommonModule::ClassMixin
+      include CommonModule::Mixin
 
       def self.find_from_id?(model_handle, module_id)
         get_obj(model_handle, sp_filter(:eq, :id, module_id))

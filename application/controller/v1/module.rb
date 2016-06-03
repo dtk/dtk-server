@@ -25,13 +25,13 @@ module DTK
 
       def list_assemblies
         project = get_default_project
-        rest_ok_response ServiceModule.list_assembly_templates(get_default_project), datatype: LIST_ASSEMBLIES_DATATYPE
+        rest_ok_response CommonModule.list_assembly_templates(get_default_project), datatype: LIST_ASSEMBLIES_DATATYPE
       end
 
       def exists
         namespace, module_name = required_request_params(:namespace, :module_name)
         version = request_params(:version)||'master'
-        rest_ok_response Module.exists(get_default_project, namespace, module_name, version)
+        rest_ok_response CommonModule.exists(get_default_project, namespace, module_name, version)
       end
 
       def install_component_module

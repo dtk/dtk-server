@@ -23,7 +23,7 @@
 module DTK
   # order is important
 
-  # TODO DTK-2587: wil be incrementally moving or depracting these to Module::* classes and modules
+  # TODO DTK-2587: wil be incrementally moving or depracting these to CommonModule::* classes and modules
   require_relative('module/module_utils')
   require_relative('module/module_common_mixin')
   require_relative('module/module_mixin') # TODO DTK-2587: cleaning up and moving fns to module/mixin
@@ -35,24 +35,11 @@ module DTK
   require_relative('module/module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output
   require_relative('module/update_module_output')
   require_relative('module/base_module')
-  require_relative('module/component_module')# TODO DTK-2587: cleaning up and moving fns from  component_module to component (Module::Component)
-  require_relative('module/service_module') # TODO DTK-2587: cleaning up and moving fns from service_module to service (Module::Service)
+  require_relative('module/component_module')# TODO DTK-2587: cleaning up and moving fns from  component_module to component (CommonModule::Component)
+  require_relative('module/service_module') # TODO DTK-2587: cleaning up and moving fns from service_module to service (CommonModule::Service)
   require_relative('module/test')
   require_relative('module/node')
   require_relative('module/branch')
   require_relative('module/version')
   require_relative('module/assembly_module')
-
-  module Module
-    # Mixins need to go before module/service and module/component
-    require_relative('module/mixin')
-    require_relative('module/class_mixin')
-
-    # including mixins to allow calls like Module.<classmixin_method>, etc.
-    extend  Module::ClassMixin
-    include Module::Mixin
-    
-    require_relative('module/service') 
-    require_relative('module/component') 
-  end
 end

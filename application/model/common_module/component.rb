@@ -16,10 +16,10 @@
 # limitations under the License.
 #
 module DTK
-  module Module
+  module CommonModule
     class Component < ComponentModule
-      extend  Module::ClassMixin
-      include Module::Mixin
+      extend  CommonModule::ClassMixin
+      include CommonModule::Mixin
 
       private
 

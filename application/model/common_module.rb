@@ -15,14 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: need to cleanup breaking into  base_module, component_module, service_module and the DSL related classes
-# There is overlap between soem service module and otehr moduel code
-# Right now seems intuitive model is that we have
-# two types of modules: service module and the rest, the prime being the component module, and that for the rest there is much similarity
-# for the rest the classes used are
 module DTK
-  module Module
-    module Mixin
+  module CommonModule
+    # Mixins need to go before common_module/service and common_module/component
+    require_relative('common_module/mixin')
+    require_relative('common_module/class_mixin')
+
+    extend  CommonModule::ClassMixin
+    include CommonModule::Mixin
+
+    require_relative('common_module/service') 
+    require_relative('common_module/component') 
+
+    def self.list_assembly_templates(project)
+      Service.list_assembly_templates(project)
     end
+
   end
 end

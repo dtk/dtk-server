@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module Module
+  module CommonModule
     module ClassMixin
       def exists(project, namespace, module_name, version)
         if service = Service.find_from_name_with_version?(project, namespace, module_name, version)

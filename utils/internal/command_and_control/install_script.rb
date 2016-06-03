@@ -71,8 +71,10 @@ module DTK
 
         raise_error_unsupported_os(@os_type) unless header =  OSTemplates[@os_type]
         
-        mime_message.inline(create_mime_shell_message(header + install_script + "\n"))
-        mime_message.inline(create_mime_cloud_config_messag(cloud_config_options)) if cloud_config_os_type.include? @os_type
+        mime_message.add(create_mime_shell_message(header + install_script + "\n"))
+        mime_message.add(create_mime_cloud_config_messag(cloud_config_options)) if cloud_config_os_type.include? @os_type
+        Log.info(mime_message)
+        mime_message
       end
       OSTemplateDefault = <<eos
 #!/bin/sh

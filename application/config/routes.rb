@@ -45,6 +45,7 @@ DTK::ReactorRoute.draw do
   # Modules
   get 'api/v1/modules/list_assemblies'   => 'v1::module/list_assemblies'
   get 'api/v1/modules'   => 'v1::module/exists'
+  post 'api/v1/modules/install_component_module'   => 'v1::module/install_component_module'
 
   # TODO: DTK-2554; temp while initial testing
   # routes that need to be put on v1

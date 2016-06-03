@@ -56,9 +56,9 @@ module DTK
         msg_part
       end
 
-      def create_mime_cloud_config_messag(cloud_config)
+      def create_mime_cloud_config_messag(cloud_config_options)
         content_subtype = 'cloud-config'
-        msg_part = MIME::Text.new(cloud_config, content_subtype)
+        msg_part = MIME::Text.new(cloud_config_options, content_subtype)
         msg_part.transfer_encoding = '7bit'
         msg_part.disposition = 'attachment'
         msg_part
@@ -70,7 +70,9 @@ module DTK
         raise_error_unsupported_os(@os_type) unless header =  OSTemplates[@os_type]
         
         mime_message.inline(create_mime_shell_message(header + install_script + "\n"))
-        mime_message.inline(create_mime_cloud_config_messag(cloud_config_options_erb)) if cloud_config_os_type.include? @os_type
+        cloud_config_options = CommandAndControl.node_config_adapter_cloud_config_options(@node, template_bindings)
+        cloud_config_os_type = CommandAndControl.node_config_adapter_cloud_config_os_type
+        mime_message.inline(create_mime_cloud_config_messag(cloud_config_options)) if cloud_config_os_type.include? @os_type
       end
       OSTemplateDefault = <<eos
 #!/bin/sh

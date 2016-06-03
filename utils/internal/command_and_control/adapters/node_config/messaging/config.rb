@@ -33,6 +33,16 @@ module DTK
           erubis_object(install_script_erb()).result(all_bindings)
         end
 
+        def cloud_config_options(node, bindings)
+          all_bindings = install_script_bindings(node, bindings)
+          erubis_object(cloud_config_options_erb()).result(all_bindings)
+        end
+
+        def cloud_config_os_type
+          os_type = R8::Config[:cloud_config][:os_type]
+          os_type = os_type.strip.delete(' ').split(',').map{ |x| x.to_sym }
+        end
+
         private
 
         def self.create
@@ -153,11 +163,6 @@ eos
 
           def install_script_erb
             USER_DATA_SH_ERB
-          end
-
-          def cloud_config_os_type
-            os_type = R8::Config[:cloud_config][:os_type]
-            os_type = os_type.strip.delete(' ').split(',').map{ |x| x.to_sym }
           end
 
           def cloud_config_options_erb

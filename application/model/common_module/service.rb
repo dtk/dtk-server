@@ -21,6 +21,8 @@ module DTK
       extend  CommonModule::ClassMixin
       include CommonModule::Mixin
 
+      require_relative('service/instance')
+
       def self.find_from_id?(model_handle, module_id)
         get_obj(model_handle, sp_filter(:eq, :id, module_id))
       end
@@ -40,14 +42,12 @@ module DTK
         get_field?(:ref)
       end
 
-
-
       private
 
       # This causes all get_obj(s) class an insatnce methods to return Module::Service objects, rather than ServiceModule ones
       def self.get_objs(model_handle, sp_hash, opts = {})
         if model_handle[:model_name] == :service_module
-          super.map { |service_module| Service.copy_as(service_module) }
+          super.map { |service_module| copy_as(service_module) }
         else
           super
         end

@@ -26,8 +26,10 @@ module DTK
       ## Params are
       ##   :assembly_name
       ##   :module_id, :module_name, :namespace - Either 'module_id' or 'module_name and namespace' must be given
-      ##   :target_id - parent target id (optional) 
+      ##   :target_id (optional) - parent target id or name
       ##   :name (optional) - name for new instance
+      ##   :is_target (optional) - Boolean
+      ##   :no_auto_complete(optional) - Boolean
     def create
       assembly_name  = required_request_params(:assembly_name)
       service_module = ret_service_module
@@ -36,42 +38,25 @@ module DTK
       unless assembly_template = service_module.assembly_template?(assembly_name, version)
         fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'"
       end
-pp assembly_template
-fail Error, "Got here"
 
-      if no_auto_complete = ret_request_params(:no_auto_complete)
-        opts[:no_auto_complete] = no_auto_complete
-      end
+      project = get_default_project
 
-      project = get_default_project()
-      opts.merge!(project: project)
+      target_info = ret_target_info(project)
+      is_target_service = target_info.is_target_service
+      target = target_info.target
 
-      if assembly_name = ret_request_params(:name)
-        opts[:assembly_name] = assembly_name
-      end
-
-      target = nil
-      target_assembly_instance =  nil
-      if is_target_service = request_params(:is_target)
-        opts[:is_target_service] = true
-        target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
-        target = Service::Target.create_target_mock(target_name, project)
-        target_assembly_instance = ret_assembly_instance_object?(:parent_service)
-      else
-        # this case is for service instance which are staged against a target service instance
-        # which is giving  parameter 'parent-service' or getting default target 
-        target_service = ret_target_service_with_default(:parent_service)
-        raise_error_if_target_not_convereged(target_service)
-        target = target_service.target
-        target_assembly_instance = target_service.assembly_instance
-      end
-
-      opts.merge!(parent_service_instance: target_assembly_instance) if target_assembly_instance
-
+      opts = {
+        project: project,
+        assembly_name: assembly_name,
+        parent_service_instance: target_info.assembly_instance,
+        no_auto_complete: boolean_request_params(:no_auto_complete),
+        is_target_service: is_target_service
+      }
+raise Error.new('got here')
       begin
-        new_assembly_obj = assembly_template.stage(target, opts)
+        new_assembly_obj = assembly_template.stage(target, Opts.new(opts))
       rescue DTK::ErrorUsage => e
-        # delete mocked target service instance created above
+        # delete target service instance created above
         Target::Instance.delete_and_destroy(target) if is_target_service
         raise e unless is_silent_fail
         # in case we are using silent fail we wont response evne if there was an error

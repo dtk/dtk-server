@@ -55,12 +55,18 @@ module Ramaze::Helper::Common
       end
     end
 
-    def request_param_boolean(param)
-      boolean_form(request_params(param))
+    def request_params_boolean(*params)
+      boolean_form(request_params(*params))
     end
 
-    def boolean_form(v)
-      v.is_a?(TrueClass) || (v.is_a?(String) && v == 'true')
+    def boolean_form(obj)
+      if obj.kind_of?(Array)
+        obj.map { |el| boolean_form(el) }
+      elsif obj.nil?
+        nil
+      else
+        obj.is_a?(TrueClass) || (obj.is_a?(String) && obj == 'true')
+      end
     end
 
     ###### TODO: deprecate below for above

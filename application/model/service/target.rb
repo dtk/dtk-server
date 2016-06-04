@@ -38,7 +38,6 @@ module DTK
         create_from_target(node.get_target)
       end
 
-
       # Creates a Service::Target object if assembly_instance represents a target service instance
       # opts can have keys
       #  :components
@@ -56,10 +55,11 @@ module DTK
       def self.stage_target_service(assembly_template, opts = Opts.new)
         target = create_target_mock(opts[:target_name], opts[:project])
         begin
-          assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
+          new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
           # TODO: see if we can remove this fix up of target name and ref
-          fixup_target_name_and_ref!(assembly_instance)
-          assembly_instance
+          fixup_target_name_and_ref!(new_assembly_instance)
+          CommonModule::Service::Instance.create_repo(new_assembly_instance)
+          new_assembly_instance
         rescue => e
           # delete target service instance created above
           Target::Instance.delete_and_destroy(target)
@@ -67,12 +67,14 @@ module DTK
         end
       end
 
-      # The method stage_service stages the assembly_template wrt self, which is a target service
+      # The method stage_service stages the assembly_template wrt this, which is a target service instance
       def stage_service(assembly_template, opts = Opts.new)
         unless is_converged?
-          fail ErrorUsage "You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and then retry this command"
+          fail ErrorUsage "Cannot stage a service instance in a target '#{target.get_field?(:display_name)}' that is not converged. Please go to target service instance, converge it and then retry this command"
         end
-        assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: assembly_instance))
+        new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
+        CommonModule::Service::Instance.create_repo(new_assembly_instance)
+        new_assembly_instance
       end
 
       def target

@@ -18,9 +18,12 @@
 module DTK
   class CommonModule::Service
     ###
-    # For Service isnatnce modules
+    # For Service instance modules
     ##
     class Instance < self
+      def self.create_repo(assembly_instance)
+        ## TODO: stub
+      end
     end
   end
 end

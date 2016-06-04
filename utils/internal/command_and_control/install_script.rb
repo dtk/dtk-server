@@ -60,7 +60,6 @@ module DTK
         message_part.mime_version = mime_version
         message_part.transfer_encoding = message_encoding
         message_part.disposition = message_disposition
-        message_part.to_s
       end
 
       def embed_in_os_specific_wrapper(install_script, cloud_config_options, cloud_config_os_type)

@@ -39,37 +39,6 @@ module DTK; class Assembly
       idh.create_object(model_name: :assembly_template)
     end
 
-    def stage_target_service(opts = Opts.new)
-      target = Service::Target.create_target_mock(opts[:target_name], opts[:project])
-      begin
-        assembly_instance = stage(target, opts.merge(is_target_service: true))
-        # TODO: see if we can remove this fix up of target name and ref
-        fixup_target_name_and_ref!(assembly_instance)
-        assembly_instance
-      rescue ErrorUsage => e
-        # delete target service instance created above
-        Target::Instance.delete_and_destroy(target)
-        raise e
-      end
-    end
-
-    def fixup_target_name_and_ref!(assembly_instance)
-      display_name = assembly_instance.get_field?(:display_name)
-      ref          = display_name.downcase.gsub(/ /, '-')
-      target.update(display_name: display_name, ref: ref)
-    end
-    private :fixup_target_name_and_ref!
-
-    def stage_wrt_target_service(target_service, opts = Opts.new)
-      target = target_service.target
-      unless Service::Target.create_from_target(target).is_converged?
-        fail ErrorUsage "You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and then retry this command"
-      end
-
-      parent_service_instance = target_service.assembly_instance
-      stage(target, opts.merge(is_target_service: false, parent_service_instance: parent_service_instance))
-    end
-
     def stage(target, opts = Opts.new)
       service_module = opts[:service_module] || get_service_module
 

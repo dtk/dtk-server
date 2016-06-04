@@ -52,10 +52,10 @@ module DTK
         new_service_instance =
           if is_target_service
             target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
-            assembly_template.stage_target_service(opts.merge(target_name: target_name))
+            Service::Target.stage_target_service(assembly_template, opts.merge(target_name: target_name))
           else
             target_service = ret_target_service_with_default(:target_service)
-            assembly_template.stage_wrt_target_service(target_service, opts)
+            target_service.stage_service(assembly_template, opts)
           end
 
         response = {

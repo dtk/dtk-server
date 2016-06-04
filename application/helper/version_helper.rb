@@ -35,7 +35,7 @@ module Ramaze::Helper
       else
         all_branches.each do |branches|
           version = branches[:version]
-          versions << (version.eql?('master') ? "0" : version.to_s)
+          versions << (version.eql?('master') ? '0' : version.to_s)
         end
       end
       return_latest(versions)

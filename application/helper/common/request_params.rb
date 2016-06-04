@@ -55,7 +55,7 @@ module Ramaze::Helper::Common
       end
     end
 
-    def request_params_boolean(*params)
+    def boolean_request_params(*params)
       boolean_form(request_params(*params))
     end
 
@@ -91,10 +91,7 @@ module Ramaze::Helper::Common
     end
 
     def ret_request_param_boolean(*args)
-      request_param_boolean(*args)
+      boolean_request_params(*args)
     end
-
-
-      
   end
 end

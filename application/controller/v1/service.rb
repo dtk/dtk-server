@@ -26,73 +26,52 @@ module DTK
       ## Params are
       ##   :assembly_name
       ##   :module_id, :module_name, :namespace - Either 'module_id' or 'module_name and namespace' must be given
-      ##   :target_id (optional) - parent target id or name
-      ##   :name (optional) - name for new instance
+      ##   :target_service (optional) - id or name of target (parent) service; if omitted default is used
+      ##   :service_name (optional) - name for new service instance
       ##   :is_target (optional) - Boolean
       ##   :no_auto_complete(optional) - Boolean
-    def create
-      assembly_name  = required_request_params(:assembly_name)
-      service_module = ret_service_module
-      version        = request_params(:version) || compute_latest_version(service_module)
+      def create
+        assembly_name     = required_request_params(:assembly_name)
+        service_module    = ret_service_module
+        version           = request_params(:version) || compute_latest_version(service_module)
+        service_name      = request_params(:service_name)
+        is_target_service = boolean_request_params(:is_target)
 
-      unless assembly_template = service_module.assembly_template?(assembly_name, version)
-        fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'"
-      end
-
-      project = get_default_project
-
-      target_info = ret_target_info(project)
-      is_target_service = target_info.is_target_service
-      target = target_info.target
-
-      opts = {
-        project: project,
-        assembly_name: assembly_name,
-        parent_service_instance: target_info.assembly_instance,
-        no_auto_complete: boolean_request_params(:no_auto_complete),
-        is_target_service: is_target_service
-      }
-raise Error.new('got here')
-      begin
-        new_assembly_obj = assembly_template.stage(target, Opts.new(opts))
-      rescue DTK::ErrorUsage => e
-        # delete target service instance created above
-        Target::Instance.delete_and_destroy(target) if is_target_service
-        raise e unless is_silent_fail
-        # in case we are using silent fail we wont response evne if there was an error
-        new_assembly_obj = Assembly::Instance.find_by_name?(target, opts[:assembly_name])
-        is_created = false
-        # in case there is still no assembly raise error
-        raise e unless new_assembly_obj
-      end
-
-      if is_target_service
-        display_name = new_assembly_obj.get_field?(:display_name)
-        ref          = display_name.downcase.gsub(/ /, '-')
-        target.update(display_name: display_name, ref: ref)
-      end
-
-      response = {
-        new_service_instance: {
-          name: new_assembly_obj.display_name_print_form,
-          id: new_assembly_obj.id(),
-          is_created: is_created
+        unless assembly_template = service_module.assembly_template?(assembly_name, version)
+          fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'"
+        end
+        
+        opts = {
+          project: get_default_project,
+          service_module: service_module,
+          service_name: service_name,
+          no_auto_complete: boolean_request_params(:no_auto_complete),
         }
-      }
+        opts = Opts.new(opts)
 
-      if ret_request_params(:do_not_encode)
-        rest_ok_response(response)
-      else
-        rest_ok_response(response, encode_into: :yaml)
+        new_service_instance = 
+          if is_target_service
+            target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
+            assembly_template.stage_target_service(opts.merge(target_name: target_name))
+          else
+            target_service = ret_target_service_with_default(:target_service)
+            assembly_template.stage_wrt_target_service(target_service, opts)
+          end
+        
+        response = {
+          service_instance: {
+            name: new_service_instance.display_name_print_form,
+            id: new_service_instance.id
+          }
+        }
+        rest_ok_response response
       end
-    end
 
       def exec
         service     = service_object()
         params_hash = params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
         rest_ok_response service.exec(params_hash)
       end
-
 
       def info
         service = service_object()

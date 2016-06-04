@@ -50,31 +50,28 @@ module DTK
       private
       require 'mime'
       include MIME
-      def create_mime_shell_message(script)
-        content_subtype = 'x-shellscript'
-        msg_part = MIME::Text.new(script, content_subtype)
-        msg_part.transfer_encoding = '7bit'
-        msg_part.disposition = 'attachment'
-        msg_part
-      end
 
-      def create_mime_cloud_config_messag(cloud_config_options)
-        content_subtype = 'cloud-config'
-        msg_part = MIME::Text.new(cloud_config_options, content_subtype)
-        msg_part.transfer_encoding = '7bit'
-        msg_part.disposition = 'attachment'
-        msg_part
+      def create_mime_message_part(message, content_subtype, filename = "plain.txt")
+        message_encoding = '7bit'
+        message_disposition = "attachment; filename=#{filename}"
+        mime_version = '1.0'
+        message_part = MIME::Text.new(message, content_subtype)
+
+        message_part.mime_version = mime_version
+        message_part.transfer_encoding = message_encoding
+        message_part.disposition = message_disposition
+        message_part
       end
 
       def embed_in_os_specific_wrapper(install_script, cloud_config_options, cloud_config_os_type)
         mime_message = MIME::Multipart::Mixed.new
-
         raise_error_unsupported_os(@os_type) unless header =  OSTemplates[@os_type]
         
-        mime_message.add(create_mime_shell_message(header + install_script + "\n"))
-        mime_message.add(create_mime_cloud_config_messag(cloud_config_options)) if cloud_config_os_type.include? @os_type
+        mime_message.add(create_mime_message_part(header + install_script + "\n", 'x-shellscript', 'script.sh'))
+        mime_message.add(create_mime_message_part(cloud_config_options), 'cloud-config', 'cloud.cfg') if cloud_config_os_type.include? @os_type
         mime_message.to_s
       end
+
       OSTemplateDefault = <<eos
 #!/bin/sh
 

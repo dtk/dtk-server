@@ -43,24 +43,25 @@ DTK::ReactorRoute.draw do
   delete 'api/v1/services/:service_id'                 => 'v1::service#delete_destroy'
 
   # Modules
-  get 'api/v1/modules/list_assemblies'   => 'v1::module/list_assemblies'
-  get 'api/v1/modules'   => 'v1::module/exists'
-  post 'api/v1/modules/install_component_module'   => 'v1::module/install_component_module'
+  get 'api/v1/modules/list_assemblies'           => 'v1::module/list_assemblies'
+  get 'api/v1/modules'                           => 'v1::module/exists'
+  post 'api/v1/modules/install_component_module' => 'v1::module/install_component_module'
+  post 'api/v1/modules/get_module_dependencies'  => 'v1::module/get_module_dependencies'
 
   # TODO: DTK-2554; temp while initial testing
   # routes that need to be put on v1
-  post 'api/v1/account/set_catalog_credentials' => 'account#set_catalog_credentials'
-  post 'api/v1/account/add_user_direct_access'  => 'account#add_user_direct_access'
-  post  'api/v1/account/check_catalog_credentials' => 'account#check_catalog_credentials'
+  post 'api/v1/account/set_catalog_credentials'   => 'account#set_catalog_credentials'
+  post 'api/v1/account/add_user_direct_access'    => 'account#add_user_direct_access'
+  post 'api/v1/account/check_catalog_credentials' => 'account#check_catalog_credentials'
 
   ########### end v1 routes
 
   # USER
-  post 'user/process_login'      => 'user#process_login'
-  get 'user/process_logout'     => 'user#process_logout'
+  post 'user/process_login' => 'user#process_login'
+  get 'user/process_logout' => 'user#process_logout'
 
   # MESSAGES
-  get 'messages/retrieve'       => 'messages#retrieve'
+  get 'messages/retrieve' => 'messages#retrieve'
 
   # INTEGRATION
   post 'integration/spin_tenant' => 'integration#spin_tenant'

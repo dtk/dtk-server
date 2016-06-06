@@ -34,8 +34,26 @@ module DTK
         rest_ok_response CommonModule.exists(get_default_project, namespace, module_name, version)
       end
 
+      def get_module_dependencies
+        namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
+        version = request_params(:version)
+        remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
+        rest_ok_response CommonModule.get_module_dependencies(get_default_project, rsa_pub_key, remote_params)
+      end
+
       def install_component_module
-        rest_ok_response install_from_dtkn_helper(:component_module)
+        namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
+        version = request_params(:version)
+
+        remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
+        local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
+
+        rest_ok_response CommonModule.install_module(:component_module, get_default_project, local_params, remote_params, rsa_pub_key)
+      end
+
+      def install_service_module
+        namespace, module_name = required_request_params(:namespace, :module_name)
+        version = request_params(:version)||'master'
       end
     end
   end

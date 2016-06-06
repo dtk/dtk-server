@@ -31,5 +31,19 @@ module DTK
       Service.list_assembly_templates(project)
     end
 
+    def self.get_module_dependencies(project, rsa_pub_key, remote_params)
+      Component.get_module_dependencies(project, rsa_pub_key, remote_params)
+    end
+
+    def self.install_module(module_type, project, local_params, remote_params, dtk_client_pub_key)
+      case module_type
+        when :component_module
+          Component.install_module(project, local_params, remote_params, dtk_client_pub_key)
+        when :service_module
+          Service.install_module(project, local_params, remote_params, dtk_client_pub_key)
+        else
+          fail ErrorUsage.new("Invalid module type #{module_type}!")
+        end
+    end
   end
 end

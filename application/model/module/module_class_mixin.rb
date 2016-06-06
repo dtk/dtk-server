@@ -237,7 +237,7 @@ module DTK
                    ]
       }
 
-      get_obj(project_idh.createMH(model_name()), sp_hash)
+      get_obj(project_idh.createMH(model_type()), sp_hash)
     end
 
     private

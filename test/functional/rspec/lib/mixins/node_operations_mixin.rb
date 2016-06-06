@@ -635,7 +635,7 @@ module NodeOperationsMixin
 	def netstats_check_for_specific_node(service_id, node_name, port)
 		puts "Netstats check:", "---------------"
 
-		node_id = get_node_id
+		node_id = get_node_id(service_id, node_name)
  		
  		netstats_check = false
 		end_loop = false

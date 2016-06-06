@@ -27,6 +27,7 @@ gem 'colorize', '~> 0.5.8'
 gem 'awesome_print', '1.1.0'
 gem 'celluloid'
 gem 'excon'
+gem 'mime'
 
 #TODO: moved back to 0.17.0.b7; looks like running into bug with 0.19.0 (7/27/13)
 gem 'rugged', '0.17.0.b7'

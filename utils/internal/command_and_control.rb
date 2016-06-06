@@ -85,6 +85,16 @@ module DTK
       klass.install_script(node, bindings)
     end
 
+    def self.node_config_adapter_cloud_config_os_type
+      klass = load_for_node_config
+      klass.cloud_config_os_type
+    end
+
+    def self.node_config_adapter_cloud_config_options(node, bindings)
+      klass = load_for_node_config
+      klass.cloud_config_options(node, bindings)
+    end
+
     def self.pbuilderid(node)
       klass = load_iaas_for(node: node)
       klass.pbuilderid(node)

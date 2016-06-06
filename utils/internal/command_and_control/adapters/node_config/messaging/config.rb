@@ -33,6 +33,24 @@ module DTK
           erubis_object(install_script_erb()).result(all_bindings)
         end
 
+        def self.cloud_config_options(node, bindings)
+          create().cloud_config_options(node, bindings)
+        end
+
+        def cloud_config_options(node, bindings)
+          all_bindings = install_script_bindings(node, bindings)
+          erubis_object(cloud_config_options_erb()).result(all_bindings)
+        end
+
+        def self.cloud_config_os_type
+          create().cloud_config_os_type
+        end
+
+        def cloud_config_os_type
+          os_type = R8::Config[:cloud_config][:os_type]
+          os_type = os_type.strip.delete(' ').split(',').map{ |x| x.to_sym }
+        end
+
         private
 
         def self.create
@@ -126,7 +144,8 @@ eos
               stomp_host: R8::Config[:stomp][:host],
               stomp_port: R8::Config[:stomp][:port],
               stomp_username: R8::Config[:stomp][:username],
-              stomp_password: R8::Config[:stomp][:password]
+              stomp_password: R8::Config[:stomp][:password],
+              cloud_config_repo_upgrade: R8::Config[:cloud_config][:repo_upgrade]
             )
           end
 
@@ -154,9 +173,18 @@ eos
             USER_DATA_SH_ERB
           end
 
+          def cloud_config_options_erb
+            CLOUD_CONFIG_ERB
+          end
+
           def get_logstash_ca
             File.open(R8::Config[:logstash][:ca_file_path], 'rb') { |f| f.read } if File.exist?(R8::Config[:logstash][:ca_file_path])
           end
+
+          CLOUD_CONFIG_ERB = <<eos
+#cloud-config
+repo_upgrade: <%= cloud_config_repo_upgrade %>
+eos
 
           USER_DATA_SH_ERB = <<eos
 mkdir -p /etc/dtk/ssh

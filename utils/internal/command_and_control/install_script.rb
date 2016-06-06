@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require 'mime'
+
 module DTK
   class CommandAndControl
     class InstallScript
@@ -40,15 +42,36 @@ module DTK
           fingerprint: fingerprint
         }
         install_script = CommandAndControl.node_config_adapter_install_script(@node, template_bindings)
-        embed_in_os_specific_wrapper(install_script)
+        cloud_config_options = CommandAndControl.node_config_adapter_cloud_config_options(@node, template_bindings)
+        cloud_config_os_type = CommandAndControl.node_config_adapter_cloud_config_os_type
+        embed_in_os_specific_wrapper(install_script, cloud_config_options, cloud_config_os_type)
       end
 
       private
+      require 'mime'
+      include MIME
 
-      def embed_in_os_specific_wrapper(install_script)
-        raise_error_unsupported_os(@os_type) unless header =  OSTemplates[@os_type]
-        header + install_script + "\n"
+      def create_mime_message_part(message, content_subtype, filename = "plain.txt")
+        message_encoding = '7bit'
+        message_disposition = "attachment; filename=#{filename}"
+        mime_version = '1.0'
+        message_part = MIME::Text.new(message, content_subtype)
+
+        message_part.mime_version = mime_version
+        message_part.transfer_encoding = message_encoding
+        message_part.disposition = message_disposition
+        message_part
       end
+
+      def embed_in_os_specific_wrapper(install_script, cloud_config_options, cloud_config_os_type)
+        mime_message = MIME::Multipart::Mixed.new
+        raise_error_unsupported_os(@os_type) unless header =  OSTemplates[@os_type]
+        
+        mime_message.add(create_mime_message_part(header + install_script + "\n", 'x-shellscript', 'script.sh'))
+        mime_message.add(create_mime_message_part(cloud_config_options, 'cloud-config', 'cloud.cfg')) if cloud_config_os_type.include? @os_type
+        mime_message.to_s
+      end
+
       OSTemplateDefault = <<eos
 #!/bin/sh
 
@@ -56,7 +79,7 @@ eos
       OSTemplateUbuntu = <<eos
 #!/bin/sh
 eos
-      OSTemplates = {
+            OSTemplates = {
         :ubuntu               => OSTemplateUbuntu,
         :redhat               => OSTemplateDefault,
         :centos               => OSTemplateDefault,

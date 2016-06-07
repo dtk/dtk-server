@@ -94,10 +94,6 @@ describe '(Repoman client integration) Test Case 16: delete-from-catalog positiv
     include_context 'Delete component module from remote', dtk_common, user_data[:component_module], user_data[:namespace]
   end
 
-  context "Create new component module version" do
-    include_context "Create component module version", dtk_common, user_data[:namespace] + ':' + user_data[:component_module], user_data[:version]
-  end
-
   context "Publish new component module version to remote repo" do
     include_context "Publish versioned component module", dtk_common, user_data[:namespace] + ':' + user_data[:component_module], "#{user_data[:namespace]}/#{user_data[:component_module]}", user_data[:version]
   end

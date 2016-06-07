@@ -14,6 +14,8 @@ require './lib/component_modules_spec'
 service_name = 'msv_test_case_1_instance'
 assembly_name = 'bootstrap::node_with_params'
 node_name = 'node1'
+os = 'precise'
+instance_size = 't1.micro'
 component_module_name = 'test_module'
 component_module_namespace = 'dtk17'
 local_component_module_name = 'dtk17:test_module'
@@ -44,6 +46,14 @@ describe '(Modules, Services and Versioning) Test Case 1: Import component modul
 
   context 'List services after stage' do
     include_context 'List services after stage', dtk_common
+  end
+
+  context 'Set image attribute function' do
+    include_context 'Set attribute', dtk_common, 'node1/image', os
+  end
+
+  context 'Set size attribute function' do
+    include_context 'Set attribute', dtk_common, 'node1/size', instance_size
   end
 
   context 'Add components to service node' do

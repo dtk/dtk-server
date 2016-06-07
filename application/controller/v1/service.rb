@@ -19,6 +19,7 @@ module DTK
   module V1
     class ServiceController < V1::Base
       helper_v1 :module_ref_helper
+      helper_v1 :service_helper
       helper :assembly_helper
       helper :task_helper
 
@@ -44,7 +45,7 @@ module DTK
         opts = {
           project: get_default_project,
           service_module: service_module,
-          service_name: service_name,
+          service_name: request_params(:service_name) || generate_new_service_name(assembly_name, service_module),
           no_auto_complete: boolean_request_params(:no_auto_complete),
         }
         opts = Opts.new(opts)

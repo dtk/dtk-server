@@ -19,7 +19,12 @@ module DTK
   module CommonModule::Service
     class Instance < AssemblyModule::Service
       def self.create_repo(assembly_instance)
-        ## TODO: stub
+        new(assembly_instance).create_repo
+      end
+
+      def create_repo
+        module_branch = get_or_create_assembly_branch
+        pp [:debug, module_branch]
       end
     end
   end

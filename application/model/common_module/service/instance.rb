@@ -16,11 +16,8 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule::Service
-    ###
-    # For Service instance modules
-    ##
-    class Instance < self
+  module CommonModule::Service
+    class Instance < AssemblyModule::Service
       def self.create_repo(assembly_instance)
         ## TODO: stub
       end

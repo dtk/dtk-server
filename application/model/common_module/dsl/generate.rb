@@ -15,11 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# TODO: need to cleanup breaking into  base_module, component_module, service_module and the DSL related classes
+# There is overlap between soem service module and otehr moduel code
+# Right now seems intuitive model is that we have
+# two types of modules: service module and the rest, the prime being the component module, and that for the rest there is much similarity
+# for the rest the classes used are
 module DTK
-  module CommonModule
-    module Service
-      require_relative('service/template')
-      require_relative('service/instance')
+  module CommonModule::DSL
+    module Generate
     end
   end
 end

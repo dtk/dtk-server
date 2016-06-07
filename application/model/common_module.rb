@@ -17,30 +17,31 @@
 #
 module DTK
   module CommonModule
-    # Mixins need to go before common_module/service and common_module/component
+    # Mixins must go first
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
 
     extend  CommonModule::ClassMixin
     include CommonModule::Mixin
 
+    require_relative('common_module/dsl') 
     require_relative('common_module/service') 
-    require_relative('common_module/component') 
+    require_relative('common_module/component')
 
     def self.list_assembly_templates(project)
-      Service.list_assembly_templates(project)
+      Service::Template.list_assembly_templates(project)
     end
 
     def self.get_module_dependencies(project, rsa_pub_key, remote_params)
-      Component.get_module_dependencies(project, rsa_pub_key, remote_params)
+      Component::Template.get_module_dependencies(project, rsa_pub_key, remote_params)
     end
 
     def self.install_module(module_type, project, local_params, remote_params, dtk_client_pub_key)
       case module_type
         when :component_module
-          Component.install_module(project, local_params, remote_params, dtk_client_pub_key)
+          Component::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
         when :service_module
-          Service.install_module(project, local_params, remote_params, dtk_client_pub_key)
+          Service::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
         else
           fail ErrorUsage.new("Invalid module type #{module_type}!")
         end

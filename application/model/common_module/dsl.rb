@@ -17,9 +17,9 @@
 #
 module DTK
   module CommonModule
-    module Service
-      require_relative('service/template')
-      require_relative('service/instance')
+    # TODO: DTK-2587: will merge this with dtk-client dsl and make seperate library
+    module DSL
+      require_relative('dsl/generate')
     end
   end
 end

@@ -17,36 +17,10 @@
 #
 module DTK
   module CommonModule
-    class Component < ComponentModule
-      extend  CommonModule::ClassMixin
-      include CommonModule::Mixin
-
-      def self.get_module_dependencies(project, rsa_pub_key, remote_params)
-        missing_modules, required_modules, dependency_warnings = get_required_and_missing_modules(project, remote_params, rsa_pub_key)
-        {
-          missing_module_components: missing_modules,
-          dependency_warnings: dependency_warnings,
-          required_modules: required_modules
-        }
-      end
-
-      def self.install_module(project, local_params, remote_params, dtk_client_pub_key)
-        # could use just install but must use ComponenModule.install because there are number of places
-        # where using class (by calling module_type() method) name to interact with database or other classes
-        # (we need ComponentModule class instead od CommonModule::Component)
-        ComponentModule.install(project, local_params, remote_params, dtk_client_pub_key)
-      end
-
-      private
-
-      # This causes all get_obj(s) class an insatnce methods to return Module::Component objects, rather than ComponentModule ones
-      def self.get_objs(model_handle, sp_hash, opts = {})
-        if model_handle[:model_name] == :component_module
-          super.map { |component_module| Component.copy_as(component_module) }
-        else
-          super
-        end
-      end
+    module Component
+      require_relative('component/template')
+#      require_relative('component/instance')
     end
   end
 end
+

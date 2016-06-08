@@ -50,7 +50,7 @@ module DTK
         }
         opts = Opts.new(opts)
 
-        new_service_instance = 
+        response = 
           if is_target_service
             target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
             Service::Target.stage_target_service(assembly_template, opts.merge(target_name: target_name))
@@ -58,13 +58,6 @@ module DTK
             target_service = ret_target_service_with_default(:target_service)
             target_service.stage_service(assembly_template, opts)
           end
-        
-        response = {
-          service_instance: {
-            name: new_service_instance.display_name_print_form,
-            id: new_service_instance.id
-          }
-        }
         rest_ok_response response
       end
 

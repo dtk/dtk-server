@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  module CommonModule::Service
+module DTK; module CommonModule
+  module Service
     class Template < ServiceModule
       extend  CommonModule::ClassMixin
       include CommonModule::Mixin
@@ -52,4 +52,5 @@ module DTK
       end
     end
   end
-end
+end; end
+

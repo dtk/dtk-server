@@ -58,8 +58,8 @@ module DTK
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
           # TODO: see if we can remove this fix up of target name and ref
           fixup_target_name_and_ref!(new_assembly_instance)
-          CommonModule::Service::Instance.create_repo(new_assembly_instance)
-          new_assembly_instance
+          module_repo_info = CommonModule::Service::Instance.create_repo(new_assembly_instance)
+          new_service_info(new_assembly_instance, module_repo_info)
         rescue => e
           # delete target service instance created above
           Target::Instance.delete_and_destroy(target)
@@ -73,8 +73,8 @@ module DTK
           fail ErrorUsage "Cannot stage a service instance in a target '#{target.get_field?(:display_name)}' that is not converged. Please go to target service instance, converge it and then retry this command"
         end
         new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
-        CommonModule::Service::Instance.create_repo(new_assembly_instance)
-        new_assembly_instance
+        module_repo_info = CommonModule::Service::Instance.create_repo(new_assembly_instance)
+        self.class.new_service_info(new_assembly_instance, module_repo_info)
       end
 
       def target
@@ -130,6 +130,15 @@ module DTK
           Log.error("Unexpected that find_assembly_instance_from_target returns nil")
         end
         ret
+      end
+
+      def self.new_service_info(assembly_instance, module_repo_info)
+        {
+          service_instance: {
+            name: assembly_instance.display_name_print_form,
+            id: assembly_instance.id
+          }
+        }.merge(module_repo_info)
       end
 
       def self.fixup_target_name_and_ref!(assembly_instance)

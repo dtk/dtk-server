@@ -15,17 +15,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  module CommonModule::Service
+module DTK; module CommonModule
+  module Service
     class Instance < AssemblyModule::Service
       def self.create_repo(assembly_instance)
         new(assembly_instance).create_repo
       end
 
       def create_repo
-        module_branch = get_or_create_assembly_branch
-        pp [:debug, module_branch]
+        module_branch = get_or_create_service_instance_branch
+        ModuleRepoInfo.new(module_branch)
+      end
+
+      private
+
+      def get_or_create_service_instance_branch
+        # TODO: DTK-2445: to co-exist with assembly_module form should we choose a differenht branch name
+        # The method  get_or_create_assembly_branch uses the name that assembly_module does
+        get_or_create_assembly_branch
       end
     end
   end
-end
+end; end

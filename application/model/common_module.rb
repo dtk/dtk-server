@@ -25,6 +25,7 @@ module DTK
     include CommonModule::Mixin
 
     require_relative('common_module/dsl')
+    require_relative('common_module/module_repo_info')
     require_relative('common_module/service')
     require_relative('common_module/component')
 

@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  module CommonModule::Component
+module DTK; module CommonModule
+  module Component
     class Template < ComponentModule
       extend  CommonModule::ClassMixin
       include CommonModule::Mixin
@@ -49,4 +49,4 @@ module DTK
       end
     end
   end
-end
+end; end

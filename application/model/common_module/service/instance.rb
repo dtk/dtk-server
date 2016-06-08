@@ -30,8 +30,8 @@ module DTK; module CommonModule
       private
       
       def get_or_create_service_instance_branch
-        # TODO: DTK-2445: to co-exist with assembly_module form should we choose a differenht branch name
-        # The method  get_or_create_assembly_branch uses the name that assembly_module does
+        # TODO: DTK-2445: to co-exist with assembly_module form should we choose a different branch name
+        # The method get_or_create_assembly_branch uses the name that assembly_module does
         get_or_create_assembly_branch
       end
     end

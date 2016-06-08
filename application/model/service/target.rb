@@ -134,7 +134,7 @@ module DTK
 
       def self.new_service_info(assembly_instance, module_repo_info)
         {
-          service_instance: {
+          service: {
             name: assembly_instance.display_name_print_form,
             id: assembly_instance.id
           }

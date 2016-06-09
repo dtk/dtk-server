@@ -48,12 +48,21 @@ module DTK
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
 
-        rest_ok_response CommonModule.install_module(:component_module, get_default_project, local_params, remote_params, rsa_pub_key)
+        rest_ok_response CommonModule.install_component_module(get_default_project, local_params, remote_params, rsa_pub_key)
       end
 
       def install_service_module
+        namespace, module_name, content = required_request_params(:namespace, :module_name, :content)
+        version = request_params(:version)
+        local_params = local_params(:service_module, module_name, namespace: namespace, version: version)
+        rest_ok_response CommonModule.install_service_module(get_default_project, local_params, content)
+      end
+
+      def create_component_module
         namespace, module_name = required_request_params(:namespace, :module_name)
-        version = request_params(:version)||'master'
+        version = request_params(:version)
+        local_params = local_params(:component_module, module_name, namespace: namespace, version: version)
+        rest_ok_response CommonModule.create_empty_module(:component_module, get_default_project, local_params)
       end
     end
   end

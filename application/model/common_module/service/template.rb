@@ -40,6 +40,10 @@ module DTK; module CommonModule
         get_field?(:ref)
       end
 
+      def self.install_module(project, local_params, content)
+        service_module = create_empty_module(project, local_params)
+      end
+
       private
 
       # This causes all get_obj(s) class an instance methods to return Service::Template objects, rather than ServiceModule ones

@@ -20,10 +20,6 @@ module DTK
     # Mixins must go first
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
-
-    extend  CommonModule::ClassMixin
-    include CommonModule::Mixin
-
     require_relative('common_module/dsl') 
     require_relative('common_module/module_repo_info') 
     require_relative('common_module/service') 
@@ -37,15 +33,34 @@ module DTK
       Component::Template.get_module_dependencies(project, rsa_pub_key, remote_params)
     end
 
-    def self.install_module(module_type, project, local_params, remote_params, dtk_client_pub_key)
-      case module_type
-        when :component_module
-          Component::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
-        when :service_module
-          Service::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
-        else
-          fail ErrorUsage.new("Invalid module type #{module_type}!")
-        end
+    def self.install_component_module(project, local_params, remote_params, dtk_client_pub_key)
+      Component::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
+    end
+
+    def self.install_service_module(project, local_params, content)
+      Service::Template.install_module(project, local_params, content)
+    end
+
+    def self.create_empty_module(module_type, project, local_params)
+      get_class_from_type(module_type).create_empty_module(project, local_params)
+    end
+
+    def self.exists(project, namespace, module_name, version)
+      if service = Service::Template.find_from_name_with_version?(project, namespace, module_name, version)
+        { service_module_id: service.id() }
+      elsif component = Component::Template.find_from_name_with_version?(project, namespace, module_name, version)
+        { component_module_id: component.id() }
+      end
+    end
+
+    private
+
+    def self.get_class_from_type(module_type)
+      case module_type.to_sym
+      when :service_module then Service::Template
+      when :component_module then Component::Template
+      else fail ErrorUsage.new("Unknown module type '#{module_type}'.")
+      end
     end
   end
 end

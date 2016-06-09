@@ -167,7 +167,7 @@ module DTK
             cols: [:id, :display_name, :group_id, :module_branches],
             filter: filter
         }
-        rows = get_objs(mh_or_idh.create_childMH(module_type()), sp_hash).map do |r|
+        rows = get_objs(mh_or_idh.create_childMH(model_type()), sp_hash).map do |r|
           r[:module_branch].merge(module_id: r[:id])
         end
         if rows.empty?

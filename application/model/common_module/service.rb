@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule
+  class CommonModule
     module Service
       require_relative('service/template')
       require_relative('service/instance')

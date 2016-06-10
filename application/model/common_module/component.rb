@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule
+  class CommonModule
     module Component
       require_relative('component/template')
 #      require_relative('component/instance')

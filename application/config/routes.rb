@@ -48,6 +48,8 @@ DTK::ReactorRoute.draw do
   post 'api/v1/modules/install_component_module' => 'v1::module/install_component_module'
   post 'api/v1/modules/install_service_module' => 'v1::module/install_service_module'
   post 'api/v1/modules/get_module_dependencies'  => 'v1::module/get_module_dependencies'
+  post 'api/v1/modules/create_empty_module'  => 'v1::module/create_empty_module'
+  # DTK-2554: Aldin: deprecate below for above
   post 'api/v1/modules/create_component_module'  => 'v1::module/create_component_module'
 
   # TODO: DTK-2554; temp while initial testing

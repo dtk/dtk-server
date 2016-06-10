@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonModule
+module DTK; class CommonModule
   module Service
     class Template < ServiceModule
       extend  CommonModule::ClassMixin
@@ -42,6 +42,12 @@ module DTK; module CommonModule
 
       def self.install_module(project, local_params, content)
         service_module = create_empty_module(project, local_params)
+      end
+
+      def self.create_empty_module(project, local_params, opts = {})
+        opts = opts.merge(return_module_branch: true)
+        module_branch = create_module(project, local_params, opts)
+        ModuleRepoInfo.new(module_branch)
       end
 
       private

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonModule
+module DTK; class CommonModule
   module Service
     class Instance < AssemblyModule::Service
       def self.create_repo(assembly_instance)
@@ -24,6 +24,14 @@ module DTK; module CommonModule
       
       def create_repo
         module_branch = get_or_create_service_instance_branch
+        ModuleRepoInfo.new(module_branch)
+      end
+
+      def self.create_empty_module(project, local_params, opts = {})
+        # DTK-2445: Aldin; try not to use '!' form becaise side effect
+        # opts.merge!(return_module_branch: true)
+        opts = opts.merge(return_module_branch: true)
+        module_branch = create_module(project, local_params, opts)
         ModuleRepoInfo.new(module_branch)
       end
       

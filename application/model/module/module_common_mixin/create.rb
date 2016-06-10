@@ -47,6 +47,8 @@ module DTK; module ModuleCommonMixin
       repo_idh = local_repo_obj.id_handle()
       module_and_branch_info = create_module_and_branch_obj?(project, repo_idh, local)
 
+      return module_and_branch_info if opts[:return_module_branch]
+
       opts_info = { version: local.version, module_namespace: local.namespace }
       module_and_branch_info.merge(module_repo_info: module_repo_info(local_repo_obj, module_and_branch_info, opts_info))
     end
@@ -77,6 +79,9 @@ module DTK; module ModuleCommonMixin
       input_hash_content_into_model(project_idh, create_hash)
 
       module_branch = get_module_branch_from_local(local)
+
+      return module_branch if opts[:return_module_branch]
+
       module_idh =  project_idh.createIDH(model_name: model_name(), id: module_branch[:module_id])
       # TODO: ModuleBranch::Location: see if after refactor version field needed
       # TODO: ModuleBranch::Location: ones that come from local can be omitted

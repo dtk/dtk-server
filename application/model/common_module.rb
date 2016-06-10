@@ -42,7 +42,7 @@ module DTK
     end
 
     def self.create_empty_module(module_type, project, local_params)
-      get_class_from_type(module_type).create_empty_module(project, local_params)
+      get_class_from_type(module_type).create_module(project, local_params)
     end
 
     def self.exists(project, namespace, module_name, version)

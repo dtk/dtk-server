@@ -21,7 +21,7 @@
 # two types of modules: service module and the rest, the prime being the component module, and that for the rest there is much similarity
 # for the rest the classes used are
 module DTK
-  module CommonModule
+  class CommonModule
     module Mixin
     end
   end

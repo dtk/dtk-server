@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule
+  class CommonModule
     module ClassMixin
       def find_from_name_with_version?(project, namespace, module_name, version)
         project_mh = project.model_handle
@@ -41,11 +41,6 @@ module DTK
         get_objs(project_mh.createMH(model_type()), sp_hash).find{ |mod| (mod[:module_branch]||{})[:version] == version }
       end
 
-      def create_module(project, local_params, opts = {})
-        opts.merge!(return_module_branch: true)
-        module_branch = super
-        ModuleRepoInfo.new(module_branch)
-      end
     end
   end
 end

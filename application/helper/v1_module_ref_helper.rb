@@ -17,7 +17,6 @@
 #
 module Ramaze::Helper
   module V1ModuleRefHelper
-    include ::DTK::CommonModule
     def ret_service_module
       module_id, module_name, namespace = request_params(:module_id, :module_name, :namespace)
       unless module_id or (module_name and namespace)
@@ -25,10 +24,10 @@ module Ramaze::Helper
       end
       if module_id
         module_id = Integer(module_id) rescue raise_error_usage("Ill-formed module id term '#{module_id}'")
-        Service::Template.find_from_id?(model_handle(:service_module), module_id) ||
+        ::DTK::CommonModule::Service::Template.find_from_id?(model_handle(:service_module), module_id) ||
           raise_error_usage("No module with id '#{module_id}' exists")
       else
-        Service::Template.find_from_name?(model_handle(:service_module),  namespace, module_name) ||
+        ::DTK::CommonModule::Service::Template.find_from_name?(model_handle(:service_module),  namespace, module_name) ||
           raise_error_usage("The module '#{namespace}/#{module_name}' does not exist")
       end
     end

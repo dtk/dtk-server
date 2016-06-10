@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonModule
+module DTK; class CommonModule
   module Component
     class Template < ComponentModule
       extend  CommonModule::ClassMixin
@@ -35,6 +35,12 @@ module DTK; module CommonModule
         # where using class (by calling module_type() method) name to interact with database or other classes
         # (we need ComponentModule class instead of CommonModule::Template::Component)
         ComponentModule.install(project, local_params, remote_params, dtk_client_pub_key)
+      end
+
+      def create_empty_module(project, local_params, opts = {})
+        opts = opts.merge(return_module_branch: true)
+        module_branch = create_module(project, local_params, opts)
+        ModuleRepoInfo.new(module_branch)
       end
 
       private

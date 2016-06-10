@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule
+  class CommonModule
     # Mixins must go first
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
@@ -24,6 +24,9 @@ module DTK
     require_relative('common_module/module_repo_info')
     require_relative('common_module/service')
     require_relative('common_module/component')
+
+    extend  CommonModule::ClassMixin
+    include CommonModule::Mixin
 
     def self.list_assembly_templates(project)
       Service::Template.list_assembly_templates(project)
@@ -41,8 +44,8 @@ module DTK
       Service::Template.install_module(project, local_params, content)
     end
 
-    def self.create_empty_module(module_type, project, local_params)
-      get_class_from_type(module_type).create_module(project, local_params)
+    def self.create_empty_module(project, local_params)
+      get_class_from_type(local_params.module_type).create_module(project, local_params)
     end
 
     def self.exists(project, namespace, module_name, version)
@@ -53,10 +56,18 @@ module DTK
       end
     end
 
+    def self.create_empty_module(project, local_params, opts = {})
+      # Write create_empty_module moded after same for creating service or component module,
+      # shoudl use same logic execpt a differnt naming convention (i.e., sm_ or cm_ prefix to distingusih this differenttype of module"
+      # Put any new code in common modules sub dircetory execpt if you need to make modules methods more general by addng optional params
+      raise Error.new("DTK-2445: Aldin: need to write CommonModule.create_empty_module")
+    end
+
     private
 
     def self.get_class_from_type(module_type)
       case module_type.to_sym
+      when :common_module then CommonModule
       when :service_module then Service::Template
       when :component_module then Component::Template
       else fail ErrorUsage.new("Unknown module type '#{module_type}'.")

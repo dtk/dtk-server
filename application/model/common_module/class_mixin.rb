@@ -41,58 +41,10 @@ module DTK
         get_objs(project_mh.createMH(model_type()), sp_hash).find{ |mod| (mod[:module_branch]||{})[:version] == version }
       end
 
-      # TODO: DTK-2583: This is copied from dtk-server/application/model/module/module_common_mixin/create.rb create_module method
-      def create_empty_module(project, local_params, opts = {})
-        local = local_params.create_local(project)
-        namespace = local_params.namespace
-        module_name = local_params.module_name
-        project_idh = project.id_handle()
-
-        module_exists = module_exists?(project_idh, module_name, namespace)
-        if module_exists and not opts[:no_error_if_exists]
-          full_module_name = Namespace.join_namespace(namespace, module_name)
-          fail ErrorUsage.new("Module (#{full_module_name}) cannot be created since it exists already")
-        end
-
-        create_opts = {
-          create_branch: local.branch_name(),
-          push_created_branch: true,
-          donot_create_master_branch: true,
-          delete_if_exists: true,
-          namespace_name: namespace
-        }
-
-        if copy_files_info = opts[:copy_files]
-          create_opts.merge!(copy_files: copy_files_info)
-        end
-
-        repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-        local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
-
-        ModuleRepoInfo.new(create_module_and_branch_obj?(project, local_repo_obj.id_handle(), local))
-      end
-
-      # TODO: DTK-2583: This is copied from dtk-server/application/model/module/module_common_mixin/create.rb create_module_and_branch_obj? method
-      def create_module_and_branch_obj?(project, repo_idh, local, opts = {})
-        namespace      = Namespace.find_or_create(project.model_handle(:namespace), local.module_namespace_name)
-        ref            = local.module_name(with_namespace: true)
-        mb_create_hash = ModuleBranch.ret_create_hash(repo_idh, local, opts)
-
-        # create module and branch (if needed)
-        fields = {
-          display_name: local.module_name,
-          module_branch: mb_create_hash,
-          namespace_id: namespace.id()
-        }
-
-        create_hash = {
-          model_type.to_s() => {
-            ref => fields
-          }
-        }
-        input_hash_content_into_model(project.id_handle(), create_hash)
-
-        get_module_branch_from_local(local)
+      def create_module(project, local_params, opts = {})
+        opts.merge!(return_module_branch: true)
+        module_branch = super
+        ModuleRepoInfo.new(module_branch)
       end
     end
   end

@@ -28,8 +28,6 @@ module DTK; class CommonModule
       end
 
       def self.create_empty_module(project, local_params, opts = {})
-        # DTK-2445: Aldin; try not to use '!' form becaise side effect
-        # opts.merge!(return_module_branch: true)
         opts = opts.merge(return_module_branch: true)
         module_branch = create_module(project, local_params, opts)
         ModuleRepoInfo.new(module_branch)

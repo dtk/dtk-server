@@ -31,9 +31,6 @@ module DTK; class CommonModule
       end
 
       def self.install_module(project, local_params, remote_params, dtk_client_pub_key)
-        # could use just install but must use ComponenModule.install because there are number of places
-        # where using class (by calling module_type() method) name to interact with database or other classes
-        # (we need ComponentModule class instead of CommonModule::Template::Component)
         ComponentModule.install(project, local_params, remote_params, dtk_client_pub_key)
       end
 

@@ -40,10 +40,6 @@ module DTK; class CommonModule
         get_field?(:ref)
       end
 
-      def self.install_module(project, local_params, content)
-        service_module = create_empty_module(project, local_params)
-      end
-
       def self.create_empty_module(project, local_params, opts = {})
         opts = opts.merge(return_module_branch: true)
         module_branch = create_module(project, local_params, opts)

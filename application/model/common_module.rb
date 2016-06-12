@@ -40,10 +40,6 @@ module DTK
       Component::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
     end
 
-    def self.install_service_module(project, local_params, content)
-      Service::Template.install_module(project, local_params, content)
-    end
-
     def self.create_empty_module(project, local_params)
       get_class_from_type(local_params.module_type).create_module(project, local_params)
     end

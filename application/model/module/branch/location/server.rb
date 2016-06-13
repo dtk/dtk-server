@@ -34,6 +34,8 @@ module DTK; class ModuleBranch
               return "sm-#{repo_name}"
             when :test
               return "tm-#{repo_name}"
+            when :common_module
+              return "m-#{repo_name}"
             else
               repo_name
             end

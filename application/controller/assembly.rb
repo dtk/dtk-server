@@ -140,6 +140,7 @@ module DTK
         cmp_idh = component.id_handle()
       else
         cmp_idh = id_handle(component_id, :component)
+        params_hash[:cmp_idh] = cmp_idh
       end
       opts = Opts.new(delete_action: 'delete_component', delete_params: [cmp_idh, node_id])
 

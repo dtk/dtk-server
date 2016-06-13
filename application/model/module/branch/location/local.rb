@@ -50,6 +50,8 @@ module DTK; class ModuleBranch
           :test #TODO: hard wired
          when :node_module
           :node_module #TODO: hard wired
+        else
+          module_type()
         end
       end
     end

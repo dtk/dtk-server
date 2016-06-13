@@ -24,9 +24,11 @@ module DTK
     require_relative('common_module/module_repo_info') 
     require_relative('common_module/service') 
     require_relative('common_module/component')
+    require_relative('common_module/create')
 
     extend  CommonModule::ClassMixin
     include CommonModule::Mixin
+    extend CommonModule::Create
 
     def self.list_assembly_templates(project)
       Service::Template.list_assembly_templates(project)
@@ -56,7 +58,14 @@ module DTK
       # Write create_empty_module moded after same for creating service or component module, 
       # shoudl use same logic execpt a differnt naming convention (i.e., sm_ or cm_ prefix to distingusih this differenttype of module"
       # Put any new code in common modules sub dircetory execpt if you need to make modules methods more general by addng optional params
-      raise Error.new("DTK-2445: Aldin: need to write CommonModule.create_empty_module")
+
+      opts = opts.merge(return_module_branch: true)
+      # module_branch = create_module(project, local_params, opts)
+      module_repo = create_module_repo(project, local_params, opts)
+      # ModuleRepoInfo.new(module_repo)
+      # ModuleRepoInfo.new(module_branch)
+
+      # raise Error.new("DTK-2445: Aldin: need to write CommonModule.create_empty_module")
     end
 
     private

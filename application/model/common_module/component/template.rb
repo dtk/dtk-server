@@ -34,7 +34,7 @@ module DTK; class CommonModule
         ComponentModule.install(project, local_params, remote_params, dtk_client_pub_key)
       end
 
-      def create_empty_module(project, local_params, opts = {})
+      def self.create_empty_module(project, local_params, opts = {})
         opts = opts.merge(return_module_branch: true)
         module_branch = create_module(project, local_params, opts)
         ModuleRepoInfo.new(module_branch)

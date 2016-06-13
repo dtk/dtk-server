@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 # dtk gems
 #TODO: commented until we solve issue with nee to get latest versions from our geminabox not rubygems
-gem 'dtk-common', :github => 'dtk/dtk-common'
+gem 'dtk-common', :github => 'dtk/dtk-common', :branch => 'DTK-2589'
 gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
 
 # required to start a server
@@ -10,12 +10,12 @@ gem 'bundler', '>= 1.1.5'
 gem 'fog'
 gem 'ramaze', '2012.04.14'
 gem 'sequel', '3.25.0'
-gem 'activesupport', '~> 3.0.0'
+gem 'activesupport'
 gem 'i18n'
 gem 'ruote', '2.3.0.1'
 gem 'eventmachine', '1.0.8'
 gem 'pg', '0.14.1'
-gem 'json', '1.5.2'
+gem 'json'
 gem 'rspec', '2.99.0'
 gem 'sshkey', '1.6.1'
 gem 'sshkeyauth', '0.0.11'
@@ -60,7 +60,7 @@ gem 'puppet', '3.4.0'
 gem 'stomp', '1.1.9'
 gem 'grit', '2.5.0'
 gem 'innate', '2012.03' #version compatible with ramaze','2012.04.14
-gem 'ruby_parser', '2.3.1' #found bug with ruote listen expression unless degrade to this version
+gem 'ruby_parser'
 gem 'docile'
 gem 'redis'
 

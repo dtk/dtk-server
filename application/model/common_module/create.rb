@@ -18,13 +18,12 @@
 module DTK
   class CommonModule
     module Create
-      def create_module_repo(project, local_params, opts = {})
+      def create_empty_module_repo(project, local_params, opts = {})
         require 'debugger'
         Debugger.wait_connection = true
         Debugger.start_remote
         debugger
-        local = local_params.create_local(project)
-        namespace = local_params.namespace
+        local       = local_params.create_local(project)
         project_idh = project.id_handle()
 
         create_opts = {
@@ -32,12 +31,13 @@ module DTK
           push_created_branch: true,
           donot_create_master_branch: true,
           delete_if_exists: true,
-          namespace_name: namespace
+          namespace_name: local_params.namespace
         }
 
         repo_user_acls = RepoUser.authorized_users_acls(project_idh)
         local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
-        repo_url = RepoManager.repo_url(local_repo_obj[:repo_name])
+        repo_url       = RepoManager.repo_url(local_repo_obj[:repo_name])
+
         local_repo_obj.merge(repo_url: repo_url)
       end
     end

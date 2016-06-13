@@ -42,10 +42,6 @@ module DTK
       Component::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
     end
 
-    def self.create_empty_module(project, local_params)
-      get_class_from_type(local_params.module_type).create_module(project, local_params)
-    end
-
     def self.exists(project, namespace, module_name, version)
       if service = Service::Template.find_from_name_with_version?(project, namespace, module_name, version)
         { service_module_id: service.id() }
@@ -55,17 +51,7 @@ module DTK
     end
 
     def self.create_empty_module(project, local_params, opts = {})
-      # Write create_empty_module moded after same for creating service or component module,
-      # shoudl use same logic execpt a differnt naming convention (i.e., sm_ or cm_ prefix to distingusih this differenttype of module"
-      # Put any new code in common modules sub dircetory execpt if you need to make modules methods more general by addng optional params
-
-      opts = opts.merge(return_module_branch: true)
-      # module_branch = create_module(project, local_params, opts)
-      module_repo = create_module_repo(project, local_params, opts)
-      # ModuleRepoInfo.new(module_repo)
-      # ModuleRepoInfo.new(module_branch)
-
-      # raise Error.new("DTK-2445: Aldin: need to write CommonModule.create_empty_module")
+      create_empty_module_repo(project, local_params, opts.merge(return_module_branch: true))
     end
 
     private

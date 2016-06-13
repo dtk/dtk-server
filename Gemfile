@@ -2,8 +2,8 @@ source 'https://rubygems.org'
 
 # dtk gems
 #TODO: commented until we solve issue with nee to get latest versions from our geminabox not rubygems
-gem 'dtk-common', :github => 'dtk/dtk-common', :branch => 'DTK-2589'
-gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
+gem 'dtk-common', :github => 'dtk/dtk-common'
+gem 'dtk-common-core', :github => 'dtk/dtk-common-core', :branch => 'DTK-2589'
 
 # required to start a server
 gem 'bundler', '>= 1.1.5'

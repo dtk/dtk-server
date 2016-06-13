@@ -18,6 +18,13 @@ shared_context 'List nodes after stage' do |dtk_common, staged_node_name|
   end
 end
 
+shared_context 'NEG - List nodes' do |dtk_common, node_name|
+  it "does not have node: #{node_name} in node list" do
+    node_exists = dtk_common.check_if_node_exists_by_node_name(dtk_common.service_id, node_name)
+    node_exists.should eq(false)
+  end
+end
+
 shared_context 'Converge node' do |dtk_common, staged_node_name|
   it "converges #{staged_node_name} node" do
     converge = dtk_common.converge_node(dtk_common.node_id)

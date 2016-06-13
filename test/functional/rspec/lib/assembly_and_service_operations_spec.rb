@@ -306,3 +306,24 @@ shared_context 'Get task action details' do |dtk_common, action_id, expected_out
     expect(correct_task_action_outputs).to eq(true)
   end
 end
+
+shared_context 'Delete service with workflow' do |dtk_common, components_to_delete|
+  it "deletes service and checks that task status output is valid" do
+    delete_successful = dtk_common.delete_service_with_workflow(dtk_common.service_id, components_to_delete)
+    expect(delete_successful).to eq(true)
+  end
+end
+
+shared_context 'Delete node with workflow' do |dtk_common, node_name, components_to_delete|
+  it "deletes node and checks that task status output is valid" do
+    delete_successful = dtk_common.delete_node_with_workflow(dtk_common.service_id, node_name, components_to_delete)
+    expect(delete_successful).to eq(true)
+  end
+end
+
+shared_context 'Delete component with workflow' do |dtk_common, node_name, components_to_delete|
+  it "deletes component and checks that task status output is valid" do
+    delete_successful = dtk_common.delete_component_with_workflow(dtk_common.service_id, node_name, components_to_delete)
+    expect(delete_successful).to eq(true)
+  end
+end

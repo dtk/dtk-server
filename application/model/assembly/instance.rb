@@ -336,6 +336,7 @@ module DTK; class  Assembly
       cmp_action  = nil
       delete_from_database = nil
       cmp_action = nil
+      cmp_node   = nil
 
       task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
       ret = {
@@ -348,6 +349,15 @@ module DTK; class  Assembly
       # check if action is called on component or on service instance action
       if task_action
         component_id, method_name = task_action.split(ACTION_DELIMITER)
+
+        if component_id && component_id =~ /^[0-9]+$/
+          if cmp_idh = params[:cmp_idh]
+            p_component = cmp_idh.create_object.update_object!(:display_name)
+            component_id = p_component[:display_name]
+            cmp_node = p_component.get_node
+          end
+        end
+
         augmented_cmps = check_if_augmented_component(params, component_id, { include_assembly_cmps: true })
 
         # check if component and service level action with same name
@@ -367,7 +377,13 @@ module DTK; class  Assembly
           fail ErrorUsage, "#{message}!" if augmented_cmps.empty?
 
           # if executing component action but node not sent, it means execute assembly component action
-          node = 'assembly_wide' unless node
+          unless node
+            if cmp_node
+              node = cmp_node[:display_name]
+            else
+              node = 'assembly_wide'
+            end
+          end
 
           opts.merge!(method_name: method_name) if method_name
           opts.merge!(task_params: task_params) if task_params

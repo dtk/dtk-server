@@ -11,6 +11,13 @@ shared_context 'Stage node template' do |dtk_common, node_name, staged_node_name
   end
 end
 
+shared_context 'Create node' do |dtk_common, node_name, node_template|
+  it "creates #{node_name} node from #{node_template} node template" do
+    node_created = dtk_common.create_node(dtk_common.service_id, node_name, node_template)
+    node_created.should_not eq(nil)
+  end
+end
+
 shared_context 'List nodes after stage' do |dtk_common, staged_node_name|
   it "has staged #{staged_node_name} node in node list" do
     node_exists = dtk_common.check_if_node_exists(dtk_common.node_id)
@@ -32,9 +39,9 @@ shared_context 'Converge node' do |dtk_common, staged_node_name|
   end
 end
 
-shared_context 'Add component to node' do |dtk_common, staged_node_name, component_name|
+shared_context 'Add component to node' do |dtk_common, staged_node_name, component_name, namespace|
   it "adds a #{component_name} component to #{staged_node_name} node" do
-    component_added = dtk_common.add_component_to_node(dtk_common.node_id, component_name)
+    component_added = dtk_common.add_component_to_node(dtk_common.service_id, staged_node_name, component_name, namespace)
     component_added.should eq(true)
   end
 end

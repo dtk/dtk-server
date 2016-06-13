@@ -19,6 +19,7 @@ service_name = 'stda_test_case_16_instance'
 assembly_name = 'test_delete::delete_workflow'
 node_name = 'node'
 components_to_delete = "test_delete::component"
+check_component_in_task_status = true
 dtk_common = Common.new(service_name, assembly_name)
 
 describe '(Staging And Deploying Assemblies) Test Case 16: Converge service instance with component that has delete action and delete node with this component' do
@@ -39,7 +40,7 @@ describe '(Staging And Deploying Assemblies) Test Case 16: Converge service inst
   end
 
   context 'Delete node with workflow' do
-    include_context 'Delete node with workflow', dtk_common, node_name, components_to_delete
+    include_context 'Delete node with workflow', dtk_common, node_name, components_to_delete, check_component_in_task_status
   end
 
   context 'List nodes after delete node' do

@@ -572,7 +572,7 @@ module AssemblyAndServiceOperationsMixin
 		return service_deleted
 	end
 
-	def delete_task_status(service_id, component_to_delete, delete_type)
+	def delete_task_status(service_id, component_to_delete, delete_type, check_component_in_task_status=true)
     service_deleted = false
     end_loop = false
 		count = 0
@@ -582,11 +582,18 @@ module AssemblyAndServiceOperationsMixin
 		while ((task_status.include? 'executing') && (end_loop == false))
 			sleep 2
 			count += 1
+
 			response_task_status = send_request('/rest/assembly/task_status', {'assembly_id'=> service_id})
 			delete_status = response_task_status['data'].first['status']
 
 			if !delete_status.nil?
-				component_delete_status = response_task_status['data'].select { |x| x['type'].include? component_to_delete }.first['status']
+				if check_component_in_task_status
+					component_delete_status = response_task_status['data'].select { |x| x['type'].include? component_to_delete }.first['status']
+				else
+          # case when performing delete action on staged service
+				  component_delete_status = 'succeeded'
+				end
+				
 				if (delete_status.include? "succeeded") && (component_delete_status.include? "succeeded")
 					service_deleted = true
 					task_status = delete_status
@@ -627,13 +634,13 @@ module AssemblyAndServiceOperationsMixin
 		service_deleted
 	end
 
-	def delete_service_with_workflow(service_id, component_to_delete)
+	def delete_service_with_workflow(service_id, component_to_delete, check_component_in_task_status)
     puts "Delete and destroy service with workflow:", "-----------------------------------------"
     service_deleted_successfully = false
 
     delete_service_response = send_request('/rest/assembly/delete_using_workflow', {:assembly_id=>service_id, :subtype => :instance})
     if delete_service_response['status'] == 'ok'
-      service_deleted_successfully = delete_task_status(service_id, component_to_delete, 'delete_service')
+      service_deleted_successfully = delete_task_status(service_id, component_to_delete, 'delete_service', check_component_in_task_status)
       puts "Service was deleted successfully!"
     else
       puts "Service was not deleted successfully!"
@@ -642,13 +649,13 @@ module AssemblyAndServiceOperationsMixin
     return service_deleted_successfully
 	end
 
-	def delete_node_with_workflow(service_id, node_name, component_to_delete)
+	def delete_node_with_workflow(service_id, node_name, component_to_delete, check_component_in_task_status)
     puts "Delete node with workflow:", "----------------------------------"
     node_deleted_successfully = false
 
     delete_node_response = send_request('/rest/assembly/delete_node_using_workflow', {:assembly_id=>service_id, :subtype => :instance, :node_id => node_name})
     if delete_node_response['status'] == 'ok'
-      node_deleted_successfully = delete_task_status(service_id, component_to_delete, 'delete_node')
+      node_deleted_successfully = delete_task_status(service_id, component_to_delete, 'delete_node', check_component_in_task_status)
       puts "Node: #{node_name} was deleted successfully!"
     else
       puts "Node: #{node_name} was not deleted successfully!"
@@ -657,13 +664,13 @@ module AssemblyAndServiceOperationsMixin
     return node_deleted_successfully
 	end
 
-	def delete_component_with_workflow(service_id, node_name, component_to_delete)
+	def delete_component_with_workflow(service_id, node_name, component_to_delete, check_component_in_task_status)
     puts "Delete component with workflow:", "---------------------------------------"
     component_deleted_successfully = false
 
     delete_component_response = send_request('/rest/assembly/delete_component_using_workflow', {:assembly_id=>service_id, :task_action => "#{component_to_delete}.delete", :task_params => { "node" => node_name }, :component_id => component_to_delete, :noop_if_no_action => nil, :cmp_full_name => "#{node_name}/#{component_to_delete}", :node_id => node_name })
     if delete_component_response['status'] == 'ok'
-      component_deleted_successfully = delete_task_status(service_id, component_to_delete, 'delete_component')
+      component_deleted_successfully = delete_task_status(service_id, component_to_delete, 'delete_component', check_component_in_task_status)
       puts "Component: #{component_to_delete} was deleted successfully!"
     else
       puts "Component: #{component_to_delete} was not deleted successfully!"

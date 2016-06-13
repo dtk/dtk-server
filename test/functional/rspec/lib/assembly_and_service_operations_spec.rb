@@ -307,23 +307,23 @@ shared_context 'Get task action details' do |dtk_common, action_id, expected_out
   end
 end
 
-shared_context 'Delete service with workflow' do |dtk_common, components_to_delete|
+shared_context 'Delete service with workflow' do |dtk_common, components_to_delete, check_component_in_task_status|
   it "deletes service and checks that task status output is valid" do
-    delete_successful = dtk_common.delete_service_with_workflow(dtk_common.service_id, components_to_delete)
+    delete_successful = dtk_common.delete_service_with_workflow(dtk_common.service_id, components_to_delete, check_component_in_task_status)
     expect(delete_successful).to eq(true)
   end
 end
 
-shared_context 'Delete node with workflow' do |dtk_common, node_name, components_to_delete|
+shared_context 'Delete node with workflow' do |dtk_common, node_name, components_to_delete, check_component_in_task_status|
   it "deletes node and checks that task status output is valid" do
-    delete_successful = dtk_common.delete_node_with_workflow(dtk_common.service_id, node_name, components_to_delete)
+    delete_successful = dtk_common.delete_node_with_workflow(dtk_common.service_id, node_name, components_to_delete, check_component_in_task_status)
     expect(delete_successful).to eq(true)
   end
 end
 
-shared_context 'Delete component with workflow' do |dtk_common, node_name, components_to_delete|
+shared_context 'Delete component with workflow' do |dtk_common, node_name, components_to_delete, check_component_in_task_status|
   it "deletes component and checks that task status output is valid" do
-    delete_successful = dtk_common.delete_component_with_workflow(dtk_common.service_id, node_name, components_to_delete)
+    delete_successful = dtk_common.delete_component_with_workflow(dtk_common.service_id, node_name, components_to_delete, check_component_in_task_status)
     expect(delete_successful).to eq(true)
   end
 end

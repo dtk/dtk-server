@@ -509,19 +509,18 @@ module NodeOperationsMixin
 		return node_deleted
 	end
 
-	def add_component_to_node(node_id, component_name)
+	def add_component_to_node(service_id, node_name, component_name, namespace)
 		puts "Add component to node:", "----------------------"
 		component_added = false
 
-		components_list = send_request('/rest/component/list', {})
-		pretty_print_JSON(components_list)
+		components_list = send_request('/rest/component/list', {:subtype => "template", :hide_assembly_cmps => "true"})
 
-		component = components_list['data'].select { |x| x['display_name'] == component_name }.first
-		puts component
+		component = components_list['data'].select { |x| x['display_name'] == namespace + ":" + component_name }.first
+		pretty_print_JSON(component)
 
 		if (!component.nil?)
 			puts "Component #{component_name} exists! Add this component to node #{node_id}..."
-			component_add_response = send_request('/rest/node/add_component', {:node_id=>node_id, :component_template_name=>component['id']})
+			component_add_response = send_request('/rest/assembly/add_component', {:assembly_id=>service_id, :node_id=>node_name, :component_template_id=>component_name, :namespace=>component['namespace']})
 
 			if (component_add_response['status'] == 'ok')
 				puts "Component #{component_name} added to node!"

@@ -49,6 +49,7 @@ DTK::ReactorRoute.draw do
   post 'api/v1/modules/install_service_module'   => 'v1::module/install_service_module'
   post 'api/v1/modules/get_module_dependencies'  => 'v1::module/get_module_dependencies'
   post 'api/v1/modules/create_empty_module'      => 'v1::module/create_empty_module'
+  post 'api/v1/modules/update_from_repo'      => 'v1::module/update_from_repo'
 
   # TODO: DTK-2554; temp while initial testing
   # routes that need to be put on v1

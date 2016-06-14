@@ -64,6 +64,13 @@ module DTK
         local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
         rest_ok_response CommonModule.create_empty_module(get_default_project, local_params)
       end
+
+      def update_from_repo
+        namespace, module_name, branch, repo_name = required_request_params(:namespace, :module_name, :branch, :repo_name)
+        version = request_params(:version)
+        local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
+        rest_ok_response CommonModule.update_from_repo(get_default_project, local_params, branch, repo_name)
+      end
     end
   end
 end

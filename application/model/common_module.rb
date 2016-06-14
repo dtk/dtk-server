@@ -54,6 +54,13 @@ module DTK
       create_empty_module_repo(project, local_params, opts.merge(return_module_branch: true))
     end
 
+    def self.update_from_repo(project, local_params, branch, repo_name, opts = {})
+      repo_obj = RepoManagerGit.create(repo_name, branch)
+      repo_obj.fast_foward_pull(branch, true)
+
+      # TODO: Aldin - continue with update_from_clone and probably refactor
+    end
+
     private
 
     def self.get_class_from_type(module_type)

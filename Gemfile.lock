@@ -208,6 +208,8 @@ GEM
     mini_portile2 (2.1.0)
     multi_json (1.12.1)
     mustache (0.99.8)
+    net-scp (1.2.1)
+      net-ssh (>= 2.6.5)
     net-ssh (2.9.4)
     nokogiri (1.6.8)
       mini_portile2 (~> 2.1.0)
@@ -317,6 +319,7 @@ DEPENDENCIES
   mcollective-client (= 2.2.3)
   mime
   mustache (~> 0.99.8)
+  net-scp
   pg (= 0.14.1)
   puppet (= 3.4.0)
   ramaze (= 2012.04.14)

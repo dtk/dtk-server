@@ -54,7 +54,16 @@ module DTK
       def image_get?(id)
         ImageInfoCache.get_or_set(:image_get, conn, id, mutex: true) do
           begin
-            if aws_image = conn.images.get(id)
+            aws_image =
+              if conn.respond_to?(:images)
+                conn.images.get(id)
+              elsif conn.respond_to?(:describe_images)
+                conn.describe_images.get(id)
+              elsif conn.respond_to?(:list_images)
+                conn.list_images.get(id)
+              end
+
+            if aws_image# = conn.images.get(id)
               hash_form(aws_image)
             end
           rescue Exception => e

@@ -53,7 +53,7 @@ end
 # Version That will work, bumped it so we could
 # bump fog as well.
 # gem 'chef','~>0.10.2' BuMP CHEF!!!!
-gem 'chef', '11.18.12'
+
 gem 'mcollective-client', '2.2.3'
 #gem 'puppet','2.7.6'
 gem 'puppet', '3.4.0'

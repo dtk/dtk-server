@@ -12,7 +12,7 @@ require './lib/component_modules_spec'
 
 service_name = 'smoke_test_instance'
 assembly_name = 'bootstrap::node_with_params'
-os_templates = ['trusty','amazon']
+os_templates = ['trusty_hvm','amazon_hvm']
 node_name = 'node1'
 component_module_name = "test_module"
 component_module_namespace = "dtk17"

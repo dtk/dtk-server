@@ -9,7 +9,7 @@ require 'awesome_print'
 require 'yaml'
 require './lib/dtk_common'
 
-service_name = 'dtk_release_deployment_test'
+service_name = "dtk_release_deployment_test" + Random.rand(100).to_s
 assembly_name = 'dtk::release'
 namespace = 'internal'
 

@@ -15,13 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 {
-  schema: :namespace,
-  table: :namespace,
+  schema: :module,
+  table: :common,
   columns: {
-    name: { type: :varchar, size: 50 },
-    remote: { type: :varchar, size: 50 }
-    },
-  virtual_columns: {},
-  one_to_many: [:component_module, :service_module, :test_module, :node_module, :common_module]
+    dsl_parsed: { type: :boolean, default: false }, #set to true when dsl has successfully parsed
+    namespace_id: {
+      type: :bigint,
+      foreign_key_rel_type: :namespace,
+      on_delete: :set_null,
+      on_update: :set_null
+    }
+  },
+  many_to_one: [:project, :library], #MOD_RESTRUCT: may remove library as parent
+  one_to_many: [:module_branch]
 }

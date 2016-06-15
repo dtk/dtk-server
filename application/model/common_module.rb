@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule
+  class CommonModule < Model
     # Mixins must go first
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
@@ -29,6 +29,13 @@ module DTK
     extend  CommonModule::ClassMixin
     include CommonModule::Mixin
     extend CommonModule::Create
+
+    extend ModuleClassMixin
+    # extend AutoImport
+    include ModuleMixin
+    # extend DSLClassMixin
+    # include DSLMixin
+    # include ModuleRefs::Mixin
 
     def self.list_assembly_templates(project)
       Service::Template.list_assembly_templates(project)
@@ -51,7 +58,9 @@ module DTK
     end
 
     def self.create_empty_module(project, local_params, opts = {})
-      create_empty_module_repo(project, local_params, opts.merge(return_module_branch: true))
+        opts = opts.merge(return_module_branch: true)
+        module_branch = create_module(project, local_params, opts)
+        ModuleRepoInfo.new(module_branch)
     end
 
     def self.update_from_repo(project, local_params, branch, repo_name, opts = {})
@@ -59,6 +68,10 @@ module DTK
       repo_obj.fast_foward_pull(branch, true)
 
       # TODO: Aldin - continue with update_from_clone and probably refactor
+    end
+
+    def self.model_type
+      :common_module
     end
 
     private

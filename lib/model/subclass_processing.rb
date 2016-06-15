@@ -130,6 +130,7 @@ module DTK
           when :component_module then ComponentModule
           when :test_module then TestModule
           when :node_module then NodeModule
+          when :common_module then CommonModule
         end
       end
 

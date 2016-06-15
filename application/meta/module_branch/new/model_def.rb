@@ -25,6 +25,8 @@ lambda__matching_library_branches =
           :test_id
         when :node_module
           :node_id
+        when :common_module
+          :common_id
         else
           :component_id
         end
@@ -108,6 +110,7 @@ end
     matching_service_library_branches: lambda__matching_library_branches.call(type: :service_module),
     matching_test_library_branches: lambda__matching_library_branches.call(type: :test_module),
     matching_node_library_branches: lambda__matching_library_branches.call(type: :node_module),
+    matching_common_library_branches: lambda__matching_library_branches.call(type: :common_module),
     service_module: {
       type: :json,
       hidden: true,
@@ -214,6 +217,6 @@ end
       }]
     }
   },
-  many_to_one: [:component_module, :service_module, :test_module, :node_module],
+  many_to_one: [:component_module, :service_module, :test_module, :node_module, :common_module],
   one_to_many: [:module_ref, :task_template]
 }

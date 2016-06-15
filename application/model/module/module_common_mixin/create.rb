@@ -72,10 +72,10 @@ module DTK; module ModuleCommonMixin
       }
 
       create_hash = {
-        model_name.to_s() => {
+        model_type.to_s() => {
           ref => fields
         }
-        }
+      }
       input_hash_content_into_model(project_idh, create_hash)
 
       module_branch = get_module_branch_from_local(local)

@@ -15,7 +15,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+lambda__segment_module_branches =
+  lambda do|args|
+  ret = {
+    model_name: :module_branch,
+    convert: true,
+    join_type: :inner,
+    join_cond: { common_id: :common_module__id },
+    cols: args[:cols]
+  }
+  ret[:filter] = args[:filter] if args[:filter]
+  ret
+end
+lambda__segment_namespace =
+  lambda do|args|
+  ret = {
+    model_name: :namespace,
+    convert: true,
+    join_type: :inner,
+    join_cond: { id: :common_module__namespace_id },
+    cols: args[:cols]
+  }
+  ret
+end
 {
   schema: :module,
   table: :common,
@@ -26,6 +48,18 @@
       foreign_key_rel_type: :namespace,
       on_delete: :set_null,
       on_update: :set_null
+    }
+  },
+  virtual_columns: {
+    namespace: {
+      type: :json,
+      hidden: true,
+      remote_dependencies: [lambda__segment_namespace.call(cols: Namespace.common_columns())]
+    },
+    module_branches: {
+      type: :json,
+      hidden: true,
+      remote_dependencies: [lambda__segment_module_branches.call(cols: ModuleBranch.common_columns())]
     }
   },
   many_to_one: [:project, :library], #MOD_RESTRUCT: may remove library as parent

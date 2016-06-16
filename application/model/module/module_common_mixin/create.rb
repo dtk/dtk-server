@@ -45,7 +45,7 @@ module DTK; module ModuleCommonMixin
       local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
 
       repo_idh = local_repo_obj.id_handle()
-      module_and_branch_info = create_module_and_branch_obj?(project, repo_idh, local)
+      module_and_branch_info = create_module_and_branch_obj?(project, repo_idh, local, opts)
 
       return module_and_branch_info if opts[:return_module_branch]
 

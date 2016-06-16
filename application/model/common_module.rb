@@ -58,14 +58,15 @@ module DTK
     end
 
     def self.create_empty_module(project, local_params, opts = {})
-        opts = opts.merge(return_module_branch: true)
-        module_branch = create_module(project, local_params, opts)
-        ModuleRepoInfo.new(module_branch)
+      module_branch = create_module(project, local_params, opts.merge(return_module_branch: true))
+      ModuleRepoInfo.new(module_branch)
     end
 
-    def self.update_from_repo(project, local_params, branch, repo_name, opts = {})
-      repo_obj = RepoManagerGit.create(repo_name, branch)
-      repo_obj.fast_foward_pull(branch, true)
+    def self.update_from_repo(project, local_params, branch, repo_name, commit_sha, opts = {})
+      namespace     = Namespace.find_by_name(project.model_handle.createMH(:namespace), local_params.namespace)
+      module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace, opts)
+
+      module_branch.pull_repo_changes?(commit_sha, true)
 
       # TODO: Aldin - continue with update_from_clone and probably refactor
     end

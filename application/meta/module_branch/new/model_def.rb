@@ -153,6 +153,13 @@ end
           join_type: :left_outer,
           join_cond: { id: q(:module_branch, :node_id) },
           cols: [:id, :group_id, :display_name]
+        },
+        {
+          model_name: :common_module,
+          convert: true,
+          join_type: :left_outer,
+          join_cond: { id: q(:module_branch, :common_id) },
+          cols: [:id, :group_id, :display_name]
         }
       ]
     },

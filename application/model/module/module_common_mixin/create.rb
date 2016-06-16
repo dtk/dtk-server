@@ -28,7 +28,7 @@ module DTK; module ModuleCommonMixin
       module_exists = module_exists?(project_idh, module_name, namespace)
       if module_exists and not opts[:no_error_if_exists]
         full_module_name = Namespace.join_namespace(namespace, module_name)
-        fail ErrorUsage.new("Module (#{full_module_name}) cannot be created since it exists already")
+        fail ErrorUsage, "Module '#{full_module_name}' cannot be created since it exists already"
       end
 
       create_opts = {

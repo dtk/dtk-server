@@ -19,12 +19,15 @@ module DTK
   class CommonModule
     module ClassMixin
       def find_from_name_with_version?(project, namespace, module_name, version)
-        project_mh = project.model_handle
-        namespace_obj = Namespace.find_by_name(project_mh.createMH(:namespace), namespace)
+        ret = nil
+        unless namespace_obj = Namespace.find_by_name?(project.model_handle(:namespace), namespace)
+          return ret
+        end
 
         sp_hash = {
           cols: [
             :id,
+            :group_id,
             :display_name,
             :namespace_id,
             :namespace,
@@ -32,13 +35,13 @@ module DTK
           ],
           filter: [
             :and,
-            [:eq, :project_project_id, project.id()],
-            [:eq, :namespace_id, namespace_obj.id()],
+            [:eq, :project_project_id, project.id],
+            [:eq, :namespace_id, namespace_obj.id],
             [:eq, :display_name, module_name]
           ]
         }
 
-        get_objs(project_mh.createMH(model_type()), sp_hash).find{ |mod| (mod[:module_branch]||{})[:version] == version }
+        get_objs(project.model_handle(model_type), sp_hash).find{ |mod| (mod[:module_branch]||{})[:version] == version }
       end
 
     end

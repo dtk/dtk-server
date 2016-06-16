@@ -63,7 +63,7 @@ module DTK
     end
 
     def self.update_from_repo(project, local_params, branch, repo_name, commit_sha, opts = {})
-      namespace     = Namespace.find_by_name(project.model_handle.createMH(:namespace), local_params.namespace)
+      namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
       module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace, opts)
 
       module_branch.pull_repo_changes?(commit_sha, true)

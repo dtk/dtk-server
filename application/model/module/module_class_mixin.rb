@@ -53,9 +53,7 @@ module DTK
         fail ErrorUsage.new('Cannot find namespace!')
       end
 
-      unless namespace_obj = Namespace.find_by_name(model_handle.createMH(:namespace), namespace)
-        fail ErrorUsage.new("Namespace '#{namespace}' does not exist!")
-      end
+      namespace_obj = Namespace.find_by_name(model_handle.createMH(:namespace), namespace)
 
       sp_hash = {
        cols: [:id],

@@ -17,15 +17,17 @@
 #
 module DTK; class BaseModule
   module DeleteMixin
-    def delete_object
-      assembly_templates = get_associated_assembly_templates()
-      unless assembly_templates.empty?
-        assembly_names = assembly_templates.map { |a| a.display_name_print_form(include_namespace: true) }
-        fail ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
-      end
+    def delete_object(opts = {})
+      unless opts[:skip_validations]
+        assembly_templates = get_associated_assembly_templates()
+        unless assembly_templates.empty?
+          assembly_names = assembly_templates.map { |a| a.display_name_print_form(include_namespace: true) }
+          fail ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
+        end
 
-      components = get_associated_component_instances()
-      raise_error_component_refs(components) unless components.empty?
+        components = get_associated_component_instances()
+        raise_error_component_refs(components) unless components.empty?
+      end
 
       impls = get_implementations()
       delete_instances(impls.map(&:id_handle))

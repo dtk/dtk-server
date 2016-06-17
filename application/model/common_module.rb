@@ -69,6 +69,22 @@ module DTK
       module_branch.pull_repo_changes?(commit_sha, true)
 
       # TODO: Aldin - continue with update_from_clone and probably refactor
+      # DTK-2445: Aldin:
+      # Need to define a new parse_template_type that will do a full parse
+      # we can start with full parse of just teh service module part and test with
+      # project repo that just has service part
+      # The call to parse wil be
+      # parsed_output = DSL::FileParser.parse_content(:service_info, file_obj)
+      # see https://github.com/dtk/dtk-dsl/blob/master/lib/dsl/file_parser.rb#L30
+      # What neds to be passed in here is a file_obj
+      # see https://github.com/dtk/dtk-dsl/blob/master/lib/dsl/util/file_obj.rb
+      # to populate this the intent is to use
+      # DTK::DSL::DirectoryParser
+      # https://github.com/dtk/dtk-dsl/blob/master/lib/dsl/directory_parser/git.rb
+      # which we would cut and paste from
+      # https://github.com/dtk/dtk-common/blob/master/lib/dsl/directory_parser/git.rb
+      # but for time being we could just directly use methods from
+      # application/model/module/dsl_parser.rb
     end
 
     def self.model_type

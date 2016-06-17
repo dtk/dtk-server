@@ -62,34 +62,28 @@ module DTK
       CommonModule.find_from_name_with_version?(project, namespace, module_name, version)
     end
 
-    def self.create_empty_module(project, local_params, opts = {})
-      module_branch = create_module(project, local_params, opts.merge(return_module_branch: true))
+    # TODO: Aldin: here and other places stripping out opts and adding back only if caller fn uses them
+    def self.create_empty_module(project, local_params)
+      module_branch = create_module(project, local_params, return_module_branch: true)
       ModuleRepoInfo.new(module_branch)
     end
 
+    # opts can have keys
+    #   :force_pull - Boolean (default false)
+    #   :force_parse - Boolean (default false)
     def self.update_from_repo(project, local_params, branch, repo_name, commit_sha, opts = {})
+      ret = ModuleDSLInfo.new
+      force_pull = opts[:force_pull]
       namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
-      module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace, opts)
+      module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace)
 
-      module_branch.pull_repo_changes?(commit_sha, true)
+      pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force_pull)
+      parse_needed = (opts[:force_parse] || !module_branch.dsl_parsed?)
+# TODO: for debugging
+parse_needed = true
+      return ret unless parse_needed || pull_was_needed
 
-      # TODO: Aldin - continue with update_from_clone and probably refactor
-      # DTK-2445: Aldin:
-      # Need to define a new parse_template_type that will do a full parse
-      # we can start with full parse of just teh service module part and test with
-      # project repo that just has service part
-      # The call to parse wil be
-      # parsed_output = DSL::FileParser.parse_content(:service_info, file_obj)
-      # see https://github.com/dtk/dtk-dsl/blob/master/lib/dsl/file_parser.rb#L30
-      # What neds to be passed in here is a file_obj
-      # see https://github.com/dtk/dtk-dsl/blob/master/lib/dsl/util/file_obj.rb
-      # to populate this the intent is to use
-      # DTK::DSL::DirectoryParser
-      # https://github.com/dtk/dtk-dsl/blob/master/lib/dsl/directory_parser/git.rb
-      # which we would cut and paste from
-      # https://github.com/dtk/dtk-common/blob/master/lib/dsl/directory_parser/git.rb
-      # but for time being we could just directly use methods from
-      # application/model/module/dsl_parser.rb
+      DSL::Parse.update_model_from_dsl(module_branch)
     end
 
     def self.delete(project, namespace, module_name, version)

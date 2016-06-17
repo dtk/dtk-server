@@ -55,6 +55,20 @@ require File.expand_path('require_first', File.dirname(__FILE__))
 # load common gem or use local dir if available
 dtk_require_common_library()
 
+module DTK::GlobalForDSL
+  Error  = ::DTK::Error
+  ErrorUsage  = ::DTK::ErrorUsage
+  # TODO: DTK-2445: Aldin; took following out and put in stub for OsUtil
+  # so it can load without error
+  # In dtk-dsl do a grep on OsUtil to see what methods need to be supported
+  #  OsUtil = ::DTK::Client::OsUtil
+  class StubOsUtil
+  end
+  OsUtil = StubOsUtil
+end
+# This must be before require 'dtk_dsl'
+require 'dtk_dsl'
+
 SYSTEM_ROOT_PATH = File.expand_path('../', File.dirname(__FILE__))
 LIB_DIR = "#{SYSTEM_ROOT_PATH}/lib"
 UTILS_BASE_DIR = "#{SYSTEM_ROOT_PATH}/utils"

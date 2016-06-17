@@ -38,6 +38,29 @@ lambda__segment_namespace =
   }
   ret
 end
+lambda__segment_impls =
+  lambda do|args|
+  ret = {
+    model_name: :implementation,
+    convert: true,
+    join_type: :inner,
+    join_cond: { repo_id: :module_branch__repo_id },
+    cols: args[:cols]
+  }
+  ret[:filter] = args[:filter] if args[:filter]
+  ret[:alias] = args[:alias] if args[:alias]
+  ret
+end
+lambda__segment_repos =
+  lambda do|args|
+  {
+    model_name: :repo,
+    convert: true,
+    join_type: :inner,
+    join_cond: { id: :module_branch__repo_id },
+    cols: args[:cols]
+  }
+end
 {
   schema: :module,
   table: :common,
@@ -60,7 +83,19 @@ end
       type: :json,
       hidden: true,
       remote_dependencies: [lambda__segment_module_branches.call(cols: ModuleBranch.common_columns())]
-    }
+    },
+    implementations: {
+      type: :json,
+      hidden: true,
+      remote_dependencies: [lambda__segment_module_branches.call(cols: [:id, :repo_id]),
+                            lambda__segment_impls.call(cols: [:id, :display_name, :group_id, :repo, :branch])]
+    },
+    repos: {
+      type: :json,
+      hidden: true,
+      remote_dependencies:       [lambda__segment_module_branches.call(cols: [:id, :repo_id]),
+                                  lambda__segment_repos.call(cols: [:id, :display_name, :group_id, :repo_name, :local_dir, :remote_repo_name, :remote_repo_namespace])]
+    },
   },
   many_to_one: [:project, :library], #MOD_RESTRUCT: may remove library as parent
   one_to_many: [:module_branch]

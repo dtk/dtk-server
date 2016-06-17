@@ -19,10 +19,6 @@ module DTK
   class CommonModule
     module Create
       def create_empty_module_repo(project, local_params, opts = {})
-        require 'debugger'
-        Debugger.wait_connection = true
-        Debugger.start_remote
-        debugger
         local       = local_params.create_local(project)
         project_idh = project.id_handle()
 

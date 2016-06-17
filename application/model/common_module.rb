@@ -33,6 +33,7 @@ module DTK
     extend ModuleClassMixin
     # extend AutoImport
     include ModuleMixin
+    include BaseModule::DeleteMixin
     # extend DSLClassMixin
     # include DSLMixin
     # include ModuleRefs::Mixin
@@ -55,6 +56,10 @@ module DTK
       elsif component = Component::Template.find_from_name_with_version?(project, namespace, module_name, version)
         { component_module_id: component.id() }
       end
+    end
+
+    def self.get_common_module?(project, namespace, module_name, version)
+      CommonModule.find_from_name_with_version?(project, namespace, module_name, version)
     end
 
     def self.create_empty_module(project, local_params, opts = {})
@@ -85,6 +90,14 @@ module DTK
       # https://github.com/dtk/dtk-common/blob/master/lib/dsl/directory_parser/git.rb
       # but for time being we could just directly use methods from 
       # application/model/module/dsl_parser.rb
+    end
+
+    def self.delete(project, namespace, module_name, version)
+      unless common_module = get_common_module?(project, namespace, module_name, version)
+        fail ErrorUsage.new("DTK module '#{namespace}/#{module_name}' does not exist!")
+      end
+
+      common_module.delete_object(skip_validations: true)
     end
 
     def self.model_type

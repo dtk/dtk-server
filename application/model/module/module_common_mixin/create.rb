@@ -21,8 +21,8 @@ module DTK; module ModuleCommonMixin
   module Create::Class
     # opts can have keys
     #  :no_error_if_exists - Booelean (default: false)
+    #  :no_initial_commit - Booelean (default: false)
     #  :return_module_branch - Boolean (default: false)
-    #  :no_initial_commit - Boolean (default: false)
     #  :copy_files - Hash with key: source_director
     def create_module(project, local_params, opts = {})
       local = local_params.create_local(project)
@@ -43,11 +43,7 @@ module DTK; module ModuleCommonMixin
         # TODO: dont think key 'namespace_name' is used
         namespace_name: namespace
       }
-      if opts[:no_initial_commit]
-        create_opts.merge!(no_initial_commit: true)
-      else
-        create_opts.merge!(push_created_branch: true)
-      end
+      create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
 
       if copy_files_info = opts[:copy_files]
         create_opts.merge!(copy_files: copy_files_info)

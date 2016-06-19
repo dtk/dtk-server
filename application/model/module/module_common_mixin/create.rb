@@ -19,11 +19,16 @@ module DTK; module ModuleCommonMixin
   module Create
   end
   module Create::Class
+    # opts can have keys
+    #  :no_error_if_exists - Booelean (default: false)
+    #  :return_module_branch - Boolean (default: false)
+    #  :no_initial_commit - Boolean (default: false)
+    #  :copy_files - Hash with key: source_director
     def create_module(project, local_params, opts = {})
       local = local_params.create_local(project)
       namespace = local_params.namespace
       module_name = local_params.module_name
-      project_idh = project.id_handle()
+      project_idh = project.id_handle
 
       module_exists = module_exists?(project_idh, module_name, namespace)
       if module_exists and not opts[:no_error_if_exists]
@@ -32,12 +37,18 @@ module DTK; module ModuleCommonMixin
       end
 
       create_opts = {
-        create_branch: local.branch_name(),
-        push_created_branch: true,
+        create_branch: local.branch_name,
         donot_create_master_branch: true,
         delete_if_exists: true,
+        # TODO: dont think key 'namespace_name' is used
         namespace_name: namespace
       }
+      if opts[:no_initial_commit]
+        create_opts.merge!(no_initial_commit: true)
+      else
+        create_opts.merge!(push_created_branch: true)
+      end
+
       if copy_files_info = opts[:copy_files]
         create_opts.merge!(copy_files: copy_files_info)
       end

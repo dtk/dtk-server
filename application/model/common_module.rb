@@ -59,9 +59,9 @@ module DTK
 
     def self.exists(project, namespace, module_name, version)
       if service = Service::Template.find_from_name_with_version?(project, namespace, module_name, version)
-        { service_module_id: service.id() }
+        { service_module_id: service.id }
       elsif component = Component::Template.find_from_name_with_version?(project, namespace, module_name, version)
-        { component_module_id: component.id() }
+        { component_module_id: component.id }
       end
     end
 
@@ -75,13 +75,15 @@ module DTK
     def self.update_from_repo(project, local_params, branch, repo_name, commit_sha, opts = {})
       ret = ModuleDSLInfo.new
       force_pull = opts[:force_pull]
+# TODO: for debugging
+force_pull = true
+commit_sha = 1
       namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
       module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace)
 
       pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force_pull)
       parse_needed = (opts[:force_parse] || !module_branch.dsl_parsed?)
-# TODO: for debugging
-parse_needed = true
+
       return ret unless parse_needed || pull_was_needed
       
       DSL::Parse.update_model_from_dsl(module_branch)

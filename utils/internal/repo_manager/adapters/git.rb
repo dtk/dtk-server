@@ -611,7 +611,7 @@ module DTK
     def add_branch(new_branch, opts = {})
       if opts[:empty] or opts[:no_initial_commit]
         git_command__create_empty_branch(new_branch)
-        git_command__empty_commit unless opts[:no_initial_commit]
+        git_command__empty_commit 
       else
         checkout(opts[:sha] || @branch) do
           git_command__add_branch(new_branch)

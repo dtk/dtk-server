@@ -32,7 +32,6 @@ module DTK
     #  :delete_if_exists - Boolean (default: false)
     #  :push_created_branch  - Boolean (default: false)
     #  :donot_create_master_branch - Boolean (default: false)
-    #  :no_initial_commit - Boolean (default: false)
     #  :create_branch  - branch to create (f non nil)
     #  :copy_files - Hash with key: source_directory
     def self.create_repo_clone(repo_obj, opts)
@@ -48,7 +47,7 @@ module DTK
       local_repo = create_without_branch(local_repo_dir, absolute_path: true, repo_does_not_exist: true)
       local_repo.create_local_repo(repo_name, opts)
       if create_branch = opts[:create_branch]
-        opts_add_branch = opts[:no_initial_commit] ? { no_initial_commit: true } : { empty: true }
+        opts_add_branch = { empty: true }
         opts_add_branch.merge!(Aux.hash_subset(opts, [:copy_files]))
         if opts[:push_created_branch]
           local_repo.add_branch_and_push?(create_branch, opts_add_branch)
@@ -590,9 +589,7 @@ module DTK
 
     # opts can have keys:
     #  :empty - Booelan (default: false)
-    #  :no_initial_commit - Booelan (default: false)
     #  :sha
-    # both :empty and :no_initial_commit canot be true
     def add_branch?(new_branch, opts = {})
       unless get_branches().include?(new_branch)
         # if :copy_files; do it here and not in add_branch
@@ -605,11 +602,9 @@ module DTK
 
     # opts can have keys:
     #  :empty - Booelan (default: false)
-    #  :no_initial_commit - Booelan (default: false)
     #  :sha
-    # both :empty and :no_initial_commit canot be true
     def add_branch(new_branch, opts = {})
-      if opts[:empty] or opts[:no_initial_commit]
+      if opts[:empty]
         git_command__create_empty_branch(new_branch)
         git_command__empty_commit 
       else

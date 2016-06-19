@@ -24,11 +24,9 @@ module DTK
     require_relative('common_module/module_repo_info') 
     require_relative('common_module/service') 
     require_relative('common_module/component')
-    require_relative('common_module/create')
 
     extend  CommonModule::ClassMixin
     include CommonModule::Mixin
-    extend CommonModule::Create
 
     extend ModuleClassMixin
     # extend AutoImport
@@ -37,6 +35,15 @@ module DTK
     # extend DSLClassMixin
     # include DSLMixin
     # include ModuleRefs::Mixin
+
+    def self.create_empty_module(project, local_params)
+      create_module_opts = {
+        return_module_branch: true,
+        no_initial_commit: true,
+      }
+      module_branch = create_module(project, local_params, create_module_opts)
+      ModuleRepoInfo.new(module_branch)
+    end
 
     def self.list_assembly_templates(project)
       Service::Template.list_assembly_templates(project)
@@ -60,12 +67,6 @@ module DTK
 
     def self.get_common_module?(project, namespace, module_name, version)
       CommonModule.find_from_name_with_version?(project, namespace, module_name, version)
-    end
-
-    # TODO: Aldin: here and other places stripping out opts and adding back only if caller fn uses them
-    def self.create_empty_module(project, local_params)
-      module_branch = create_module(project, local_params, return_module_branch: true)
-      ModuleRepoInfo.new(module_branch)
     end
 
     # opts can have keys

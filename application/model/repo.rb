@@ -17,11 +17,11 @@
 #
 module DTK
   class Repo < Model
-    r8_nested_require('repo', 'with_branch')
-    r8_nested_require('repo', 'diff')
-    r8_nested_require('repo', 'diffs')
-    r8_nested_require('repo', 'remote')
-    r8_nested_require('repo', 'connection_to_remote')
+    require_relative('repo/with_branch')
+    require_relative('repo/diff')
+    require_relative('repo/diffs')
+    require_relative('repo/remote')
+    require_relative('repo/connection_to_remote')
     extend ConnectionToRemoteClassMixin
     include ConnectionToRemoteMixin
 

@@ -20,7 +20,7 @@ module XYZ
   ##relies on Sequel overwriting ~ | and &
   # TODO: maybe otehr syntax to get around problems with these characters in ruby 1.9
   module SQL
-    ## Booelan expressions
+    ## Boolean expressions
     def self.not(x)
       return nil if x.nil?
       ~x

@@ -194,6 +194,13 @@ module DTK
 
     ###### for repo admin functions, such as creating and deleting repositories
 
+    # opts can have keys:
+    #  :delete_if_exists - Boolean (default: false)
+    #  :push_created_branch  - Boolean (default: false)
+    #  :donot_create_master_branch - Boolean (default: false)
+    #  :no_initial_commit - Boolean (default: false)
+    #  :create_branch  - branch to create (f non nil)
+    #  :copy_files - Hash with key: source_directory
     def self.create_workspace_repo(repo_obj, repo_user_acls, opts)
       klass = load_and_return_adapter_class()
       # create repo on repo server

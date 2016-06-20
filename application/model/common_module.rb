@@ -75,9 +75,7 @@ module DTK
     def self.update_from_repo(project, local_params, branch, repo_name, commit_sha, opts = {})
       ret = ModuleDSLInfo.new
       force_pull = opts[:force_pull]
-# TODO: for debugging
-force_pull = true
-commit_sha = 1
+
       namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
       module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace)
 

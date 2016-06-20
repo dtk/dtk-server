@@ -69,7 +69,7 @@ module DTK
         namespace, module_name, branch, repo_name, commit_sha = required_request_params(:namespace, :module_name, :branch, :repo_name, :commit_sha)
         version = request_params(:version)
         local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
-        rest_ok_response CommonModule.update_from_repo(get_default_project, local_params, branch, repo_name, commit_sha)
+        rest_ok_response CommonModule.update_from_repo(get_default_project, local_params, branch, repo_name, commit_sha, { force_pull: true })
       end
 
       def delete

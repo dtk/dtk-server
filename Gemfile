@@ -23,7 +23,6 @@ gem 'iconv'
 gem 'thin'
 gem 'addressable'
 gem 'colorize', '~> 0.5.8'
-# gem 'rack-contrib'
 gem 'awesome_print', '1.1.0'
 gem 'celluloid'
 gem 'excon'
@@ -32,11 +31,6 @@ gem 'mime'
 #TODO: moved back to 0.17.0.b7; looks like running into bug with 0.19.0 (7/27/13)
 gem 'rugged', '0.17.0.b7'
 
-#case RUBY_VERSION
-#  when '1.8.7' then gem 'rugged','0.17.0.b7'
-#  when '1.9.3' then gem 'rugged','0.19.0'
-#end
-
 group :development do
 case RUBY_VERSION
   when /1.8.7.*/ then
@@ -44,18 +38,10 @@ case RUBY_VERSION
   else
     gem 'debugger'
     gem 'em-ssh', '0.6.5'
+  end
 end
-end
-
-# required to successfully run it
-# Minor change
-
-# Version That will work, bumped it so we could
-# bump fog as well.
-# gem 'chef','~>0.10.2' BuMP CHEF!!!!
 
 gem 'mcollective-client', '2.2.3'
-#gem 'puppet','2.7.6'
 gem 'puppet', '3.4.0'
 gem 'stomp', '1.1.9'
 gem 'grit', '2.5.0'

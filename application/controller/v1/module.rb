@@ -66,11 +66,7 @@ module DTK
       end
 
       def update_from_repo
-        # TODO: DTK-2554: Aldin: took out below until we send commit_sha value
-#        namespace, module_name, branch, repo_name, commit_sha = required_request_params(:namespace, :module_name, :branch, :repo_name, :commit_sha)
-        namespace, module_name, branch, repo_name = required_request_params(:namespace, :module_name, :branch, :repo_name)
-        commit_sha = nil
-
+        namespace, module_name, branch, repo_name, commit_sha = required_request_params(:namespace, :module_name, :branch, :repo_name, :commit_sha)
         version = request_params(:version)
         local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
         rest_ok_response CommonModule.update_from_repo(get_default_project, local_params, branch, repo_name, commit_sha)

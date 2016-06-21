@@ -29,12 +29,8 @@ module DTK
     include CommonModule::Mixin
 
     extend ModuleClassMixin
-    # extend AutoImport
     include ModuleMixin
     include BaseModule::DeleteMixin
-    # extend DSLClassMixin
-    # include DSLMixin
-    # include ModuleRefs::Mixin
 
     def self.create_empty_module(project, local_params)
       create_module_opts = {
@@ -57,14 +53,9 @@ module DTK
       Component::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
     end
 
-    # TODO: Aldin 6/21/2016:
-    # Modify behavior and of find_from_name_with_version?
-    # to reflect changes described in https://github.com/dtk/dtk-cli/commit/7fb42dc40318dad851f49de31b8c64e2fced6268
-    def self.exists(project, namespace, module_name, version)
-      if service = Service::Template.find_from_name_with_version?(project, namespace, module_name, version)
-        { service_module_id: service.id }
-      elsif component = Component::Template.find_from_name_with_version?(project, namespace, module_name, version)
-        { component_module_id: component.id }
+    def self.exists(project, module_type, namespace, module_name, version)
+      if matching_module = get_class_from_type(module_type).find_from_name_with_version?(project, namespace, module_name, version)
+        ModuleRepoInfo.new(matching_module[:module_branch])
       end
     end
 

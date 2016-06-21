@@ -57,6 +57,9 @@ module DTK
       Component::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
     end
 
+    # TODO: Aldin 6/21/2016:
+    # Modify behavior and of find_from_name_with_version?
+    # to reflect changes described in https://github.com/dtk/dtk-cli/commit/7fb42dc40318dad851f49de31b8c64e2fced6268
     def self.exists(project, namespace, module_name, version)
       if service = Service::Template.find_from_name_with_version?(project, namespace, module_name, version)
         { service_module_id: service.id }

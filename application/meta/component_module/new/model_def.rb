@@ -185,7 +185,7 @@ end
     version_info: {
       type: :json,
       hidden: true,
-      remote_dependencies: [lambda__segment_module_branches.call(cols: [:version])]
+      remote_dependencies: [lambda__segment_module_branches.call(cols: ModuleBranch.common_columns())]
     },
     # MOD_RESTRUCT: deprecate below for above
     library_repo: {

@@ -29,9 +29,9 @@ module DTK
       end
 
       def exists
-        namespace, module_name = required_request_params(:namespace, :module_name)
+        namespace, module_name, module_type = required_request_params(:namespace, :module_name, :module_type)
         version = request_params(:version)||'master'
-        rest_ok_response CommonModule.exists(get_default_project, namespace, module_name, version)
+        rest_ok_response CommonModule.exists(get_default_project, module_type, namespace, module_name, version)
       end
 
       def get_module_dependencies
@@ -74,7 +74,7 @@ module DTK
 
       def delete
         namespace, module_name, = required_request_params(:namespace, :module_name)
-        version = request_params(:version)
+        version = request_params(:version)||'master'
         rest_ok_response CommonModule.delete(get_default_project, namespace, module_name, version)
       end
     end

@@ -17,36 +17,28 @@
 #
 module DTK
   module CommonModule::DSL::Parse
-    module Directory
-      def self.get_file_object(module_branch)
+    class Directory < ::DTK::DSL::DirectoryParser
+      require_relative('directory/git')
 
+      # file_types - a single or array of :DTK::DSL::FileObj objects
+      # opts can have keys
+      #   :branch - Module::Branch
+      #   :file_path - string
+      #   :dir_path - string
+      # Returns :DTK::DSL::FileObj that matches a file_typeo bject that matches a file_type in file_types
+      #   or returns nil if no match found
+      def self.matching_file_obj?(file_types, opts = {})
+        adapter(file_types, opts).matching_file_obj?(opts)
       end
 
       private
 
-      def directory_parser
-        @directory_parser ||= ::DTK::DSL::DirectoryParser::Git.new
+      def self.adapter(file_types, opts = {})
+        unless branch = opts[:branch]
+          fail Error, "option :branch is required"
+        end
+        Git.new(file_types, branch)
       end
-
     end
   end
 end
-
-
-      # TODO: Aldin - continue with update_from_clone and probably refactor
-      # DTK-2445: Aldin:
-      # Need to define a new parse_template_type that will do a full parse
-      # we can start with full parse of just teh service module part and test with
-      # project repo that just has service part
-      # The call to parse wil be 
-      # parsed_output = DSL::FileParser.parse_content(:service_info, file_obj)
-      # see https://github.com/dtk/dtk-dsl/blob/master/lib/dsl/file_parser.rb#L30
-      # What neds to be passed in here is a file_obj
-      # see https://github.com/dtk/dtk-dsl/blob/master/lib/dsl/util/file_obj.rb
-      # to populate this the intent is to use 
-      # DTK::DSL::DirectoryParser
-      # https://github.com/dtk/dtk-dsl/blob/master/lib/dsl/directory_parser/git.rb
-      # which we would cut and paste from 
-      # https://github.com/dtk/dtk-common/blob/master/lib/dsl/directory_parser/git.rb
-      # but for time being we could just directly use methods from 
-      # application/model/module/dsl_parser.rb

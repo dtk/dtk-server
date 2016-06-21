@@ -17,8 +17,8 @@
 #
 module DTK
   module CommonModule::DSL::Parse
-    class Directory < ::DTK::DSL::DirectoryParser
-      require_relative('directory/git')
+    class DirectoryParser < ::DTK::DSL::DirectoryParser
+      require_relative('directory_parser/git')
 
       # file_types - a single or array of :DTK::DSL::FileObj objects
       # opts can have keys

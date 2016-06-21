@@ -16,22 +16,9 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule::DSL
-    module Parse
-      require_relative('parse/directory_parser')
-      require_relative('parse/file_parser')
-
-      def self.update_model_from_dsl(module_branch)
-        ret = ModuleDSLInfo.new
-        unless file_obj = DirectoryParser.matching_file_obj?(::DTK::DSL::FileType::CommonModule, branch: module_branch)
-          fail Error, "Unexpected that 'file_obj' is nil"
-        end
-        parsed_output = FileParser.parse_content(:base_module, file_obj)
-        pp [:debug, parsed_output]
-        # TODO: now we run file parser
-        ret
-      end
-
+  module CommonModule::DSL::Parse
+    class FileParser < ::DTK::DSL::FileParser
     end
   end
 end
+

@@ -17,7 +17,7 @@
 #
 module DTK
   module CommonModule::DSL::Parse
-    class Directory
+    class DirectoryParser
       class Git < self
         def initialize(file_types, module_branch)
           @file_types    = file_types.kind_of?(Array) ? file_types : [file_types]

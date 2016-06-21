@@ -23,12 +23,10 @@ module DTK
 
       def self.update_model_from_dsl(module_branch)
         ret = ModuleDSLInfo.new
-      end
-
-      private
-
-      def directory_parser
-        @directory_parser ||= ::DTK::DSL::DirectoryParser::Git.new
+        file_obj = Directory.matching_file_obj?(::DTK::DSL::FileType::CommonModule, branch: module_branch)
+        pp [:debug, 'CommonModule::DSL.update_model_from_dsl', :file_obj, file_obj]
+        # TODO: now we run file parser
+        ret
       end
 
     end

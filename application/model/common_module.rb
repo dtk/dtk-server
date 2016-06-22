@@ -92,5 +92,16 @@ module DTK
       else fail ErrorUsage.new("Unknown module type '#{module_type}'.")
       end
     end
+
+    def self.create_local_params(module_type, module_name, opts = {})
+      version   = opts[:version]
+      namespace = opts[:namespace] || default_local_namespace_name()
+      ModuleBranch::Location::LocalParams::Server.new(
+        module_type: module_type,
+        module_name: module_name,
+        version:     version,
+        namespace:   namespace
+      )
+    end
   end
 end

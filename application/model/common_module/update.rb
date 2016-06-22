@@ -61,11 +61,30 @@ opts[:force_parse] = true
           fail(Error, "Unexpected that 'dsl_file_obj' is nil")
       end
 
-      # TODO: Aldin 6/22/2016
-      # This method creates or returns a service_module or component_module branch that corresponds to
-      # common_module__module_branch
-      # type will be :service_module or :component_module
+      # if module does not exist, create it
+      # else if module branch does not exist, create it
+      # else return module branch
       def self.create_or_ret_module_branch(type, common_module__module_branch)
+        module_info  = common_module__module_branch.get_module
+        module_name  = module_info.module_name
+        namespace_name = module_info.module_namespace
+        project      = module_info.get_project
+        local_params = create_local_params(type, module_name, version: common_module__module_branch[:version], namespace: namespace_name)
+
+        namespace = Namespace.find_by_name(project.model_handle(:namespace), namespace_name)
+        version   = local_params.version
+        module_class = get_class_from_type(type)
+
+        if service_module = module_class.find_from_name?(project.model_handle(type), namespace_name, module_name)
+          if module_branch = module_class.get_workspace_module_branch(project, module_name, version, namespace)
+            module_branch
+          else
+            repo = service_module.get_repo!
+            module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, nil, return_module_branch: true)
+          end
+        else
+          module_class.create_module(module_info.get_project, local_params, return_module_branch: true)
+        end
       end
     end
   end

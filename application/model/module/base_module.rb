@@ -163,7 +163,7 @@ module DTK
     end
 
     # raises exception if more repos found
-    def get_repo!
+    def get_repo
       repos = get_repos().uniq
       unless repos.size == 1
         fail Error.new('unexpected that number of matching repos is not equal to 1')

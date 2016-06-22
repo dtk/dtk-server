@@ -57,7 +57,7 @@ module DTK; module ModuleCommonMixin
         if module_obj
           # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
           # fail Error.new('TODO: ModuleBranch::Location; need to right this')
-          repo = module_obj.get_repo!()
+          repo = module_obj.get_repo
           repo.merge!(branch_name: local_branch)
           repo_with_branch = repo.create_subclass_obj(:repo_with_branch)
         else

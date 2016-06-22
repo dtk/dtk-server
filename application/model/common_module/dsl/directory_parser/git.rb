@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule::DSL::Parse
+  module CommonModule::DSL
     class DirectoryParser
       class Git < self
         def initialize(file_types, module_branch)
@@ -33,7 +33,7 @@ module DTK
           @file_types.each do |file_type|
             files.each do |file_path|
               if file_type.matches?(file_path, exact: true)
-                return ::DTK::DSL::FileObj.new(file_type, file_path, content: get_file_content(file_path))
+                return FileObj.new(file_type, file_path, content: get_file_content(file_path))
               end
             end
           end

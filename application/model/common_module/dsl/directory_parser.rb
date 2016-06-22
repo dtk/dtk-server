@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule::DSL::Parse
+  module CommonModule::DSL
     class DirectoryParser < ::DTK::DSL::DirectoryParser
       require_relative('directory_parser/git')
 

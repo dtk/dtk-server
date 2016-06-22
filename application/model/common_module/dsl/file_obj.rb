@@ -16,12 +16,8 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule
-    module DSL
-      require_relative('dsl/file_type')
-      require_relative('dsl/file_obj')
-      require_relative('dsl/directory_parser')
-      require_relative('dsl/file_parser')
+  module CommonModule::DSL
+    class FileObj < ::DTK::DSL::FileObj
     end
   end
 end

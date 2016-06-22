@@ -23,13 +23,31 @@ module DTK
 
       def self.update_model_from_dsl(module_branch)
         ret = ModuleDSLInfo.new
-        unless file_obj = DirectoryParser.matching_file_obj?(::DTK::DSL::FileType::CommonModule, branch: module_branch)
-          fail Error, "Unexpected that 'file_obj' is nil"
+        unless dsl_file_obj = DirectoryParser.matching_file_obj?(::DTK::DSL::FileType::CommonModule, branch: module_branch)
+          fail Error, "Unexpected that 'dsl_file_obj' is nil"
         end
-        parsed_output = FileParser.parse_content(:base_module, file_obj)
-        pp [:debug, parsed_output]
-        # TODO: now we run file parser
+        ServiceModule.create_and_update_model_from_dsl(module_branch, dsl_file_obj)
+        ComponentModule.update_model_from_dsl?(module_branch, dsl_file_obj)
         ret
+      end
+
+      module ServiceModule
+        def self.update_model_from_dsl(module_branch, dsl_file_obj)
+          update_component_module_refs(module_branch, dsl_file_obj)
+        end
+
+        private
+
+        def update_component_module_refs(module_branch, dsl_file_obj)
+          parsed_output = FileParser.parse_content(:common_module_depedencies, file_obj)
+          pp [:debug, parsed_output]
+        end
+      end
+      
+      module ComponentModule
+        # return if no component info
+        def update_model_from_dsl?(module_branch, dsl_file_obj)
+        end
       end
 
     end

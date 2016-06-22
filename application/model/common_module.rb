@@ -22,6 +22,7 @@ module DTK
     require_relative('common_module/class_mixin')
     require_relative('common_module/dsl') 
     require_relative('common_module/module_repo_info') 
+    require_relative('common_module/update') 
     require_relative('common_module/service') 
     require_relative('common_module/component')
 
@@ -60,32 +61,20 @@ module DTK
     end
 
     def self.get_common_module?(project, namespace, module_name, version)
-      CommonModule.find_from_name_with_version?(project, namespace, module_name, version)
+      find_from_name_with_version?(project, namespace, module_name, version)
     end
 
     # opts can have keys
     #   :force_pull - Boolean (default false) 
     #   :force_parse - Boolean (default false) 
-    def self.update_from_repo(project, local_params, branch, repo_name, commit_sha, opts = {})
-      ret = ModuleDSLInfo.new
-      force_pull = opts[:force_pull]
-
-      namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
-      module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace)
-
-      pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force_pull)
-      parse_needed = (opts[:force_parse] || !module_branch.dsl_parsed?)
-
-      return ret unless parse_needed || pull_was_needed
-      
-      DSL::Parse.update_model_from_dsl(module_branch)
+    def self.update_from_repo(project, local_params, repo_name, commit_sha, opts = {})
+      Update.update_from_repo(project, local_params, repo_name, commit_sha, opts)
     end
 
     def self.delete(project, namespace, module_name, version)
       unless common_module = get_common_module?(project, namespace, module_name, version)
         fail ErrorUsage.new("DTK module '#{namespace}:#{module_name}' does not exist!")
       end
-
       common_module.delete_object(skip_validations: true)
     end
 

@@ -22,8 +22,8 @@ module DTK
         # This method creates af necssary a service module and branch from the common module module_branch
         # with matching namespace, module name, and version
         # It then updates the service module branch object model from parse_hash
-        def self.create_or_update_from_common_module(common_module__module_branch, parse_hash)
-          module_branch = create_or_ret_module_branch(:service_module, common_module__module_branch)
+        def self.create_or_update_from_common_module(project, local_params, common_module__module_branch, parse_hash)
+          module_branch = create_or_ret_module_branch(:service_module, project, local_params, common_module__module_branch)
           update_service_module_from_dsl(module_branch, parse_hash)
         end
 

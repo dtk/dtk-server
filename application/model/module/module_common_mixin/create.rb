@@ -100,7 +100,7 @@ module DTK; module ModuleCommonMixin
       project_idh = project.id_handle()
 
       ref = Namespace.join_namespace(namespace.display_name(), module_name)
-      module_type = model_name.to_s
+      module_type = model_type.to_s
       create_opts = { version: input_version }
       create_opts.merge!(ancestor_branch_idh: ancestor_branch_idh) if ancestor_branch_idh
       create_opts.merge!(frozen: opts[:frozen]) if opts[:frozen]
@@ -114,7 +114,7 @@ module DTK; module ModuleCommonMixin
       }
 
       create_hash = {
-        model_name.to_s => {
+        model_type.to_s => {
           ref => fields
         }
       }
@@ -122,6 +122,8 @@ module DTK; module ModuleCommonMixin
       input_hash_content_into_model(project_idh, create_hash)
 
       module_branch = get_workspace_module_branch(project, module_name, version, namespace)
+      return module_branch if opts[:return_module_branch]
+
       module_idh =  project_idh.createIDH(model_name: model_name(), id: module_branch[:module_id])
       { version: version, module_name: module_name, module_idh: module_idh, module_branch_idh: module_branch.id_handle() }
     end

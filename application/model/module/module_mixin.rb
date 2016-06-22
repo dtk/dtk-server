@@ -205,7 +205,7 @@ module DTK
 
     # TODO: ModuleBranch::Location : need to paramterize this on branch
     # raises exception if more repos found
-    def get_repo!
+    def get_repo
       repos = get_repos()
 
       unless repos.size == 1

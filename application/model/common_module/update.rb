@@ -77,7 +77,8 @@ opts[:force_parse] = true
           if module_branch = module_class.get_workspace_module_branch(project, module_name, version, namespace)
             module_branch
           else
-            repo = service_module.get_repo!
+            # TODO: see if this case is ever exercised; remove if not
+            repo = service_module.get_repo
             module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, nil, return_module_branch: true)
           end
         else

@@ -19,46 +19,73 @@ module DTK
   class CommonModule
     class Update
       class ServiceModule < self
-        # This method creates af necssary a service module and branch from the common module module_branch 
-        # with matching namespace, module name, and version
-        # It then updates the service module branch object model from parse_hash 
         def self.create_or_update_from_common_module(project, local_params, common_module__module_branch, parse_hash)
           module_branch = create_or_ret_module_branch(:service_module, project, local_params, common_module__module_branch)
-          update_service_module_from_dsl(module_branch, parse_hash)
+          update_service_module_from_dsl(project, module_branch, parse_hash)
         end
         
         private
-        
-        # TODO: Aldin 6/22/2016
-        # Write this method to update or create the data model objects that make up teh service model.
-        # Mimic the existing call that updates the service model from clone
-        # https://github.com/dtk/dtk-server/blob/DTK-2554/application/model/module/service_module/dsl.rb#L204
-        # start by implementing update to the component module refs and the assembly
-        # Right now we will just update the object model, but not create or update a service moduel git repo
-        # 
-        def self.update_service_module_from_dsl(module_branch, parse_hash)
+
+        def self.update_service_module_from_dsl(project, module_branch, parse_hash)
           update_component_module_refs(module_branch, parse_hash)
-          update_assemblies(module_branch, parse_hash)
+          update_assemblies(project, module_branch, parse_hash)
         end
         
         def self.update_component_module_refs(module_branch, parse_hash)
           if dependent_modules = parse_hash[:dependent_modules]
-            # use dependent_modules to pupulate the component module refs on
-            # service module module_branch
+            component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
+
+            cmp_modules_with_namespaces = dependent_modules.map do |dm|
+              { display_name: dm[:module_name], namespace_name: dm[:namespace], version_info: dm[:version] }
+            end
+
+            component_module_refs.update() if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
           end
         end
         
-        def self.update_assemblies(module_branch, parse_hash)
-          # in base module there wil be the canoical key that assemblies are assigned to;
-          # if it ios assemblies; they we want to 
-          # use assemblies = parse_hash[:assemblies]
-          # to poplate the assemblies on the service module module_branch
-          # Try to reuse as much as possible teh existing code that is used in teh assebly processing part of
-          # https://github.com/dtk/dtk-server/blob/DTK-2554/application/model/module/service_module/dsl.rb#L204
-          # The way that parse has well be formed is different but population from the parse has should be very simple 
-          # and in fleshing out the parse hash keys in dtk-=dsl templates; we could choose keys to make this as aligned as possible
-          # One thing to first look at is trapping the function taht parses assemblies and look at the parse hash key structure to
-          # use in building up dtk-dsl parse templates
+        # TODO: Aldin - need to do some more refactoring
+        def self.update_assemblies(project, module_branch, parse_hash)
+          if assemblies = parse_hash[:assemblies]
+            module_branch.set_dsl_parsed!(false)
+
+            service_module = module_branch.get_module
+            module_refs    = ModuleRefs.get_component_module_refs(module_branch)
+            import_helper  = ::DTK::ServiceModule::AssemblyImport.new(project.id_handle, module_branch, service_module, module_refs)
+
+            assemblies.each do |assembly|
+              hash_content     = {}
+              assembly_name    = assembly[:name]
+              assembly_content = assembly[:content]
+              opts             = { default_assembly_name: assembly_name }
+
+              if workflows = assembly_content && assembly_content.delete('workflows')
+                hash_content.merge!('workflows' => workflows)
+              end
+
+              hash_content.merge!('assembly' => assembly_content)
+
+              # hash_content.merge!('dsl_version' => '1.0.0')
+              # TODO: Aldin - need to take dsl_version from hash;
+              # currently there is issue with using version 1.0.0, error happens in
+              # application/model/module/service_module/dsl/assembly_import/adapters/v4.rb:79:in `import_task_templates'",
+              # so when dsl_version not specified it will use old v2 adapter and it will pass successfully
+
+              hash_content.merge!('name' => assembly_name)
+
+              service_module.create_ec2_properties?(hash_content)
+              service_module.parse_assembly_wide_components!(hash_content)
+
+              import_helper.process(service_module.module_name, hash_content, opts)
+              ::DTK::ServiceModule::SetParsedDSL.set_assembly_raw_hash?(assembly_name, hash_content, opts)
+            end
+
+            assembly_workflows = import_helper.import()
+
+            module_refs = ModuleRefs.get_component_module_refs(module_branch)
+            ::DTK::ServiceModule::SetParsedDSL.set_module_refs_and_workflows?(service_module.module_name, assembly_workflows, module_refs)
+
+            module_branch.set_dsl_parsed!(true)
+          end
         end
       end
     end

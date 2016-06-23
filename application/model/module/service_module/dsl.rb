@@ -240,6 +240,36 @@ module DTK
         ret
       end
 
+      def create_ec2_properties?(hash_content)
+        updated = false
+        nodes   = (hash_content['assembly']||{})['nodes']
+
+        return unless nodes
+
+        updated =
+          if node_bindings = hash_content['node_bindings']
+            create_ec2_properties_from_node_bindings(node_bindings, nodes)
+          else
+            create_ec2_properties_from_node_attributes(nodes)
+          end
+
+        updated
+      end
+
+      def parse_assembly_wide_components!(hash_content)
+        return unless (hash_content['assembly'] && hash_content['assembly']['components'])
+
+        assembly_wide_cmps = hash_content['assembly']['components']
+        assembly_wide_cmps = assembly_wide_cmps.is_a?(Array) ? assembly_wide_cmps : [assembly_wide_cmps]
+
+        if hash_content['assembly']['nodes']
+          hash_content['assembly']['nodes'].merge!('assembly_wide' => { 'components' => assembly_wide_cmps })
+        else
+          hash_content['assembly']['nodes'] = { 'assembly_wide' => { 'components' => assembly_wide_cmps } }
+        end
+      end
+
+
       private
 
       def update_component_module_refs(module_branch, opts = {})
@@ -297,7 +327,7 @@ module DTK
             hash_content = Aux.convert_to_hash(file_content, format_type, opts) || {}
             fail hash_content if ParsingError.is_error?(hash_content)
 
-            create_ec2_properties?(hash_content, meta_file, module_branch)
+            create_ec2_properties?(hash_content)
 
             # check if comp_name.dtk.assembly.yaml matches name in that file
             # only perform check for new service module structure
@@ -461,35 +491,6 @@ module DTK
           v_namespace = v[:namespace_info]
           return ParsingError::BadNamespaceReference.new(name: v_namespace) unless namespaces.include?(v_namespace)
         end
-      end
-
-      def parse_assembly_wide_components!(hash_content)
-        return unless (hash_content['assembly'] && hash_content['assembly']['components'])
-
-        assembly_wide_cmps = hash_content['assembly']['components']
-        assembly_wide_cmps = assembly_wide_cmps.is_a?(Array) ? assembly_wide_cmps : [assembly_wide_cmps]
-
-        if hash_content['assembly']['nodes']
-          hash_content['assembly']['nodes'].merge!('assembly_wide' => { 'components' => assembly_wide_cmps })
-        else
-          hash_content['assembly']['nodes'] = { 'assembly_wide' => { 'components' => assembly_wide_cmps } }
-        end
-      end
-
-      def create_ec2_properties?(hash_content, meta_file, module_branch)
-        updated = false
-        nodes   = (hash_content['assembly']||{})['nodes']
-
-        return unless nodes
-
-        updated =
-          if node_bindings = hash_content['node_bindings']
-            create_ec2_properties_from_node_bindings(node_bindings, nodes)
-          else
-            create_ec2_properties_from_node_attributes(nodes)
-          end
-
-        updated
       end
 
       def get_ec2_properties_from_node_binding(node_binding)

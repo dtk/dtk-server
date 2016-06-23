@@ -31,14 +31,10 @@ module DTK
 opts[:force_parse] = true
         parse_needed = (opts[:force_parse] || !module_branch.dsl_parsed?)
         return ret unless parse_needed || pull_was_needed
-        
+
         dsl_file_obj = dsl_file_obj_from_repo(module_branch)
         parse_hash = DSL::FileParser.parse_content(:base_module, dsl_file_obj)
 
-        # TODO: Aldin: 06/21/2016
-        # The logic under https://github.com/dtk/dtk-dsl/tree/master/lib/dsl/file_parser/template/v1
-        # must be extended so that base_modules parsers also the assemblies
-        # so a template for assemblies and it subparts should be put in file_parser/template/v1
         pp [:debug, :parse_hash, parse_hash]
         ServiceModule.create_or_update_from_common_module(project, local_params, module_branch, parse_hash)
         # ComponentModule.create_or_update_from_common_module?(module_branch, parse_hash)
@@ -78,6 +74,8 @@ opts[:force_parse] = true
             module_branch
           else
             # TODO: see if this case is ever exercised; remove if not
+            # Aldin: this case will happen if there is service module, but no branch for this version;
+            # e.g. we have service module with master branch, but want to create branch (version) 0.0.1
             repo = service_module.get_repo
             module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, nil, return_module_branch: true)
           end

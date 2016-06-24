@@ -77,7 +77,13 @@ module DTK
       unless common_module = get_common_module?(project, namespace, module_name, version)
         fail ErrorUsage.new("DTK module '#{namespace}:#{module_name}' does not exist!")
       end
+      delete_associated_service_module(common_module)
       common_module.delete_object(skip_validations: true)
+    end
+
+    def self.delete_associated_service_module(common_module)
+      service_module = BaseService.find_from_name?(common_module.model_handle(:service_module), common_module.module_namespace, common_module.module_name)
+      service_module.delete_object()
     end
 
     def self.model_type

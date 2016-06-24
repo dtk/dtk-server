@@ -72,8 +72,12 @@ module DTK
         # version_proc_class.import_assembly_top and version_proc_class.import_nodes
         # should be replaced by two phase processing:
         # dtk-dsl should do fine grain parsing of assembly rather than course (i.e., returning just :name and :assembly
-        # This shoudl return hash with all keys in 'symbol form' we then have code in drk-server that converts this to
-        #  'db_update_hash form and add anythng that needs db lookup such as the ids'
+        # This should return hash with all keys in 'symbol form' we then have code in dtk-server that converts this to
+        #  'db_update_hash form' and adds anything that needs db lookup such as the ids'
+        #  if having parse_hash using symbol rather than string keys forces much rewrite on part of code that
+        #  converts to 'db_update_hash form' then we could either return rather than a class that inherots from hash
+        #  that allows one to interchange between strings an dkeys; I got pretty far in writing this but had some problems
+        #  so left this as a branch in dtk-dsl: https://github.com/dtk/dtk-dsl/tree/common_input_output
         # in the version_proc_class when see 'aggregate_errors.aggregate_errors!'; remove this; its purpose is to bulk up errors
         # to make parsing simpler just throwing error on first error
         integer_version = determine_integer_version(assembly_hash, opts)

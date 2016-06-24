@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class CommonModule
-  module Service
-    class Template < ServiceModule
+module DTK
+  class CommonModule
+    class BaseService < ServiceModule
       extend  CommonModule::ClassMixin
       include CommonModule::Mixin
 
@@ -48,7 +48,7 @@ module DTK; class CommonModule
 
       private
 
-      # This causes all get_obj(s) class an instance methods to return Service::Template objects, rather than ServiceModule ones
+      # This causes all get_obj(s) class an instance methods to return BaseService objects, rather than ServiceModule ones
       def self.get_objs(model_handle, sp_hash, opts = {})
         if model_handle[:model_name] == :service_module
           super.map { |service_module| copy_as(service_module) }
@@ -58,5 +58,6 @@ module DTK; class CommonModule
       end
     end
   end
-end; end
+end
+
 

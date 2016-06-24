@@ -23,8 +23,9 @@ module DTK
     require_relative('common_module/dsl') 
     require_relative('common_module/module_repo_info') 
     require_relative('common_module/update') 
-    require_relative('common_module/service') 
-    require_relative('common_module/component')
+    require_relative('common_module/base_service') 
+    require_relative('common_module/base_component')
+    require_relative('common_module/service_instance')
 
     extend  CommonModule::ClassMixin
     include CommonModule::Mixin
@@ -43,15 +44,15 @@ module DTK
     end
 
     def self.list_assembly_templates(project)
-      Service::Template.list_assembly_templates(project)
+      BaseService.list_assembly_templates(project)
     end
 
     def self.get_module_dependencies(project, rsa_pub_key, remote_params)
-      Component::Template.get_module_dependencies(project, rsa_pub_key, remote_params)
+      BaseComponent.get_module_dependencies(project, rsa_pub_key, remote_params)
     end
 
     def self.install_component_module(project, local_params, remote_params, dtk_client_pub_key)
-      Component::Template.install_module(project, local_params, remote_params, dtk_client_pub_key)
+      BaseComponent.install_module(project, local_params, remote_params, dtk_client_pub_key)
     end
 
     def self.exists(project, module_type, namespace, module_name, version)
@@ -87,8 +88,8 @@ module DTK
     def self.get_class_from_type(module_type)
       case module_type.to_sym
       when :common_module then CommonModule
-      when :service_module then Service::Template
-      when :component_module then Component::Template
+      when :service_module then BaseService
+      when :component_module then BaseComponent
       else fail ErrorUsage.new("Unknown module type '#{module_type}'.")
       end
     end

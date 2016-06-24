@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class CommonModule
-  module Component
-    class Template < ComponentModule
+module DTK
+  class CommonModule
+    class BaseComponent < ComponentModule
       extend  CommonModule::ClassMixin
       include CommonModule::Mixin
 
@@ -42,7 +42,7 @@ module DTK; class CommonModule
 
       private
 
-      # This causes all get_obj(s) class an instance methods to return Component::Template objects, rather than ComponentModule ones
+      # This causes all get_obj(s) class an instance methods to return BaseComponent objects, rather than ComponentModule ones
       def self.get_objs(model_handle, sp_hash, opts = {})
         if model_handle[:model_name] == :component_module
           super.map { |component_module| copy_as(component_module) }
@@ -52,4 +52,5 @@ module DTK; class CommonModule
       end
     end
   end
-end; end
+end
+

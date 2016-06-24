@@ -28,8 +28,8 @@ module DTK; class ServiceModule
       @ndx_ports = {}
       @ndx_assembly_hashes = {} #indexed by ref
       @module_branch = module_branch
-      @module_name = service_module.module_name()
-      @module_namespace = service_module.module_namespace()
+      @module_name = service_module.module_name
+      @module_namespace = service_module.module_namespace
       @service_module = service_module
       @component_module_refs = component_module_refs
       @ndx_version_proc_classes = {}
@@ -37,7 +37,7 @@ module DTK; class ServiceModule
     end
 
     def ports
-      @ndx_ports.values()
+      @ndx_ports.values
     end
     
     # Needed by AssemblyImport::Port

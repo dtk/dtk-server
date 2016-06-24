@@ -18,12 +18,6 @@ GIT
       grit (~> 2.5)
       rugged (~> 0.17.0.b7)
 
-GIT
-  remote: git://github.com/dtk/dtk-dsl.git
-  revision: 774742bd04d3925d5a47f7b190562841fbcd97b3
-  specs:
-    dtk-dsl (0.0.1)
-
 GEM
   remote: https://rubygems.org/
   specs:

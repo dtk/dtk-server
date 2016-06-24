@@ -46,6 +46,17 @@ module DTK
         ModuleRepoInfo.new(module_branch)
       end
 
+      def self.update_assemblies_from_parse_hash(project, module_branch, parse_hash)
+        if assemblies = parse_hash[:assemblies]
+          module_branch.set_dsl_parsed!(false)
+
+          import_helper = AssembliesImportHelper.new(project, module_branch)
+          import_helper.process_from_parse_hash(assemblies)
+
+          module_branch.set_dsl_parsed!(true)
+        end
+      end
+
       private
 
       # This causes all get_obj(s) class an instance methods to return BaseService objects, rather than ServiceModule ones

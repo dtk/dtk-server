@@ -18,8 +18,8 @@
 # converts serialized form into object form
 module DTK; class ServiceModule
   class AssemblyImport
-    r8_nested_require('assembly_import', 'port_ref')
-    r8_nested_require('assembly_import', 'port_processing')
+    require_relative('assembly_import/port_ref')
+    require_relative('assembly_import/port_processing')
     extend FactoryObjectClassMixin
 
     def initialize(container_idh, module_branch, service_module, component_module_refs)

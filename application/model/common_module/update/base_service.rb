@@ -21,17 +21,13 @@ module DTK
       class BaseService < self
         def self.create_or_update_from_common_module(project, local_params, common_module__module_branch, parse_hash)
           module_branch = create_or_ret_module_branch(:service_module, project, local_params, common_module__module_branch)
-          update_service_module_from_dsl(project, module_branch, parse_hash)
+          update_component_module_refs_from_parse_hash(module_branch, parse_hash)
+          CommonModule::BaseService.update_assemblies_from_parse_hash(project, module_branch, parse_hash)
         end
 
         private
 
-        def self.update_service_module_from_dsl(project, module_branch, parse_hash)
-          update_component_module_refs(module_branch, parse_hash)
-          update_assemblies(project, module_branch, parse_hash)
-        end
-
-        def self.update_component_module_refs(module_branch, parse_hash)
+        def self.update_component_module_refs_from_parse_hash(module_branch, parse_hash)
           if dependent_modules = parse_hash[:dependent_modules]
             component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
 
@@ -43,50 +39,6 @@ module DTK
           end
         end
 
-        # TODO: Aldin - need to do some more refactoring
-        def self.update_assemblies(project, module_branch, parse_hash)
-          if assemblies = parse_hash[:assemblies]
-            module_branch.set_dsl_parsed!(false)
-
-            service_module = module_branch.get_module
-            module_refs    = ModuleRefs.get_component_module_refs(module_branch)
-            import_helper  = ServiceModule::AssemblyImport.new(project.id_handle, module_branch, service_module, module_refs)
-
-            assemblies.each do |assembly|
-              hash_content     = {}
-              assembly_name    = assembly[:name]
-              assembly_content = assembly[:content]
-              opts             = { default_assembly_name: assembly_name }
-
-              if workflows = assembly_content && assembly_content.delete('workflows')
-                hash_content.merge!('workflows' => workflows)
-              end
-
-              hash_content.merge!('assembly' => assembly_content)
-
-              # hash_content.merge!('dsl_version' => '1.0.0')
-              # TODO: Aldin - need to take dsl_version from hash;
-              # currently there is issue with using version 1.0.0, error happens in
-              # application/model/module/service_module/dsl/assembly_import/adapters/v4.rb:79:in `import_task_templates'",
-              # so when dsl_version not specified it will use old v2 adapter and it will pass successfully
-
-              hash_content.merge!('name' => assembly_name)
-
-              service_module.create_ec2_properties?(hash_content)
-              service_module.parse_assembly_wide_components!(hash_content)
-
-              import_helper.process(service_module.module_name, hash_content, opts)
-              ServiceModule::SetParsedDSL.set_assembly_raw_hash?(assembly_name, hash_content, opts)
-            end
-
-            assembly_workflows = import_helper.import()
-
-            module_refs = ModuleRefs.get_component_module_refs(module_branch)
-            ServiceModule::SetParsedDSL.set_module_refs_and_workflows?(service_module.module_name, assembly_workflows, module_refs)
-
-            module_branch.set_dsl_parsed!(true)
-          end
-        end
       end
     end
   end

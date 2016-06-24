@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class CommonModule
-  module Service
-    class Instance < AssemblyModule::Service
+module DTK
+  class CommonModule
+    class ServiceInstance < AssemblyModule::Service
       def self.create_repo(assembly_instance)
         new(assembly_instance).create_repo
       end
@@ -42,4 +42,4 @@ module DTK; class CommonModule
       end
     end
   end
-end; end
+end

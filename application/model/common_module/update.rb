@@ -18,8 +18,8 @@
 module DTK
   class CommonModule
     class Update < self
-      require_relative('update/service_module')
-#      require_relative('update/component_module')
+      require_relative('update/base_service')
+#      require_relative('update/base_component')
 
       # opts can have keys
       #   :force_pull - Boolean (default false)
@@ -36,7 +36,7 @@ opts[:force_parse] = true
         parse_hash = DSL::FileParser.parse_content(:base_module, dsl_file_obj)
 
         pp [:debug, :parse_hash, parse_hash]
-        ServiceModule.create_or_update_from_common_module(project, local_params, module_branch, parse_hash)
+        BaseService.create_or_update_from_common_module(project, local_params, module_branch, parse_hash)
         # ComponentModule.create_or_update_from_common_module?(module_branch, parse_hash)
         # TODO: stub value for ret; might not need to rerun any results since any parsing error wll thro an error
         ret

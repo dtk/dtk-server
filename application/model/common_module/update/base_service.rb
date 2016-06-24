@@ -18,7 +18,7 @@
 module DTK
   class CommonModule
     class Update
-      class ServiceModule < self
+      class BaseService < self
         def self.create_or_update_from_common_module(project, local_params, common_module__module_branch, parse_hash)
           module_branch = create_or_ret_module_branch(:service_module, project, local_params, common_module__module_branch)
           update_service_module_from_dsl(project, module_branch, parse_hash)
@@ -50,7 +50,7 @@ module DTK
 
             service_module = module_branch.get_module
             module_refs    = ModuleRefs.get_component_module_refs(module_branch)
-            import_helper  = ::DTK::ServiceModule::AssemblyImport.new(project.id_handle, module_branch, service_module, module_refs)
+            import_helper  = ServiceModule::AssemblyImport.new(project.id_handle, module_branch, service_module, module_refs)
 
             assemblies.each do |assembly|
               hash_content     = {}
@@ -76,13 +76,13 @@ module DTK
               service_module.parse_assembly_wide_components!(hash_content)
 
               import_helper.process(service_module.module_name, hash_content, opts)
-              ::DTK::ServiceModule::SetParsedDSL.set_assembly_raw_hash?(assembly_name, hash_content, opts)
+              ServiceModule::SetParsedDSL.set_assembly_raw_hash?(assembly_name, hash_content, opts)
             end
 
             assembly_workflows = import_helper.import()
 
             module_refs = ModuleRefs.get_component_module_refs(module_branch)
-            ::DTK::ServiceModule::SetParsedDSL.set_module_refs_and_workflows?(service_module.module_name, assembly_workflows, module_refs)
+            ServiceModule::SetParsedDSL.set_module_refs_and_workflows?(service_module.module_name, assembly_workflows, module_refs)
 
             module_branch.set_dsl_parsed!(true)
           end

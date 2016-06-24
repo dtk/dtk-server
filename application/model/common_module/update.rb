@@ -73,9 +73,6 @@ opts[:force_parse] = true
           if module_branch = module_class.get_workspace_module_branch(project, module_name, version, namespace)
             module_branch
           else
-            # TODO: see if this case is ever exercised; remove if not
-            # Aldin: this case will happen if there is service module, but no branch for this version;
-            # e.g. we have service module with master branch, but want to create branch (version) 0.0.1
             repo = service_module.get_repo
             module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, nil, return_module_branch: true)
           end

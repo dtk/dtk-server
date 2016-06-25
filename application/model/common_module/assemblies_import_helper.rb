@@ -27,7 +27,8 @@ module DTK
       def put_needed_info_into_import_helper!(parse_hash)
         parse_hash.each do |assembly|
           hash_content     = {}
-          assembly_name    = assembly[:name]
+          assembly_name    = assembly.req(:AssemblyName)
+          # TODO: content wil be replaced by finer grain parsed objects
           assembly_content = assembly[:content]
           opts             = { default_assembly_name: assembly_name }
           

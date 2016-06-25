@@ -35,7 +35,7 @@ module DTK
               { display_name: dm[:module_name], namespace_name: dm[:namespace], version_info: dm[:version] }
             end
 
-            component_module_refs.update() if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
+            component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
           end
         end
         

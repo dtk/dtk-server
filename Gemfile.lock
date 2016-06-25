@@ -18,6 +18,12 @@ GIT
       grit (~> 2.5)
       rugged (~> 0.17.0.b7)
 
+GIT
+  remote: git://github.com/dtk/dtk-dsl.git
+  revision: 8c5b87bc8c7e496b7f0b57606591b670a31e826b
+  specs:
+    dtk-dsl (0.0.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -42,7 +48,7 @@ GEM
     debugger-ruby_core_source (1.3.8)
     diff-lcs (1.2.5)
     docile (1.1.3)
-    docker-api (1.28.0)
+    docker-api (1.29.0)
       excon (>= 0.38.0)
       json
     em-ssh (0.6.5)

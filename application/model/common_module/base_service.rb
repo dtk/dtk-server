@@ -46,13 +46,13 @@ module DTK
         ModuleRepoInfo.new(module_branch)
       end
 
-      def self.update_assemblies_from_parse_hash(project, module_branch, parse_hash)
-        if assemblies = parse_hash[:assemblies]
+      def self.update_assemblies_from_parsed_common_module(project, module_branch, parsed_common_module)
+        if parsed_assemblies = parsed_common_module.val(:Assemblies)
           module_branch.set_dsl_parsed!(false)
 
           base_service_module = get_base_service_module(module_branch)
           import_helper = AssembliesImportHelper.new(project, base_service_module, module_branch)
-          import_helper.put_needed_info_into_import_helper!(assemblies)
+          import_helper.put_needed_info_into_import_helper!(parsed_assemblies)
           import_helper.import_into_model
           # TODO: dont need set_module_refs_and_workflows?; only applicable if opts passed and
           #  have opts[:ret_parsed_dsl] set to true

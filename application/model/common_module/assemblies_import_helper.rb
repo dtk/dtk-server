@@ -24,8 +24,8 @@ module DTK
         super(project.id_handle, module_branch, service_module, module_refs)
       end
 
-      def put_needed_info_into_import_helper!(parse_hash)
-        parse_hash.each do |assembly|
+      def put_needed_info_into_import_helper!(parsed_assemblies)
+        parsed_assemblies.each do |assembly|
           hash_content     = {}
           assembly_name    = assembly.req(:AssemblyName)
           # TODO: content wil be replaced by finer grain parsed objects
@@ -38,7 +38,7 @@ module DTK
           
           hash_content.merge!('assembly' => assembly_content)
           
-          # Aldin: 06/24/2016: no need to pass in dsl version; since parse_hash wil reflect all teh vesrion specific parsing and be 
+          # Aldin: 06/24/2016: no need to pass in dsl version; since parsed_assemblies wil reflect all teh vesrion specific parsing and be 
           # in version independent 'canonical form'
           # I put back in hash_content.merge!('dsl_version' => '1.0.0') so the code runs through v4 parsing
           # all the equivalent rules to v4 parsing should be put in dtk-dsl under v1
@@ -75,7 +75,7 @@ module DTK
         # dtk-dsl should do fine grain parsing of assembly rather than course (i.e., returning just :name and :assembly
         # This should return hash with all keys in 'symbol form' we then have code in dtk-server that converts this to 
         #  'db_update_hash form' and adds anything that needs db lookup such as the ids'
-        #  if having parse_hash using symbol rather than string keys forces much rewrite on part of code that 
+        #  if having parsed_assemblies using symbol rather than string keys forces much rewrite on part of code that 
         #  converts to 'db_update_hash form' then we could either return rather than a class that inherots from hash
         #  that allows one to interchange between strings an dkeys; I got pretty far in writing this but had some problems 
         #  so left this as a branch in dtk-dsl: https://github.com/dtk/dtk-dsl/tree/common_input_output

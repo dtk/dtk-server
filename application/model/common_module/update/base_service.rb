@@ -19,20 +19,24 @@ module DTK
   class CommonModule
     class Update
       class BaseService < self
-        def self.create_or_update_from_common_module(project, local_params, common_module__module_branch, parse_hash)
+        def self.create_or_update_from_parsed_common_module(project, local_params, common_module__module_branch, parsed_common_module)
           module_branch = create_or_ret_module_branch(:service_module, project, local_params, common_module__module_branch)
-          update_component_module_refs_from_parse_hash(module_branch, parse_hash)
-          CommonModule::BaseService.update_assemblies_from_parse_hash(project, module_branch, parse_hash)
+          update_component_module_refs_from_parsed_common_module(module_branch, parsed_common_module)
+          CommonModule::BaseService.update_assemblies_from_parsed_common_module(project, module_branch, parsed_common_module)
         end
         
         private
 
-        def self.update_component_module_refs_from_parse_hash(module_branch, parse_hash)
-          if dependent_modules = parse_hash[:dependent_modules]
+        def self.update_component_module_refs_from_parsed_common_module(module_branch, parsed_common_module)
+          if dependent_modules = parsed_common_module.val(:DependentModules)
             component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
 
-            cmp_modules_with_namespaces = dependent_modules.map do |dm|
-              { display_name: dm[:module_name], namespace_name: dm[:namespace], version_info: dm[:version] }
+            cmp_modules_with_namespaces = dependent_modules.map do |parsed_module_ref|
+              { 
+                display_name: parsed_module_ref.req(:ModuleName), 
+                namespace_name: parsed_module_ref.req(:Namespace), 
+                version_info: parsed_module_ref.val(:ModuleVersion) 
+              }
             end
 
             component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)

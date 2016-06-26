@@ -21,8 +21,13 @@
 #
 # It will be required from either `config.ru` or `start.rb`
 
-# TODO: add all required gem includes here, or where appropriate
-require 'rubygems'
+
+##### temp until convert to DTK
+module XYZ; end
+Object.send(:remove_const, :DTK) rescue nil
+DTK = XYZ
+####
+
 require 'bundler/setup'
 require 'ramaze'
 require 'json'
@@ -43,11 +48,6 @@ end
 #    puts "---------------------------------------------------------------------------\n"
 #  end
 #end
-
-##### temp until convert to DTK
-module XYZ
-end
-DTK = XYZ
 
 require 'bundler/setup'
 require File.expand_path('require_first', File.dirname(__FILE__))

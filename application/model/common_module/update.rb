@@ -32,9 +32,7 @@ opts[:force_parse] = true
         parse_needed = (opts[:force_parse] || !module_branch.dsl_parsed?)
         return ret unless parse_needed || pull_was_needed
 
-        dsl_file_obj = dsl_file_obj_from_repo(module_branch)
-        parsed_common_module = DSL::FileParser.parse_content(:common_module, dsl_file_obj)
-
+        parsed_common_module = dsl_file_obj_from_repo(module_branch).parse_content(:common_module)
         pp [:debug, :parsed_common_module, parsed_common_module]
         BaseService.create_or_update_from_parsed_common_module(project, local_params, module_branch, parsed_common_module)
         # ComponentModule.create_or_update_from_parsed_common_module?(module_branch, parsed_common_module)

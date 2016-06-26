@@ -33,7 +33,7 @@ module DTK
           @file_types.each do |file_type|
             files.each do |file_path|
               if file_type.matches?(file_path, exact: true)
-                return FileObj.new(file_type, file_path, content: get_file_content(file_path))
+                return FileObj.new(file_type, file_path, file_parser: FileParser, content: get_file_content(file_path))
               end
             end
           end

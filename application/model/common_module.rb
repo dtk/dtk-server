@@ -21,12 +21,12 @@ module DTK
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
     require_relative('common_module/dsl')
+    require_relative('common_module/import')
     require_relative('common_module/module_repo_info')
     require_relative('common_module/update')
     require_relative('common_module/base_service')
     require_relative('common_module/base_component')
     require_relative('common_module/service_instance')
-    require_relative('common_module/assemblies_import_helper')
 
     extend  CommonModule::ClassMixin
     include CommonModule::Mixin

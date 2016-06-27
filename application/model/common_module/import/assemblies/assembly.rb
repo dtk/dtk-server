@@ -17,51 +17,55 @@
 #
 module DTK
   class CommonModule::Import::Assemblies
-    module AssemblyMixin
-      # opts can have keys:
-      #   :module_version
-      def process_assembly!(parsed_assembly, opts = {})
-        @assembly_name = parsed_assembly.req(:AssemblyName)
-        @assembly_ref = @service_module.assembly_ref(@assembly_name, opts[:module_version])
-        # Aldin: 06/27/2016: remove need for version_proc_class  and instaed handle anything dsl version specfic in 
-        # dtk-dsl
-        # in process_assembly_top! and process_assembly_body!
-        # rversion_proc_class.import_assembly_top and version_proc_class.import_nodes
-        # should be replaced by two phase processing:
-        # dtk-dsl should do fine grain parsing of assembly rather than course (i.e., returning just :name and :assembly
-        # This should return hash with all keys in 'symbol form' we then have code in dtk-server that converts this to 
-        #  'db_update_hash form' and adds anything that needs db lookup such as the ids'
-        #  if having parsed_assemblies using symbol rather than string keys forces much rewrite on part of code that 
-        #  converts to 'db_update_hash form' then we could either return rather than a class that inherots from hash
-        #  that allows one to interchange between strings an dkeys; I got pretty far in writing this but had some problems 
-        #  so left this as a branch in dtk-dsl: https://github.com/dtk/dtk-dsl/tree/common_input_output
-        # in the version_proc_class when see 'aggregate_errors.aggregate_errors!'; remove this; its purpose is to bulk up errors
-        # to make parsing simpler just throwing error on first error
-        integer_version = 4 # stubbed this until we remove version_proc_class
-        @version_proc_class = load_and_return_version_adapter_class(integer_version)
+    module Assembly
+      require_relative('assembly/top')
 
-        process_assembly_top!(parsed_assembly)
-        process_assembly_body!(parsed_assembly)
-        
-        # Aldin: 06/27/2016: See if these can be removed
-        @ndx_assembly_hashes[@assembly_ref] ||= parsed_assembly
-        @ndx_version_proc_classes[@assembly_ref] ||= @version_proc_class
-      end
+      module Mixin
+        # opts can have keys:
+        #   :module_version
+        def process_assembly!(parsed_assembly, opts = {})
+          assembly_name = parsed_assembly.req(:Name)
+          assembly_ref = @service_module.assembly_ref(assembly_name, opts[:module_version])
+          # Aldin: 06/27/2016: remove need for version_proc_class
+          integer_version = 4 # stubbed this until we remove version_proc_class
+          version_proc_class = load_and_return_version_adapter_class(integer_version)
 
-      private
-      
-      def process_assembly_top!(parsed_assembly)
-        db_updates_cmp = @version_proc_class.import_assembly_top(@assembly_ref, parsed_assembly, @module_branch, @module_name, default_assembly_name: @assembly_name)
-        @db_updates_assemblies['component'].merge!(db_updates_cmp)
-      end
-      
-      def process_assembly_body!(parsed_assembly)        
-        # if bad node reference, return error and continue with module import
-        # Took at processing of node_bidnings_hash since assume common modules have node attributes instaed
-        node_bindings_hash = {}
-        db_updates = @version_proc_class.import_nodes(@container_idh, @module_branch, @assembly_ref, parsed_assembly, node_bindings_hash, @component_module_refs, default_assembly_name: @assembly_name)
-        raise db_updates if ServiceModule::ParsingError.is_error?(db_updates)
-        @db_updates_assemblies['node'].merge!(db_updates)
+          # add to @db_updates_assemblies['component'] - the db update hash that captures global assembly attributes
+          # Aldin: 06/27/2016: did partial conversion of @version_proc_class.import_assembly_top to use
+          #  Assembly::Top.db_update_hash_value
+          # Looking for you to finsh this and to convert @version_proc_class.import_nodes
+          # to  Assembly::Nodes. in same way
+          #  db_updates_cmp = @version_proc_class.import_assembly_top(@assembly_ref, parsed_assembly, @module_branch, @module_name, default_assembly_name: @assembly_name)
+          db_update_hash = Assembly::Top.db_update_hash(parsed_assembly, @module_branch, @module_name)
+          @db_updates_assemblies['component'].merge!(assembly_ref => db_update_hash)          
+          assembly_ref_pointer = @db_updates_assemblies['component'][assembly_ref] 
+
+          # Aldin: 06/27/2016: There is alot of code in parsing workflow; I will handle conversion to
+          # split between dtk-dsl and code I will put in assembly/workflows
+          # add in workflows (task_templates)
+          workflows_db_update_hash  = version_proc_class.import_task_templates(parsed_assembly)
+          assembly_ref_pointer.merge!('task_template' => workflows_db_update_hash.mark_as_complete)
+
+          # Aldin: 06/27/2016: create new file assembly/attributes and put in replacement for @version_proc_class.import_assembly_attributes
+          # that uses new parsing template 'attributes'
+          # add in assembly attributes
+          assembly_ref_pointer.merge!('attribute' => version_proc_class.import_assembly_attributes(parsed_assembly.val(:Attributes)))
+
+          # add to @db_updates_assemblies['node'] the db update hash that captures the nodes section
+          node_bindings_hash = {}
+          # Aldin: 06/27/2016: create new file assembly/nodes and put in replacement for @version_proc_class.import_nodes
+          # have this only return db hash updates and not error by raising ruby on first error
+          # this wil allow you to remove raise db_updates if ServiceModule::ParsingError.is_error?(db_updates)
+          db_updates = version_proc_class.import_nodes(@container_idh, @module_branch, assembly_ref, parsed_assembly, node_bindings_hash, @component_module_refs, default_assembly_name: assembly_name)
+          raise db_updates if ServiceModule::ParsingError.is_error?(db_updates)
+          @db_updates_assemblies['node'].merge!(db_updates)
+
+
+          @ndx_assembly_hashes[assembly_ref] ||= parsed_assembly
+
+          # Aldin: 06/27/2016: See how to remove this
+          @ndx_version_proc_classes[assembly_ref] ||= version_proc_class
+        end
       end
     end
   end

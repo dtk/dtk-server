@@ -20,7 +20,7 @@ module DTK
     module Import
       class Assemblies < ServiceModule::AssemblyImport
         require_relative('assemblies/assembly')
-        include AssemblyMixin
+        include Assembly::Mixin
 
         def initialize(project, service_module, module_branch)
           module_refs   = ModuleRefs.get_component_module_refs(module_branch)

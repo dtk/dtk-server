@@ -63,6 +63,71 @@ module DTK
         end
       end
 
+      def self.create_ec2_properties?(parsed_assembly)
+        if nodes = parsed_assembly.val(:Nodes)
+          create_ec2_properties_from_node_attributes(nodes)
+        end
+      end
+
+      def self.create_ec2_properties_from_node_attributes(nodes)
+        nodes.each do |node_name, node_content|
+          if attributes = node_content['attributes']
+            image = attributes['image']
+            size  = attributes['size']
+
+            next if image.nil? && size.nil?
+
+            new_attrs = {}
+            new_attrs.merge!('image' => image)
+            new_attrs.merge!('size' => size)
+
+            if components = node_content['components']
+              components = components.is_a?(Array) ? components : [components]
+
+              if index = include_property_component?(components)
+                ec2_properties = components[index]
+                if ec2_properties.is_a?(Hash)
+                  if attributes = ec2_properties.values.first['attributes']
+                    attributes['image'] = image if (image && !attributes['image'])
+                    attributes['size'] = size if (size && !attributes['size'])
+                  else
+                    ec2_properties.merge!('attributes' => new_attrs )
+                  end
+                else
+                  components[index] = {  ec2_properties => { 'attributes' => new_attrs } }
+                end
+              else
+                components << { CommandAndControl.node_property_component() => { 'attributes' => new_attrs } }
+              end
+            end
+          else
+            if components = node_content['components']
+              components = components.is_a?(Array) ? components : [components]
+              components << CommandAndControl.node_property_component() unless include_property_component?(components)
+            else
+              if node_content && node_content.is_a?(Hash)
+                node_content['components'] = [CommandAndControl.node_property_component()]
+              else
+                node_content = { 'components' => [CommandAndControl.node_property_component()] }
+              end
+            end
+          end
+        end
+      end
+
+      def self.include_property_component?(components)
+        property_component = CommandAndControl.node_property_component()
+        components.each do |component|
+          if component.is_a?(Hash)
+            return components.index(component) if component.keys.first.eql?(property_component)
+          else
+            return components.index(component)  if component.eql?(property_component)
+          end
+        end
+
+        false
+      end
+
       private
 
       def self.get_base_service_module(module_branch)

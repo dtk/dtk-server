@@ -776,6 +776,12 @@ module DTK
       rest_ok_response service_instance.set_as_default_target()
     end
 
+    def rest__get_default_target
+      target_service = ret_target_service_with_default()
+      target_assembly_instance = target_service.assembly_instance
+      rest_ok_response target_assembly_instance
+    end
+
     def rest__create_workspace
       workspace_name = ret_request_params(:workspace_name)
 

@@ -184,6 +184,7 @@ shared_context 'Delete all local component module versions' do |component_module
 	it "deletes all local versions of component module #{component_module_name}" do
 		puts "Delete all local component module versions:", '-------------------------------------------'
     	passed = false
+      puts "rm -rf #{component_module_filesystem_location}/#{component_module_name}*"
     	delete_versions_output = `rm -rf #{component_module_filesystem_location}/#{component_module_name}*`
     	passed = !delete_versions_output.include?('cannot remove')
     	puts "Component module #{component_module_name} versions deleted from local filesystem successfully!" if passed == true

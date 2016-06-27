@@ -45,6 +45,21 @@ module AssemblyAndServiceOperationsMixin
    return components_list
  end
 
+ def get_default_target_service
+   puts "Get default target service instance id:", "---------------------------------------"
+   service_id = nil
+   default_target_service_response = send_request('/rest/assembly/get_default_target', {})
+
+   if default_target_service_response['status'] == 'ok'
+     puts "Default target service instance succesfully found."
+     service_id = default_target_service_response['data']['id']
+    else
+    	puts "Default target service was not succesfully found."
+    end
+
+    puts ''
+    service_id
+ end
 
 	def stage_service_with_namespace(namespace)
 		#Get list of assemblies, extract selected assembly, stage service and return its id
@@ -173,6 +188,24 @@ module AssemblyAndServiceOperationsMixin
 		end
 		puts ""
 		return attributes_linked
+	end
+
+	def get_service_id_by_name(service_name)
+		puts "Get service instance id by its name", "-----------------------------------"
+		service_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance'})
+		puts "List of all services and its content:"
+		service_instance = nil
+		filtered_services = service_list['data'].select { |x| x['display_name'] == service_name }
+
+		if filtered_services.length == 1
+			puts "Service instance with name #{service_name} exists: "
+			pretty_print_JSON(filtered_services)
+			service_instance = filtered_services[0]
+		elsif filtered_services.length.zero?
+			puts "Service instance with name #{service_name} does not exist."
+		else
+			puts "Multiple service instances with name #{service_name} exist."
+		end
 	end
 
 	def check_if_service_exists(service_id)

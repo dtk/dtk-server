@@ -132,6 +132,12 @@ shared_context 'Delete services' do |dtk_common|
   end
 end
 
+shared_context 'Delete services with name' do |dtk_common, service_name|
+  it "deletes #{service_name} service" do
+    service_deleted
+  end
+end
+
 shared_context 'List services after delete' do |dtk_common|
   it "doesn't have #{dtk_common.service_name} service in service list" do
     service_exists = dtk_common.check_if_service_exists(dtk_common.service_id)

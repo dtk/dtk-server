@@ -98,6 +98,39 @@ module TargetMixin
     node_exists
   end
 
+  def get_default_target
+    puts "Get default target service instance id:", "---------------------------------------"
+    service_id = nil
+    default_target_service_response = send_request('/rest/assembly/get_default_target', {})
+
+    if default_target_service_response['status'] == 'ok'
+      puts "Default target service instance succesfully found."
+      service_id = default_target_service_response['data']['id']
+    else
+      puts "Default target service was not succesfully found."
+    end
+
+    puts ''
+    service_id
+  end
+
+  def get_default_target_name
+    puts "Get default target service instance id:", "---------------------------------------"
+    service_name = nil
+    default_target_service_response = send_request('/rest/assembly/get_default_target', {})
+
+    if default_target_service_response['status'] == 'ok'
+      puts "Default target service instance succesfully found."
+      service_name = default_target_service_response['data']['display_name']
+      puts service_name
+    else
+      puts "Default target service was not succesfully found."
+    end
+
+    puts ''
+    service_name
+  end
+  
   def stage_service_in_specific_target(target_name)
     #Get list of assemblies, extract selected assembly, stage service to defined target and return its service id
     puts 'Stage service in specific target:', '---------------------------------'

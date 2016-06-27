@@ -59,3 +59,11 @@ shared_context 'Stage service in specific target' do |dtk_common, target_name|
     dtk_common.service_id.should_not eq(nil)
   end
 end
+
+shared_context 'Delete default target' do |dtk_common|
+  it "deletes default target" do
+    target_id = dtk_common.get_default_target
+    target_deleted = dtk_common.delete_and_destroy_service(target_id)
+    target_deleted.should eq(true)
+  end
+end

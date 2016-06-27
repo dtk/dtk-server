@@ -1,11 +1,11 @@
 r8server:
-  server: https://dev17.dtk.io
+  server: https://adnan.dtk.io
   repoman: https://repoman1.internal.r8network.com
   port: 443
-  username: dtk17-client
-  password: r8server
+  username: dtk2
+  password: abhr8server
   log: /home/dtk17/server/application/log/production.log
-  ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCkfRjIJPunPenoNwkCKtKWxwUdlk8TbCAJeF73F5LAeQAEW+ov/Jd0Ewb10plNrxqZsZ4S2hOqi9+5J8KMImLL94pLEDWmGZ+pcfpICleOoMz3is3ticF3INLgv5Vx/eioJoHXBvXXKxWrcBpz2C3eczDdtIa9++Js/JA/jQkRaAXLTkoiIfSwf/tbSNpYtF0xoWGWspqTvoBhJKuVhfOGhKtlUXI24FMy7I0kvOX66m4z+3/CN5xNkZ564uEMGMjrkUoEsPj1DvV4tiQZ7uEUlga1A9vYGmNLogpzqd8UtNLdt9plluV7p68VfLIlQrAGgil3sR3+lWldvUuU+YJL dtk17-client@dtk17-server"
+  ssh_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDqkU+XPOEMrfRCJlNWNRlP49i/gfLlk4in6sYdMw3VXFQ9wR9nmYp48uE3oIHSUF1Kf9JrrSrbwxWKAmD/RxJpj4LTRb96xzVP2mOncXJ83NtheUeBVMANfhNWmOXDRKtIPP20BtgMHUQd1qMbglr64mO1xPkqWP9O9IeqSOggi1nU5/fYV+bJi1+jhZiQ2daNtyATerRMPpZKMl/5I6BlNN0tlHJoducKD1Nyr2vm7cF26Yd2yWH60OQVeGuXbCfkDPp2d6nxhyFivABQjxnrOo0EalFrBkxTxe2EZHKLUqQr7ZfzS2ilqR3YHFAQ5BJbqF1YQrWW/opDyUqZNEid vagrant@vagrant-ubuntu-trusty-64"
   repoman_user: dtk17-client
   repoman_username: dtk-admin
   repoman_password: 

@@ -278,6 +278,7 @@ shared_context 'Delete component module from local filesystem' do |component_mod
   it "deletes #{component_module_name} component module from local filesystem" do
     puts 'Delete component module from local filesystem:', '----------------------------------------------'
     pass = false
+    puts "rm -rf #{component_module_filesystem_location}/#{component_module_name}"
     value = `rm -rf #{component_module_filesystem_location}/#{component_module_name}`
     pass = !value.include?('cannot remove')
     puts "Component module #{component_module_name} deleted from local filesystem successfully!" if pass == true

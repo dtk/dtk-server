@@ -50,4 +50,62 @@ module WorkspaceMixin
     puts ''
     workspace_created
   end
+
+  def delete_workspaces_in_target(target_instance = 'target', assembly_template = 'workspace')
+    puts "Delete workspace instances in #{target_instance} target service instance", "------------------------------------------------------------------------"
+
+    workspace_instance_list = list_existing_workspaces(target_instance, assembly_template)
+    workspace_instances_deleted = false
+  
+    if workspace_instance_list
+      puts "Workspace instances list "
+      extracted_workspace_id_list = workspace_instance_list.map { |x| x['id'] }
+      extracted_workspace_id_list.each do |id| 
+
+      delete_workspace_instance_response = send_request('/rest/assembly/delete', {:assembly_id=>id})
+        if delete_workspace_instance_response['status'] != 'ok'
+          puts "Workspace #{id} was not deleted successfully."          
+          workspace_instances_deleted = false
+          break
+        else 
+          puts "Workspace #{id} was deleted successfully."
+          workspace_instances_deleted = true
+        end
+      end
+      if workspace_instances_deleted
+        puts "Delete of workspace service instances was successful"
+      else
+        puts "Delete of workspace service instances was not successful"
+      end
+    else
+      puts "Could not get workspace service instance list"
+    end
+
+    puts ''
+    workspace_instances_deleted
+  end
+
+  def list_existing_workspaces(target_instance = 'target', assembly_template = 'workspace')
+    # Get list of existing workspace service instances in a specific target
+    puts "List workspace service instances in #{target_instance}:", "-------------------------------------------------------"
+    service_instance_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance', :include_namespaces => true})
+    workspace_instance_list = nil
+
+    if service_instance_list['status'] == 'ok' 
+      workspace_instance_list = service_instance_list['data'].select{ |x| x['assembly_template'] == assembly_template && x['target'] == target_instance }
+      
+      if workspace_instance_list.length.zero?
+        puts "No workspace service instances found for #{target_instance} target instance."
+        workspace_instance_list = nil
+      else
+        puts "#{workspace_instance_list.length} workspace service instances found for #{target_instance} target instance: "
+        pretty_print_JSON(workspace_instance_list) 
+      end
+    else
+      puts "Could not get service instance list."
+    end
+
+    puts ''
+    workspace_instance_list
+  end
 end

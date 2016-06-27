@@ -30,10 +30,7 @@ module DTK
 
         def put_needed_info_into_import_helper!(parsed_assemblies)
           parsed_assemblies.each do |parsed_assembly|
-
-            #  Aldin: 06/27/2016: write CommonModule::BaseService#create_ec2_properties?(parsed_assembly)
-            # to replace @service_module.create_ec2_properties?(hash_content)
-            # @service_module.create_ec2_properties?(hash_content)
+            CommonModule::BaseService.create_ec2_properties?(parsed_assembly)
 
             # Aldin: 06/27/2016: move this logic to the parser
             # @service_module.parse_assembly_wide_components!(hash_content)

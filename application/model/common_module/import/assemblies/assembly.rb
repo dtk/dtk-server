@@ -19,6 +19,7 @@ module DTK
   class CommonModule::Import::Assemblies
     module Assembly
       require_relative('assembly/top')
+      require_relative('assembly/attributes')
 
       module Mixin
         # opts can have keys:
@@ -30,12 +31,6 @@ module DTK
           integer_version = 4 # stubbed this until we remove version_proc_class
           version_proc_class = load_and_return_version_adapter_class(integer_version)
 
-          # add to @db_updates_assemblies['component'] - the db update hash that captures global assembly attributes
-          # Aldin: 06/27/2016: did partial conversion of @version_proc_class.import_assembly_top to use
-          #  Assembly::Top.db_update_hash_value
-          # Looking for you to finsh this and to convert @version_proc_class.import_nodes
-          # to  Assembly::Nodes. in same way
-          #  db_updates_cmp = @version_proc_class.import_assembly_top(@assembly_ref, parsed_assembly, @module_branch, @module_name, default_assembly_name: @assembly_name)
           db_update_hash = Assembly::Top.db_update_hash(parsed_assembly, @module_branch, @module_name)
           @db_updates_assemblies['component'].merge!(assembly_ref => db_update_hash)
           assembly_ref_pointer = @db_updates_assemblies['component'][assembly_ref]
@@ -46,10 +41,8 @@ module DTK
           workflows_db_update_hash  = version_proc_class.import_task_templates(parsed_assembly)
           assembly_ref_pointer.merge!('task_template' => workflows_db_update_hash.mark_as_complete)
 
-          # Aldin: 06/27/2016: create new file assembly/attributes and put in replacement for @version_proc_class.import_assembly_attributes
-          # that uses new parsing template 'attributes'
-          # add in assembly attributes
-          assembly_ref_pointer.merge!('attribute' => version_proc_class.import_assembly_attributes(parsed_assembly.val(:Attributes)))
+          asembly_attributes_hash = Assembly::Attributes.db_update_hash(parsed_assembly.val(:Attributes))
+          assembly_ref_pointer.merge!('attribute' => asembly_attributes_hash)
 
           # add to @db_updates_assemblies['node'] the db update hash that captures the nodes section
           node_bindings_hash = {}

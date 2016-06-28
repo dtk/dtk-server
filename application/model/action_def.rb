@@ -68,6 +68,14 @@ module DTK
       parse_and_reify_content?().functions()
     end
 
+    def docker
+      require 'debugger'
+      Debugger.wait_connection = true
+      Debugger.start_remote
+      debugger
+      parse_and_reify_content?().docker()
+    end
+
     def content
       parse_and_reify_content?()
     end

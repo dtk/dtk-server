@@ -32,6 +32,10 @@ module DTK; class Task
       end
 
       def create_subtask_instances(task_mh, assembly_idh)
+        require 'debugger'
+        Debugger.wait_connection = true
+        Debugger.start_remote
+        debugger
         ret = []
         return ret if empty?()
         all_actions = []

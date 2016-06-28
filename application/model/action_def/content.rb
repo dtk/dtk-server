@@ -39,6 +39,9 @@ module DTK; class ActionDef
       @functions = (self[Constant::Functions] || []).map do |serialized_command|
         Command.parse(serialized_command)
       end
+      @docker = (self[Constant::Docker] || []).map do |serialized_command|
+        Command.parse(serialized_command)
+      end
       self
     end
   end

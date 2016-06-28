@@ -20,6 +20,7 @@ module DTK; class ActionDef; class Content
     Commands = :commands
     Functions = :functions
     FilePositioning = :file_positioning
+    Docker = :docker
     module Command
       RunRegexp = /^RUN\s+(.+$)/
     end

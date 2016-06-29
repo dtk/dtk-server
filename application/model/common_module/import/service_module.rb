@@ -18,8 +18,8 @@
 module DTK
   class CommonModule
     module Import
-      class Assemblies < ServiceModule::AssemblyImport
-        require_relative('assemblies/assembly')
+      class ServiceModule < ::DTK::ServiceModule::AssemblyImport
+        require_relative('service_module/assembly')
         include Assembly::Mixin
 
         def initialize(project, service_module, module_branch)

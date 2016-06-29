@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule::Import::Assemblies
+  class CommonModule::Import::ServiceModule
     module Assembly
       module Top
         def self.db_update_hash(parsed_assembly, module_branch, module_name)

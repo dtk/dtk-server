@@ -52,7 +52,7 @@ module DTK
           module_branch.set_dsl_parsed!(false)
 
           base_service_module = get_base_service_module(module_branch)
-          import_helper = Import::Assemblies.new(project, base_service_module, module_branch)
+          import_helper = Import::ServiceModule.new(project, base_service_module, module_branch)
           import_helper.put_needed_info_into_import_helper!(parsed_assemblies)
           import_helper.import_into_model
           # TODO: dont need set_module_refs_and_workflows?; only applicable if opts passed and

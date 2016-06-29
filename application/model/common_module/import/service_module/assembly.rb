@@ -17,7 +17,7 @@
 #
 module DTK
   class CommonModule
-    class Import::Assemblies
+    class Import::ServiceModule
       module Assembly
         require_relative('assembly/top')
         require_relative('assembly/attributes')

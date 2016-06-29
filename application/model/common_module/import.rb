@@ -19,7 +19,7 @@ module DTK
   class CommonModule
     # This module contains logic to import parsed dsl into the object model
     module Import
-      require_relative('import/assemblies')
+      require_relative('import/service_module')
     end
   end
 end

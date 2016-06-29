@@ -317,10 +317,6 @@ module DTK
     end
 
     def config_agent_type
-      require 'debugger'
-      Debugger.wait_connection = true
-      Debugger.start_remote
-      debugger
       case (self[:external_ref] || {})[:type]
        when 'chef_recipe' then 'chef'
        when 'puppet_class', 'puppet_definition' then 'puppet'

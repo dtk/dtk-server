@@ -139,8 +139,7 @@ module DTK
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         mc_info = mc_info_for_config_agent(config_agent)
-        # mc_info = { agent: 'docker_agent', action: 'run' }
-        # msg_content = "{'module_name':'r8::stdlib','action_name':'create','top_task_id':'100000001','task_id':'100000002', 'docker_image':'getdtk/test', 'docker_command':'whoami', 'execution_type':'bash', 'dockerfile':'FROM ubuntu:12.04\nRUN\nRUN apt-get upgrade -y\nRUN gem install aws-sdk'}"
+
         async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
       end
 

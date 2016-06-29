@@ -161,10 +161,7 @@ module DTK; class Task
        else
         fail Error.new("Unexpected component_type (#{component_type})")
       end
-require 'debugger'
-Debugger.wait_connection = true
-Debugger.start_remote
-debugger
+
       opts_tt = opts.merge(component_type_filter: component_type)
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, opts_tt)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())

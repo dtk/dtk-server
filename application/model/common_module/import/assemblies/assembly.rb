@@ -21,7 +21,7 @@ module DTK
       module Assembly
         require_relative('assembly/top')
         require_relative('assembly/attributes')
-        
+
         module Mixin
           # opts can have keys:
           #   :module_version
@@ -33,7 +33,7 @@ module DTK
 
             # Aldin: 06/27/2016: move this logic to the parser
             # @service_module.parse_assembly_wide_components!(hash_content)
-            
+
             assembly_name = parsed_assembly.req(:Name)
             assembly_ref = @service_module.assembly_ref(assembly_name, opts[:module_version])
             # Aldin: 06/27/2016: remove need for version_proc_class
@@ -53,7 +53,7 @@ module DTK
             assembly_attrs_db_update_hash = Assembly::Attributes.db_update_hash(parsed_assembly.val(:Attributes) || [])
             # Aldin: 06/27/2016: Moving mark as complete to this level
             assembly_ref_pointer.merge!('attribute' => assembly_attrs_db_update_hash.mark_as_complete)
-            
+
             # add to @db_updates_assemblies['node'] the db update hash that captures the nodes section
             # Aldin: 06/27/2016: create new file assembly/nodes and put in replacement for @version_proc_class.import_nodes
             # have this only return db hash updates and not error by raising ruby on first error
@@ -66,6 +66,7 @@ module DTK
               raise db_updates if ServiceModule::ParsingError.is_error?(db_updates)
               @db_updates_assemblies['node'].merge!(db_updates)
             end
+
             
             @ndx_assembly_hashes[assembly_ref] ||= parsed_assembly
             
@@ -77,4 +78,3 @@ module DTK
     end
   end
 end
-

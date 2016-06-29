@@ -72,7 +72,7 @@ module DTK; class ServiceModule
           end
 
         if workflows_to_parse
-          ret = workflows_to_parse.inject(ret) do  |h, r| 
+          ret = workflows_to_parse.inject(ret) do  |h, r|
             workflow_hash = r[:workflow] || {}
             # we explicitly want to delete from workflow_hash; workflow_action can be nil
             action_under_key = (workflow_hash.kind_of?(Hash) ? workflow_hash.delete(Constant::WorkflowAction) : nil)
@@ -88,8 +88,8 @@ module DTK; class ServiceModule
       def self.parse_workflow(workflow_hash, workflow_action, assembly_hash, opts = {})
         raise_error_if_parsing_error(workflow_hash, workflow_action, opts)
         check_if_invalid_component_in_workflow(assembly_hash, workflow_hash)
-        
-        normalized_workflow_action = 
+
+        normalized_workflow_action =
           if opts[:service_module_workflow]
             normalized_service_module_action(workflow_hash, workflow_action)
           else

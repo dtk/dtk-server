@@ -24,7 +24,7 @@ module DTK
           update_component_module_refs_from_parsed_common_module(module_branch, parsed_common_module)
           CommonModule::BaseService.update_assemblies_from_parsed_common_module(project, module_branch, parsed_common_module)
         end
-        
+
         private
 
         def self.update_component_module_refs_from_parsed_common_module(module_branch, parsed_common_module)
@@ -42,7 +42,7 @@ module DTK
             component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
           end
         end
-        
+
       end
     end
   end

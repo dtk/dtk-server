@@ -606,7 +606,11 @@ module DTK
     def add_branch(new_branch, opts = {})
       if opts[:empty]
         git_command__create_empty_branch(new_branch)
+<<<<<<< HEAD
         git_command__empty_commit 
+=======
+        git_command__empty_commit
+>>>>>>> docker-executor-temp
       else
         checkout(opts[:sha] || @branch) do
           git_command__add_branch(new_branch)

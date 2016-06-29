@@ -67,7 +67,7 @@ module DTK
         # - serialized_content has an assembly section
         # - the file 'assembly_dsl_path' exists
         new_commit_sha = nil
-        if opts[:mode] == :update and 
+        if opts[:mode] == :update and
             serialized_content_has_assembly_section?(serialized_content) and
             file_exists?(assembly_dsl_path)
             new_commit_sha = serialize_and_save_to_repo__fold_into_existing?(assembly_dsl_path, serialized_content)
@@ -91,7 +91,7 @@ module DTK
 
         unless instance_lock = Assembly::Instance::Lock.get(assembly_instance)
           Log.info('Legacy can have Assembly::Instance::Lock.get(assembly_instance) be nil')
-          return ret 
+          return ret
         end
 
         assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance)
@@ -118,7 +118,7 @@ module DTK
 
         RepoManager.file_changed_since_specified_sha(initial_sha, assembly_dsl_path, @service_module_branch)
       end
-      
+
       def file_exists?(path)
         RepoManager.file_exists?(path, @service_module_branch)
       end

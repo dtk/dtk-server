@@ -320,6 +320,7 @@ module DTK
        when 'puppet_class', 'puppet_definition' then 'puppet'
        when 'bash_command' then 'dtk_provider'
        when 'ruby_function' then 'ruby_function'
+       when 'docker' then 'docker'
        else 'no_op'
       end
     end

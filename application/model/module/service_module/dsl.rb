@@ -213,7 +213,7 @@ module DTK
         service_module_workflows = update_service_module_workflows_from_dsl(module_branch)
         return service_module_workflows if ParsingError.is_error?(service_module_workflows)
 
-        assembly_workflows, parsed_dsl, parsing_error = nil 
+        assembly_workflows, parsed_dsl, parsing_error = nil
         begin
           assembly_workflows, module_refs, parsed_dsl = update_assemblies_from_dsl(module_branch, module_refs, opts)
          rescue => e
@@ -372,11 +372,11 @@ module DTK
           set?(opts) do |parsed_dsl_handle|
             parsed_dsl_update = {
               display_name:       module_name,
-              module_refs:        module_refs, 
+              module_refs:        module_refs,
               assembly_workflows: assembly_workflows
             }
             parsed_dsl_handle.add(parsed_dsl_update)
-          end 
+          end
         end
 
         private
@@ -403,7 +403,7 @@ module DTK
           workflow_name = (if meta_file =~ regexp then Regexp.last_match(1); end)
           block.call(meta_file, workflow_name)
         end
-      end      
+      end
 
       def validate_service_instance_references(service_instances, module_branch)
         assembly_names = []
@@ -571,7 +571,7 @@ module DTK
                     ec2_properties.merge!('attributes' => new_attrs )
                   end
                 else
-                  components[index] = {  ec2_properties => { 'attributes' => new_attrs } } 
+                  components[index] = {  ec2_properties => { 'attributes' => new_attrs } }
                 end
               else
                 components << { CommandAndControl.node_property_component() => { 'attributes' => new_attrs } }

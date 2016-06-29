@@ -21,20 +21,21 @@ module DTK
       def self.create_repo(assembly_instance)
         new(assembly_instance).create_repo
       end
-      
+
       def create_repo
         module_branch = get_or_create_service_instance_branch
         ModuleRepoInfo.new(module_branch)
       end
-      
+
       def self.create_empty_module(project, local_params, opts = {})
         opts = opts.merge(return_module_branch: true)
         module_branch = create_module(project, local_params, opts)
         ModuleRepoInfo.new(module_branch)
       end
-      
+
+
       private
-      
+
       def get_or_create_service_instance_branch
         # TODO: DTK-2445: to co-exist with assembly_module form should we choose a different branch name
         # The method get_or_create_assembly_branch uses the name that assembly_module does
@@ -43,4 +44,3 @@ module DTK
     end
   end
 end
-

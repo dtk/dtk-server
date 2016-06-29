@@ -23,7 +23,7 @@ module DTK; class ActionDef
     r8_nested_require('content', 'command')
     r8_nested_require('content', 'template_processor')
 
-    attr_reader :commands, :functions
+    attr_reader :commands, :functions, :docker
     def initialize(hash_content)
       super()
       replace(hash_content)
@@ -37,6 +37,9 @@ module DTK; class ActionDef
         Command.parse(serialized_command)
       end
       @functions = (self[Constant::Functions] || []).map do |serialized_command|
+        Command.parse(serialized_command)
+      end
+      @docker = (self[Constant::Docker] || []).map do |serialized_command|
         Command.parse(serialized_command)
       end
       self

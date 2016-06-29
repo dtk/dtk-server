@@ -40,7 +40,7 @@ opts[:force_parse] = opts[:force_pull] = true
         # TODO: stub value for ret; might not need to rerun any results since any parsing error wll thro an error
         ret
       end
-      
+
       private
 
       # returns [module_branch, pull_was_needed]

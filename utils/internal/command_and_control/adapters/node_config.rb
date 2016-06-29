@@ -19,6 +19,10 @@ module DTK
   class CommandAndControl
     class NodeConfig < self
       def self.mc_info_for_config_agent(config_agent)
+        require 'debugger'
+        Debugger.wait_connection = true
+        Debugger.start_remote
+        debugger
       type = config_agent.type()
         ConfigAgentTypeToMCInfo[type] || fail(Error.new("unexpected config adapter: #{type}"))
       end
@@ -26,7 +30,8 @@ module DTK
       ConfigAgentTypeToMCInfo = {
         puppet: { agent: 'puppet_apply', action: 'run' },
         dtk_provider: { agent: 'action_agent', action: 'run_command' },
-        chef: { agent: 'chef_solo', action: 'run' }
+        chef: { agent: 'chef_solo', action: 'run' },
+        docker: { agent: 'docker_agent', action: 'run' },
       }
     end
   end

@@ -139,6 +139,7 @@ module DTK
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         mc_info = mc_info_for_config_agent(config_agent)
+
         async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
       end
 

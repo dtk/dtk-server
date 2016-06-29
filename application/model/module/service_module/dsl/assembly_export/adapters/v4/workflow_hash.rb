@@ -19,7 +19,7 @@ module DTK; class ServiceModule
   class AssemblyExport; class V4
     module WorkflowHash
       include Task::Template::Serialization
-      
+
       def self.workflow_hash(input_hash_task_templates)
         input_hash_task_templates.inject(SimpleOrderedHash.new) do |h, (internal_task_action_name, input_hash)|
           task_action_name = Task::Template.task_action_external_name(internal_task_action_name)
@@ -34,7 +34,7 @@ module DTK; class ServiceModule
 
       def self.task_body(input_hash)
         input_hash.inject(input_hash.class.new) do |h, (k, input_info)|
-          info =  
+          info =
             case k
               when :subtasks
                 input_info.map { |input_subtask| subtask(input_subtask) }

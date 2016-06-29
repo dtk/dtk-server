@@ -80,7 +80,7 @@ module DTK; class ServiceModule
           error_or_nil = input_port_hash
           return([error_or_nil, input_port_hash, output_port_hash])
         end
-        
+
         output_port_hash = output.matching_port(ports, opts_matching_port.merge(is_output: true))
         if ParsingError.is_error?(output_port_hash)
           error_or_nil = output_port_hash

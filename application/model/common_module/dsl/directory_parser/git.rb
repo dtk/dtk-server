@@ -39,7 +39,7 @@ module DTK
           end
           ret
         end
-        
+
         private
 
         def list_files_in_repo

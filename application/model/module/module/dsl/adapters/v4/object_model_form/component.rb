@@ -55,9 +55,12 @@ module DTK; class ModuleDSL; class V4
       def set_action_def_and_external_ref!(ret, input_hash, cmp, _context = {})
         create_action = nil
         function = nil
+        docker = nil
         if action_def = ActionDef.new(cmp).convert_action_defs?(input_hash)
           if validate_action_def_function(action_def)
             function = action_def.delete_create_action!()
+          elsif validate_action_def_docker(action_def)
+            docker = action_def.delete_create_action!()
           else
             create_action = action_def.delete_create_action!()
           end
@@ -68,12 +71,14 @@ module DTK; class ModuleDSL; class V4
         end
 
         ret['action_def'] = { 'create' => function } if function
+        ret['action_def'] = { 'create' => docker } if docker
 
         # If ret['external_ref'] is nil that means to use the 'no_op' config adapter
         ret['external_ref'] =
           if input_hash['external_ref'] then external_ref(input_hash['external_ref'], cmp) # this is for legacy
           elsif create_action then external_ref_from_create_action?(create_action, cmp, ret)
           elsif function then external_ref_from_function?(function, cmp)
+          elsif docker then external_ref_from_docker?(docker, cmp)
           end
         ret
       end
@@ -97,10 +102,25 @@ module DTK; class ModuleDSL; class V4
         end
       end
 
+      def external_ref_from_docker?(docker, _cmp)
+        if DTK::ActionDef::Constant.matches?(docker[:method_name], :CreateActionName)
+          if docker[:content].respond_to?(:external_ref_from_docker)
+            docker[:content].external_ref_from_docker()
+          end
+        end
+      end
+
       def validate_action_def_function(action_def)
         if kv = DTK::ActionDef::Constant.matching_key_and_value?(action_def, :CreateActionName)
           create = kv.values.first
           create[:content] && create[:content].key?(:functions)
+        end
+      end
+
+      def validate_action_def_docker(action_def)
+        if kv = DTK::ActionDef::Constant.matching_key_and_value?(action_def, :CreateActionName)
+          create = kv.values.first
+          create[:content] && create[:content].key?(:docker)
         end
       end
     end

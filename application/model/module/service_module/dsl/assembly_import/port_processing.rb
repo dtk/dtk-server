@@ -44,18 +44,18 @@ module DTK; class ServiceModule
       def self.create_assembly_template_ports?(link_defs_info, opts = {})
         create_assembly_template_ports__private?(link_defs_info, opts)
       end
-      
+
       private
 
       def self.add_needed_ports(assembly_idh)
         ret = []
         assembly = assembly_idh.create_object()
         link_defs_info = LinkDef::Info.get_link_def_info(assembly)
-        
+
         create_opts = { returning_sql_cols: [:link_def_id, :id, :display_name, :type, :connected] }
         create_assembly_template_ports__private?(link_defs_info, create_opts)
       end
-      
+
       def self.create_assembly_template_ports__private?(link_defs_info, opts = {})
         ret = []
         return ret if link_defs_info.empty?
@@ -78,7 +78,7 @@ module DTK; class ServiceModule
           end
           end
         end
-        
+
         # add the remote ports
         link_defs_info.generate_link_def_link_pairs do |link_def, link|
           remote_component_type = link[:remote_component_type]
@@ -96,13 +96,13 @@ module DTK; class ServiceModule
             end
           end
         end
-        
+
         new_rows = []
         ndx_rows.values.each do |r|
           create_port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
           new_rows += Model.create_from_rows(create_port_mh, r[:ndx_create_rows].values, opts)
         end
-        
+
         # delete any existing ports that match what is being put in now
         port_idhs_to_delete = []
         ndx_existing_ports.each_value do |inner_ndx_ports|
@@ -115,7 +115,7 @@ module DTK; class ServiceModule
         unless port_idhs_to_delete.empty?()
           Model.delete_instances(port_idhs_to_delete)
         end
-        
+
         # for new rows need to splice in node info
       unless new_rows.empty?
         sp_hash = {
@@ -129,7 +129,7 @@ module DTK; class ServiceModule
       end
         ret + new_rows
       end
-      
+
       # returns hash where each key value has form
       # PortID:
       #  port: PORT
@@ -138,13 +138,13 @@ module DTK; class ServiceModule
         ndx_existing_ports = {}
         nodes = link_defs_info.map { |ld| ld[:node] }
         return ndx_existing_ports if nodes.empty?
-        
+
         # make sure duplicate ports are pruned; tried to use :duplicate_refs => :prune_duplicates but bug; so explicitly looking for existing ports
         sp_hash = {
           cols: ([:node_node_id, :ref, :node] + (opts[:returning_sql_cols] || [])).uniq,
           filter: [:oneof, :node_node_id, nodes.map { |n| n[:id] }]
         }
-        
+
         Model.get_objs(port_mh, sp_hash, keep_ref_cols: true).each do |r|
           (ndx_existing_ports[r[:node_node_id]] ||= {})[r[:ref]] = { port: r, matched: false }
         end

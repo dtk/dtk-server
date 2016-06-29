@@ -36,7 +36,7 @@ module DTK
           end
           pp ['converted from parse form to db hash update form', @db_updates_assemblies]
         end
-        
+
         def import_into_model
           import
         end
@@ -45,4 +45,3 @@ module DTK
     end
   end
 end
-

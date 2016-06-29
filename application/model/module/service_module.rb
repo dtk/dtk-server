@@ -404,7 +404,7 @@ module DTK
       end
       ret
     end
-    
+
     def update_model_from_dsl__assembly_module(assembly, module_branch, diffs_summary, opts = {})
       opts_finalize = Aux.hash_subset(opts, [:task_action])
       ParsingError.trap(only_return_error: true) do

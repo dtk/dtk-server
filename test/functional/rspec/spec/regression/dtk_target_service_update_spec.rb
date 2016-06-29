@@ -19,7 +19,7 @@ require './lib/service_module_versions_spec'
 
 target_name = 'target'
 workspace_assembly_template = 'workspace'
-module_dir = '~/dtk/'
+module_dir = '~/dtk'
 namespace = 'aws'
 ec2_component_module_name = 'ec2'
 image_component_module_name = 'image_aws'
@@ -58,7 +58,7 @@ describe 'DTK Target Service Instance update' do
   end
 
   context "Delete #{namespace}/#{network_service_module_name} service module from local filesystem" do
-    include_context 'Delete all local service module versions', "#{module_dir}/service_modules", "#{namespace}/#{network_service_module_name}"
+    include_context 'Delete all local service module versions', "#{module_dir}/service_modules/#{namespace}", "#{network_service_module_name}"
   end
 
   context "Delete #{namespace}/#{image_component_module_name} component modules" do
@@ -66,7 +66,7 @@ describe 'DTK Target Service Instance update' do
   end
 
   context "Delete #{namespace}/#{image_component_module_name} component modules from local filesystem" do
-    include_context 'Delete all local component module versions', "#{module_dir}/image_component_module_name", "#{namespace}/#{image_component_module_name}"
+    include_context 'Delete all local component module versions', "#{module_dir}/component_modules/#{namespace}/", "#{image_component_module_name}"
   end
   
   context "Import #{namespace}#{network_service_module_name} service module" do

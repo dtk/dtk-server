@@ -51,15 +51,19 @@ module WorkspaceMixin
     workspace_created
   end
 
-  def delete_workspaces_in_target(target_instance = 'target', assembly_template = 'workspace')
+  def delete_workspaces_in_target(target_instance = 'target', assembly_template = 'workspace', workspace_name = 'workspace')
     puts "Delete workspace instances in #{target_instance} target service instance", "------------------------------------------------------------------------"
-
-    workspace_instance_list = list_existing_workspaces(target_instance, assembly_template)
+    
+    workspace_instance_list = []
+    workspace_instance_list = list_services_by_property("assembly_template", assembly_template)
+    workspace_instance_list += list_services_by_property("display_name", workspace_name)
     workspace_instances_deleted = false
   
     if workspace_instance_list
       puts "Workspace instances list "
-      extracted_workspace_id_list = workspace_instance_list.map { |x| x['id'] }
+      extracted_workspace_id_list = workspace_instance_list.select { |x| x['target'] == target_instance }
+      extracted_workspace_id_list = extracted_workspace_id_list.map { |x| x['id'] }
+      extracted_workspace_id_list.uniq!
       extracted_workspace_id_list.each do |id| 
 
       delete_workspace_instance_response = send_request('/rest/assembly/delete', {:assembly_id=>id})

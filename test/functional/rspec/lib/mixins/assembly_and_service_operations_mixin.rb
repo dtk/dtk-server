@@ -804,6 +804,29 @@ module AssemblyAndServiceOperationsMixin
 		return response
 	end
 
+	def list_services_by_property(key, value)
+				# Get list of existing workspace service instances in a specific target
+    puts "List service instances with #{value} value for #{key} property:", "----------------------------------------------------------------------------------"
+    service_instance_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance', :include_namespaces => true})
+    filtered_services = nil
+
+    if service_instance_list['status'] == 'ok' 
+      filtered_services = service_instance_list['data'].select{ |x| x[key].include? value }
+      
+      if filtered_services.length.zero?
+        puts "No service instances with #{value} value for #{key} property been found."
+        filtered_services = nil
+      else
+        puts "#{filtered_services.length} service instances with #{value} value for #{key} property found: "
+      end
+    else
+      puts "Could not get service instance list."
+    end
+
+    puts ''
+    filtered_services
+  end
+
 	def list_ssh_access(service_id, system_user, rsa_pub_name, nodes)
 		puts "List ssh access:", "---------------------"
 		sleep 5

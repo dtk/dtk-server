@@ -223,7 +223,7 @@ git_server = "<%= git_server_url %>"
 <% if pbuilderid %>
 pbuilderid = <%= pbuilderid %>
 <% else %>
-# pbuidlerid =
+# pbuilderid =
 <% end %>
 private_key = /etc/dtk/ssh/arbiter
 EOF

@@ -95,7 +95,3 @@ module DTK
     end
   end
 end
-<<<<<<< HEAD
-
-=======
->>>>>>> docker-executor-temp

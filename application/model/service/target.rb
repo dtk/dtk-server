@@ -63,21 +63,13 @@ module DTK
         rescue => e
           # delete target service instance created above
           Target::Instance.delete_and_destroy(target)
-<<<<<<< HEAD
           raise e 
-=======
-          raise e
->>>>>>> docker-executor-temp
         end
       end
 
       # The method stage_service stages the assembly_template wrt this, which is a target service instance
       def stage_service(assembly_template, opts = Opts.new)
-<<<<<<< HEAD
         unless is_converged? 
-=======
-        unless is_converged?
->>>>>>> docker-executor-temp
           fail ErrorUsage "Cannot stage a service instance in a target '#{target.get_field?(:display_name)}' that is not converged. Please go to target service instance, converge it and then retry this command"
         end
         new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))

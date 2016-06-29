@@ -19,10 +19,6 @@ module DTK
   class CommandAndControl
     class NodeConfig < self
       def self.mc_info_for_config_agent(config_agent)
-        require 'debugger'
-        Debugger.wait_connection = true
-        Debugger.start_remote
-        debugger
       type = config_agent.type()
         ConfigAgentTypeToMCInfo[type] || fail(Error.new("unexpected config adapter: #{type}"))
       end

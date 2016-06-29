@@ -25,10 +25,11 @@ module DTK
       #   :force_pull - Boolean (default false) 
       #   :force_parse - Boolean (default false) 
       def self.update_from_repo(project, local_params, repo_name, commit_sha, opts = {})
+# for testing
+opts[:force_parse] = opts[:force_pull] = true
+
         ret = ModuleDSLInfo.new
         module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, opts)
-# for testing
-opts[:force_parse] = true
         parse_needed = (opts[:force_parse] || !module_branch.dsl_parsed?)
         return ret unless parse_needed || pull_was_needed
 

@@ -30,15 +30,11 @@ module DTK
 
         def put_needed_info_into_import_helper!(parsed_assemblies)
           parsed_assemblies.each do |parsed_assembly|
-            CommonModule::BaseService.create_ec2_properties?(parsed_assembly)
-
-            # Aldin: 06/27/2016: move this logic to the parser
-            # @service_module.parse_assembly_wide_components!(hash_content)
-
             process_assembly!(parsed_assembly)
             # TODO: dont need unless have opts[:ret_parsed_dsl] is set to true
             # @parent_class::SetParsedDSL.set_assembly_raw_hash?(assembly_name, hash_content, opts)
           end
+          pp ['converted from parse form to db hash update form', @db_updates_assemblies]
         end
 
         def import_into_model

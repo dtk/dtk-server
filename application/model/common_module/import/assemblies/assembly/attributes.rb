@@ -20,22 +20,16 @@ module DTK
     module Assembly
       module Attributes
         def self.db_update_hash(parsed_attributes)
-          ret = DBUpdateHash.new()
-
-          parsed_attributes.each do |attribute|
-            attr_name = attribute[:name]
-            attr_val = attribute[:value]
-
-            ref = attr_name
-
-            ret[ref] = {
-              'display_name' => attr_name,
+          parsed_attributes.inject(DBUpdateHash.new) do |h, parsed_attribute|
+            attr_name    = parsed_attribute.req(:Name)
+            attr_val     = parsed_attribute.val(:Value)
+            attr_content = {
+              'display_name'   => attr_name,
               'value_asserted' => attr_val,
-              'data_type' => Attribute::Datatype.datatype_from_ruby_object(attr_val)
+              'data_type'      => Attribute::Datatype.datatype_from_ruby_object(attr_val)
             }
+            h.merge(attr_name => attr_content)
           end
-
-          ret.mark_as_complete()
         end
       end
     end

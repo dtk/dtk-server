@@ -498,7 +498,7 @@ module DTK
         [image, size]
       end
 
-      def include_property_component?(components)
+      def include_node_property_component?(components)
         property_component = CommandAndControl.node_property_component()
         components.each do |component|
           if component.is_a?(Hash)
@@ -522,7 +522,7 @@ module DTK
             components = hash_node['components']
             components = components.is_a?(Array) ? components : [components]
 
-            if index = include_property_component?(components)
+            if index = include_node_property_component?(components)
               ec2_properties = components[index]
               if ec2_properties.is_a?(Hash)
                 if attributes = ec2_properties.values.first['attributes']
@@ -561,7 +561,7 @@ module DTK
             if components = node_content['components']
               components = components.is_a?(Array) ? components : [components]
 
-              if index = include_property_component?(components)
+              if index = include_node_property_component?(components)
                 ec2_properties = components[index]
                 if ec2_properties.is_a?(Hash)
                   if attributes = ec2_properties.values.first['attributes']
@@ -580,7 +580,7 @@ module DTK
           else
             if components = node_content['components']
               components = components.is_a?(Array) ? components : [components]
-              components << CommandAndControl.node_property_component() unless include_property_component?(components)
+              components << CommandAndControl.node_property_component() unless include_node_property_component?(components)
             else
               if node_content && node_content.is_a?(Hash)
                 node_content['components'] = [CommandAndControl.node_property_component()]

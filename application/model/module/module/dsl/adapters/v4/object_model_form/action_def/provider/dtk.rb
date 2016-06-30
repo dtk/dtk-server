@@ -30,6 +30,7 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         Variations::Functions = ['functions', 'function']
 
         Docker = 'docker'
+        Variations::Docker = ['docker_image', 'docker_run_params']
       end
 
       def self.matches_input_hash?(input_hash)
@@ -43,7 +44,8 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
           elsif functions = Constant.matches?(input_hash, :Functions)
             { functions: functions.is_a?(Array) ? functions : [functions] }
           elsif docker = Constant.matches?(input_hash, :Docker)
-            { docker: docker.is_a?(Array) ? docker : [docker] }
+            # { docker: docker.is_a?(Array) ? docker : [docker] }
+            { docker: [input_hash]}
           end
 
         stdout_err = input_hash['stdout_and_stderr']

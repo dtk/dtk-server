@@ -56,6 +56,7 @@ module DTK; class ModuleDSL; class V4
         create_action = nil
         function = nil
         docker = nil
+
         if action_def = ActionDef.new(cmp).convert_action_defs?(input_hash)
           if validate_action_def_function(action_def)
             function = action_def.delete_create_action!()
@@ -70,8 +71,21 @@ module DTK; class ModuleDSL; class V4
           ret['action_def'] = action_def
         end
 
-        ret['action_def'] = { 'create' => function } if function
-        ret['action_def'] = { 'create' => docker } if docker
+        if function
+          if ret['action_def']
+            ret['action_def']['create'] = function
+          else
+            ret['action_def'] = { 'create' => function }
+          end
+        end
+
+        if docker
+          if ret['action_def']
+            ret['action_def']['create'] = docker
+          else
+            ret['action_def'] = { 'create' => docker }
+          end
+        end
 
         # If ret['external_ref'] is nil that means to use the 'no_op' config adapter
         ret['external_ref'] =

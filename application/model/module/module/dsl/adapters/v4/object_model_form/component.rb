@@ -72,19 +72,11 @@ module DTK; class ModuleDSL; class V4
         end
 
         if function
-          if ret['action_def']
-            ret['action_def']['create'] = function
-          else
-            ret['action_def'] = { 'create' => function }
-          end
+          (ret['action_def'] ||= {}).merge!('create' => function)
         end
 
         if docker
-          if ret['action_def']
-            ret['action_def']['create'] = docker
-          else
-            ret['action_def'] = { 'create' => docker }
-          end
+          (ret['action_def'] ||= {}).merge!('create' => docker)
         end
 
         # If ret['external_ref'] is nil that means to use the 'no_op' config adapter

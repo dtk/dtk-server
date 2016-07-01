@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule::DSL
-    class FileParser < ::DTK::DSL::FileParser
+  module CommonModule::DSL::Parse
+    class FileObj < ::DTK::DSL::FileObj
     end
   end
 end

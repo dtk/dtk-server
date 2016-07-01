@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule::DSL
+  module CommonModule::DSL::Parse
     class DirectoryParser
       class Git < self
         def initialize(file_types, module_branch)

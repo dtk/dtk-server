@@ -17,7 +17,16 @@
 #
 module DTK
   module CommonModule::DSL
-    class FileType < ::DTK::DSL::FileType
-    end
-  end
+   module Parse
+     require_relative('parse/file_type')
+     require_relative('parse/file_obj')
+     require_relative('parse/directory_parser')
+     require_relative('parse/file_parser')
+
+     def self.matching_common_module_file_obj?(module_branch)
+       DirectoryParser.matching_file_obj?(FileType::CommonModule, branch: module_branch)
+     end
+
+   end
+ end
 end

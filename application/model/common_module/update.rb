@@ -52,8 +52,7 @@ opts[:force_parse] = opts[:force_pull] = true
       end
 
       def self.dsl_file_obj_from_repo(module_branch)
-        DSL::DirectoryParser.matching_file_obj?(DSL::FileType::CommonModule, branch: module_branch) ||
-          fail(Error, "Unexpected that 'dsl_file_obj' is nil")
+        DSL::Parse.matching_common_module_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
       end
 
       # if module does not exist, create it

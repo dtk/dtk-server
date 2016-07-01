@@ -16,10 +16,8 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule
-    module DSL
-      require_relative('dsl/parse')
-      require_relative('dsl/generate')
-    end
-  end
+  module CommonModule::DSL
+   module Generate
+   end
+ end
 end

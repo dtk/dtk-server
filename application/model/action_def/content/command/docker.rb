@@ -18,16 +18,17 @@
 module DTK; class ActionDef; class Content
   class Command
     class Docker < self
-      attr_reader :docker_image, :docker_file_template
+      attr_reader :docker_image, :docker_file_template, :docker_run_params
 
-      def initialize(docker_image, docker_file_template)
+      def initialize(docker_image, docker_file_template, docker_run_params)
         @docker_image = docker_image
         @docker_file_template = docker_file_template
+        @docker_run_params = docker_run_params
       end
 
       def self.parse?(serialized_command)
-        if serialized_command.is_a?(Hash) && (serialized_command.key?(:docker_image) || serialized_command.key?(:docker_file_template))
-          new(serialized_command[:docker_image], serialized_command[:docker_file_template])
+        if serialized_command.is_a?(Hash) && (serialized_command.key?(:docker_image) || serialized_command.key?(:docker_file_template) || serialized_command.key?(:docker_run_params))
+          new(serialized_command[:docker_image], serialized_command[:docker_file_template], serialized_command[:docker_run_params])
         end
       end
 

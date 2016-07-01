@@ -21,6 +21,7 @@ module DTK
       module Assembly
         require_relative('assembly/top')
         require_relative('assembly/attributes')
+        require_relative('assembly/nodes')
 
         module Mixin
           # opts can have keys:
@@ -47,8 +48,8 @@ module DTK
             # Aldin: 06/27/2016: There is alot of code in parsing workflow; I will handle conversion to
             # split between dtk-dsl and code I will put in assembly/workflows
             # add in workflows (task_templates)
-            workflows_db_update_hash  = version_proc_class.import_task_templates(parsed_assembly)
-            assembly_ref_pointer.merge!('task_template' => workflows_db_update_hash.mark_as_complete)
+            # workflows_db_update_hash  = version_proc_class.import_task_templates(parsed_assembly)
+            # assembly_ref_pointer.merge!('task_template' => workflows_db_update_hash.mark_as_complete)
             
             assembly_attrs_db_update_hash = Assembly::Attributes.db_update_hash(parsed_assembly.val(:Attributes) || [])
             # Aldin: 06/27/2016: Moving mark as complete to this level
@@ -59,7 +60,13 @@ module DTK
             # have this only return db hash updates and not error by raising ruby on first error
             # this wil allow you to remove raise db_updates if ServiceModule::ParsingError.is_error?(db_updates)
             # TODO: next line needed until convert from version_proc_class.import_nodes
+
             if parsed_nodes = parsed_assembly.delete(:nodes)
+            # if parsed_nodes = parsed_assembly.val(:Nodes)
+              # nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_assembly.val(:Nodes) || [], node_bindings_hash, @component_module_refs, default_assembly_name: assembly_name)
+              # Aldin: 06/27/2016: Moving mark as complete to this level
+              # assembly_ref_pointer.merge!('nodes' => nodes_db_update_hash.mark_as_complete)
+
               parsed_assembly['nodes'] = parsed_nodes.inject({}) { |h, parsed_node| h.merge(parsed_node.req(:Name) => parsed_node) }
               node_bindings_hash = {}
               db_updates = version_proc_class.import_nodes(@container_idh, @module_branch, assembly_ref, parsed_assembly, node_bindings_hash, @component_module_refs, default_assembly_name: assembly_name)

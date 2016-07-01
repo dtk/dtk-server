@@ -38,7 +38,8 @@ module DTK; class ConfigAgent; module Adapter
         :docker_image => docker_exec.docker_image,
         :docker_command => 'whoami',
         :execution_type => 'bash',
-        :dockerfile => docker_exec.docker_file_template
+        :dockerfile => docker_exec.docker_file_template,
+        :docker_run_params => docker_exec.docker_run_params
       }
 
       if assembly = opts[:assembly]

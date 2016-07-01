@@ -52,29 +52,30 @@ module DTK
       end
 
       # This method stages a target service
-      def self.stage_target_service(assembly_template, opts = Opts.new)
-        target = create_target_mock(opts[:target_name], opts[:project])
-        begin
+      # This method is just called from v1 interface
+      def self.stage_target_service(assembly_template, service_module_class, opts = Opts.new)
+        Model.Transaction do
+          target = create_target_mock(opts[:target_name], opts[:project])
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
           # TODO: see if we can remove this fix up of target name and ref
           fixup_target_name_and_ref!(new_assembly_instance)
-          module_repo_info = CommonModule::Service::Instance.create_repo(new_assembly_instance)
+          module_repo_info = service_module_class.create_repo(new_assembly_instance)
           new_service_info(new_assembly_instance, module_repo_info)
-        rescue => e
-          # delete target service instance created above
-          Target::Instance.delete_and_destroy(target)
-          raise e 
         end
       end
 
       # The method stage_service stages the assembly_template wrt this, which is a target service instance
-      def stage_service(assembly_template, opts = Opts.new)
+      # This method is just called from v1 interface
+      def stage_service(assembly_template, service_module_class, opts = Opts.new)
         unless is_converged? 
           fail ErrorUsage "Cannot stage a service instance in a target '#{target.get_field?(:display_name)}' that is not converged. Please go to target service instance, converge it and then retry this command"
         end
-        new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
-        module_repo_info = CommonModule::Service::Instance.create_repo(new_assembly_instance)
-        self.class.new_service_info(new_assembly_instance, module_repo_info)
+        Model.Transaction do 
+          new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
+          module_repo_info = service_module_class.create_repo(new_assembly_instance)
+Aux.stop_for_testing?(:create_service_instance) # TODO: for debugging
+          self.class.new_service_info(new_assembly_instance, module_repo_info)
+        end
       end
 
       def target

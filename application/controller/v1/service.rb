@@ -61,24 +61,35 @@ module DTK
         rest_ok_response response
       end
 
+      def update_from_repo
+        namespace, module_name, repo_name, commit_sha = required_request_params(:namespace, :module_name, :repo_name, :commit_sha)
+        version = request_params(:version)
+        local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
+        rest_ok_response CommonModule.update_from_repo(:service_instance, get_default_project, local_params, repo_name, commit_sha, { force_pull: true })
+      end
+
+
+      #############################################
+      # TODO: DTK-2575: Below were written before new client; ckeck to see if need to be modified
+
       def exec
-        service     = service_object()
+        service     = service_object
         params_hash = params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
         rest_ok_response service.exec(params_hash)
       end
 
       def info
-        service = service_object()
+        service = service_object
         rest_ok_response service.info
       end
 
       def nodes
-        service = service_object()
+        service = service_object
         rest_ok_response service.info_about(:nodes)
       end
 
       def components
-        service = service_object()
+        service = service_object
 
         opts = Opts.new(detail_level: nil)
         opts[:filter_proc] = Proc.new do |e|
@@ -90,17 +101,17 @@ module DTK
       end
 
       def tasks
-        service = service_object()
+        service = service_object
         rest_ok_response service.info_about(:tasks)
       end
 
       def access_tokens
-        service = service_object()
+        service = service_object
         rest_ok_response
       end
 
       def converge
-        service = service_object()
+        service = service_object
 
         if running_task = most_recent_task_is_executing?(service)
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
@@ -113,16 +124,16 @@ module DTK
           }
           return rest_ok_response(response)
         end
-        task.save!()
+        task.save!
 
         workflow = Workflow.create(task)
-        workflow.defer_execution()
+        workflow.defer_execution
 
         rest_ok_response task_id: task.id
       end
 
       def start
-        service = service_object()
+        service = service_object
 
         # filters only stopped nodes for this assembly
         nodes, is_valid, error_msg = service.nodes_valid_for_stop_or_start(nil, :stopped)
@@ -140,7 +151,7 @@ module DTK
         end
 
         task = Task.task_when_nodes_ready_from_assembly(service, :assembly, opts)
-        task.save!()
+        task.save!
 
         Node.start_instances(nodes)
 
@@ -148,7 +159,7 @@ module DTK
       end
 
       def stop
-        service = service_object()
+        service = service_object
 
         # cancel task if running on the assembly
         if running_task = most_recent_task_is_executing?(service)
@@ -168,14 +179,14 @@ module DTK
       end
 
       def create_assembly
-        service = service_object()
+        service = service_object
         assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(service)
 
         if assembly_template_name.nil? || service_module_name.nil?
           fail ErrorUsage.new('SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given')
         end
 
-        project = get_default_project()
+        project = get_default_project
         opts = { mode: :create, local_clone_dir_exists: false }
 
         if namespace = request_params(:namespace)
@@ -189,13 +200,13 @@ module DTK
         end
 
         service_module = Assembly::Template.create_or_update_from_instance(project, service, service_module_name, assembly_template_name, opts)
-        rest_ok_response service_module.ret_clone_update_info()
+        rest_ok_response service_module.ret_clone_update_info
       end
 
       def delete_destroy
-        service = service_object()
+        service = service_object
 
-        Assembly::Instance.delete(service.id_handle(), destroy_nodes: true)
+        Assembly::Instance.delete(service.id_handle, destroy_nodes: true)
 
         rest_ok_response
       end

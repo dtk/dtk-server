@@ -20,6 +20,16 @@ module DTK
     class Update < self
       require_relative('update/base_service')
 #      require_relative('update/base_component')
+#      require_relative('update/service_instance')
+
+      def self.update_class(common_module_type)
+        case common_module_type
+        when :base_service then BaseService
+        when :base_component then BaseComponent
+        when :_service_instance then ServiceInstance
+        else fail Error, "Illegal common_module_type '#{common_module_type}'"
+        end
+      end
 
       # opts can have keys
       #   :force_pull - Boolean (default false) 
@@ -35,9 +45,7 @@ opts[:force_parse] = opts[:force_pull] = true
 
         parsed_common_module = dsl_file_obj_from_repo(module_branch).parse_content(:common_module)
         pp [:debug, :parsed_common_module, parsed_common_module]
-        BaseService.create_or_update_from_parsed_common_module(project, local_params, module_branch, parsed_common_module)
-        # ComponentModule.create_or_update_from_parsed_common_module?(module_branch, parsed_common_module)
-        # TODO: stub value for ret; might not need to rerun any results since any parsing error wll thro an error
+        create_or_update_from_parsed_common_module(project, local_params, module_branch, parsed_common_module)
         ret
       end
 

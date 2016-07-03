@@ -59,7 +59,7 @@ module DTK
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
           # TODO: see if we can remove this fix up of target name and ref
           fixup_target_name_and_ref!(new_assembly_instance)
-          module_repo_info = service_module_class.create_repo(new_assembly_instance)
+          module_repo_info = service_module_class.create_repo_and_generate_dsl(new_assembly_instance)
           new_service_info(new_assembly_instance, module_repo_info)
         end
       end
@@ -72,7 +72,7 @@ module DTK
         end
         Model.Transaction do 
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
-          module_repo_info = service_module_class.create_repo(new_assembly_instance)
+          module_repo_info = service_module_class.create_repo_and_generate_dsl(new_assembly_instance)
 Aux.stop_for_testing?(:create_service_instance) # TODO: for debugging
           self.class.new_service_info(new_assembly_instance, module_repo_info)
         end

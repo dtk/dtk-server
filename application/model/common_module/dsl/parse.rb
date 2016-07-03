@@ -18,7 +18,6 @@
 module DTK
   module CommonModule::DSL
    module Parse
-     require_relative('parse/file_type')
      require_relative('parse/file_obj')
      require_relative('parse/directory_parser')
      require_relative('parse/file_parser')

@@ -20,12 +20,12 @@ module DTK
     class DirectoryParser < ::DTK::DSL::DirectoryParser
       require_relative('directory_parser/git')
 
-      # file_types - a single or array of FileObj objects
+      # file_types - a single or array of FileType
       # opts can have keys
       #   :branch - Module::Branch
       #   :file_path - string
       #   :dir_path - string
-      # Rreturns a FileObj that matches a file_typeo bject that matches a file_type in file_types
+      # Returns a FileObj that matches a file_type object that matches a file_type in file_types
       #   or returns nil if no match found
       def self.matching_file_obj?(file_types, opts = {})
         adapter(file_types, opts).matching_file_obj?(opts)

@@ -18,6 +18,7 @@
 module DTK
   class CommonModule
     module DSL
+     require_relative('dsl/file_type')
       require_relative('dsl/parse')
       require_relative('dsl/generate')
     end

@@ -18,6 +18,10 @@
 module DTK
   module CommonModule::DSL
    module Generate
+     def self.generate_service_instance_dsl(module_branch)
+        # TODO: DTK-2575: stub
+        pp 'stub for CommonModule::DSL::Generate.generate_service_instance_dsl(module_branch)'
+      end
    end
  end
 end

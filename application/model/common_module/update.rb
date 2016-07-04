@@ -26,7 +26,7 @@ module DTK
         case common_module_type
         when :base_service then BaseService
         when :base_component then BaseComponent
-        when :_service_instance then ServiceInstance
+        when :service_instance then ServiceInstance
         else fail Error, "Illegal common_module_type '#{common_module_type}'"
         end
       end

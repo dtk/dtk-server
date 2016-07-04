@@ -51,8 +51,8 @@ module DTK
         new(find_assembly_instance_from_target(target), target: target)
       end
 
+      ###### Just called from v1 controller ######
       # This method stages a target service
-      # This method is just called from v1 interface
       def self.stage_target_service(assembly_template, service_module_class, opts = Opts.new)
         Model.Transaction do
           target = create_target_mock(opts[:target_name], opts[:project])
@@ -65,7 +65,6 @@ module DTK
       end
 
       # The method stage_service stages the assembly_template wrt this, which is a target service instance
-      # This method is just called from v1 interface
       def stage_service(assembly_template, service_module_class, opts = Opts.new)
         unless is_converged? 
           fail ErrorUsage "Cannot stage a service instance in a target '#{target.get_field?(:display_name)}' that is not converged. Please go to target service instance, converge it and then retry this command"
@@ -77,6 +76,9 @@ Aux.stop_for_testing?(:create_service_instance) # TODO: for debugging
           self.class.new_service_info(new_assembly_instance, module_repo_info)
         end
       end
+
+      ###### end: Just called from v1 controller ######
+
 
       def target
         Log.error("Unexpected that @target is nil") unless @target

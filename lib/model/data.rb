@@ -57,8 +57,7 @@ module XYZ
     end
 
     def to_s
-     return 'UNKNOWN' if self[:display_name].nil?
-     self[:display_name]
+      self[:display_name] || get_field?(:display_name) || 'UNKNOWN'
     end
 
     def get_qualified_ref

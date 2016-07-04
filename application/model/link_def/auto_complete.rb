@@ -85,17 +85,17 @@ module DTK; class LinkDef
       component = components.first
       if dependencies = component[:dependencies]
         unlinked_link_defs = get_unlinked_link_defs(dependencies)
-        Log.info("Auto-linking components output:")
-        Log.info("#{component[:id]} => nil") if unlinked_link_defs.empty?
+        # Log.info("Auto-linking components output:")
+        # Log.info("#{component[:id]} => nil") if unlinked_link_defs.empty?
 
         unlinked_link_defs.each do |link_def|
           matching_cmps = check_if_matching_cmps(link_def, aug_cmps, component)
           if matching_cmps.empty?
-            Log.info("#{component[:id]} => { #{link_def} => [] }")
+            # Log.info("#{component[:id]} => { #{link_def} => [] }")
           elsif matching_cmps.size > 1
-            Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
+            # Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
           else
-            Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
+            # Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
             matching_cmp = matching_cmps.first
             output_cmp_idh = matching_cmp.id_handle()
             assembly.add_service_link?(input_cmp_idh, output_cmp_idh)

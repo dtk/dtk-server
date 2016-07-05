@@ -39,13 +39,14 @@ module DTK
 opts[:force_parse] = opts[:force_pull] = true
 
         ret = ModuleDSLInfo.new
-        module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, opts)
-        parse_needed = (opts[:force_parse] || !module_branch.dsl_parsed?)
+        common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, opts)
+        parse_needed = (opts[:force_parse] || !common_module__module_branch.dsl_parsed?)
         return ret unless parse_needed || pull_was_needed
 
-        parsed_common_module = dsl_file_obj_from_repo(module_branch).parse_content(:common_module)
+        parsed_common_module = dsl_file_obj_from_repo(common_module__module_branch).parse_content(:common_module)
         pp [:debug, :parsed_common_module, parsed_common_module]
-        create_or_update_from_parsed_common_module(project, local_params, module_branch, parsed_common_module)
+        DSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
+        create_or_update_from_parsed_common_module(project, local_params, common_module__module_branch, parsed_common_module)
         ret
       end
 

@@ -79,11 +79,12 @@ end
   table: :branch,
   columns: {
     branch: { type: :varchar, size: 100 },
-    version: { type: :varchar, size: 100 },
+    version: { type: :varchar, size: 50 },
     is_workspace: { type: :boolean },
     type: { type: :varchar, size: 20 }, #service_module or component_module
     current_sha: { type: :varchar, size: 50 }, #indicates the sha of the branch that is currently synchronized with object model
     external_ref: { type: :text },
+    dsl_version: { type: :varchar, size: 30 },
     dsl_parsed: { type: :boolean, default: true },
     frozen: { type: :boolean, default: false },
     repo_id: {

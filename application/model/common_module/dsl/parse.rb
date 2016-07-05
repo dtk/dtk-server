@@ -26,6 +26,10 @@ module DTK
        DirectoryParser.matching_file_obj?(FileType::CommonModule, branch: module_branch)
      end
 
+     def self.set_dsl_version!(module_branch, parsed_common_module)
+       module_branch.set_dsl_version!(parsed_common_module.req(:DSLVersion))
+     end
+
    end
  end
 end

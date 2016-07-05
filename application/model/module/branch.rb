@@ -46,6 +46,14 @@ module DTK
       get_field?(:type).to_sym
     end
 
+    def dsl_version
+      get_field?(:dsl_version)
+    end
+
+    def set_dsl_version!(dsl_version)
+      update(dsl_version: dsl_version)
+    end
+
     def set_dsl_parsed!(boolean_val)
       update(dsl_parsed: boolean_val)
     end

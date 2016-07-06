@@ -19,6 +19,11 @@ module DTK
   module CommonModule::DSL::Generate
     class ContentInput < ::DTK::DSL::FileGenerator::ContentInput
       require_relative('content_input/service_instance')
+
+      def self.generate_for_service_instance(module_branch)
+        ServiceInstance.new(module_branch).generate_content_input
+      end
+
     end
   end
 end

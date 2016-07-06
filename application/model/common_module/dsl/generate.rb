@@ -24,8 +24,9 @@ module DTK
       def self.generate_service_instance_dsl(module_branch)
         # content_input is a dsl version independent canonical form that has all content needed to
         # generate the dsl file using syntax for version  module_branch.dsl_version
-        content_input = ContentInput::ServiceInstance.generate_content_input(module_branch)
-        FileGenerator.generate(:assembly, content_input, module_branch.dsl_version)
+        content_input = ContentInput.generate_for_service_instance(module_branch)
+        pp [:content_input, content_input.class, content_input]
+#        FileGenerator.generate(:assembly, content_input, module_branch.dsl_version)
       end
     end
   end

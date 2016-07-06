@@ -16,12 +16,23 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule::DSL::Generate::ContentInput
-    class ServiceInstance < self
-      def self.generate_content_input(module_branch)
-        ret = Hash.new
-        pp [:debug, ret.class]
-        ret
+  module CommonModule::DSL::Generate
+    class ContentInput
+      class ServiceInstance < ContentInput::Hash
+        def initialize(module_branch)
+          @module_branch = module_branch
+        end
+        
+        def generate_content_input
+          generate_content_input!
+          self
+        end
+
+        private
+
+        def generate_content_input!
+          pp [:debug, self.class, self]
+        end
       end
     end
   end

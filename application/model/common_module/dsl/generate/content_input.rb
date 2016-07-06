@@ -16,18 +16,9 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule::DSL
-    module Generate
-      require_relative('generate/content_input')
-      require_relative('generate/file_generator')
-      
-      def self.generate_service_instance_dsl(module_branch)
-        # content_input is a dsl version independent canonical form that has all content needed to
-        # generate the dsl file using syntax for version  module_branch.dsl_version
-        content_input = ContentInput::ServiceInstance.generate_content_input(module_branch)
-        FileGenerator.generate(:assembly, content_input, module_branch.dsl_version)
-      end
+  module CommonModule::DSL::Generate
+    class ContentInput < ::DTK::DSL::FileGenerator::ContentInput
+      require_relative('content_input/service_instance')
     end
   end
 end
-

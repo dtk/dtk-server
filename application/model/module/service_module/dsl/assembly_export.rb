@@ -18,7 +18,7 @@
 module DTK
   class ServiceModule
     class AssemblyExport < Hash
-      r8_nested_require('assembly_export', 'fold_into_existing')
+      require_relative('assembly_export/fold_into_existing')
 
       include ServiceDSLCommonMixin
 

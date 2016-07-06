@@ -15,11 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-r8_require('../../factory_object_type')
+require_relative('../../factory_object_type')
 module DTK
   class Assembly; class Template
     class Factory < self
-      r8_nested_require('factory', 'non_default_attribute')
+      require_relative('factory/non_default_attribute')
       extend FactoryObjectClassMixin
       include FactoryObjectMixin
 

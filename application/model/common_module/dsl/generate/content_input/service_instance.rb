@@ -32,7 +32,8 @@ module DTK
 
         def generate_content_input!
           # TODO: stub
-          set(:DSLVersion, '1.0.0')
+          set(:DSLVersion, @module_branch.dsl_version)
+          pp @module_branch.get_module
           pp [:debug, self.class, self]
         end
       end

@@ -48,7 +48,7 @@ module DTK
         version = (opts[:filter] || {})[:version]
         version_field = ModuleBranch.version_field(version) #version can be nil
         sp_hash = {
-          cols: [:display_name, :workspace_info_full, :namespace]
+          cols: [:display_name, :augmented_branch_info, :namespace]
         }
         module_rows = get_objs(sp_hash).select do |r|
           r[:module_branch][:version] == version_field

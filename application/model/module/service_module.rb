@@ -372,10 +372,10 @@ module DTK
     # returns the new module branch
     def create_new_version__type_specific(repo_for_new_branch, new_version, opts = {})
       project = get_project()
-      repo_idh = repo_for_new_branch.id_handle()
-      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project, repo_idh, module_name(), new_version, module_namespace_obj(), nil, opts)
+      repo_idh = repo_for_new_branch.id_handle
+      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project, repo_idh, module_name(), new_version, module_namespace_obj, opts)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
-      module_branch_idh.create_object()
+      module_branch_idh.create_object
     end
 
     # Returns DTK::ModuleDSLInfo object

@@ -81,7 +81,7 @@ opts[:force_parse] = opts[:force_pull] = true
             module_branch
           else
             repo = service_module.get_repo
-            module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, nil, return_module_branch: true)
+            module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, return_module_branch: true)
           end
         else
           module_class.create_module(project, local_params, return_module_branch: true)

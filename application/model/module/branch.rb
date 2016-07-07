@@ -25,7 +25,7 @@ module DTK
     extend BranchNames::ClassMixin
 
     def self.common_columns
-      [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :frozen]
+      [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :dsl_version, :frozen]
     end
 
     # TODO: should change type of self[:external_ref] to json
@@ -548,6 +548,7 @@ module DTK
       }
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
       assigns.merge!(frozen: opts[:frozen]) if opts[:frozen]
+      assigns.merge!(dsl_version: opts[:dsl_version]) if opts[:dsl_version]
       ref = branch
       { ref => assigns }
     end

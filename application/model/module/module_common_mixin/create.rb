@@ -63,6 +63,7 @@ module DTK; module ModuleCommonMixin
     # opts can have keys
     #  :ancestor_branch_idh
     #  :current_sha
+    # TODO: 2575: look at setting new branch dsl_version from branch clone from
     def create_module_and_branch_obj?(project, repo_idh, local, opts = {})
       project_idh = project.id_handle()
       module_name = local.module_name
@@ -96,21 +97,29 @@ module DTK; module ModuleCommonMixin
     end
 
     # TODO: ModuleBranch::Location: deprecate below for above
-    def create_ws_module_and_branch_obj?(project, repo_idh, module_name, input_version, namespace, ancestor_branch_idh = nil, opts = {})
-      project_idh = project.id_handle()
+    # opts can have keys
+    #   :dsl_version (required)
+    #   :frozen
+    #   :ancestor_branch_idh
+    #   :return_module_branch - Boolean (default: false)
+    def create_ws_module_and_branch_obj?(project, repo_idh, module_name, input_version, namespace, opts = {})
+      project_idh = project.id_handle
 
-      ref = Namespace.join_namespace(namespace.display_name(), module_name)
+      ref = Namespace.join_namespace(namespace.display_name, module_name)
       module_type = model_type.to_s
-      create_opts = { version: input_version }
-      create_opts.merge!(ancestor_branch_idh: ancestor_branch_idh) if ancestor_branch_idh
-      create_opts.merge!(frozen: opts[:frozen]) if opts[:frozen]
+      create_opts = { 
+        version: input_version,
+        ancestor_branch_idh: opts[:ancestor_branch_idh],
+        frozen: opts[:frozen],
+        dsl_version: opts[:dsl_version]
+      }
       mb_create_hash = ModuleBranch.ret_workspace_create_hash(project, module_type, repo_idh, create_opts)
       version = mb_create_hash.values.first[:version]
 
       fields = {
         display_name: module_name,
         module_branch: mb_create_hash,
-        namespace_id: namespace.id()
+        namespace_id: namespace.id
       }
 
       create_hash = {
@@ -124,8 +133,8 @@ module DTK; module ModuleCommonMixin
       module_branch = get_workspace_module_branch(project, module_name, version, namespace)
       return module_branch if opts[:return_module_branch]
 
-      module_idh =  project_idh.createIDH(model_name: model_name(), id: module_branch[:module_id])
-      { version: version, module_name: module_name, module_idh: module_idh, module_branch_idh: module_branch.id_handle() }
+      module_idh =  project_idh.createIDH(model_name: model_name, id: module_branch[:module_id])
+      { version: version, module_name: module_name, module_idh: module_idh, module_branch_idh: module_branch.id_handle }
     end
   end
 
@@ -135,7 +144,7 @@ module DTK; module ModuleCommonMixin
     #  :sha - this is base sha to branch from
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_workspace_branch(Opts.new(filter: { version: base_version }))
-        fail ErrorUsage.new("There is no module (#{pp_module_name()}) in the workspace")
+        fail ErrorUsage.new("There is no module (#{pp_module_name}) in the workspace")
       end
 
       # make sure there is a not an existing branch that matches the new one
@@ -144,8 +153,14 @@ module DTK; module ModuleCommonMixin
       end
 
       opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :version_branch, :checkout_branch])
-      new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project(), aug_base_branch[:repo], new_version, opts_repo_update)
-      opts_create_branch = opts.merge(ancestor_branch_idh: aug_base_branch.id_handle(), current_sha: new_version_sha, new_branch_name: new_branch_name)
+      new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project, aug_base_branch[:repo], new_version, opts_repo_update)
+      
+      opts_create_branch = opts.merge(
+        ancestor_branch_idh: aug_base_branch.id_handle, 
+        current_sha: new_version_sha, 
+        new_branch_name: new_branch_name,
+        dsl_version: aug_base_branch.dsl_version
+      )
 
       if opts[:inherit_frozen_from_base]
         opts_create_branch.merge!(frozen: aug_base_branch[:frozen])

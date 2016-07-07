@@ -31,6 +31,31 @@ module DTK
           end
         end
       end
+
+      def self.node_bindings_from_node_property_component(cmps, container_idh)
+        nb_name          = nil
+        node_binding     = nil
+        nb_rs_containter = Library.get_public_library(container_idh.createMH(:library))
+
+        cmps.each do |cmp|
+          if cmp.is_a?(Hash) && cmp.keys.first.eql?(CommandAndControl.node_property_component)
+            if attributes = cmp.values.first['attributes']
+              size = attributes['size']
+              image = attributes['image']
+              nb_name = "#{image}-#{size}" if size && image
+            end
+            break
+          end
+        end
+
+        if nb_name
+          filter = [:eq, :ref, nb_name]
+          node_bindings = nb_rs_containter.get_node_binding_rulesets(filter)
+          node_binding = node_bindings.first[:id] unless node_bindings.empty?
+        end
+
+        node_binding
+      end
       
       private
 

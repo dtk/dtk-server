@@ -22,6 +22,7 @@ module DTK
         require_relative('assembly/top')
         require_relative('assembly/attributes')
         require_relative('assembly/nodes')
+        require_relative('assembly/components')
 
         module Mixin
           # opts can have keys:

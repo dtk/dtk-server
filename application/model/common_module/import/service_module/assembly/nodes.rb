@@ -49,15 +49,17 @@ module DTK
               '*assembly_id' => "/component/#{assembly_ref}"
             }
 
-            # we are not going to use node-bindings in new dsl, instead will retreive node bindings from ec2_properties component
+            # we are not going to use node-bindings in new dsl, instead will retreive node bindings from node property component
             components = node_hash['components']
 
             if components
-              node_output['node_binding_rs_id'] = node_binding_from_ec2_component_attributes(components, container_idh)
+              node_output['node_binding_rs_id'] = CommonModule::BaseService::NodePropertyComponent.node_bindings_from_node_property_component(components, container_idh)
 
               # Aldin: 07/04/2016 - need to rewrite this part without version_proc_class
               if version_proc_class = opts[:version_proc_class]
                 cmps_output = version_proc_class.import_component_refs(container_idh, opts[:default_assembly_name], components, component_module_refs, opts)
+
+                # cmps_output = Components.db_update_hash(container_idh, components, component_module_refs, opts)
 
                 unless cmps_output.empty?
                   node_output['component_ref'] = cmps_output
@@ -67,31 +69,6 @@ module DTK
 
             h.merge(node_ref => node_output)
           end
-        end
-
-        def self.node_binding_from_ec2_component_attributes(cmps, container_idh)
-          nb_name          = nil
-          node_binding     = nil
-          nb_rs_containter = Library.get_public_library(container_idh.createMH(:library))
-
-          cmps.each do |cmp|
-            if cmp.is_a?(Hash) && cmp.keys.first.eql?(CommandAndControl.node_property_component())
-              if attributes = cmp.values.first['attributes']
-                size = attributes['size']
-                image = attributes['image']
-                nb_name = "#{image}-#{size}" if size && image
-              end
-              break
-            end
-          end
-
-          if nb_name
-            filter = [:eq, :ref, nb_name]
-            node_bindings = nb_rs_containter.get_node_binding_rulesets(filter)
-            node_binding = node_bindings.first[:id] unless node_bindings.empty?
-          end
-
-          node_binding
         end
 
         def self.ret_node_type(attributes = {})

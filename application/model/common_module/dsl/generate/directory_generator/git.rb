@@ -16,8 +16,22 @@
 # limitations under the License.
 #
 module DTK
-  module CommonModule::DSL
-    class FileType < ::DTK::DSL::FileType
+  module CommonModule::DSL::Generate
+    class DirectoryGenerator
+      class Git < self
+        def initialize(file_type, module_branch)
+          @file_type     = file_type
+          @module_branch = module_branch
+        end
+        def add_file?(file_content, opts = {})
+          if any_changes = RepoManager.add_file(@file_type.canonical_path, file_content, opts[:commit_msg], @module_branch)
+            unless opts[:donot_push_changes]
+              RepoManager.push_changes(@module_branch)
+            end
+          end
+        end
+
+      end
     end
   end
 end

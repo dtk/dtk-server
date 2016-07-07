@@ -20,11 +20,11 @@ module DTK
     class ServiceInstance < AssemblyModule::Service
       # TODO: should create repo methods be in rescue blocks that cleanup if fails in teh middle?
 
-      def self.create_repo_and_generate_dsl(assembly_instance)
-        new(assembly_instance).create_repo_and_generate_dsl
+      def self.create_branch_and_generate_dsl(assembly_instance)
+        new(assembly_instance).create_branch_and_generate_dsl
       end
 
-      def create_repo_and_generate_dsl
+      def create_branch_and_generate_dsl
         # TODO: currently this creates a branch per service instance on the service module repo
         # that gets created when common module is created
         # Should we change to creating a repo per service instance?

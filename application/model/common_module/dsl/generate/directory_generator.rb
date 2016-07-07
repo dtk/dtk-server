@@ -17,24 +17,26 @@
 #
 module DTK
   module CommonModule::DSL::Generate
-    class ContentInput
-      class ServiceInstance < ContentInput::Hash
-        def initialize(module_branch)
-          @module_branch = module_branch
-        end
-        
-        def generate_content_input
-          generate_content_input!
-          self
-        end
+    class DirectoryGenerator < ::DTK::DSL::DirectoryGenerator
+      require_relative('directory_generator/git')
 
-        private
+      # file_type - class of type FileType
+      # opts can have keys
+      #   :branch - Module::Branch (required)
+      #   :commit_msg
+      #   :donot_push_changes - Boolean (default: false)
+      # Adds or modifies file; returns true if new file or any change
+      def self.add_file?(file_type, file_content, opts = {})
+        adapter(file_type, opts).add_file?(file_content, opts)
+      end
 
-        def generate_content_input!
-          # TODO: stub
-          set(:DSLVersion, '1.0.0')
-          pp [:debug, self.class, self]
+      private
+
+      def self.adapter(file_type, opts = {})
+        unless branch = opts[:branch]
+          fail Error, "option :branch is required"
         end
+        Git.new(file_type, branch)
       end
     end
   end

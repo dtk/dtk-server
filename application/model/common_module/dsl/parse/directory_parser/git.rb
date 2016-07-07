@@ -51,7 +51,7 @@ module DTK
         end
 
         def ls_r_depth(_file_types)
-          # By setting this to nil, we haev simple strategy where RepoManager.ls_r returns all files
+          # By setting this to nil, we have simple strategy where RepoManager.ls_r returns all files
           # More sophisticated would be to look at @file_types patterns to find what could be maximum depth
           nil
         end

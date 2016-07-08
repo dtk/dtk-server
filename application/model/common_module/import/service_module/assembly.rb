@@ -58,16 +58,8 @@ module DTK
 
             # if parsed_nodes = parsed_assembly.delete(:nodes)
             if parsed_nodes = parsed_assembly.val(:Nodes)
-              node_bindings_hash = {}
-
-              # Aldin: 07/04/2016 - still not 100% completed
-              nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_nodes, node_bindings_hash, @component_module_refs, { default_assembly_name: assembly_name, version_proc_class: version_proc_class })
+              nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_nodes, @component_module_refs, { default_assembly_name: assembly_name, version_proc_class: version_proc_class })
               @db_updates_assemblies['node'].merge!(nodes_db_update_hash)
-
-              # parsed_assembly['nodes'] = parsed_nodes.inject({}) { |h, parsed_node| h.merge(parsed_node.req(:Name) => parsed_node) }
-              # db_updates = version_proc_class.import_nodes(@container_idh, @module_branch, assembly_ref, parsed_assembly, node_bindings_hash, @component_module_refs, default_assembly_name: assembly_name)
-              # raise db_updates if ServiceModule::ParsingError.is_error?(db_updates)
-              # @db_updates_assemblies['node'].merge!(db_updates)
             end
 
             @ndx_assembly_hashes[assembly_ref] ||= parsed_assembly

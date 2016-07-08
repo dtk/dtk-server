@@ -21,7 +21,7 @@ module DTK
       module Nodes
         extend FactoryObjectClassMixin
 
-        def self.db_update_hash(container_idh, assembly_ref, parsed_nodes, node_bindings_hash, component_module_refs, opts = {})
+        def self.db_update_hash(container_idh, assembly_ref, parsed_nodes, component_module_refs, opts = {})
           unless parsed_nodes.is_a?(Array)
             fail ParsingError.new('Nodes section is ill-formed', opts_file_path(opts))
           end
@@ -56,15 +56,15 @@ module DTK
               node_output['node_binding_rs_id'] = CommonModule::BaseService::NodePropertyComponent.node_bindings_from_node_property_component(components, container_idh)
 
               # Aldin: 07/04/2016 - need to rewrite this part without version_proc_class
-              if version_proc_class = opts[:version_proc_class]
-                cmps_output = version_proc_class.import_component_refs(container_idh, opts[:default_assembly_name], components, component_module_refs, opts)
+              # if version_proc_class = opts[:version_proc_class]
+                # cmps_output = version_proc_class.import_component_refs(container_idh, opts[:default_assembly_name], components, component_module_refs, opts)
 
-                # cmps_output = Components.db_update_hash(container_idh, components, component_module_refs, opts)
+                cmps_output = Components.db_update_hash(container_idh, components, component_module_refs, opts)
 
                 unless cmps_output.empty?
                   node_output['component_ref'] = cmps_output
                 end
-              end
+              # end
             end
 
             h.merge(node_ref => node_output)

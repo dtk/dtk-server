@@ -19,22 +19,20 @@ module DTK
   module CommonModule::DSL::Generate
     class ContentInput
       class ServiceInstance < ContentInput::Hash
-        def initialize(module_branch)
-          @module_branch = module_branch
+        include Mixin
+
+        def initialize(service_instance, module_branch)
+          @service_instance = service_instance
+          @module_branch    = module_branch
         end
         
-        def generate_content_input
-          generate_content_input!
-          self
-        end
-
         private
 
         def generate_content_input!
-          # TODO: stub
+          assembly_instance = @service_instance.assembly_instance
           set(:DSLVersion, @module_branch.dsl_version)
-          pp @module_branch.get_module
-          pp [:debug, self.class, self]
+          set(:Name, assembly_instance.display_name) 
+          set(:Assembly, Assembly.new(assembly_instance).generate_content_input)
         end
       end
     end

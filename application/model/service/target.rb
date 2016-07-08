@@ -86,7 +86,7 @@ Aux.stop_for_testing?(:create_service_instance) # TODO: for debugging
       end
 
       def display_name
-        @assembly_instance.get_field?(:display_name)
+        @assembly_instance.display_name
       end
 
       def self.target_when_target_assembly_instance?(assembly)

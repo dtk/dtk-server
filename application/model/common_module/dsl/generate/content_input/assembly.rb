@@ -17,16 +17,22 @@
 #
 module DTK
   module CommonModule::DSL::Generate
-    class ContentInput < ::DTK::DSL::FileGenerator::ContentInput
-      require_relative('content_input/mixin')
-      # mixin must go first
-      require_relative('content_input/service_instance')
-      require_relative('content_input/assembly')
+    class ContentInput
+      class Assembly < ContentInput::Hash
+        include Mixin
 
-      def self.generate_for_service_instance(service_instance, module_branch)
-        ServiceInstance.new(service_instance, module_branch).generate_content_input
+        def initialize(assembly_instance)
+          @assembly_instance = assembly_instance
+        end
+        
+        private
+
+        def generate_content_input!
+          # TODO: stub: blob not interpreted and straight dump of info
+          # need to use variation of cut and paste info and to break into sub objects that have canonical keys
+          merge!(@assembly_instance.info)
+        end
       end
-
     end
   end
 end

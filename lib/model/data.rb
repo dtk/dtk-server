@@ -56,8 +56,12 @@ module XYZ
       self.class.get_object_ids_wrt_parent(child_relation_type, id_handle, where_clause)
     end
 
+    def display_name
+      self[:display_name] || get_field?(:display_name)
+    end
+
     def to_s
-      self[:display_name] || get_field?(:display_name) || 'UNKNOWN'
+      display_name || 'UNKNOWN'
     end
 
     def get_qualified_ref

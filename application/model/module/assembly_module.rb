@@ -30,6 +30,10 @@ module DTK
       Service.new(assembly).delete_module?(opts)
     end
 
+    def assembly_instance
+      @assembly
+    end
+
     private
 
     def self.assembly_module_version(assembly)

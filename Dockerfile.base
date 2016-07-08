@@ -1,18 +1,13 @@
-FROM getdtk/trusty-puppet:0.3
+FROM getdtk/trusty-puppet:0.4
 MAINTAINER dduvnjak <dario@atlantbh.com>
 
 RUN mkdir -p /etc/puppet/modules
 COPY dtk-provisioning/modules /etc/puppet/modules
 COPY docker/manifests /tmp/manifests
 
-RUN git clone https://github.com/rich-reactor8/dtk-node-agent /tmp/dtk-node-agent && \
-    mkdir -p /usr/share/mcollective/plugins/mcollective && \
-    cp -r /tmp/dtk-node-agent/mcollective_additions/plugins/v2.2/* /usr/share/mcollective/plugins/mcollective
-
 RUN puppet apply --debug /tmp/manifests/stage1.pp
 RUN puppet apply --debug /tmp/manifests/stage2.pp
 RUN puppet apply --debug /tmp/manifests/stage4.pp
-
 
 RUN apt-get install -y libpq-dev redis-server
 COPY Gemfile* /tmp/

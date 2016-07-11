@@ -38,9 +38,6 @@ module DTK
 
             assembly_name = parsed_assembly.req(:Name)
             assembly_ref = @service_module.assembly_ref(assembly_name, opts[:module_version])
-            # Aldin: 06/27/2016: remove need for version_proc_class
-            integer_version = 4 # stubbed this until we remove version_proc_class
-            version_proc_class = load_and_return_version_adapter_class(integer_version)
             
             db_update_hash = Assembly::Top.db_update_hash(parsed_assembly, @module_branch, @module_name)
             @db_updates_assemblies['component'].merge!(assembly_ref => db_update_hash)          
@@ -58,7 +55,7 @@ module DTK
 
             # if parsed_nodes = parsed_assembly.delete(:nodes)
             if parsed_nodes = parsed_assembly.val(:Nodes)
-              nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_nodes, @component_module_refs, { default_assembly_name: assembly_name, version_proc_class: version_proc_class })
+              nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_nodes, @component_module_refs, default_assembly_name: assembly_name)
               @db_updates_assemblies['node'].merge!(nodes_db_update_hash)
             end
 

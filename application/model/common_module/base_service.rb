@@ -55,10 +55,6 @@ module DTK
           import_helper = Import::ServiceModule.new(project, base_service_module, module_branch)
           import_helper.put_needed_info_into_import_helper!(parsed_assemblies)
           import_helper.import_into_model
-          # TODO: dont need set_module_refs_and_workflows?; only applicable if opts passed and
-          #  have opts[:ret_parsed_dsl] set to true
-          #assembly_workflows = import_helper.import_into_model
-          #SetParsedDSL.set_module_refs_and_workflows?(import_helper.module_name, assembly_workflows, import_helper.component_module_refs)
 
           module_branch.set_dsl_parsed!(true)
         end

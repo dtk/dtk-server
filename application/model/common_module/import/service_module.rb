@@ -31,8 +31,6 @@ module DTK
         def put_needed_info_into_import_helper!(parsed_assemblies)
           parsed_assemblies.each do |parsed_assembly|
             process_assembly!(parsed_assembly)
-            # TODO: dont need unless have opts[:ret_parsed_dsl] is set to true
-            # @parent_class::SetParsedDSL.set_assembly_raw_hash?(assembly_name, hash_content, opts)
           end
           pp ['converted from parse form to db hash update form', @db_updates_assemblies]
         end

@@ -63,9 +63,6 @@ module DTK
             end
 
             @ndx_assembly_hashes[assembly_ref] ||= parsed_assembly
-            
-            # Aldin: 06/27/2016: See how to remove this
-            @ndx_version_proc_classes[assembly_ref] ||= version_proc_class
           end
         end
       end

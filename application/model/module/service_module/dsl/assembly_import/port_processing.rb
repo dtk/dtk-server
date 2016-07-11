@@ -27,7 +27,15 @@ module DTK; class ServiceModule
         port.ndx_assembly_hashes.each do |assembly_ref, assembly|
           assembly_idh = port.container_idh.get_child_id_handle(:component, assembly_ref)
           ports = add_needed_ports(assembly_idh)
-          version_proc_class = port.ndx_version_proc_classes[assembly_ref]
+
+          # if ndx_version_proc_classes is not set will use latest assembly import v4
+          # using this because we want to remove version_proc_class from
+          # dtk-server/application/model/common_module/import/service_module/assembly.rb
+          # will rewrite this later remove version_proc_class completely
+          #
+          # version_proc_class = port.ndx_version_proc_classes[assembly_ref]
+          version_proc_class = port.ndx_version_proc_classes[assembly_ref] || XYZ::ServiceModule::AssemblyImport::V4
+
           opts = {}
           if file_path = port.ndx_assembly_file_paths[assembly_ref]
             opts[:file_path] = file_path

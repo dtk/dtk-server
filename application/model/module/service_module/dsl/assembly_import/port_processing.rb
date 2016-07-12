@@ -17,8 +17,8 @@
 #
 module DTK; class ServiceModule
   class AssemblyImport
+    require_relative('adapters/v4')
     module PortProcessing
-
       # raises, rather than returns, parsing errors
       def self.add_port_and_port_links(port)
         # port links can only be imported in after ports created
@@ -34,7 +34,7 @@ module DTK; class ServiceModule
           # will rewrite this later remove version_proc_class completely
           #
           # version_proc_class = port.ndx_version_proc_classes[assembly_ref]
-          version_proc_class = port.ndx_version_proc_classes[assembly_ref] || XYZ::ServiceModule::AssemblyImport::V4
+          version_proc_class = port.ndx_version_proc_classes[assembly_ref]||XYZ::ServiceModule::AssemblyImport::V4
 
           opts = {}
           if file_path = port.ndx_assembly_file_paths[assembly_ref]

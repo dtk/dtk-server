@@ -28,13 +28,9 @@ module DTK
           # opts can have keys:
           #   :module_version
           def process_assembly!(parsed_assembly, opts = {})
-            # DTK-2554: when we treat service instance modules along with base service ones dont want to call below
             if parsed_nodes = parsed_assembly.val(:Nodes)
               BaseService::NodePropertyComponent.create_node_property_components?(parsed_nodes)
             end
-
-            # Aldin: 06/27/2016: move this logic to the parser
-            # @service_module.parse_assembly_wide_components!(hash_content)
 
             assembly_name = parsed_assembly.req(:Name)
             assembly_ref = @service_module.assembly_ref(assembly_name, opts[:module_version])

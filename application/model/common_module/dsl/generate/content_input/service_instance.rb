@@ -21,13 +21,18 @@ module DTK
       class ServiceInstance < ContentInput::Hash
         include Mixin
 
-        def initialize(service_instance, module_branch)
+        def self.create(service_instance, module_branch)
+          new(self, service_instance, module_branch)
+        end
+
+        private
+
+        def initialize(parent_class, service_instance, module_branch)
+          super(parent_class)
           @service_instance = service_instance
           @module_branch    = module_branch
         end
         
-        private
-
         def generate_content_input!
           assembly_instance = @service_instance.assembly_instance
           set(:DSLVersion, @module_branch.dsl_version)

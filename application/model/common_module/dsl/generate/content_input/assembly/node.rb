@@ -26,12 +26,14 @@ module DTK; module CommonModule::DSL::Generate
         end
         
         def generate_content_input!(aug_node)
-          self[:is_assembly_wide_node] = true if aug_node.is_assembly_wide_node?
-          # Add scalar properties
-          # TODO: add set(:Attributes, ...)
           aug_components = aug_node[:components] || []
-#          set(:Components, Component.generate_content_input(aug_components)) unless aug_components.empty?
-          merge!(components: Component.generate_content_input(aug_components)) unless aug_components.empty?
+          attributes = aug_node[:attributes] || []
+          # :is_assembly_wide_node just used intentall; so not using 'set' method
+          self[:is_assembly_wide_node] = true if aug_node.is_assembly_wide_node?
+          
+          set(:Name, aug_node.display_name)
+          set(:Attributes, Attribute.generate_content_input(attributes))  unless attributes.empty?
+          set(:Components, Component.generate_content_input(aug_components)) unless aug_components.empty?
           self
         end
 
@@ -41,7 +43,7 @@ module DTK; module CommonModule::DSL::Generate
           ndx_nodes = assembly_instance.get_nodes.inject({}) { |h, r| h.merge(r.id => r) }
           add_node_level_attributes!(ndx_nodes)
           add_augmented_components!(ndx_nodes)
-          # TODO: add all needed content, i.e., componnets, their attributes their links
+          # TODO: add all oher needed content, i.e., links
           ndx_nodes.values
         end
         

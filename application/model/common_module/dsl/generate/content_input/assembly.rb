@@ -21,6 +21,7 @@ module DTK
       class Assembly < ContentInput::Hash
         require_relative('assembly/node')
         require_relative('assembly/component')
+        require_relative('assembly/attribute')
 
         def self.generate_content_input(assembly_instance)
           new.generate_content_input!(assembly_instance)

@@ -18,33 +18,27 @@
 module DTK; module CommonModule::DSL::Generate
   class ContentInput 
     class Assembly
-      class Component < ContentInput::Hash
-
-        def initialize(aug_component)
-          super()
-          @aug_component = aug_component
-        end
-        private :initialize
-
-        def self.generate_content_input(aug_components)
+      class Attribute < ContentInput::Hash
+        def self.generate_content_input(attributes)
           ret = ContentInput::Array.new
-          aug_components.each { |aug_component| ret << new(aug_component).generate_content_input! }
+          attributes.each { |attribute| ret << new.generate_content_input!(attribute) }
           ret
         end
         
-        def generate_content_input!
-          set(:Name, name)
-          pp [:component, self]
-          # TODO: stub
-          # merge!(aug_component)
+        def generate_content_input!(attribute)
+          set(:Name, attribute.display_name)
+          set(:Value, attribute[:attribute_value])
+          add_tags?(tags?(attribute))
           self
         end
 
         private
 
-        def name
-          @aug_component.display_name_print_form(without_version: true)
+        def tags?(attribute)
+          # TODO: stub
+          :foo
         end
+
       end
     end
   end

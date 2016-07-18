@@ -19,7 +19,7 @@
 module XYZ
   class LibraryNodes
     def self.get_hash(opts = {})
-      ret = { 'node' => node_templates(opts), 'node_binding_ruleset' => node_binding_rulesets() }
+      ret = { 'node' => node_templates(opts), 'node_binding_ruleset' => node_binding_rulesets(opts) }
       if opts[:in_library]
         { 'library' => { opts[:in_library] => ret } }
       else
@@ -31,24 +31,27 @@ module XYZ
 
     def self.node_templates(opts = {})
        ret = {}
-       nodes_info.each do |k, info|
+       nodes_info(opts).each do |k, info|
          ret[k] = node_info(info, opts)
       end
       ret['null-node-template'] = null_node_info(opts)
       ret
      end
 
-     def self.node_binding_rulesets
-       ret_node_bindings_from_config_file() || Bindings
+     def self.node_binding_rulesets(opts = {})
+       ret_node_bindings_from_config_file(opts) || Bindings
      end
-     def self.nodes_info
-       ret_nodes_info_from_config_file() || NodesInfoDefault
+     def self.nodes_info(opts = {})
+       ret_nodes_info_from_config_file(opts) || NodesInfoDefault
      end
 
-     def self.ret_nodes_info_from_config_file
-       unless content = ret_nodes_info_content_from_config_file()
+     def self.ret_nodes_info_from_config_file(opts = {})
+       content = opts[:content] || ret_nodes_info_content_from_config_file()
+
+       unless content
          return nil
        end
+
        ret = {}
        content.each do |ami, info|
          info['sizes'].each do |ec2_size|
@@ -67,8 +70,10 @@ module XYZ
        ret
      end
 
-     def self.ret_node_bindings_from_config_file
-       unless content = ret_nodes_info_content_from_config_file()
+     def self.ret_node_bindings_from_config_file(opts = {})
+      content = opts[:content] || ret_nodes_info_content_from_config_file()
+
+       unless content
          return nil
        end
        ret = {}

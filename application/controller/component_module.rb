@@ -75,32 +75,40 @@ module DTK
       commit_sha    = ret_non_null_request_params(:commit_sha)
       version       = ret_version()
       diffs_summary = ret_diffs_summary()
+      opts          =  {}
 
-      opts =  {}
       if ret_request_param_boolean(:internal_trigger)
         opts.merge!(do_not_raise: true)
       end
+
       if ret_request_param_boolean(:force_parse)
         opts.merge!(force_parse: true)
       end
+
       if ret_request_params(:set_parsed_false)
         opts.merge!(dsl_parsed_false: true)
       end
+
       if ret_request_params(:update_from_includes)
         opts.merge!(update_from_includes: true)
       end
+
       if ret_request_params(:service_instance_module)
         opts.merge!(service_instance_module: true)
       end
+
       if current_branch_sha = ret_request_params(:current_branch_sha)
         opts.merge!(current_branch_sha: current_branch_sha)
       end
+
       if force = ret_request_params(:force)
         opts.merge!(force: force)
       end
+
       if generate_docs = ret_request_param_boolean(:generate_docs)
         opts.merge!(generate_docs: generate_docs)
       end
+
       if use_impl_id = ret_request_param_boolean(:use_impl_id)
         opts.merge!(use_impl_id: use_impl_id)
       end

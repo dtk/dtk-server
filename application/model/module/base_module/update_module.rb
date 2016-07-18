@@ -92,8 +92,9 @@ module DTK; class BaseModule
 
     # only returns non nil if parsing error; it traps parsing errors
     def parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts = {})
-      ret = nil
-      module_branch = module_branch_idh.create_object()
+      ret                  = nil
+      update_node_bindings = nil
+      module_branch        = module_branch_idh.create_object()
 
       if version && !version.eql?('') && !version.eql?('master')
         unless version = ::DTK::ModuleVersion.ret(version)
@@ -110,7 +111,24 @@ module DTK; class BaseModule
 
       opts[:ret_parsed_dsl].add(dsl_obj) if opts[:ret_parsed_dsl]
 
-      dsl_obj.update_model_with_ref_integrity_check(version: version)
+      update_opts = { version: version }
+
+      # when image_aws component is updated; need to check if new images are added and update node-bindings accordingly
+      if @base_module[:display_name].eql?('image_aws')
+        update_node_bindings = check_if_node_bindings_update_needed(@base_module.get_objs(cols: [:components]), dsl_obj.input_hash)
+      end
+
+      dsl_obj.update_model_with_ref_integrity_check(update_opts)
+
+      if update_node_bindings
+        images_content = nil
+
+        dsl_obj.input_hash.each_pair do |name, hash_value|
+          images_content = hash_value if name.eql?('image_aws')
+        end
+
+        update_node_bindings_info(images_content) if images_content
+      end
 
       update_from_includes = {}
       no_errors = true
@@ -172,6 +190,86 @@ module DTK; class BaseModule
     end
 
     private
+
+    def check_if_node_bindings_update_needed(base_components, new_input_hash)
+      update_node_bindings = false
+      images_hash          = nil
+
+      new_input_hash.each_pair do |name, ih|
+        if name.eql?('image_aws')
+          attr_content = ih['attribute']||{}
+          images_hash = (attr_content['images']||{})['value_asserted']
+          break
+        end
+      end
+
+      if images_hash
+        update_node_bindings = update_node_bindings?(base_components, images_hash)
+      end
+
+      update_node_bindings
+    end
+
+    def update_node_bindings?(base_components, images_hash)
+      if base_image_cmp = (base_components||{}).find{ |bc| bc[:component][:component_type].eql?('image_aws') }
+        if images_attribute = base_image_cmp[:component].get_attributes.find{ |attribute| attribute[:display_name].eql?('images') }
+          value_asserted = images_attribute[:value_asserted]
+
+          return false if images_hash == value_asserted
+
+          new_images_sorted      = sort_images(images_hash)
+          existing_images_sorted = sort_images(value_asserted)
+
+          !(new_images_sorted == existing_images_sorted)
+        end
+      end
+    end
+
+    def sort_images(images)
+      sorted = images.inject({}) do |h, (region, value)|
+        h.merge(region => value.sort_by{ |key, val| key })
+      end
+    end
+
+    def update_node_bindings_info(images_content)
+      attr_content = images_content['attribute']||{}
+      images_hash = (attr_content['images']||{})['value_asserted']
+      require File.expand_path('../../../utility/library_nodes', File.dirname(__FILE__))
+
+      nodes_info = prepare_nodes_info(images_hash)
+
+      container_idh = @base_module.model_handle(:user).create_top()
+      hash_content = LibraryNodes.get_hash(in_library: 'public', content: nodes_info)
+      hash_content['library']['public']['display_name'] ||= 'public'
+      Model.import_objects_from_hash(container_idh, hash_content)
+    end
+
+    def prepare_nodes_info(images_hash)
+      ret = {}
+
+      images_hash.each_pair do |region, i_hash|
+        ret.merge!(prepare_type(region, i_hash))
+      end
+
+      ret
+    end
+
+    def prepare_type(region, i_hash)
+      ret = {}
+
+      i_hash.each_pair do |type, t_hash|
+        ret[t_hash['ami']] = {
+          'region'       => region,
+          'type'         => type,
+          'os_type'      => t_hash['os_type'],
+          'display_name' => type,
+          'png'          => "#{type}.png",
+          'sizes'        => (t_hash['sizes']||{}).values
+        }
+      end
+
+      ret
+    end
 
     def klass
       case @module_class

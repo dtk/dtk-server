@@ -20,11 +20,15 @@ module DTK
     class SpHash < ::Hash
       module Mixin
         def sp_filter(*args)
-          SpHash.new.cols(SpHash.base_cols).filter(*args)
+          SpHash.new.cols(*SpHash.base_cols).filter(*args)
+        end
+
+        def sp_cols(*cols)
+          SpHash.new.cols(*cols)
         end
       end
 
-      def cols(cols)
+      def cols(*cols)
         merge(cols: cols)
       end
 

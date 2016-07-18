@@ -27,16 +27,17 @@ module DTK
   class Attribute < Model
     set_relation_name(:attribute, :attribute)
 
-    r8_nested_require('attribute', 'get_method')
-    r8_nested_require('attribute', 'meta')
-    r8_nested_require('attribute', 'datatype')
-    r8_nested_require('attribute', 'propagate_changes')
-    r8_nested_require('attribute', 'pattern')
-    r8_nested_require('attribute', 'legal_value')
-    r8_nested_require('attribute', 'special_processing')
-    r8_nested_require('attribute', 'constant')
-    r8_nested_require('attribute', 'print_form')
-    r8_nested_require('attribute', 'semantic_datatype')
+    require_relative('attribute/get_method')
+    require_relative('attribute/meta')
+    require_relative('attribute/datatype')
+    require_relative('attribute/propagate_changes')
+    require_relative('attribute/pattern')
+    require_relative('attribute/legal_value')
+    require_relative('attribute/special_processing')
+    require_relative('attribute/constant')
+    require_relative('attribute/print_form')
+    require_relative('attribute/semantic_datatype')
+    require_relative('attribute/non_default')
 
     include GetMethod::Mixin
     extend GetMethod::ClassMixin

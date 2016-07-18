@@ -328,25 +328,28 @@ module DTK
                                                                                  cols: [:id, :display_name, :type, :component_id]
                                                                                }]
       virtual_column :components_and_attrs, type: :json, hidden: true,
-                                            remote_dependencies:         lambda__components_and_attrs.call(
-          cmp_cols: FactoryObject::CommonCols + [:component_type],
-          attr_cols: FactoryObject::CommonCols + [:attribute_value, :required])
+        remote_dependencies:  
+           lambda__components_and_attrs.call(
+             cmp_cols: FactoryObject::CommonCols + [:component_type],
+             attr_cols: FactoryObject::CommonCols + [:attribute_value, :required])
 
       virtual_column :cmps_and_non_default_attr_candidates, type: :json, hidden: true,
-                                                            remote_dependencies:         lambda__cmps_and_non_default_attr_candidates.call(
-          cmp_cols: FactoryObject::CommonCols + [:ancestor_id, :component_type, :only_one_per_node],
-          attr_cols: FactoryObject::CommonCols + [:is_instance_value, :attribute_value, :external_ref, :data_type, :tags])
+        remote_dependencies:         
+          lambda__cmps_and_non_default_attr_candidates.call(
+            cmp_cols: FactoryObject::CommonCols + [:ancestor_id, :component_type, :only_one_per_node],
+            attr_cols: FactoryObject::CommonCols + [:is_instance_value, :attribute_value, :external_ref, :data_type, :tags, :hidden])
 
       virtual_column :input_attribute_links_cmp, type: :json, hidden: true,
-                                                 remote_dependencies:         lambda__components_and_attrs.call(cmp_cols: [:id, :display_name, :component_type, id(:node)], attr_cols: [:id, :display_name]) +
-        [
-         {
-           model_name: :attribute_link,
-           convert: true,
-           join_type: :inner,
-           join_cond: { input_id: q(:attribute, :id) },
-           cols: [:id, :display_name, :type, :input_id, :output_id]
-         }]
+        remote_dependencies:         
+          lambda__components_and_attrs.call(cmp_cols: [:id, :display_name, :component_type, id(:node)], attr_cols: [:id, :display_name]) +
+          [
+           {
+             model_name: :attribute_link,
+             convert: true,
+             join_type: :inner,
+             join_cond: { input_id: q(:attribute, :id) },
+             cols: [:id, :display_name, :type, :input_id, :output_id]
+           }]
       virtual_column :input_attribute_links_node, type: :json, hidden: true,
                                                   remote_dependencies:         node_attrs_on_node_def +
         [

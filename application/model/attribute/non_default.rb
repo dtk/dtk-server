@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class Assembly; class Template
-  class Factory
-    class NonDefaultAttribute < ::Hash
+module DTK
+  class Attribute
+    class NonDefault < ::Hash
       attr_reader :is_title_attribute
       def initialize(attr, cmp)
         super()
@@ -78,4 +78,4 @@ module DTK; class Assembly; class Template
       end
     end
   end
-end; end; end
+end

@@ -18,13 +18,14 @@
 module DTK
   module CommonModule::DSL::Generate
     class ContentInput < ::DTK::DSL::FileGenerator::ContentInput
-      require_relative('content_input/mixin')
-      # mixin must go first
+      require_relative('content_input/hash')
+      require_relative('content_input/array')
+
       require_relative('content_input/service_instance')
       require_relative('content_input/assembly')
 
       def self.generate_for_service_instance(service_instance, module_branch)
-        ServiceInstance.create(service_instance, module_branch).generate_content_input
+        ServiceInstance.new(service_instance, module_branch).generate_content_input!
       end
 
     end

@@ -19,20 +19,50 @@ module DTK
   module CommonModule::DSL::Generate
     class ContentInput
       class Assembly < ContentInput::Hash
-        include Mixin
+        require_relative('assembly/node')
+        require_relative('assembly/component')
 
-        def initialize(assembly_instance)
-          @assembly_instance = assembly_instance
+        def self.generate_content_input(assembly_instance)
+          new.generate_content_input!(assembly_instance)
         end
         
-        private
-
-        def generate_content_input!
+        def generate_content_input!(assembly_instance)
+          nodes = ContentInput::Array.new
+          components = ContentInput::Array.new
+          Node.generate_content_input(assembly_instance).each do | content_input_hash |
+            if content_input_hash[:is_assembly_wide_node]
+              components += (content_input_hash.val(:components) || ContentInput::Array.new)
+            else
+              nodes << content_input_hash
+            end
+          end
+          set(:Nodes, nodes) unless nodes.empty?
+          set(:Components, components) unless components.empty?
+          # TODO: add assembly level attributes, workflows, ...
+          pp [:debug, self]
+          
           # TODO: stub: blob not interpreted and straight dump of info
           # need to use variation of cut and paste info and to break into sub objects that have canonical keys
-          merge!(@assembly_instance.info)
+          merge!(assembly_instance.info)
+          self
         end
       end
     end
   end
 end
+=begin
+{:name=>"simple",
+     :description=>"Simple assembly for DTK-2554",
+     :attributes=>[{:name=>"global_num", :value=>5}],
+     :nodes=>
+      [{:name=>"n1",
+        :attributes=>
+         [{:name=>"image", :value=>"amazon_hvm"},
+          {:name=>"size", :value=>"small"}],
+        "components"=>
+         [{"host::hostname"=>{"attributes"=>{"hostname"=>"host1"}}}]}],
+     "workflows"=>
+      {"create"=>
+        {"subtasks"=>
+          [{"name"=>"set hostname", "components"=>["host::hostname"]}]}}}]}]
+=end

@@ -18,19 +18,9 @@
 module DTK
   module CommonModule::DSL::Generate
     class ContentInput
-      class ServiceInstance < ContentInput::Hash
-        def initialize(service_instance, module_branch)
-          super()
-          @service_instance = service_instance
-          @module_branch    = module_branch
-        end
-
-        def generate_content_input!
-          assembly_instance = @service_instance.assembly_instance
-          set(:DSLVersion, @module_branch.dsl_version)
-          set(:Name, assembly_instance.display_name) 
-          set(:Assembly, Assembly.generate_content_input(assembly_instance))
-          self
+      class Hash < ContentInput::Hash
+        def initialize
+          super(ContentInput)
         end
       end
     end

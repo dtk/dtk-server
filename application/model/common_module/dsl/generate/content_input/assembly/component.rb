@@ -15,16 +15,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  module CommonModule::DSL::Generate
-    class ContentInput
-      module Mixin
-        def generate_content_input
-          generate_content_input!
+module DTK; module CommonModule::DSL::Generate
+  class ContentInput 
+    class Assembly
+      class Component < ContentInput::Hash
+        def self.generate_content_input(aug_components)
+          ret = ContentInput::Array.new
+          aug_components.each { |aug_component| ret << new.generate_content_input!(aug_component) }
+          ret
+        end
+        
+        def generate_content_input!(aug_component)
+          # TODO: stub
+          merge!(aug_component)
           self
         end
-
       end
     end
   end
-end
+end; end

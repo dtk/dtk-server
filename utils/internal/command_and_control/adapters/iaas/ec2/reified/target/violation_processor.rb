@@ -53,7 +53,7 @@ module DTK
           iam_user_viols = ndx_components[:iam_user].map { |reified_component| reified_component.validate_and_fill_in_values! }.flatten(1)
           ret += iam_user_viols
           return ret unless iam_user_viols.empty?
-          ordered_cmp_type = [:vpc_subnet, :vpc, :security_group]
+          ordered_cmp_type = [:vpc]
           ordered_cmp_type.each do |cmp_type|
             ndx_components[cmp_type].each do |reified_component|
               ret += reified_component.validate_and_fill_in_values!

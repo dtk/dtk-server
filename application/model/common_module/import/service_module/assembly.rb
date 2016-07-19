@@ -38,13 +38,10 @@ module DTK
             db_update_hash = Assembly::Top.db_update_hash(parsed_assembly, @module_branch, @module_name)
             @db_updates_assemblies['component'].merge!(assembly_ref => db_update_hash)          
             assembly_ref_pointer = @db_updates_assemblies['component'][assembly_ref] 
-            
-            # Aldin: 06/27/2016: There is alot of code in parsing workflow; I will handle conversion to
-            # split between dtk-dsl and code I will put in assembly/workflows
-            # add in workflows (task_templates)
-            #
-            # workflows_db_update_hash  = version_proc_class.import_task_templates(parsed_assembly)
-            # assembly_ref_pointer.merge!('task_template' => workflows_db_update_hash.mark_as_complete)
+
+            if workflows_db_update_hash = parsed_assembly.val(:TaskTemplates)
+              assembly_ref_pointer.merge!('task_template' => DBUpdateHash.new(workflows_db_update_hash).mark_as_complete)
+            end
 
             assembly_attrs_db_update_hash = Assembly::Attributes.db_update_hash(parsed_assembly.val(:Attributes) || [])
             assembly_ref_pointer.merge!('attribute' => assembly_attrs_db_update_hash.mark_as_complete)

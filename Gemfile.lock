@@ -18,6 +18,12 @@ GIT
       grit (~> 2.5)
       rugged (~> 0.17.0.b7)
 
+GIT
+  remote: git://github.com/dtk/dtk-dsl.git
+  revision: 1ddc222c41b3dfbe5c131d86d23d2b2d52d0fd0a
+  specs:
+    dtk-dsl (0.0.1)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -334,6 +340,3 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
-
-BUNDLED WITH
-   1.10.6

@@ -219,4 +219,54 @@ module ServiceModulesMixin
       pretty_print_JSON(response)
       service_module_cloned = true if response['status'] == 'ok'
     end
+
+
+  def list_all_assemblies
+    puts "List assemblies of installed modules:", "---------------------------------------------" 
+
+    assemblies_list_response = send_request('/rest/api/v1/modules/list_assemblies', {}, 'get')
+    assemblies_listed = false
+    pretty_print_JSON(assemblies_list_response)
+
+    if assemblies_list_response['status'] == 'ok'
+      puts "List of all assemblies was successfully."
+      assemblies_listed = true
+    else
+      puts "List of all assemblies was not successful."
+      assemblies_listed = false
+    end
+
+    puts ''
+    assemblies_listed
+  end
+
+
+  def check_module_for_assembly(module_name, assembly_name)
+    puts "Check module for assembly:", "--------------------------" 
+
+    assemblies_list_response = send_request('/rest/api/v1/modules/list_assemblies', {}, 'get')
+    assembly_found = false
+    # pretty_print_JSON(assemblies_list_response)
+
+    if assemblies_list_response['status'] == 'ok'
+      service_module_list = assemblies_list_response['data']
+      assembly = service_module_list.select { |x| x['service_module']['ref'] == module_name && x['display_name'] == assembly_name }
+      assembly = assembly[0]
+      pretty_print_JSON(assembly)
+      
+      if assembly.nil?
+        puts "Assembly #{assembly_name} does not exists in module #{module_name} module"
+        assembly_found = false
+      else
+        puts "Assembly #{assembly_name} exists in #{module_name} module"
+        assembly_found = true
+      end
+    else
+      puts "Assembly list request was not successful"
+      assembly_found = false
+    end
+
+    puts ''
+    assembly_found
+  end
 end

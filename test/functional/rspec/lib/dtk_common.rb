@@ -138,9 +138,16 @@ class Common
 		return final_log
 	end
 
-	def send_request(path, body)
+	def send_request(path, body, request_type = 'post')
 		resource = RestClient::Resource.new(@endpoint + path, $opts)
-		response = resource.post(body)
+		puts @endpoint
+		response = nil
+		case request_type
+		when 'post'
+		  response = resource.post(body)
+		when 'get'
+			response = resource.get(body)
+		end
 		response_JSON = JSON.parse(response)
 
 		#If response contains errors, accumulate all errors to error_message

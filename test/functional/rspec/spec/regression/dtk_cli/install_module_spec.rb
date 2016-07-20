@@ -1,8 +1,11 @@
 require './lib/dtk_cli_spec'
+require './lib/dtk_common'
 
-dtk_cli_path = '/Users/bjusufbe/R8-public/dtk-cli'
-module_name = 'rich/simple'
+dtk_cli_path = '/home/vagrant/r8/dtk-cli'
+module_name = 'rich:simple'
 assembly_name = 'simple'
+
+dtk_common = Common.new('', '')
 
 describe "(DTK CLI) Test Case 1: Install module with new dtk cli" do
   before(:all) do
@@ -14,7 +17,7 @@ describe "(DTK CLI) Test Case 1: Install module with new dtk cli" do
   end
 
   context "List assemblies contained in this module" do
-    include_context "List assemblies", module_name, assembly_name, dtk_cli_path
+    include_context "List assemblies", module_name, assembly_name, dtk_common
   end
 
   context "Push module" do

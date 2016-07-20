@@ -20,11 +20,10 @@ shared_context 'Install module' do |module_name, dtk_cli_path|
   end
 end
 
-shared_context 'List assemblies' do |module_name, assembly_name, dtk_cli_path|
+shared_context 'List assemblies' do |module_name, assembly_name, dtk_common|
   it "checks that assembly: #{assembly_name} exists as part of module: #{module_name}" do
     puts 'List assemblies:', '----------------------'
-    assembly_found = false
-    # TODO: Add logic to search for assembly as part of module
+    assembly_found = dtk_common.check_module_for_assembly(module_name, assembly_name)
     expect(assembly_found).to eq(true)
   end
 end

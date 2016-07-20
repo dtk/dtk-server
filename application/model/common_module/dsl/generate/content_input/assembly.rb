@@ -19,9 +19,10 @@ module DTK
   module CommonModule::DSL::Generate
     class ContentInput
       class Assembly < ContentInput::Hash
+        require_relative('assembly/attribute')
+        # attribute must be before node and component
         require_relative('assembly/node')
         require_relative('assembly/component')
-        require_relative('assembly/attribute')
 
         def self.generate_content_input(assembly_instance)
           new.generate_content_input!(assembly_instance)
@@ -37,13 +38,14 @@ module DTK
               nodes << content_input_hash
             end
           end
+
+          # TODO: add assembly level attributes
           set(:Nodes, nodes) unless nodes.empty?
           set(:Components, components) unless components.empty?
-          # TODO: add assembly level attributes, workflows, ...
+          # TODO: add assembly level workflows
           pp [:debug, self]
           
           # TODO: stub: blob not interpreted and straight dump of info
-          # need to use variation of cut and paste info and to break into sub objects that have canonical keys
           merge!(assembly_instance.info)
           self
         end
@@ -51,19 +53,3 @@ module DTK
     end
   end
 end
-=begin
-{:name=>"simple",
-     :description=>"Simple assembly for DTK-2554",
-     :attributes=>[{:name=>"global_num", :value=>5}],
-     :nodes=>
-      [{:name=>"n1",
-        :attributes=>
-         [{:name=>"image", :value=>"amazon_hvm"},
-          {:name=>"size", :value=>"small"}],
-        "components"=>
-         [{"host::hostname"=>{"attributes"=>{"hostname"=>"host1"}}}]}],
-     "workflows"=>
-      {"create"=>
-        {"subtasks"=>
-          [{"name"=>"set hostname", "components"=>["host::hostname"]}]}}}]}]
-=end

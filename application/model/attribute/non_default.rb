@@ -19,11 +19,11 @@ module DTK
   class Attribute
     class NonDefault < ::Hash
       attr_reader :is_title_attribute
-      def initialize(attr, cmp)
+      def initialize(attr, cmp = nil)
         super()
         replace(Aux.hash_subset(attr, [:display_name, :description, :ref, :tags, :is_instance_value]))
         self[:attribute_value] = attr[:attribute_value] # virtual attributes do not work in Aux::hash_subset
-        @is_title_attribute = ((not cmp[:only_one_per_node]) && attr.is_title_attribute?())
+        @is_title_attribute = (cmp && (not cmp[:only_one_per_node]) && attr.is_title_attribute?)
       end
       private :initialize
 
@@ -50,7 +50,7 @@ module DTK
 
       def self.base_tags?(attr)
         if attr[:tags] = HierarchicalTags.reify(attr[:tags])
-          attr[:tags].base_tags?()
+          attr[:tags].base_tags?
         end
       end
 

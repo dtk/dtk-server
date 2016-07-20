@@ -723,8 +723,13 @@ module DTK; class  Assembly
       av_pairs
     end
 
-    def self.exists?(target, display_name)
-      !!find_by_name?(target, display_name)
+    def self.exists?(mh, display_name)
+      filter_array = 
+        [ :and, 
+          [:eq, :display_name, display_name], 
+          [:eq, :type, 'composite'],
+          [:neq, :datacenter_datacenter_id, nil]]
+      ! get_objs(mh.createMH(:assembly_instance), sp_filter(filter_array)).empty?
     end
 
     def self.check_valid_id(model_handle, id)

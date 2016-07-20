@@ -38,7 +38,6 @@ module DTK
         create_from_target(node.get_target)
       end
 
-
       # Creates a Service::Target object if assembly_instance represents a target service instance
       # opts can have keys
       #  :components
@@ -52,13 +51,42 @@ module DTK
         new(find_assembly_instance_from_target(target), target: target)
       end
 
+      ###### Just called from v1 controller ######
+      # This method stages a target service
+      def self.stage_target_service(assembly_template, service_module_class, opts = Opts.new)
+        Model.Transaction do
+          target = create_target_mock(opts[:target_name], opts[:project])
+          new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
+          # TODO: see if we can remove this fix up of target name and ref
+          fixup_target_name_and_ref!(new_assembly_instance)
+          module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance)
+          new_service_info(new_assembly_instance, module_repo_info)
+        end
+      end
+
+      # The method stage_service stages the assembly_template wrt this, which is a target service instance
+      def stage_service(assembly_template, service_module_class, opts = Opts.new)
+        unless is_converged? 
+          fail ErrorUsage, "Cannot stage a service instance in a target service instance '#{target}' that is not converged."
+        end
+        Model.Transaction do 
+          new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
+          module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance)
+Aux.stop_for_testing?(:create_service_instance) # TODO: for debugging
+          self.class.new_service_info(new_assembly_instance, module_repo_info)
+        end
+      end
+
+      ###### end: Just called from v1 controller ######
+
+
       def target
         Log.error("Unexpected that @target is nil") unless @target
         @target
       end
 
       def display_name
-        @assembly_instance.get_field?(:display_name)
+        @assembly_instance.display_name
       end
 
       def self.target_when_target_assembly_instance?(assembly)
@@ -105,6 +133,21 @@ module DTK
           Log.error("Unexpected that find_assembly_instance_from_target returns nil")
         end
         ret
+      end
+
+      def self.new_service_info(assembly_instance, module_repo_info)
+        {
+          service: {
+            name: assembly_instance.display_name_print_form,
+            id: assembly_instance.id
+          }
+        }.merge(module_repo_info)
+      end
+
+      def self.fixup_target_name_and_ref!(assembly_instance)
+        display_name = assembly_instance.get_field?(:display_name)
+        ref          = display_name.downcase.gsub(/ /, '-')
+        target.update(display_name: display_name, ref: ref)
       end
     end
   end

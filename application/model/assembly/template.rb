@@ -39,20 +39,37 @@ module DTK; class Assembly
       idh.create_object(model_name: :assembly_template)
     end
 
-    def stage(target, opts = {})
-      service_module = get_service_module()
+    # opts can have keys:
+    #  :service_module - service module object
+    #  :service_name - new service name (TODO: code to deprecate can use :assembly_name)
+    #  :parent_service_instance
+    #  :project
+    #  :service_settings - TODO: may be deprecated
+    #  :node_size
+    #  :os_type
+    #  :no_auto_complete - Boolean (default false)
+    #  :is_target_service - Boolean (default false)
+    #  :service_name_globally_scoped - Boolean (default false); alternative is unique wrt to target
+    #  TODO: see if anyother sused when passing opts to get_augmented_components(opts) and autocomplete_component_links(assembly_instance, aug_cmps, opts)
+    def stage(target, opts = Opts.new)
+      service_module = opts[:service_module] || get_service_module
 
-      # unless is_dsl_parsed = service_module.dsl_parsed?()
-      service_module_branch = service_module.get_workspace_module_branch()
-      unless is_dsl_parsed = service_module_branch.dsl_parsed?()
-        fail ErrorUsage.new("An assembly template from an unparsed service-module ('#{service_module}') cannot be staged")
+      # raise error if service_module is not parsed
+      service_module_branch = service_module.get_workspace_module_branch
+      unless is_dsl_parsed = service_module_branch.dsl_parsed?
+        fail ErrorUsage.new("An assembly template from an unparsed service-module '#{service_module}' cannot be staged")
       end
 
       # including :description here because it is not a field that gets copied by clone copy processor
       override_attrs = { description: get_field?(:description), service_module_sha: service_module_branch[:current_sha] }
-      if assembly_name = opts[:assembly_name]
-        fail ErrorUsage.new("Service '#{assembly_name}' already exists in target '#{target.get_field?(:display_name)}'") if Assembly::Instance.exists?(target, assembly_name)
-        override_attrs[:display_name] = assembly_name
+      
+      # See if service instance name is passed and if so make sure name not used already
+      # TODO: will deprecate opts[:assembly_name] for :service_name
+      if service_name = opts[:service_name] || opts[:assembly_name]
+        if Assembly::Instance.exists?(target.model_handle, service_name)
+          fail ErrorUsage.new("Service '#{service_name}' already exists")
+        end
+        override_attrs[:display_name] = service_name
       end
 
       # only if called from stage-target; we set specific_type field to 'target'
@@ -73,7 +90,7 @@ module DTK; class Assembly
 
         assembly_instance = Assembly::Instance.create_subclass_object(new_assembly_obj)
         assembly_instance_lock = Assembly::Instance::Lock.create_from_element(assembly_instance, service_module)
-        assembly_instance_lock.save_to_model()
+        assembly_instance_lock.save_to_model
 
         # user can provide custom node-size and os-type attribute, we proccess them here and assign to nodes
         set_custom_node_attributes(assembly_instance, opts) if opts[:node_size] || opts[:os_type]

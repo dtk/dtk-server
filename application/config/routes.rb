@@ -15,12 +15,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: figure out how to use routing to select/define specific templates
-#      and action_set's to be used for a given route
-r8_require('../../utils/internal/routes/routes')
+require_relative('../../utils/internal/routes/routes')
 
-R8::ReactorRoute.draw do
-  # V1 Namespace
+DTK::ReactorRoute.draw do
+
+  ############## V1 Namespace
+
+  # Auth
+  post 'api/v1/auth/login' => 'v1::authorization#login'
+  post 'api/v1/auth/logout' => 'v1::authorization#logout'
+
+  # Metadata
+  get 'api/v1/metadata/get/:metadata_file' => 'v1::metadata#get'
+
+  # Services
   get    'api/v1/services/:service_id'                 => 'v1::service#info'
   get    'api/v1/services/:service_id/nodes'           => 'v1::service#nodes'
   get    'api/v1/services/:service_id/components'      => 'v1::service#components'
@@ -34,15 +42,30 @@ R8::ReactorRoute.draw do
   post   'api/v1/services/:service_id/:task_action'    => 'v1::service#exec'
   delete 'api/v1/services/:service_id'                 => 'v1::service#delete_destroy'
 
-  post 'api/v1/auth/login' => 'v1::authorization#login'
-  post 'api/v1/auth/logout' => 'v1::authorization#logout'
+  # Modules
+  get 'api/v1/modules/list_assemblies'           => 'v1::module/list_assemblies'
+  get 'api/v1/modules'                           => 'v1::module/exists'
+  post 'api/v1/modules/install_component_module' => 'v1::module/install_component_module'
+  post 'api/v1/modules/install_service_module'   => 'v1::module/install_service_module'
+  post 'api/v1/modules/get_module_dependencies'  => 'v1::module/get_module_dependencies'
+  post 'api/v1/modules/create_empty_module'      => 'v1::module/create_empty_module'
+  post 'api/v1/modules/update_from_repo'         => 'v1::module/update_from_repo'
+  post 'api/v1/modules/delete'                   => 'v1::module/delete'
+
+  # TODO: DTK-2554; temp while initial testing
+  # routes that need to be put on v1
+  post 'api/v1/account/set_catalog_credentials'   => 'account#set_catalog_credentials'
+  post 'api/v1/account/add_user_direct_access'    => 'account#add_user_direct_access'
+  post 'api/v1/account/check_catalog_credentials' => 'account#check_catalog_credentials'
+
+  ########### end v1 routes
 
   # USER
-  post 'user/process_login'      => 'user#process_login'
-  get 'user/process_logout'     => 'user#process_logout'
+  post 'user/process_login' => 'user#process_login'
+  get 'user/process_logout' => 'user#process_logout'
 
   # MESSAGES
-  get 'messages/retrieve'       => 'messages#retrieve'
+  get 'messages/retrieve' => 'messages#retrieve'
 
   # INTEGRATION
   post 'integration/spin_tenant' => 'integration#spin_tenant'
@@ -379,4 +402,4 @@ R8::ReactorRoute.draw do
   post 'namespace/default_namespace_name' => 'namespace#default_namespace_name'
 end
 
-R8::Routes.freeze
+DTK::Routes.freeze

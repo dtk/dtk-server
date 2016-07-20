@@ -18,7 +18,7 @@
 # TODO: replace as many git checkout calls with either qualified calls raw object model ops taht work in both clone and bare repos
 require 'grit'
 require 'fileutils'
-r8_nested_require('git', 'manage_git_server')
+require_relative('git/manage_git_server')
 
 Grit.debug = R8::Config[:grit][:debug]
 Grit::Git.git_timeout = R8::Config[:grit][:git_timeout]
@@ -28,6 +28,12 @@ module DTK
   class RepoManagerGit < RepoManager
     extend RepoGitManageClassMixin
 
+    # opts can have keys:
+    #  :delete_if_exists - Boolean (default: false)
+    #  :push_created_branch  - Boolean (default: false)
+    #  :donot_create_master_branch - Boolean (default: false)
+    #  :create_branch  - branch to create (f non nil)
+    #  :copy_files - Hash with key: source_directory
     def self.create_repo_clone(repo_obj, opts)
       local_repo_dir = repo_obj[:local_dir]
       repo_name = repo_obj[:repo_name]
@@ -41,7 +47,8 @@ module DTK
       local_repo = create_without_branch(local_repo_dir, absolute_path: true, repo_does_not_exist: true)
       local_repo.create_local_repo(repo_name, opts)
       if create_branch = opts[:create_branch]
-        opts_add_branch = { empty: true }.merge(Aux.hash_subset(opts, [:copy_files]))
+        opts_add_branch = { empty: true }
+        opts_add_branch.merge!(Aux.hash_subset(opts, [:copy_files]))
         if opts[:push_created_branch]
           local_repo.add_branch_and_push?(create_branch, opts_add_branch)
         else
@@ -126,9 +133,9 @@ module DTK
       @git_url ||= self.class.repo_url()
     end
 
+    # opts can have keys:
+    #  :donot_create_master_branch - Boolean (default: false)
     def create_local_repo(repo_name, opts = {})
-      # TODO: patch until Haris looks at it DTK-2124
-      remote_repo = nil
       remote_repo = "#{repo_url()}/#{repo_name}"
 
       git_command__clone(remote_repo, @path)
@@ -449,7 +456,9 @@ module DTK
     end
 
     def branch_head_sha
-      @grit_repo.commit(@branch).id
+      if commit = @grit_repo.commit(@branch)
+        commit.id
+      end
     end
 
     # returns :equal, :local_behind, :local_ahead, or :branchpoint
@@ -578,6 +587,9 @@ module DTK
       new_branch_sha
     end
 
+    # opts can have keys:
+    #  :empty - Booelan (default: false)
+    #  :sha
     def add_branch?(new_branch, opts = {})
       unless get_branches().include?(new_branch)
         # if :copy_files; do it here and not in add_branch
@@ -588,10 +600,13 @@ module DTK
       end
     end
 
+    # opts can have keys:
+    #  :empty - Booelan (default: false)
+    #  :sha
     def add_branch(new_branch, opts = {})
       if opts[:empty]
         git_command__create_empty_branch(new_branch)
-        git_command__empty_commit()
+        git_command__empty_commit 
       else
         checkout(opts[:sha] || @branch) do
           git_command__add_branch(new_branch)

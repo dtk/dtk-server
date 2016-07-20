@@ -99,7 +99,7 @@ module DTK
     # opts can have keys
     #  :cols - component columns
     #  :filter - filter on component
-    #  :with_attributes (Booelan)
+    #  :with_attributes (Boolean)
     def get_components(opts = {})
       filter = [:eq, :node_node_id, id]
       if cmp_filter = opts[:filter]

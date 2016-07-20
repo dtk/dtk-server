@@ -25,6 +25,8 @@ lambda__matching_library_branches =
           :test_id
         when :node_module
           :node_id
+        when :common_module
+          :common_id
         else
           :component_id
         end
@@ -77,11 +79,12 @@ end
   table: :branch,
   columns: {
     branch: { type: :varchar, size: 100 },
-    version: { type: :varchar, size: 100 },
+    version: { type: :varchar, size: 50 },
     is_workspace: { type: :boolean },
     type: { type: :varchar, size: 20 }, #service_module or component_module
     current_sha: { type: :varchar, size: 50 }, #indicates the sha of the branch that is currently synchronized with object model
     external_ref: { type: :text },
+    dsl_version: { type: :varchar, size: 30 },
     dsl_parsed: { type: :boolean, default: true },
     frozen: { type: :boolean, default: false },
     repo_id: {
@@ -108,6 +111,7 @@ end
     matching_service_library_branches: lambda__matching_library_branches.call(type: :service_module),
     matching_test_library_branches: lambda__matching_library_branches.call(type: :test_module),
     matching_node_library_branches: lambda__matching_library_branches.call(type: :node_module),
+    matching_common_library_branches: lambda__matching_library_branches.call(type: :common_module),
     service_module: {
       type: :json,
       hidden: true,
@@ -149,6 +153,13 @@ end
           convert: true,
           join_type: :left_outer,
           join_cond: { id: q(:module_branch, :node_id) },
+          cols: [:id, :group_id, :display_name]
+        },
+        {
+          model_name: :common_module,
+          convert: true,
+          join_type: :left_outer,
+          join_cond: { id: q(:module_branch, :common_id) },
           cols: [:id, :group_id, :display_name]
         }
       ]
@@ -214,6 +225,6 @@ end
       }]
     }
   },
-  many_to_one: [:component_module, :service_module, :test_module, :node_module],
+  many_to_one: [:component_module, :service_module, :test_module, :node_module, :common_module],
   one_to_many: [:module_ref, :task_template]
 }

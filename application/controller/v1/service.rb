@@ -17,79 +17,79 @@
 #
 module DTK
   module V1
-    class ServiceController < AuthController
-
+    class ServiceController < V1::Base
+      helper_v1 :module_ref_helper
+      helper_v1 :service_helper
       helper :assembly_helper
       helper :task_helper
 
-      def rest__create
-        target_id = ret_request_param_id_optional(:target_id, Target::Instance)
-        target = target_with_default(target_id)
+      ### For creating a service instance from an assembly
+      ## Params are
+      ##   :assembly_name
+      ##   :module_id, :module_name, :namespace - Either 'module_id' or 'module_name and namespace' must be given
+      ##   :target_service (optional) - id or name of target (parent) service; if omitted default is used
+      ##   :service_name (optional) - name for new service instance
+      ##   :is_target (optional) - Boolean
+      ##   :no_auto_complete(optional) - Boolean
+      def create
+        assembly_name     = required_request_params(:assembly_name)
+        service_module    = ret_service_module
+        version           = request_params(:version) || compute_latest_version(service_module)
+        service_name      = request_params(:service_name)
+        is_target_service = boolean_request_params(:is_target)
 
-        service_module_obj = create_obj(:service_module_name, ServiceModule)
-
-        # Special case to support Jenikins CLI orders, since we are not using shell we do not have access
-        # to element IDs. This "workaround" helps with that.
-        if service_module_id = service_module_obj.id
-          # this is name of assembly template
-          assembly_id = ret_request_params(:assembly_name)
-          service_module = ServiceModule.find(model_handle(:service_module), service_module_id)
-          assembly_template = service_module.get_assembly_templates().find { |template| template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i }
-          fail ErrorUsage, "We are not able to find assembly '#{assembly_id}' for service module '#{service_module_id}'" unless assembly_template
-        else
-          assembly_template = ret_assembly_template_object()
+        unless assembly_template = service_module.assembly_template?(assembly_name, version)
+          fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'"
         end
-
-        opts = {}
-        if assembly_name = ret_request_params(:name)
-          opts[:assembly_name] = assembly_name
-        end
-
-        if service_settings = ret_settings_objects(assembly_template)
-          opts[:service_settings] = service_settings
-        end
-
-        if node_size = ret_request_params(:node_size)
-          opts[:node_size] = node_size
-        end
-
-        if os_type = ret_request_params(:os_type)
-          opts[:os_type] = os_type
-        end
-
-        new_assembly_obj = assembly_template.stage(target, opts)
-
-        response = {
-          new_service_instance: {
-            name: new_assembly_obj.display_name_print_form,
-            id: new_assembly_obj.id()
-          },
-          display_name: new_assembly_obj.display_name,
-          id: new_assembly_obj.id
+        
+        opts = {
+          project: get_default_project,
+          service_module: service_module,
+          service_name: request_params(:service_name) || generate_new_service_name(assembly_name, service_module),
+          no_auto_complete: boolean_request_params(:no_auto_complete),
         }
+        opts = Opts.new(opts)
 
-        rest_ok_response(response)
+        response = 
+          if is_target_service
+            target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
+            Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
+          else
+            target_service = ret_target_service_with_default(:target_service)
+            target_service.stage_service(assembly_template, CommonModule::ServiceInstance, opts)
+          end
+        rest_ok_response response
       end
 
-      def rest__exec
-        service    = service_object()
-        params_hash = ret_params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
+      def update_from_repo
+        namespace, module_name, repo_name, commit_sha = required_request_params(:namespace, :module_name, :repo_name, :commit_sha)
+        version = request_params(:version)
+        local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
+        rest_ok_response CommonModule.update_from_repo(:service_instance, get_default_project, local_params, repo_name, commit_sha, { force_pull: true })
+      end
+
+
+      #############################################
+      # TODO: DTK-2575: Below were written before new client; ckeck to see if need to be modified
+
+      def exec
+        service     = service_object
+        params_hash = params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
         rest_ok_response service.exec(params_hash)
       end
 
-
-      def rest__info
-        service = service_object()
+      def info
+        service = service_object
         rest_ok_response service.info
       end
 
-      def rest__nodes
-        service = service_object()
+      def nodes
+        service = service_object
         rest_ok_response service.info_about(:nodes)
       end
 
-      def rest__components
-        service = service_object()
+      def components
+        service = service_object
 
         opts = Opts.new(detail_level: nil)
         opts[:filter_proc] = Proc.new do |e|
@@ -100,18 +100,18 @@ module DTK
         rest_ok_response service.info_about(:components, opts)
       end
 
-      def rest__tasks
-        service = service_object()
+      def tasks
+        service = service_object
         rest_ok_response service.info_about(:tasks)
       end
 
-      def rest__access_tokens
-        service = service_object()
+      def access_tokens
+        service = service_object
         rest_ok_response
       end
 
-      def rest__converge
-        service = service_object()
+      def converge
+        service = service_object
 
         if running_task = most_recent_task_is_executing?(service)
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
@@ -124,16 +124,16 @@ module DTK
           }
           return rest_ok_response(response)
         end
-        task.save!()
+        task.save!
 
         workflow = Workflow.create(task)
-        workflow.defer_execution()
+        workflow.defer_execution
 
         rest_ok_response task_id: task.id
       end
 
-      def rest__start
-        service = service_object()
+      def start
+        service = service_object
 
         # filters only stopped nodes for this assembly
         nodes, is_valid, error_msg = service.nodes_valid_for_stop_or_start(nil, :stopped)
@@ -151,15 +151,15 @@ module DTK
         end
 
         task = Task.task_when_nodes_ready_from_assembly(service, :assembly, opts)
-        task.save!()
+        task.save!
 
         Node.start_instances(nodes)
 
         rest_ok_response task_id: task.id
       end
 
-      def rest__stop
-        service = service_object()
+      def stop
+        service = service_object
 
         # cancel task if running on the assembly
         if running_task = most_recent_task_is_executing?(service)
@@ -178,35 +178,35 @@ module DTK
         rest_ok_response
       end
 
-      def rest__create_assembly
-        service = service_object()
+      def create_assembly
+        service = service_object
         assembly_template_name, service_module_name, module_namespace = get_template_and_service_names_params(service)
 
         if assembly_template_name.nil? || service_module_name.nil?
           fail ErrorUsage.new('SERVICE-NAME/ASSEMBLY-NAME cannot be determined and must be explicitly given')
         end
 
-        project = get_default_project()
+        project = get_default_project
         opts = { mode: :create, local_clone_dir_exists: false }
 
-        if namespace = ret_request_params(:namespace)
+        if namespace = request_params(:namespace)
           opts.merge!(namespace: namespace)
-        elsif ret_request_params(:use_module_namespace)
+        elsif request_params(:use_module_namespace)
           opts.merge!(namespace: module_namespace)
         end
 
-        if description = ret_request_params(:description)
+        if description = request_params(:description)
           opts.merge!(description: description)
         end
 
         service_module = Assembly::Template.create_or_update_from_instance(project, service, service_module_name, assembly_template_name, opts)
-        rest_ok_response service_module.ret_clone_update_info()
+        rest_ok_response service_module.ret_clone_update_info
       end
 
-      def rest__delete_destroy
-        service = service_object()
+      def delete_destroy
+        service = service_object
 
-        Assembly::Instance.delete(service.id_handle(), destroy_nodes: true)
+        Assembly::Instance.delete(service.id_handle, destroy_nodes: true)
 
         rest_ok_response
       end

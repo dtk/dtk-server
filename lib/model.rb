@@ -18,25 +18,29 @@
 # TODO: needs cleanup and partitioning
 # TODO: model_name and relation_type redundant
 # TODO: move these down under class Model
-r8_nested_require('model', 'input_into_model')
-r8_nested_require('model', 'field_set')
-r8_nested_require('model', 'clone')
-r8_nested_require('model', 'get_items')
+require_relative('model/input_into_model')
+require_relative('model/field_set')
+require_relative('model/clone')
+require_relative('model/get_items')
 
-r8_nested_require('model', 'schema')
-r8_nested_require('model', 'data')
-r8_nested_require('model', 'rails_class')
+require_relative('model/schema')
+require_relative('model/data')
+require_relative('model/rails_class')
 
 module DTK
   class Model < HashObject::Model
-    r8_nested_require('model', 'subclass_processing')
+    require_relative('model/sp_hash')
+    extend SpHash::Mixin
+    include SpHash::Mixin
+
+    require_relative('model/subclass_processing')
     extend SubclassProcessingClassMixin
     include SubclassProcessingMixin
 
-    r8_nested_require('model', 'name_and_id_mixins')
+    require_relative('model/name_and_id_mixins')
     extend NameAndIdClassMixin
 
-    r8_nested_require('model', 'pp_object_type')
+    require_relative('model/pp_object_type')
     extend PPObjectType::ClassMixin
     include PPObjectType::Mixin
 
@@ -277,9 +281,18 @@ module DTK
       end
     end
 
-    def self.create_from_model_handle(hash_scalar_values, model_handle)
-      self.new(hash_scalar_values, model_handle[:c], model_handle[:model_name])
+    def self.copy_as(model_obj)
+      create_from_model_or_id_handle(model_obj, model_obj.model_handle, model_obj.id_handle)
     end
+
+    def self.create_from_model_handle(hash_scalar_values, model_handle)
+      create_from_model_or_id_handle(hash_scalar_values, model_handle)
+    end
+
+    def self.create_from_model_or_id_handle(hash_scalar_values, model_handle, id_handle = nil)
+      self.new(hash_scalar_values, model_handle[:c], model_handle[:model_name], id_handle)
+    end
+    private_class_method :create_from_model_or_id_handle
 
     def i18n_language
       @id_handle ? @id_handle.i18n_language() : R8::Config[:default_language]

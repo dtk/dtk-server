@@ -61,15 +61,19 @@ module DTK
 
 
     def commands
-      parse_and_reify_content?().commands()
+      parse_and_reify_content?.commands
     end
 
     def functions
-      parse_and_reify_content?().functions()
+      parse_and_reify_content?.functions
+    end
+
+    def docker
+      parse_and_reify_content?.docker
     end
 
     def content
-      parse_and_reify_content?()
+      parse_and_reify_content?
     end
 
     # if parse does not go through; raises parse error

@@ -743,7 +743,7 @@ module DTK
         # delete mocked target service instance created above
         Target::Instance.delete_and_destroy(target) if is_target_service
         raise e unless is_silent_fail
-        # in case we are using silent fail we wont response evne if there was an error
+        # in case we are using silent fail we wont response event if there was an error
         new_assembly_obj = Assembly::Instance.find_by_name?(target, opts[:assembly_name])
         is_created = false
         # in case there is still no assembly raise error

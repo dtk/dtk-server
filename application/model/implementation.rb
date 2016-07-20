@@ -15,12 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-r8_require('branch_names')
+require_relative('branch_names')
 
 module DTK
   class Implementation < Model
-    include BranchNamesMixin
-    extend BranchNamesClassMixin
+    include BranchNames::Mixin
+    extend BranchNames::ClassMixin
 
     def self.common_columns
       [:id, :group_id, :display_name, :type, :repo, :module_name, :module_namespace, :parse_state, :branch, :version, :updated, :repo_id, :assembly_id]

@@ -22,17 +22,24 @@
 # for the rest the classes used are
 module DTK
   # order is important
-  r8_nested_require('module', 'mixins')
-  r8_nested_require('module', 'dsl_parser')
-  r8_nested_require('module', 'external_dependencies')
-  r8_nested_require('module', 'module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output
-  r8_nested_require('module', 'update_module_output')
-  r8_nested_require('module', 'base_module')
-  r8_nested_require('module', 'component_module')
-  r8_nested_require('module', 'service')
-  r8_nested_require('module', 'test')
-  r8_nested_require('module', 'node')
-  r8_nested_require('module', 'branch')
-  r8_nested_require('module', 'version')
-  r8_nested_require('module', 'assembly_module')
+
+  # TODO DTK-2587: wil be incrementally moving or depracting these to CommonModule::* classes and modules
+  require_relative('module/module_utils')
+  require_relative('module/module_common_mixin')
+  require_relative('module/module_mixin') # TODO DTK-2587: cleaning up and moving fns to module/mixin
+  require_relative('module/module_class_mixin') # TODO DTK-2587: cleaning up and moving fns to module/class_mixin
+  require_relative('module/module_repo_info')
+
+  require_relative('module/dsl_parser')
+  require_relative('module/external_dependencies')
+  require_relative('module/module_dsl_info') #TODO: this will get deprecated when all move over to update_module_output
+  require_relative('module/update_module_output')
+  require_relative('module/base_module')
+  require_relative('module/component_module')# TODO DTK-2587: cleaning up and moving fns from  component_module to component (CommonModule::Template::Component)
+  require_relative('module/service_module') # TODO DTK-2587: cleaning up and moving fns from service_module to service (CommonModule::Template::Service)
+  require_relative('module/test')
+  require_relative('module/node')
+  require_relative('module/branch')
+  require_relative('module/version')
+  require_relative('module/assembly_module') # TODO DTK-2587: cleaning up and moving fns to CommonModule::Instance
 end

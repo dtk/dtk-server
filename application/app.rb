@@ -21,8 +21,13 @@
 #
 # It will be required from either `config.ru` or `start.rb`
 
-# TODO: add all required gem includes here, or where appropriate
-require 'rubygems'
+
+##### temp until convert to DTK
+module XYZ; end
+Object.send(:remove_const, :DTK) rescue nil
+DTK = XYZ
+####
+
 require 'bundler/setup'
 require 'ramaze'
 require 'json'
@@ -44,16 +49,18 @@ end
 #  end
 #end
 
-##### temp until convert to DTK
-module XYZ
-end
-DTK = XYZ
-
 require 'bundler/setup'
 require File.expand_path('require_first', File.dirname(__FILE__))
 
 # load common gem or use local dir if available
 dtk_require_common_library()
+
+module DTK::GlobalForDSL
+  Error  = ::DTK::Error
+  ErrorUsage  = ::DTK::ErrorUsage
+end
+# DTK::GlobalForDSL defs must before "require 'dtk_dsl'"
+require 'dtk_dsl'
 
 SYSTEM_ROOT_PATH = File.expand_path('../', File.dirname(__FILE__))
 LIB_DIR = "#{SYSTEM_ROOT_PATH}/lib"

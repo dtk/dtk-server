@@ -15,17 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-r8_require('../branch_names')
+require_relative('../branch_names')
 
 module DTK
   class ModuleBranch < Model
-    r8_nested_require('branch', 'location')
+    require_relative('branch/location')
 
-    include BranchNamesMixin
-    extend BranchNamesClassMixin
+    include BranchNames::Mixin
+    extend BranchNames::ClassMixin
 
     def self.common_columns
-      [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :frozen]
+      [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :dsl_version, :frozen]
     end
 
     # TODO: should change type of self[:external_ref] to json
@@ -44,6 +44,14 @@ module DTK
 
     def get_type
       get_field?(:type).to_sym
+    end
+
+    def dsl_version
+      get_field?(:dsl_version)
+    end
+
+    def set_dsl_version!(dsl_version)
+      update(dsl_version: dsl_version)
     end
 
     def set_dsl_parsed!(boolean_val)
@@ -540,6 +548,7 @@ module DTK
       }
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
       assigns.merge!(frozen: opts[:frozen]) if opts[:frozen]
+      assigns.merge!(dsl_version: opts[:dsl_version]) if opts[:dsl_version]
       ref = branch
       { ref => assigns }
     end

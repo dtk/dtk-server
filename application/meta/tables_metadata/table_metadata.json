@@ -427,6 +427,24 @@
       "description": "description"
     }
   },
+  "assembly_template_with_module": {
+    "order": [
+      "id",
+      "module",
+      "version",
+      "assembly_name",
+      "nodes",
+      "description"
+    ],
+    "mapping": {
+      "nodes": "nodes_size",
+      "assembly_name": "display_name",
+      "id": "dtk_id",
+      "description": "description",
+      "module": "module_name",
+      "version": "display_version"
+    }
+  },
   "remote_assembly_template_description": {
     "order": [
       "assembly_name",

@@ -28,10 +28,13 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
 
         Functions = 'functions'
         Variations::Functions = ['functions', 'function']
+
+        Docker = 'docker'
+        Variations::Docker = ['docker_image', 'docker_run_params']
       end
 
       def self.matches_input_hash?(input_hash)
-        !!Constant.matches?(input_hash, :Commands) || !!Constant.matches?(input_hash, :Functions)
+        !!Constant.matches?(input_hash, :Commands) || !!Constant.matches?(input_hash, :Functions) || !!Constant.matches?(input_hash, :Docker)
       end
 
       def provider_specific_fields(input_hash)
@@ -40,6 +43,9 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
             { commands: commands.is_a?(Array) ? commands : [commands] }
           elsif functions = Constant.matches?(input_hash, :Functions)
             { functions: functions.is_a?(Array) ? functions : [functions] }
+          elsif docker = Constant.matches?(input_hash, :Docker)
+            # { docker: docker.is_a?(Array) ? docker : [docker] }
+            { docker: [input_hash]}
           end
 
         stdout_err = input_hash['stdout_and_stderr']
@@ -59,6 +65,10 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
 
       def external_ref_from_bash_command
         { type: 'bash_command' }
+      end
+
+      def external_ref_from_docker
+        { type: 'docker' }
       end
     end
   end; end

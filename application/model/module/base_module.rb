@@ -145,13 +145,25 @@ module DTK
       config_agent_type
     end
 
+    def self.exists(project, namespace, module_name, version = nil)
+      ret = {}
+
+      if service_module_id = ServiceModule.module_exists(project, namespace, module_name, version)
+        ret.merge!(service_module_id: service_module_id)
+      elsif component_module_id = ComponentModule.module_exists(project, namespace, module_name, version)
+        ret.merge!(component_module_id: component_module_id)
+      end
+
+      ret
+    end
+
     def module_branches
       self.update_object!(:module_branches)
       self[:module_branch]
     end
 
     # raises exception if more repos found
-    def get_repo!
+    def get_repo
       repos = get_repos().uniq
       unless repos.size == 1
         fail Error.new('unexpected that number of matching repos is not equal to 1')

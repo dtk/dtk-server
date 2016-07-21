@@ -34,10 +34,10 @@ module DTK; module CommonModule::DSL::Generate
         end
         
         def generate_content_input!
+          attributes = @aug_component[:attributes] || []
           set(:Name, name)
-          pp [:component, self]
-          # TODO: stub
-          # merge!(aug_component)
+          set?(:Attributes, Attribute.generate_content_input?(:component, attributes, component: @aug_component)) unless attributes.empty?
+          # TODO: add component links
           self
         end
 

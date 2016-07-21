@@ -30,7 +30,7 @@ module DTK; module CommonModule::DSL::Generate
         def generate_content_input!(aug_node)
           aug_components = aug_node[:components] || []
           attributes = aug_node[:attributes] || []
-          # :is_assembly_wide_node just used intentall; so not using 'set' method
+          # :is_assembly_wide_node just used internally to server-side processing; so not using 'set' method
           self[:is_assembly_wide_node] = true if aug_node.is_assembly_wide_node?
           
           set(:Name, aug_node.display_name)

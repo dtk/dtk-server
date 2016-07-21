@@ -215,7 +215,7 @@ module DTK
             cmps << matching_cmp
           end
           if attr_cand = r[:non_default_attr_candidate]
-            if non_default_attr = Attribute::NonDefault.isa?(attr_cand, matching_cmp)
+            if non_default_attr = Attribute::DerivationType::NonDefault.isa?(attr_cand, matching_cmp)
               matching_cmp[:non_default_attributes] << non_default_attr
             end
           end
@@ -396,7 +396,7 @@ module DTK
         cmp_ref_hash.merge!(component_template_id: cmp_template_id)
         attrs = cmp[:non_default_attributes]
         unless attrs.nil? || attrs.empty?
-          Attribute::NonDefault.add_to_cmp_ref_hash!(cmp_ref_hash, self, attrs, cmp_template_id)
+          Attribute::DerivationType::NonDefault.add_to_cmp_ref_hash!(cmp_ref_hash, self, attrs, cmp_template_id)
         end
         { cmp_ref_ref => cmp_ref_hash }
       end

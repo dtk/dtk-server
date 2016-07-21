@@ -22,21 +22,50 @@ module DTK; class CommonModule::DSL::Generate::ContentInput
 
         def initialize(type, attribute, opts = {})
           super(type, attribute)
-          unless component = opts[:component]
-            fail Error, "Missing opts[:component]"
-          end
-          @component = component
+          fail Error, "Missing opts[:component]" unless opts[:component]
+          @component = opts[:component]
         end
         private :initialize
 
+        # TODO: debug
+        def generate_content_input?
+          ret = super
+          unless @attribute.get_field?(:hidden)
+            unless tags.empty?
+              pp [:attribute, merge(TAGS: tags)]
+            end
+          end
+          ret
+        end
+
         private
 
-        # TODO: write these
-        # def prune?
-        # end
+        def prune? 
+          attribute_value.nil? or is_title_attribute?
+        end
 
-        # def tags?
-        # end
+        def tags?
+          # assumption that @attribute has keys :hidden, 
+          ret = []
+          derivation_type = @attribute.derivation_type
+          derivation_tag = 
+            case derivation_type
+            when :asserted, :derived__default, :derived__propagated
+              derivation_type
+            else
+              Log.error("Unexpected derivation type '#{derivation_type}'")
+              nil
+            end
+
+          ret << derivation_tag if derivation_tag
+          ret << :hidden if @attribute.get_field?(:hidden)
+          ret.empty? ? nil : ret
+        end
+
+        def is_title_attribute?
+          # @component[:only_one_per_node] is check just for efficiency
+          (not @component[:only_one_per_node]) and @attribute.is_title_attribute?
+        end
         
       end
     end

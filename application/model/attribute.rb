@@ -37,7 +37,7 @@ module DTK
     require_relative('attribute/constant')
     require_relative('attribute/print_form')
     require_relative('attribute/semantic_datatype')
-    require_relative('attribute/non_default')
+    require_relative('attribute/derivation_type')
 
     include GetMethod::Mixin
     extend GetMethod::ClassMixin
@@ -50,6 +50,7 @@ module DTK
     extend PrintFormClassMixin
     extend PropagateChangesClassMixin
     extend MetaClassMixin
+    include DerivationType::Mixin
 
     def self.common_columns
       [:id, :display_name, :group_id, :hidden, :description, :component_component_id, :value_derived, :value_asserted, :semantic_data_type, :semantic_type, :semantic_type_summary, :data_type, :required, :dynamic, :cannot_change, :port_type_asserted, :is_port, :external_ref, :read_only, :tags]

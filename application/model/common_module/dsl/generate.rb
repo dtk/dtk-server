@@ -26,7 +26,6 @@ module DTK
         # content_input is a dsl version independent canonical form that has all content needed to
         # generate the dsl file using syntax for version (module_branch.dsl_version)
         content_input = ContentInput.generate_for_service_instance(service_instance, module_branch)
-        pp [:content_input, content_input.class, content_input]
         yaml_text = FileGenerator.generate_yaml_text(:service_instance, content_input, module_branch.dsl_version)
         DirectoryGenerator.add_file?(FileType::ServiceInstance, yaml_text, branch: module_branch)
       end

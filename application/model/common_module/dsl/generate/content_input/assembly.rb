@@ -33,7 +33,7 @@ module DTK
           components = ContentInput::Array.new
           Node.generate_content_input(assembly_instance).each do | content_input_hash |
             if content_input_hash[:is_assembly_wide_node]
-              components += (content_input_hash.val(:components) || ContentInput::Array.new)
+              components += (content_input_hash.val(:Components) || ContentInput::Array.new)
             else
               nodes << content_input_hash
             end
@@ -43,10 +43,7 @@ module DTK
           set(:Nodes, nodes) unless nodes.empty?
           set(:Components, components) unless components.empty?
           # TODO: add assembly level workflows
-          pp [:debug, self]
-          
-          # TODO: stub: blob not interpreted and straight dump of info
-          merge!(assembly_instance.info)
+
           self
         end
       end

@@ -205,7 +205,7 @@ module XYZ
    end
 
    def self.node_info_binding_ruleset_id(info, opts = {})
-     node_binding_rulesets().each do |k, v|
+     node_binding_rulesets(opts).each do |k, v|
        v[:rules].each_with_index do |r, _i|
          nt = r[:node_template]
          if info[:ami] == nt[:image_id] && info[:size] == nt[:size]

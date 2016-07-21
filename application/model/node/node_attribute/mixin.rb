@@ -37,7 +37,7 @@ module DTK; class Node
       # TODO: once see calling contex, remove stub call
       def get_node_and_component_attributes(_opts = {})
         node_attrs = get_node_attributes_stub()
-        component_attrs = get_objs(cols: [:components_and_attrs]).map { |r| r[:attribute] }
+        component_attrs = get_objs(cols: [:component_attrs]).map { |r| r[:attribute] }
         component_attrs + node_attrs
       end
 
@@ -60,7 +60,7 @@ module DTK; class Node
 
       def get_attributes_print_form_aux(filter_proc = nil)
         node_attrs = get_node_attributes_stub()
-        component_attrs = get_objs(cols: [:components_and_attrs]).map do |r|
+        component_attrs = get_objs(cols: [:component_attrs]).map do |r|
           attr = r[:attribute]
           # TODO: more efficient to have sql query do filtering
           if filter_proc.nil? || filter_proc.call(attr)

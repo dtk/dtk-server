@@ -94,7 +94,7 @@ end; end
 
         # get contained components-non-default attribute candidates
         sp_hash = {
-          cols: node_scalar_cols + [:cmps_and_non_default_attr_candidates],
+          cols: node_scalar_cols + [:components_and_their_attrs],
           filter: [:oneof, :id, node_ids]
         }
 
@@ -102,7 +102,7 @@ end; end
         if node_cmp_attr_rows.empty?
           fail ErrorUsage.new('No components in the nodes being grouped to be an assembly template')
         end
-        cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attr_candidate]
+        cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:components_and_their_attrs]
         @ndx_nodes = {}
         node_cmp_attr_rows.each do |r|
           node_id = r[:id]

@@ -190,7 +190,7 @@ module DTK
 
         # get contained components-non-default attribute candidates
         sp_hash = {
-          cols: node_scalar_cols + [:cmps_and_non_default_attr_candidates],
+          cols: node_scalar_cols + [:components_and_their_attrs],
           filter: [:oneof, :id, node_ids]
         }
 
@@ -198,7 +198,7 @@ module DTK
         if node_cmp_attr_rows.empty?
           fail ErrorUsage.new('No components in the nodes being grouped to be an assembly template')
         end
-        cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:non_default_attr_candidate]
+        cmp_scalar_cols = node_cmp_attr_rows.first[:component].keys - [:attribute]
         @ndx_nodes = {}
         node_cmp_attr_rows.each do |r|
           node_id = r[:id]
@@ -214,7 +214,7 @@ module DTK
             matching_cmp = r[:component].hash_subset(*cmp_scalar_cols).merge(non_default_attributes: [])
             cmps << matching_cmp
           end
-          if attr_cand = r[:non_default_attr_candidate]
+          if attr_cand = r[:attribute]
             if non_default_attr = Attribute::DerivationType::NonDefault.isa?(attr_cand, matching_cmp)
               matching_cmp[:non_default_attributes] << non_default_attr
             end

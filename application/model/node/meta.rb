@@ -281,7 +281,7 @@ module DTK
           cols: cmp_cols
         }
       end
-      lambda__components_and_attrs =
+      lambda__component_attrs =
         lambda do|args|
         cmp_cols = args[:cmp_cols]
         attr_cols = args[:attr_cols]
@@ -294,7 +294,7 @@ module DTK
            cols: attr_cols
          }]
       end
-      lambda__cmps_and_non_default_attr_candidates =
+      lambda__components_and_their_attrs =
         lambda do|args|
         cmp_cols = args[:cmp_cols]
         attr_cols = args[:attr_cols]
@@ -302,7 +302,6 @@ module DTK
          {
            model_name: :attribute,
            convert: true,
-           alias: :non_default_attr_candidate,
            join_type: :left_outer,
            join_cond: { component_component_id: q(:component, :id) },
            cols: attr_cols
@@ -327,21 +326,21 @@ module DTK
                                                                                  join_cond: { id: q(:component, :module_branch_id) },
                                                                                  cols: [:id, :display_name, :type, :component_id]
                                                                                }]
-      virtual_column :components_and_attrs, type: :json, hidden: true,
+      virtual_column :component_attrs, type: :json, hidden: true,
         remote_dependencies:  
-           lambda__components_and_attrs.call(
+           lambda__component_attrs.call(
              cmp_cols: FactoryObject::CommonCols + [:component_type],
              attr_cols: FactoryObject::CommonCols + [:attribute_value, :required])
 
-      virtual_column :cmps_and_non_default_attr_candidates, type: :json, hidden: true,
+      virtual_column :components_and_their_attrs, type: :json, hidden: true,
         remote_dependencies:         
-          lambda__cmps_and_non_default_attr_candidates.call(
+          lambda__components_and_their_attrs.call(
             cmp_cols: FactoryObject::CommonCols + [:ancestor_id, :component_type, :only_one_per_node],
-            attr_cols: FactoryObject::CommonCols + [:is_instance_value, :attribute_value, :external_ref, :data_type, :tags, :hidden])
+            attr_cols: FactoryObject::CommonCols + [:is_instance_value, :attribute_value, :external_ref, :data_type, :tags, :hidden, :dynamic])
 
       virtual_column :input_attribute_links_cmp, type: :json, hidden: true,
         remote_dependencies:         
-          lambda__components_and_attrs.call(cmp_cols: [:id, :display_name, :component_type, id(:node)], attr_cols: [:id, :display_name]) +
+          lambda__component_attrs.call(cmp_cols: [:id, :display_name, :component_type, id(:node)], attr_cols: [:id, :display_name]) +
           [
            {
              model_name: :attribute_link,
@@ -361,7 +360,7 @@ module DTK
            cols: [:id, :display_name, :type, :input_id, :output_id]
          }]
       virtual_column :output_attribute_links_cmp, type: :json, hidden: true,
-                                                  remote_dependencies:         lambda__components_and_attrs.call(cmp_cols: [:id, :display_name, :component_type, id(:node)], attr_cols: [:id, :display_name]) +
+                                                  remote_dependencies:         lambda__component_attrs.call(cmp_cols: [:id, :display_name, :component_type, id(:node)], attr_cols: [:id, :display_name]) +
         [
          {
            model_name: :attribute_link,

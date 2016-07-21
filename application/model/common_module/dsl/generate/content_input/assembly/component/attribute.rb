@@ -45,21 +45,30 @@ module DTK; class CommonModule::DSL::Generate::ContentInput
         end
 
         def tags?
-          # assumption that @attribute has keys :hidden, 
           ret = []
-          derivation_type = @attribute.derivation_type
-          derivation_tag = 
-            case derivation_type
-            when :asserted, :derived__default, :derived__propagated
-              derivation_type
-            else
-              Log.error("Unexpected derivation type '#{derivation_type}'")
-              nil
+          # checking for whether attribute a desired state or actual state (dynamic)
+          # and if derived whether asserted or derived from default or propagation
+          pp caller[0]
+          if @attribute.get_field?(:dynamic)
+            ret << :actual
+          else
+            if desired_state_tag = desired_state_tag? 
+              ret << desired_state_tag
             end
-
-          ret << derivation_tag if derivation_tag
+          end
           ret << :hidden if @attribute.get_field?(:hidden)
           ret.empty? ? nil : ret
+        end
+
+        def desired_state_tag?
+          derivation_type = @attribute.derivation_type
+          case derivation_type
+          when :asserted, :derived__default, :derived__propagated
+            "desired__#{derivation_type}".to_sym
+          else
+            Log.error("Unexpected derivation type '#{derivation_type}'")
+            nil
+          end
         end
 
         def is_title_attribute?

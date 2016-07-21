@@ -35,8 +35,7 @@ module DTK
         # get contained components-non-default attribute candidates
         node_ids = ndx_nodes.keys
         node_mh = ndx_nodes.values.first.model_handle
-        # 'non_default_attr_candidate' is a misnomer; this gets all attributes
-        sp_hash = sp_cols(:cmps_and_non_default_attr_candidates).filter(:oneof, :id, node_ids)
+        sp_hash = sp_cols(:components_and_their_attrs).filter(:oneof, :id, node_ids)
         get_objs(node_mh, sp_hash, keep_ref_cols: true).each do |r|
           node_id = r.id
           cmp_id = r[:component][:id]
@@ -45,7 +44,7 @@ module DTK
             matching_cmp = r[:component].merge(attributes: [])
             cmps << matching_cmp
           end
-          if attr = r[:non_default_attr_candidate]
+          if attr = r[:attribute]
             matching_cmp[:attributes] << attr
           end
         end

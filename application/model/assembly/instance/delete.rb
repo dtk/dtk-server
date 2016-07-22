@@ -223,7 +223,7 @@ module DTK; class  Assembly
                 Target::Instance.set_default_target(builtin_target)
               end
               # purge workspace and reset its target if workspace is non null meaning it is dependent on target
-              purge_workspace(workspace, builtin_target) if workspace
+              purge_workspace(workspace, builtin_target, target) if workspace
             end
             ndx_targets_to_delete[target.id] ||= target
           end
@@ -236,7 +236,7 @@ module DTK; class  Assembly
         current_default_target && current_default_target.id == target.id
       end        
     
-      def self.purge_workspace(workspace, new_default_target)
+      def self.purge_workspace(workspace, new_default_target, target)
         if current_workspace_target = workspace.get_target()
           if current_workspace_target.id == target.id
             workspace.set_target(new_default_target, mode: :from_delete_target) if new_default_target

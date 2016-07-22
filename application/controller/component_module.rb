@@ -60,6 +60,10 @@ module DTK
       opts = { scaffold_if_no_dsl: scaffold, do_not_raise: true, process_provider_specific_dependencies: true }
       opts.merge!(commit_dsl: true) if ret_request_params(:commit_dsl)
 
+      if ret_request_params(:update_from_includes)
+        opts.merge!(update_from_includes: true)
+      end
+
       response =
         if git_import
           component_module.import_from_git(commit_sha, repo_idh, version, opts)

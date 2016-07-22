@@ -29,12 +29,15 @@ DTK::ReactorRoute.draw do
   get 'api/v1/metadata/get/:metadata_file' => 'v1::metadata#get'
 
   # Services
+  # Routes for new client
+  post   'api/v1/services/create'                      => 'v1::service#create'
+  post   'api/v1/services/update_from_repo'            => 'v1::service#update_from_repo_debug'
+
   get    'api/v1/services/:service_id'                 => 'v1::service#info'
   get    'api/v1/services/:service_id/nodes'           => 'v1::service#nodes'
   get    'api/v1/services/:service_id/components'      => 'v1::service#components'
   get    'api/v1/services/:service_id/tasks'           => 'v1::service#tasks'
   get    'api/v1/services/:service_id/access_tokens'   => 'v1::service#access_tokens'
-  post   'api/v1/services/create'                      => 'v1::service#create'
   post   'api/v1/services/:service_id/converge'        => 'v1::service#converge'
   post   'api/v1/services/:service_id/start'           => 'v1::service#start'
   post   'api/v1/services/:service_id/stop'            => 'v1::service#stop'

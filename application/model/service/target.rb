@@ -53,6 +53,11 @@ module DTK
 
       ###### Just called from v1 controller ######
       # This method stages a target service
+      #   :project (required)
+      #   :target_name (required)
+      #   :service_module
+      #   :service_name
+      #   :no_auto_complete - Boolean (default: false)
       def self.stage_target_service(assembly_template, service_module_class, opts = Opts.new)
         Model.Transaction do
           target = create_target_mock(opts[:target_name], opts[:project])
@@ -65,11 +70,18 @@ module DTK
       end
 
       # The method stage_service stages the assembly_template wrt this, which is a target service instance
+      # opts can have keys
+      #   :project
+      #   :service_module
+      #   :service_name
+      #   :no_auto_complete - Boolean (default: false)
+      #   :allow_existing_service - Boolean (default: false)
       def stage_service(assembly_template, service_module_class, opts = Opts.new)
         unless is_converged? 
           fail ErrorUsage, "Cannot stage a service instance in a target service instance '#{target}' that is not converged."
         end
         Model.Transaction do 
+          # if :allow_existing_service is true then new_assembly_instance wil be existing assembly_instance
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
           module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance)
 Aux.stop_for_testing?(:create_service_instance) # TODO: for debugging

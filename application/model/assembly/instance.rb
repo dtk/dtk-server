@@ -729,7 +729,7 @@ module DTK; class  Assembly
           [:eq, :display_name, display_name], 
           [:eq, :type, 'composite'],
           [:neq, :datacenter_datacenter_id, nil]]
-      ! get_objs(mh.createMH(:assembly_instance), sp_filter(filter_array)).empty?
+      get_obj(mh.createMH(:assembly_instance), sp_filter(filter_array))
     end
 
     def self.check_valid_id(model_handle, id)

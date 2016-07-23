@@ -56,6 +56,8 @@ module DTK
             Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
           else
             target_service = ret_target_service_with_default(:target_service)
+            # TODO: for testing; might remove
+            opts = opts.merge!(allow_existing_service: true) # TODO: for testing; might remove
             target_service.stage_service(assembly_template, CommonModule::ServiceInstance, opts)
           end
         rest_ok_response response

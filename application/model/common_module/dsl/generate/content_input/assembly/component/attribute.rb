@@ -27,17 +27,6 @@ module DTK; class CommonModule::DSL::Generate::ContentInput
         end
         private :initialize
 
-        # TODO: debug
-        def generate_content_input?
-          ret = super
-          unless @attribute.get_field?(:hidden)
-            unless tags.empty?
-              pp [:attribute, merge(TAGS: tags)]
-            end
-          end
-          ret
-        end
-
         private
 
         def prune? 
@@ -48,7 +37,6 @@ module DTK; class CommonModule::DSL::Generate::ContentInput
           ret = []
           # checking for whether attribute a desired state or actual state (dynamic)
           # and if derived whether asserted or derived from default or propagation
-          pp caller[0]
           if @attribute.get_field?(:dynamic)
             ret << :actual
           else

@@ -50,7 +50,8 @@ module DTK; class Assembly
     #  :no_auto_complete - Boolean (default false)
     #  :is_target_service - Boolean (default false)
     #  :service_name_globally_scoped - Boolean (default false); alternative is unique wrt to target
-    #  TODO: see if anyother sused when passing opts to get_augmented_components(opts) and autocomplete_component_links(assembly_instance, aug_cmps, opts)
+    #  :allow_existing_service - Boolean (default false)
+    #  TODO: see if any others used when passing opts to get_augmented_components(opts) and autocomplete_component_links(assembly_instance, aug_cmps, opts)
     def stage(target, opts = Opts.new)
       service_module = opts[:service_module] || get_service_module
 
@@ -66,8 +67,9 @@ module DTK; class Assembly
       # See if service instance name is passed and if so make sure name not used already
       # TODO: will deprecate opts[:assembly_name] for :service_name
       if service_name = opts[:service_name] || opts[:assembly_name]
-        if Assembly::Instance.exists?(target.model_handle, service_name)
-          fail ErrorUsage.new("Service '#{service_name}' already exists")
+        if existing_assembly_instance = Assembly::Instance.exists?(target.model_handle, service_name)
+          return existing_assembly_instance if opts[:allow_existing_service]
+          fail ErrorUsage.new("Service '#{service_name}' already exists") 
         end
         override_attrs[:display_name] = service_name
       end

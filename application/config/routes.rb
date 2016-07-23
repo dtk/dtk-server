@@ -29,9 +29,10 @@ DTK::ReactorRoute.draw do
   get 'api/v1/metadata/get/:metadata_file' => 'v1::metadata#get'
 
   # Services
-  # Routes for new client
+  # Routes for new dtk client
   post   'api/v1/services/create'                      => 'v1::service#create'
-  post   'api/v1/services/update_from_repo'            => 'v1::service#update_from_repo_debug'
+
+  # TODO: see if we remove these older routes
 
   get    'api/v1/services/:service_id'                 => 'v1::service#info'
   get    'api/v1/services/:service_id/nodes'           => 'v1::service#nodes'
@@ -46,6 +47,7 @@ DTK::ReactorRoute.draw do
   delete 'api/v1/services/:service_id'                 => 'v1::service#delete_destroy'
 
   # Modules
+  # Routes for new dtk client
   get 'api/v1/modules/list_assemblies'           => 'v1::module/list_assemblies'
   get 'api/v1/modules'                           => 'v1::module/exists'
   post 'api/v1/modules/install_component_module' => 'v1::module/install_component_module'

@@ -46,7 +46,6 @@ module DTK; module CommonModule::DSL::Generate
             if tags = tags?
               add_tags!(tags)
             end
-          # TODO: see if we should treat HierarchicalTags which would be under attribute_info in dsl
             self
           end
         end

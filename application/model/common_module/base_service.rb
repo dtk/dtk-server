@@ -20,7 +20,6 @@ module DTK
     class BaseService < ServiceModule
       extend  CommonModule::ClassMixin
       include CommonModule::Mixin
-      require_relative('base_service/node_property_component')
 
       def self.find_from_id?(model_handle, module_id)
         get_obj(model_handle, sp_filter(:eq, :id, module_id))
@@ -57,12 +56,6 @@ module DTK
           import_helper.import_into_model
 
           module_branch.set_dsl_parsed!(true)
-        end
-      end
-
-      def self.create_ec2_properties?(parsed_assembly)
-        if parsed_nodes = parsed_assembly.val(:Nodes)
-          NodePropertyComponent.create_node_property_components?(parsed_nodes)
         end
       end
 

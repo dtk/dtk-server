@@ -16,66 +16,59 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule::Import::ServiceModule
-    module Assembly
+  class CommonModule
+    module Import::ServiceModule::Assembly
       module Nodes
         extend FactoryObjectClassMixin
 
-        def self.db_update_hash(container_idh, assembly_ref, parsed_nodes, component_module_refs, opts = {})
-          unless parsed_nodes.is_a?(Array)
-            fail ParsingError.new('Nodes section is ill-formed', opts_file_path(opts))
-          end
+        def self.db_update_hash(container_idh, assembly_ref, parsed_assembly, component_module_refs, opts = {})
+          parsed_nodes_with_assembly_wide_components(parsed_assembly).inject(DBUpdateHash.new) do |h, parsed_node|
+            parsed_node_name = parsed_node.req(:Name)
+            node_ref         = assembly_template_node_ref(assembly_ref, parsed_node_name)
 
-          parsed_nodes.inject(DBUpdateHash.new) do |h, node_hash|
-            if node_hash && node_hash.is_a?(String)
-              node_hash = { name: node_hash }
-            end
-
-            node_hash ||= {}
-            node_hash_ref = node_hash.req(:Name)
-            node_ref      = assembly_template_node_ref(assembly_ref, node_hash_ref)
-
-            unless (node_hash || {}).is_a?(Hash)
-              fail ParsingError.new("The content associated with key (#{node_hash_ref}) should be a hash representing assembly node info", opts_file_path(opts))
-            end
-
-            attributes = Attributes.db_update_hash(node_hash.val(:Attributes) || []).mark_as_complete
-            type       = node_hash_ref.eql?(Node::Type::Node.assembly_wide) ? node_hash_ref : ret_node_type(attributes)
+            attributes = Attributes.db_update_hash(parsed_node.val(:Attributes) || []).mark_as_complete
+            type       = parsed_node_name.eql?(Node::Type::Node.assembly_wide) ? parsed_node_name : ret_node_type(attributes)
 
             node_output = {
-              'display_name' => node_hash_ref,
-              'type' => type,
-              'attribute' => attributes,
+              'display_name' => parsed_node_name,
+              'type'         => type,
+              'attribute'    => attributes,
               '*assembly_id' => "/component/#{assembly_ref}"
             }
 
-            # we are not going to use node-bindings in new dsl, instead will retreive node bindings from node property component
-            components = node_hash['components']
+            # Not using node-bindings in new dsl, instead will retreive node bindings from node property component
+            if components = parsed_node.val(:Components)
+              node_output['node_binding_rs_id'] = NodePropertyComponent.node_bindings_from_node_property_component(components, container_idh)
 
-            if components
-              node_output['node_binding_rs_id'] = CommonModule::BaseService::NodePropertyComponent.node_bindings_from_node_property_component(components, container_idh)
-
-              # Aldin: 07/04/2016 - need to rewrite this part without version_proc_class
-              # if version_proc_class = opts[:version_proc_class]
-                # cmps_output = version_proc_class.import_component_refs(container_idh, opts[:default_assembly_name], components, component_module_refs, opts)
-
-                cmps_output = Components.db_update_hash(container_idh, components, component_module_refs, opts)
-
-                unless cmps_output.empty?
-                  node_output['component_ref'] = cmps_output
-                end
-              # end
+              cmps_output = Components.db_update_hash(container_idh, components, component_module_refs, opts)
+              node_output['component_ref'] = cmps_output unless cmps_output.empty?
             end
 
             h.merge(node_ref => node_output)
           end
         end
 
+        private
+
         def self.ret_node_type(attributes = {})
           return Node::Type::Node.stub unless attributes['type']
           attributes.delete('type')
           Node::Type::NodeGroup.stub
         end
+
+        def self.parsed_nodes_with_assembly_wide_components(parsed_assembly)
+          ret = parsed_assembly.val(:Nodes) || DSL::Parse::CanonicalInput::Array.new
+          assembly_wide_components = parsed_assembly.val(:Components)
+          unless assembly_wide_components.nil? or assembly_wide_components.empty?
+            # assembly wiide components get added under 'fake node' 'assembly_wide'
+            node_to_add = DSL::Parse::CanonicalInput::Hash.new
+            node_to_add.set(:Name, Node::Type::Node.assembly_wide)
+            node_to_add.set(:Components, assembly_wide_components)
+            ret << node_to_add
+          end
+          ret
+        end
+
       end
     end
   end

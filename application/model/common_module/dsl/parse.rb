@@ -21,6 +21,7 @@ module DTK
      require_relative('parse/file_obj')
      require_relative('parse/directory_parser')
      require_relative('parse/file_parser')
+     require_relative('parse/canonical_input')
 
      def self.matching_common_module_file_obj?(module_branch)
        DirectoryParser.matching_file_obj?(FileType::CommonModule, branch: module_branch)

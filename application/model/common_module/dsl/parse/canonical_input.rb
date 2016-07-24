@@ -16,11 +16,18 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule
-    module DSL
-      require_relative('dsl/file_type')
-      require_relative('dsl/parse')
-      require_relative('dsl/generate')
+  module CommonModule::DSL::Parse
+    class CanonicalInput < ::DTK::DSL::InputOutputCommon::Canonical
+      class Array < ::DTK::DSL::InputOutputCommon::Canonical::Array
+        def initialize
+          super(CanonicalInput)
+        end
+      end
+      class Hash < ::DTK::DSL::InputOutputCommon::Canonical::Hash
+        def initialize
+          super(CanonicalInput)
+        end
+      end
     end
   end
 end

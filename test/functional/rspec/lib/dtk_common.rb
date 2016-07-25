@@ -140,8 +140,8 @@ class Common
 
 	def send_request(path, body, request_type = 'post')
 		resource = RestClient::Resource.new(@endpoint + path, $opts)
-		puts @endpoint
 		response = nil
+		
 		case request_type
 		when 'post'
 		  response = resource.post(body)

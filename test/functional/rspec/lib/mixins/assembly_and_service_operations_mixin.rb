@@ -1,5 +1,5 @@
 module AssemblyAndServiceOperationsMixin
-	def stage_service
+	def stage_service(target = nil)
 		#Get list of assemblies, extract selected assembly, stage service and return its id
 		puts "Stage service:", "--------------"
 		service_id = nil
@@ -18,7 +18,11 @@ module AssemblyAndServiceOperationsMixin
       if @is_target
 			  stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :is_target => @is_target})	
 			else
-        stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name})
+				unless target
+          stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name})
+        else
+        	stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :target_id=>target})
+        end
 			end
 
 			pretty_print_JSON(stage_service_response)

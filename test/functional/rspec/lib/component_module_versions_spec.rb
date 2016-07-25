@@ -11,6 +11,47 @@ shared_context 'Check if component module version exists on server' do |dtk_comm
   end
 end
 
+shared_context 'Generate component module version' do |dtk_common, component_module_name|
+  it "generates new (latest) version for component module #{component_module_name}" do
+    namespace, module_name = component_module_name.split(':')
+    existing_versions = dtk_common.list_component_module_remote_versions(namespace, module_name)
+    new_version = dtk_common.generate_new_componnet_module_version(existing_versions)
+    component_module_version_created = dtk_common.create_component_module_version(component_module_name, new_version)
+    expect(component_module_version_created).to eq(true)
+  end
+end
+
+shared_context 'Publish latest component module version' do |dtk_common, component_module_name|
+  it "publish latest version of #{component_module_name} component module" do
+    namespace, module_name = component_module_name.split(':')
+    existing_versions = dtk_common.list_component_module_local_versions(component_module_name)
+    puts existing_versions
+    latests_version = dtk_common.filter_component_module_version(existing_versions).last
+
+    pass = false
+    value = `dtk component-module #{component_module_name} publish -v #{latests_version}`
+    puts value
+    pass = true if (value.include? 'Status: OK')
+    puts "Publish of component module #{component_module_name} #{latests_version} completed successfully!" if pass == true
+    puts "Publish of component module #{component_module_name} #{latests_version} was not successfully" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Check if local latest version exists on remote' do |dtk_common, component_module_name|
+  it "check if latest #{component_module_name} component-module version exits on remote" do
+    namespace, module_name = component_module_name.split(':')
+
+    namespace, module_name = component_module_name.split(':')
+    existing_versions = dtk_common.list_component_module_local_versions(component_module_name)
+    latest_version = dtk_common.filter_component_module_version(existing_versions).last
+
+    component_module_version_exists = dtk_common.check_component_module_remote_versions(component_module_name, latest_version)
+    expect(component_module_version_exists).to eq(true)    
+  end
+end
+
 shared_context 'NEG - Check if component module version exists on server' do |dtk_common, component_module_name, version_name|
   it "checks that component module #{component_module_name} with version #{version_name} does not exist on server" do
     component_module_version_exists = dtk_common.check_component_module_version(component_module_name, version_name)

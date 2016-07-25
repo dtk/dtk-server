@@ -15,14 +15,69 @@ module ComponentModulesVersionMixin
 		version_found
 	end
 
+  def filter_component_module_version(versions)
+    version_regex = /\d.\d.\d/
+    versions.select!{ |ver| ver.match version_regex}
+    versions.sort!
+  end
+
+  def generate_new_componnet_module_version(versions)
+    puts "Generate new component module version:", "--------------------------------------"
+
+    latest_version = filter_component_module_version(versions).last || ['0.0.0']
+    latest_version_digits = latest_version.split('.')
+    puts latest_version_digits
+    latest_version_digits.map!{ |x| x.to_i }
+    latest_version_digits[2] += 1
+
+    new_module_version = latest_version_digits.join('.')
+  end
+
+  def list_component_module_remote_versions(namespace, module_name)
+    puts "List remote component module versions:", "------------------------------------"
+    component_module_versions = []
+    component_modules_list = send_request('/rest/component_module/list_remote', {:rsa_pub_key => self.ssh_key, :module_namespace => namespace})   
+    pretty_print_JSON(component_modules_list)
+
+    if component_modules_list['data'].empty?
+      component_module_versions = []
+    else
+       component_module = component_modules_list['data'].select { |mod| mod['display_name'] == "#{namespace}/#{module_name}" }[0]
+       if component_module
+         puts "Component module versions found."
+         component_module_versions = component_module['versions']
+       else
+         puts "Did not find component module versions."
+       end
+    end
+    puts ""
+    return component_module_versions
+  end
+
+  def list_component_module_local_versions(component_module_name)
+    puts "List local component module versions:", "------------------------------------"
+    component_module_versions = []
+    component_modules_response = send_request('/rest/component_module/list_versions', {:component_module_id=>component_module_name})   
+    pretty_print_JSON(component_modules_response)
+
+    if component_modules_response['status'] == 'ok'
+      puts "Component module versions have not been found."
+      component_module_versions = component_modules_response['data'][0]['versions']
+    else
+      component_module_versions = nil
+      puts "Component module versions successfully found."
+    end
+    puts ""
+    return component_module_versions
+  end
+
 	def check_component_module_remote_versions(component_module_name, version_name)
 		puts "List remote component module versions: ", "-------------------------------------"
 		remote_version_found = false
 		remote_versions = send_request('/rest/component_module/list_remote_versions', {:component_module_id=>component_module_name, :rsa_pub_key => @ssh_key})
-		ap remote_versions
 
 		if remote_versions['data'][0]['versions'].include? version_name
-		  	puts "Version #{version_name} exists on component module #{component_module_name} remote"
+		  puts "Version #{version_name} exists on component module #{component_module_name} remote"
 			remote_version_found = true
 		else
       	puts "Version #{version_name} does not exist on component module #{component_module_name} remote"

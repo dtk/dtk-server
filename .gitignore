@@ -16,3 +16,4 @@ application/log/
 /vendor/bundle
 list_of_files.txt
 .byebug_history
+.vscode

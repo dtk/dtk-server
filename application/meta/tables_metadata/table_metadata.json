@@ -382,7 +382,7 @@
   "assembly": {
     "order": [
       "id",
-      "assembly_name",
+      "service_instance",
       "status",
       "last_run",
       "assembly_template",
@@ -392,7 +392,7 @@
     ],
     "mapping": {
       "# nodes": "nodes.size",
-      "assembly_name": "display_name",
+      "service_instance": "display_name",
       "created_at": "created_at.get_date",
       "id": "dtk_id",
       "assembly_template": "assembly_template",

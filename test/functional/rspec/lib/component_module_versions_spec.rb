@@ -25,7 +25,6 @@ shared_context 'Publish latest component module version' do |dtk_common, compone
   it "publish latest version of #{component_module_name} component module" do
     namespace, module_name = component_module_name.split(':')
     existing_versions = dtk_common.list_component_module_local_versions(component_module_name)
-    puts existing_versions
     latests_version = dtk_common.filter_component_module_version(existing_versions).last
 
     pass = false

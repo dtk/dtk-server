@@ -26,7 +26,6 @@ module ComponentModulesVersionMixin
 
     latest_version = filter_component_module_version(versions).last || ['0.0.0']
     latest_version_digits = latest_version.split('.')
-    puts latest_version_digits
     latest_version_digits.map!{ |x| x.to_i }
     latest_version_digits[2] += 1
 
@@ -61,11 +60,11 @@ module ComponentModulesVersionMixin
     pretty_print_JSON(component_modules_response)
 
     if component_modules_response['status'] == 'ok'
-      puts "Component module versions have not been found."
+      puts "Component module versions successfully found."
       component_module_versions = component_modules_response['data'][0]['versions']
     else
       component_module_versions = nil
-      puts "Component module versions successfully found."
+      puts "Component module versions have not been found."
     end
     puts ""
     return component_module_versions

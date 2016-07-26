@@ -117,7 +117,7 @@ module DTK
               dependency_name = deps['name']
               # incosistency in puppetlabs meta, is manually fixed here
               dependency_name.gsub!('puppetlabs-', 'puppetlabs/')
-
+              dependency_name.gsub!('camptocamp-', 'camptocamp/')
               matching = all_imported.detect { |imported| imported.forge_name.eql?(dependency_name) }
 
               normalized_dependencies << {

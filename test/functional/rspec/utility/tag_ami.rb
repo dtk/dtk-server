@@ -31,10 +31,9 @@ component_module_versions.each do |version|
     amis = dtk_model_images[region]
     amis.each do |image_type, image_attr|
       image = Aws::EC2::Image.new(image_attr['ami'])
-      image.clear_tags
-      image.add_tag('DTK Server Version', value: dtk_server_version)
-      image.add_tag('DTK Arbiter Version', value: dtk_arbiter_version)
-      image.add_tag('aws:image_aws Version', value: version)
+      image.create_tags(tags: [ {key: 'DTK Server Version', value: dtk_server_version},
+      {key: 'DTK Arbiter Version', value: dtk_arbiter_version},
+      {key: 'Image_aws Version', value: version}])
       puts "    AMI #{image_type}:#{image_attr['ami']} tagged with DTK Server Version: #{dtk_server_version}, DTK Arbiter Version: #{dtk_arbiter_version}"
     end
   end

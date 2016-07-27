@@ -425,7 +425,7 @@ module DTK; class  Assembly
         end
       end
 
-      delete_from_database = Task.create_for_delete_from_detabase(self, component, node, opts)
+      delete_from_database = Task.create_for_delete_from_database(self, component, node, opts)
 
       task.add_subtask(cmp_action) if cmp_action
       task.add_subtask(delete_from_database) if delete_from_database
@@ -450,7 +450,10 @@ module DTK; class  Assembly
 
       if components = node.get_components
         cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
-        components.each do |component|
+
+        # order components by 'delete' action inside assembly workflow if exists
+        ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(self))
+        ordered_components.each do |component|
           cmp_action = nil
           cmp_top_task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
           cmp_opts.merge!(delete_params: [component.id_handle, node.id()])
@@ -469,7 +472,7 @@ module DTK; class  Assembly
       end
 
       command_and_control_action = Task.create_for_command_and_control_action(self, 'destroy_node?', node_idh.get_id(), node, opts)
-      delete_from_database = Task.create_for_delete_from_detabase(self, nil, node, opts)
+      delete_from_database = Task.create_for_delete_from_database(self, nil, node, opts)
 
       task.add_subtask(command_and_control_action) if command_and_control_action
       return task if opts[:return_task]
@@ -497,7 +500,7 @@ module DTK; class  Assembly
         group_member_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true))
         task.add_subtask(group_member_task) if group_member_task
       end
-      delete_from_database = Task.create_for_delete_from_detabase(self, nil, node_group, opts.merge!(skip_running_check: true))
+      delete_from_database = Task.create_for_delete_from_database(self, nil, node_group, opts.merge!(skip_running_check: true))
       task.add_subtask(delete_from_database) if delete_from_database
       task = task.save_and_add_ids()
 
@@ -519,7 +522,10 @@ module DTK; class  Assembly
       if assembly_wide_node = self.has_assembly_wide_node?
         if components = assembly_wide_node.get_components
           cmp_opts = { method_name: 'delete' }
-          components.each do |component|
+
+          # order components by 'delete' action inside assembly workflow if exists
+          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(self))
+          ordered_components.each do |component|
             cmp_top_task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
             cmp_action = nil
 
@@ -529,7 +535,7 @@ module DTK; class  Assembly
               Log.info("Ignoring component 'delete' action does not exist.")
             end
 
-            delete_cmp_from_database = Task.create_for_delete_from_detabase(self, component, assembly_wide_node, opts)
+            delete_cmp_from_database = Task.create_for_delete_from_database(self, component, assembly_wide_node, opts)
             cmp_top_task.add_subtask(cmp_action) if cmp_action
             cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
             task.add_subtask(cmp_top_task)
@@ -544,7 +550,7 @@ module DTK; class  Assembly
         end
       end
 
-      delete_assembly_from_database = Task.create_for_delete_from_detabase(self, nil, nil, opts.merge!(skip_running_check: true))
+      delete_assembly_from_database = Task.create_for_delete_from_database(self, nil, nil, opts.merge!(skip_running_check: true))
       task.add_subtask(delete_assembly_from_database) if delete_assembly_from_database
       task = task.save_and_add_ids()
 
@@ -831,6 +837,13 @@ module DTK; class  Assembly
       Model.get_objs(model_handle(:node), sp_hash).find { |ng| ng[:node_member].id == node_id }
     end
 
+    def order_components_by_workflow(components, workflow_delete_order)
+      return components unless workflow_delete_order
+
+      ordered_components   = components.select{ |cmp| workflow_delete_order.include?(cmp[:display_name]) }
+      remaining_components = components - ordered_components
+      ordered_components + remaining_components
+    end
   end
 end
 # TODO: hack to get around error in lib/model.rb:31:in `const_get

@@ -45,8 +45,8 @@ module DTK; class Task
       Create.create_top_level_task(task_mh, assembly, opts)
     end
 
-    def create_for_delete_from_detabase(assembly, component, node, opts = {})
-      task = Create.create_for_delete_from_detabase(assembly, component, node, opts)
+    def create_for_delete_from_database(assembly, component, node, opts = {})
+      task = Create.create_for_delete_from_database(assembly, component, node, opts)
       # ret = NodeGroupProcessing.decompose_node_groups!(task, opts)
 
       unless opts[:skip_running_check]
@@ -66,6 +66,31 @@ module DTK; class Task
       task = Create.create_for_command_and_control_action(assembly, action, params, node, opts)
       NodeGroupProcessing.decompose_node_groups!(task, opts)
     end
+
+    def get_delete_workflow_order(assembly)
+      target_idh            = target_idh_from_assembly(assembly)
+      task_mh               = target_idh.create_childMH(:task)
+
+      begin
+        task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'deletes' })
+      rescue Task::Template::ParsingError => e
+        return
+      rescue Task::Template::TaskActionNotFoundError => e
+        return
+      end
+
+      if serialization_form = task_template_content && task_template_content.serialization_form
+        components_list = []
+
+        if subtasks = serialization_form[:subtasks]
+          subtasks.each do |subtask|
+            subtask[:ordered_components].each{ |cmp| components_list << cmp.gsub!('::', '__') }
+          end
+        end
+
+        components_list.flatten
+      end
+    end
   end
 
   class Create
@@ -82,7 +107,7 @@ module DTK; class Task
       create_top_level_task(task_mh, assembly, task_action: task_action_name).add_subtasks(subtasks)
     end
 
-    def self.create_for_delete_from_detabase(assembly, component, node, opts = {})
+    def self.create_for_delete_from_database(assembly, component, node, opts = {})
       task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
       ret = create_top_level_task(task_mh, assembly, task_action: 'delete_from_database')
 

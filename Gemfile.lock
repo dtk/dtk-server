@@ -305,7 +305,7 @@ DEPENDENCIES
   activesupport
   addressable
   awesome_print (= 1.1.0)
-  bundler (>= 1.1.5)
+  bundler
   celluloid
   colorize (~> 0.5.8)
   debugger
@@ -342,4 +342,4 @@ DEPENDENCIES
   thin
 
 BUNDLED WITH
-   1.10.6
+   1.12.5

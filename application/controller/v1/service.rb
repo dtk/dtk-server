@@ -70,6 +70,11 @@ module DTK
         rest_ok_response CommonModule.update_from_repo(:service_instance, get_default_project, local_params, repo_name, commit_sha, { force_pull: true })
       end
 
+      def delete
+        service = service_object
+        Assembly::Instance.delete(service.id_handle, destroy_nodes: true)
+        rest_ok_response
+      end
 
       #############################################
       # TODO: DTK-2575: Below were written before new client; ckeck to see if need to be modified
@@ -203,14 +208,6 @@ module DTK
 
         service_module = Assembly::Template.create_or_update_from_instance(project, service, service_module_name, assembly_template_name, opts)
         rest_ok_response service_module.ret_clone_update_info
-      end
-
-      def delete_destroy
-        service = service_object
-
-        Assembly::Instance.delete(service.id_handle, destroy_nodes: true)
-
-        rest_ok_response
       end
 
     end

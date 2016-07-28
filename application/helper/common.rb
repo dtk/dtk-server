@@ -267,7 +267,16 @@ module Ramaze::Helper
 
     # TODO: these three methods below need some cleanup
     # param refers to key that can have id or name value
-    def create_obj(param, model_class = nil, extra_context = nil)
+    # If list of params finds first one with a value
+    def create_obj(param_or_params, model_class = nil, extra_context = nil)
+      params = param_or_params.kind_of?(Array) ? param_or_params : [param_or_params]
+      param = 
+        if params.size == 1
+          params.first
+        else
+          param = params.find { |p| !request_params(p).nil? }
+        end
+      fail Error, "Illegal rest params" if param.nil?
       create_object_from_id(ret_request_param_id(param, model_class, extra_context), model_class)
     end
 

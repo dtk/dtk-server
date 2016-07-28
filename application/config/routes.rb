@@ -30,10 +30,12 @@ DTK::ReactorRoute.draw do
 
   # Services
   # Routes for new dtk client
-  post   'api/v1/services/create'                      => 'v1::service#create'
+  post 'api/v1/services/create' => 'v1::service#create'
+  post 'api/v1/services/delete' => 'v1::service#delete'
+  # TODO: should we use below instead?
+  # delete 'api/v1/services/:service_id' => 'v1::service#delete'
 
   # TODO: see if we remove these older routes
-
   get    'api/v1/services/:service_id'                 => 'v1::service#info'
   get    'api/v1/services/:service_id/nodes'           => 'v1::service#nodes'
   get    'api/v1/services/:service_id/components'      => 'v1::service#components'
@@ -44,7 +46,7 @@ DTK::ReactorRoute.draw do
   post   'api/v1/services/:service_id/stop'            => 'v1::service#stop'
   post   'api/v1/services/:service_id/create_assembly' => 'v1::service#create_assembly'
   post   'api/v1/services/:service_id/:task_action'    => 'v1::service#exec'
-  delete 'api/v1/services/:service_id'                 => 'v1::service#delete_destroy'
+
 
   # Modules
   # Routes for new dtk client

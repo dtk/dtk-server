@@ -27,7 +27,7 @@ module Ramaze::Helper
     end
 
     def service_object
-      create_obj(:service_id, Assembly::Instance)
+      create_obj([:service_id, :service_instance], Assembly::Instance)
     end
 
     def ret_target_service_with_default(parent_service_param = :parent_service)

@@ -76,6 +76,11 @@ module DTK
         rest_ok_response
       end
 
+      def repo_info
+        service = service_object
+        rest_ok_response CommonModule::ServiceInstance.get_repo_info(service)
+      end
+
       #############################################
       # TODO: DTK-2575: Below were written before new client; ckeck to see if need to be modified
 

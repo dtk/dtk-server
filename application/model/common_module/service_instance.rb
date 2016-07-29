@@ -43,6 +43,22 @@ module DTK
         ModuleRepoInfo.new(module_branch)
       end
 
+      def self.get_repo_info(assembly_instance)
+        new(assembly_instance).get_repo_info
+      end
+
+      def get_repo_info
+        module_branch = get_or_create_service_instance_branch
+        module_repo_info = ModuleRepoInfo.new(module_branch)
+        assembly_instance = self.assembly_instance
+        {
+          service: {
+            name: assembly_instance.display_name_print_form,
+            id: assembly_instance.id
+          }
+        }.merge(module_repo_info)
+      end
+
       private
 
       def get_or_create_service_instance_branch

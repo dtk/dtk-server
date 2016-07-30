@@ -83,7 +83,7 @@ module DTK
 
     def self.delete_associated_service_module(common_module)
       if service_module = BaseService.find_from_name?(common_module.model_handle(:service_module), common_module.module_namespace, common_module.module_name)
-        service_module.delete_object()
+        service_module.delete_object(from_common_module: true)
       end
     end
 

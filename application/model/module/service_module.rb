@@ -97,13 +97,21 @@ module DTK
       rows
     end
 
-    def delete_object
+    # opts can have keys
+    #   :from_common_module
+    def delete_object(opts = {})
       assembly_templates = get_assembly_templates()
 
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
       unless assoc_assemblies.empty?
         assembly_names = assoc_assemblies.map { |a| a[:display_name] }
-        fail ErrorUsage.new("Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})")
+        error_msg =
+          if opts[:from_common_module]
+            "Cannot uninstall a module if one or more service instances (#{assembly_names.join(',')}) created from it exist"
+          else
+            "Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})"
+          end
+        fail ErrorUsage, error_msg
       end
       repos = get_repos()
       repos.each { |repo| RepoManager.delete_repo(repo) }

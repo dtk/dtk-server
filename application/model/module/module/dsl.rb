@@ -93,7 +93,7 @@ module DTK
       opts[:file_path] = dsl_filename
       input_hash = convert_to_hash(content, parsed_name[:format_type], opts)
       return input_hash if ParsingError.is_error?(input_hash)
-      
+
       name_attribute_check = name_attribute_integrity_check(input_hash['components'])
       return name_attribute_check if ParsingError.is_error?(name_attribute_check)
 

@@ -93,13 +93,31 @@ module DTK
       opts[:file_path] = dsl_filename
       input_hash = convert_to_hash(content, parsed_name[:format_type], opts)
       return input_hash if ParsingError.is_error?(input_hash)
-
+      
       name_attribute_check = name_attribute_integrity_check(input_hash['components'])
       return name_attribute_check if ParsingError.is_error?(name_attribute_check)
+
+      ports = raise_error_if_port_number_wrong(input_hash['components'])
+      return ports if ParsingError.is_error?(ports)
 
       ParsingError.trap do
         module_branch = impl_obj.get_module_branch()
         new(impl_obj.id_handle(), module_branch, input_hash, opts)
+      end
+    end
+
+    def self.raise_error_if_port_number_wrong(components)
+      return unless components
+      names = []
+      components.each do |name, value|
+        value ||= {}
+        if attributes = value["attributes"]
+          attributes.each do |k, v|
+            if /(_port)$/.match(k.to_s) || /(port)$/.match(k.to_s)
+              return ParsingError::BadPortNumber.new(component: v["default"], invalid_names: names) if v["default"] && (v["default"] > 65535)
+            end
+          end    
+        end    
       end
     end
 

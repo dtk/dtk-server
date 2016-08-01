@@ -561,7 +561,10 @@ module DTK; class  Assembly
       end
 
       if any_stopped_nodes?(:admin)
-        return { confirmation_message: true } if opts[:start_assembly].nil?
+        if opts[:start_assembly].nil?
+          instance_type = Workspace.is_workspace?(self) ? 'Workspace service' : 'Service instance' 
+          return { confirmation_message: true, confirmation_message_text: "#{instance_type} is stopped, do you want to start it" }
+        end
         opts.merge!(start_nodes: true, ret_nodes_to_start: [])
       else
         unless R8::Config[:debug][:disable_task_concurrent_check]

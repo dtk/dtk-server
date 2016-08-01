@@ -148,6 +148,11 @@ module DTK; class ServiceModule
           end
           type, attributes = import_type_and_node_attributes(node_hash, opts)
           type = node_hash_ref.eql?(Node::Type::Node.assembly_wide) ? node_hash_ref : type
+
+          if node_hash_ref.match(" ") || node_hash_ref.match("/")
+            return ParsingError::BadNodeName.new(node_name: node_hash_ref, assembly: assembly_hash['name'])
+          end
+
           node_output = {
             'display_name' => node_hash_ref,
             'type' => type,

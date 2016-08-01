@@ -71,6 +71,18 @@ module DTK
         end
       end
 
+       class BadPortNumber < self
+        def initialize(params = {})
+          component = params[:component]
+          invalid_names = params[:invalid_names]
+          err_msg = 'The following port (?name) is invalid'
+          
+          err_params = Params.new(name: params[:component])
+          super(err_msg, err_params)
+        end
+      end
+
+
       class AmbiguousModuleRef < self
         def initialize(params = {})
           err_msg = 'Reference to ?module_type module (?module_name) is ambiguous; it belongs to the namespaces (?namespaces); one of these namespaces should be selected by editing the module_refs file'

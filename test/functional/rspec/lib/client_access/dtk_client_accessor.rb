@@ -1,4 +1,4 @@
-require 'dtk_client'
+require 'dtk-shell'
 
 class DtkClientAccessor
 	attr_accessor :connection

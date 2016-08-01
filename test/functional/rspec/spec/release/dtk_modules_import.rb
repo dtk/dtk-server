@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
-#This script is importing latest DTK modules from community repoman.
-#These modules will be used for dtk release deployment test
+#This script is importing latest dtk-run modules from community repoman.
+#These modules will be used for dtk-run release deployment test
 
 require 'rubygems'
 require 'rest_client'
@@ -52,7 +52,7 @@ end
 
 def install_service_module(service_module_remote)
   pass = true
-  value = `dtk service-module install #{service_module_remote} -y`
+  value = `dtk-run service-module install #{service_module_remote} -y`
   puts value
   pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client'))
   puts "Import of remote service module #{service_module_remote} completed successfully!" if pass == true
@@ -62,7 +62,7 @@ end
 
 def install_component_module(component_module_remote)
   pass = true
-  value = `dtk component-module install #{component_module_remote}`
+  value = `dtk-run component-module install #{component_module_remote}`
   puts value
   pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client'))
   puts "Import of remote component module #{component_module_remote} completed successfully!" if pass == true

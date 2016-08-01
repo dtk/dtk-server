@@ -40,6 +40,14 @@ module DTK
         end
       end
 
+      class BadNodeName < self
+        def initialize(params = {})
+          err_msg = "Bad node name (?node_name) in assembly '?assembly'"
+          err_params = Params.new(node_name: params[:node_name], assembly: params[:assembly])
+          super(err_msg, err_params)
+        end
+      end
+
       class BadAssemblyReference < self
         def initialize(params = {})
           err_msg = "Assembly name (?name) does not match assembly name in file path '?file_path'"

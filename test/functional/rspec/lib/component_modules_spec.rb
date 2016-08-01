@@ -8,7 +8,7 @@ shared_context 'Import remote component module' do |component_module_name|
   it "imports #{component_module_name} component module from remote repo" do
     puts 'Import remote component module:', '-------------------------------'
     pass = true
-    value = `dtk component-module install #{component_module_name}`
+    value = `dtk-run component-module install #{component_module_name}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
     puts "Import of remote component module #{component_module_name} completed successfully!" if pass == true
@@ -22,7 +22,7 @@ shared_context 'NEG - Import remote component module' do |component_module_name|
   it "does not import #{component_module_name} component module from remote repo since it already exists" do
     puts 'NEG - Import remote component module:', '-----------------------------------'
     pass = false
-    value = `dtk component-module install #{component_module_name}`
+    value = `dtk-run component-module install #{component_module_name}`
     puts value
     pass = true if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
     puts "Import of remote component module #{component_module_name} did not complete successfully since component module from same namespace already exists!" if pass == true
@@ -36,7 +36,7 @@ shared_context 'Import component module from provided git repo' do |component_mo
   it "imports #{component_module_name} component module from #{git_ssh_repo_url} repo" do
     puts 'Import component module from git repo:', '--------------------------------------'
     pass = true
-    value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
+    value = `dtk-run component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Repository not found') || (value.include? 'denied'))
     puts "Component module #{component_module_name} created successfully from provided git repo!" if pass == true
@@ -50,7 +50,7 @@ shared_context 'NEG - Import component module from provided git repo' do |compon
   it "does not import #{component_module_name} component module from #{git_ssh_repo_url} repo" do
     puts 'NEG - Import component module from git repo:', '--------------------------------------------'
     pass = false
-    value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
+    value = `dtk-run component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
     pass = true if ((value.include? 'ERROR') || (value.include? 'Repository not found') || (value.include? 'denied'))
     puts "Component module #{component_module_name} was not created successfully from provided incorrect git repo!" if pass == true
@@ -64,7 +64,7 @@ shared_context 'Import component module from provided git repo to specific names
   it "imports #{component_module_name} component module from #{git_ssh_repo_url} repo to namespace #{namespace}" do
     puts 'Import component module from git repo:', '--------------------------------------'
     pass = true
-    value = `dtk component-module import-git #{git_ssh_repo_url} #{namespace}:#{component_module_name}`
+    value = `dtk-run component-module import-git #{git_ssh_repo_url} #{namespace}:#{component_module_name}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Repository not found') || (value.include? 'denied'))
     puts "Component module #{component_module_name} created successfully from provided git repo!" if pass == true
@@ -78,7 +78,7 @@ shared_context 'NEG - Import component module from provided git repo to specific
   it "does not import #{component_module_name} component module from #{git_ssh_repo_url} repo to namespace #{namespace}" do
     puts 'NEG - Import component module from git repo:', '--------------------------------------------'
     pass = false
-    value = `dtk component-module import-git #{git_ssh_repo_url} #{namespace}:#{component_module_name}`
+    value = `dtk-run component-module import-git #{git_ssh_repo_url} #{namespace}:#{component_module_name}`
     puts value
     pass = true if ((value.include? 'ERROR') || (value.include? 'Repository not found') || (value.include? 'denied'))
     puts "Component module #{component_module_name} was not created successfully from provided incorrect git repo!" if pass == true
@@ -92,8 +92,8 @@ shared_context 'NEG - Import component module with dependency from provided git 
   it "imports #{component_module_name} component module from #{git_ssh_repo_url} repo but with dependency warning on #{dependency_component_module}" do
     puts 'NEG - Import component module with dependency from git repo:', '------------------------------------------------------------'
     pass = false
-    puts "dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}"
-    value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
+    puts "dtk-run component-module import-git #{git_ssh_repo_url} #{component_module_name}"
+    value = `dtk-run component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
     if (value.include? "There are missing module dependencies mentioned in the git repo: #{dependency_component_module}")
       pass = true
@@ -109,7 +109,7 @@ shared_context 'NEG - Import component module with version dependency from provi
   it "imports #{component_module_name} component module from #{git_ssh_repo_url} repo but with version dependency error" do
     puts 'NEG - Import component module with version dependency from git repo:', '--------------------------------------------------------------------'
     pass = false
-    value = `dtk component-module import-git #{git_ssh_repo_url} #{component_module_name}`
+    value = `dtk-run component-module import-git #{git_ssh_repo_url} #{component_module_name}`
     puts value
     if (value.include? 'There are some inconsistent dependencies')
       pass = true
@@ -125,7 +125,7 @@ shared_context 'Import component module' do |component_module_name|
   it "imports #{component_module_name} component module from content on local machine" do
     puts 'Import component module:', '------------------------'
     pass = false
-    value = `dtk component-module import #{component_module_name}`
+    value = `dtk-run component-module import #{component_module_name}`
     puts value
     pass = true unless value.include? 'ERROR'
     puts "Component module #{component_module_name} imported successfully!" if pass == true
@@ -140,7 +140,7 @@ shared_context 'Export component module' do |component_module_name, namespace|
     puts 'Export component module:', '------------------------'
     pass = false
     cmp_module = component_module_name.split(':').last
-    value = `dtk component-module #{component_module_name} publish #{namespace}/#{cmp_module}`
+    value = `dtk-run component-module #{component_module_name} publish #{namespace}/#{cmp_module}`
     puts value
     pass = true if value.include? 'Status: OK'
     puts "Component module #{cmp_module} exported successfully!" if pass == true
@@ -305,7 +305,7 @@ shared_context 'Delete component module from remote repo' do |component_module_n
   it "deletes #{component_module_name} component module with #{namespace} namespace from remote repo" do
     puts 'Delete component module from remote:', '------------------------------------'
     pass = false
-    value = `dtk component-module delete-from-catalog #{namespace}/#{component_module_name} -y`
+    value = `dtk-run component-module delete-from-catalog #{namespace}/#{component_module_name} -y`
     pass = !value.include?('error')
     puts "Component module #{component_module_name} deleted from dtkn (remote) successfully!" if pass == true
     puts "Component module #{component_module_name} was not deleted from dtkn (remote) successfully!" if pass == false
@@ -349,7 +349,7 @@ shared_context 'Push clone changes to server' do |component_module_name, file_fo
   it "pushes #{component_module_name} component module changes from local filesystem to server with changes on file #{file_for_change}" do
     puts 'Push clone changes to server:', '-----------------------------'
     pass = false
-    value = `dtk component-module #{component_module_name} push`
+    value = `dtk-run component-module #{component_module_name} push`
     puts value
     pass = value.include?('Status: OK')
     puts 'Clone changes pushed to server successfully!' if pass == true
@@ -363,7 +363,7 @@ shared_context 'NEG - Push clone changes to server' do |component_module_name, f
   it "pushes #{component_module_name} component module changes from local filesystem to server but fails - reason: #{fail_message}" do
       puts 'NEG - Push clone changes to server:', '-----------------------------------'
       fail = false
-      value = `dtk component-module #{component_module_name} push`
+      value = `dtk-run component-module #{component_module_name} push`
       puts value
       fail = value.include?(expected_error_message)
       puts ''
@@ -375,7 +375,7 @@ shared_context 'Push to remote changes for component module' do |component_modul
   it "pushes #{component_module_name} component module changes from server to repoman" do
     puts 'Push to remote component module changes:', '-----------------------------------'
     pass = false
-    value = `dtk component-module #{component_module_name} push-dtkn`
+    value = `dtk-run component-module #{component_module_name} push-dtkn`
     puts value
     pass = value.include?('Status: OK')
     puts 'Push to remote passed successfully!' if pass == true
@@ -538,7 +538,7 @@ shared_context 'NEG - List remote' do |error_message|
   it "does not work because ssh key is not added to repoman" do
     puts "NEG - List remote:", "-------------------"
     fail = false
-    value = `dtk component-module list --remote`
+    value = `dtk-run component-module list --remote`
     puts value
     fail = value.include?(error_message)
     puts ''
@@ -664,9 +664,9 @@ shared_context 'Import module from puppet forge' do |puppet_forge_module_name, n
     pass = true
     if !namespace.nil?
       module_name = puppet_forge_module_name.split('-').last
-      value = `dtk component-module import-puppet-forge #{puppet_forge_module_name} #{namespace}/#{module_name}`
+      value = `dtk-run component-module import-puppet-forge #{puppet_forge_module_name} #{namespace}/#{module_name}`
     else
-      value = `dtk component-module import-puppet-forge #{puppet_forge_module_name}`
+      value = `dtk-run component-module import-puppet-forge #{puppet_forge_module_name}`
     end
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))

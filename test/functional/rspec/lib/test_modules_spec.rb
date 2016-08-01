@@ -8,7 +8,7 @@ shared_context 'Create test module' do |test_module_name|
   it "creates #{test_module_name} test module" do
     puts 'Create tests module:', '------------------------'
     pass = true
-    value = `dtk test-module create #{test_module_name}`
+    value = `dtk-run test-module create #{test_module_name}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
     puts "Test module #{test_module_name} created successfully!" if pass == true
@@ -22,7 +22,7 @@ shared_context 'Create test module in specific namespace' do |test_module_name, 
   it "creates #{test_module_name} test module in namespace #{namespace}" do
     puts 'Create tests module in specific namespace:', '-------------------------------------'
     pass = true
-    value = `dtk test-module create #{namespace}:#{test_module_name}`
+    value = `dtk-run test-module create #{namespace}:#{test_module_name}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
     puts "Test module #{test_module_name} created successfully in namespace #{namespace}!" if pass == true
@@ -36,7 +36,7 @@ shared_context 'Install test module' do |test_module_name|
   it "installs #{test_module_name} test module from remote repo" do
     puts 'Import remote test module:', '----------------------------'
     pass = true
-    value = `dtk test-module install #{test_module_name}`
+    value = `dtk-run test-module install #{test_module_name}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
     puts "Install of test module #{test_module_name} completed successfully!" if pass == true

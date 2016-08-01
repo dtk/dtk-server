@@ -44,7 +44,7 @@ shared_context 'NEG - Rename service to existing name' do |service_name, new_ser
   it "does not rename #{service_name} service to #{new_service_name} since #{new_service_name} already exists" do
     puts 'NEG - Rename service to existing name:', '---------------------------------------'
     pass = false
-    value = `dtk service rename #{service_name} #{new_service_name}`
+    value = `dtk-run service rename #{service_name} #{new_service_name}`
     puts value
     pass = true if value.include? "[ERROR] Service with name '#{new_service_name}' exists already."
     puts 'Rename did not passed successfully which is expected!' if pass == true
@@ -58,7 +58,7 @@ shared_context 'NEG - Rename service to workspace name' do |service_name|
   it "does not rename #{service_name} service to workspace since workspace is special type of service" do
     puts 'NEG - Rename service to workspace name:', '----------------------------------------'
     pass = false
-    value = `dtk service rename #{service_name} workspace`
+    value = `dtk-run service rename #{service_name} workspace`
     puts value
     pass = true if value.include? "[ERROR] You are not allowed to use keyword 'workspace' as service name."
     puts 'Rename did not passed successfully which is expected!' if pass == true

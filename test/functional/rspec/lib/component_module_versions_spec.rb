@@ -28,7 +28,7 @@ shared_context 'Publish latest component module version' do |dtk_common, compone
     latests_version = dtk_common.filter_component_module_version(existing_versions).last
 
     pass = false
-    value = `dtk component-module #{component_module_name} publish -v #{latests_version}`
+    value = `dtk-run component-module #{component_module_name} publish -v #{latests_version}`
     puts value
     pass = true if (value.include? 'Status: OK')
     puts "Publish of component module #{component_module_name} #{latests_version} completed successfully!" if pass == true
@@ -97,7 +97,7 @@ shared_context 'Publish versioned component module' do |dtk_common, component_mo
 	it "publish/push component module #{component_module_name} with version #{version_name}" do
 		puts "Publish component module version to remote:", "-------------------------------------------"
 	    pass = false
-	    value = `dtk component-module #{component_module_name} publish #{remote_component_name} -v #{version_name}`
+	    value = `dtk-run component-module #{component_module_name} publish #{remote_component_name} -v #{version_name}`
 	    puts value
 	    pass = true if (value.include? 'Status: OK')
 	    puts "Publish of component module #{component_module_name} #{version_name} completed successfully!" if pass == true
@@ -111,7 +111,7 @@ shared_context 'NEG - Publish versioned component module' do |dtk_common, compon
 	it "does not publish/push component module #{component_module_name} since this version #{version_name} does not exist" do
 		puts "Publish component module version to remote:", "-------------------------------------------"
 	    pass = true
-	    value = `dtk component-module #{component_module_name} publish #{remote_component_name} -v #{version_name}`
+	    value = `dtk-run component-module #{component_module_name} publish #{remote_component_name} -v #{version_name}`
 	    puts value
 	    pass = false if (value.include? 'Status: OK')
 	    puts "Publish of component module #{component_module_name} #{version_name} was successfully, even though it should be!" if pass == false
@@ -181,7 +181,7 @@ shared_context 'Install component module version' do |component_module_name, com
 	it "installs component module #{component_module_namespace}/#{component_module_name} version #{version_name} from remote" do
 		puts "Install component module version from remote:", "---------------------------------------------"
 	    pass = true
-	    value = `dtk component-module install #{component_module_namespace}/#{component_module_name} -v #{version_name}`
+	    value = `dtk-run component-module install #{component_module_namespace}/#{component_module_name} -v #{version_name}`
 	    puts value
 	    pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
 	    puts "Install of component module #{component_module_name} #{version_name} completed successfully!" if pass == true
@@ -196,7 +196,7 @@ shared_context 'NEG - Install component module version' do |dtk_common, componen
 	it "does not install component module #{component_module_namespace}/#{component_module_name} version #{version_name} from remote" do
 		puts 'Install component module version from remote:', '---------------------------------------------'
 	    pass = true
-	    value = `dtk component-module install #{component_module_namespace}/#{component_module_name} -v #{version_name}`
+	    value = `dtk-run component-module install #{component_module_namespace}/#{component_module_name} -v #{version_name}`
 	    puts value
 	    pass = true if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
 	    puts "Install of component module #{component_module_name} #{version_name} was not successfull!" if pass == true

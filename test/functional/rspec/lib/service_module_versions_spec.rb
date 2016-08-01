@@ -36,7 +36,7 @@ shared_context 'Publish versioned service module' do |dtk_common, service_module
 	it "publish/push service module #{service_module_name} with version #{version_name}" do
 		puts "Publish service module version to remote:", "-------------------------------------------"
 	    pass = false
-	    value = `dtk service-module #{service_module_name} publish #{remote_service_module_name} -v #{version_name}`
+	    value = `dtk-run service-module #{service_module_name} publish #{remote_service_module_name} -v #{version_name}`
 	    puts value
 	    pass = true if (value.include? 'Status: OK')
 	    puts "Publish of service module #{service_module_name} #{version_name} completed successfully!" if pass == true
@@ -50,7 +50,7 @@ shared_context 'NEG - Publish versioned service module' do |dtk_common, service_
 	it "does not publish/push service module #{service_module_name} since this version #{version_name} does not exist" do
 		puts "Publish service module version to remote:", "-------------------------------------------"
 	    pass = true
-	    value = `dtk service-module #{service_module_name} publish #{remote_service_module_name} -v #{version_name}`
+	    value = `dtk-run service-module #{service_module_name} publish #{remote_service_module_name} -v #{version_name}`
 	    puts value
 	    pass = false if (value.include? 'Status: OK')
 	    puts "Publish of service module #{service_module_name} #{version_name} was successfully, even though it should be!y!" if pass == false
@@ -119,7 +119,7 @@ shared_context 'Install service module version' do |service_module_name, service
 	it 'installs service module #{service_module_namespace}/#{service_module_name} version #{version_name} from remote' do
 		puts "Install service module version from remote:", "---------------------------------------------"
 	    pass = true
-	    value = `dtk service-module install #{service_module_namespace}/#{service_module_name} -v #{version_name} --update-none -y`
+	    value = `dtk-run service-module install #{service_module_namespace}/#{service_module_name} -v #{version_name} --update-none -y`
 	    puts value
 	    pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
 	    puts "Install of service module #{service_module_name} #{version_name} completed successfully!" if pass == true
@@ -133,7 +133,7 @@ shared_context 'NEG - Install service module version' do |dtk_common, service_mo
 	it "does not install service module #{service_module_namespace}/#{service_module_name} version #{version_name} from remote" do
 		puts 'Install service module version from remote:', '---------------------------------------------'
 	    pass = true
-	    value = `dtk service-module install #{service_module_namespace}/#{service_module_name} -v #{version_name} --update-none -y`
+	    value = `dtk-run service-module install #{service_module_namespace}/#{service_module_name} -v #{version_name} --update-none -y`
 	    puts value
 	    pass = true if ((value.include? 'ERROR') || (value.include? 'exists on client') || (value.include? 'denied') || (value.include? 'Conflicts with existing server local module'))
 	    puts "Install of service module #{service_module_name} #{version_name} was not successfull!" if pass == true

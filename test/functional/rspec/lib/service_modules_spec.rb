@@ -10,7 +10,7 @@ shared_context 'Import service module' do |service_module_name|
   it "imports #{service_module_name} service module from local filesystem to server" do
     puts 'Import service module:', '----------------------'
     pass = true
-    value = `dtk service-module import #{service_module_name}`
+    value = `dtk-run service-module import #{service_module_name}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
     puts "Import of service module #{service_module_name} completed successfully!" if pass == true
@@ -24,7 +24,7 @@ shared_context 'Import remote service module' do |service_module_name|
   it "imports #{service_module_name} service module from remote repo" do
     puts 'Import remote service module:', '-----------------------------'
     pass = true
-    value = `dtk service-module install #{service_module_name} --update-none -y`
+    value = `dtk-run service-module install #{service_module_name} --update-none -y`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists on client'))
     puts "Import of remote service module #{service_module_name} completed successfully!" if pass == true
@@ -38,7 +38,7 @@ shared_context 'NEG - Import remote service module' do |service_module_name|
   it "will not import #{service_module_name} service module from remote repo since there are referenced component modules on local filesystem which are not deleted" do
     puts 'NEG - Import remote service module:', '-----------------------------------'
     pass = false
-    value = `dtk service-module install #{service_module_name} --update-none`
+    value = `dtk-run service-module install #{service_module_name} --update-none`
     puts value
     pass = true if (value.include? 'is not empty')
     puts "Import of remote service module #{service_module_name} did not complete successfully because of the referenced component module that exists on local filesystem!" if pass == true
@@ -89,7 +89,7 @@ shared_context 'List all service modules on remote' do |service_module_name, nam
   it "verifies that #{service_module_name} service module exists on remote" do
     puts 'List all service modules on remote:', '-----------------------------------'
     pass = false
-    value = `dtk service-module list --remote`
+    value = `dtk-run service-module list --remote`
     puts value
     pass = true if value.include? "#{namespace}/#{service_module_name}"
     puts "List of service modules on remote contains service module #{service_module_name} on namespace #{namespace}" if pass == true
@@ -104,7 +104,7 @@ shared_context 'Export service module' do |service_module_name, namespace|
     puts 'Export service module to remote:', '--------------------------------'
     pass = false
     service_module = service_module_name.split(':').last
-    value = `dtk service-module #{service_module_name} publish #{namespace}/#{service_module}`
+    value = `dtk-run service-module #{service_module_name} publish #{namespace}/#{service_module}`
     puts value
     pass = true if value.include? 'Status: OK'
     puts "Publish of #{service_module} service module to #{namespace} namespace has been completed successfully!" if pass == true
@@ -145,7 +145,7 @@ shared_context 'Delete service module from remote repo' do |service_module_name,
   it "deletes #{service_module_name} service module with #{namespace} namespace from remote repo" do
     puts 'Delete service module from remote (dtkn):', '-----------------------------------------'
     pass = false
-    value = `dtk service-module delete-from-catalog #{namespace}/#{service_module_name} -y`
+    value = `dtk-run service-module delete-from-catalog #{namespace}/#{service_module_name} -y`
     pass = true if (!value.include?('error') || !value.include?('cannot remove'))
     puts "Service module #{service_module_name} deleted from remote (dtkn) successfully!" if pass == true
     puts "Service module #{service_module_name} was not deleted from remote (dtkn) successfully!" if pass == false
@@ -202,7 +202,7 @@ shared_context 'Push local service module changes to server' do |service_module_
   it "pushes #{service_module_name} service module changes from local filesystem to server with changes on file #{file_for_change}" do
     puts 'Push clone changes to server:', '-----------------------------'
     pass = false
-    value = `dtk service-module #{service_module_name} push`
+    value = `dtk-run service-module #{service_module_name} push`
     puts value
     pass = value.include?('Status: OK')
     puts 'Clone changes pushed to server successfully!' if pass == true
@@ -216,7 +216,7 @@ shared_context 'NEG - Push local service module changes to server' do |service_m
   it "pushes #{service_module_name} service module changes from local filesystem to server but fails - reason: #{fail_message}" do
       puts 'NEG - Push clone changes to server:', '-----------------------------------'
       fail = false
-      value = `dtk service-module #{service_module_name} push`
+      value = `dtk-run service-module #{service_module_name} push`
       puts value
       fail = value.include?(expected_error_message)
       puts ''
@@ -228,7 +228,7 @@ shared_context 'Push to remote changes for service module' do |service_module_na
   it "pushes #{service_module_name} service module changes from server to repoman" do
     puts 'Push to remote service module changes:', '-----------------------------------'
     pass = false
-    value = `dtk service-module #{service_module_name} push-dtkn`
+    value = `dtk-run service-module #{service_module_name} push-dtkn`
     puts value
     pass = value.include?('Status: OK')
     puts 'Push to remote passed successfully!' if pass == true

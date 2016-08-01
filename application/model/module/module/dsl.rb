@@ -114,7 +114,7 @@ module DTK
         if attributes = value["attributes"]
           attributes.each do |k, v|
             if /(_port)$/.match(k.to_s) || /(port)$/.match(k.to_s)
-              return ParsingError::BadPortNumber.new(component: v["default"], invalid_names: names) if v["default"] && (v["default"] > 65535)
+              return ParsingError::BadPortNumber.new(component: v["default"], invalid_names: names) if v["default"] && (v["default"].to_i > 65535)
             end
           end    
         end    

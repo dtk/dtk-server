@@ -30,7 +30,7 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         Variations::Functions = ['functions', 'function']
 
         Docker = 'docker'
-        Variations::Docker = ['docker_image', 'docker_run_params']
+        Variations::Docker = ['docker_image', 'docker_run_params', 'docker_file_template']
       end
 
       def self.matches_input_hash?(input_hash)

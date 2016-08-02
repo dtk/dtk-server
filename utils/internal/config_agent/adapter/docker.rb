@@ -40,8 +40,9 @@ module DTK; class ConfigAgent; module Adapter
 
       fail ErrorUsage.new("Unexpected to call docker adapter without docker actions!") unless action_def
 
-      docker_execs = action_def.docker
-      docker_exec  = docker_execs.first
+      docker_execs         = action_def.docker
+      docker_exec          = docker_execs.first
+      docker_file_template = substitute_template_values(docker_exec.docker_file_template, component_action.attribute_and_parameter_values)
 
       msg_content = {
         module_name: cmp_module,
@@ -51,7 +52,7 @@ module DTK; class ConfigAgent; module Adapter
         docker_image: docker_exec.docker_image,
         docker_command: 'whoami',
         execution_type: 'bash',
-        dockerfile: docker_exec.docker_file_template,
+        dockerfile: docker_file_template,
         docker_run_params: docker_exec.docker_run_params,
         entrypoint: docker_exec.entrypoint,
         version_context: get_version_context(config_node, opts[:assembly]),
@@ -83,6 +84,20 @@ module DTK; class ConfigAgent; module Adapter
       # want components to be unique
       components = component_actions.inject({}) { |h, r| h.merge(r[:component][:id] => r[:component]) }.values
       ComponentModule::VersionContextInfo.get_in_hash_form(components, assembly_instance)
+    end
+
+    def substitute_template_values(docker_file_template, attributes)
+      if MustacheTemplate.needs_template_substitution?(docker_file_template)
+        begin
+          docker_file_template = MustacheTemplate.render(docker_file_template, attributes)
+        rescue MustacheTemplateError::MissingVar => e
+          ident = 4
+          err_msg = "The variable '#{e.missing_var}' in the following workflow term is not set:\n#{' ' * ident}#{string}"
+          fail ErrorUsage.new(err_msg)
+        end
+      end
+
+      docker_file_template
     end
   end
 end; end; end

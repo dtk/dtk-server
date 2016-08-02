@@ -39,7 +39,7 @@ module DTK
       column :basic_type, :varchar, size: 25 #service, application, language, application, extension, database, user
       # leaf type in component type
       column :specific_type, :varchar, size: 30
-      column :component_type, :varchar, size: 50 #this is the exact component type; two instances taht share this can differ by things like defaults
+      column :component_type, :varchar, size: 150 #this is the exact component type; two instances taht share this can differ by things like defaults
 
       column :locked_sha, :varchar, size: 50
       column :service_module_sha, :varchar, size: 50

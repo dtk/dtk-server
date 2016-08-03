@@ -223,6 +223,10 @@ module DTK
         rest_ok_response service_module.ret_clone_update_info
       end
 
+      def task_status
+        rest_ok_response Task::Status::Assembly.get_status(service_object.id_handle, format: :table), datatype: :task_status
+      end
+
     end
   end
 end

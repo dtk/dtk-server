@@ -30,9 +30,10 @@ DTK::ReactorRoute.draw do
 
   # Services
   # Routes for new dtk client
-  post 'api/v1/services/create'    => 'v1::service#create'
-  post 'api/v1/services/delete'    => 'v1::service#delete'
-  post 'api/v1/services/repo_info' => 'v1::service#repo_info'
+  post 'api/v1/services/create'      => 'v1::service#create'
+  post 'api/v1/services/delete'      => 'v1::service#delete'
+  post 'api/v1/services/repo_info'   => 'v1::service#repo_info'
+  post 'api/v1/services/task_status' => 'v1::service#task_status'
   # TODO: should we use below instead?
   # delete 'api/v1/services/:service_id' => 'v1::service#delete'
 

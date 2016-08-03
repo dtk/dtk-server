@@ -129,19 +129,27 @@ module DTK
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
         end
 
-        unless task = Task.create_from_assembly_instance?(service, {})
-          # TODO: double check this is right
-          response =  {
-            message: "There are no steps in the action to execute"
-          }
-          return rest_ok_response(response)
+        opts = {
+          start_nodes: true,
+          ret_nodes_to_start: []
+        }
+
+        unless task = Task.create_from_assembly_instance?(service, opts)
+          return rest_ok_response({ message: "There are no steps in the action to execute" })
         end
+
         task.save!
 
-        workflow = Workflow.create(task)
+        # still have to use start_instances until we implement this to start from workflow task
+        unless (opts[:ret_nodes_to_start]||[]).empty?
+          Node.start_instances(opts[:ret_nodes_to_start])
+        end
+
+        reified_task = Task::Hierarchical.get_and_reify(task.id_handle)
+        workflow = Workflow.create(reified_task)
         workflow.defer_execution
 
-        rest_ok_response task_id: task.id
+        rest_ok_response task_id: reified_task.id
       end
 
       def start

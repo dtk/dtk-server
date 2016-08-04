@@ -97,7 +97,7 @@ module DTK
 
       def nodes
         service = service_object
-        rest_ok_response service.info_about(:nodes)
+        rest_ok_response service.info_about(:nodes), datatype: :node
       end
 
       def components

@@ -41,11 +41,11 @@ DTK::ReactorRoute.draw do
   # TODO: see if we remove these older routes
   get    'api/v1/services/:service_id'                        => 'v1::service#info'
   get    'api/v1/services/:service_id/nodes'                  => 'v1::service#nodes'
-  get    'api/v1/services/:service_id/components'             => 'v1::service#components'
   get    'api/v1/services/:service_id/tasks'                  => 'v1::service#tasks'
   get    'api/v1/services/:service_id/access_tokens'          => 'v1::service#access_tokens'
   get    'api/v1/services/:service_id/list_component_links'   => 'v1::service#list_component_links'
   get    'api/v1/services/:service_id/list_dependent_modules' => 'v1::service#list_dependent_modules'
+  post   'api/v1/services/:service_id/components'             => 'v1::service#components'
   post   'api/v1/services/:service_id/attributes'             => 'v1::service#attributes'
   post   'api/v1/services/:service_id/actions'                => 'v1::service#actions'
   post   'api/v1/services/:service_id/converge'               => 'v1::service#converge'

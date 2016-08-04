@@ -101,7 +101,8 @@ module DTK
       end
 
       def components
-        service = service_object
+        service  = service_object
+        datatype = :component
 
         opts = Opts.new(detail_level: nil)
         opts[:filter_proc] = Proc.new do |e|
@@ -109,7 +110,12 @@ module DTK
           (!node.is_a?(Node)) || !Node::TargetRef.is_target_ref?(node)
         end
 
-        rest_ok_response service.info_about(:components, opts)
+        if request_params(:dependencies)
+          opts.merge!(detail_to_include: [:component_dependencies])
+          datatype = :component_with_dependencies
+        end
+
+        rest_ok_response service.info_about(:components, opts), datatype: datatype
       end
 
       def tasks

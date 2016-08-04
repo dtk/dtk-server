@@ -151,11 +151,9 @@ module DTK
           Node.start_instances(opts[:ret_nodes_to_start])
         end
 
-        reified_task = Task::Hierarchical.get_and_reify(task.id_handle)
-        workflow = Workflow.create(reified_task)
-        workflow.defer_execution
+        execute_task(task)
 
-        rest_ok_response task_id: reified_task.id
+        rest_ok_response task_id: task.id
       end
 
       def start
@@ -180,6 +178,8 @@ module DTK
         task.save!
 
         Node.start_instances(nodes)
+
+        execute_task(task)
 
         rest_ok_response task_id: task.id
       end
@@ -289,6 +289,14 @@ module DTK
 
       def list_dependent_modules
         rest_ok_response service_object.info_about(:modules, Opts.new(detail_to_include: [:version_info])), datatype: :assembly_component_module
+      end
+
+      private
+
+      def execute_task(task)
+        reified_task = Task::Hierarchical.get_and_reify(task.id_handle)
+        workflow = Workflow.create(reified_task)
+        workflow.defer_execution
       end
 
     end

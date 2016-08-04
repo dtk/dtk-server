@@ -50,7 +50,6 @@ module DTK; class ConfigAgent; module Adapter
         top_task_id: opts[:top_task_id],
         task_id: opts[:task_id],
         docker_image: docker_exec.docker_image,
-        docker_command: 'whoami',
         execution_type: 'bash',
         dockerfile: docker_file_template,
         docker_run_params: docker_exec.docker_run_params,

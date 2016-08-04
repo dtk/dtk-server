@@ -81,9 +81,6 @@ module DTK
         rest_ok_response CommonModule::ServiceInstance.get_repo_info(service)
       end
 
-      #############################################
-      # TODO: DTK-2575: Below were written before new client; ckeck to see if need to be modified
-
       def exec
         service     = service_object
         params_hash = params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
@@ -289,6 +286,17 @@ module DTK
 
       def list_dependent_modules
         rest_ok_response service_object.info_about(:modules, Opts.new(detail_to_include: [:version_info])), datatype: :assembly_component_module
+      end
+
+      def cancel_last_task
+        if running_task = most_recent_task_is_executing?(service_object)
+          top_task_id = running_task.id()
+        else
+          fail ErrorUsage.new('No running tasks found')
+        end
+
+        cancel_task(top_task_id)
+        rest_ok_response task_id: top_task_id
       end
 
       private

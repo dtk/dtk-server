@@ -53,6 +53,7 @@ DTK::ReactorRoute.draw do
   post   'api/v1/services/:service_id/start'                  => 'v1::service#start'
   post   'api/v1/services/:service_id/stop'                   => 'v1::service#stop'
   post   'api/v1/services/:service_id/create_assembly'        => 'v1::service#create_assembly'
+  post   'api/v1/services/:service_id/cancel_last_task'       => 'v1::service#cancel_last_task'
   post   'api/v1/services/:service_id/:task_action'           => 'v1::service#exec'
 
 

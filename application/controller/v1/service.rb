@@ -237,9 +237,44 @@ module DTK
         rest_ok_response Assembly::Instance.list(model_handle(), params_hash), datatype: :assembly
       end
 
-      def list_actions
+      def actions
         type = request_params(:type)
         rest_ok_response service_object.list_actions(type), datatype: :service_actions
+      end
+
+      def attributes
+        service           = service_object
+        detail_to_include = []
+        datatype          = :workspace_attribute
+        opts              = Opts.new(detail_level: nil)
+
+        if request_params(:links)
+          detail_to_include << :attribute_links
+          datatype = :workspace_attribute_w_link
+        end
+
+        if node_id = request_params(:node_id)
+          node_id = "#{ret_node_id(:node_id, service)}" unless (node_id =~ /^[0-9]+$/)
+          opts.merge!(node_cmp_name: true)
+        end
+
+        if component_id = request_params(:component_id)
+          component_id = "#{ret_component_id(:component_id, service, filter_by_node: true)}" unless (component_id =~ /^[0-9]+$/)
+        end
+
+        additional_filter_proc = Proc.new do |e|
+          attr = e[:attribute]
+          (!attr.is_a?(Attribute)) || !attr.filter_when_listing?({})
+        end
+
+        opts[:filter_proc] = Proc.new do |element|
+          if element_matches?(element, [:node, :id], node_id) && element_matches?(element, [:attribute, :component_component_id], component_id)
+            element if additional_filter_proc.nil? || additional_filter_proc.call(element)
+          end
+        end
+
+        opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
+        rest_ok_response service.info_about(:attributes, opts), datatype: datatype
       end
 
     end

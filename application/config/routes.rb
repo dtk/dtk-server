@@ -44,12 +44,13 @@ DTK::ReactorRoute.draw do
   get    'api/v1/services/:service_id/components'      => 'v1::service#components'
   get    'api/v1/services/:service_id/tasks'           => 'v1::service#tasks'
   get    'api/v1/services/:service_id/access_tokens'   => 'v1::service#access_tokens'
+  post   'api/v1/services/:service_id/attributes'      => 'v1::service#attributes'
+  post   'api/v1/services/:service_id/actions'         => 'v1::service#actions'
   post   'api/v1/services/:service_id/converge'        => 'v1::service#converge'
   post   'api/v1/services/:service_id/start'           => 'v1::service#start'
   post   'api/v1/services/:service_id/stop'            => 'v1::service#stop'
   post   'api/v1/services/:service_id/create_assembly' => 'v1::service#create_assembly'
   post   'api/v1/services/:service_id/find_violations' => 'v1::service#find_violations'
-  post   'api/v1/services/:service_id/list_actions' => 'v1::service#list_actions'
   post   'api/v1/services/:service_id/:task_action'    => 'v1::service#exec'
 
 

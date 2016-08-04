@@ -49,6 +49,7 @@ DTK::ReactorRoute.draw do
   post   'api/v1/services/:service_id/stop'            => 'v1::service#stop'
   post   'api/v1/services/:service_id/create_assembly' => 'v1::service#create_assembly'
   post   'api/v1/services/:service_id/find_violations' => 'v1::service#find_violations'
+  post   'api/v1/services/:service_id/list_actions' => 'v1::service#list_actions'
   post   'api/v1/services/:service_id/:task_action'    => 'v1::service#exec'
 
 

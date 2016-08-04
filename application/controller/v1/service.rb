@@ -237,6 +237,11 @@ module DTK
         rest_ok_response Assembly::Instance.list(model_handle(), params_hash), datatype: :assembly
       end
 
+      def list_actions
+        type = request_params(:type)
+        rest_ok_response service_object.list_actions(type), datatype: :service_actions
+      end
+
     end
   end
 end

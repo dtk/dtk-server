@@ -233,7 +233,7 @@ module DTK
         rest_ok_response Task::Status::Assembly.get_status(service_object.id_handle, format: :table), datatype: :task_status
       end
 
-      def find_violations
+      def list_violations
         violations = service_object.find_violations
         rest_ok_response violations.table_form, datatype: :violation
       end

@@ -34,6 +34,7 @@ DTK::ReactorRoute.draw do
   post 'api/v1/services/delete'      => 'v1::service#delete'
   post 'api/v1/services/repo_info'   => 'v1::service#repo_info'
   post 'api/v1/services/task_status' => 'v1::service#task_status'
+  post 'api/v1/services/list'        => 'v1::service#list'
   # TODO: should we use below instead?
   # delete 'api/v1/services/:service_id' => 'v1::service#delete'
 

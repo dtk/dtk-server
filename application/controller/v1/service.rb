@@ -277,6 +277,10 @@ module DTK
         rest_ok_response service.info_about(:attributes, opts), datatype: datatype
       end
 
+      def list_component_links
+        rest_ok_response service_object.list_service_links(hide_assembly_wide_node: true), datatype: :service_link
+      end
+
     end
   end
 end

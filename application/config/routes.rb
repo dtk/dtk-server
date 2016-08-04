@@ -44,6 +44,7 @@ DTK::ReactorRoute.draw do
   get    'api/v1/services/:service_id/components'      => 'v1::service#components'
   get    'api/v1/services/:service_id/tasks'           => 'v1::service#tasks'
   get    'api/v1/services/:service_id/access_tokens'   => 'v1::service#access_tokens'
+  get    'api/v1/services/:service_id/list_component_links' => 'v1::service#list_component_links'
   post   'api/v1/services/:service_id/attributes'      => 'v1::service#attributes'
   post   'api/v1/services/:service_id/actions'         => 'v1::service#actions'
   post   'api/v1/services/:service_id/converge'        => 'v1::service#converge'

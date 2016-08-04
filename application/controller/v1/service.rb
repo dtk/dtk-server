@@ -281,6 +281,10 @@ module DTK
         rest_ok_response service_object.list_service_links(hide_assembly_wide_node: true), datatype: :service_link
       end
 
+      def list_dependent_modules
+        rest_ok_response service_object.info_about(:modules, Opts.new(detail_to_include: [:version_info])), datatype: :assembly_component_module
+      end
+
     end
   end
 end

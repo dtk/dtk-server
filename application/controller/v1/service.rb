@@ -227,7 +227,31 @@ module DTK
       end
 
       def task_status
-        rest_ok_response Task::Status::Assembly.get_status(service_object.id_handle, format: :table), datatype: :task_status
+        service = service_object
+
+        response =
+          if request_params(:form) == 'stream_form'
+            element_detail = request_params(:element_detail)||{}
+            element_detail[:action_results] ||= true
+            element_detail[:errors] ||= true
+
+            opts = {
+              end_index:      request_params(:end_index),
+              start_index:    request_params(:start_index),
+              element_detail: element_detail
+            }
+
+            if wait_for = request_params(:wait_for)
+              opts.merge!(wait_for: wait_for.to_sym)
+            end
+
+            Task::Status::Assembly::StreamForm.get_status(service.id_handle, opts)
+          else
+            Task::Status::Assembly.get_status(service.id_handle, format: :table)
+          end
+
+        rest_ok_response response, datatype: :task_status
+        # rest_ok_response Task::Status::Assembly.get_status(service_object.id_handle, format: :table), datatype: :task_status
       end
 
       def list_violations

@@ -299,6 +299,15 @@ module DTK
         rest_ok_response task_id: top_task_id
       end
 
+      def required_attributes
+        rest_ok_response service_object.get_attributes_print_form(Opts.new(filter: :required_unset_attributes))
+      end
+
+      def set_attributes
+        service_object.set_attributes(ret_params_av_pairs, update_meta: true)
+        rest_ok_response
+      end
+
       private
 
       def execute_task(task)

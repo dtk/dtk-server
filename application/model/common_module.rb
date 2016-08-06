@@ -44,6 +44,13 @@ module DTK
       ModuleRepoInfo.new(module_branch)
     end
 
+    # opts can have keys
+    #  :remote_repo_base
+    #  :detail_to_include
+    def self.list(project, opts = Opts.new)
+      BaseService.list(opts.merge(project_idh: project.id_handle))
+    end
+
     def self.list_assembly_templates(project)
       BaseService.list_assembly_templates(project)
     end

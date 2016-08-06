@@ -61,6 +61,7 @@ DTK::ReactorRoute.draw do
 
   # Modules
   # Routes for new dtk client
+  get 'api/v1/modules/list'                      => 'v1::module/list'
   get 'api/v1/modules/list_assemblies'           => 'v1::module/list_assemblies'
   get 'api/v1/modules'                           => 'v1::module/exists'
   post 'api/v1/modules/install_component_module' => 'v1::module/install_component_module'

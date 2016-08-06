@@ -18,14 +18,21 @@
 module DTK
   module V1
     class ModuleController < V1::Base
+      helper_v1 :module_helper
       helper :module_helper
-      # helper :remotes_helper
 
-      LIST_ASSEMBLIES_DATATYPE = :assembly_template_with_module
+      def list
+        opts = Opts.new(remote_repo_base: ret_remote_repo_base)
+        datatype  = :module
+        if detail_to_include = ret_detail_to_include
+          opts.merge!(detail_to_include: detail_to_include)
+          datatype  = :module_with_versions if detail_to_include.include?(:versions)
+        end
+        rest_ok_response CommonModule.list(get_default_project, opts), datatype: datatype
+      end
 
       def list_assemblies
-        project = get_default_project
-        rest_ok_response CommonModule.list_assembly_templates(get_default_project), datatype: LIST_ASSEMBLIES_DATATYPE
+        rest_ok_response CommonModule.list_assembly_templates(get_default_project), datatype: :assembly_template_with_module
       end
 
       def exists

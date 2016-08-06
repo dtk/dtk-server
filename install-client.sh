@@ -106,6 +106,7 @@ auto_commit_changes=false         # autocommit for modules
 verbose_rest_calls=false          # logging of REST calls
 
 # if relative path is used we will use HOME + relative path, apsoluth path will override this
+instance_location=service
 module_location=component_modules
 service_location=service_modules
 test_module_location=test_modules

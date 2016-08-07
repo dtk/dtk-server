@@ -29,5 +29,12 @@ while [[ ! -f $HOST_VOLUME/arbiter/arbiter_remote ]]; do
   sleep 2
 done
 
+# check if docker daemon socket is available
+# and mount it inside dtk-arbiter contianer if so
+additional_args=''
+if [[ -e /var/run/docker.sock ]]; then
+  additional_args="-v /var/run/docker.sock:/var/run/docker.sock "
+fi
+
 # start the dtk-arbiter container
-docker run --name dtk-arbiter $PBUILDER_ARG -v $HOST_VOLUME:/host_volume -td getdtk/dtk-arbiter
+docker run --name dtk-arbiter $PBUILDER_ARG -v $HOST_VOLUME:/host_volume $additional_args -td getdtk/dtk-arbiter

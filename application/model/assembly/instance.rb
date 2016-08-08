@@ -843,7 +843,13 @@ module DTK; class  Assembly
     def order_components_by_workflow(components, workflow_delete_order)
       return components unless workflow_delete_order
 
-      ordered_components   = components.select{ |cmp| workflow_delete_order.include?(cmp[:display_name]) }
+      ordered_components = []
+      workflow_delete_order.each do |o_cmp|
+        if matching_cmp = components.find{ |cmp| cmp[:display_name].eql?(o_cmp) }
+          ordered_components << matching_cmp
+        end
+      end
+
       remaining_components = components - ordered_components
       ordered_components + remaining_components
     end

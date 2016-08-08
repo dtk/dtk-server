@@ -72,7 +72,7 @@ module DTK; class Task
       task_mh               = target_idh.create_childMH(:task)
 
       begin
-        task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'deletes' })
+        task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'delete' })
       rescue Task::Template::ParsingError => e
         return
       rescue Task::Template::TaskActionNotFoundError => e

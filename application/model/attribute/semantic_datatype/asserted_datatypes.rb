@@ -56,7 +56,7 @@ module DTK; class Attribute
     end
     Type :boolean do
       basetype :boolean
-      validation /true|false/
+      validation /\A(true|false)\z/
       internal_form lambda{|v|
         if v.is_a?(TrueClass) || v == 'true'
           true

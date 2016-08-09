@@ -260,7 +260,7 @@ module DTK
       end
 
       def list
-        params_hash = params_hash(:filter, :detail_level, :include_namespaces).merge(remove_assembly_wide_node: true)
+        params_hash = params_hash(:detail_level, :include_namespaces).merge(remove_assembly_wide_node: true)
         rest_ok_response Assembly::Instance.list(model_handle(), params_hash), datatype: :assembly
       end
 

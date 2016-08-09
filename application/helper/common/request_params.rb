@@ -47,7 +47,7 @@ module Ramaze::Helper::Common
 
     def params_hash(*params)
       ret = {}
-      return ret unless request_method_is_post?()
+      # return ret unless request_method_is_post?()
       return ret if params.size == 0
       params.inject({}) do |h, p|
         val = request.params[p.to_s]

@@ -30,11 +30,11 @@ DTK::ReactorRoute.draw do
 
   # Services
   # Routes for new dtk client
+  get  'api/v1/services/list'        => 'v1::service#list'
   post 'api/v1/services/create'      => 'v1::service#create'
   post 'api/v1/services/delete'      => 'v1::service#delete'
   post 'api/v1/services/repo_info'   => 'v1::service#repo_info'
   post 'api/v1/services/task_status' => 'v1::service#task_status'
-  post 'api/v1/services/list'        => 'v1::service#list'
   # TODO: should we use below instead?
   # delete 'api/v1/services/:service_id' => 'v1::service#delete'
 
@@ -47,9 +47,9 @@ DTK::ReactorRoute.draw do
   get    'api/v1/services/:service_id/list_dependent_modules' => 'v1::service#list_dependent_modules'
   get    'api/v1/services/:service_id/list_violations'        => 'v1::service#list_violations'
   get    'api/v1/services/:service_id/required_attributes'    => 'v1::service#required_attributes'
-  post   'api/v1/services/:service_id/components'             => 'v1::service#components'
-  post   'api/v1/services/:service_id/attributes'             => 'v1::service#attributes'
-  post   'api/v1/services/:service_id/actions'                => 'v1::service#actions'
+  get    'api/v1/services/:service_id/actions'                => 'v1::service#actions'
+  get    'api/v1/services/:service_id/attributes'             => 'v1::service#attributes'
+  get    'api/v1/services/:service_id/components'             => 'v1::service#components'
   post   'api/v1/services/:service_id/converge'               => 'v1::service#converge'
   post   'api/v1/services/:service_id/start'                  => 'v1::service#start'
   post   'api/v1/services/:service_id/stop'                   => 'v1::service#stop'

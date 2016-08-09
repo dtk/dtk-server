@@ -25,6 +25,8 @@ output_dir=$2
 
 # DTK repos url
 dtk_client="git@github.com:dtk/dtk-client.git"
+dtk_shell="git@github.com:dtk/dtk-shell.git"
+dtk_dsl="git@github.com:dtk/dtk-dsl.git"
 dtk_common="git@github.com:dtk/dtk-common.git"
 dtk_common_core="git@github.com:dtk/dtk-common-core.git"
 dtk_node_agent="git@github.com:dtk/dtk-node-agent.git"
@@ -38,6 +40,8 @@ dtk_repos=()
 dtk_repos+=($dtk_common_core)
 dtk_repos+=($dtk_common)
 dtk_repos+=($dtk_client)
+dtk_repos+=($dtk_shell)
+dtk_repos+=($dtk_dsl)
 dtk_repos+=($dtk_node_agent)
 dtk_repos+=($dtk_repo_manager_admin)
 dtk_repos+=($dtk_repo_manager)
@@ -120,7 +124,7 @@ function tag_code() {
 			  git tag $next_tag
 			  git push --tags
 			fi
-		elif [[ $repo_name == "dtk-common" || $repo_name == "dtk-client" ]]; then
+		elif [[ $repo_name == "dtk-common" || $repo_name == "dtk-shell" || $repo_name == "dtk-client" ]]; then
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
@@ -130,8 +134,8 @@ function tag_code() {
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $next_tag
 			git push --tags
-		elif [[ $repo_name == "dtk-common-core" ]]; then
-			cd lib/dtk-common-core
+		elif [[ $repo_name == "dtk-common-core" || $repo_name == "dtk-dsl" ]]; then
+			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
 			git add .; git commit -m "bump version"; git push origin master
@@ -180,7 +184,7 @@ function tag_code() {
       git push origin stable
 			git tag $dtk_major_tag
 			#git push --tags
-		elif [[ $repo_name == "dtk-client" || $repo_name == "dtk-common" ]]; then
+		elif [[ $repo_name == "dtk-client" || $repo_name == "dtk-common" || $repo_name == "dtk-shell" ]]; then
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
@@ -190,14 +194,13 @@ function tag_code() {
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $dtk_major_tag
 			git push --tags
-		elif [[ $repo_name == "dtk-common-core" ]]; then
-			cd lib/dtk-common-core
+		elif [[ $repo_name == "dtk-common-core" || $repo_name == "dtk-dsl" ]]; then
+			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
 			git add .; git commit -m "bump version"; git push origin master
 			git tag $dtk_major_tag
 			git push --tags
-			export DTK_COMMON_CORE=$next_tag
 		elif [[ $repo_name == "dtk-server" ]]; then
 			set_release_yaml_file $dtk_major_tag
 			cd $repo_name

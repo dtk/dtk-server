@@ -14,7 +14,7 @@ shared_context 'Install module' do |module_name, module_location|
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
     puts "Install of module #{module_name} was completed successfully!" if pass == true
-    puts "Instlal of module #{module_name} did not complete successfully!" if pass == false
+    puts "Install of module #{module_name} did not complete successfully!" if pass == false
     puts ''
     expect(pass).to eq(true)
   end
@@ -46,6 +46,7 @@ shared_context 'Converge service instance' do |service_location, dtk_common, ser
   it "converges new instance" do
     puts 'Converge service instance', '-------------------------'
     pass = true
+    service_location = service_location + service_instance
     value = `cd #{service_location} && dtk service converge && cd -`
     puts value
     if value.include? 'ERROR'
@@ -66,11 +67,13 @@ shared_context 'Converge service instance' do |service_location, dtk_common, ser
   end
 end
 
-shared_context 'Destroy service instance' do |service_location|
+shared_context 'Destroy service instance' do |service_location, service_instance|
   it "deletes and destroys service instance" do
     puts 'Destroy instance', '--------------------'
     pass = true
+    service_location = service_location + service_instance
     value = `dtk service destroy --purge -d #{service_location} -y`
+    puts value
     pass = false if value.include? 'ERROR'
     puts ''
     expect(pass).to eq(true)
@@ -97,8 +100,8 @@ shared_context 'Setup initial module on filesystem' do |initial_module_location,
     pass = true
     filename = initial_module_location.split('/').last
     `mkdir #{module_location} && cp #{initial_module_location} #{module_location} && mv #{module_location}/#{filename} #{module_location}/dtk.module.yaml`
-    value = `ls #{module_location}/dtk.module.yaml`
-    pass = false if value.include? 'No such file or directory'
+    value = system("ls #{module_location}/dtk.module.yaml")
+    pass = false if value == false
     puts ''
     expect(pass).to eq(true)
   end
@@ -109,8 +112,8 @@ shared_context 'Delete initial module on filesystem' do |module_location|
     puts 'Delete initial module on filesystem', '----------------------------------'
     pass = false
     `rm -rf #{module_location}`
-    value = `ls #{module_location}`
-    pass = true if value.include? 'No such file or directory'
+    value = system("ls #{module_location}")
+    pass = true if value == false
     puts ''
     expect(pass).to eq(true)
   end

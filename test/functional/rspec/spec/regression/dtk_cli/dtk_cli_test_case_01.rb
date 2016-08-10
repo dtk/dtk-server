@@ -6,7 +6,7 @@ module_location = '/tmp/dtk_cli_test_case_01'
 module_name = 'test/dtk_cli_test_case_01'
 assembly_name = 'new_module_assembly'
 service_name = 'dtk_cli_test_case_01'
-service_location = `~/dtk/#{service_name}`
+service_location = "~/dtk/"
 
 dtk_common = Common.new('', '')
 
@@ -36,7 +36,7 @@ describe "(DTK CLI) Test Case 1: Smoke test of dtk cli" do
   end
 
   context "Destroy service instance" do
-    include_context "Destroy service instance", service_location
+    include_context "Destroy service instance", service_location, service_name
   end
 
   context "Uninstall module" do

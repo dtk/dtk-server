@@ -11,7 +11,6 @@ module AssemblyAndServiceOperationsMixin
 			sleep 5
 			count += 1	
       task_status_response = send_request("/rest/api/v1/services/#{service_instance_name}/task_status", {}, 'get')
-      ap task_status_response
       if task_status_response['status'] == 'ok'
         if task_status_response['data'].first['status'] == 'succeeded'
         	puts "Service was converged successfully!"

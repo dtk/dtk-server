@@ -51,7 +51,7 @@ module DTK
             target_name = service_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
             Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
           else
-            target_service = ret_target_service_with_default(:target_service)
+            target_service = ret_target_service_with_default(:target_service, { new_client: true })
             # TODO: for testing; might remove
             opts = opts.merge!(allow_existing_service: true) # TODO: for testing; might remove
             target_service.stage_service(assembly_template, CommonModule::ServiceInstance, opts)

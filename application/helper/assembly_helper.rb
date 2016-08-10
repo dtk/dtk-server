@@ -30,11 +30,11 @@ module Ramaze::Helper
       create_obj([:service_id, :service_instance], Assembly::Instance)
     end
 
-    def ret_target_service_with_default(parent_service_param = :parent_service)
+    def ret_target_service_with_default(parent_service_param = :parent_service, opts = {})
       if target_assembly_instance = ret_assembly_instance_object?(parent_service_param)
         Service::Target::create_from_assembly_instance?(target_assembly_instance)
       else
-        Service::Target.create_from_target(default_target)
+        Service::Target.create_from_target(default_target(opts))
       end
     end
 

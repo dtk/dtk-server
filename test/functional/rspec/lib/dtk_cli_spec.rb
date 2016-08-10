@@ -66,6 +66,17 @@ shared_context 'Converge service instance' do |service_location, dtk_common, ser
   end
 end
 
+shared_context 'Destroy service instance' do |service_location|
+  it "deletes and destroys service instance" do
+    puts 'Destroy instance', '--------------------'
+    pass = true
+    value = `dtk service destroy --purge -d #{service_location} -y`
+    pass = false if value.include? 'ERROR'
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context 'Uninstall module' do |module_name|
   it "uninstalls #{module_name} module from server" do
     puts 'Uninstall module:', '----------------------'
@@ -85,8 +96,8 @@ shared_context 'Setup initial module on filesystem' do |initial_module_location,
     puts 'Setup initial module on filesystem', '-------------------------------'
     pass = true
     filename = initial_module_location.split('/').last
-    `mkdir #{module_location} && cp #{initial_module_location} #{module_location}`
-    value = `ls #{module_location}/#{filename}`
+    `mkdir #{module_location} && cp #{initial_module_location} #{module_location} && mv #{module_location}/#{filename} #{module_location}/dtk.module.yaml`
+    value = `ls #{module_location}/dtk.module.yaml`
     pass = false if value.include? 'No such file or directory'
     puts ''
     expect(pass).to eq(true)
@@ -97,7 +108,7 @@ shared_context 'Delete initial module on filesystem' do |module_location|
   it "deletes initial module location #{module_location}" do
     puts 'Delete initial module on filesystem', '----------------------------------'
     pass = false
-    `rm #{module_location}`
+    `rm -rf #{module_location}`
     value = `ls #{module_location}`
     pass = true if value.include? 'No such file or directory'
     puts ''

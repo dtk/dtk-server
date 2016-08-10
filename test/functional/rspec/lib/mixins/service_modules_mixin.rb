@@ -244,6 +244,7 @@ module ServiceModulesMixin
   def check_module_for_assembly(module_name, assembly_name)
     puts "Check module for assembly:", "--------------------------" 
 
+    module_name = module_name.gsub('/',':')
     assemblies_list_response = send_request('/rest/api/v1/modules/list_assemblies', {}, 'get')
     assembly_found = false
 

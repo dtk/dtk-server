@@ -27,15 +27,15 @@ describe "(DTK CLI) Test Case 1: Smoke test of dtk cli" do
     include_context "List assemblies", module_name, assembly_name, dtk_common
   end
 
-  context "Stage assembly from module"
+  context "Stage assembly from module" do
     include_context "Stage assembly from module", module_name, assembly_name, service_name
   end
 
-  context "Converge service instance"
-    include_context "Converge service instance", service_location
+  context "Converge service instance" do
+    include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context "Destroy service instance " do
+  context "Destroy service instance" do
     include_context "Destroy service instance", service_location
   end
 

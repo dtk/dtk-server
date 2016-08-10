@@ -28,36 +28,48 @@ DTK::ReactorRoute.draw do
   # Metadata
   get 'api/v1/metadata/get/:metadata_file' => 'v1::metadata#get'
 
-  # Services
+  ########## Services
   # Routes for new dtk client
-  get  'api/v1/services/list'        => 'v1::service#list'
-  post 'api/v1/services/create'      => 'v1::service#create'
-  post 'api/v1/services/delete'      => 'v1::service#delete'
+  get  'api/v1/services/list'                          => 'v1::service#list'
+  get  'api/v1/services/:service_id/actions'           => 'v1::service#actions'
+  get  'api/v1/services/:service_id/attributes'        => 'v1::service#attributes'
+  get  'api/v1/services/:service_id/components'        => 'v1::service#components'
+  get  'api/v1/services/:service_id/component_links'   => 'v1::service#component_links'
+  get  'api/v1/services/:service_id/dependent_modules' => 'v1::service#dependent_modules'
+  get  'api/v1/services/:service_id/nodes'             => 'v1::service#nodes'
+  get  'api/v1/services/:service_id/violations'        => 'v1::service#violations'
+
+  post 'api/v1/services/create'                        => 'v1::service#create'
+  post 'api/v1/services/:service_id/cancel_last_task'  => 'v1::service#cancel_last_task'
+  post 'api/v1/services/:service_id/converge'          => 'v1::service#converge'
+  post 'api/v1/services/:service_id/set_attributes'    => 'v1::service#set_attributes'
+  post 'api/v1/services/:service_id/start'             => 'v1::service#start'
+  post 'api/v1/services/:service_id/stop'              => 'v1::service#stop'
+
+
+  # TODOs associated with following routes
+  # want to deprecate this route; used now by stk service ssh
+  get   'api/v1/services/:service_id' => 'v1::service#info'  
+
+  # TODO: make change so the route is api/v1/services/:service_id/attributes with query string that gives filter
+  get    'api/v1/services/:service_id/required_attributes'    => 'v1::service#required_attributes'
+
+  # TODO: repo_info and task_status should be changed to gets
   post 'api/v1/services/repo_info'   => 'v1::service#repo_info'
   post 'api/v1/services/task_status' => 'v1::service#task_status'
+
+  post 'api/v1/services/delete'      => 'v1::service#delete'
   # TODO: should we use below instead?
   # delete 'api/v1/services/:service_id' => 'v1::service#delete'
 
   # TODO: see if we remove these older routes
-  get    'api/v1/services/:service_id'                        => 'v1::service#info'
-  get    'api/v1/services/:service_id/nodes'                  => 'v1::service#nodes'
   get    'api/v1/services/:service_id/tasks'                  => 'v1::service#tasks'
   get    'api/v1/services/:service_id/access_tokens'          => 'v1::service#access_tokens'
-  get    'api/v1/services/:service_id/list_component_links'   => 'v1::service#list_component_links'
-  get    'api/v1/services/:service_id/list_dependent_modules' => 'v1::service#list_dependent_modules'
-  get    'api/v1/services/:service_id/list_violations'        => 'v1::service#list_violations'
-  get    'api/v1/services/:service_id/required_attributes'    => 'v1::service#required_attributes'
-  get    'api/v1/services/:service_id/actions'                => 'v1::service#actions'
-  get    'api/v1/services/:service_id/attributes'             => 'v1::service#attributes'
-  get    'api/v1/services/:service_id/components'             => 'v1::service#components'
-  post   'api/v1/services/:service_id/converge'               => 'v1::service#converge'
-  post   'api/v1/services/:service_id/start'                  => 'v1::service#start'
-  post   'api/v1/services/:service_id/stop'                   => 'v1::service#stop'
+
   post   'api/v1/services/:service_id/create_assembly'        => 'v1::service#create_assembly'
-  post   'api/v1/services/:service_id/cancel_last_task'       => 'v1::service#cancel_last_task'
-  post   'api/v1/services/:service_id/set_attributes'         => 'v1::service#set_attributes'
   post   'api/v1/services/:service_id/:task_action'           => 'v1::service#exec'
 
+  ########## end: Services
 
   # Modules
   # Routes for new dtk client

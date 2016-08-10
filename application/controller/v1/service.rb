@@ -87,11 +87,6 @@ module DTK
         rest_ok_response service.exec(params_hash)
       end
 
-      def info
-        service = service_object
-        rest_ok_response service.info
-      end
-
       def nodes
         service = service_object
         rest_ok_response service.info_about(:nodes), datatype: :node
@@ -254,7 +249,7 @@ module DTK
         # rest_ok_response Task::Status::Assembly.get_status(service_object.id_handle, format: :table), datatype: :task_status
       end
 
-      def list_violations
+      def violations
         violations = service_object.find_violations
         rest_ok_response violations.table_form, datatype: :violation
       end
@@ -304,11 +299,11 @@ module DTK
         rest_ok_response service.info_about(:attributes, opts), datatype: datatype
       end
 
-      def list_component_links
+      def component_links
         rest_ok_response service_object.list_service_links(hide_assembly_wide_node: true), datatype: :service_link
       end
 
-      def list_dependent_modules
+      def dependent_modules
         rest_ok_response service_object.info_about(:modules, Opts.new(detail_to_include: [:version_info])), datatype: :assembly_component_module
       end
 

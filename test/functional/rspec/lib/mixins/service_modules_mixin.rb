@@ -246,7 +246,6 @@ module ServiceModulesMixin
 
     assemblies_list_response = send_request('/rest/api/v1/modules/list_assemblies', {}, 'get')
     assembly_found = false
-    # pretty_print_JSON(assemblies_list_response)
 
     if assemblies_list_response['status'] == 'ok'
       service_module_list = assemblies_list_response['data']

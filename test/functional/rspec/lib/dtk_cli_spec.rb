@@ -6,11 +6,11 @@ require 'awesome_print'
 
 STDOUT.sync = true
 
-shared_context 'Install module' do |module_name, dtk_cli_path|
+shared_context 'Install module' do |module_name, module_location|
   it "installs #{module_name} module from local filesystem to server" do
     puts 'Install module:', '----------------------'
     pass = true
-    value = `#{dtk_cli_path}/bin/dtk module install`
+    value = `dtk module install -d #{module_location}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
     puts "Install of module #{module_name} was completed successfully!" if pass == true
@@ -28,29 +28,78 @@ shared_context 'List assemblies' do |module_name, assembly_name, dtk_common|
   end
 end
 
-shared_context 'Push module' do |module_name, dtk_cli_path|
-  it "push #{module_name} module changes from local filesystem to server" do
-    puts 'Push module:', '----------------------'
+shared_context 'Stage assembly from module' do |module_name, assembly_name, service_name|
+  it "stages assembly #{assembly_name} from module #{module_name}" do
+    puts 'Stage assembly from module', '-------------------------'
     pass = true
-    value = `#{dtk_cli_path}/bin/dtk module push`
+    value = `dtk service stage -m #{module_name} -n #{service_name} #{assembly_name}`
     puts value
     pass = false if value.include? 'ERROR'
-    puts "Push of module #{module_name} was completed successfully!" if pass == true
-    puts "Push of module #{module_name} did not complete successfully!" if pass == false
+    puts "Assembly #{assembly_name} is staged successfully!" if pass == true
+    puts "Assembly #{assembly_name} did not stage successfully!" if pass == false
     puts ''
     expect(pass).to eq(true)
   end
 end
 
-shared_context 'Delete module' do |module_name, dtk_cli_path|
-  it "deletes #{module_name} module from server" do
-    puts 'Delete module:', '----------------------'
+shared_context 'Converge service instance' do |service_location, dtk_common, service_instance|
+  it "converges new instance" do
+    puts 'Converge service instance', '-------------------------'
     pass = true
-    value = `#{dtk_cli_path}/bin/dtk module delete -y` # currently -y flag does not work
+    value = `cd #{service_location} && dtk service converge && cd -`
+    puts value
+    if value.include? 'ERROR'
+      pass = false
+      puts "Service instance was not converged successfully!"
+    else
+      converge_succeeded = dtk_common.check_task_status(service_instance)
+      if converge_succeeded
+        pass = true
+        puts "Service instance is converged successfully!"
+      else
+        pass = false
+        puts "Service instance was not converged successfully!"
+      end
+    end
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Uninstall module' do |module_name|
+  it "uninstalls #{module_name} module from server" do
+    puts 'Uninstall module:', '----------------------'
+    pass = true
+    value = `dtk module uninstall -m #{module_name} -y`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'does not exist'))
-    puts "Delete of module #{module_name} was completed successfully!" if pass == true
-    puts "Delete of module #{module_name} did not complete successfully!" if pass == false
+    puts "Uninstall of module #{module_name} was completed successfully!" if pass == true
+    puts "Uninstall of module #{module_name} did not complete successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Setup initial module on filesystem' do |initial_module_location, module_location|
+  it "copies initial module on location #{module_location}" do
+    puts 'Setup initial module on filesystem', '-------------------------------'
+    pass = true
+    filename = initial_module_location.split('/').last
+    `mkdir #{module_location} && cp #{initial_module_location} #{module_location}`
+    value = `ls #{module_location}/#{filename}`
+    pass = false if value.include? 'No such file or directory'
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Delete initial module on filesystem' do |module_location|
+  it "deletes initial module location #{module_location}" do
+    puts 'Delete initial module on filesystem', '----------------------------------'
+    pass = false
+    `rm #{module_location}`
+    value = `ls #{module_location}`
+    pass = true if value.include? 'No such file or directory'
     puts ''
     expect(pass).to eq(true)
   end

@@ -1,4 +1,38 @@
 module AssemblyAndServiceOperationsMixin
+	# Commands used from new dtk client
+  def check_task_status(service_instance_name)
+  	puts "Check task status", "----------------"
+  	service_converged = false
+  	end_loop = false
+		count = 0
+		max_num_of_retries = 50
+
+    while (count < max_num_of_retries)
+			sleep 5
+			count += 1	
+      task_status_response = send_request("/rest/api/v1/services/#{service_instance_name}/task_status", {}, 'get')
+      ap task_status_response
+      if task_status_response['status'] == 'ok'
+        if task_status_response['data'].first['status'] == 'succeeded'
+        	puts "Service was converged successfully!"
+          service_converged = true
+          break
+        elsif task_status_response['data'].first['status'] == 'failed'
+          puts 'Service was not converged successfully!'
+          service_converged = false
+          break
+        end
+      else
+        puts "Service was not converged successfully!"
+        service_converged = false
+        break
+      end
+    end
+    puts ''
+    service_converged
+  end
+
+  # Commands used from old dtk client
 	def stage_service(target = nil)
 		#Get list of assemblies, extract selected assembly, stage service and return its id
 		puts "Stage service:", "--------------"

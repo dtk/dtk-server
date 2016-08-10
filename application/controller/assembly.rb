@@ -773,7 +773,7 @@ module DTK
 
     def rest__set_default_target
       service_instance = ret_assembly_instance_object()
-      rest_ok_response service_instance.set_as_default_target()
+      rest_ok_response service_instance.set_as_default_target
     end
 
     def rest__get_default_target

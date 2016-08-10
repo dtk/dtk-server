@@ -171,6 +171,10 @@ module DTK
         rest_ok_response CommonModule.update_from_repo(:service_instance, get_default_project, local_params, repo_name, commit_sha, { force_pull: true })
       end
 
+      def set_default_target
+        rest_ok_response service_object.set_as_default_target
+      end
+
       private
 
       def execute_task(task)

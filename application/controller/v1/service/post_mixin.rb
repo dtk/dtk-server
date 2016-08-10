@@ -31,24 +31,24 @@ module DTK
         assembly_name     = required_request_params(:assembly_name)
         service_module    = ret_service_module
         version           = request_params(:version) || compute_latest_version(service_module)
-        service_name      = request_params(:service_name)
+        service_name      = request_params(:service_name) || generate_new_service_name(assembly_name, service_module)
         is_target_service = boolean_request_params(:is_target)
 
         unless assembly_template = service_module.assembly_template?(assembly_name, version)
           fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'"
         end
-        
+
         opts = {
           project: get_default_project,
           service_module: service_module,
-          service_name: request_params(:service_name) || generate_new_service_name(assembly_name, service_module),
+          service_name: service_name,
           no_auto_complete: boolean_request_params(:no_auto_complete),
         }
         opts = Opts.new(opts)
 
         response = 
           if is_target_service
-            target_name = assembly_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
+            target_name = service_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
             Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
           else
             target_service = ret_target_service_with_default(:target_service)

@@ -62,8 +62,7 @@ module DTK
         Model.Transaction do
           target = create_target_mock(opts[:target_name], opts[:project])
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
-          # TODO: see if we can remove this fix up of target name and ref
-          fixup_target_name_and_ref!(new_assembly_instance)
+          fixup_target_name_and_ref!(new_assembly_instance, target)
           module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance)
           new_service_info(new_assembly_instance, module_repo_info)
         end
@@ -156,7 +155,7 @@ Aux.stop_for_testing?(:create_service_instance) # TODO: for debugging
         }.merge(module_repo_info)
       end
 
-      def self.fixup_target_name_and_ref!(assembly_instance)
+      def self.fixup_target_name_and_ref!(assembly_instance, target)
         display_name = assembly_instance.get_field?(:display_name)
         ref          = display_name.downcase.gsub(/ /, '-')
         target.update(display_name: display_name, ref: ref)

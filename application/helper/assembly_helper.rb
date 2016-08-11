@@ -38,10 +38,11 @@ module Ramaze::Helper
       end
     end
 
-    def raise_error_if_target_not_convereged(target_service)
+    def raise_error_if_target_not_convereged(target_service, opts = {})
       target = target_service.target
-      unless Service::Target.create_from_target(target).is_converged? 
-        fail ErrorUsage.new "You are trying to stage service instance in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and then retry this command"
+      unless Service::Target.create_from_target(target).is_converged?
+        instance = opts[:is_workspace] ? 'create workspace' : 'stage service instance'
+        fail ErrorUsage.new "You are trying to #{instance} in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and then retry this command"
       end
     end
 

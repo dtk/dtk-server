@@ -46,12 +46,12 @@ module DTK
         }
         opts = Opts.new(opts)
 
-        response = 
+        response =
           if is_target_service
             target_name = service_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
             Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
           else
-            target_service = ret_target_service_with_default(:target_service, { new_client: true })
+            target_service = ret_target_service_with_default(:target_service, new_client: true)
             # TODO: for testing; might remove
             opts = opts.merge!(allow_existing_service: true) # TODO: for testing; might remove
             target_service.stage_service(assembly_template, CommonModule::ServiceInstance, opts)
@@ -173,6 +173,35 @@ module DTK
 
       def set_default_target
         rest_ok_response service_object.set_as_default_target
+      end
+
+      def create_workspace
+        workspace_name  = ret_request_params(:workspace_name)
+        default_project = get_default_project
+
+        unless workspace_name
+          instance_list  = Assembly::Instance.list_with_workspace(model_handle)
+          workspace_name = Workspace.calculate_workspace_name(instance_list)
+        end
+
+        target_service = ret_target_service_with_default(:target_service, new_client: true)
+        raise_error_if_target_not_convereged(target_service, is_workspace: true)
+        target = target_service.target
+        target_service_instance = target_service.assembly_instance
+
+        opts = Opts.new(project: default_project)
+        opts.merge!(parent_service_instance: target_service_instance) if target_service_instance
+
+        workspace = Workspace.create?(target.id_handle, default_project.id_handle, workspace_name, opts)
+
+        response = {
+          workspace: {
+            name: workspace[:display_name],
+            id: workspace[:guid]
+          }
+        }
+
+        rest_ok_response response
       end
 
       private

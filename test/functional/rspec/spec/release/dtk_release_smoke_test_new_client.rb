@@ -1,5 +1,6 @@
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
+require './lib/component_modules_spec'
 
 initial_module_location = "./spec/smoke/resources/new_client_dtk.module.yaml"
 module_location = '/tmp/dtk_new_client_smoke'
@@ -8,11 +9,21 @@ assembly_name = 'new_module_assembly'
 service_name = 'dtk_new_client_smoke'
 service_location = "~/dtk/"
 
+puppet_forge_module_name = 'puppetlabs-stdlib'
+component_module_name = 'puppetlabs:stdlib'
+component_module_filesystem_location = '~/dtk/component_modules/puppetlabs'
+namespace = 'puppetlabs'
+
 dtk_common = Common.new('', '')
 
-describe "DTK Server smoke test with new client" do
+describe "DTK Server release smoke test with new client" do
   before(:all) do
-    puts '*************************************', ''
+    puts '*********************************************', ''
+  end
+
+  # import module from puppet forge needed for module in new client as dependency
+  context 'Import module from puppet forge' do
+    include_context 'Import module from puppet forge', puppet_forge_module_name, namespace
   end
 
   context "Setup initial module on filesystem" do
@@ -45,6 +56,15 @@ describe "DTK Server smoke test with new client" do
 
   context "Delete initial module on filesystem" do
     include_context "Delete initial module on filesystem", module_location
+  end
+
+  # Cleanup of module imported from puppet forge
+  context 'Delete component module' do
+    include_context 'Delete component module', dtk_common, component_module_name
+  end
+
+  context 'Delete component module from local filesystem' do
+    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name.split(':').last
   end
 
   after(:all) do

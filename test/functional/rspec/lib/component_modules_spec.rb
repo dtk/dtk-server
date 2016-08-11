@@ -270,7 +270,7 @@ end
 shared_context 'Delete component module' do |dtk_common, component_module_name|
   it "deletes #{component_module_name} component module from server" do
     component_module_deleted = dtk_common.delete_component_module(component_module_name)
-    component_module_deleted.should eq(true)
+    expect(component_module_deleted).to eq(true)
   end
 end
 
@@ -284,7 +284,7 @@ shared_context 'Delete component module from local filesystem' do |component_mod
     puts "Component module #{component_module_name} deleted from local filesystem successfully!" if pass == true
     puts "Component module #{component_module_name} was not deleted from local filesystem successfully!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -673,7 +673,7 @@ shared_context 'Import module from puppet forge' do |puppet_forge_module_name, n
     puts "Import of puppet forge module #{puppet_forge_module_name} completed successfully!" if pass == true
     puts "Import of puppet forge module #{puppet_forge_module_name} did not complete successfully!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 

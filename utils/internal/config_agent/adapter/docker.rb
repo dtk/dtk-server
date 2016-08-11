@@ -55,6 +55,7 @@ module DTK; class ConfigAgent; module Adapter
         docker_run_params: docker_exec.docker_run_params,
         entrypoint: docker_exec.entrypoint,
         version_context: get_version_context(config_node, opts[:assembly]),
+        dynamic_attributes: dynamic_attributes(component_action),
       }
 
       if assembly = opts[:assembly]
@@ -69,6 +70,32 @@ module DTK; class ConfigAgent; module Adapter
     end
 
     private
+
+    def dynamic_attributes(component_action)
+      (component_action[:attributes] || []).map do |attribute|
+        if attribute[:dynamic]
+          {
+            component_ref: component_ref(component_action[:component]),
+            name: attribute[:display_name],
+            id: attribute[:id]
+          }
+        end
+      end.compact
+    end
+
+    def component_ref(component)
+      name = component[:component_type].gsub(/__/,'::')
+      if component[:only_one_per_node]
+        name
+      else
+        # TODO: below is not robust; use common function to find this
+        unless name_attr = component[:attributes].find { |attr| attr[:display_name] == 'name' }
+          fail ErrorUsage, "Cannot find the title associated with component '#{name}'"
+        end
+        title = name_attr[:attribute_value]
+        "#{name}[#{title}]"
+      end
+    end
 
     def get_version_context(config_node, assembly_instance)
       ret =  []

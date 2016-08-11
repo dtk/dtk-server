@@ -37,4 +37,4 @@ if [[ -e /var/run/docker.sock ]]; then
 fi
 
 # start the dtk-arbiter container
-docker run --name dtk-arbiter $PBUILDER_ARG -v $HOST_VOLUME:/host_volume $additional_args -td getdtk/dtk-arbiter
+docker run --name dtk-arbiter $PBUILDER_ARG -v $HOST_VOLUME:/host_volume $additional_args --restart=on-failure -td getdtk/dtk-arbiter

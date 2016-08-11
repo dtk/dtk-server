@@ -1,88 +1,108 @@
 GIT
-  remote: git://github.com/ATLANTBH/rspec.git
-  revision: 9b7997ce959ee3bd6c2c1ec766f0a6b42040ccc2
+  remote: https://github.com/dtk/dtk-client.git
+  revision: 6a2079cc226387e8f2ea71bc9357b3fa645d2656
   specs:
-    rspec2db (0.1.4)
+    dtk-client (0.0.1)
+      colorize (= 0.7.7)
+      dtk-common-core (= 0.9.0)
+      git (= 1.2.9)
+      gli (= 2.13.4)
+      highline (= 1.7.8)
+      hirb (= 0.7.3)
+
+GIT
+  remote: https://github.com/dtk/dtk-dsl.git
+  revision: 8c236333ee6b36e03c0f5ad144e5db361d82e4ae
+  specs:
+    dtk-dsl (0.0.1)
+
+GIT
+  remote: https://github.com/dtk/dtk-shell.git
+  revision: ab57824e42c056b1440264d780bbc19332df65b9
+  specs:
+    dtk-shell (0.9.1)
+      awesome_print (= 1.1.0)
+      bundler (>= 1.2.4)
+      colorize (= 0.7.7)
+      diff-lcs (= 1.2.0)
+      dtk-common-core (= 0.9.0)
+      erubis (~> 2.7.0)
+      git (= 1.2.9)
+      highline (= 1.7.8)
+      hirb (~> 0.7.0)
+      json_pure (= 1.7.4)
+      mime-types (~> 1.25)
+      thor (~> 0.15.4)
+
+GIT
+  remote: git://github.com/ATLANTBH/rspec.git
+  revision: 74a8d1e2404362ea3be7b5af8ea2e0873f0236c4
+  specs:
+    rspec2db (1.1.1)
       activerecord (~> 3.2.12)
       activerecord-postgresql-adapter
       pg
-      rspec (= 2.99.0)
+      rspec (>= 3.0.0)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (3.2.21)
-      activesupport (= 3.2.21)
+    activemodel (3.2.22.2)
+      activesupport (= 3.2.22.2)
       builder (~> 3.0.0)
-    activerecord (3.2.21)
-      activemodel (= 3.2.21)
-      activesupport (= 3.2.21)
+    activerecord (3.2.22.2)
+      activemodel (= 3.2.22.2)
+      activesupport (= 3.2.22.2)
       arel (~> 3.0.2)
       tzinfo (~> 0.3.29)
     activerecord-postgresql-adapter (0.0.1)
       pg
-    activesupport (3.2.21)
+    activesupport (3.2.22.2)
       i18n (~> 0.6, >= 0.6.4)
       multi_json (~> 1.0)
     arel (3.0.3)
     awesome_print (1.1.0)
     builder (3.0.4)
-    colorize (0.5.8)
-    diff-lcs (1.1.3)
-    domain_name (0.5.24)
-      unf (>= 0.0.5, < 1.0.0)
-    dtk-client (0.7.4.1)
-      awesome_print (= 1.1.0)
-      bundler (>= 1.2.4)
-      colorize (~> 0.5.8)
-      diff-lcs (= 1.1.3)
-      dtk-common-core (= 0.7.2)
-      erubis (~> 2.7.0)
-      git (= 1.2.8)
-      highline (= 1.6.16)
-      hirb (~> 0.7.0)
-      json_pure (= 1.7.4)
-      mime-types (~> 1.25)
-      thor (~> 0.15.4)
-    dtk-common-core (0.7.2)
+    colorize (0.7.7)
+    diff-lcs (1.2.0)
+    dtk-common-core (0.9.0)
       rest-client (= 1.6.7)
     erubis (2.7.0)
-    git (1.2.8)
-    highline (1.6.16)
+    git (1.2.9)
+    gli (2.13.4)
+    highline (1.7.8)
     hirb (0.7.3)
-    http-cookie (1.0.2)
-      domain_name (~> 0.5)
     i18n (0.7.0)
     json_pure (1.7.4)
     mime-types (1.25.1)
-    multi_json (1.11.0)
-    netrc (0.10.3)
-    pg (0.18.2)
+    multi_json (1.12.1)
+    pg (0.18.4)
     rest-client (1.6.7)
       mime-types (>= 1.16)
-    rspec (2.99.0)
-      rspec-core (~> 2.99.0)
-      rspec-expectations (~> 2.99.0)
-      rspec-mocks (~> 2.99.0)
-    rspec-core (2.99.2)
-    rspec-expectations (2.99.2)
-      diff-lcs (>= 1.1.3, < 2.0)
-    rspec-mocks (2.99.3)
+    rspec (3.5.0)
+      rspec-core (~> 3.5.0)
+      rspec-expectations (~> 3.5.0)
+      rspec-mocks (~> 3.5.0)
+    rspec-core (3.5.2)
+      rspec-support (~> 3.5.0)
+    rspec-expectations (3.5.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.5.0)
+    rspec-mocks (3.5.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.5.0)
+    rspec-support (3.5.0)
     thor (0.15.4)
-    tzinfo (0.3.44)
-    unf (0.1.4)
-      unf_ext
-    unf_ext (0.0.7.1)
+    tzinfo (0.3.51)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   awesome_print (= 1.1.0)
-  dtk-client
+  dtk-client!
+  dtk-dsl!
+  dtk-shell!
   rest-client
-  rspec (= 2.99.0)
+  rspec
   rspec2db!
-
-BUNDLED WITH
-   1.10.3

@@ -199,7 +199,10 @@ if [[ -f ${HOST_VOLUME}/dtk.config ]] && [[ ! -f ${HOST_VOLUME}/init_done ]]; th
   su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/server/current/application; bundle exec ./utility/add_user.rb ${USERNAME} -p ${PASSWORD}"
   #touch ${HOST_VOLUME}/init_done
 fi
-
+# extract the tenant private rsa key
+mkdir -p ${HOST_VOLUME}/ssh/tenant
+chown ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/ssh/tenant
+su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/server/current/application; bundle exec ./utility/extract_key_to_file.rb ${HOST_VOLUME}/ssh/tenant/id_rsa"
 
 # potential fix for auth keys
 if [[ ! -f "/home/dtk1/local/triggers/link-akf" ]]; then

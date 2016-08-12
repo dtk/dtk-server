@@ -170,6 +170,13 @@ eos
   end
   private :ret_idhs
 
+  def extract_repo_user_key_to_file
+    repo_user_mh = pre_execute(:repo_user)
+    repo_user = RepoUser.get_matching_repo_user(repo_user_mh, { type: :node }, [:display_name, :ssh_rsa_private_key, :ssh_rsa_pub_key])
+    file_path = R8::Config[:key][:extract][:path]||"/tmp/#{repo_user[:display_name]}"
+    File.open(file_path, 'w') { |f| f.write(repo_user[:ssh_rsa_private_key]) }
+  end
+
   def add_modules_workspaces(project, library_impls)
     library_impls.map { |library_impl| library_impl.clone_into_project_if_needed(project) }
   end

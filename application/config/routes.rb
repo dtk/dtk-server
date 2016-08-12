@@ -40,7 +40,7 @@ DTK::ReactorRoute.draw do
   get  'api/v1/services/:service_id/repo_info'         => 'v1::service#repo_info'
   get  'api/v1/services/:service_id/task_status'       => 'v1::service#task_status'
   get  'api/v1/services/:service_id/violations'        => 'v1::service#violations'
-
+  get  'api/v1/services/:service_id/info'              => 'v1::service#info'
 
   post 'api/v1/services/create'                        => 'v1::service#create'
   post 'api/v1/services/set_default_target'            => 'v1::service#set_default_target'
@@ -54,8 +54,6 @@ DTK::ReactorRoute.draw do
   post 'api/v1/services/:service_id/:task_action'      => 'v1::service#exec'
 
   # TODOs associated with following routes
-  # want to deprecate this route; used now by command 'dtk service ssh' to get info needed for ssh
-  get   'api/v1/services/:service_id' => 'v1::service#info'  
 
   # TODO: make change so the route is api/v1/services/:service_id/attributes with query string that gives filter
   get    'api/v1/services/:service_id/required_attributes'    => 'v1::service#required_attributes'

@@ -138,6 +138,10 @@ module DTK
         rest_ok_response violations.table_form, datatype: :violation
       end
 
+      def info
+        rest_ok_response service_object.info
+      end
+
     end
   end
 end

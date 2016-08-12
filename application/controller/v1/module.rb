@@ -19,6 +19,7 @@ module DTK
   module V1
     class ModuleController < V1::Base
       helper_v1 :module_helper
+      helper_v1 :module_ref_helper
       helper :module_helper
 
       def list
@@ -32,7 +33,18 @@ module DTK
       end
 
       def list_assemblies
-        rest_ok_response CommonModule.list_assembly_templates(get_default_project), datatype: :assembly_template_with_module
+        module_id, module_name, namespace = request_params(:module_id, :module_name, :namespace)
+        datatype = :assembly_template_with_module
+
+        response =
+          if module_id or (module_name and namespace)
+            datatype = :assembly_template_description
+            ret_service_module.list_assembly_templates
+          else
+            CommonModule.list_assembly_templates(get_default_project)
+          end
+
+        rest_ok_response response, datatype: datatype
       end
 
       def exists

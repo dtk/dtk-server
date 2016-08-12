@@ -126,6 +126,11 @@ module DTK
       TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_component_names }
     end
 
+    # returns type of all components that capture the node property
+    def self.node_property_component_types
+      node_property_component_names.map { |n| n.gsub(/::/,'__') }
+    end
+
     def self.node_property_legal_attributes
       TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_legal_attributes }
     end

@@ -38,6 +38,9 @@ module DTK; module CommonModule::DSL::Generate
           set(:Name, name)
           set?(:Attributes, Attribute.generate_content_input?(:component, attributes, component: @aug_component)) unless attributes.empty?
           # TODO: add component links
+          if tags = tags?
+            add_tags!(tags)
+          end
           self
         end
 
@@ -46,6 +49,18 @@ module DTK; module CommonModule::DSL::Generate
         def name
           @aug_component.display_name_print_form(without_version: true)
         end
+
+        def tags?
+          ret = []
+          # mark hidden any node_property component
+          ret << :hidden if node_property_component_types.include?(@aug_component[:component_type])
+          ret.empty? ? nil : ret
+        end
+
+        def node_property_component_types
+          @@node_property_component_types ||= CommandAndControl.node_property_component_types
+        end
+
       end
     end
   end

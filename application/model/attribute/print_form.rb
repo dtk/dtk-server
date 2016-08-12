@@ -135,7 +135,7 @@ module DTK
       end
 
       def self.node_property_component_types
-        @node_property_component_types ||= CommandAndControl.node_property_component_names.map { |n| n.gsub(/::/,'__') }
+        @node_property_component_types ||= CommandAndControl.node_property_component_types
       end
       
       def self.linked_to_display_form(linked_to_obj)

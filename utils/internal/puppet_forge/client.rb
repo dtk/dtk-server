@@ -17,10 +17,11 @@
 #
 # TODO: ; a possible enhancement is to calling puppet in process since we have puppet loaded already
 require 'active_support/hash_with_indifferent_access'
-require 'puppet'
 require 'open3'
 
 module DTK
+  # TODO: make it so this file is dynamically loaded only if need puppet
+  PuppetLoader.load
   module PuppetForge
     #
     # Wrapper around puppet CLI (distributed via puppet gem)

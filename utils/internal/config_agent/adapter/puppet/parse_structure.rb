@@ -17,6 +17,8 @@
 #
 module DTK; class ConfigAgent; module Adapter; class Puppet
   class ParseStructure < SimpleHashObject
+    # TODO: make it so this file is dynamically loaded only if needed
+    PuppetLoader.load
     r8_nested_require('parse_structure', 'parse_error')
     def initialize(ast_item = nil, _opts = {})
       return super() if ast_item.nil?

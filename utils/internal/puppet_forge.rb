@@ -17,8 +17,8 @@
 #
 module DTK
   module PuppetForge
-    r8_nested_require('puppet_forge', 'client')
-    r8_nested_require('puppet_forge', 'local_copy')
+    require_relative('puppet_forge/client')
+    require_relative('puppet_forge/local_copy')
 
     # user and name sepparator used by puppetforge
     MODULE_NAME_SEPARATOR = '-'

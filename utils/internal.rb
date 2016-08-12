@@ -17,6 +17,7 @@
 #
 files =
   %w(dynamic_loader aux sql aes dataset_from_search_pattern hash_object opts array_object rest_uri serialize_to_json import_export semantic_type workflow command_and_control config_agent cloud_connect view_def_processor repo_manager parse_log current_session create_thread eventmachine_helper extract action_results_queue simple_action_queue async_response output_table rubygems_checker hierarchical_tags puppet_forge mustache_template data_encryption)
+r8_nested_require('internal', 'puppet_loader') #puppet_loader needs to be before config_agent and puppet_forge
 r8_nested_require('internal', files)
 
 r8_nested_require('internal/workflow/adapters', 'agent_grit_adapter')

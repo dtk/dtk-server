@@ -16,6 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# usage:
+# bundle exec ./utility/extract_key_to_file.rb [key_path]
+
+path = ARGV[0]
 require File.expand_path('common', File.dirname(__FILE__))
 server = R8Server.new('superuser', groupname: 'all')
-repo_user_mh = server.extract_repo_user_key_to_file
+repo_user_mh = server.extract_repo_user_key_to_file(path)
+

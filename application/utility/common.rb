@@ -170,10 +170,10 @@ eos
   end
   private :ret_idhs
 
-  def extract_repo_user_key_to_file
+  def extract_repo_user_key_to_file(path = nil)
     repo_user_mh = pre_execute(:repo_user)
     repo_user = RepoUser.get_matching_repo_user(repo_user_mh, { type: :node }, [:display_name, :ssh_rsa_private_key, :ssh_rsa_pub_key])
-    file_path = R8::Config[:key][:extract][:path]||"/tmp/#{repo_user[:display_name]}"
+    file_path = path || R8::Config[:key][:extract][:path]||"/tmp/#{repo_user[:display_name]}"
     File.open(file_path, 'w') { |f| f.write(repo_user[:ssh_rsa_private_key]) }
   end
 
@@ -200,3 +200,4 @@ eos
     ModelHandle.new(c, model_name)
   end
 end
+

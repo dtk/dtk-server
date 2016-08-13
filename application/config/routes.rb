@@ -69,17 +69,18 @@ DTK::ReactorRoute.draw do
 
   ########## end: Services
 
-  # Modules
-  # Routes for new dtk client
+  ########## Modules
+  get 'api/v1/modules'                           => 'v1::module/exists'
   get 'api/v1/modules/list'                      => 'v1::module/list'
   get 'api/v1/modules/list_assemblies'           => 'v1::module/list_assemblies'
-  get 'api/v1/modules'                           => 'v1::module/exists'
+  get 'api/v1/modules/module_dependencies'       => 'v1::module/module_dependencies'
+
+  post 'api/v1/modules/create_empty_module'      => 'v1::module/create_empty_module'
+  post 'api/v1/modules/delete'                   => 'v1::module/delete'
   post 'api/v1/modules/install_component_module' => 'v1::module/install_component_module'
   post 'api/v1/modules/install_service_module'   => 'v1::module/install_service_module'
-  post 'api/v1/modules/get_module_dependencies'  => 'v1::module/get_module_dependencies'
-  post 'api/v1/modules/create_empty_module'      => 'v1::module/create_empty_module'
   post 'api/v1/modules/update_from_repo'         => 'v1::module/update_from_repo'
-  post 'api/v1/modules/delete'                   => 'v1::module/delete'
+  ########## end: Modules
 
   # TODO: DTK-2554; temp while initial testing
   # routes that need to be put on v1

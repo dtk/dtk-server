@@ -19,8 +19,9 @@ module DTK
   class CommonModule
     class Update < self
       require_relative('update/base_service')
-#      require_relative('update/base_component')
-#      require_relative('update/service_instance')
+      # require_relative('update/service_instance')
+      # require_relative('update/base_component')
+
 
       def self.update_class(common_module_type)
         case common_module_type
@@ -44,7 +45,6 @@ opts[:force_parse] = opts[:force_pull] = true
         return ret unless parse_needed || pull_was_needed
 
         parsed_common_module = dsl_file_obj_from_repo(common_module__module_branch).parse_content(:common_module)
-        pp [:debug, :parsed_common_module, parsed_common_module]
         DSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
         create_or_update_from_parsed_common_module(project, local_params, common_module__module_branch, parsed_common_module)
         ret

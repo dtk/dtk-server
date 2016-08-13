@@ -165,10 +165,9 @@ module DTK
       end
 
       def update_from_repo
-        namespace, module_name, repo_name, commit_sha = required_request_params(:namespace, :module_name, :repo_name, :commit_sha)
-        version = request_params(:version)
-        local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
-        rest_ok_response CommonModule.update_from_repo(:service_instance, get_default_project, local_params, repo_name, commit_sha, { force_pull: true })
+        service = service_object
+        commit_sha = required_request_params(:commit_sha)
+        rest_ok_response CommonModule::ServiceInstance.update_from_repo(get_default_project, service, commit_sha)
       end
 
       def set_default_target

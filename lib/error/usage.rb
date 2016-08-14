@@ -148,7 +148,7 @@ module DTK
     end
 
     def msg(name, object_type, augment_string)
-      msg = "No object of type #{object_type} with name (#{name}) exists"
+      msg = "No object of type #{object_type} with name '#{name}' exists"
       if augment_string
         msg << " #{augment_string}"
       end

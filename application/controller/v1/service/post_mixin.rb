@@ -61,7 +61,7 @@ module DTK
 
       ### Service instance specific
       def cancel_last_task
-        if running_task = most_recent_task_is_executing?(service_object)
+        if running_task = most_recent_task_is_executing?(assembly_instance)
           top_task_id = running_task.id()
         else
           fail ErrorUsage.new('No running tasks found')
@@ -72,9 +72,8 @@ module DTK
       end
 
       def converge
-        service = service_object
-
-        if running_task = most_recent_task_is_executing?(service)
+        assembly_instance = assembly_instance()
+        if running_task = most_recent_task_is_executing?(assembly_instance)
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
         end
 
@@ -83,7 +82,7 @@ module DTK
           ret_nodes_to_start: []
         }
 
-        unless task = Task.create_from_assembly_instance?(service, opts)
+        unless task = Task.create_from_assembly_instance?(assembly_instance, opts)
           return rest_ok_response({ message: "There are no steps in the action to execute" })
         end
 
@@ -100,27 +99,25 @@ module DTK
       end
 
       def delete
-        service = service_object
-        Assembly::Instance.delete(service.id_handle, destroy_nodes: true)
+        Assembly::Instance.delete(assembly_instance.id_handle, destroy_nodes: true)
         rest_ok_response
       end
 
       def exec
-        service     = service_object
         params_hash = params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
-        rest_ok_response service.exec(params_hash)
+        rest_ok_response assembly_instance.exec(params_hash)
       end
 
       def set_attributes
-        service_object.set_attributes(ret_params_av_pairs, update_meta: true)
+        assembly_instance.set_attributes(ret_params_av_pairs, update_meta: true)
         rest_ok_response
       end
 
       def start
-        service = service_object
+        assembly_instance = assembly_instance()
 
         # filters only stopped nodes for this assembly
-        nodes, is_valid, error_msg = service.nodes_valid_for_stop_or_start(nil, :stopped)
+        nodes, is_valid, error_msg = assembly_instance.nodes_valid_for_stop_or_start(nil, :stopped)
 
         unless is_valid
           Log.info(error_msg)
@@ -134,7 +131,7 @@ module DTK
           opts.merge!(nodes: nodes)
         end
 
-        task = Task.task_when_nodes_ready_from_assembly(service, :assembly, opts)
+        task = Task.task_when_nodes_ready_from_assembly(assembly_instance, :assembly, opts)
         task.save!
 
         Node.start_instances(nodes)
@@ -145,14 +142,14 @@ module DTK
       end
 
       def stop
-        service = service_object
+        assembly_instance = assembly_instance()
 
         # cancel task if running on the assembly
-        if running_task = most_recent_task_is_executing?(service)
+        if running_task = most_recent_task_is_executing?(assembly_instance)
           cancel_task(running_task.id)
         end
 
-        nodes, is_valid, error_msg = service.nodes_valid_for_stop_or_start(nil, :running)
+        nodes, is_valid, error_msg = assembly_instance.nodes_valid_for_stop_or_start(nil, :running)
 
         unless is_valid
           Log.info(error_msg)
@@ -165,42 +162,12 @@ module DTK
       end
 
       def update_from_repo
-        service = service_object
         commit_sha = required_request_params(:commit_sha)
-        rest_ok_response CommonModule::ServiceInstance.update_from_repo(get_default_project, service, commit_sha)
+        rest_ok_response CommonModule.update_from_repo(:service_instance, get_default_project, commit_sha, service_instance: service_instance)
       end
 
       def set_default_target
-        rest_ok_response service_object.set_as_default_target
-      end
-
-      def create_workspace
-        workspace_name  = ret_request_params(:workspace_name)
-        default_project = get_default_project
-
-        unless workspace_name
-          instance_list  = Assembly::Instance.list_with_workspace(model_handle)
-          workspace_name = Workspace.calculate_workspace_name(instance_list)
-        end
-
-        target_service = ret_target_service_with_default(:target_service, new_client: true)
-        raise_error_if_target_not_convereged(target_service, is_workspace: true)
-        target = target_service.target
-        target_service_instance = target_service.assembly_instance
-
-        opts = Opts.new(project: default_project)
-        opts.merge!(parent_service_instance: target_service_instance) if target_service_instance
-
-        workspace = Workspace.create?(target.id_handle, default_project.id_handle, workspace_name, opts)
-
-        response = {
-          workspace: {
-            name: workspace[:display_name],
-            id: workspace[:guid]
-          }
-        }
-
-        rest_ok_response response
+        rest_ok_response assembly_instance.set_as_default_target
       end
 
       private

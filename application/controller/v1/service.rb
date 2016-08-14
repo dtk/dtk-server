@@ -60,6 +60,35 @@ module DTK
         rest_ok_response service_module.ret_clone_update_info
       end
 
+      def create_workspace
+        workspace_name  = ret_request_params(:workspace_name)
+        default_project = get_default_project
+
+        unless workspace_name
+          instance_list  = Assembly::Instance.list_with_workspace(model_handle)
+          workspace_name = Workspace.calculate_workspace_name(instance_list)
+        end
+
+        target_service = ret_target_service_with_default(:target_service, new_client: true)
+        raise_error_if_target_not_convereged(target_service, is_workspace: true)
+        target = target_service.target
+        target_service_instance = target_service.assembly_instance
+
+        opts = Opts.new(project: default_project)
+        opts.merge!(parent_service_instance: target_service_instance) if target_service_instance
+
+        workspace = Workspace.create?(target.id_handle, default_project.id_handle, workspace_name, opts)
+
+        response = {
+          workspace: {
+            name: workspace[:display_name],
+            id: workspace[:guid]
+          }
+        }
+
+        rest_ok_response response
+      end
+
       def tasks
         service = service_object
         rest_ok_response service.info_about(:tasks)

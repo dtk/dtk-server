@@ -21,18 +21,18 @@ module DTK
 
       def list
         params_hash = params_hash(:detail_level, :include_namespaces).merge(remove_assembly_wide_node: true)
-        rest_ok_response Assembly::Instance.list(model_handle(), params_hash), datatype: :assembly
+        rest_ok_response Assembly::Instance.list(model_handle, params_hash), datatype: :assembly
       end
 
       ### Service instance specific
 
       def actions
         type = request_params(:type)
-        rest_ok_response service_object.list_actions(type), datatype: :service_actions
+        rest_ok_response assembly_instance.list_actions(type), datatype: :service_actions
       end
 
       def attributes
-        service           = service_object
+        assembly_instance = assembly_instance()
         detail_to_include = []
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
@@ -43,12 +43,12 @@ module DTK
         end
 
         if node_id = request_params(:node_id)
-          node_id = "#{ret_node_id(:node_id, service)}" unless (node_id =~ /^[0-9]+$/)
+          node_id = "#{ret_node_id(:node_id, assembly_instance)}" unless (node_id =~ /^[0-9]+$/)
           opts.merge!(node_cmp_name: true)
         end
 
         if component_id = request_params(:component_id)
-          component_id = "#{ret_component_id(:component_id, service, filter_by_node: true)}" unless (component_id =~ /^[0-9]+$/)
+          component_id = "#{ret_component_id(:component_id, assembly_instance, filter_by_node: true)}" unless (component_id =~ /^[0-9]+$/)
         end
 
         additional_filter_proc = Proc.new do |e|
@@ -63,18 +63,15 @@ module DTK
         end
 
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
-        rest_ok_response service.info_about(:attributes, opts), datatype: datatype
+        rest_ok_response assembly_instance.info_about(:attributes, opts), datatype: datatype
       end
-
+      # TODO: will subsume required_attributes by attributes
       def required_attributes
-        rest_ok_response service_object.get_attributes_print_form(Opts.new(filter: :required_unset_attributes))
+        rest_ok_response assembly_instance.get_attributes_print_form(Opts.new(filter: :required_unset_attributes))
       end
-
 
       def components
-        service  = service_object
         datatype = :component
-
         opts = Opts.new(detail_level: nil)
         opts[:filter_proc] = Proc.new do |e|
           node = e[:node]
@@ -86,27 +83,27 @@ module DTK
           datatype = :component_with_dependencies
         end
 
-        rest_ok_response service.info_about(:components, opts), datatype: datatype
+        rest_ok_response assembly_instance.info_about(:components, opts), datatype: datatype
       end
 
       def component_links
-        rest_ok_response service_object.list_service_links(hide_assembly_wide_node: true), datatype: :service_link
+        rest_ok_response assembly_instance.list_service_links(hide_assembly_wide_node: true), datatype: :service_link
       end
 
       def dependent_modules
-        rest_ok_response service_object.info_about(:modules, Opts.new(detail_to_include: [:version_info])), datatype: :assembly_component_module
+        rest_ok_response assembly_instance.info_about(:modules, Opts.new(detail_to_include: [:version_info])), datatype: :assembly_component_module
       end
 
       def nodes
-        rest_ok_response service_object.info_about(:nodes), datatype: :node
+        rest_ok_response assembly_instance.info_about(:nodes), datatype: :node
       end
 
       def repo_info
-        rest_ok_response CommonModule::ServiceInstance.get_repo_info(service_object)
+        rest_ok_response service_instance.get_repo_info
       end
 
       def task_status
-        service = service_object
+        assembly_instance = assembly_instance()
 
         response =
           if request_params(:form) == 'stream_form'
@@ -123,23 +120,21 @@ module DTK
             if wait_for = request_params(:wait_for)
               opts.merge!(wait_for: wait_for.to_sym)
             end
-
-            Task::Status::Assembly::StreamForm.get_status(service.id_handle, opts)
+            Task::Status::Assembly::StreamForm.get_status(assembly_instance.id_handle, opts)
           else
-            Task::Status::Assembly.get_status(service.id_handle, format: :table)
+            Task::Status::Assembly.get_status(assembly_instance.id_handle, format: :table)
           end
 
         rest_ok_response response, datatype: :task_status
-        # rest_ok_response Task::Status::Assembly.get_status(service_object.id_handle, format: :table), datatype: :task_status
       end
 
       def violations
-        violations = service_object.find_violations
+        violations = assembly_instance.find_violations
         rest_ok_response violations.table_form, datatype: :violation
       end
 
       def info
-        rest_ok_response service_object.info
+        rest_ok_response assembly_instance.info
       end
 
     end

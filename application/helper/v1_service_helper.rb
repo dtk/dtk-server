@@ -21,6 +21,14 @@ module Ramaze::Helper
     NEW_SERVICE_NAME_DELIM = '-'
     NEW_SERVICE_INDEX_REGEXP = Regexp.new("^#{NEW_SERVICE_NAME_DELIM}([0-9]+$)")
 
+    def service_instance
+      ::DTK::CommonModule::ServiceInstance.new(assembly_instance)
+    end
+
+    def assembly_instance
+      create_obj([:service_id, :service_instance], ::DTK::Assembly::Instance)
+    end
+
     def generate_new_service_name(assembly_name, service_module)
       name_seed = "#{service_module.get_field?(:display_name)}#{NEW_SERVICE_NAME_DELIM}#{assembly_name}"
       name_seed_regex = Regexp.new("^#{name_seed}(.*$)")

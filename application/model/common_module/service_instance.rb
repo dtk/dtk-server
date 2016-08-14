@@ -43,10 +43,6 @@ module DTK
         ModuleRepoInfo.new(module_branch)
       end
 
-      def self.get_repo_info(assembly_instance)
-        new(assembly_instance).get_repo_info
-      end
-
       def get_repo_info
         module_branch = get_or_create_service_instance_branch
         module_repo_info = ModuleRepoInfo.new(module_branch)
@@ -59,11 +55,15 @@ module DTK
         }.merge(module_repo_info)
       end
 
+      # TODO: DTK-2445: to co-exist with assembly_module form should we choose a different branch name
+      # The method get_or_create_assembly_branch uses the name that assembly_module does      
+      def get_service_instance_branch
+        get_assembly_branch
+      end
+
       private
 
       def get_or_create_service_instance_branch
-        # TODO: DTK-2445: to co-exist with assembly_module form should we choose a different branch name
-        # The method get_or_create_assembly_branch uses the name that assembly_module does
         get_or_create_assembly_branch
       end
     end

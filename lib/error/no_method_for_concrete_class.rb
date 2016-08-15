@@ -16,14 +16,17 @@
 # limitations under the License.
 #
 module DTK
-  class Error ##TODO: cleanup; DTK::Error is coming from /home/dtk18/dtk-common/lib/errors/errors.rb
-    require_relative('error/rest_error')
-    require_relative('error/usage')
-    require_relative('error/not_implemented')
-    require_relative('error/no_method_for_concrete_class')
-
-    # TODO: may deprecate these two below
-    require_relative('error/not_found')
-    require_relative('error/amqp')
+  class Error
+    class NoMethodForConcreteClass < self
+      def initialize(klass)
+        method_string = caller[1]
+        method_ref =
+          if method_string =~ /`(.+)'$/
+            method = $1
+            " '#{method}'"
+          end
+        super("No method#{method_ref} for concrete class #{klass}")
+      end
+    end
   end
 end

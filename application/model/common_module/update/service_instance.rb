@@ -36,6 +36,7 @@ module DTK
           parsed_service_module = dsl_file_obj_from_repo(module_branch).parse_content(:service_instance)
           existing = DSL::Generate.generate_service_instance_canonical_form(service_instance, module_branch)
           pp [parsed_service_module.class, existing.class]
+          existing.diff?(parsed_service_module)
           ret
         end
 

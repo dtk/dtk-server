@@ -19,9 +19,18 @@ module DTK
   module CommonModule::DSL::Generate
     class ContentInput
       class Array < ContentInput::Array
+        include Diff::Mixin
+        extend Diff::ClassMixin
+
         def initialize
           super(ContentInput)
         end
+
+        # Needed by any object that can be grouped as an array (as opposed to a hash)
+        def diff_key
+          raise Error::NoMethodForConcreteClass.new(self.class)
+        end
+
       end
     end
   end

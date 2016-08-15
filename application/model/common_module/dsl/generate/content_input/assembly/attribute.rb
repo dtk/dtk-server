@@ -50,6 +50,24 @@ module DTK; module CommonModule::DSL::Generate
           end
         end
 
+        ### For diffs
+        def self.compute_diff_object?(attributes1, attributes2)
+          Diff.objects_in_array?(:attribute, attributes1, attributes2)
+        end
+
+        def diff_key
+          req(:Name)
+        end
+
+        def diff?(attribute)
+          # Only called if name are the same
+          val1 = val(:Value)
+          val2 = attribute.val(:Value)
+          if val1.class == val2.class and val1 == val2
+            Diff.base_new(val1, v1l2)
+          end
+        end
+
         private
 
         # Could be overwritten

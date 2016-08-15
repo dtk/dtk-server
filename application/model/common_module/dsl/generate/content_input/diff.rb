@@ -15,22 +15,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  module CommonModule::DSL::Generate
-    class ContentInput < ::DTK::DSL::FileGenerator::ContentInput
-      require_relative('content_input/diff')
-      # diff needs to be before hash and array
-      require_relative('content_input/hash')
-      require_relative('content_input/array')
-
-      # requires below need to be before hash and array
-      require_relative('content_input/service_instance')
-      require_relative('content_input/assembly')
-
-      def self.generate_for_service_instance(service_instance, module_branch)
-        ServiceInstance.new(service_instance, module_branch).generate_content_input!
+module DTK; module CommonModule::DSL::Generate
+  class ContentInput
+    class Diff < ::DTK::DSL::InputOutputCommon::Canonical::Diff  
+      module Mixin
+        # Main template-specific diff instance method call; Concrete classes overwrite this
+        def diff?(_object2)
+          raise Error::NoMethodForConcreteClass.new(self.class)
+        end
       end
-
+      
+      module ClassMixin
+        # Main template-specific diff class method call; Concrete classes overwrite this
+        def compute_diff_object?(_objects1, _objects2)
+          raise Error::NoMethodForConcreteClass.new(self)
+        end
+      end
     end
   end
-end
+end; end

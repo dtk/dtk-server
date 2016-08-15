@@ -19,6 +19,9 @@ module DTK
   module CommonModule::DSL::Generate
     class ContentInput
       class Hash < ContentInput::Hash
+        include Diff::Mixin
+        extend Diff::ClassMixin
+
         def initialize
           super(ContentInput)
         end

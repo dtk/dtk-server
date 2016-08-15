@@ -26,15 +26,16 @@ module DTK
           unless service_instance = opts[:service_instance]
             fail Error, "opts[:service_instance] should not be nil"
           end
-          # for testing
-          opts[:force_pull] = true
-          
           ret = ModuleDSLInfo.new
           module_branch = service_instance.get_service_instance_branch
-          pull_was_needed = module_branch.pull_repo_changes?(commit_sha, opts[:force_pull])
-          
+
+          unless pull_was_needed = module_branch.pull_repo_changes?(commit_sha, opts[:force_pull])
+            # for testing
+            # return ret
+          end
           parsed_service_module = dsl_file_obj_from_repo(module_branch).parse_content(:service_instance)
-          pp [:parsed_service_module, parsed_service_module]
+          existing = DSL::Generate.generate_service_instance_canonical_form(service_instance, module_branch)
+          pp [parsed_service_module.class, existing.class]
           ret
         end
 

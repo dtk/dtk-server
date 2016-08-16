@@ -29,13 +29,13 @@ module DTK
         end
         
         def generate_content_input!(assembly_instance)
-          nodes = ContentInput::Array.new
+          nodes = ContentInput::Hash.new
           components = ContentInput::Array.new
-          Node.generate_content_input(assembly_instance).each do | content_input_hash |
-            if content_input_hash[:is_assembly_wide_node]
-              components += (content_input_hash.val(:Components) || ContentInput::Array.new)
+          Node.generate_content_input(assembly_instance).each do | key, content_input_node |
+            if content_input_node[:is_assembly_wide_node]
+              components += (content_input_node.val(:Components) || ContentInput::Array.new)
             else
-              nodes << content_input_hash
+              nodes.merge!(key => content_input_node)
             end
           end
 
@@ -46,6 +46,17 @@ module DTK
 
           self
         end
+
+         ### For diffs
+        def diff?(assembly_parse)
+          ret = nil
+          # TODO: need to look at diffs on all subobjects
+          if nodes = val(:Nodes)
+            ret = Diff.objects_in_hash?(:node, nodes, assembly_parse.val(:Nodes))
+          end
+          ret
+        end
+
       end
     end
   end

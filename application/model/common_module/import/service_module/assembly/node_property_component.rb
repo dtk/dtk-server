@@ -21,7 +21,7 @@ module DTK
       module NodePropertyComponent
         # For each node, it creates a node_property_component if needed using the relevant nod attributes in paresd node
         def self.create_node_property_components?(parsed_nodes)
-          parsed_nodes.each do |parsed_node|
+          parsed_nodes.each do |name, parsed_node|
             node_property_component = find_or_add_node_property_component!(parsed_node)
             if parsed_attributes = parsed_node.val(:Attributes)
               attr_val_pairs = {

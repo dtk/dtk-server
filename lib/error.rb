@@ -17,13 +17,13 @@
 #
 module DTK
   class Error ##TODO: cleanup; DTK::Error is coming from /home/dtk18/dtk-common/lib/errors/errors.rb
-    require_relative('error/rest_error')
-    require_relative('error/usage')
-    require_relative('error/not_implemented')
-    require_relative('error/no_method_for_concrete_class')
+    r8_nested_require('error', 'rest_error')
+    r8_nested_require('error', 'usage')
+    r8_nested_require('error', 'not_implemented')
+    r8_nested_require('error', 'no_method_for_concrete_class')
 
     # TODO: may deprecate these two below
-    require_relative('error/not_found')
-    require_relative('error/amqp')
+    r8_nested_require('error', 'not_found')
+    r8_nested_require('error', 'amqp')
   end
 end

@@ -32,6 +32,13 @@ module DTK
           set(:Assembly, Assembly.generate_content_input(assembly_instance))
           self
         end
+
+        ### For diffs
+        def diff?(service_instance)
+          # DSLVersion and Name will be the same
+          # service_instance has assembly attributes at same level as DSLVersion and Name
+          req(:Assembly).diff?(service_instance)
+        end
       end
     end
   end

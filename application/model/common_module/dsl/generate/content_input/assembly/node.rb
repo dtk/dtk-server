@@ -22,9 +22,9 @@ module DTK; module CommonModule::DSL::Generate
         require_relative('node/attribute')
 
         def self.generate_content_input(assembly_instance)
-          ret = ContentInput::Array.new
-          get_augmented_nodes(assembly_instance).each { |aug_node| ret << new.generate_content_input!(aug_node) }
-          ret
+          get_augmented_nodes(assembly_instance).inject(ContentInput::Hash.new) do |h, aug_node| 
+            h.merge(aug_node.display_name => new.generate_content_input!(aug_node))
+          end
         end
         
         def generate_content_input!(aug_node)
@@ -33,14 +33,23 @@ module DTK; module CommonModule::DSL::Generate
           # :is_assembly_wide_node just used internally to server-side processing; so not using 'set' method
           self[:is_assembly_wide_node] = true if aug_node.is_assembly_wide_node?
           
-          set(:Name, aug_node.display_name)
           set?(:Attributes, Attribute.generate_content_input?(:node, attributes)) unless attributes.empty?
           set(:Components, Component.generate_content_input(aug_components)) unless aug_components.empty?
           self
         end
 
+        ### For diffs
+        def diff?(node_parse)
+          ret = nil
+          # TODO: need to look at diffs on all subobjects
+          if attributes = val(:Attributes)
+            ret = Diff.objects_in_hash?(:attributes, attributes, node_parse.val(:Attributes))
+          end
+          ret
+        end
+
         private
-        
+
         def self.get_augmented_nodes(assembly_instance)
           ndx_nodes = assembly_instance.get_nodes.inject({}) { |h, r| h.merge(r.id => r) }
           add_node_level_attributes!(ndx_nodes)

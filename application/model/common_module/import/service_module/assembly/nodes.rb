@@ -22,10 +22,8 @@ module DTK
         extend FactoryObjectClassMixin
 
         def self.db_update_hash(container_idh, assembly_ref, parsed_assembly, component_module_refs, opts = {})
-          parsed_nodes_with_assembly_wide_components(parsed_assembly).inject(DBUpdateHash.new) do |h, parsed_node|
-            parsed_node_name = parsed_node.req(:Name)
-            node_ref         = assembly_template_node_ref(assembly_ref, parsed_node_name)
-
+          parsed_nodes_with_assembly_wide_components(parsed_assembly).inject(DBUpdateHash.new) do |h, (parsed_node_name, parsed_node)|
+            node_ref   = assembly_template_node_ref(assembly_ref, parsed_node_name)
             attributes = Attributes.db_update_hash(parsed_node.val(:Attributes) || []).mark_as_complete
             type       = parsed_node_name.eql?(Node::Type::Node.assembly_wide) ? parsed_node_name : ret_node_type(attributes)
 
@@ -57,14 +55,13 @@ module DTK
         end
 
         def self.parsed_nodes_with_assembly_wide_components(parsed_assembly)
-          ret = parsed_assembly.val(:Nodes) || DSL::Parse::CanonicalInput::Array.new
+          ret = parsed_assembly.val(:Nodes) || DSL::Parse::CanonicalInput::Hash.new
           assembly_wide_components = parsed_assembly.val(:Components)
           unless assembly_wide_components.nil? or assembly_wide_components.empty?
             # assembly wiide components get added under 'fake node' 'assembly_wide'
             node_to_add = DSL::Parse::CanonicalInput::Hash.new
-            node_to_add.set(:Name, Node::Type::Node.assembly_wide)
             node_to_add.set(:Components, assembly_wide_components)
-            ret << node_to_add
+            ret.merge!(Node::Type::Node.assembly_wide => node_to_add)
           end
           ret
         end

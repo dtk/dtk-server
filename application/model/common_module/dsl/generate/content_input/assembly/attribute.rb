@@ -30,18 +30,15 @@ module DTK; module CommonModule::DSL::Generate
         # type can be :assembly, :node, :component
         # opts - depends on type
         def self.generate_content_input?(type, attributes, opts = {})
-          content_input_attributes = ContentInput::Array.new
-          attributes.each do |attribute| 
-            if content_input_attr = create(type, attribute, opts).generate_content_input?
-              content_input_attributes << content_input_attr
-            end
+          content_input_attributes = attributes.inject(ContentInput::Hash.new) do |h, attribute| 
+            content_input_attr = create(type, attribute, opts).generate_content_input?
+            content_input_attr ? h.merge!(attribute_name(attribute) => content_input_attr) : h
           end
           content_input_attributes.empty? ? nil : sort(content_input_attributes)
         end
         
         def generate_content_input?
           unless prune?
-            set(:Name, attribute_name)
             set(:Value,  attribute_value)
             if tags = tags?
               add_tags!(tags)
@@ -51,8 +48,7 @@ module DTK; module CommonModule::DSL::Generate
         end
 
         ### For diffs
-        def diff?(attribute)
-          # Only called if name are the same
+        def diff?(attribute_parse)
           val1 = val(:Value)
           val2 = attribute.val(:Value)
           if val1.class == val2.class and val1 == val2
@@ -94,7 +90,9 @@ module DTK; module CommonModule::DSL::Generate
         end
 
         def self.sort(content_input_attributes)
-          content_input_attributes.sort { |a, b| a.req(:Name) <=> b.req(:Name) }
+          content_input_attributes.keys.sort.inject(ContentInput::Hash.new) do |h, key|
+            h.merge(key => content_input_attributes[key])
+          end
         end
 
         def attribute_value
@@ -102,7 +100,11 @@ module DTK; module CommonModule::DSL::Generate
         end
 
         def attribute_name
-          @attribute.display_name
+          self.class.attribute_name(@attribute)
+        end
+
+        def self.attribute_name(attribute)
+          attribute.display_name
         end
 
       end

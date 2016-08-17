@@ -249,11 +249,8 @@ module DTK; class  Assembly
             component_name   = component[:display_name].match(/.*(\[.*\])/)
             node_name        = nil
 
-            if node = component[:node]
-              node_name = node[:display_name]
-              # ignore assembly wide components, or components on node group members
-              next if node_name.eql?('assembly_wide') || node.is_target_ref?
-            end
+            node = component[:node]
+            node_name = node[:display_name]
 
             if node && node.is_node_group?
               node_group_member_actions = expand_node_group_members(component_action, component_name, node)
@@ -279,7 +276,7 @@ module DTK; class  Assembly
                 match = component_instance.match(/(^[\w\-\:]*)\/(.*)/)
                 node_name, cmp_name = match[1], match[2]
                 # ignore assembly wide component actions
-                next if node_name.eql?('assembly_wide')
+                #next if node_name.eql?('assembly_wide')
               end
 
               if component_instance.include?("[")

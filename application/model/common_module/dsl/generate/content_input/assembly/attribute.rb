@@ -48,20 +48,14 @@ module DTK; module CommonModule::DSL::Generate
         end
 
         ### For diffs
-        def diff?(attribute_parse)
-          val1 = val(:Value)
-          val2 = attribute.val(:Value)
-          if val1.class == val2.class and val1 == val2
-            Diff.base_new(val1, v1l2)
-          end
+        def diff?(attribute_parse, key = nil)
+          cur_val = val(:Value)
+          new_val = attribute_parse.val(:Value)
+          Diff::Base.diff?(:attribute, key, cur_val, new_val)
         end
 
-        def self.compute_diff_object?(attributes1, attributes2)
-          Diff.objects_in_array?(:attribute, attributes1, attributes2)
-        end
-
-        def diff_key
-          req(:Name)
+        def self.diff_set(attributes_gen, attributes_parse)
+          Diff::Set.between_hashes(:attribute, attributes_gen, attributes_parse)
         end
 
         private

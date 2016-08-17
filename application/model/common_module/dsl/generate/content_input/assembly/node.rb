@@ -39,13 +39,15 @@ module DTK; module CommonModule::DSL::Generate
         end
 
         ### For diffs
-        def diff?(node_parse)
-          ret = nil
+        def diff?(node_parse, key)
           # TODO: need to look at diffs on all subobjects
-          if attributes = val(:Attributes)
-            ret = Diff.objects_in_hash?(:attributes, attributes, node_parse.val(:Attributes))
-          end
-          ret
+          ret = Attribute.diff_set(val(:Attributes), node_parse.val(:Attributes))
+          # + ...
+          ret.empty? ? nil : ret
+        end
+
+        def self.diff_set(nodes_gen, nodes_parse)
+          Diff::Set.between_hashes(:node, nodes_gen, nodes_parse)
         end
 
         private

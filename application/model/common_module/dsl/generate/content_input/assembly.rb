@@ -48,13 +48,10 @@ module DTK
         end
 
          ### For diffs
-        def diff?(assembly_parse)
-          ret = nil
+        def diff?(assembly_parse, key = nil)
           # TODO: need to look at diffs on all subobjects
-          if nodes = val(:Nodes)
-            ret = Diff.objects_in_hash?(:node, nodes, assembly_parse.val(:Nodes))
-          end
-          ret
+          ret = Node.diff_set(val(:Nodes), assembly_parse.val(:Nodes))
+          ret.empty? ? nil : ret
         end
 
       end

@@ -1,0 +1,16 @@
+{
+  "uploadOnSave": true,
+  "useAtomicWrites": false,
+  "deleteLocal": false,
+  "hostname": "dev23.r8network.com",
+  "port": "22",
+  "target": "/home/dtk23/server/current/",
+  "ignore": [
+    ".remote-sync.json",
+    ".git/**"
+  ],
+  "username": "dtk23",
+  "keyfile": "/Users/almin/Dropbox/testing_use1.pem",
+  "watch": [],
+  "transport": "scp"
+}

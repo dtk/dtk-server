@@ -62,6 +62,7 @@ module DTK
           end
         end
 
+        opts.merge!(truncate_attribute_values: true, mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
         rest_ok_response assembly_instance.info_about(:attributes, opts), datatype: datatype
       end

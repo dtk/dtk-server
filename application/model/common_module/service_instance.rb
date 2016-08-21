@@ -33,7 +33,7 @@ module DTK
         #  One advantage of service instance per branch is that we can merge between branches 
         # so can use this to for example merge tested changes in testing service instance to production service instance
         module_branch = get_or_create_service_instance_branch
-        DSL::Generate.generate_service_instance_dsl(self, module_branch)
+        CommonDSL::Generate.generate_service_instance_dsl(self, module_branch)
         ModuleRepoInfo.new(module_branch)
       end
 

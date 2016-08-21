@@ -20,7 +20,6 @@ module DTK
     # Mixins must go first
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
-    require_relative('common_module/dsl') 
     require_relative('common_module/import')
     require_relative('common_module/module_repo_info') 
     require_relative('common_module/update') 

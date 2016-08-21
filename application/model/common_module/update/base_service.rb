@@ -40,7 +40,7 @@ module DTK
           return ret unless parse_needed || pull_was_needed
           
           parsed_common_module = dsl_file_obj_from_repo(common_module__module_branch).parse_content(:common_module)
-          DSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
+          CommonDSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
           create_or_update_from_parsed_common_module(project, local_params, common_module__module_branch, parsed_common_module)
           ret
         end
@@ -57,7 +57,7 @@ module DTK
 
         def self.create_or_update_from_parsed_common_module(project, local_params, common_module__module_branch, parsed_common_module)
           module_branch = create_or_ret_module_branch(:service_module, project, local_params, common_module__module_branch)
-          DSL::Parse.set_dsl_version!(module_branch, parsed_common_module)
+          CommonDSL::Parse.set_dsl_version!(module_branch, parsed_common_module)
           update_component_module_refs_from_parsed_common_module(module_branch, parsed_common_module)
           CommonModule::BaseService.update_assemblies_from_parsed_common_module(project, module_branch, parsed_common_module)
         end
@@ -105,7 +105,7 @@ module DTK
         private
 
         def self.dsl_file_obj_from_repo(module_branch)
-          DSL::Parse.matching_common_module_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
+          CommonDSL::Parse.matching_common_module_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
         end
         
       end

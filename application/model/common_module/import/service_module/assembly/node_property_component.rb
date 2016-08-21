@@ -96,13 +96,13 @@ module DTK
         end
 
         def self.canonical_hash(hash = {})
-          ret = DSL::Parse::CanonicalInput::Hash.new
+          ret = CommonDSL::Parse::CanonicalInput::Hash.new
           hash.each_pair { |k, v| ret.set(k, v) }
           ret
         end
 
         def self.new_canonical_array
-          DSL::Parse::CanonicalInput::Array.new
+          CommonDSL::Parse::CanonicalInput::Array.new
         end
 
       end

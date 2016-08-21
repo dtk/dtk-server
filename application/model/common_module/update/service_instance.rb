@@ -34,7 +34,7 @@ module DTK
             # return ret
           end
           parsed_service_module = dsl_file_obj_from_repo(module_branch).parse_content(:service_instance)
-          existing = DSL::Generate.generate_service_instance_canonical_form(service_instance, module_branch)
+          existing = CommonDSL::Generate.generate_service_instance_canonical_form(service_instance, module_branch)
           pp [parsed_service_module.class, existing.class]
           existing.diff?(parsed_service_module)
           ret
@@ -43,7 +43,7 @@ module DTK
         private
 
         def self.dsl_file_obj_from_repo(module_branch)
-          DSL::Parse.matching_service_instance_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
+          CommonDSL::Parse.matching_service_instance_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
         end
 
       end

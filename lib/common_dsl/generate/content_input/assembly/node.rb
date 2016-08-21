@@ -19,6 +19,7 @@ module DTK; module CommonDSL::Generate
   class ContentInput 
     class Assembly
       class Node < ContentInput::Hash
+        require_relative('node/diff')
         require_relative('node/attribute')
 
         def self.generate_content_input(assembly_instance)
@@ -47,7 +48,7 @@ module DTK; module CommonDSL::Generate
         end
 
         def self.diff_set(nodes_gen, nodes_parse)
-          Diff::Set.between_hashes(:node, nodes_gen, nodes_parse)
+          Diff::Set.between_hashes(nodes_gen, nodes_parse)
         end
 
         private

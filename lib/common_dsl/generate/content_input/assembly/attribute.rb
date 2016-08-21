@@ -19,6 +19,7 @@ module DTK; module CommonDSL::Generate
   class ContentInput 
     class Assembly
       class Attribute < ContentInput::Hash
+        require_relative('attribute/diff')
 
         def initialize(type, attribute)
           super()
@@ -51,11 +52,11 @@ module DTK; module CommonDSL::Generate
         def diff?(attribute_parse, key = nil)
           cur_val = val(:Value)
           new_val = attribute_parse.val(:Value)
-          Diff::Base.diff?(:attribute, key, cur_val, new_val)
+          Diff::Base.diff?(key, cur_val, new_val)
         end
 
         def self.diff_set(attributes_gen, attributes_parse)
-          Diff::Set.between_hashes(:attribute, attributes_gen, attributes_parse)
+          Diff::Set.between_hashes(attributes_gen, attributes_parse)
         end
 
         private

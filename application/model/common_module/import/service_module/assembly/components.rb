@@ -57,15 +57,13 @@ module DTK
         end
 
         def self.add_attribute_overrides!(component_info, parsed_component)
-          (parsed_component.val(:Attributes) || []).each do |parsed_attribute|
-            (component_info[:attribute_override] ||= {}).merge!(attribute_override(parsed_attribute))
+          (parsed_component.val(:Attributes) || {}).each do |attr_name, parsed_attribute|
+            (component_info[:attribute_override] ||= {}).merge!(attribute_override(attr_name, parsed_attribute))
           end
         end
 
-        def self.attribute_override(parsed_attribute)
-          name  = parsed_attribute.req(:Name) 
-          value = parsed_attribute.val(:Value)
-          { name => {display_name: name, attribute_value: value } }
+        def self.attribute_override(attr_name, parsed_attribute)
+          { attr_name => {display_name: attr_name, attribute_value: parsed_attribute.val(:Value) } }
         end
 
       end

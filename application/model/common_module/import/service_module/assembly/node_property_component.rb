@@ -60,9 +60,9 @@ module DTK
         
         private
         
-        def self.find_attribute_value?(parsed_attributes, attribute_name)
-          if match = parsed_attributes.find { |parsed_attribute| attribute_name == parsed_attribute.req(:Name) }
-            match.val(:Value)
+        def self.find_attribute_value?(parsed_attributes, target_attribute_name)
+          if match = parsed_attributes.find { |attribute_name, parsed_attribute| attribute_name == target_attribute_name }
+            match[1].val(:Value)
           end
         end
         
@@ -87,11 +87,11 @@ module DTK
 
         def self.update_attributes_in_node_property_component!(node_property_component, attr_val_pairs)
           unless attributes = node_property_component.val(:Attributes)
-            attributes = new_canonical_array
+            attributes = canonical_hash
             node_property_component.set(:Attributes, attributes)
           end
           attr_val_pairs.each_pair do |attr_name, attr_val|
-            attributes << canonical_hash(:Name => attr_name, :Value => attr_val) unless attr_val.nil?
+            attributes.merge!(attr_name => canonical_hash(:Value => attr_val)) unless attr_val.nil?
           end
         end
 

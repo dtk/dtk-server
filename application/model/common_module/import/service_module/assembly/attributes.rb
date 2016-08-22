@@ -20,8 +20,7 @@ module DTK
     module Assembly
       module Attributes
         def self.db_update_hash(parsed_attributes)
-          parsed_attributes.inject(DBUpdateHash.new) do |h, parsed_attribute|
-            attr_name    = parsed_attribute.req(:Name)
+          parsed_attributes.inject(DBUpdateHash.new) do |h, (attr_name, parsed_attribute)|
             attr_val     = parsed_attribute.val(:Value)
             attr_content = {
               'display_name'   => attr_name,

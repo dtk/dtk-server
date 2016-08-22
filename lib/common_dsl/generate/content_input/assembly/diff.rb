@@ -17,8 +17,8 @@
 #
 module DTK 
   module CommonDSL::Generate
-    class ContentInput::Assembly::Attribute
-      class Diff < ContentInput::Diff::Base 
+    class ContentInput::Assembly
+      class Diff < ContentInput::Diff::Set 
       end
     end
   end

@@ -19,6 +19,8 @@ module DTK
   module CommonDSL::Generate
     class ContentInput
       class Assembly < ContentInput::Hash
+        require_relative('assembly/diff')
+
         require_relative('assembly/attribute')
         # attribute must be before node and component
         require_relative('assembly/node')
@@ -49,9 +51,11 @@ module DTK
 
          ### For diffs
         def diff?(assembly_parse, key = nil)
-          # TODO: need to look at diffs on all subobjects
-          ret = Node.diff_set(val(:Nodes), assembly_parse.val(:Nodes))
-          ret.empty? ? nil : ret
+          diff_sets = Node.diff_set(val(:Nodes), assembly_parse.val(:Nodes))
+          # TODO: need to add diffs on all subobjects
+          # diff_sets << Component.diff_set
+          # ...
+          Diff.aggregate?(diff_sets, key: key)
         end
 
       end

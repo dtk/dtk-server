@@ -52,11 +52,11 @@ module DTK; module CommonDSL::Generate
         def diff?(attribute_parse, key = nil)
           cur_val = val(:Value)
           new_val = attribute_parse.val(:Value)
-          Diff::Base.diff?(key, cur_val, new_val)
+          Diff.diff?(key, cur_val, new_val)
         end
 
         def self.diff_set(attributes_gen, attributes_parse)
-          Diff::Set.between_hashes(attributes_gen, attributes_parse)
+          Diff.between_hashes(attributes_gen, attributes_parse)
         end
 
         private

@@ -17,7 +17,7 @@
 #
 module DTK
   module CommonDSL::Generate
-    class ContentInput < ::DTK::DSL::FileGenerator::ContentInput
+    class ContentInput
       require_relative('content_input/diff')
       # diff needs to be before hash and array
       require_relative('content_input/hash')

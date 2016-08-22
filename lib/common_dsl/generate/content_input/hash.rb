@@ -18,7 +18,7 @@
 module DTK
   module CommonDSL::Generate
     class ContentInput
-      class Hash < ContentInput::Hash
+      class Hash < ::DTK::DSL::FileGenerator::ContentInput::Hash
         include Diff::Mixin
         extend Diff::ClassMixin
 

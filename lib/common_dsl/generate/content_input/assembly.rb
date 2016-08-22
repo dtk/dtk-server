@@ -31,6 +31,7 @@ module DTK
         end
         
         def generate_content_input!(assembly_instance)
+          set_id(assembly_instance.id)
           nodes = ContentInput::Hash.new
           components = ContentInput::Array.new
           Node.generate_content_input(assembly_instance).each do | key, content_input_node |

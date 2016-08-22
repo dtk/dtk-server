@@ -18,7 +18,7 @@
 module DTK
   module CommonDSL::Generate
     class ContentInput
-      class Array < ContentInput::Array
+      class Array < ::DTK::DSL::FileGenerator::ContentInput::Array
         include Diff::Mixin
         extend Diff::ClassMixin
 

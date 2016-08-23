@@ -72,17 +72,20 @@ module DTK
           if match = matching_node_property_component?(parsed_node, node_property_component_name)
             ret = match
           else
-            ret = canonical_hash(:Name => node_property_component_name)
+            ret = canonical_hash.merge(node_property_component_name => canonical_hash)
             unless parsed_components = parsed_node.val(:Components)
-              parsed_node.set(:Components, new_canonical_array)
+              parsed_components = canonical_hash
+              parsed_node.set(:Components, parsed_components)
             end
-            parsed_components << ret
+            parsed_components.merge!(ret)
           end
           ret
         end
         
         def self.matching_node_property_component?(parsed_node, node_property_component_name)
-          (parsed_node.val(:Components) || []).find { |parsed_component| parsed_component.val(:Name) == node_property_component_name }
+          if match_in_array_form = (parsed_node.val(:Components) || {}).find { |name, parsed_component| name == node_property_component_name }
+            canonical_hash.merge(node_property_component_name => match_in_array_form[1])
+          end
         end
 
         def self.update_attributes_in_node_property_component!(node_property_component, attr_val_pairs)
@@ -100,11 +103,6 @@ module DTK
           hash.each_pair { |k, v| ret.set(k, v) }
           ret
         end
-
-        def self.new_canonical_array
-          CommonDSL::Parse::CanonicalInput::Array.new
-        end
-
       end
     end
   end

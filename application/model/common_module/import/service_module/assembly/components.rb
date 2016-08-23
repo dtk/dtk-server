@@ -23,8 +23,8 @@ module DTK
 
         def self.db_update_hash(container_idh, parsed_components, component_module_refs, opts = {})
           cmps_with_titles = []
-          ret = parsed_components.inject(DBUpdateHash.new) do |h, parsed_component| 
-            component_info = component_info(parsed_component)
+          ret = parsed_components.inject(DBUpdateHash.new) do |h, (component_name, parsed_component)| 
+            component_info = component_info(component_name)
             add_attribute_overrides!(component_info, parsed_component)
             if title = component_info[:component_title]
               cmps_with_titles << { cmp_ref: component_info, cmp_title: title }
@@ -40,8 +40,8 @@ module DTK
 
         private
 
-        def self.component_info(parsed_component)
-          info    = InternalForm.component_ref_info(parsed_component.req(:Name))
+        def self.component_info(component_name)
+          info    = InternalForm.component_ref_info(component_name)
           type    = info[:component_type]
           title   = info[:title]
           version = info[:version]

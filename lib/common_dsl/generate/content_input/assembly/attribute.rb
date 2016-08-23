@@ -40,7 +40,7 @@ module DTK; module CommonDSL::Generate
         
         def generate_content_input?
           unless prune?
-          set_id_handle(@attribute)
+            set_id_handle(@attribute)
             set(:Value,  attribute_value)
             if tags = tags?
               add_tags!(tags)

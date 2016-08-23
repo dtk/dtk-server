@@ -31,7 +31,7 @@ module DTK
         end
         
         def generate_content_input!(assembly_instance)
-          set_id(assembly_instance.id)
+          set_id_handle(assembly_instance)
           nodes = ContentInput::Hash.new
           components = ContentInput::Array.new
           Node.generate_content_input(assembly_instance).each do | key, content_input_node |
@@ -56,7 +56,7 @@ module DTK
           # TODO: need to add diffs on all subobjects
           # diff_sets << Component.diff_set
           # ...
-          Diff.aggregate?(diff_sets, key: key)
+          aggregate_diffs?(key, diff_sets)
         end
 
       end

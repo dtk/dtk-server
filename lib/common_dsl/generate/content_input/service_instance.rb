@@ -37,7 +37,9 @@ module DTK
         def diff?(service_instance)
           # DSLVersion and Name will be the same
           # service_instance has assembly attributes at same level as DSLVersion and Name
-          req(:Assembly).diff?(service_instance)
+          ret = req(:Assembly).diff?(service_instance)
+          pp [:diffs, ret]
+          ret
         end
       end
     end

@@ -23,6 +23,15 @@ module DTK; module CommonDSL::Generate
         def diff?(_object2)
           raise Error::NoMethodForConcreteClass.new(self.class)
         end
+
+        def aggregate_diffs?(key, diff_sets)
+          self.class::Diff.aggregate?(diff_sets, key: key, id_handle: id_handle)
+        end
+
+        def create_diff?(key, cur_val, new_val)
+          self.class::Diff.diff?(cur_val, new_val, key: key, id_handle: id_handle)
+        end
+
       end
       
       module ClassMixin

@@ -29,6 +29,7 @@ module DTK; module CommonDSL::Generate
         end
         
         def generate_content_input!(aug_node)
+          set_id_handle(aug_node)
           aug_components = aug_node[:components] || []
           attributes = aug_node[:attributes] || []
           # :is_assembly_wide_node just used internally to server-side processing; so not using 'set' method
@@ -45,7 +46,7 @@ module DTK; module CommonDSL::Generate
           # TODO: need to add diffs on all subobjects
           # diff_sets << Component.diff_set
           # ...
-          Diff.aggregate?(diff_sets, key: key)
+          aggregate_diffs?(key, diff_sets)
         end
 
         def self.diff_set(nodes_gen, nodes_parse)

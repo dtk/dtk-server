@@ -84,7 +84,7 @@ shared_context 'Uninstall module' do |module_name|
   it "uninstalls #{module_name} module from server" do
     puts 'Uninstall module:', '----------------------'
     pass = true
-    value = `dtk module uninstall -m #{module_name} -y`
+    value = `dtk module uninstall -d #{module_name} -y`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'does not exist'))
     puts "Uninstall of module #{module_name} was completed successfully!" if pass == true

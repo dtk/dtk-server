@@ -28,11 +28,11 @@ shared_context 'List assemblies' do |module_name, assembly_name, dtk_common|
   end
 end
 
-shared_context 'Stage assembly from module' do |module_name, assembly_name, service_name|
+shared_context 'Stage assembly from module' do |module_name, module_location, assembly_name, service_name|
   it "stages assembly #{assembly_name} from module #{module_name}" do
     puts 'Stage assembly from module', '-------------------------'
     pass = true
-    value = `dtk service stage -d #{module_name} -n #{service_name} #{assembly_name}`
+    value = `dtk service stage -d #{module_location} -n #{service_name} #{assembly_name}`
     puts value
     pass = false if value.include? 'ERROR'
     puts "Assembly #{assembly_name} is staged successfully!" if pass == true
@@ -80,11 +80,11 @@ shared_context 'Destroy service instance' do |service_location, service_instance
   end
 end
 
-shared_context 'Uninstall module' do |module_name|
+shared_context 'Uninstall module' do |module_name, module_location|
   it "uninstalls #{module_name} module from server" do
     puts 'Uninstall module:', '----------------------'
     pass = true
-    value = `dtk module uninstall -d #{module_name} -y`
+    value = `dtk module uninstall -d #{module_location} -y`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'does not exist'))
     puts "Uninstall of module #{module_name} was completed successfully!" if pass == true

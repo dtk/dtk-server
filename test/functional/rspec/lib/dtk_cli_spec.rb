@@ -32,7 +32,7 @@ shared_context 'Stage assembly from module' do |module_name, assembly_name, serv
   it "stages assembly #{assembly_name} from module #{module_name}" do
     puts 'Stage assembly from module', '-------------------------'
     pass = true
-    value = `dtk service stage -m #{module_name} -n #{service_name} #{assembly_name}`
+    value = `dtk service stage -d #{module_name} -n #{service_name} #{assembly_name}`
     puts value
     pass = false if value.include? 'ERROR'
     puts "Assembly #{assembly_name} is staged successfully!" if pass == true

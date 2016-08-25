@@ -57,7 +57,7 @@ module DTK; module CommonDSL::Generate
         end
 
         def self.diff_set(attributes_gen, attributes_parse)
-          Diff.between_hashes(attributes_gen, attributes_parse)
+          array_of_diffs_from_hashes(attributes_gen, attributes_parse)
         end
 
         private

@@ -42,14 +42,14 @@ module DTK; module CommonDSL::Generate
 
         ### For diffs
         def diff?(node_parse, key)
-          diff_sets = Attribute.diff_set(val(:Attributes), node_parse.val(:Attributes))
-          # TODO: need to add diffs on all subobjects
-          # diff_sets << Component.diff_set
-          # ...
-          aggregate_diffs?(key, diff_sets)
+          aggregate_diffs?(key) do |diff_set|
+            diff_set.add? Attribute.diff_set(val(:Attributes), node_parse.val(:Attributes))
+            # TODO: need to add diffs on all subobjects
+          end
         end
 
         def self.diff_set(nodes_gen, nodes_parse)
+          diff_set_from_hashes(nodes_gen, nodes_parse)
           Diff.between_hashes(nodes_gen, nodes_parse)
         end
 

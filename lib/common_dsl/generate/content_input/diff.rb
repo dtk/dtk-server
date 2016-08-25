@@ -24,8 +24,8 @@ module DTK; module CommonDSL::Generate
           raise Error::NoMethodForConcreteClass.new(self.class)
         end
 
-        def aggregate_diffs?(key, diff_sets)
-          self.class::Diff.aggregate?(diff_sets, key: key, id_handle: id_handle)
+        def aggregate_diffs?(key, &body)
+          self.class::Diff.aggregate?(key: key, id_handle: id_handle, &body)
         end
 
         def create_diff?(key, cur_val, new_val)
@@ -39,6 +39,15 @@ module DTK; module CommonDSL::Generate
         def compute_diff_object?(_objects1, _objects2)
           raise Error::NoMethodForConcreteClass.new(self)
         end
+
+        def diff_set_from_hashes(gen_hash, parse_hash)
+          Diff.between_hashes(gen_hash, parse_hash)
+        end
+
+        def array_of_diffs_from_hashes(gen_hash, parse_hash)
+          Diff.array_of_diffs_from_hashes(gen_hash, parse_hash)
+        end
+
       end
     end
   end

@@ -52,11 +52,12 @@ module DTK
 
          ### For diffs
         def diff?(assembly_parse, key = nil)
-          diff_sets = Node.diff_set(val(:Nodes), assembly_parse.val(:Nodes))
-          # TODO: need to add diffs on all subobjects
-          # diff_sets << Component.diff_set
-          # ...
-          aggregate_diffs?(key, diff_sets)
+          aggregate_diffs?(key) do |diff_set|
+            diff_set.add? Node.diff_set(val(:Nodes), assembly_parse.val(:Nodes))
+            # TODO: need to add diffs on all subobjects
+            # diff_set.add? Component.diff_set(val(:Components), assembly_parse.val(:Components))
+            # ...
+          end
         end
 
       end

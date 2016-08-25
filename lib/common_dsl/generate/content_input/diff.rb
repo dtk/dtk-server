@@ -17,7 +17,7 @@
 #
 module DTK; module CommonDSL::Generate
   class ContentInput
-    class Diff < ::DTK::DSL::InputOutputCommon::Canonical::Diff  
+    class Diff < ::DTK::Diff
       module Mixin
         # Main template-specific diff instance method call; Concrete classes overwrite this
         def diff?(_object2)

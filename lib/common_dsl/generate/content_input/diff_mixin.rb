@@ -30,6 +30,14 @@ module DTK; module CommonDSL::Generate
       def create_diff?(key, cur_val, new_val)
         self.class::Diff.diff?(cur_val, new_val, key: key, id_handle: id_handle)
       end
+
+      # when comparing content of gen_hash to parse_hash this indicates what gen_hash keys to ignore
+      def ignore_for_diff_to_parse?
+        # TODO: want to change so ignore hidden and all except asserted, i.e., non-hidden asserted
+        # hidden objects will appear in gen_hash but not parse_hash
+        matches_tag_type?(:hidden)
+      end
+
     end
   end
 end; end

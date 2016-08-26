@@ -47,7 +47,7 @@ module DTK; module CommonDSL::Generate
       
       # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse with values being elements of same type
       def self.between_hashes(gen_hash, parse_hash)
-          between_arrays_or_hashes(:hash, gen_hash, parse_hash)
+        between_arrays_or_hashes(:hash, gen_hash, parse_hash)
       end
       
       # The arguments gen_array is canonical array produced by generation and parse_array is canonical array produced by parse with values being elements of same type
@@ -74,7 +74,7 @@ module DTK; module CommonDSL::Generate
       
       def modified_empty?
         @modified.empty?
-        end
+      end
       
       def empty?
         @added.empty? and @deleted.empty? and @modified.empty?
@@ -124,7 +124,9 @@ module DTK; module CommonDSL::Generate
         end
         
         gen_hash.each do |key, gen_object|
-          deleted << DeleteElement.new(key, gen_object) unless parse_hash.has_key?(key)
+          unless gen_object.ignore_for_diff_to_parse?
+            deleted << DeleteElement.new(key, gen_object) unless parse_hash.has_key?(key)
+          end
         end
           
         case array_or_hash

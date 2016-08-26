@@ -42,7 +42,7 @@ module DTK
     #   :key
       #   :id_handle
     def self.diff?(current_val, new_val, opts = {})
-        bass_class.diff?(current_val, new_val, opts)
+      bass_class.diff?(current_val, new_val, opts)
     end
     
     # opts can have keys
@@ -69,9 +69,10 @@ module DTK
     
     # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse 
     # with values being elements of same type
-    # Returns an array of Diff objects
-    def self.array_of_diffs_from_hashes(gen_hash, parse_hash)
-      set_class.array_of_diffs_from_hashes(gen_hash, parse_hash)
+    # Returns an array of Diff objects onjust matching keys; does not look for one hash have keys not in otehr hash
+    
+    def self.array_of_diffs_on_matching_keys(gen_hash, parse_hash)
+      set_class.array_of_diffs_on_matching_keys(gen_hash, parse_hash)
     end
     
     private

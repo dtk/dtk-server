@@ -15,22 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
+module DTK 
   module CommonDSL::Generate
-    class ContentInput
-      require_relative('content_input/diff')
-      # diff needs to be before hash and array because it has mixins used by these
-      require_relative('content_input/hash')
-      require_relative('content_input/array')
-
-      # requires below need to be before hash and array
-      require_relative('content_input/service_instance')
-      require_relative('content_input/assembly')
-
-      def self.generate_for_service_instance(service_instance, module_branch)
-        ServiceInstance.new(service_instance, module_branch).generate_content_input!
+    class ContentInput::Assembly::Component
+      class Diff < ContentInput::Diff::Set 
       end
-
     end
   end
 end

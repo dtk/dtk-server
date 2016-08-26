@@ -33,10 +33,10 @@ module DTK
         def generate_content_input!(assembly_instance)
           set_id_handle(assembly_instance)
           nodes = ContentInput::Hash.new
-          components = ContentInput::Array.new
+          components = ContentInput::Hash.new
           Node.generate_content_input(assembly_instance).each do | key, content_input_node |
             if content_input_node[:is_assembly_wide_node]
-              components += (content_input_node.val(:Components) || ContentInput::Array.new)
+              components.merge!(content_input_node.val(:Components) || {})
             else
               nodes.merge!(key => content_input_node)
             end
@@ -54,8 +54,8 @@ module DTK
         def diff?(assembly_parse, key = nil)
           aggregate_diffs?(key) do |diff_set|
             diff_set.add? Node.diff_set(val(:Nodes), assembly_parse.val(:Nodes))
+            diff_set.add? Component.diff_set(val(:Components), assembly_parse.val(:Components))
             # TODO: need to add diffs on all subobjects
-            # diff_set.add? Component.diff_set(val(:Components), assembly_parse.val(:Components))
             # ...
           end
         end

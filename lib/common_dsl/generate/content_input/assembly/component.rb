@@ -19,6 +19,7 @@ module DTK; module CommonDSL::Generate
   class ContentInput 
     class Assembly
       class Component < ContentInput::Hash
+        require_relative('component/diff')
         require_relative('component/attribute')
 
         def initialize(aug_component)
@@ -28,14 +29,14 @@ module DTK; module CommonDSL::Generate
         private :initialize
 
         def self.generate_content_input(aug_components)
-          ret = ContentInput::Array.new
-          aug_components.each { |aug_component| ret << new(aug_component).generate_content_input! }
-          ret
+          aug_components.inject(ContentInput::Hash.new) do |h, aug_component|
+            h.merge(component_name(aug_component) => new(aug_component).generate_content_input!)
+          end
         end
         
         def generate_content_input!
+          set_id_handle(@aug_component)
           attributes = @aug_component[:attributes] || []
-          set(:Name, name)
           set?(:Attributes, Attribute.generate_content_input?(:component, attributes, component: @aug_component)) unless attributes.empty?
           # TODO: add component links
           if tags = tags?
@@ -44,12 +45,24 @@ module DTK; module CommonDSL::Generate
           self
         end
 
-        private
-
-        def name
-          @aug_component.display_name_print_form(without_version: true)
+        # For diffs
+        def diff?(component_parse, key)
+          aggregate_diffs?(key) do |diff_set|
+            diff_set.add? Attribute.diff_set(val(:Attributes), component_parse.val(:Attributes))
+            # TODO: need to add diffs on all subobjects
+          end
         end
 
+        def self.diff_set(nodes_gen, nodes_parse)
+          diff_set_from_hashes(nodes_gen, nodes_parse)
+        end
+
+        private
+
+        def self.component_name(aug_component)
+          aug_component.display_name_print_form(without_version: true)
+        end
+        
         def tags?
           ret = []
           # mark hidden any node_property component

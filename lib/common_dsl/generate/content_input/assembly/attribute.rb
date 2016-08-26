@@ -57,7 +57,10 @@ module DTK; module CommonDSL::Generate
         end
 
         def self.diff_set(attributes_gen, attributes_parse)
-          array_of_diffs_from_hashes(attributes_gen, attributes_parse)
+          # The method array_of_diffs_on_matching_keys; so assuming that user is not adding attributes
+          # and by design not erroneously catching hidden attributes, which wil show up in self (attribute_gen),
+          # but not attributes_parse
+          array_of_diffs_on_matching_keys(attributes_gen, attributes_parse)
         end
 
         private

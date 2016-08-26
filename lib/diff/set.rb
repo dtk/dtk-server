@@ -24,7 +24,7 @@ module DTK
       #   :id_handle
       #   :key
       AddElement = Struct.new(:key, :info)
-      DeleteElement = Struct.new(:key, :id_handle)
+      DeleteElement = Struct.new(:key, :info)
       def initialize(opts = {})
         super(opts)
         # The object attributes are
@@ -79,9 +79,10 @@ module DTK
       def empty?
         @added.empty? and @deleted.empty? and @modified.empty?
       end
-      
-      def self.array_of_diffs_from_hashes(gen_hash, parse_hash)
+
+      def self.array_of_diffs_on_matching_keys(gen_hash, parse_hash)
         ret = []
+        return ret if (gen_hash || {}).empty? or (parse_hash || {}).empty?
         parse_hash.each do |key, parse_object|
           if gen_hash.has_key?(key)
             if diff = gen_hash[key].diff?(parse_object, key)
@@ -123,7 +124,7 @@ module DTK
         end
         
         gen_hash.each do |key, gen_object|
-            deleted << DeleteElement.new(key, gen_object.id_handle) unless parse_hash.has_key?(key)
+            deleted << DeleteElement.new(key, gen_object) unless parse_hash.has_key?(key)
         end
           
         case array_or_hash

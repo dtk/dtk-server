@@ -15,17 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  module CommonDSL::Generate
-    class ContentInput
-      class Hash < ::DTK::DSL::FileGenerator::ContentInput::Hash
-        include DiffMixin
-        extend DiffClassMixin
-
-        def initialize
-          super(ContentInput)
-        end
+module DTK; module CommonDSL::Generate
+  class ContentInput
+    module DiffClassMixin
+      # Main template-specific diff class method call; Concrete classes overwrite this
+      def compute_diff_object?(_objects1, _objects2)
+        raise Error::NoMethodForConcreteClass.new(self)
+      end
+      
+      def diff_set_from_hashes(gen_hash, parse_hash)
+        self::Diff.between_hashes(gen_hash, parse_hash)
+      end
+      
+      def array_of_diffs_on_matching_keys(gen_hash, parse_hash)
+        self::Diff.array_of_diffs_on_matching_keys(gen_hash, parse_hash)
       end
     end
   end
-end
+end; end

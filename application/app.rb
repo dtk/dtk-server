@@ -84,7 +84,7 @@ r8_require("#{SYSTEM_DIR}/utility")
 r8_require("#{SYSTEM_DIR}/common_mixin")
 r8_require("#{UTILS_BASE_DIR}/utils")
 
-%w{model response_info doc_generator diff common_dsl parsed_dsl}.each { |r| r8_require("#{LIB_DIR}/#{r}") }
+%w{model response_info doc_generator common_dsl parsed_dsl}.each { |r| r8_require("#{LIB_DIR}/#{r}") }
 
 
 r8_require('config/routes.rb')

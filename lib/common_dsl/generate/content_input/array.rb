@@ -19,8 +19,8 @@ module DTK
   module CommonDSL::Generate
     class ContentInput
       class Array < ::DTK::DSL::FileGenerator::ContentInput::Array
-        include Diff::Mixin
-        extend Diff::ClassMixin
+        include DiffMixin
+        extend DiffClassMixin
 
         def initialize
           super(ContentInput)

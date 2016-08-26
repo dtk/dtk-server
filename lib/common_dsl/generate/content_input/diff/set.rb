@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  class Diff 
+module DTK; module CommonDSL::Generate
+  class ContentInput::Diff 
     class Set < self
       # opts can have keys
       #   :triplet - array with elememts [added, deleted, modified]
@@ -124,7 +124,7 @@ module DTK
         end
         
         gen_hash.each do |key, gen_object|
-            deleted << DeleteElement.new(key, gen_object) unless parse_hash.has_key?(key)
+          deleted << DeleteElement.new(key, gen_object) unless parse_hash.has_key?(key)
         end
           
         case array_or_hash
@@ -137,5 +137,6 @@ module DTK
       
     end
   end
-end
+end; end
+
 

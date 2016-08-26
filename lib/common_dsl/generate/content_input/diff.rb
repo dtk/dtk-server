@@ -16,38 +16,74 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL::Generate
-  class ContentInput
-    class Diff < ::DTK::Diff
-      module Mixin
-        # Main template-specific diff instance method call; Concrete classes overwrite this
-        def diff?(_object2)
-          raise Error::NoMethodForConcreteClass.new(self.class)
-        end
-
-        def aggregate_diffs?(key, &body)
-          self.class::Diff.aggregate?(key: key, id_handle: id_handle, &body)
-        end
-
-        def create_diff?(key, cur_val, new_val)
-          self.class::Diff.diff?(cur_val, new_val, key: key, id_handle: id_handle)
-        end
-
+  class ContentInput              
+    class Diff
+      require_relative('diff/base')
+      require_relative('diff/set')
+      
+      attr_writer :key, :id_handle
+      # opts can have keys
+      #   :key
+      #   :id_handle
+      def initialize(opts = {})
+        @key        = opts[:key]
+        @id_handle  = opts[:id_handle]
+      end
+      private :initialize
+      
+      def key
+        @key || raise(Error, "Unexpected that @key is nil")
       end
       
-      module ClassMixin
-        # Main template-specific diff class method call; Concrete classes overwrite this
-        def compute_diff_object?(_objects1, _objects2)
-          raise Error::NoMethodForConcreteClass.new(self)
-        end
-
-        def diff_set_from_hashes(gen_hash, parse_hash)
-          self::Diff.between_hashes(gen_hash, parse_hash)
-        end
-
-        def array_of_diffs_on_matching_keys(gen_hash, parse_hash)
-          self::Diff.array_of_diffs_on_matching_keys(gen_hash, parse_hash)
-        end
-
+      def id_handle
+        @id_handle || raise(Error, "Unexpected that @id_handle is nil")
+      end
+    
+      # opts can have keys
+      #   :key
+      #   :id_handle
+      def self.diff?(current_val, new_val, opts = {})
+        bass_class.diff?(current_val, new_val, opts)
+      end
+      
+      # opts can have keys
+      #   :key
+      #   :id_handle
+      def self.aggregate?(diff_sets, opts = {})
+        set_class.aggregate?(diff_sets, opts)
+      end
+      
+      
+      # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse 
+      # with values being elements of same type
+      # Returns a Diff::Set object
+      def self.between_hashes(gen_hash, parse_hash)
+        set_class.between_hashes(gen_hash, parse_hash)
+      end
+      
+      # The arguments gen_array is canonical array produced by generation and parse_array is canonical array produced by parse 
+      # with values being elements of same type
+      # Returns a Diff::Set object
+      def self.between_arrays(gen_array, parse_array)
+        set_class.between_arrays(gen_array, parse_array)
+      end
+      
+      # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse 
+      # with values being elements of same type
+      # Returns an array of Diff objects onjust matching keys; does not look for one hash have keys not in otehr hash
+      
+      def self.array_of_diffs_on_matching_keys(gen_hash, parse_hash)
+        set_class.array_of_diffs_on_matching_keys(gen_hash, parse_hash)
+      end
+      
+      private
+      
+      def self.bass_class
+        kind_of?(Base) ? self : Base
+      end
+      
+      def self.set_class
+        kind_of?(Set) ? self : Set
       end
     end
   end

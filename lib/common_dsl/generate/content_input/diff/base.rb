@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  class Diff
+module DTK; module CommonDSL::Generate
+  class ContentInput::Diff
     class Base < self
       # opts can have keys
       #   :key
@@ -48,4 +48,4 @@ module DTK
       
     end
   end
-end
+end; end

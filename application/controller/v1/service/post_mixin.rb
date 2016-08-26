@@ -34,8 +34,21 @@ module DTK
         service_name      = request_params(:service_name) || generate_new_service_name(assembly_name, service_module)
         is_target_service = boolean_request_params(:is_target)
 
+        list = service_module.get_assembly_templates
+        display_names = list.map(&:display_name)
+
+        if assembly_name.empty?
+         if list.empty?
+             fail ErrorUsage, "Service module has no assemblies."
+         elsif list.size > 1
+             fail ErrorUsage, "Service module has more then one assembly template, please choose which one to stage: #{display_names.join(', ')}"
+         else
+          assembly_name = list.first[:display_name]
+         end
+        end
+
         unless assembly_template = service_module.assembly_template?(assembly_name, version)
-          fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'"
+          fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'. Valid names: #{display_names.join(', ')}"
         end
 
         opts = {

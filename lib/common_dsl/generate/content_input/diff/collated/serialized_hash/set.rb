@@ -15,18 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK 
-  module CommonDSL::Generate
-    class ContentInput::Assembly::Attribute
-      class Diff < ContentInput::Diff::Base 
-        def type_print_form
-          'attribute'
+module DTK; module CommonDSL::Generate
+  class ContentInput::Diff
+    class SerializedHash
+      class Set < self
+        module Key
+          ADDED    = 'ADDED'
+          DELETED  = 'DELETED'
+          MODIFIED = 'MODIFIED'
         end
-
-        class Modify < ContentInput::Diff::Processor::Modify
+        KEYS = [:added, :deleted, :modified]
+        def self.create_info(opts)
+          KEYS.inject(base_hash) do |h, key|
+            (opts[key] || []).empty? ? h : h.merge(Key.const_get(key.upcase) => opts[key])
+          end
         end
-
       end
+
     end
   end
-end
+end; end

@@ -19,6 +19,10 @@ module DTK
   module CommonDSL::Generate
     class ContentInput::Assembly::Node
       class Diff < ContentInput::Diff::Set 
+        def type_print_form
+          'node'
+        end
+
       end
     end
   end

@@ -37,9 +37,14 @@ module DTK
         def diff?(service_instance)
           # DSLVersion and Name will be the same
           # service_instance has assembly attributes at same level as DSLVersion and Name
-          ret = req(:Assembly).diff?(service_instance)
-          pp [:diffs, ret]
-          ret
+          diff = req(:Assembly).diff?(service_instance)
+# TODO: debug
+File.open('/tmp/raw', 'w') {|f| PP.pp(diff, f) }
+if collated_diff = diff && diff.collate
+  #  File.open('/tmp/collated', 'w') {|f| PP.pp(collated_diff, f) }
+  pp collated_diff
+end
+          diff
         end
       end
     end

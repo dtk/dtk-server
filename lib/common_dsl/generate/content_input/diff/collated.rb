@@ -15,18 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK 
-  module CommonDSL::Generate
-    class ContentInput::Assembly::Attribute
-      class Diff < ContentInput::Diff::Base 
-        def type_print_form
-          'attribute'
-        end
-
-        class Modify < ContentInput::Diff::Processor::Modify
-        end
-
+module DTK; module CommonDSL::Generate
+  class ContentInput::Diff
+    class Collated 
+      def initialize
+        @diffs = {}
       end
+
+      def add!(diff, diff_type, object)
+        ((@diffs[diff.class] ||= {})[diff_type] ||= []) << object
+        self
+      end
+
     end
   end
-end
+end; end

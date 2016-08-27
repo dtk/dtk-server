@@ -18,6 +18,10 @@
 module DTK; module CommonDSL::Generate
   class ContentInput              
     class Diff
+      require_relative('diff/collated.rb')
+      require_relative('diff/qualified_key')
+      require_relative('diff/processor')
+
       require_relative('diff/base')
       require_relative('diff/set')
       
@@ -77,6 +81,10 @@ module DTK; module CommonDSL::Generate
       end
       
       private
+
+      def type_print_form
+        raise Error::NoMethodForConcreteClass.new(self.class)
+      end
       
       def self.bass_class
         kind_of?(Base) ? self : Base

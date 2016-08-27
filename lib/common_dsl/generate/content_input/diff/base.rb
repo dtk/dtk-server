@@ -18,6 +18,11 @@
 module DTK; module CommonDSL::Generate
   class ContentInput::Diff
     class Base < self
+      require_relative('base/collate')
+
+      include Collate::Mixin
+
+      attr_reader :current_val, :new_val
       # opts can have keys
       #   :key
       #   :id_handle
@@ -35,7 +40,11 @@ module DTK; module CommonDSL::Generate
       end
       
       private
-      
+
+      def create_modify_processor(qualified_key)
+        self.class::Modify.new(qualified_key, self)
+      end
+
       def self.has_diff?(current_val, new_val)
         no_diff = false
         if current_val.respond_to?(:to_s) and new_val.respond_to?(:to_s) and current_val.to_s == new_val.to_s

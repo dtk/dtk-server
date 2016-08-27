@@ -15,17 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK 
-  module CommonDSL::Generate
-    class ContentInput::Assembly::Attribute
-      class Diff < ContentInput::Diff::Base 
-        def type_print_form
-          'attribute'
-        end
+module DTK
+  class CommonDSL::Generate::ContentInput::Diff
+    class Processor
+      require_relative('processor/modify')
+#      require_relative('processor/add')
+#      require_relative('processor/delete')
 
-        class Modify < ContentInput::Diff::Processor::Modify
-        end
-
+      def initialize(qualified_key)
+        @qualified_key = qualified_key
       end
     end
   end

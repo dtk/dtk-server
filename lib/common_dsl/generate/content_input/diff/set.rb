@@ -18,6 +18,10 @@
 module DTK; module CommonDSL::Generate
   class ContentInput::Diff 
     class Set < self
+      require_relative('set/collate')
+
+      include Collate::Mixin
+
       # opts can have keys
       #   :triplet - array with elememts [added, deleted, modified]
       #   :diff_set
@@ -44,7 +48,7 @@ module DTK; module CommonDSL::Generate
       end
       private :initialize
       attr_accessor :added, :deleted, :modified
-      
+
       # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse with values being elements of same type
       def self.between_hashes(gen_hash, parse_hash)
         between_arrays_or_hashes(:hash, gen_hash, parse_hash)

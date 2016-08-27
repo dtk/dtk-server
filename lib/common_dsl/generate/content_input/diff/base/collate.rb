@@ -15,18 +15,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK 
-  module CommonDSL::Generate
-    class ContentInput::Assembly::Attribute
-      class Diff < ContentInput::Diff::Base 
-        def type_print_form
-          'attribute'
+module DTK; class CommonDSL::Generate::ContentInput::Diff
+  class Base
+    module Collate
+      module Mixin
+        def collate
+          add_to_collate!(Collated.new)
         end
 
-        class Modify < ContentInput::Diff::Processor::Modify
+        # opts can have keys
+        #  :qualified_key
+        def add_to_collate!(collated, parent_qualified_key = QualifiedKey.new)
+          qualified_key = parent_qualified_key.create_with_new_element?(type_print_form, @key)
+          collated.add!(self, :modified, create_modify_processor(qualified_key))
         end
 
       end
     end
   end
-end
+end; end
+
+

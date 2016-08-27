@@ -15,15 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK 
-  module CommonDSL::Generate
-    class ContentInput::Assembly::Attribute
-      class Diff < ContentInput::Diff::Base 
-        def type_print_form
-          'attribute'
-        end
-
-        class Modify < ContentInput::Diff::Processor::Modify
+module DTK
+  class CommonDSL::Generate::ContentInput::Diff
+    class Processor
+      class Modify < self
+        def initialize(qualified_key, base_diff)
+          super(qualified_key)
+          @id_handle   = base_diff.id_handle
+          @current_val = base_diff.current_val
+          @new_val     = base_diff.new_val
         end
 
       end

@@ -25,10 +25,8 @@ module DTK; module CommonDSL::Generate
       # opts can have keys
       #   :triplet - array with elememts [added, deleted, modified]
       #   :diff_set
-      #   :id_handle
-      #   :qualified_key
       def initialize(opts = {})
-        super(opts)
+        super()
         # The object attributes are
         #  @added - array, possibly empty, of Diff::Element::Add objects
         #  @deleted - array, possibly empty, of Diff::Element::Delete objects
@@ -61,11 +59,8 @@ module DTK; module CommonDSL::Generate
         between_arrays_or_hashes(:array, ndx_gen_array, ndx_parse_array, qualified_key) 
       end
       
-      # opts can have keys
-      #   :qualified_key
-      #   :id_handle
-      def self.aggregate?(opts = {}, &body)
-        diff_set = new(opts)
+      def self.aggregate?(&body)
+        diff_set = new
         # the code passed into body will call diff_set.add?
         # which conditionally adds to @modified
         body.call(diff_set)

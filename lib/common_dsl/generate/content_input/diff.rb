@@ -25,22 +25,7 @@ module DTK; module CommonDSL::Generate
       require_relative('diff/base')
       require_relative('diff/set')
       
-      # opts can have keys
-      #   :qualified_key
-      #   :id_handle
-      def initialize(opts = {})
-        @qualified_key = opts[:qualified_key]
-        @id_handle     = opts[:id_handle]
-      end
-      private :initialize
       
-      def id_handle
-        @id_handle || raise(Error, "Unexpected that @id_handle is nil")
-      end
-
-      def qualified_key
-        @qualified_key || raise(Error, "Unexpected that @qualified_key is nil")
-      end
     
       # opts can have keys
       #   :qualified_key
@@ -49,11 +34,8 @@ module DTK; module CommonDSL::Generate
         bass_class.diff?(current_val, new_val, opts)
       end
       
-      # opts can have keys
-      #   :qualified_key
-      #   :id_handle
-      def self.aggregate?(diff_sets, opts = {})
-        set_class.aggregate?(diff_sets, opts)
+      def self.aggregate?(diff_sets)
+        set_class.aggregate?(diff_sets)
       end
       
       

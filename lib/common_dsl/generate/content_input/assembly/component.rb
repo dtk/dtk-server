@@ -47,7 +47,7 @@ module DTK; module CommonDSL::Generate
 
         # For diffs
         def diff?(component_parse, qualified_key = Diff::QualifiedKey.new)
-          aggregate_diffs?(qualified_key) do |diff_set|
+          aggregate_diffs? do |diff_set|
             diff_set.add? Attribute.diff_set(val(:Attributes), component_parse.val(:Attributes), qualified_key)
             # TODO: need to add diffs on all subobjects
           end

@@ -22,14 +22,28 @@ module DTK; module CommonDSL::Generate
 
       include Collate::Mixin
 
-      attr_reader :current_val, :new_val
+      attr_reader :current_val, :new_val, :id_handle, :qualified_key
       # opts can have keys
-      #   :qualified_key
-      #   :id_handle
+      #   :qualified_key (required)
+      #   :id_handle (required)
       def initialize(current_val, new_val, opts = {})
-        super(opts)
+        super()
+        unless @qualified_key = opts[:qualified_key]
+          raise Error, "Unexpected that opts[:qualified_key] is nil"
+        end
+        unless @id_handle = opts[:id_handle]
+          raise Error, "Unexpected that opts[:id_handle] is nil"
+        end
         @current_val = current_val
         @new_val     = new_val
+      end
+
+      def id_handle
+        @id_handle || raise(Error, "Unexpected that @id_handle is nil")
+      end
+
+      def qualified_key
+        @qualified_key || raise(Error, "Unexpected that @qualified_key is nil")
       end
       
       # opts can have keys

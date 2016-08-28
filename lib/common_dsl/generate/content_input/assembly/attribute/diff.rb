@@ -19,11 +19,12 @@ module DTK
   module CommonDSL::Generate
     class ContentInput::Assembly::Attribute
       class Diff < ContentInput::Diff::Base 
-        def type_print_form
+        private
+        def self.type_print_form
           'attribute'
         end
 
-        class Modify < ContentInput::Diff::Processor::Modify
+        class Modify < ContentInput::Diff::Element::Modify
         end
 
       end

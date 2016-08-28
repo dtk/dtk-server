@@ -41,17 +41,16 @@ module DTK; module CommonDSL::Generate
         end
 
         ### For diffs
-        def diff?(node_parse, key)
-          aggregate_diffs?(key) do |diff_set|
-            diff_set.add? Attribute.diff_set(val(:Attributes), node_parse.val(:Attributes))
-            diff_set.add? Component.diff_set(val(:Components), node_parse.val(:Components))
+        def diff?(node_parse, qualified_key = Diff::QualifiedKey.new)
+          aggregate_diffs?(qualified_key) do |diff_set|
+            diff_set.add? Attribute.diff_set(val(:Attributes), node_parse.val(:Attributes), qualified_key)
+            diff_set.add? Component.diff_set(val(:Components), node_parse.val(:Components), qualified_key)
             # TODO: need to add diffs on all subobjects
           end
         end
 
-        def self.diff_set(nodes_gen, nodes_parse)
-          diff_set_from_hashes(nodes_gen, nodes_parse)
-          Diff.between_hashes(nodes_gen, nodes_parse)
+        def self.diff_set(nodes_gen, nodes_parse, qualified_key)
+          diff_set_from_hashes(nodes_gen, nodes_parse, qualified_key)
         end
 
         private

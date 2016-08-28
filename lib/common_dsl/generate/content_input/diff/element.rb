@@ -15,21 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK 
-  module CommonDSL::Generate
-    class ContentInput::Assembly::Component
-      class Diff < ContentInput::Diff::Set 
-        private
-        def self.type_print_form
-          'component'
-        end
-
-        class Add < ContentInput::Diff::Element::Add
-        end
-
-        class Delete < ContentInput::Diff::Element::Delete
-        end
-
+module DTK
+  class CommonDSL::Generate::ContentInput::Diff
+    class Element
+      require_relative('element/modify')
+      require_relative('element/add')
+      require_relative('element/delete')
+      def initialize(qualified_key)
+        @qualified_key = qualified_key
       end
     end
   end

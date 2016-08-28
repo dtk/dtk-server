@@ -50,11 +50,11 @@ module DTK
           self
         end
 
-         ### For diffs
-        def diff?(assembly_parse, key = nil)
-          aggregate_diffs?(key) do |diff_set|
-            diff_set.add? Node.diff_set(val(:Nodes), assembly_parse.val(:Nodes))
-            diff_set.add? Component.diff_set(val(:Components), assembly_parse.val(:Components))
+        ### For diffs
+        def diff?(assembly_parse, qualified_key = Diff::QualifiedKey.new)
+          aggregate_diffs?(qualified_key) do |diff_set|
+            diff_set.add? Node.diff_set(val(:Nodes), assembly_parse.val(:Nodes), qualified_key)
+            diff_set.add? Component.diff_set(val(:Components), assembly_parse.val(:Components), qualified_key)
             # TODO: need to add diffs on all subobjects
             # ...
           end

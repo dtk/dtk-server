@@ -18,17 +18,12 @@
 module DTK; module CommonDSL::Generate
   class ContentInput
     module DiffClassMixin
-      # Main template-specific diff class method call; Concrete classes overwrite this
-      def compute_diff_object?(_objects1, _objects2)
-        raise Error::NoMethodForConcreteClass.new(self)
+      def diff_set_from_hashes(gen_hash, parse_hash, quaified_key)
+        self::Diff.between_hashes(gen_hash, parse_hash, quaified_key)
       end
       
-      def diff_set_from_hashes(gen_hash, parse_hash)
-        self::Diff.between_hashes(gen_hash, parse_hash)
-      end
-      
-      def array_of_diffs_on_matching_keys(gen_hash, parse_hash)
-        self::Diff.array_of_diffs_on_matching_keys(gen_hash, parse_hash)
+      def array_of_diffs_on_matching_keys(gen_hash, parse_hash, quaified_key)
+        self::Diff.array_of_diffs_on_matching_keys(gen_hash, parse_hash, quaified_key)
       end
     end
   end

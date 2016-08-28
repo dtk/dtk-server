@@ -23,22 +23,10 @@ module DTK; class CommonDSL::Generate::ContentInput::Diff
           add_to_collate!(Collated.new)
         end
         
-        # opts can have keys
-        #  :qualified_key
-        def add_to_collate!(collated, parent_qualified_key = QualifiedKey.new)
-          qualified_key =  parent_qualified_key.create_with_new_element?(type_print_form, @key) 
-          
-          @added.each do |added_diff|
-            collated.add!(self, :added, qualified_key: qualified_key.print_form, added_diff: added_diff)
-          end
-          
-          @deleted.each do |deleted_diff|
-            collated.add!(self, :deleted, qualified_key: qualified_key.print_form, deleted_diff: deleted_diff)
-          end
-          
-          @modified.each do |diff|
-            diff.add_to_collate!(collated, qualified_key)
-          end
+        def add_to_collate!(collated)
+          @added.each { |added_diff| collated.add!(self, :added, added_diff) }
+          @deleted.each { |deleted_diff| collated.add!(self, :deleted, deleted_diff) }
+          @modified.each { |diff| diff.add_to_collate!(collated) }
           collated
         end
         

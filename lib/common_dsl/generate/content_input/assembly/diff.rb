@@ -19,7 +19,8 @@ module DTK
   module CommonDSL::Generate
     class ContentInput::Assembly
       class Diff < ContentInput::Diff::Set 
-        def type_print_form
+        private
+        def self.type_print_form
           'assembly'
         end
 

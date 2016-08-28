@@ -50,17 +50,19 @@ module DTK; module CommonDSL::Generate
         end
 
         ### For diffs
-        def diff?(attribute_parse, key = nil)
+        def diff?(attribute_parse, qualified_key = Diff::QualifiedKey.new)
           cur_val = val(:Value)
           new_val = attribute_parse.val(:Value)
-          create_diff?(key, cur_val, new_val)
+          create_diff?(cur_val, new_val, qualified_key)
         end
 
-        def self.diff_set(attributes_gen, attributes_parse)
+        # opts can have keys
+        #  :qualified_key
+        def self.diff_set(attributes_gen, attributes_parse, opts = {})
           # The method array_of_diffs_on_matching_keys; so assuming that user is not adding attributes
           # and by design not erroneously catching hidden attributes, which wil show up in self (attribute_gen),
           # but not attributes_parse
-          array_of_diffs_on_matching_keys(attributes_gen, attributes_parse)
+          array_of_diffs_on_matching_keys(attributes_gen, attributes_parse, opts)
         end
 
         private

@@ -26,14 +26,12 @@ module DTK; module CommonDSL::Generate
       #   :triplet - array with elememts [added, deleted, modified]
       #   :diff_set
       #   :id_handle
-      #   :key
-      AddElement = Struct.new(:key, :info)
-      DeleteElement = Struct.new(:key, :info)
+      #   :qualified_key
       def initialize(opts = {})
         super(opts)
         # The object attributes are
-        #  @added - array, possibly empty, of AddElements
-        #  @deleted - array, possibly empty, of DeleteElements
+        #  @added - array, possibly empty, of Diff::Element::Add objects
+        #  @deleted - array, possibly empty, of Diff::Element::Delete objects
         #  @modified - array, possibly empty, of Diff objects
         if diff_set = opts[:diff_set]
           @added    = diff_set.added
@@ -49,20 +47,22 @@ module DTK; module CommonDSL::Generate
       private :initialize
       attr_accessor :added, :deleted, :modified
 
-      # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse with values being elements of same type
-      def self.between_hashes(gen_hash, parse_hash)
-        between_arrays_or_hashes(:hash, gen_hash, parse_hash)
+      # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash 
+      # produced by parse with values being elements of same type
+      def self.between_hashes(gen_hash, parse_hash, qualified_key)
+        between_arrays_or_hashes(:hash, gen_hash, parse_hash, qualified_key)
       end
       
-      # The arguments gen_array is canonical array produced by generation and parse_array is canonical array produced by parse with values being elements of same type
-      def self.between_arrays(gen_array, parse_array)
+      # The arguments gen_array is canonical array produced by generation and parse_array is canonical array 
+      # produced by parse with values being elements of same type
+      def self.between_arrays(gen_array, parse_array, qualified_key)
         ndx_gen_array = (gen_array || []).inject({}) { |h, gen_object| h.merge(gen_object.diff_key => gen_object) }
         ndx_parse_array = (parse_array || []).inject({}) { |h, parse_object| h.merge(parse_object.diff_key => parse_object) }
-        between_arrays_or_hashes(:array, ndx_gen_array, ndx_parse_array) 
+        between_arrays_or_hashes(:array, ndx_gen_array, ndx_parse_array, qualified_key) 
       end
       
       # opts can have keys
-      #   :key
+      #   :qualified_key
       #   :id_handle
       def self.aggregate?(opts = {}, &body)
         diff_set = new(opts)
@@ -84,12 +84,15 @@ module DTK; module CommonDSL::Generate
         @added.empty? and @deleted.empty? and @modified.empty?
       end
 
-      def self.array_of_diffs_on_matching_keys(gen_hash, parse_hash)
+      def self.array_of_diffs_on_matching_keys(gen_hash, parse_hash, parent_qualified_key)
         ret = []
         return ret if (gen_hash || {}).empty? or (parse_hash || {}).empty?
         parse_hash.each do |key, parse_object|
           if gen_hash.has_key?(key)
-            if diff = gen_hash[key].diff?(parse_object, key)
+            gen_object      = gen_hash[key]
+            type_print_form = gen_object.class::Diff.type_print_form
+            qualified_key   =  parent_qualified_key.create_with_new_element?(type_print_form, key)
+            if diff =  gen_object.diff?(parse_object, qualified_key)
               ret << diff
             end
           end
@@ -109,7 +112,7 @@ module DTK; module CommonDSL::Generate
         end
       end
       
-      def self.between_arrays_or_hashes(array_or_hash, gen_hash, parse_hash)
+      def self.between_arrays_or_hashes(array_or_hash, gen_hash, parse_hash, parent_qualified_key)
         added    = []
         deleted  = []
         modified = []
@@ -118,18 +121,22 @@ module DTK; module CommonDSL::Generate
         parse_hash ||= {}
         
         parse_hash.each do |key, parse_object|
+          qualified_key =  parent_qualified_key.create_with_new_element?(type_print_form, key)
           if gen_hash.has_key?(key)
-            if diff = gen_hash[key].diff?(parse_object, key)
+            if diff = gen_hash[key].diff?(parse_object, qualified_key)
               modified << diff
             end
           else
-            added << AddElement.new(key, parse_object)
-            end
+            added << self::Add.new(qualified_key, parse_object: parse_object)
+          end
         end
         
         gen_hash.each do |key, gen_object|
           unless gen_object.ignore_for_diff_to_parse?
-            deleted << DeleteElement.new(key, gen_object) unless parse_hash.has_key?(key)
+            unless parse_hash.has_key?(key)
+              qualified_key =  parent_qualified_key.create_with_new_element?(type_print_form, key)
+              deleted << self::Delete.new(qualified_key, gen_object: gen_object) 
+            end
           end
         end
           

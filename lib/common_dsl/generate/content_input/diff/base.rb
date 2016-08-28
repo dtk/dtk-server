@@ -24,7 +24,7 @@ module DTK; module CommonDSL::Generate
 
       attr_reader :current_val, :new_val
       # opts can have keys
-      #   :key
+      #   :qualified_key
       #   :id_handle
       def initialize(current_val, new_val, opts = {})
         super(opts)
@@ -33,7 +33,7 @@ module DTK; module CommonDSL::Generate
       end
       
       # opts can have keys
-      #   :key
+      #   :qualified_key
       #   :id_handle
       def self.diff?(current_val, new_val, opts = {})
         new(current_val, new_val, opts) if has_diff?(current_val, new_val)
@@ -41,8 +41,8 @@ module DTK; module CommonDSL::Generate
       
       private
 
-      def create_modify_processor(qualified_key)
-        self.class::Modify.new(qualified_key, self)
+      def create_modify_element
+        self.class::Modify.new(self)
       end
 
       def self.has_diff?(current_val, new_val)

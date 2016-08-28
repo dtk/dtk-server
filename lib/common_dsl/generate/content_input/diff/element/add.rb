@@ -17,13 +17,13 @@
 #
 module DTK
   class CommonDSL::Generate::ContentInput::Diff
-    class Processor
-      class Modify < self
-        def initialize(qualified_key, base_diff)
+    class Element
+      class Add < self
+        # opts can have keys
+        #  :parse_object
+        def initialize(qualified_key, opts = {})
           super(qualified_key)
-          @id_handle   = base_diff.id_handle
-          @current_val = base_diff.current_val
-          @new_val     = base_diff.new_val
+          @parse_object = opts[:parse_object]
         end
 
       end

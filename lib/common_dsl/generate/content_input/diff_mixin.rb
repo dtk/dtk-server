@@ -19,16 +19,16 @@ module DTK; module CommonDSL::Generate
   class ContentInput
     module DiffMixin
       # Main template-specific diff instance method call; Concrete classes overwrite this
-      def diff?(_object2)
+      def diff?(_parse_object, _qualified_key = Diff::QualifiedKey.new)
         raise Error::NoMethodForConcreteClass.new(self.class)
       end
       
-      def aggregate_diffs?(key, &body)
-        self.class::Diff.aggregate?(key: key, id_handle: id_handle, &body)
+      def aggregate_diffs?(qualified_key, &body)
+        self.class::Diff.aggregate?(qualified_key: qualified_key, id_handle: id_handle, &body)
       end
       
-      def create_diff?(key, cur_val, new_val)
-        self.class::Diff.diff?(cur_val, new_val, key: key, id_handle: id_handle)
+      def create_diff?(cur_val, new_val, qualified_key)
+        self.class::Diff.diff?(cur_val, new_val, qualified_key: qualified_key, id_handle: id_handle)
       end
 
       # when comparing content of gen_hash to parse_hash this indicates what gen_hash keys to ignore

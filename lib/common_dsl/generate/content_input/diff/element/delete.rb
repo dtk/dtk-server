@@ -15,21 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK 
-  module CommonDSL::Generate
-    class ContentInput::Assembly::Component
-      class Diff < ContentInput::Diff::Set 
-        private
-        def self.type_print_form
-          'component'
+module DTK
+  class CommonDSL::Generate::ContentInput::Diff
+    class Element
+      class Delete < self
+        # opts can have keys
+        #  :gen_object
+        def initialize(qualified_key, opts = {})
+          super(qualified_key)
+          @id_handle = opts[:gen_object].id_handle
         end
-
-        class Add < ContentInput::Diff::Element::Add
-        end
-
-        class Delete < ContentInput::Diff::Element::Delete
-        end
-
       end
     end
   end

@@ -39,7 +39,7 @@ describe "DTK Server release smoke test with new client" do
   end
 
   context "Stage assembly from module" do
-    include_context "Stage assembly from module", module_name, assembly_name, service_name
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
   context "Converge service instance" do
@@ -51,7 +51,7 @@ describe "DTK Server release smoke test with new client" do
   end
 
   context "Uninstall module" do
-    include_context "Uninstall module", module_name
+    include_context "Uninstall module", module_name, module_location
   end
 
   context "Delete initial module on filesystem" do

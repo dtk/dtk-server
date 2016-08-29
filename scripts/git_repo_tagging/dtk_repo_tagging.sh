@@ -145,6 +145,7 @@ function tag_code() {
 			set_release_yaml_file "not_set"
 			cd $repo_name
 			bundle update dtk-common # updates both dtk-common and dtk-common-core
+			bundle update dtk-dsl
 			git add .; git commit -m "bump versions for release.yaml"; git push origin master
 			git tag $next_tag
 			git push --tags
@@ -205,6 +206,7 @@ function tag_code() {
 			set_release_yaml_file $dtk_major_tag
 			cd $repo_name
 			bundle update dtk-common
+			bundle update dtk-dsl
 			git add .; git commit -m "bump versions for release.yaml"; git push origin master
 			git tag $dtk_major_tag
 			git push --tags

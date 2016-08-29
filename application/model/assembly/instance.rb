@@ -511,13 +511,30 @@ module DTK; class  Assembly
       ret
     end
 
-    def exec__delete(opts = {})
+    def check_if_target(assembly, recursive)
+      opts = {:detail_level=>"nodes", :include_namespaces=>"true"}
+      service_instance_list = Assembly::Instance.list(model_handle(), opts)
+
+      service_instance_list.each do |v|
+         if v[:target] == assembly[:assembly_instance_name] && v[:id] != assembly[:assembly_instance_id]
+           if recursive == "false"
+             fail ErrorUsage, "The target service '#{assembly[:assembly_instance_name]}' cannot be deleted because there are service instances dependent on it. Please use flag '-r' to remove all " 
+           end
+         end
+      end
+      service_instance_list
+    end
+
+    def exec__delete(opts = {}, recursive)
       task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
       ret = {
         assembly_instance_id: self.id(),
         assembly_instance_name: self.display_name_print_form
       }
       opts.merge!(skip_running_check: true)
+
+      service_instance_list = check_if_target(ret, recursive)
+      recursive_delete(ret, service_instance_list) if recursive == "true"
 
       if assembly_wide_node = self.has_assembly_wide_node?
         if components = assembly_wide_node.get_components
@@ -560,6 +577,57 @@ module DTK; class  Assembly
       ret.merge!(task_id: task.id())
       ret
     end
+
+    def recursive_delete(ret, service_instance_list)
+     opts = {:detail_level=>"nodes", :include_namespaces=>"true", :remove_assembly_wide_node=>true, :delete_action => "delete"}
+     service_instance_list.each do |v|
+       if v[:target] == ret[:assembly_instance_name] && v[:id] != ret[:assembly_instance_id]
+
+           idh = model_handle.createIDH(v)
+           assembly = self.class.create_from_id_handle(idh)
+
+           recursive_task = Task.create_top_level(model_handle(:task), assembly, task_action: 'delete and destroy')
+
+           if assembly_wide_node = assembly.has_assembly_wide_node?
+             if components = assembly_wide_node.get_components
+               cmp_opts = { method_name: 'delete' }
+
+               # order components by 'delete' action inside assembly workflow if exists
+               ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly))
+               ordered_components.each do |component|
+                 cmp_top_task = Task.create_top_level(model_handle(:task), assembly, task_action: 'delete component')
+                 cmp_action = nil
+
+                 begin
+                  cmp_action = Task.create_for_ad_hoc_action(assembly, component, cmp_opts) if assembly_wide_node.get_admin_op_status.eql?'running'
+                 rescue Task::Template::ParsingError => e
+                   Log.info("Ignoring component 'delete' action does not exist.")
+                 end
+
+                 delete_cmp_from_database = Task.create_for_delete_from_database(assembly, component, assembly_wide_node, opts)
+                 cmp_top_task.add_subtask(cmp_action) if cmp_action
+                 cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
+                 recursive_task.add_subtask(cmp_top_task)
+               end
+             end
+           end
+
+           if nodes = assembly.get_leaf_nodes(remove_assembly_wide_node: true)
+             nodes.each do |node|
+               node_top_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true))
+               recursive_task.add_subtask(node_top_task) if node_top_task
+             end
+           end
+
+           delete_assembly_from_database = Task.create_for_delete_from_database(assembly, nil, nil, opts.merge!(skip_running_check: true))
+           recursive_task.add_subtask(delete_assembly_from_database) if delete_assembly_from_database
+           recursive_task = recursive_task.save_and_add_ids()
+
+           workflow = Workflow.create(recursive_task)
+           workflow.defer_execution()
+       end
+     end
+   end
 
     def create_task(opts)
       if task_params = opts[:task_params]

@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 # dtk gems
 gem 'dtk-common', :github => 'dtk/dtk-common'
-gem 'dtk-common-core', :github => 'dtk/dtk-common-core', :branch => 'DTK-2589'
+gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
 gem 'dtk-dsl', :github => 'dtk/dtk-dsl'
 
 # required to start a server

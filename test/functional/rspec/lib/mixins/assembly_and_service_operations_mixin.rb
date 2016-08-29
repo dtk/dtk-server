@@ -283,7 +283,7 @@ module AssemblyAndServiceOperationsMixin
 	def list_matched_success_service(service_name)
 		puts "List success services:", "------------------------"
 		service_list = send_request('/rest/assembly/list', {:subtype=>'instance', :detail_level => 'nodes'})
-		success_services = service_list['data'].select { |x| x['display_name'].include? service_name && x['execution_status'] == 'succeeded' }
+		success_services = service_list['data'].select { |x| (x['display_name'].include? service_name) && (x['execution_status'] == 'succeeded') }
 		pretty_print_JSON(success_services)
 		return success_services
 	end
@@ -299,7 +299,7 @@ module AssemblyAndServiceOperationsMixin
 	def list_matched_failed_service(service_name)
 		puts "List failed services:", "-------------------------"
 		service_list = send_request('/rest/assembly/list', {:subtype=>'instance', :detail_level => 'nodes'})
-		failed_services = service_list['data'].select { |x| x['display_name'].include? service_name && x['execution_status'] == 'failed' }
+		failed_services = service_list['data'].select { |x| (x['display_name'].include? service_name) && (x['execution_status'] == 'failed') }
 		pretty_print_JSON(failed_services)
 		return failed_services
 	end

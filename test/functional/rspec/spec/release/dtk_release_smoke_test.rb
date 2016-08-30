@@ -207,9 +207,9 @@ describe "DTK Server smoke test release" do
     include_context 'Delete all component module versions', dtk_common, local_component_module_name
   end
 
-  context "Delete component module function" do
-    include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + ec2_component_module_name
-  end
+  #context "Delete component module function" do
+  #  include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + ec2_component_module_name
+  #end
 
   #context "Delete component module function" do
   #  include_context 'Delete all component module versions', dtk_common, local_default_namespace + ":" + image_component_module_name

@@ -38,13 +38,13 @@ module DTK
         display_names = list.map(&:display_name)
 
         if assembly_name.empty?
-         if list.empty?
-             fail ErrorUsage, "Service module has no assemblies."
-         elsif list.size > 1
-             fail ErrorUsage, "Service module has more then one assembly template, please choose which one to stage: #{display_names.join(', ')}"
-         else
-          assembly_name = list.first[:display_name]
-         end
+          if list.empty?
+            fail ErrorUsage, "Service module has no assemblies."
+          elsif list.size > 1
+            fail ErrorUsage, "Service module has more then one assembly template, please choose which one to stage: #{display_names.join(', ')}"
+          else
+            assembly_name = list.first[:display_name]
+          end
         end
 
         unless assembly_template = service_module.assembly_template?(assembly_name, version)

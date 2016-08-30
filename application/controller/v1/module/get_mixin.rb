@@ -58,6 +58,13 @@ module DTK
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         rest_ok_response CommonModule.get_module_dependencies(get_default_project, rsa_pub_key, remote_params)
       end
+
+      def remote_module_info
+        namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
+        version = request_params(:version)
+        remote_params = remote_params_dtkn(:service_module, namespace, module_name, version)
+        rest_ok_response CommonModule.get_remote_module_info(get_default_project, rsa_pub_key, remote_params)
+      end
     end
   end
 end

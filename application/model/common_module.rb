@@ -58,6 +58,10 @@ module DTK
       BaseComponent.get_module_dependencies(project, rsa_pub_key, remote_params)
     end
 
+    def self.get_remote_module_info(project, rsa_pub_key, remote_params)
+       get_class_from_type(remote_params.module_type).get_remote_module_info(project, rsa_pub_key, remote_params)
+    end
+
     def self.install_component_module(project, local_params, remote_params, dtk_client_pub_key)
       BaseComponent.install_module(project, local_params, remote_params, dtk_client_pub_key)
     end

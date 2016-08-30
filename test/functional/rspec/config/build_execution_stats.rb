@@ -9,6 +9,10 @@ class TestRun < ActiveRecord::Base
   belongs_to :testsuite
 end
 
+def is_number? string
+  true if Integer(string) rescue false
+end
+
 dbconfig = YAML.load(File.open('./config/rspec2db.yml'))
 ActiveRecord::Base.establish_connection(dbconfig['dbconnection'])
 
@@ -19,8 +23,13 @@ if ARGV[2] == nil
   @query = "select * from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{suite_name}' order by tr.created_at desc limit 1"
 elsif ARGV[2] == 'all'
   @query = "select * from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{suite_name}' order by tr.created_at desc"
-else 
-  raise Exception, 'Invalid parameter value.'
+else
+  if is_number? ARGV[2]
+    limit = ARGV[2].to_i
+    @query = "select * from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{suite_name}' order by tr.created_at desc limit #{limit}"
+  else
+    raise Exception, 'Invalid parameter value.'
+  end
 end
 
 report = "Execution stats:\n"

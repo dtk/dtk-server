@@ -236,7 +236,6 @@ end
 
 shared_context 'Delete workspace instances in default target' do |dtk_common|
   it "Deletes workspace instances present in default target" do
-    target_instance = dtk_common.get_default_target_name
     workspace_instances_deleted = dtk_common.delete_workspaces_in_target("target")
     expect(workspace_instances_deleted).to eq(true)
   end

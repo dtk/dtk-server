@@ -56,7 +56,8 @@ module WorkspaceMixin
     
     workspace_instance_list = []
     workspace_instance_list = list_services_by_property("assembly_template", assembly_template)
-    workspace_instance_list += list_services_by_property("display_name", workspace_name)
+    workspace_retrieved = list_services_by_property("display_name", workspace_name)
+    workspace_instance_list += workspace_retrieved unless workspace_retrieved.nil?
     workspace_instances_deleted = false
   
     if workspace_instance_list

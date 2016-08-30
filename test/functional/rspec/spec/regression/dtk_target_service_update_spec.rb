@@ -50,7 +50,7 @@ describe 'DTK Target Service Instance update' do
     include_context 'Delete workspace instances in default target', target
   end
 
-  context 'Delete default  target service instance' do
+  context 'Delete default target service instance' do
     include_context 'Delete default target', target
   end
   context "Delete #{namespace}/#{network_service_module_name} service module" do

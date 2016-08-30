@@ -14,7 +14,7 @@ shared_context 'Import remote component module' do |component_module_name|
     puts "Import of remote component module #{component_module_name} completed successfully!" if pass == true
     puts "Import of remote component module #{component_module_name} did not complete successfully!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -28,7 +28,7 @@ shared_context 'NEG - Import remote component module' do |component_module_name|
     puts "Import of remote component module #{component_module_name} did not complete successfully since component module from same namespace already exists!" if pass == true
     puts "Import of remote component module #{component_module_name} completed successfully even though it should not!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -42,7 +42,7 @@ shared_context 'Import component module from provided git repo' do |component_mo
     puts "Component module #{component_module_name} created successfully from provided git repo!" if pass == true
     puts "Component module #{component_module_name} was not created successfully from provided git repo!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -56,7 +56,7 @@ shared_context 'NEG - Import component module from provided git repo' do |compon
     puts "Component module #{component_module_name} was not created successfully from provided incorrect git repo!" if pass == true
     puts "Component module #{component_module_name} was created successfully from provided incorrect git repo!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -70,7 +70,7 @@ shared_context 'Import component module from provided git repo to specific names
     puts "Component module #{component_module_name} created successfully from provided git repo!" if pass == true
     puts "Component module #{component_module_name} was not created successfully from provided git repo!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -84,7 +84,7 @@ shared_context 'NEG - Import component module from provided git repo to specific
     puts "Component module #{component_module_name} was not created successfully from provided incorrect git repo!" if pass == true
     puts "Component module #{component_module_name} was created successfully from provided incorrect git repo!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -101,7 +101,7 @@ shared_context 'NEG - Import component module with dependency from provided git 
     puts "Component module #{component_module_name} was created successfully from provided git repo but with dependency missing warning!" if pass == true
     puts "Component module #{component_module_name} was not created successfully from provided git repo or was created but without dependency warning!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -117,7 +117,7 @@ shared_context 'NEG - Import component module with version dependency from provi
     puts "Component module #{component_module_name} was created successfully from provided git repo but with version dependency missing error!" if pass == true
     puts "Component module #{component_module_name} was not created successfully from provided git repo or was created but without dependency error!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -131,7 +131,7 @@ shared_context 'Import component module' do |component_module_name|
     puts "Component module #{component_module_name} imported successfully!" if pass == true
     puts "Component module #{component_module_name} was not imported successfully!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -145,7 +145,7 @@ shared_context 'Pull-dtkn component module' do |component_module_name|
     puts "Component module #{component_module_name} pulled from repoman successfully!" if pass == true
     puts "Component module #{component_module_name} was not pulled from repoman successfully!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -160,7 +160,7 @@ shared_context 'Export component module' do |component_module_name, namespace|
     puts "Component module #{cmp_module} exported successfully!" if pass == true
     puts "Component module #{cmp_module} was not exported successfully!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -250,7 +250,7 @@ shared_context 'Check component module imported on local filesystem' do |compone
       puts "Component module #{component_module_name} was not imported on local filesystem successfully!"
     end
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -263,7 +263,7 @@ shared_context 'Check versioned module imported on local filesystem' do |compone
     puts "Versioned component module #{component_module_name} imported on local filesystem successfully!" if pass == true
     puts "Versioned component module #{component_module_name} was not imported on local filesystem successfully!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -311,7 +311,7 @@ shared_context 'Delete versioned component module from local filesystem' do |com
     puts "Versioned component module #{component_module_name} deleted from local filesystem successfully!" if pass == true
     puts "Versioned component module #{component_module_name} was not deleted from local filesystem successfully!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -324,7 +324,7 @@ shared_context 'Delete component module from remote repo' do |component_module_n
     puts "Component module #{component_module_name} deleted from dtkn (remote) successfully!" if pass == true
     puts "Component module #{component_module_name} was not deleted from dtkn (remote) successfully!" if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -369,7 +369,7 @@ shared_context 'Push clone changes to server' do |component_module_name, file_fo
     puts 'Clone changes pushed to server successfully!' if pass == true
     puts 'Clone changes were not pushed to server successfully!' if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -395,7 +395,7 @@ shared_context 'Push to remote changes for component module' do |component_modul
     puts 'Push to remote passed successfully!' if pass == true
     puts 'Push to remote didnt pass successfully!' if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -426,7 +426,7 @@ shared_context 'Replace dtk.model.yaml file with new one' do |component_module_n
     puts 'Old dtk.model.yaml replaced with new one!' if pass == true
     puts 'Old dtk.model.yaml was not replaced with new one!' if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -443,7 +443,7 @@ shared_context 'Add module_refs.yaml file' do |component_module_name, file_for_c
     puts 'module_refs.yaml has been added!' if pass == true
     puts 'module_refs.yaml has not been added!' if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -458,7 +458,7 @@ shared_context 'Add includes to dtk.model.yaml' do |dtk_model_yaml_file_location
     value = `cat #{dtk_model_yaml_file_location} | grep includes`
     pass = true unless value.empty?
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -474,7 +474,7 @@ shared_context 'Remove includes from dtk.model.yaml' do |dtk_model_yaml_file_loc
     pass = true if value.empty?
     puts ''
     `sed -i "/^\s*$/d" #{dtk_model_yaml_file_location}`
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -488,7 +488,7 @@ shared_context 'Remove module_refs.yaml file' do |component_module_name, file_fo
     puts 'module_refs.yaml has been removed!' if pass == true
     puts 'module_refs.yaml has not been removed!' if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -703,7 +703,7 @@ shared_context 'Check module_refs.yaml for imported module' do |component_module
         break
       end
     end
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 

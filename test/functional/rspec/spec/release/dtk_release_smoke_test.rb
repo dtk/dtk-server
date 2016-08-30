@@ -107,7 +107,7 @@ describe "DTK Server smoke test release" do
   end
 
   context "Set keypair attribute" do
-    include_context "Set attribute", target, 'network_aws::iam_user[default]/default_keypair', default_keypair
+    include_context "Set attribute", target, 'network_aws::vpc[vpc1]/default_keypair', default_keypair
   end
 
   context "Set subnet id attribute" do
@@ -227,21 +227,21 @@ describe "DTK Server smoke test release" do
     include_context "Delete component module from remote repo", component_module_name, namespace
   end
 
-  context "Delete #{ec2_component_module_name} component module version #{component_module_version} from remote" do
-    include_context "Delete component module from remote repo", ec2_component_module_name, namespace
-  end
+  #context "Delete #{ec2_component_module_name} component module version #{component_module_version} from remote" do
+  #  include_context "Delete component module from remote repo", ec2_component_module_name, namespace
+  #end
 
-  context "Delete #{ec2_component_module_name} component module base version from remote" do
-    include_context "Delete component module from remote repo", ec2_component_module_name, namespace
-  end
+  #context "Delete #{ec2_component_module_name} component module base version from remote" do
+  #  include_context "Delete component module from remote repo", ec2_component_module_name, namespace
+  #end
 
-  context "Delete #{service_module_name} service module version #{service_module_version} from remote" do
-    include_context "Delete service module from remote repo", service_module_name, namespace
-  end
+  #context "Delete #{service_module_name} service module version #{service_module_version} from remote" do
+  #  include_context "Delete service module from remote repo", service_module_name, namespace
+  #end
 
-  context "Delete #{service_module_name} service module base version from remote" do
-    include_context "Delete service module from remote repo", service_module_name, namespace
-  end
+  #context "Delete #{service_module_name} service module base version from remote" do
+  #  include_context "Delete service module from remote repo", service_module_name, namespace
+  #end
 
   after(:all) do
     puts "", ""

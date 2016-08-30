@@ -74,6 +74,7 @@ DTK::ReactorRoute.draw do
   get 'api/v1/modules/list'                      => 'v1::module/list'
   get 'api/v1/modules/list_assemblies'           => 'v1::module/list_assemblies'
   get 'api/v1/modules/module_dependencies'       => 'v1::module/module_dependencies'
+  get 'api/v1/modules/remote_module_info'        => 'v1::module/remote_module_info'
 
   post 'api/v1/modules/create_empty_module'      => 'v1::module/create_empty_module'
   post 'api/v1/modules/delete'                   => 'v1::module/delete'

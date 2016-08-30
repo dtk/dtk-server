@@ -135,6 +135,20 @@ shared_context 'Import component module' do |component_module_name|
   end
 end
 
+shared_context 'Pull-dtkn component module' do |component_module_name|
+  it "pulls latest content for #{component_module_name} from repoman" do
+    puts 'Pull-dtkn component module:', '----------------------------'
+    pass = false
+    value = `dtk-run component-module #{component_module_name} pull-dtkn`
+    puts value
+    pass = true unless value.include? 'ERROR'
+    puts "Component module #{component_module_name} pulled from repoman successfully!" if pass == true
+    puts "Component module #{component_module_name} was not pulled from repoman successfully!" if pass == false
+    puts ''
+    pass.should eq(true)
+  end
+end
+
 shared_context 'Export component module' do |component_module_name, namespace|
   it "exports #{component_module_name} component module to #{namespace} namespace on remote repo" do
     puts 'Export component module:', '------------------------'

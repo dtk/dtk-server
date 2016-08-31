@@ -15,22 +15,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK 
-  module CommonDSL::Generate
-    class ContentInput::Assembly::Node
-      class Diff < ContentInput::Diff::Set 
-        private
-        def self.type_print_form
-          'node'
-        end
-
-        class Add < ContentInput::Diff::Element::Add
-        end
-
-        class Delete < ContentInput::Diff::Element::Delete
-        end
-
+module DTK; module CommonDSL 
+  class Generate::ContentInput::Assembly::Node
+    class Diff < CommonDSL::Diff::Set 
+      class Add < CommonDSL::Diff::Element::Add
       end
+      
+      class Delete < CommonDSL::Diff::Element::Delete
+      end
+
+      private
+      def self.type
+        :node
+      end
+
     end
   end
-end
+end; end

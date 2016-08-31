@@ -15,23 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL::Generate
-  class ContentInput::Diff
-    class SerializedHash
-      class Set < self
-        module Key
-          ADDED    = 'ADDED'
-          DELETED  = 'DELETED'
-          MODIFIED = 'MODIFIED'
+module DTK
+  class CommonDSL::Diff
+    class Element
+      class Modify < self
+        attr_reader :current_val, :new_val
+        def initialize(base_diff)
+          super(base_diff.qualified_key)
+          @id_handle   = base_diff.id_handle
+          @current_val = base_diff.current_val
+          @new_val     = base_diff.new_val
         end
-        KEYS = [:added, :deleted, :modified]
-        def self.create_info(opts)
-          KEYS.inject(base_hash) do |h, key|
-            (opts[key] || []).empty? ? h : h.merge(Key.const_get(key.upcase) => opts[key])
-          end
-        end
-      end
 
+        def serialize(serialized_hash)
+          serialized_hash.serialize_modify_element(self)
+        end
+
+      end
     end
   end
-end; end
+end

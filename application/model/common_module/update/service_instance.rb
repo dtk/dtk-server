@@ -33,10 +33,9 @@ module DTK
             # for testing
             # return ret
           end
-          parsed_service_module = dsl_file_obj_from_repo(module_branch).parse_content(:service_instance)
-          existing = CommonDSL::Generate.generate_service_instance_canonical_form(service_instance, module_branch)
-          existing.diff?(parsed_service_module)
-          ret
+          service_instance_parse = dsl_file_obj_from_repo(module_branch).parse_content(:service_instance)
+          existing_service_instance = CommonDSL::Generate.generate_service_instance_canonical_form(service_instance, module_branch)
+          CommonDSL::Diff.process_service_instance(existing_service_instance, service_instance_parse)
         end
 
         private

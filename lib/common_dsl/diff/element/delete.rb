@@ -16,16 +16,19 @@
 # limitations under the License.
 #
 module DTK
-  class CommonDSL::Generate::ContentInput::Diff
+  class CommonDSL::Diff
     class Element
-      class Add < self
+      class Delete < self
         # opts can have keys
-        #  :parse_object
+        #  :gen_object
         def initialize(qualified_key, opts = {})
           super(qualified_key)
-          @parse_object = opts[:parse_object]
+          @id_handle = opts[:gen_object].id_handle
         end
 
+        def serialize(serialized_hash)
+          serialized_hash.serialize_delete_element(self)
+        end
       end
     end
   end

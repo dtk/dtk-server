@@ -18,8 +18,6 @@
 module DTK
   module CommonDSL::Generate
     class ContentInput
-      require_relative('content_input/diff')
-
       require_relative('content_input/diff_mixin')
       require_relative('content_input/diff_class_mixin')
       # diff_mixin and diff_class_mixin need to be before hash and array because it has mixins used by these

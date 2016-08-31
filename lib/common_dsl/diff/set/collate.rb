@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class CommonDSL::Generate::ContentInput::Diff
+module DTK; class CommonDSL::Diff
   class Set 
     module Collate
       module Mixin
@@ -34,5 +34,6 @@ module DTK; class CommonDSL::Generate::ContentInput::Diff
     end
   end
 end; end
+
 
 

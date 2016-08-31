@@ -15,21 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class CommonDSL::Generate::ContentInput::Diff
-  class Base
-    module Collate
-      module Mixin
-        def collate
-          add_to_collate!(Collated.new)
+module DTK
+  class CommonDSL::Diff
+    class Element
+      class Add < self
+        attr_reader :parse_object
+        # opts can have keys
+        #  :parse_object
+        def initialize(qualified_key, opts = {})
+          super(qualified_key)
+          @parse_object = opts[:parse_object]
         end
 
-        def add_to_collate!(collated)
-          collated.add!(self, :modified, create_modify_element)
+        def serialize(serialized_hash)
+          serialized_hash.serialize_add_element(self)
         end
 
       end
     end
   end
-end; end
-
-
+end

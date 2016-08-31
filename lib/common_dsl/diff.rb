@@ -15,17 +15,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL::Generate
-  class ContentInput              
+module DTK
+  module CommonDSL
     class Diff
+      require_relative('diff/serialized_hash')
       require_relative('diff/collated.rb')
       require_relative('diff/qualified_key')
       require_relative('diff/element')
 
       require_relative('diff/base')
       require_relative('diff/set')
-      
-      
+
+      def self.process_service_instance(service_instance_gen, service_instance_parse)
+        assembly_gen   = service_instance_gen.req(:Assembly)
+        assembly_parse = service_instance_parse
+        dsl_version    = service_instance_gen.req(:DSLVersion)
+
+        if base_diffs = assembly_gen.diff?(assembly_parse, QualifiedKey.new)
+          if collated_diffs = base_diffs.collate
+            
+# for debug
+#File.open('/tmp/raw', 'w') {|f| PP.pp(base_diffs, f) }
+#File.open('/tmp/collated', 'w') {|f| PP.pp(collated_diffs, f) }
+STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
+
+            Model.Transaction do
+              collated_diffs.process
+            end
+            nil
+          end
+        end  
+      end
     
       # opts can have keys
       #   :qualified_key
@@ -61,10 +81,14 @@ module DTK; module CommonDSL::Generate
         set_class.array_of_diffs_on_matching_keys(gen_hash, parse_hash, qualified_key)
       end
 
+      def type
+        self.class.type
+      end
+
       private
 
-      def type_print_form
-        self.class.type_print_form
+      def self.type_print_form
+        type.to_s
       end      
       
       def self.bass_class
@@ -76,4 +100,4 @@ module DTK; module CommonDSL::Generate
       end
     end
   end
-end; end
+end

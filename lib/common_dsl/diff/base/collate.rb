@@ -15,15 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  class CommonDSL::Generate::ContentInput::Diff
-    class Element
-      require_relative('element/modify')
-      require_relative('element/add')
-      require_relative('element/delete')
-      def initialize(qualified_key)
-        @qualified_key = qualified_key
+module DTK; class CommonDSL::Diff
+  class Base
+    module Collate
+      module Mixin
+        def collate
+          add_to_collate!(Collated.new)
+        end
+
+        def add_to_collate!(collated)
+          collated.add!(self, :modified, create_modify_element)
+        end
+
       end
     end
   end
-end
+end; end
+
+

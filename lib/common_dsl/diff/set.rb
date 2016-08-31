@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL::Generate
-  class ContentInput::Diff 
+module DTK
+  class CommonDSL::Diff
     class Set < self
       require_relative('set/collate')
 
@@ -127,7 +127,7 @@ module DTK; module CommonDSL::Generate
         end
         
         gen_hash.each do |key, gen_object|
-          unless gen_object.ignore_for_diff_to_parse?
+          unless gen_object.skip_for_generation?
             unless parse_hash.has_key?(key)
               qualified_key =  parent_qualified_key.create_with_new_element?(type_print_form, key)
               deleted << self::Delete.new(qualified_key, gen_object: gen_object) 
@@ -145,6 +145,6 @@ module DTK; module CommonDSL::Generate
       
     end
   end
-end; end
+end
 
 

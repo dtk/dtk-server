@@ -19,7 +19,7 @@ module DTK; module CommonDSL::Generate
   class ContentInput
     module DiffMixin
       # Main template-specific diff instance method call; Concrete classes overwrite this
-      def diff?(_parse_object, _qualified_key = Diff::QualifiedKey.new)
+      def diff?(_parse_object, _qualified_key)
         raise Error::NoMethodForConcreteClass.new(self.class)
       end
       
@@ -31,10 +31,8 @@ module DTK; module CommonDSL::Generate
         self.class::Diff.diff?(cur_val, new_val, qualified_key: qualified_key, id_handle: id_handle)
       end
 
-      # when comparing content of gen_hash to parse_hash this indicates what gen_hash keys to ignore
-      def ignore_for_diff_to_parse?
-        # TODO: want to change so ignore hidden and all except asserted, i.e., non-hidden asserted
-        # hidden objects will appear in gen_hash but not parse_hash
+      # The method skip_for_generation? can be overwritten
+      def skip_for_generation?
         matches_tag_type?(:hidden)
       end
 

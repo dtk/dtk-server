@@ -15,19 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK 
-  module CommonDSL::Generate
-    class ContentInput::Assembly::Attribute
-      class Diff < ContentInput::Diff::Base 
-        private
-        def self.type_print_form
-          'attribute'
-        end
+module DTK; module CommonDSL 
+  class Generate::ContentInput::Assembly::Attribute
+    class Diff < CommonDSL::Diff::Base
+      class Modify < CommonDSL::Diff::Element::Modify
+      end
 
-        class Modify < ContentInput::Diff::Element::Modify
-        end
-
+      private
+      def self.type
+        :attribute
       end
     end
   end
-end
+end; end

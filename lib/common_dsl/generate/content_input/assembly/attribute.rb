@@ -49,11 +49,17 @@ module DTK; module CommonDSL::Generate
           end
         end
 
+        def skip_for_generation?
+          super or matches_tag_type?(:desired__derived__propagated) or matches_tag_type?(:actual)
+        end
+
         ### For diffs
-        def diff?(attribute_parse, qualified_key = Diff::QualifiedKey.new)
-          cur_val = val(:Value)
-          new_val = attribute_parse.val(:Value)
-          create_diff?(cur_val, new_val, qualified_key)
+        def diff?(attribute_parse, qualified_key)
+          unless skip_for_generation?
+            cur_val = val(:Value)
+            new_val = attribute_parse.val(:Value)
+            create_diff?(cur_val, new_val, qualified_key)
+          end
         end
 
         # opts can have keys

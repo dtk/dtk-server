@@ -15,18 +15,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL::Generate
-  class ContentInput::Diff
-    class Collated 
-      def initialize
-        @diffs = {}
-      end
+module DTK
+  class CommonDSL::Diff
+    class SerializedHash
+      module Term
+        CURRENT_VAL = 'CURRENT_VAL'
+        NEW_VAL     = 'NEW_VAL'
+        
+        def self.diff_element_type(diff_type, diff_operation)
+          # assuming that pural form can be produced by just adding 'S'
+          "#{diff_type.upcase}S_#{diff_operation.upcase}"
+        end
 
-      def add!(diff, diff_type, object)
-        ((@diffs[diff.class] ||= {})[diff_type] ||= []) << object
-        self
       end
-
     end
   end
-end; end
+end
+

@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL::Generate
-  class ContentInput::Diff
+module DTK
+  class CommonDSL::Diff
     class QualifiedKey 
       def initialize(elements_to_copy = [])
         @key_elements = copy(elements_to_copy)
@@ -44,4 +44,4 @@ module DTK; module CommonDSL::Generate
       
     end
   end
-end; end
+end

@@ -18,7 +18,10 @@
 module DTK
   module CommonDSL
     require_relative('common_dsl/file_type')
-    require_relative('common_dsl/parse')
+    require_relative('common_dsl/diff')
+    # diff must be before generate
     require_relative('common_dsl/generate')
+    require_relative('common_dsl/parse')
+
   end
 end

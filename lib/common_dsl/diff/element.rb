@@ -16,16 +16,19 @@
 # limitations under the License.
 #
 module DTK
-  class CommonDSL::Generate::ContentInput::Diff
+  class CommonDSL::Diff
     class Element
-      class Modify < self
-        def initialize(base_diff)
-          super(base_diff.qualified_key)
-          @id_handle   = base_diff.id_handle
-          @current_val = base_diff.current_val
-          @new_val     = base_diff.new_val
-        end
+      require_relative('element/modify')
+      require_relative('element/add')
+      require_relative('element/delete')
 
+      attr_reader :qualified_key
+      def initialize(qualified_key)
+        @qualified_key = qualified_key
+      end
+
+      def process
+        raise Error::NoMethodForConcreteClass.new(self.class)
       end
     end
   end

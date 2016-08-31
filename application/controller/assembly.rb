@@ -36,8 +36,11 @@ module DTK
     end
 
     def rest__delete_using_workflow
-      assembly = ret_assembly_instance_object()
+      assembly  = ret_assembly_instance_object()
+
       opts = Opts.new(delete_action: 'delete', delete_params: [assembly.id_handle()])
+      opts.merge!(recursive: true) if ret_request_params(:recursive)
+
       rest_ok_response assembly.exec__delete(opts)
     end
 

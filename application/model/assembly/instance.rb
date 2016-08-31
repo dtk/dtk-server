@@ -519,39 +519,14 @@ module DTK; class  Assembly
       }
       opts.merge!(skip_running_check: true)
 
-      if assembly_wide_node = self.has_assembly_wide_node?
-        if components = assembly_wide_node.get_components
-          cmp_opts = { method_name: 'delete' }
-
-          # order components by 'delete' action inside assembly workflow if exists
-          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(self))
-          ordered_components.each do |component|
-            cmp_top_task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
-            cmp_action = nil
-
-            begin
-             cmp_action = Task.create_for_ad_hoc_action(self, component, cmp_opts) if assembly_wide_node.get_admin_op_status.eql?'running'
-            rescue Task::Template::ParsingError => e
-              Log.info("Ignoring component 'delete' action does not exist.")
-            end
-
-            delete_cmp_from_database = Task.create_for_delete_from_database(self, component, assembly_wide_node, opts)
-            cmp_top_task.add_subtask(cmp_action) if cmp_action
-            cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
-            task.add_subtask(cmp_top_task)
-          end
-        end
+      if opts[:recursive]
+        fail ErrorUsage, "You can use recursive delete with target service instances only!" unless is_target_service_instance?
+        delete_recursive(self, task, opts)
       end
 
-      if nodes = self.get_leaf_nodes(remove_assembly_wide_node: true)
-        nodes.each do |node|
-          node_top_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true))
-          task.add_subtask(node_top_task) if node_top_task
-        end
-      end
+      self_subtask = delete_instance_task(self, opts)
+      task.add_subtask(self_subtask)
 
-      delete_assembly_from_database = Task.create_for_delete_from_database(self, nil, nil, opts.merge!(skip_running_check: true))
-      task.add_subtask(delete_assembly_from_database) if delete_assembly_from_database
       task = task.save_and_add_ids()
 
       workflow = Workflow.create(task)
@@ -559,6 +534,46 @@ module DTK; class  Assembly
 
       ret.merge!(task_id: task.id())
       ret
+    end
+
+    def delete_instance_task(assembly_instance, opts = {})
+      task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
+
+      if assembly_wide_node = assembly_instance.has_assembly_wide_node?
+        if components = assembly_wide_node.get_components
+          cmp_opts = { method_name: 'delete' }
+
+          # order components by 'delete' action inside assembly workflow if exists
+          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
+          ordered_components.each do |component|
+            cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
+            cmp_action = nil
+
+            begin
+             cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if assembly_wide_node.get_admin_op_status.eql?'running'
+            rescue Task::Template::ParsingError => e
+              Log.info("Ignoring component 'delete' action does not exist.")
+            end
+
+            delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, assembly_wide_node, opts)
+            cmp_top_task.add_subtask(cmp_action) if cmp_action
+            cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
+            task.add_subtask(cmp_top_task)
+          end
+        end
+      end
+
+      if nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
+        nodes.each do |node|
+          node_top_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true))
+          task.add_subtask(node_top_task) if node_top_task
+        end
+      end
+
+      delete_assembly_from_database = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
+      task.add_subtask(delete_assembly_from_database) if delete_assembly_from_database
+
+      task
     end
 
     def create_task(opts)
@@ -852,6 +867,16 @@ module DTK; class  Assembly
 
       remaining_components = components - ordered_components
       ordered_components + remaining_components
+    end
+
+    def delete_recursive(service, parent_task, opts = {})
+      staged_instances = Assembly::Instance.get(model_handle, target_idhs: [service.get_target.id_handle])
+      staged_instances.reject!{ |si| si[:id] == service[:id] }
+
+      staged_instances.each do |staged_instance|
+        instance_subtask = delete_instance_task(staged_instance, opts)
+        parent_task.add_subtask(instance_subtask)
+      end
     end
   end
 end

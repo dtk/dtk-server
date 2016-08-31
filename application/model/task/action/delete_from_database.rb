@@ -37,7 +37,13 @@ module DTK; class Task
 
       def execute_delete_action(top_task_idh)
         top_task = top_task_idh.create_object()
-        assembly = top_task.assembly
+
+        assembly =
+          if subtask_assembly = self[:assembly]
+            top_task.id_handle.createIDH(id: subtask_assembly[:id], model_name: :assembly).create_object
+          else
+            top_task.assembly
+          end
 
         if assembly
           assembly_instance = assembly.copy_as_assembly_instance

@@ -54,7 +54,7 @@ module DTK
                 v.respond_to?(:to_s) &&
                 (not v.is_a?(Array)) &&
                 (not v.is_a?(Hash)) &&
-                v.to_s =~ validation
+                !!(v.to_s =~ validation)
               end
             else
               fail Error.new("Illegal validation argument (#{validation.inspect})")

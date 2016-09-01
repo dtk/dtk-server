@@ -17,21 +17,28 @@
 #
 module DTK; class Attribute
   class LegalValue
-    def self.raise_usage_errors?(existing_attrs, ndx_new_vals)
+    # opts can have keys:
+    #   :only_special_processing
+    def self.raise_error_if_invalid(existing_attrs, ndx_new_vals, opts = {})
       errors = ErrorsUsage.new
-      existing_attrs.each do |a|
-        new_val = ndx_new_vals[a[:id]]
-        special_processing, error = SpecialProcessing::ValueCheck.error_special_processing?(a, new_val)
+      existing_attrs.each do |attr|
+        attr.update_object!(:node_node_id, :component_component_id, :semantic_data_type) # proactive in fields needed
+        new_val = ndx_new_vals[attr[:id]]
+        special_processing, error = SpecialProcessing::ValueCheck.error_special_processing?(attr, new_val)
         if special_processing
           errors << error if error
         else
-          # TODO: stub for normal error processing
+          unless opts[:only_special_processing]
+            if semantic_data_type = attr[:semantic_data_type]
+              errors << Error.new(attr, new_val) unless SemanticDatatype.is_valid?(semantic_data_type, new_val)
+            end
+          end
         end
-      end
-      unless errors.empty?
-        fail errors
+        
+        fail errors unless errors.empty?
       end
     end
+
     class Error < ErrorUsage
       def initialize(attr, new_val, info = {})
         super(error_msg(attr, new_val, info))
@@ -41,7 +48,7 @@ module DTK; class Attribute
 
       def error_msg(attr, new_val, info)
         attr_name = attr[:display_name]
-        ret = "Attribute (#{attr}) has illegal value (#{new_val})"
+        ret = "Attribute '#{attr}' has illegal value #{new_val.inspect}"
         if legal_vals = info[:legal_values]
           ident = ' ' * 2;
           sep = '--------------'

@@ -19,6 +19,9 @@ module DTK; module CommonDSL
   class Generate::ContentInput::Assembly::Attribute
     class Diff < CommonDSL::Diff::Base
       class Modify < CommonDSL::Diff::Element::Modify
+        def process
+          ::DTK::Attribute.update_and_propagate_attribute_from_diff(existing_object, new_val)
+        end
       end
 
       private

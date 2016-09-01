@@ -31,7 +31,10 @@ module DTK
       end
 
       def process
-        # TODO: stub
+        Sort::ForProcess.sort_keys(@diffs.keys).each do |collate_key|
+          diffs_of_same_type = @diffs[collate_key]
+          diffs_of_same_type.each { |diff| diff.process }
+        end
       end
 
       # opts can have keys
@@ -39,8 +42,8 @@ module DTK
       def serialize(opts = {})
         SerializedHash.create(opts) do |serialized_hash|
           Sort::ForSerialize.sort_keys(@diffs.keys).each do |collate_key|
-            diffs = @diffs[collate_key]
-            serialized_hash.add_collate_level_elements?(collate_key, diffs)
+            diffs_of_same_type = @diffs[collate_key]
+            serialized_hash.add_collate_level_elements?(collate_key, diffs_of_same_type)
           end
         end
       end
@@ -76,6 +79,20 @@ module DTK
             @op_order_mapping ||= order_mapping(OP_ORDER)
           end
         end
+
+        class ForProcess < self
+          private
+          TYPE_ORDER = [:node, :component, :attribute]
+          OP_ORDER   = [:added, :deleted, :modified]
+
+          def self.type_order_mapping
+            @type_order_mapping ||= order_mapping(TYPE_ORDER)
+          end
+          def self.op_order_mapping
+            @op_order_mapping ||= order_mapping(OP_ORDER)
+          end
+        end
+
       end
     end
   end

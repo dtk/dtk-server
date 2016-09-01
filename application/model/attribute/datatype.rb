@@ -41,9 +41,12 @@ module DTK; class Attribute
       end
     end
 
-    def convert_value_to_ruby_object
+    # opts can have keys:
+    #  :value_field
+    #  :donot_raise_error
+    def convert_value_to_ruby_object(opts = {})
       update_object!(:data_type, :value_asserted, :value_derived)
-      Datatype.convert_value_to_ruby_object(self)
+      Datatype.convert_value_to_ruby_object(self, opts)
     end
 
     private
@@ -81,30 +84,33 @@ module DTK; class Attribute
       end
     end
 
+    # opts can have keys:
+    #  :value_field
+    #  :donot_raise_error
     def self.convert_value_to_ruby_object(attr, opts = {})
       attr_val_field = opts[:value_field] || :attribute_value
       raw_val = attr[attr_val_field]
       return nil if raw_val.nil?
-      case (attr[:data_type] || 'string')
-        when 'string'
+      case (attr[:data_type] || :string).to_sym
+        when :string
           raw_val
-        when 'boolean'
+        when :boolean
           case raw_val.to_s
             when 'true' then true
             when 'false' then false
-            else raise_error_msg('boolean', raw_val, attr)
+            else raise_error_msg?(:boolean, raw_val, attr, opts)
           end
-        when 'integer'
+        when :integer
           if raw_val =~ /^[0-9]+$/
             raw_val.to_i
           else
-            raise_error_msg('integer', raw_val, attr)
+            raise_error_msg?(:integer, raw_val, attr, opts)
           end
-        when 'json'
+        when :json
           # will be converted already
           raw_val
         else
-        fail Error.new("Unexpected Datatype (#{attr[:data_type]}) for attribute (#{attr.print_form()})")
+        fail Error, "Unexpected Datatype '#{attr[:data_type]}' for attribute '#{attr.print_form}'"
       end
     end
 
@@ -149,9 +155,15 @@ module DTK; class Attribute
 
     private
 
+    # opts can have keys:
+    #  :donot_raise_error
+    def self.raise_error_msg?(type, val, attr, opts = {})
+      opts[:donot_raise_error] ? val : raise_error_msg(type, val, attr)
+    end
+
     def self.raise_error_msg(type, val, attr)
       val_print_form = (val.respond_to?(:to_s) ? val.to_s : val.inspect)
-      fail ErrorUsage.new("Unexpected #{type.to_s.capitalize} Value (#{val_print_form}) for attribute (#{attr.print_form}); use set-attribute to change its value")
+      fail ErrorUsage, "Unexpected #{type} value for attribute '#{attr.print_form}': #{val_print_form}"
     end
 
     def self.ret_builtin_scalar_types

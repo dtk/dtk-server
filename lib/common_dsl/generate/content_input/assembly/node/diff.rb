@@ -19,9 +19,15 @@ module DTK; module CommonDSL
   class Generate::ContentInput::Assembly::Node
     class Diff < CommonDSL::Diff::Set 
       class Add < CommonDSL::Diff::Element::Add
+        def process
+          # TODO: stub 
+        end
       end
       
       class Delete < CommonDSL::Diff::Element::Delete
+        def process
+          # TODO: stub 
+        end
       end
 
       private

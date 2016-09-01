@@ -57,7 +57,7 @@ module DTK
       end
 
       def self.datatype(semantic_data_type)
-        lookup(semantic_data_type).datatype()
+        lookup(semantic_data_type).datatype
       end
 
       def is_valid?(value)
@@ -65,7 +65,7 @@ module DTK
       end
 
       def self.isa?(term)
-        all_types().key?(term.to_sym)
+        all_types.key?(term.to_sym)
       end
 
       def self.convert_to_internal_form(semantic_data_type, value)
@@ -82,10 +82,7 @@ module DTK
       private
 
       def self.lookup(semantic_data_type)
-        unless ret = all_types()[semantic_data_type.to_sym]
-          fail ErrorUsage.new("Illegal datatype (#{semantic_data_type})")
-        end
-        ret
+        all_types[semantic_data_type.to_sym] || fail(ErrorUsage, "Illegal datatype (#{semantic_data_type})")
       end
     end
   end

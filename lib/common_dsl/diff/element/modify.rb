@@ -31,6 +31,12 @@ module DTK
           serialized_hash.serialize_modify_element(self)
         end
 
+        private
+
+        def existing_object
+          @existing_object ||= @id_handle.create_object
+        end
+
       end
     end
   end

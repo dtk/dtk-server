@@ -130,8 +130,8 @@ module DTK; class Attribute
       }
       existing_attrs = Model.get_objs(attr_mh, sp_hash, opts)
       ndx_new_vals = attribute_rows.inject({}) { |h, r| h.merge(r[:id] => r[:value_asserted]) }
-      LegalValue.raise_usage_errors?(existing_attrs, ndx_new_vals)
-
+      # TODO: can we get rid of { only_special_processing: true }
+      LegalValue.raise_error_if_invalid(existing_attrs, ndx_new_vals, only_special_processing: true)
       SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
       Attribute.update_and_propagate_attributes(attr_mh, attribute_rows, opts)
       ret

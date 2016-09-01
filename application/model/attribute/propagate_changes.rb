@@ -17,6 +17,19 @@
 #
 module DTK; class Attribute
   module PropagateChangesClassMixin
+    def update_and_propagate_attribute_from_diff(existing_attribute, new_val)
+      existing_attrs = [existing_attribute]
+      ndx_new_vals   = { existing_attribute.id => new_val }
+      attribute_rows = [{ id: existing_attribute.id, value_asserted: new_val }]
+      # Make method in LegalValue taht just returns info about illegal values; could be list of logal value errors
+      # do it so higher level can bulk up multiple errors
+      # The diff modify calling function should then report errors with respect to 
+      # the qualified key
+      LegalValue.raise_error_if_invalid(existing_attrs, ndx_new_vals)
+      SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
+      update_and_propagate_attributes(existing_attribute.model_handle, attribute_rows)
+    end
+
     # assume attribute_rows all have :value_asserted or all have :value_derived
     # TODO: DTK-2226; partial_value is set by default to  true; updated update_and_propagate_dynamic_attributes so partial_value: false
     #       see if this is right and whether other calls to update_and_propagate_attributes should set partial_value: false

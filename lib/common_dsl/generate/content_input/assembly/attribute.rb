@@ -103,7 +103,7 @@ module DTK; module CommonDSL::Generate
         end
 
         def attribute_value
-          @attribute_value ||= DTK::Attribute::Datatype.convert_value_to_ruby_object(@attribute, value_field: :attribute_value)
+          @attribute_value ||= @attribute.convert_value_to_ruby_object(value_field: :attribute_value, donot_raise_error: true)
         end
 
         def attribute_name

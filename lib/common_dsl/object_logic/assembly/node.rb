@@ -15,15 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL::Generate
-  class ContentInput 
+module DTK; module CommonDSL
+  module ObjectLogic
     class Assembly
-      class Node < ContentInput::Hash
+      class Node < Generate::ContentInput::Hash
         require_relative('node/diff')
         require_relative('node/attribute')
 
         def self.generate_content_input(assembly_instance)
-          get_augmented_nodes(assembly_instance).inject(ContentInput::Hash.new) do |h, aug_node| 
+          get_augmented_nodes(assembly_instance).inject(ObjectLogic.new_content_input_hash) do |h, aug_node| 
             h.merge(aug_node.display_name => new.generate_content_input!(aug_node))
           end
         end

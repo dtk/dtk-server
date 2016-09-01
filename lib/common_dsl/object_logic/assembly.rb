@@ -16,9 +16,9 @@
 # limitations under the License.
 #
 module DTK
-  module CommonDSL::Generate
-    class ContentInput
-      class Assembly < ContentInput::Hash
+  module CommonDSL
+    module ObjectLogic
+      class Assembly < Generate::ContentInput::Hash
         require_relative('assembly/diff')
 
         require_relative('assembly/attribute')
@@ -32,8 +32,8 @@ module DTK
         
         def generate_content_input!(assembly_instance)
           set_id_handle(assembly_instance)
-          nodes = ContentInput::Hash.new
-          components = ContentInput::Hash.new
+          nodes = ObjectLogic.new_content_input_hash
+          components = ObjectLogic.new_content_input_hash
           Node.generate_content_input(assembly_instance).each do | key, content_input_node |
             if content_input_node[:is_assembly_wide_node]
               components.merge!(content_input_node.val(:Components) || {})
@@ -59,7 +59,6 @@ module DTK
             # ...
           end
         end
-
       end
     end
   end

@@ -15,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL::Generate
-  class ContentInput 
+module DTK; module CommonDSL
+  module ObjectLogic
     class Assembly
-      class Component < ContentInput::Hash
+      class Component < Generate::ContentInput::Hash
         require_relative('component/diff')
         require_relative('component/attribute')
 
@@ -29,7 +29,7 @@ module DTK; module CommonDSL::Generate
         private :initialize
 
         def self.generate_content_input(aug_components)
-          aug_components.inject(ContentInput::Hash.new) do |h, aug_component|
+          aug_components.inject(ObjectLogic.new_content_input_hash) do |h, aug_component|
             h.merge(component_name(aug_component) => new(aug_component).generate_content_input!)
           end
         end

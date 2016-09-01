@@ -15,25 +15,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  module CommonDSL::Generate
-    class ContentInput
-      class ServiceInstance < ContentInput::Hash
-        def initialize(service_instance, module_branch)
-          super()
-          @service_instance = service_instance
-          @module_branch    = module_branch
+module DTK; module CommonDSL 
+  class ObjectLogic::Assembly::Component
+    class Diff < CommonDSL::Diff::Set 
+      class Add < CommonDSL::Diff::Element::Add
+        def process
+          # TODO: stub 
         end
-
-        def generate_content_input!
-          assembly_instance = @service_instance.assembly_instance
-          set(:DSLVersion, @module_branch.dsl_version)
-          set(:Name, assembly_instance.display_name) 
-          set(:Assembly, Assembly.generate_content_input(assembly_instance))
-          self
+      end
+      
+      class Delete < CommonDSL::Diff::Element::Delete
+        def process
+          # TODO: stub 
         end
+      end
 
+      private
+      def self.type
+        :component
       end
     end
   end
-end
+end; end
+

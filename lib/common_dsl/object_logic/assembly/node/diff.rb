@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL 
-  class Generate::ContentInput::Assembly::Node
+  class ObjectLogic::Assembly::Node
     class Diff < CommonDSL::Diff::Set 
       class Add < CommonDSL::Diff::Element::Add
         def process

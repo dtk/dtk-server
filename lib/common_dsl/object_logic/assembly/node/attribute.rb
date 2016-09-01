@@ -15,18 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL 
-  class Generate::ContentInput::Assembly::Attribute
-    class Diff < CommonDSL::Diff::Base
-      class Modify < CommonDSL::Diff::Element::Modify
-        def process
-          ::DTK::Attribute.update_and_propagate_attribute_from_diff(existing_object, new_val)
-        end
-      end
+module DTK; module CommonDSL::ObjectLogic
+  class Assembly
+    class Node
+      class Attribute < Assembly::Attribute
+        private
 
-      private
-      def self.type
-        :attribute
+        def prune?
+          attribute_name == 'name'
+        end
+
       end
     end
   end

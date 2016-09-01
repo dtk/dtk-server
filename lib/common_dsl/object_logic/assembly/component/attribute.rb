@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class CommonDSL::Generate::ContentInput
+module DTK; module CommonDSL::ObjectLogic
   class Assembly
     class Component
       class Attribute < Assembly::Attribute

@@ -16,22 +16,19 @@
 # limitations under the License.
 #
 module DTK
-  module CommonDSL::Generate
-    class ContentInput
-      require_relative('content_input/diff_mixin')
-      require_relative('content_input/diff_class_mixin')
-      # diff_mixin and diff_class_mixin need to be before hash and array because it has mixins used by these
-      require_relative('content_input/hash')
-      require_relative('content_input/array')
-
-      # requires below need to be before hash and array
-      require_relative('content_input/service_instance')
-      require_relative('content_input/assembly')
-
-      def self.generate_for_service_instance(service_instance, module_branch)
-        ServiceInstance.new(service_instance, module_branch).generate_content_input!
+  module CommonDSL
+    module Generate
+      class ContentInput
+        require_relative('content_input/diff_mixin')
+        require_relative('content_input/diff_class_mixin')
+        # diff_mixin and diff_class_mixin need to be before hash and array because it has mixins used by these
+        require_relative('content_input/hash')
+        require_relative('content_input/array')
+        
+        def self.generate_for_service_instance(service_instance, module_branch)
+          ObjectLogic::ServiceInstance.new(service_instance, module_branch).generate_content_input!
+        end
       end
-
     end
   end
 end

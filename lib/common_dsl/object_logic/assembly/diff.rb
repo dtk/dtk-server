@@ -17,13 +17,14 @@
 #
 module DTK
   module CommonDSL
-    require_relative('common_dsl/file_type')
-    require_relative('common_dsl/diff')
-    # diff must be before generate
-    require_relative('common_dsl/generate')
-    require_relative('common_dsl/parse')
+    class ObjectLogic::Assembly 
+      class Diff < CommonDSL::Diff::Set 
+        private
+        def type
+          :assembly
+        end
 
-    # object_logic must go last
-    require_relative('common_dsl/object_logic')
+      end
+    end
   end
 end

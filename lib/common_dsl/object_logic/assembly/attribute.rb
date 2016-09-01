@@ -15,10 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL::Generate
-  class ContentInput 
+module DTK; module CommonDSL
+  module ObjectLogic
     class Assembly
-      class Attribute < ContentInput::Hash
+      class Attribute < Generate::ContentInput::Hash
         require_relative('attribute/diff')
 
         def initialize(type, attribute)
@@ -31,7 +31,7 @@ module DTK; module CommonDSL::Generate
         # type can be :assembly, :node, :component
         # opts - depends on type
         def self.generate_content_input?(type, attributes, opts = {})
-          content_input_attributes = attributes.inject(ContentInput::Hash.new) do |h, attribute| 
+          content_input_attributes = attributes.inject(ObjectLogic.new_content_input_hash) do |h, attribute| 
             content_input_attr = create(type, attribute, opts).generate_content_input?
             content_input_attr ? h.merge!(attribute_name(attribute) => content_input_attr) : h
           end
@@ -97,7 +97,7 @@ module DTK; module CommonDSL::Generate
         end
 
         def self.sort(content_input_attributes)
-          content_input_attributes.keys.sort.inject(ContentInput::Hash.new) do |h, key|
+          content_input_attributes.keys.sort.inject(ObjectLogic.new_content_input_hash) do |h, key|
             h.merge(key => content_input_attributes[key])
           end
         end

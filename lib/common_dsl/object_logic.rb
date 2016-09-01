@@ -15,14 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL
-  class Generate::ContentInput::Assembly 
-    class Diff < CommonDSL::Diff::Set 
-      private
-      def type
-        :assembly
-      end
+module DTK
+  module CommonDSL
+    module ObjectLogic
+      require_relative('object_logic/service_instance')
+      require_relative('object_logic/assembly')
 
+      def self.new_content_input_hash
+        Generate::ContentInput::Hash.new
+      end
     end
   end
-end; end
+end

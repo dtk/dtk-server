@@ -51,10 +51,12 @@ module DTK
         end
 
         ### For diffs
-        def diff?(assembly_parse, qualified_key)
-          aggregate_diffs? do |diff_set|
-            diff_set.add? Node.diff_set(val(:Nodes), assembly_parse.val(:Nodes), qualified_key)
-            diff_set.add? Component.diff_set(val(:Components), assembly_parse.val(:Components), qualified_key)
+        # opts can have keys:
+        #  :service_instance
+        def diff?(assembly_parse, qualified_key, opts = {})
+          aggregate_diffs?(qualified_key, opts) do |diff_set|
+            diff_set.add_diff_set? Node, val(:Nodes), assembly_parse.val(:Nodes)
+            diff_set.add_diff_set? Component, val(:Components), assembly_parse.val(:Components)
             # TODO: need to add diffs on all subobjects
             # ...
           end

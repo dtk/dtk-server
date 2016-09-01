@@ -26,19 +26,20 @@ module DTK
       require_relative('diff/base')
       require_relative('diff/set')
 
-      def self.process_service_instance(service_instance_gen, service_instance_parse)
-        assembly_gen   = service_instance_gen.req(:Assembly)
-        assembly_parse = service_instance_parse
-        dsl_version    = service_instance_gen.req(:DSLVersion)
+      def self.process_service_instance(service_instance, module_branch)
+        unless dsl_file_obj = Parse.matching_service_instance_file_obj?(module_branch)
+          fail Error, "Unexpected that 'dsl_file_obj' is nil"
+        end
+        service_instance_parse = dsl_file_obj.parse_content(:service_instance)
+        service_instance_gen   = Generate.generate_service_instance_canonical_form(service_instance, module_branch)
 
-        if base_diffs = assembly_gen.diff?(assembly_parse, QualifiedKey.new)
+        if base_diffs = compute_base_diffs(service_instance, service_instance_parse, service_instance_gen)
           if collated_diffs = base_diffs.collate
-            
+            dsl_version = service_instance_gen.req(:DSLVersion)
 # for debug
 #File.open('/tmp/raw', 'w') {|f| PP.pp(base_diffs, f) }
 #File.open('/tmp/collated', 'w') {|f| PP.pp(collated_diffs, f) }
 STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
-
             Model.Transaction do
               collated_diffs.process
             end
@@ -46,7 +47,7 @@ STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
           end
         end  
       end
-    
+
       # opts can have keys
       #   :qualified_key
       #   :id_handle
@@ -57,7 +58,6 @@ STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
       def self.aggregate?(diff_sets)
         set_class.aggregate?(diff_sets)
       end
-      
       
       # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse 
       # with values being elements of same type
@@ -86,6 +86,12 @@ STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
       end
 
       private
+
+      def self.compute_base_diffs(service_instance, service_instance_parse, service_instance_gen)
+        assembly_gen   = service_instance_gen.req(:Assembly)
+        assembly_parse = service_instance_parse # assembly parse and service_instance parse are identical
+        assembly_gen.diff?(assembly_parse, QualifiedKey.new, service_instance: service_instance)
+      end
 
       def self.type_print_form
         type.to_s

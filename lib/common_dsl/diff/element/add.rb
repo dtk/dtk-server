@@ -22,9 +22,11 @@ module DTK
         attr_reader :parse_object
         # opts can have keys
         #  :parse_object
+        #  :service_instance
         def initialize(qualified_key, opts = {})
           super(qualified_key)
-          @parse_object = opts[:parse_object]
+          @parse_object     = opts[:parse_object]
+          @service_instance = opts[:service_instance]
         end
 
         def serialize(serialized_hash)

@@ -41,36 +41,45 @@ module DTK
           @deleted  = triplet[1] || []
           @modified = triplet[2] || []
         end
+        @qualified_key    = opts[:qualified_key]
+        @service_instance = opts[:service_instance]
       end
       private :initialize
       attr_accessor :added, :deleted, :modified
 
       # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash 
       # produced by parse with values being elements of same type
-      def self.between_hashes(gen_hash, parse_hash, qualified_key)
-        between_arrays_or_hashes(:hash, gen_hash, parse_hash, qualified_key)
+      # opts can have keys:
+      #  :service_instance
+      def self.between_hashes(gen_hash, parse_hash, qualified_key, opts = {})
+        between_arrays_or_hashes(:hash, gen_hash, parse_hash, qualified_key, opts)
       end
       
       # The arguments gen_array is canonical array produced by generation and parse_array is canonical array 
       # produced by parse with values being elements of same type
-      def self.between_arrays(gen_array, parse_array, qualified_key)
+      # opts can have keys:
+      #  :service_instance
+      def self.between_arrays(gen_array, parse_array, qualified_key, opts = {})
         ndx_gen_array = (gen_array || []).inject({}) { |h, gen_object| h.merge(gen_object.diff_key => gen_object) }
         ndx_parse_array = (parse_array || []).inject({}) { |h, parse_object| h.merge(parse_object.diff_key => parse_object) }
-        between_arrays_or_hashes(:array, ndx_gen_array, ndx_parse_array, qualified_key) 
+        between_arrays_or_hashes(:array, ndx_gen_array, ndx_parse_array, qualified_key, opts) 
       end
       
-      def self.aggregate?(&body)
-        diff_set = new
-        # the code passed into body will call diff_set.add?
+
+      # opts can have keys:
+      #  :service_instance
+      def self.aggregate?(qualified_key, opts = {},&body)
+        diff_set = new(opts.merge(qualified_key: qualified_key))
+        # the code passed into body conditionally will update diff_set
         # which conditionally adds to @modified
         body.call(diff_set)
         diff_set.modified_empty? ? nil : diff_set
       end
-      
-      def add?(diff_set_or_array)
-        add_to_modified?(diff_set_or_array)
+
+      def add_diff_set?(object_klass, gen_object, parse_object)
+        add?(object_klass.diff_set(gen_object, parse_object, @qualified_key, service_instance: @service_instance))
       end
-      
+
       def modified_empty?
         @modified.empty?
       end
@@ -96,6 +105,10 @@ module DTK
       end
       
       private
+
+      def add?(diff_set_or_array)
+        add_to_modified?(diff_set_or_array)
+      end
       
       def add_to_modified?(diff_set_or_array)
         unless diff_set_or_array.nil? or diff_set_or_array.empty?
@@ -107,7 +120,9 @@ module DTK
         end
       end
       
-      def self.between_arrays_or_hashes(array_or_hash, gen_hash, parse_hash, parent_qualified_key)
+      # opts can have keys:
+      #  :service_instance
+      def self.between_arrays_or_hashes(array_or_hash, gen_hash, parse_hash, parent_qualified_key, opts = {})
         added    = []
         deleted  = []
         modified = []
@@ -118,11 +133,11 @@ module DTK
         parse_hash.each do |key, parse_object|
           qualified_key =  parent_qualified_key.create_with_new_element?(type_print_form, key)
           if gen_hash.has_key?(key)
-            if diff = gen_hash[key].diff?(parse_object, qualified_key)
+            if diff = gen_hash[key].diff?(parse_object, qualified_key, opts)
               modified << diff
             end
           else
-            added << self::Add.new(qualified_key, parse_object: parse_object)
+            added << self::Add.new(qualified_key, parse_object: parse_object, service_instance: opts[:service_instance])
           end
         end
         

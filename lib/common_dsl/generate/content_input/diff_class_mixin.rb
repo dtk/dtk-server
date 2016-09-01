@@ -18,8 +18,10 @@
 module DTK; module CommonDSL::Generate
   class ContentInput
     module DiffClassMixin
-      def diff_set_from_hashes(gen_hash, parse_hash, quaified_key)
-        self::Diff.between_hashes(gen_hash, parse_hash, quaified_key)
+      # opts can haev keys:
+      #   :service_instance
+      def diff_set_from_hashes(gen_hash, parse_hash, quaified_key, opts = {})
+        self::Diff.between_hashes(gen_hash, parse_hash, quaified_key, opts)
       end
       
       def array_of_diffs_on_matching_keys(gen_hash, parse_hash, quaified_key)

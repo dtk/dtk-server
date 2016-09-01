@@ -62,13 +62,11 @@ module DTK; module CommonDSL
           end
         end
 
-        # opts can have keys
-        #  :qualified_key
-        def self.diff_set(attributes_gen, attributes_parse, opts = {})
+        def self.diff_set(attributes_gen, attributes_parse, qualified_key, _opts = {})
           # The method array_of_diffs_on_matching_keys; so assuming that user is not adding attributes
           # and by design not erroneously catching hidden attributes, which wil show up in self (attribute_gen),
           # but not attributes_parse
-          array_of_diffs_on_matching_keys(attributes_gen, attributes_parse, opts)
+          array_of_diffs_on_matching_keys(attributes_gen, attributes_parse, qualified_key)
         end
 
         private

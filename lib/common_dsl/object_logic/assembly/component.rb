@@ -46,15 +46,19 @@ module DTK; module CommonDSL
         end
 
         # For diffs
-        def diff?(component_parse, qualified_key)
-          aggregate_diffs? do |diff_set|
-            diff_set.add? Attribute.diff_set(val(:Attributes), component_parse.val(:Attributes), qualified_key)
+        # opts can have keys:
+        #   :service_instance
+        def diff?(component_parse, qualified_key, opts = {})
+          aggregate_diffs?(qualified_key, opts) do |diff_set|
+            diff_set.add_diff_set? Attribute, val(:Attributes), component_parse.val(:Attributes)
             # TODO: need to add diffs on all subobjects
           end
         end
 
-        def self.diff_set(nodes_gen, nodes_parse, qualified_key)
-          diff_set_from_hashes(nodes_gen, nodes_parse, qualified_key)
+        # opts can have keys:
+        #   :service_instance
+        def self.diff_set(nodes_gen, nodes_parse, qualified_key, opts = {})
+          diff_set_from_hashes(nodes_gen, nodes_parse, qualified_key, opts)
         end
 
         private

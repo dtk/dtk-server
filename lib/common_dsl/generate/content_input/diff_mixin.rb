@@ -23,8 +23,10 @@ module DTK; module CommonDSL::Generate
         raise Error::NoMethodForConcreteClass.new(self.class)
       end
       
-      def aggregate_diffs?(&body)
-        self.class::Diff.aggregate?(&body)
+      # opts can have keys:
+      #  :service_instance
+      def aggregate_diffs?(qualified_key, opts = {}, &body)
+        self.class::Diff.aggregate?(qualified_key, opts, &body)
       end
       
       def create_diff?(cur_val, new_val, qualified_key)

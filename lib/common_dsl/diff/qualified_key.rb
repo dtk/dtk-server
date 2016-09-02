@@ -34,6 +34,13 @@ module DTK
         end
       end
 
+      def relative_key
+        unless last = @key_elements.last
+          fail Error, "Unexpectd that @key_elements is empty" 
+        end
+        last[:key]
+      end
+
       private
 
       def copy(key_elements)

@@ -17,15 +17,13 @@
 #
 module DTK; module CommonDSL 
   class ObjectLogic::Assembly::Node
-    class Diff < CommonDSL::Diff::Set 
-      require_relative('diff/add')
-      require_relative('diff/delete')
+    class Diff
+      class Delete < CommonDSL::Diff::Element::Delete
+        def process
+          # TODO: stub 
+        end
 
-      private
-      def self.type
-        :node
       end
-
     end
   end
 end; end

@@ -42,6 +42,7 @@ module DTK
 STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
             Model.Transaction do
               collated_diffs.process
+Aux.stop_for_testing?(:push_diff) # TODO: for debugging
             end
             nil
           end

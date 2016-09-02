@@ -21,7 +21,6 @@ module DTK; module CommonDSL
       class Add < CommonDSL::Diff::Element::Add
         def process
           # TODO: stub 
-          pp [:add_component_processing, self]
         end
       end
       

@@ -30,6 +30,13 @@ module DTK
       def process
         raise Error::NoMethodForConcreteClass.new(self.class)
       end
+
+      private
+
+      def relative_key
+        @qualified_key.relative_key
+      end
+
     end
   end
 end

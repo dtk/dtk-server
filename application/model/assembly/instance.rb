@@ -96,6 +96,17 @@ module DTK; class  Assembly
       nodes
     end
 
+    def add_node_from_diff(node_name)
+      target = get_target
+      node_template = Node::Template.find_matching_node_template(target)
+
+      override_attrs = {
+        display_name: node_name,
+        assembly_id: id
+      }
+      target.clone_into(node_template, override_attrs, node_template.source_clone_info_opts)
+    end
+
     def add_node(node_name, node_binding_rs = nil, opts = {})
       # if assembly_wide node (used to add component directly on service_instance/assembly_template/workspace)
       # check if type = Node::Type::Node.assembly_wide

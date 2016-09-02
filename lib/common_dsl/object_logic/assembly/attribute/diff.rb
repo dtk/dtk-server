@@ -23,11 +23,6 @@ module DTK; module CommonDSL
           ::DTK::Attribute.update_and_propagate_attribute_from_diff(existing_object, new_val)
         end
       end
-
-      private
-      def self.type
-        :attribute
-      end
     end
   end
 end; end

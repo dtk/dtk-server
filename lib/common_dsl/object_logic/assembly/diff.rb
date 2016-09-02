@@ -19,11 +19,6 @@ module DTK
   module CommonDSL
     class ObjectLogic::Assembly 
       class Diff < CommonDSL::Diff::Set 
-        private
-        def type
-          :assembly
-        end
-
       end
     end
   end

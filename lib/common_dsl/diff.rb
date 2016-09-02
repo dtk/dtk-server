@@ -97,7 +97,15 @@ Aux.stop_for_testing?(:push_diff) # TODO: for debugging
       def self.type_print_form
         type.to_s
       end      
-      
+
+      def self.type
+        split = to_s.split('::')
+        unless split.size > 2 and split.last == 'Diff'
+          fail Error, "Unexpected class fomat: #{self}" 
+        end
+        split[-2].downcase.to_sym
+      end
+
       def self.bass_class
         kind_of?(Base) ? self : Base
       end

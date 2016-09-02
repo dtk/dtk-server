@@ -58,7 +58,7 @@ module DTK
           ret = parsed_assembly.val(:Nodes) || CommonDSL::Parse::CanonicalInput::Hash.new
           assembly_wide_components = parsed_assembly.val(:Components)
           unless assembly_wide_components.nil? or assembly_wide_components.empty?
-            # assembly wiide components get added under 'fake node' 'assembly_wide'
+            # assembly wide components get added under 'fake node' 'assembly_wide'
             node_to_add = CommonDSL::Parse::CanonicalInput::Hash.new
             node_to_add.set(:Components, assembly_wide_components)
             ret.merge!(Node::Type::Node.assembly_wide => node_to_add)

@@ -30,10 +30,6 @@ module DTK; module CommonDSL
         end
       end
 
-      private
-      def self.type
-        :component
-      end
     end
   end
 end; end

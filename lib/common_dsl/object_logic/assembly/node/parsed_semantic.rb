@@ -17,9 +17,10 @@
 #
 module DTK; module CommonDSL 
   class ObjectLogic::Assembly::Node
-    class Diff < CommonDSL::Diff::Set 
-      require_relative('diff/add')
-      require_relative('diff/delete')
+    class ParsedSemantic 
+      def initialize(node_parsed_syntactic)
+        @node_parsed_syntactic = node_parsed_syntactic
+      end
     end
   end
 end; end

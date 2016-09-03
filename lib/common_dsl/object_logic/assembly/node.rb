@@ -21,7 +21,6 @@ module DTK; module CommonDSL
       class Node < Generate::ContentInput::Hash
         require_relative('node/diff')
         require_relative('node/attribute')
-        require_relative('node/parsed_semantic')
 
         def self.generate_content_input(assembly_instance)
           get_augmented_nodes(assembly_instance).inject(ObjectLogic.new_content_input_hash) do |h, aug_node| 

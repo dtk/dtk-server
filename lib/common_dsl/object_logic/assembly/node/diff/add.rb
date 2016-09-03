@@ -20,48 +20,39 @@ module DTK; module CommonDSL
     class Diff
       class Add < CommonDSL::Diff::Element::Add
         def process
-          # TODO: need to recursively add node or node group and then add attributes under it
-          # first case on whether node or node group
-          pp [:add_node_processing, self]
-          pp [:node_type, node_type]
-          new_node = assembly_instance.add_node_from_diff(node_name)
+          new_node = 
+            case node_type
+            when :node
+              assembly_instance.add_node_from_diff(node_name)
+            when :node_group
+              assembly_instance.add_node_group_from_diff(node_name)
+            else
+              fail "Unexpected type '#{node_type}'"
+            end
           add_node_properties_component(new_node)
-          pp [:new_node, new_node]
           nil
         end
 
         private 
 
+        def node_type
+          @node_type ||= @parse_object.type
+        end
+
+        def node_name
+          relative_distinguished_name
+        end
+        
         def add_node_properties_component(node)
-          image = nil # TODO: stub
-          instance_size = nil # TODO: stub
+          image         = node_attribute(:image)
+          instance_size = node_attribute(:size)
+          pp(image: image, instance_size: instance_size)
           # TODO: hard coded to ec2_properties
           assembly_instance.add_ec2_properties_and_set_attributes(project, node, image, instance_size)
         end
 
-        # possible values are :node, or :node_group
-        def node_type
-          if attributes = node_attributes
-            pp [:test, attributes]
-
-            if parsed_type = attributes['type'] && attributes['type'].req(:Value)
-              case parsed_type.to_sym
-              when :group then :node_group
-              else
-                fail ErrorUsage, "The type attribute value '#{parsed_type}' on node '#{node_name}' is not a legal node type"
-              end
-             else
-              :node
-            end
-          end
-        end
-        
-        def node_name
-          relative_key
-        end
-        
-        def node_attributes
-          @parse_object.val(:Attributes)
+        def node_attribute(attr_name)
+          @parse_object.attribute_value(attr_name)
         end
 
       end

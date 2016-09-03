@@ -68,7 +68,7 @@ module DTK
 
       # opts can have keys:
       #  :service_instance
-      def self.aggregate?(qualified_key, opts = {},&body)
+      def self.aggregate?(qualified_key, opts = {}, &body)
         diff_set = new(opts.merge(qualified_key: qualified_key))
         # the code passed into body conditionally will update diff_set
         # which conditionally adds to @modified

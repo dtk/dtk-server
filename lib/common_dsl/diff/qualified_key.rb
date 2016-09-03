@@ -34,7 +34,7 @@ module DTK
         end
       end
 
-      def relative_key
+      def relative_distinguished_name
         unless last = @key_elements.last
           fail Error, "Unexpectd that @key_elements is empty" 
         end

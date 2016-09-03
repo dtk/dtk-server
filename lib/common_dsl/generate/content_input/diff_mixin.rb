@@ -20,7 +20,7 @@ module DTK; module CommonDSL::Generate
     module DiffMixin
       # Main template-specific diff instance method call; Concrete classes overwrite this
       def diff?(_parse_object, _qualified_key)
-        raise Error::NoMethodForConcreteClass.new(self.class)
+        fail Error::NoMethodForConcreteClass.new(self.class)
       end
       
       # opts can have keys:

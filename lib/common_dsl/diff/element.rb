@@ -28,13 +28,13 @@ module DTK
       end
 
       def process
-        raise Error::NoMethodForConcreteClass.new(self.class)
+        fail Error::NoMethodForConcreteClass.new(self.class)
       end
 
       private
 
-      def relative_key
-        @qualified_key.relative_key
+      def relative_distinguished_name
+        @qualified_key.relative_distinguished_name
       end
 
     end

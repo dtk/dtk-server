@@ -28,7 +28,7 @@ module DTK
 
         # Needed by any object that can be grouped as an array (as opposed to a hash)
         def diff_key
-          raise Error::NoMethodForConcreteClass.new(self.class)
+          fail Error::NoMethodForConcreteClass.new(self.class)
         end
 
       end

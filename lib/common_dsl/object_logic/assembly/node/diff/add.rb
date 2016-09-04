@@ -52,13 +52,33 @@ module DTK; module CommonDSL
           assembly_instance.add_ec2_properties_and_set_attributes(project, node, image, instance_size)
         end
 
+        # TODO: move so that can create component add components for each and bulk of this code there so
+        # can reuse code if added if under node or new top level
+        def add_nested_components(node)
+          # stub
+          pp [:add_nested_components, :components, components_indexed_by_names]
+          components.each do |component|
+            matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component.name) 
+            pp [:matching_aug_cmp_templates, component.name, matching_aug_cmp_templates]
+            unless matching_aug_cmp_templates.size == 1
+              fail Error, "TODO: DTK-2650: put in error messages to indicate that no or ambiguous module match found"
+            end
+            aug_cmp_template = matching_aug_cmp_templates.first
+            # TODO: use this and node to add component to node
+          end 
+        end
+
         def node_attribute(attr_name)
           @parse_object.attribute_value(attr_name)
         end
 
-        def components
-          @parse_object.val(:Components) || []
+        def components_indexed_by_names
+          @parse_object.val(:Components) || {}
         end
+        def components
+          components_indexed_by_names.values
+        end
+
       end
     end
   end

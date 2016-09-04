@@ -174,7 +174,7 @@ module DTK; class  Assembly
       namespace = EC2_PROPERTIES_NAMESPACE
 
       unless aug_component_template = Component::Template.get_augmented_component_template?(self, cmp_name, namespace: namespace, use_base_template: true)
-        fail ErrorUsage.new("Component with identifier '#{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
+        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
       end
 
       opts = Opts.new( auto_complete_links: true, project: project)

@@ -254,7 +254,7 @@ module DTK; class Component
       end
     end
 
-    # This method returns an hash with the matching component template, if a unique; the exact object returned is a hash with keys
+    # This method returns an augmented_component_template if a unique match is found; this is a component template augmented with keys:
     #   :module_branch
     #   :component_module
     #   :namespace
@@ -295,7 +295,7 @@ module DTK; class Component
       ret_cmp
     end
 
-    # This method returns an array with zero or more matching component templates
+    # This method returns an array with zero or more matching augmented component templates
     # opts can have keys
     #   :namespace
     #   :use_base_template
@@ -312,7 +312,7 @@ module DTK; class Component
                  [:oneof, :version, filter_on_versions(assembly: assembly, version: version)],
                  [:eq, :node_node_id, nil]]
       }
-      ret = get_objs(assembly.module_handle(:component_template), sp_hash, keep_ref_cols: true)
+      ret = get_objs(assembly.model_handle(:component_template), sp_hash, keep_ref_cols: true)
       if namespace = opts[:namespace]
         # filter component templates by namepace
         ret.select! { |cmp| cmp[:namespace][:display_name] == namespace }

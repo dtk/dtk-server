@@ -34,6 +34,7 @@ REPO_PORT=443
 MCO_PORT=61663
 SSH_PORT=2222
 HTTP_PORT=8080
+GIT_USERNAME=dtk1
 DOCKER_ID=$(date +%Y%m%d%H%M%S)
 
 ADDRESS=${1}
@@ -41,9 +42,9 @@ UPGRADE=${2}
 CONTAINER=${3:-dtk}
 ARBITER_CONTAINER=${4:-dtk-arbiter}
 NAME=${6:-dtk-docker-${DOCKER_ID}}
-USER=${7:-dtk17-docker}
+USER=${7:-docker-test}
 PASS=${8:-r8server}
-STOMP_USERNAME=${9:-dtk17}
+STOMP_USERNAME=${9:-dtk1}
 STOMP_PASSWORD=${10:-marionette}
 
 if [[ $UPGRADE -eq 0 ]]; then
@@ -52,7 +53,7 @@ if [[ $UPGRADE -eq 0 ]]; then
 	echo -e "Root Container directory /${CONTAINER} removed."
 fi
 
-echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}\nGIT_PORT=22\nSTOMP_PASSWORD=${STOMP_PASSWORD}\nSTOMP_USERNAME=${STOMP_USERNAME}" > "/${CONTAINER}/dtk.config"
+echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}\nGIT_PORT=${SSH_PORT}\nSTOMP_PASSWORD=${STOMP_PASSWORD}\nSTOMP_USERNAME=${STOMP_USERNAME}" > "/${CONTAINER}/dtk.config"
 
 docker ps | grep dtk > /dev/null
 RUNNING=$?
@@ -104,7 +105,7 @@ echo -e "\nStarting a new Docker Container: ${ARBITER_CONTAINER}"
 HOST_VOLUME="/${CONTAINER}"
 
 # start the dtk-server container
-docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name $CONTAINER -v $HOST_VOLUME:/host_volume -p $HTTP_PORT:80 -p $MCO_PORT:6163 -p $SSH_PORT:22 -d $DTK_IMAGE
+docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}
 
 # wait for dtk-arbiter ssh keypair to be generated
 while [[ ! -f $HOST_VOLUME/arbiter/arbiter_remote ]]; do
@@ -113,10 +114,10 @@ done
 
 # check if docker daemon socket is available
 # and mount it inside dtk-arbiter contianer if so
-additional_args=''
+ADDITIONAL_ARGS=''
 if [[ -e /var/run/docker.sock ]]; then
-  additional_args="-v /var/run/docker.sock:/var/run/docker.sock "
+  ADDITIONAL_ARGS="-v /var/run/docker.sock:/var/run/docker.sock "
 fi
 
 # start the dtk-arbiter container
-docker run --name $ARBITER_CONTAINER -v $HOST_VOLUME:/host_volume -e HOST_VOLUME=$HOST_VOLUME $additional_args --restart=on-failure -td $ARBITER_IMAGE
+docker run -e GIT_USERNAME=${GIT_USERNAME} --name ${ARBITER_CONTAINER} -v ${HOST_VOLUME}:/host_volume -e HOST_VOLUME=${HOST_VOLUME} ${ADDITIONAL_ARGS} --restart=on-failure -td ${ARBITER_IMAGE}

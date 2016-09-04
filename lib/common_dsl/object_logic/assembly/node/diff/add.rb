@@ -25,11 +25,12 @@ module DTK; module CommonDSL
             when :node
               assembly_instance.add_node_from_diff(node_name)
             when :node_group
-              assembly_instance.add_node_group_from_diff(node_name)
+              fail Error "TODO: write 'assembly_instance.add_node_group_from_diff(node_name)'"
             else
               fail "Unexpected type '#{node_type}'"
             end
           add_node_properties_component(new_node)
+          add_nested_components(new_node)
           nil
         end
 
@@ -55,6 +56,9 @@ module DTK; module CommonDSL
           @parse_object.attribute_value(attr_name)
         end
 
+        def components
+          @parse_object.val(:Components) || []
+        end
       end
     end
   end

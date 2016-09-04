@@ -254,47 +254,25 @@ module DTK; class Component
       end
     end
 
-    # This method returns a component augmented with keys having objects
-    # :module_branch
-    # :component_module
-    # :namespace
-    def self.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly, opts = {})
+    # This method returns an hash with the matching component template, if a unique; the exact object returned is a hash with keys
+    #   :module_branch
+    #   :component_module
+    #   :namespace
+    # if no match is found then nil is returned otherwise error raised indicating multiple matches found
+    # opts can have keys:
+    #   :namespace
+    #   :use_base_template
+    def self.get_augmented_component_template?(assembly, cmp_name, opts = {})
       ret_cmp = nil
-      match_cmps = []
-      cmp_module_ids = []
-      display_name = display_name_from_user_friendly_name(cmp_name)
-      component_type, title, version =  ComponentTitle.parse_component_display_name(display_name, return_version: true)
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info, :version],
-        filter: [:and,
-                 [:eq, :type, 'template'],
-                 [:eq, :component_type, component_type],
-                 [:neq, :project_project_id, nil],
-                 [:oneof, :version, filter_on_versions(assembly: assembly, version: version)],
-                 [:eq, :node_node_id, nil]]
-      }
-      cmp_templates = get_objs(cmp_mh.createMH(:component_template), sp_hash, keep_ref_cols: true)
-      if namespace
-        # filter component templates by namsepace
-        cmp_templates.select! { |cmp| cmp[:namespace][:display_name] == namespace }
-      end
-      return ret_cmp if cmp_templates.empty?
+      matching_cmp_templates = find_matching_component_templates(assembly, cmp_name, opts)
 
-      # there could be two matches one from base template and one from service insatnce specific template; in
-      # this case use service specfic one
-      assembly_version = assembly_version(assembly)
-      if cmp_templates.find { |cmp| cmp[:version] == assembly_version }
-        if opts[:use_base_template]
-          cmp_templates.reject! { |cmp| cmp[:version] == assembly_version }
-        else
-          cmp_templates.select! { |cmp| cmp[:version] == assembly_version }
-        end
-      end
-      unless cmp_templates.size == 1
-        possible_names = cmp_templates.map { |r| r.display_name_print_form(namespace_prefix: true) }.join(',')
+      if matching_cmp_templates.empty?
+        return ret_cmp
+      elsif matching_cmp_templates.size > 1
+        possible_names = matching_cmp_templates.map { |r| r.display_name_print_form(namespace_prefix: true) }.join(',')
         fail ErrorUsage.new("Multiple components with different namespaces or/and versions match. You have to specify namespace or version.")
       end
-      ret_cmp = cmp_templates.first
+      ret_cmp = matching_cmp_templates.first
 
       # if component_template with same name exist but have different namespace, return error message that user should
       # use component_template from module that already exist in service instance
@@ -315,6 +293,45 @@ module DTK; class Component
         fail ErrorUsage.new("Unable to add component from (#{full_ret_cmp_name}) because you are already using components version: #{full_cmp_mod_name}") if ret_cmp_version != cmp_mod_version
       end
       ret_cmp
+    end
+
+    # This method returns an array with zero or more matching component templates
+    # opts can have keys
+    #   :namespace
+    #   :use_base_template
+    def self.find_matching_component_templates(assembly, cmp_name, opts = {})
+      ret = []
+      display_name = display_name_from_user_friendly_name(cmp_name)
+      component_type, title, version =  ComponentTitle.parse_component_display_name(display_name, return_version: true)
+      sp_hash = {
+        cols: [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info, :version],
+        filter: [:and,
+                 [:eq, :type, 'template'],
+                 [:eq, :component_type, component_type],
+                 [:neq, :project_project_id, nil],
+                 [:oneof, :version, filter_on_versions(assembly: assembly, version: version)],
+                 [:eq, :node_node_id, nil]]
+      }
+      ret = get_objs(assembly.module_handle(:component_template), sp_hash, keep_ref_cols: true)
+      if namespace = opts[:namespace]
+        # filter component templates by namepace
+        ret.select! { |cmp| cmp[:namespace][:display_name] == namespace }
+      end
+      ret
+      return ret if ret.empty?
+
+      # there could be two matches one from base template and one from service insatnce specific template; in
+      # this case use service specfic one
+      assembly_version = assembly_version(assembly)
+      if ret.find { |cmp| cmp[:version] == assembly_version }
+        if opts[:use_base_template]
+          ret.reject! { |cmp| cmp[:version] == assembly_version }
+        else
+          ret.select! { |cmp| cmp[:version] == assembly_version }
+        end
+      end
+
+      ret
     end
 
     private

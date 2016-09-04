@@ -642,9 +642,8 @@ module DTK
       cmp_name, namespace = ret_request_params(:component_template_id, :namespace)
       assembly_idh = assembly.id_handle()
 
-      cmp_mh = assembly_idh.createMH(:component)
-      unless aug_component_template = Component::Template.get_augmented_component_template(cmp_mh, cmp_name, namespace, assembly, use_base_template: true)
-        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
+      unless aug_component_template = Component::Template.get_augmented_component_template?(assembly, cmp_name, namespace: namespace, use_base_template: true)
+        fail ErrorUsage.new("Component with identifier '#{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
       end
 
       component_title = ret_component_title?(cmp_name)

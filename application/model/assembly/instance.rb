@@ -155,16 +155,19 @@ module DTK; class  Assembly
       new_obj
     end
 
+    # TODO: encapsulate where this comes from
+    EC2_PROPERTIES_DISPLAY_NAME = 'ec2::properties'
+    EC2_PROPERTIES_NAMESPACE    = 'aws'
     def add_ec2_properties_and_set_attributes(project, node, image, instance_size)
-      cmp_mh = id_handle().createMH(:component)
-      cmp_name, namespace = 'ec2::properties', 'aws'
+      cmp_name  = EC2_PROPERTIES_DISPLAY_NAME
+      namespace = EC2_PROPERTIES_NAMESPACE
 
-      unless aug_component_template = Component::Template.get_augmented_component_template(cmp_mh, cmp_name, namespace, self, use_base_template: true)
-        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
+      unless aug_component_template = Component::Template.get_augmented_component_template?(self, cmp_name, namespace: namespace, use_base_template: true)
+        fail ErrorUsage.new("Component with identifier '#{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
       end
 
       opts = Opts.new( auto_complete_links: true, project: project)
-      component_title = ::DTK::ComponentTitle.parse_title?(cmp_name)
+      component_title = ComponentTitle.parse_title?(cmp_name)
       new_component_idh = add_component(node.id_handle(), aug_component_template, component_title, opts)
 
       node.update_object!(:display_name)

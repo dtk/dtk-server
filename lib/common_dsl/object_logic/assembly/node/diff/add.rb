@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::Node
-    class Diff
+  class ObjectLogic::Assembly
+    class Node::Diff
       class Add < CommonDSL::Diff::Element::Add
         def process
           new_node = 
@@ -55,16 +55,10 @@ module DTK; module CommonDSL
         # TODO: move so that can create component add components for each and bulk of this code there so
         # can reuse code if added if under node or new top level
         def add_nested_components(node)
-          # stub
-          pp [:add_nested_components, :components, components_indexed_by_names]
-          components.each do |component|
-            matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component.name) 
-            pp [:matching_aug_cmp_templates, component.name, matching_aug_cmp_templates]
-            unless matching_aug_cmp_templates.size == 1
-              fail Error, "TODO: DTK-2650: put in error messages to indicate that no or ambiguous module match found"
-            end
-            aug_cmp_template = matching_aug_cmp_templates.first
-            # TODO: use this and node to add component to node
+           components_semantic_parse_array.each do |component|
+            # TODO: need to put new node in method called below
+            component_add_diff = Component::Diff::Add.new(component.qualified_key, parse_object: component, service_instance: @service_instance)
+            component_add_diff.process
           end 
         end
 
@@ -72,11 +66,12 @@ module DTK; module CommonDSL
           @parse_object.attribute_value(attr_name)
         end
 
-        def components_indexed_by_names
+        def components_semantic_parse_hash
           @parse_object.val(:Components) || {}
         end
-        def components
-          components_indexed_by_names.values
+
+        def components_semantic_parse_array
+          components_semantic_parse_hash.values
         end
 
       end

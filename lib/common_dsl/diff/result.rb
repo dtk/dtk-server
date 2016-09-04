@@ -15,14 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::Component
-    class Diff < CommonDSL::Diff::Set 
-      class Add < CommonDSL::Diff::Element::Add
-        require_relative('diff/add')
-        require_relative('diff/delete')
+module DTK
+  class CommonDSL::Diff
+    class Result
+      def initialize
+        @repo_updated = true
+        @warnings     = []
+        @errors       = []
       end
+      
+      def to_hash
+        {
+          repo_updated: @repo_updated,
+          warning: @warnings,
+          errors: @errors
+        }
+      end
+
     end
   end
-end; end
-
+end

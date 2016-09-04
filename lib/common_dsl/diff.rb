@@ -18,6 +18,7 @@
 module DTK
   module CommonDSL
     class Diff
+      require_relative('diff/result')
       require_relative('diff/serialized_hash')
       require_relative('diff/collated.rb')
       require_relative('diff/qualified_key')
@@ -27,6 +28,7 @@ module DTK
       require_relative('diff/set')
 
       def self.process_service_instance(service_instance, module_branch)
+        ret = Result.new
         unless dsl_file_obj = Parse.matching_service_instance_file_obj?(module_branch)
           fail Error, "Unexpected that 'dsl_file_obj' is nil"
         end
@@ -44,7 +46,7 @@ STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
               collated_diffs.process
 Aux.stop_for_testing?(:push_diff) # TODO: for debugging
             end
-            nil
+            ret
           end
         end  
       end

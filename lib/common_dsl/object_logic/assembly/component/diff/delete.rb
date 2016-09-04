@@ -16,13 +16,14 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::Component
-    class Diff < CommonDSL::Diff::Set 
-      class Add < CommonDSL::Diff::Element::Add
-        require_relative('diff/add')
-        require_relative('diff/delete')
+  class ObjectLogic::Assembly
+    class Component::Diff
+      class Delete < CommonDSL::Diff::Element::Delete
+        def process
+          # TODO: stub 
+        end
+
       end
     end
   end
 end; end
-

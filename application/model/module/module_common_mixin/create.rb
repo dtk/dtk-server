@@ -39,15 +39,14 @@ module DTK; module ModuleCommonMixin
       end
 
 
-      # if module_obj
-      #   # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
-      #   # fail Error.new('TODO: ModuleBranch::Location; need to right this')
-      #   repo = module_obj.get_repo
-      #   repo.merge!(branch_name: local.branch_name)
-      #   repo.add_branch?(local.branch_name)
-      #   RepoManager.add_branch?(local.branch_name)
-      #   local_repo_obj = repo.create_subclass_obj(:repo_with_branch)
-      # else
+      if module_obj
+        # Aldin TODO: need to find better way to add additional branch to repo
+        base_branch = module_obj.get_module_branches.first
+        repo = module_obj.get_repo
+        repo.merge!(branch_name: local.branch_name)
+        RepoManager.add_branch?(local.branch_name, {}, base_branch)
+        local_repo_obj = repo.create_subclass_obj(:repo_with_branch)
+      else
         create_opts = {
           create_branch: local.branch_name,
           donot_create_master_branch: true,
@@ -62,22 +61,7 @@ module DTK; module ModuleCommonMixin
         end
         repo_user_acls = RepoUser.authorized_users_acls(project_idh)
         local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
-      # end
-
-      # create_opts = {
-      #   create_branch: local.branch_name,
-      #   donot_create_master_branch: true,
-      #   delete_if_exists: true,
-      #   # TODO: dont think key 'namespace_name' is used
-      #   namespace_name: namespace
-      # }
-      # create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
-
-      # if copy_files_info = opts[:copy_files]
-      #   create_opts.merge!(copy_files: copy_files_info)
-      # end
-      # repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-      # local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
+      end
 
       repo_idh = local_repo_obj.id_handle()
       module_and_branch_info = create_module_and_branch_obj?(project, repo_idh, local, opts)

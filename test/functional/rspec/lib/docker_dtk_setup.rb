@@ -45,7 +45,7 @@ if target.check_if_service_exists(target.service_id)
   set_attributes_array = []
   set_attributes_array << target.set_attribute(target.service_id, 'network_aws::iam_user[default]/aws_access_key_id', aws_access_key)
   set_attributes_array << target.set_attribute(target.service_id, 'network_aws::iam_user[default]/aws_secret_access_key', aws_secret_key)
-  set_attributes_array << target.set_attribute(target.service_id, 'network_aws::iam_user[vpc1]/default_keypair', default_keypair)
+  set_attributes_array << target.set_attribute(target.service_id, 'network_aws::vpc[vpc1]/default_keypair', default_keypair)
   set_attributes_array << target.set_attribute(target.service_id, 'network_aws::vpc_subnet[vpc1-public]/subnet_id', subnet_id)
   set_attributes_array << target.set_attribute(target.service_id, 'network_aws::security_group[vpc1-default]/group_name', security_group_name)
   set_attributes_array << target.set_attribute(target.service_id, 'network_aws::security_group[vpc1-default]/group_id', security_group_id)

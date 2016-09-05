@@ -101,6 +101,10 @@ module DTK
         unsorted_ret.reject! { |r| r[:module_branch] && r[:module_branch][:version] != ModuleBranch.version_field_default() }
       end
 
+      if opts[:remove_assembly_branches]
+        unsorted_ret.reject! { |r| r[:module_branch] && r[:module_branch].assembly_module_version? }
+      end
+
       # if namespace provided with list command filter before aggregating details
       unsorted_ret = filter_by_namespace(unsorted_ret, namespace) if namespace
 

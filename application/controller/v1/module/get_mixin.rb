@@ -38,13 +38,13 @@ module DTK
 
       def list_assemblies
         # TODO: if  module_name, namespace gievn filter on this
-        module_name, namespace = request_params(:module_name, :namespace)
+        module_name, namespace, version = request_params(:module_name, :namespace, :version)
         datatype = :assembly_template_with_module
 
         response =
           if module_name and namespace
             datatype = :assembly_template_description
-            ret_service_module.list_assembly_templates
+            ret_service_module.list_assembly_templates(version)
           else
             CommonModule.list_assembly_templates(get_default_project)
           end

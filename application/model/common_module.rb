@@ -38,6 +38,7 @@ module DTK
       create_module_opts = {
         return_module_branch: true,
         no_initial_commit: true,
+        common_module: true
       }
       module_branch = create_module(project, local_params, create_module_opts)
       ModuleRepoInfo.new(module_branch)

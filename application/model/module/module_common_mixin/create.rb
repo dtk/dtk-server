@@ -32,14 +32,14 @@ module DTK; module ModuleCommonMixin
 
       module_obj = module_exists?(project_idh, module_name, namespace)
       if module_obj and not opts[:no_error_if_exists]
-        if module_obj.get_module_branch(local.branch_name)
+        if opts[:common_module] && module_obj.get_module_branch(local.branch_name)
           full_module_name = Namespace.join_namespace(namespace, module_name)
           fail ErrorUsage, "Module '#{full_module_name}' cannot be created since it exists already"
         end
       end
 
 
-      if module_obj
+      if module_obj && opts[:common_module]
         # Aldin TODO: need to find better way to add additional branch to repo
         base_branch = module_obj.get_module_branches.first
         repo = module_obj.get_repo

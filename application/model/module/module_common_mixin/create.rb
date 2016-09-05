@@ -30,26 +30,54 @@ module DTK; module ModuleCommonMixin
       module_name = local_params.module_name
       project_idh = project.id_handle
 
-      module_exists = module_exists?(project_idh, module_name, namespace)
-      if module_exists and not opts[:no_error_if_exists]
-        full_module_name = Namespace.join_namespace(namespace, module_name)
-        fail ErrorUsage, "Module '#{full_module_name}' cannot be created since it exists already"
+      module_obj = module_exists?(project_idh, module_name, namespace)
+      if module_obj and not opts[:no_error_if_exists]
+        if module_obj.get_module_branch(local.branch_name)
+          full_module_name = Namespace.join_namespace(namespace, module_name)
+          fail ErrorUsage, "Module '#{full_module_name}' cannot be created since it exists already"
+        end
       end
 
-      create_opts = {
-        create_branch: local.branch_name,
-        donot_create_master_branch: true,
-        delete_if_exists: true,
-        # TODO: dont think key 'namespace_name' is used
-        namespace_name: namespace
-      }
-      create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
 
-      if copy_files_info = opts[:copy_files]
-        create_opts.merge!(copy_files: copy_files_info)
-      end
-      repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-      local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
+      # if module_obj
+      #   # TODO: ModuleBranch::Location: since repo has remote_ref in it must get appopriate repo
+      #   # fail Error.new('TODO: ModuleBranch::Location; need to right this')
+      #   repo = module_obj.get_repo
+      #   repo.merge!(branch_name: local.branch_name)
+      #   repo.add_branch?(local.branch_name)
+      #   RepoManager.add_branch?(local.branch_name)
+      #   local_repo_obj = repo.create_subclass_obj(:repo_with_branch)
+      # else
+        create_opts = {
+          create_branch: local.branch_name,
+          donot_create_master_branch: true,
+          delete_if_exists: true,
+          # TODO: dont think key 'namespace_name' is used
+          namespace_name: namespace
+        }
+        create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
+
+        if copy_files_info = opts[:copy_files]
+          create_opts.merge!(copy_files: copy_files_info)
+        end
+        repo_user_acls = RepoUser.authorized_users_acls(project_idh)
+        local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
+      # end
+
+      # create_opts = {
+      #   create_branch: local.branch_name,
+      #   donot_create_master_branch: true,
+      #   delete_if_exists: true,
+      #   # TODO: dont think key 'namespace_name' is used
+      #   namespace_name: namespace
+      # }
+      # create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
+
+      # if copy_files_info = opts[:copy_files]
+      #   create_opts.merge!(copy_files: copy_files_info)
+      # end
+      # repo_user_acls = RepoUser.authorized_users_acls(project_idh)
+      # local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
 
       repo_idh = local_repo_obj.id_handle()
       module_and_branch_info = create_module_and_branch_obj?(project, repo_idh, local, opts)

@@ -20,7 +20,7 @@ module DTK
       ### Module specific
       def create_empty_module
         namespace, module_name = required_request_params(:namespace, :module_name)
-        version = request_params(:version)
+        version = request_params(:version) || 'master'
         local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
         rest_ok_response CommonModule.create_empty_module(get_default_project, local_params)
       end

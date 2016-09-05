@@ -1,7 +1,7 @@
 ---
 dsl_version: 1.0.0
 module: test/dtk_new_client_smoke
-version: 0.0.1
+version: master
 keywords: bootstrap
 description: test123
 license: Apache 2.0

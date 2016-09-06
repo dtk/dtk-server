@@ -23,10 +23,10 @@ module DTK; module CommonDSL
           matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component_name) 
           pp [:matching_aug_cmp_templates, component_name, matching_aug_cmp_templates]
           if matching_aug_cmp_templates.empty?
-            result.add_error_msg("Component '#{component_name}' does not match any installed component templates")
+            result.add_error_msg("Component '#{qualified_key.print_form}' does not match any installed component templates")
           elsif matching_aug_cmp_templates.size > 1
             # TODO: put in message the name of matching component templates
-            result.add_error_msg("Component '#{component_name}' matches multiple installed component templates")
+            result.add_error_msg("Component '#{qualified_key.print_form}' matches multiple installed component templates")
           else
             aug_cmp_template = matching_aug_cmp_templates.first
             # TODO: use this and node to add component to node

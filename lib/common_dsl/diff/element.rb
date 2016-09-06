@@ -33,9 +33,15 @@ module DTK
 
       private
 
+      def name
+        relative_distinguished_name
+      end
+
       def relative_distinguished_name
         @qualified_key.relative_distinguished_name
       end
+
+      
 
     end
   end

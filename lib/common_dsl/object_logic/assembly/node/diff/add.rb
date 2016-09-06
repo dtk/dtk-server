@@ -34,6 +34,8 @@ module DTK; module CommonDSL
           return if result.any_errors?
 
           add_node_properties_component(new_node)
+
+          result.add_item_to_update(:workflow) # workflow updated to add a node
         end
 
         private 

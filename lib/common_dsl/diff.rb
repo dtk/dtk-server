@@ -46,8 +46,21 @@ STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
               collated_diffs.process(diff_result)
               pp [:diff_result, diff_result]
 Aux.stop_for_testing?(:push_diff) # TODO: for debugging
-              Model.RollbackTransaction if ret.any_errors?
+              Model.RollbackTransaction if diff_result.any_errors?
             end
+
+            unless diff_result.any_errors? 
+              items_to_update = diff_result.items_to_update
+              unless items_to_update.empty?
+                # Items in repo that need updating by generating from the server's object model
+                pp [:needs_updating, diff_result.items_to_update]
+                # TODO: logic that updates the repo from the object model
+
+                
+                diff_result.repo_updated = true # means repo updated by server
+              end
+            end
+
             diff_result
           end
         end  

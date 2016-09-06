@@ -30,12 +30,19 @@ module DTK; class Assembly; class Instance
       @service_module_sha = nil
     end
 
-    def self.create_from_element(assembly_instance, service_module)
+    def self.create_from_element(assembly_instance, service_module, opts = {})
       ret = create_stub(assembly_instance.model_handle(:assembly_instance_lock))
       ret.assembly_instance = assembly_instance
       ret.service_module_name = service_module[:display_name]
       ret.service_module_namespace = service_module.module_namespace
-      ret.service_module_sha = service_module.get_augmented_workspace_branch.get_field?(:current_sha)
+      branch =
+        if opts[:version]
+          service_module.get_module_branch_matching_version(opts[:version])
+        else
+          service_module.get_augmented_workspace_branch
+        end
+      # ret.service_module_sha = service_module.get_augmented_workspace_branch.get_field?(:current_sha)
+      ret.service_module_sha = branch.get_field?(:current_sha)
       ret
     end
 

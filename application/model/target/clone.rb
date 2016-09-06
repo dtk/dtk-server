@@ -94,7 +94,9 @@ module DTK
         add_service_module_task_templates(assembly, clone_copy_output)
 
         begin
-          ModuleRefs::Lock.create_or_update(assembly, raise_errors: true)
+          m_ref_opts = {raise_errors: true}
+          m_ref_opts.merge!(version: opts[:version]) if opts[:version]
+          ModuleRefs::Lock.create_or_update(assembly, m_ref_opts)
         rescue ModuleRef::Missing::Error => e
           includes = ModuleRefs::Tree.create(assembly).hash_form()
           str_includes = keys_to_string(includes)

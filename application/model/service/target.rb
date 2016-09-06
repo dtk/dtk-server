@@ -82,7 +82,7 @@ module DTK
         Model.Transaction do
           # if :allow_existing_service is true then new_assembly_instance wil be existing assembly_instance
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
-          module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance)
+          module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance, opts)
 Aux.stop_for_testing?(:create_service_instance) # TODO: for debugging
           self.class.new_service_info(new_assembly_instance, module_repo_info)
         end

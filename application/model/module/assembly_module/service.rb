@@ -28,18 +28,21 @@ module DTK; class AssemblyModule
     private :initialize
 
     # This checks if an assembly specfic branch has been made and returns this otherwise gives teh base branch
-    def self.get_assembly_branch(assembly)
-      new(assembly).get_assembly_branch()
+    def self.get_assembly_branch(assembly, opts = {})
+      new(assembly).get_assembly_branch(opts)
     end
-    def get_assembly_branch
+    def get_assembly_branch(opts = {})
       module_branches = @service_module.get_module_branches()
-      module_branches.find { |mb| mb.matches_version?(@am_version) } || module_branches.find(&:matches_base_version?)
+      # module_branches.find { |mb| mb.matches_version?(@am_version) } || module_branches.find(&:matches_base_version?)
+      module_branches.find do |mb|
+        return mb if mb.matches_version?(@am_version) || mb.matches_version?(opts[:version]) || mb.matches_base_version?
+      end
     end
     def self.get_or_create_assembly_branch(assembly)
        new(assembly).get_or_create_assembly_branch()
     end
-    def get_or_create_assembly_branch
-      @service_module.get_module_branch_matching_version(@am_version) || create_assembly_branch()
+    def get_or_create_assembly_branch(opts = {})
+      @service_module.get_module_branch_matching_version(@am_version) || create_assembly_branch(opts)
     end
 
     # returns a ModuleRepoInfo object
@@ -64,8 +67,8 @@ module DTK; class AssemblyModule
     private
 
     # returns new module branch
-    def create_assembly_branch
-      base_version = @service_module.get_field?(:version) #TODO: is this right; shouldnt version be on branch, not module
+    def create_assembly_branch(opts = {})
+      base_version = @service_module.get_field?(:version) || opts[:version] #TODO: is this right; shouldnt version be on branch, not module
       @service_module.create_new_version(base_version, @am_version)
     end
 

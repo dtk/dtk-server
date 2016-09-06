@@ -38,7 +38,7 @@ module DTK
       # opts can have
       # :components - a set of component instances to contrain what is returned
       def self.create(assembly_instance, opts = {})
-        assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance)
+        assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance, opts)
         components =  opts[:components] || assembly_instance.get_component_instances()
         create_module_refs_starting_from_assembly(assembly_instance, assembly_branch, components)
       end

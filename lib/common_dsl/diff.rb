@@ -22,6 +22,8 @@ module DTK
       require_relative('diff/serialized_hash')
       require_relative('diff/collated.rb')
       require_relative('diff/qualified_key')
+      require_relative('diff/repo_update')
+      require_relative('diff/error_usage')
       require_relative('diff/element')
 
       require_relative('diff/base')
@@ -39,28 +41,27 @@ module DTK
           if collated_diffs = base_diffs.collate
             dsl_version = service_instance_gen.req(:DSLVersion)
 # for debug
-#File.open('/tmp/raw', 'w') {|f| PP.pp(base_diffs, f) }
-#File.open('/tmp/collated', 'w') {|f| PP.pp(collated_diffs, f) }
 STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
             Model.Transaction do
               collated_diffs.process(diff_result)
-              pp [:diff_result, diff_result]
-Aux.stop_for_testing?(:push_diff) # TODO: for debugging
               Model.RollbackTransaction if diff_result.any_errors?
-            end
 
-            unless diff_result.any_errors? 
+              # items_to_update are things that need to be updated in repo from what at this point are in object model
               items_to_update = diff_result.items_to_update
               unless items_to_update.empty?
-                # Items in repo that need updating by generating from the server's object model
-                pp [:needs_updating, diff_result.items_to_update]
-                # TODO: logic that updates the repo from the object model
-
-                
-                diff_result.repo_updated = true # means repo updated by server
+                # Treat updates to repo from object model as transaction that rolls back git repo to what client set it as
+                # If error,  RepoUpdate.Transaction wil throw error
+                RepoUpdate.Transaction module_branch do
+                  # Items in repo that need updating by generating from the server's object model
+                  # TODO: logic that updates the repo from the object model
+                  diff_result.repo_updated = true # means repo updated by server
+                end
               end
-            end
+# for debug
+pp [:diff_result, diff_result]
 
+Aux.stop_for_testing?(:push_diff) # TODO: for debugging
+            end
             diff_result
           end
         end  

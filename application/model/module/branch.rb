@@ -180,8 +180,12 @@ module DTK
       end
     end
 
+    def current_sha
+      get_field?(:current_sha)
+    end
+
     def is_set_to_sha?(commit_sha)
-      commit_sha == get_field?(:current_sha)
+      commit_sha == current_sha
     end
 
     def set_sha(commit_sha)

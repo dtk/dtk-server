@@ -66,7 +66,7 @@ module DTK
           else
             target_service = ret_target_service_with_default(:target_service, new_client: true)
             # TODO: for testing; might remove
-            opts = opts.merge!(allow_existing_service: true) # TODO: for testing; might remove
+            opts = opts.merge!(allow_existing_service: true, version: version) # TODO: for testing; might remove
             target_service.stage_service(assembly_template, CommonModule::ServiceInstance, opts)
           end
         rest_ok_response response

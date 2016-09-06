@@ -28,9 +28,9 @@ module DTK
           super(project.id_handle, module_branch, service_module, module_refs)
         end
 
-        def put_needed_info_into_import_helper!(parsed_assemblies)
+        def put_needed_info_into_import_helper!(parsed_assemblies, opts = {})
           parsed_assemblies.each do |parsed_assembly|
-            process_assembly!(parsed_assembly)
+            process_assembly!(parsed_assembly, opts)
           end
           pp ['converted from parse form to db hash update form', @db_updates_assemblies]
         end

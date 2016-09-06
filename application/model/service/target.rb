@@ -79,7 +79,7 @@ module DTK
         unless is_converged? 
           fail ErrorUsage, "Cannot stage a service instance in a target service instance '#{target}' that is not converged."
         end
-        Model.Transaction do 
+        Model.Transaction do
           # if :allow_existing_service is true then new_assembly_instance wil be existing assembly_instance
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
           module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance)

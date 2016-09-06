@@ -33,8 +33,12 @@ module DTK
               NodePropertyComponent.create_node_property_components?(parsed_nodes)
             end
 
+            if module_version = opts[:module_version]
+              module_version = nil if module_version.eql?('master')
+            end
+
             assembly_name = parsed_assembly.req(:Name)
-            assembly_ref = @service_module.assembly_ref(assembly_name, opts[:module_version])
+            assembly_ref = @service_module.assembly_ref(assembly_name, module_version)
             
             db_update_hash = Assembly::Top.db_update_hash(parsed_assembly, @module_branch, @module_name)
             @db_updates_assemblies['component'].merge!(assembly_ref => db_update_hash)          

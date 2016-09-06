@@ -55,8 +55,14 @@ module DTK; class Assembly
     def stage(target, opts = Opts.new)
       service_module = opts[:service_module] || get_service_module
 
-      # raise error if service_module is not parsed
-      service_module_branch = service_module.get_workspace_module_branch
+      service_module_branch =
+        if version = opts[:version]
+          service_module.get_module_branch_matching_version(version)
+        else
+          service_module.get_workspace_module_branch
+        end
+
+      # service_module_branch = service_module.get_workspace_module_branch
       unless is_dsl_parsed = service_module_branch.dsl_parsed?
         fail ErrorUsage.new("An assembly template from an unparsed service-module '#{service_module}' cannot be staged")
       end

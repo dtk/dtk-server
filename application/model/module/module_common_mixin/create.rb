@@ -44,7 +44,7 @@ module DTK; module ModuleCommonMixin
         base_branch = module_obj.get_module_branches.first
         repo = module_obj.get_repo
         repo.merge!(branch_name: local.branch_name)
-        RepoManager.add_branch?(local.branch_name, {}, base_branch)
+        RepoManager.add_branch_and_push?(local.branch_name, {}, base_branch)
         local_repo_obj = repo.create_subclass_obj(:repo_with_branch)
       else
         create_opts = {

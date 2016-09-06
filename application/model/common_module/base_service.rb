@@ -52,7 +52,7 @@ module DTK
 
           base_service_module = get_base_service_module(module_branch)
           import_helper = Import::ServiceModule.new(project, base_service_module, module_branch)
-          import_helper.put_needed_info_into_import_helper!(parsed_assemblies)
+          import_helper.put_needed_info_into_import_helper!(parsed_assemblies, module_version: parsed_common_module[:version])
           import_helper.import_into_model
 
           module_branch.set_dsl_parsed!(true)

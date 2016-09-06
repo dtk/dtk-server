@@ -33,7 +33,7 @@ module DTK
           end
           # for testing
           opts[:force_parse] = opts[:force_pull] = true
-          
+
           ret = ModuleDSLInfo.new
           common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, opts)
           parse_needed = (opts[:force_parse] || !common_module__module_branch.dsl_parsed?)
@@ -79,7 +79,11 @@ module DTK
               module_branch
             else
               repo = service_module.get_repo
-              module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, return_module_branch: true)
+              module_branch = module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, return_module_branch: true)
+              repo.merge!(branch_name: module_branch[:branch])
+              base_branch = service_module.get_module_branches.first
+              RepoManager.add_branch_and_push?(module_branch[:branch], {}, base_branch)
+              module_branch
             end
           else
             module_class.create_module(project, local_params, return_module_branch: true)

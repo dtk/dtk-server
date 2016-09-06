@@ -27,7 +27,7 @@ module DTK
         @qualified_key = qualified_key
       end
 
-      def process
+      def process(_result)
         fail Error::NoMethodForConcreteClass.new(self.class)
       end
 

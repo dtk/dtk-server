@@ -20,16 +20,28 @@ module DTK
     class Result
       def initialize
         @repo_updated = true
-        @warnings     = []
-        @errors       = []
+        @warning_msgs = []
+        @error_msgs   = []
       end
-      
+
+      def add_warning_msg(msg)
+        @warning_msgs << msg
+      end
+
+      def add_error_msg(msg)
+        @error_msgs << msg
+      end
+
       def to_hash
         {
           repo_updated: @repo_updated,
-          warning: @warnings,
-          errors: @errors
+          warning_msgs: @warning_msgs,
+          error_msgs: @error_msgs
         }
+      end
+
+      def any_errors?
+        !@error_msgs.empty?
       end
 
     end

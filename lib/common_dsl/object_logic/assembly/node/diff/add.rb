@@ -19,7 +19,7 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly
     class Node::Diff
       class Add < CommonDSL::Diff::Element::Add
-        def process
+        def process(result)
           new_node = 
             case node_type
             when :node
@@ -30,8 +30,7 @@ module DTK; module CommonDSL
               fail "Unexpected type '#{node_type}'"
             end
           add_node_properties_component(new_node)
-          add_nested_components(new_node)
-          nil
+          add_nested_components(new_node, result)
         end
 
         private 
@@ -52,13 +51,11 @@ module DTK; module CommonDSL
           assembly_instance.add_ec2_properties_and_set_attributes(project, node, image, instance_size)
         end
 
-        # TODO: move so that can create component add components for each and bulk of this code there so
-        # can reuse code if added if under node or new top level
-        def add_nested_components(node)
+        def add_nested_components(node, result)
            components_semantic_parse_array.each do |component|
             # TODO: need to put new node in method called below
             component_add_diff = Component::Diff::Add.new(component.qualified_key, parse_object: component, service_instance: @service_instance)
-            component_add_diff.process
+            component_add_diff.process(result)
           end 
         end
 

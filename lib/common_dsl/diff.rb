@@ -43,8 +43,9 @@ module DTK
 #File.open('/tmp/collated', 'w') {|f| PP.pp(collated_diffs, f) }
 STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
             Model.Transaction do
-              collated_diffs.process
+              collated_diffs.process(ret)
 Aux.stop_for_testing?(:push_diff) # TODO: for debugging
+              Model.RollbackTransaction if ret.any_errors?
             end
             ret
           end

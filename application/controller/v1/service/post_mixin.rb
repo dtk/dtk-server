@@ -176,7 +176,8 @@ module DTK
 
       def update_from_repo
         commit_sha = required_request_params(:commit_sha)
-        rest_ok_response CommonModule.update_from_repo(:service_instance, get_default_project, commit_sha, service_instance: service_instance)
+        diff_result = CommonModule.update_from_repo(:service_instance, get_default_project, commit_sha, service_instance: service_instance)
+        rest_ok_response diff_result.to_hash
       end
 
       def set_default_target

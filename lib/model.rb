@@ -470,6 +470,10 @@ module DTK
       @db.transaction(*args, &block)
     end
 
+    def self.RollbackTransaction
+      raise ::Sequel::Rollback
+    end
+
     # adds or deletes children based on match_cols
     # returns the list of idhs that have been created or modified
     # opts can include teh Booelan options

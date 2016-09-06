@@ -30,10 +30,10 @@ module DTK
         self
       end
 
-      def process
+      def process(result)
         Sort::ForProcess.sort_keys(@diffs.keys).each do |collate_key|
           diffs_of_same_type = @diffs[collate_key]
-          diffs_of_same_type.each { |diff| diff.process }
+          diffs_of_same_type.each { |diff| diff.process(result) }
         end
       end
 

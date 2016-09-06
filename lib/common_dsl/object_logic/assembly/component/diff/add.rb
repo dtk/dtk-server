@@ -19,17 +19,21 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly
     class Component::Diff
       class Add < CommonDSL::Diff::Element::Add
-        def process
+        def process(result)
           matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component_name) 
           pp [:matching_aug_cmp_templates, component_name, matching_aug_cmp_templates]
-          unless matching_aug_cmp_templates.size == 1
-            fail Error, "TODO: DTK-2650: put in error messages to indicate that no or ambiguous module match found"
-          end
-          aug_cmp_template = matching_aug_cmp_templates.first
-          # TODO: use this and node to add component to node
-          # node is gotten by looking at qualified_key
-          # case on whether assembly or node level
-        end 
+          if matching_aug_cmp_templates.empty?
+            result.add_error_msg("Component '#{component_name}' does not match any installed component templates")
+          elsif matching_aug_cmp_templates.size > 1
+            # TODO: put in message the name of matching component templates
+            result.add_error_msg("Component '#{component_name}' matches multiple installed component templates")
+          else
+            aug_cmp_template = matching_aug_cmp_templates.first
+            # TODO: use this and node to add component to node
+            # node is gotten by looking at qualified_key
+            # case on whether assembly or node level
+          end 
+        end
 
         private
 
@@ -38,6 +42,7 @@ module DTK; module CommonDSL
         end
 
       end
+      
     end
   end
 end; end

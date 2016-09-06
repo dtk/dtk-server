@@ -18,8 +18,9 @@
 module DTK
   class CommonDSL::Diff
     class Result
+      attr_writer :repo_updated
       def initialize
-        @repo_updated = true
+        @repo_updated = false
         @warning_msgs = []
         @error_msgs   = []
       end

@@ -29,8 +29,11 @@ module DTK; module CommonDSL
             else
               fail "Unexpected type '#{node_type}'"
             end
-          add_node_properties_component(new_node)
           add_nested_components(new_node, result)
+          # dont process anything more if any errors in add_nested_components
+          return if result.any_errors?
+
+          add_node_properties_component(new_node)
         end
 
         private 

@@ -28,7 +28,7 @@ module DTK
       require_relative('diff/set')
 
       def self.process_service_instance(service_instance, module_branch)
-        ret = Result.new
+        diff_result = Result.new
         unless dsl_file_obj = Parse.matching_service_instance_file_obj?(module_branch)
           fail Error, "Unexpected that 'dsl_file_obj' is nil"
         end
@@ -43,11 +43,12 @@ module DTK
 #File.open('/tmp/collated', 'w') {|f| PP.pp(collated_diffs, f) }
 STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
             Model.Transaction do
-              collated_diffs.process(ret)
+              collated_diffs.process(diff_result)
+              pp [:diff_result, diff_result]
 Aux.stop_for_testing?(:push_diff) # TODO: for debugging
               Model.RollbackTransaction if ret.any_errors?
             end
-            ret
+            diff_result
           end
         end  
       end

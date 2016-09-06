@@ -15,8 +15,8 @@ db.name = dtk1
 
 stomp.host = ${PUBLIC_ADDRESS}
 stomp.port = ${MCOLLECTIVE_PORT}
-stomp.username= ${TENANT_USER}
-stomp.password= marionette
+stomp.username= ${STOMP_USERNAME}
+stomp.password= ${STOMP_PASSWORD}
 stomp.collective= mcollective
 
 arbiter.ssh.local.public_key= ${HOST_VOLUME}/arbiter/arbiter_local.pub

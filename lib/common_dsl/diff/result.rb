@@ -19,7 +19,7 @@ module DTK
   class CommonDSL::Diff
     class Result
       attr_writer :repo_updated
-      attr_reader :items_to_update
+      attr_reader :items_to_update, :error_msgs
       def initialize
         @repo_updated    = false # if true, means repo updated by server
         @items_to_update = [] # items in repo that server needs to update
@@ -35,18 +35,17 @@ module DTK
         @error_msgs << msg
       end
 
+      def any_errors?
+        !@error_msgs.empty?
+      end
+
       def hash_for_response
         {
           repo_updated: @repo_updated,
           warning_msgs: @warning_msgs,
-          error_msgs: @error_msgs
         }
       end
 
-      def any_errors?
-        !@error_msgs.empty?
-      end
-      
       UPDATE_ITEMS = [:workflow, :assembly]
       def add_item_to_update(item)
         fail Error, "Illegal update item '#{item}'"  unless UPDATE_ITEMS.include?(item)

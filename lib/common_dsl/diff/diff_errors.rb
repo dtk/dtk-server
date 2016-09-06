@@ -17,7 +17,28 @@
 #
 module DTK
   class CommonDSL::Diff
-    class ErrorUsage < ::DTK::ErrorUsage
+    class DiffErrors < ErrorUsage
+      def initialize(error_msgs)
+        super(error_msg(error_msgs))
+      end
+      private :initialize
+      
+      def self.raise_if_any_errors(diff_result)
+        error_msgs = diff_result.error_msgs
+        fail new(error_msgs) unless error_msgs.empty?
+      end
+
+      private
+
+
+      IDENT = 2
+      def error_msg(error_msgs)
+        if error_msgs.size == 1
+          error_msgs.first
+        else
+          error_msgs.inject("\n") { |str, error_msg| "#{str}#{' ' * IDENT}#{error_msg}\n" }
+        end
+      end
     end
   end
 end

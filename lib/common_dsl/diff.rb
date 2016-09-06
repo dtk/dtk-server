@@ -23,7 +23,7 @@ module DTK
       require_relative('diff/collated.rb')
       require_relative('diff/qualified_key')
       require_relative('diff/repo_update')
-      require_relative('diff/error_usage')
+      require_relative('diff/diff_errors')
       require_relative('diff/element')
 
       require_relative('diff/base')
@@ -44,7 +44,7 @@ module DTK
 STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
             Model.Transaction do
               collated_diffs.process(diff_result)
-              Model.RollbackTransaction if diff_result.any_errors?
+              DiffErrors.raise_if_any_errors(diff_result)
 
               # items_to_update are things that need to be updated in repo from what at this point are in object model
               items_to_update = diff_result.items_to_update
@@ -59,7 +59,6 @@ STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
               end
 # for debug
 pp [:diff_result, diff_result]
-
 Aux.stop_for_testing?(:push_diff) # TODO: for debugging
             end
             diff_result

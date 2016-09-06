@@ -22,42 +22,91 @@ if [[ -z $1 ]]; then
     exit 1
 fi
 
-IMAGE=getdtk/dtk-server
+DTK_IMAGE=getdtk/dtk-server
+ARBITER_IMAGE=getdtk/dtk-arbiter
 REPO_HOST=repoman1.internal.r8network.com
 REPO_PORT=443
 MCO_PORT=6163
 SSH_PORT=2222
 HTTP_PORT=8080
+GIT_USERNAME=dtk1
 DOCKER_ID=$(date +%Y%m%d%H%M%S)
 
 ADDRESS=${1}
-CONTAINER=${2:-dtk}
-USER=${4:-dtk-docker}
-PASS=${5:-r8server}
-NAME=${6:-dtk-docker}
-VOLUME="/usr/share/docker/dtk"
+UPGRADE=${2}
+CONTAINER=${3:-dtk}
+ARBITER_CONTAINER=${4:-dtk-arbiter}
+NAME=${6:-dtk-docker-${DOCKER_ID}}
+USER=${7:-docker-test}
+PASS=${8:-r8server}
+STOMP_USERNAME=${9:-dtk1}
+STOMP_PASSWORD=${10:-marionette}
+VOLUME="/dtk"
 
-docker ps | grep [d]tk
+echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}\nGIT_PORT=${SSH_PORT}\nSTOMP_PASSWORD=${STOMP_PASSWORD}\nSTOMP_USERNAME=${STOMP_USERNAME}" > "/${CONTAINER}/dtk.config"
+
+docker ps | grep dtk > /dev/null
 RUNNING=$?
 if [[ $RUNNING -eq 0 ]]; then
     echo -e "Stoping Docker Container: ${CONTAINER}...\n"
     docker stop ${CONTAINER} > /dev/null
 fi
 
-docker ps -a | grep [d]tk > /dev/null
+docker ps -a | grep dtk > /dev/null
 EXISTS=$?
 if [[ $EXISTS -eq 0 ]]; then
     echo -e "Removing Docker Container: ${CONTAINER}...\n"
     docker rm ${CONTAINER} > /dev/null
 fi
 
+docker ps | grep dtk-arbiter > /dev/null
+RUNNING=$?
+if [[ $RUNNING -eq 0 ]]; then
+    echo -e "Stoping Docker Container: ${ARBITER_CONTAINER}...\n"
+    docker stop ${ARBITER_CONTAINER} > /dev/null
+fi
+
+docker ps -a | grep dtk-arbiter > /dev/null
+EXISTS=$?
+if [[ $EXISTS -eq 0 ]]; then
+    echo -e "Removing Docker Container: ${ARBITER_CONTAINER}...\n"
+    docker rm ${ARBITER_CONTAINER} > /dev/null
+fi
+
 echo -e "Pulling the latest DTK - Server image. \n"
-docker pull ${IMAGE}
+docker pull ${DTK_IMAGE} > /dev/null
 PULLED=$?
 if [[ $PULLED -eq 1 ]]; then
-	echo -e "Error while pulling image. \n"
-	exit 1
+  echo -e "Error while pulling dtk server image. \n"
+  exit 1
+fi
+
+echo -e "Pulling the latest DTK - Arbiter image. \n"
+docker pull ${ARBITER_IMAGE} > /dev/null
+PULLED=$?
+if [[ $PULLED -eq 1 ]]; then
+    echo -e "Error while pulling dtk arbiter image. \n"
+    exit 1
 fi
 
 echo -e "\nStarting a new Docker Container: ${CONTAINER}"
+echo -e "\nStarting a new Docker Container: ${ARBITER_CONTAINER}"
+
+# start the dtk-server container
+docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}
+
+# wait for dtk-arbiter ssh keypair to be generated
+while [[ ! -f $HOST_VOLUME/arbiter/arbiter_remote ]]; do
+  sleep 2
+done
+
+# check if docker daemon socket is available
+# and mount it inside dtk-arbiter contianer if so
+ADDITIONAL_ARGS=''
+if [[ -e /var/run/docker.sock ]]; then
+  ADDITIONAL_ARGS="-v /var/run/docker.sock:/var/run/docker.sock "
+fi
+
+# start the dtk-arbiter container
+docker run -e GIT_USERNAME=${GIT_USERNAME} --name ${ARBITER_CONTAINER} -v ${HOST_VOLUME}:/host_volume -e HOST_VOLUME=${HOST_VOLUME} ${ADDITIONAL_ARGS} --restart=on-failure -td ${ARBITER_IMAGE}
 docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name ${CONTAINER} -v ${VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${IMAGE}

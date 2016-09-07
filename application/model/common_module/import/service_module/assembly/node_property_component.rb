@@ -91,7 +91,7 @@ module DTK
         def self.update_attributes_in_node_property_component!(node_property_component, attr_val_pairs)
           unless attributes = node_property_component.val(:Attributes)
             attributes = canonical_hash
-            node_property_component.set(:Attributes, attributes)
+            node_property_component.values.first.set(:Attributes, attributes)
           end
           attr_val_pairs.each_pair do |attr_name, attr_val|
             attributes.merge!(attr_name => canonical_hash(:Value => attr_val)) unless attr_val.nil?

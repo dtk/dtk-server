@@ -241,6 +241,8 @@ fi
 # persist nginx confs
 if [[ ! -d /host_volume/nginx ]]; then
   mv /etc/nginx /host_volume/
+else
+  rm -rf /etc/nginx
 fi
 ln -sfn /host_volume/nginx /etc/nginx
 

@@ -22,7 +22,7 @@ if [[ -n $PBUILDERID ]]; then
 fi
 
 # start the dtk-server container
-docker run --name dtk -v $HOST_VOLUME:/host_volume -p 8080:80 -p 6163:6163 -p $GIT_PORT:22 -d getdtk/dtk-server
+docker run --name dtk -v $HOST_VOLUME:/host_volume -p 8080:80 -p 6163:6163 -p $GIT_PORT:22 --restart=on-failure -d getdtk/dtk-server
 
 # wait for dtk-arbiter ssh keypair to be generated
 while [[ ! -f $HOST_VOLUME/arbiter/arbiter_remote ]]; do

@@ -27,7 +27,7 @@ module DTK; class AssemblyModule
     end
     private :initialize
 
-    # This checks if an assembly specfic branch has been made and returns this otherwise gives teh base branch
+    # This checks if an assembly specfic branch has been made and returns this otherwise gives the base branch
     def self.get_assembly_branch(assembly, opts = {})
       new(assembly).get_assembly_branch(opts)
     end

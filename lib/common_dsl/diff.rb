@@ -43,7 +43,7 @@ module DTK
 # for debug
 STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
             Model.Transaction do
-              collated_diffs.process(diff_result)
+              diff_result = collated_diffs.process
               DiffErrors.raise_if_any_errors(diff_result)
 
               # items_to_update are things that need to be updated in repo from what at this point are in object model

@@ -41,7 +41,7 @@ USER=${7:-docker-test}
 PASS=${8:-r8server}
 STOMP_USERNAME=${9:-dtk1}
 STOMP_PASSWORD=${10:-marionette}
-VOLUME="/dtk"
+HOST_VOLUME="/dtk"
 
 echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}\nGIT_PORT=${SSH_PORT}\nSTOMP_PASSWORD=${STOMP_PASSWORD}\nSTOMP_USERNAME=${STOMP_USERNAME}" > "/${CONTAINER}/dtk.config"
 
@@ -109,4 +109,4 @@ fi
 
 # start the dtk-arbiter container
 docker run -e GIT_USERNAME=${GIT_USERNAME} --name ${ARBITER_CONTAINER} -v ${HOST_VOLUME}:/host_volume -e HOST_VOLUME=${HOST_VOLUME} ${ADDITIONAL_ARGS} --restart=on-failure -td ${ARBITER_IMAGE}
-docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name ${CONTAINER} -v ${VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${IMAGE}
+docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} -e MCOLLECTIVE_PORT=${MCO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${IMAGE}

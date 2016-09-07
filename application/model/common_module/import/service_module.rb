@@ -32,7 +32,6 @@ module DTK
           parsed_assemblies.each do |parsed_assembly|
             process_assembly!(parsed_assembly, opts)
           end
-          pp ['converted from parse form to db hash update form', @db_updates_assemblies]
         end
 
         def import_into_model

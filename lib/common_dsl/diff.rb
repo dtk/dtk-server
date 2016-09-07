@@ -61,9 +61,9 @@ STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
 pp [:diff_result, diff_result]
 Aux.stop_for_testing?(:push_diff) # TODO: for debugging
             end
-            diff_result
           end
         end  
+        diff_result
       end
 
       # opts can have keys

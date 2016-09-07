@@ -25,6 +25,7 @@ module DTK
         # attribute must be before node and component
         require_relative('assembly/node')
         require_relative('assembly/component')
+        require_relative('assembly/workflow')
 
         def self.generate_content_input(assembly_instance)
           new.generate_content_input!(assembly_instance)
@@ -45,8 +46,7 @@ module DTK
           # TODO: add assembly level attributes
           set(:Nodes, nodes) unless nodes.empty?
           set(:Components, components) unless components.empty?
-          # TODO: add assembly level workflows
-
+          set(:Workflows, Workflow.generate_content_input(assembly_instance))
           self
         end
 
@@ -61,6 +61,7 @@ module DTK
             # ...
           end
         end
+
       end
     end
   end

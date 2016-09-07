@@ -238,6 +238,12 @@ if [[ -d /home/dtk-client ]]; then
   ln -sfn ${HOST_VOLUME}/client /home/dtk-client/dtk
 fi
 
+# persist nginx confs
+if [[ ! -d /host_volume/nginx ]]; then
+  mv /etc/nginx /host_volume/
+fi
+ln -sfn /host_volume/nginx /etc/nginx
+
 # start redis
 /usr/bin/redis-server &
 

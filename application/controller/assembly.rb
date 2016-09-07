@@ -669,6 +669,7 @@ module DTK
       is_created = true
 
       service_module_id = nil
+      version = nil
 
       unless service_module_id = ret_request_params(:service_module_id)
         if ret_request_params(:service_module_name)
@@ -688,7 +689,7 @@ module DTK
 
         # if we do not specify version use latest
         version = compute_latest_version(service_module) unless version
-
+        
         module_name        = ret_request_params(:service_module_name)
         assembly_version   = (version.nil? || version.eql?('base')) ? 'master' : version
         assembly_templates = service_module.get_assembly_templates().select { |template| (template[:display_name].eql?(assembly_id) || template[:id] == assembly_id.to_i) }
@@ -697,6 +698,8 @@ module DTK
       else
         assembly_template = ret_assembly_template_object()
       end
+
+      opts[:version] = version if version
 
       if service_settings = ret_settings_objects(assembly_template)
         opts[:service_settings] = service_settings

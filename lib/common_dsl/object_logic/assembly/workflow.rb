@@ -19,23 +19,60 @@ module DTK; module CommonDSL
   module ObjectLogic
     class Assembly
       class Workflow < Generate::ContentInput::Hash
-        def initialize(workflow_name, assembly_instance)
+        def initialize(workflow)
           super()
-          @workflow_name     = workflow_name
-          @assembly_instance = assembly_instance
+          @workflow = workflow
         end
         private :initialize
 
         def self.generate_content_input(assembly_instance)
-          # TODO: DTK-2651 need to get more than the create workflow
-          workflow_names = ['create']
-          workflow_names.inject(ObjectLogic.new_content_input_hash) do |h, workflow_name| 
-            h.merge(workflow_name => new(workflow_name, assembly_instance).generate_content_input!)
+          generate_and_persist_create_workflow_if_needed(assembly_instance)
+
+          workflows = assembly_instance.get_task_templates(set_display_names: true)
+          unsorted = workflows.inject({}) do |h, workflow| 
+            h.merge(workflow.display_name => new(workflow).generate_content_input!)
           end
+          sorted_workflow_names(unsorted.keys).inject(new_input_hash) { |h, workflow_name| h.merge(workflow_name => unsorted[workflow_name]) }
         end
 
         def generate_content_input!
-          Task::Template::ConfigComponents.get_or_generate_template_content(:assembly, @assembly_instance, task_action: @workflow_name).serialization_form
+          change_symbols_to_strings(new_input_hash(@workflow[:content]))
+        end
+
+        private
+        def self.generate_and_persist_create_workflow_if_needed(assembly_instance)
+          Task::Template::ConfigComponents.get_or_generate_template_content(:assembly, assembly_instance)
+          nil
+        end
+
+        def change_symbols_to_strings(obj)
+          if obj.kind_of?(::Hash)
+            obj.inject({}) { |h, (k, v)| h.merge(k.to_s => change_symbols_to_strings(v)) }
+          elsif obj.kind_of?(::Array)
+            obj.map { |el| change_symbols_to_strings(el) }
+          elsif obj.kind_of?(::Symbol)
+            obj.to_s
+          else
+            obj
+          end
+        end
+
+        # alphabetical with create and delete first
+        ORDERED_WORKFLOW_NAMES = ['create', 'delete'] 
+        def self.sorted_workflow_names(workflow_names)
+          ret = []
+          names = workflow_names.clone
+          ORDERED_WORKFLOW_NAMES.each do |name|
+            ret << name if names.delete(name)
+          end
+          ret + names.sort
+        end
+            
+        def self.new_input_hash(hash = nil)
+          hash ? ObjectLogic.new_content_input_hash.merge(hash) : ObjectLogic.new_content_input_hash
+        end
+        def new_input_hash(hash = nil)
+          self.class.new_input_hash(hash)
         end
       end
     end

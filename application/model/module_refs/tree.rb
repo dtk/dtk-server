@@ -38,8 +38,8 @@ module DTK
       # opts can have
       # :components - a set of component instances to contrain what is returned
       def self.create(assembly_instance, opts = {})
-        # TODO: DTK-2650; Aldin: think that get_assembly_branch shoudl not have opts; assembly instance has all info
-        #  needed to determine teh exact branch; so think should be
+        # TODO Rich DTK-2650: we have to provide version through opts because later in get_assembly_branch we need to match against specific
+        # module version if assembly branch is not found
         # assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance) and should not pass version into create
         assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance, opts)
         components =  opts[:components] || assembly_instance.get_component_instances()

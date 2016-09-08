@@ -27,30 +27,22 @@ module DTK; class AssemblyModule
     end
     private :initialize
 
-    # TODO: DTK-2650; Aldin: think that get_assembly_branch should not have opts; assembly has all the info it needs to determien branch
-    # This checks if an assembly specfic branch has been made and returns this otherwise gives the base branch
+    # TODO: Rich DTK-2650: we need to pass version in opts because if assebmly version is not found, we will have to match against
+    # specific module version. With new client we can have module version without base installed so mb.matches_base_version? will also bi nil
+    # so need to match against mb.matches_version?(opts[:version]) to find module branch for specific version
     def self.get_assembly_branch(assembly, opts = {})
       new(assembly).get_assembly_branch(opts)
     end
     def get_assembly_branch(opts = {})
       module_branches = @service_module.get_module_branches
-      # TODO: DTK-2650; commented out below; problem is that find can match multiple cases so non determinstmn; so changed to do what I think only match should be
 
       if ret = module_branches.find { |mb| mb.matches_version?(@am_version) }
         return ret
       end
 
-      # TODO: DTK-2650; dont think we want to have opts (and match againts opts) see if we need match with base version
-      # put in these two matches, but they shoudl be looked at to see what shoudl be taken out
       module_branches.find do |mb|
         mb.matches_version?(opts[:version]) || mb.matches_base_version?
       end
-
-      # TODO: DTK-2650: commented out
-      # module_branches.find { |mb| mb.matches_version?(@am_version) } || module_branches.find(&:matches_base_version?)
-      # module_branches.find do |mb|
-      #  return mb if mb.matches_version?(@am_version) || mb.matches_version?(opts[:version]) || mb.matches_base_version?
-      # end
     end
 
     def self.get_or_create_assembly_branch(assembly)

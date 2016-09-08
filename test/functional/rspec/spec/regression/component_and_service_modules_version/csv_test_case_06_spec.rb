@@ -21,9 +21,9 @@ service_module_name = 'bootstrap'
 service_module_namespace = 'version'
 assembly_template = 'test1'
 assembly_name = "#{service_module_name}::#{assembly_template}"
-service_name = 'csv_test_case_05_instance'
-new_service_name = 'csv_test_case_05_instance_new'
-new_assembly = 'csv_test_case_05_assembly'
+service_name = 'csv_test_case_06_instance'
+new_service_name = 'csv_test_case_06_instance_new'
+new_assembly = 'csv_test_case_06_assembly'
 node_name = 'test1'
 
 

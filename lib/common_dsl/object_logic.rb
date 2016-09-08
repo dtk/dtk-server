@@ -20,6 +20,7 @@ module DTK
     module ObjectLogic
       require_relative('object_logic/service_instance')
       require_relative('object_logic/assembly')
+      require_relative('object_logic/dependency')
 
       def self.new_content_input_hash
         Generate::ContentInput::Hash.new

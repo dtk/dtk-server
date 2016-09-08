@@ -459,7 +459,7 @@ module DTK
 
     def get_module_refs
       sp_hash = {
-        cols: [:id, :display_name, :namespace_info],
+        cols: [:id, :display_name, :namespace_info, :version_info],
         filter: [:eq, :branch_id, self[:id]]
       }
       Model.get_objs(model_handle(:module_ref), sp_hash)

@@ -28,7 +28,8 @@ module DTK
         def generate_content_input!
           assembly_instance = @service_instance.assembly_instance
           set(:DSLVersion, @module_branch.dsl_version)
-          set(:Name, assembly_instance.display_name) 
+          set(:Name, assembly_instance.display_name)
+          set(:DependentModules, Dependency.generate_content_input(assembly_instance, @module_branch))
           set(:Assembly, Assembly.generate_content_input(assembly_instance))
           self
         end

@@ -28,7 +28,7 @@ describe "(New DTK client) Test Case 1: Smoke test of new dtk client" do
   end
 
   context "Stage assembly from module" do
-    include_context "Stage assembly from module", module_name, assembly_name, service_name
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
   context "Converge service instance" do

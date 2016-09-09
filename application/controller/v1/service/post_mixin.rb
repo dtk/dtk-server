@@ -28,16 +28,13 @@ module DTK
       ##   :is_target (optional) - Boolean
       ##   :no_auto_complete(optional) - Boolean
       def create
-        assembly_name     = required_request_params(:assembly_name)
         service_module    = ret_service_module
         version           = request_params(:version) || compute_latest_version(service_module)
-        service_name      = request_params(:service_name) || generate_new_service_name(assembly_name, service_module)
         is_target_service = boolean_request_params(:is_target)
+        list              = service_module.get_assembly_templates
+        display_names     = list.map(&:display_name)
 
-        list = service_module.get_assembly_templates
-        display_names = list.map(&:display_name)
-
-        if assembly_name.empty?
+        unless assembly_name = request_params(:assembly_name)
           if list.empty?
             fail ErrorUsage, "Service module has no assemblies."
           elsif list.size > 1
@@ -46,6 +43,8 @@ module DTK
             assembly_name = list.first[:display_name]
           end
         end
+
+        service_name = request_params(:service_name) || generate_new_service_name(assembly_name, service_module)
 
         unless assembly_template = service_module.assembly_template?(assembly_name, version)
           fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'. Valid names: #{display_names.join(', ')}"

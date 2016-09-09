@@ -24,24 +24,36 @@ module DTK; class AssemblyModule
       @assembly_template_name = assembly_template_name?(assembly)
       @service_module = opts[:service_module] || get_service_module(assembly)
       @am_version = assembly_module_version(assembly)
+      # dynamically computed
+      @module_branches = nil
     end
     private :initialize
 
-    # TODO: Rich DTK-2650: we need to pass version in opts because if assebmly version is not found, we will have to match against
-    # specific module version. With new client we can have module version without base installed so mb.matches_base_version? will also bi nil
-    # so need to match against mb.matches_version?(opts[:version]) to find module branch for specific version
-    def self.get_assembly_branch(assembly, opts = {})
-      new(assembly).get_assembly_branch(opts)
+    def self.get_assembly_branch(assembly)
+      new(assembly).get_assembly_branch
     end
-    def get_assembly_branch(opts = {})
-      module_branches = @service_module.get_module_branches
 
-      if ret = module_branches.find { |mb| mb.matches_version?(@am_version) }
+    def get_assembly_branch
+      module_branches.find { |mb| mb.matches_version?(@am_version) }
+    end
+
+    # opts can have keys:
+    #   :version - version of base branch otherwise base is base_version
+    def self.get_assembly_or_base_branch(assembly, opts = {})
+      new(assembly).get_assembly_or_base_branch(opts)
+    end
+    def get_assembly_or_base_branch(opts = {})
+      if ret = get_assembly_branch
         return ret
       end
 
+      version = opts[:version]
       module_branches.find do |mb|
-        mb.matches_version?(opts[:version]) || mb.matches_base_version?
+        if version 
+           mb.matches_version?(version)
+        else
+          mb.matches_base_version?
+        end
       end
     end
 
@@ -72,6 +84,10 @@ module DTK; class AssemblyModule
     end
 
     private
+
+    def module_branches
+      @module_branches ||= @service_module.get_module_branches
+    end
 
     # returns new module branch
     def create_assembly_branch(opts = {})

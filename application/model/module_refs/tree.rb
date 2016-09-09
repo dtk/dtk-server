@@ -36,14 +36,12 @@ module DTK
       private :initialize
 
       # opts can have
-      # :components - a set of component instances to contrain what is returned
+      #   :components - a set of component instances to contrain what is returned
+      #   :version
       def self.create(assembly_instance, opts = {})
-        # TODO Rich DTK-2650: we have to provide version through opts because later in get_assembly_branch we need to match against specific
-        # module version if assembly branch is not found
-        # assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance) and should not pass version into create
-        assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance, opts)
-        components =  opts[:components] || assembly_instance.get_component_instances()
-        create_module_refs_starting_from_assembly(assembly_instance, assembly_branch, components)
+        module_branch = AssemblyModule::Service.get_assembly_or_base_branch(assembly_instance, opts)
+        components = opts[:components] || assembly_instance.get_component_instances
+        create_module_refs_starting_from_assembly(assembly_instance, module_branch, components)
       end
 
       def isa_missing_module_ref?
@@ -183,7 +181,7 @@ module DTK
         namespace ? "#{namespace}:#{module_name}" : module_name
       end
 
-      def self.create_module_refs_starting_from_assembly(assembly_instance, assembly_branch, components)
+      def self.create_module_refs_starting_from_assembly(assembly_instance, module_branch, components)
         # get relevant service and component module branches
         ndx_cmps = {} #components indexed (grouped) by branch id
         components.each do |cmp|
@@ -207,14 +205,14 @@ module DTK
           Log.error("Unexpected that the following branches dont exist; branches with ids #{missing_branches.join(',')}")
         end
 
-        ret = new(assembly_branch, assembly_instance)
-        get_top_level_children(cmp_module_branches, assembly_branch) do |module_name, child|
+        ret = new(module_branch, assembly_instance)
+        get_top_level_children(cmp_module_branches, module_branch) do |module_name, child|
           if child
             ret.add_module_ref!(module_name, child)
             parent_path = [namespace_model_name_path_el(child.namespace, module_name)]
             child.recursive_add_module_refs!(parent_path)
           else
-            Log.error_pp(['Unexpected that in get_top_level_children child can be nil', cmp_module_branches, assembly_branch])
+            Log.error_pp(['Unexpected that in get_top_level_children child can be nil', cmp_module_branches, module_branch])
           end
         end
         ret

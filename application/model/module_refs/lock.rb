@@ -129,8 +129,9 @@ module DTK
       end
 
       # opts can have keys
-      # :with_module_branches - Boolean
-      # :raise_errors - Boolean
+      #   :with_module_branches - Boolean
+      #   :raise_errors - Boolean
+      #   :version
       def self.compute_elements(assembly_instance, types, opts = {})
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance, opts)
         collapsed = module_refs_tree.collapse(Aux.hash_subset(opts, [:raise_errors]))

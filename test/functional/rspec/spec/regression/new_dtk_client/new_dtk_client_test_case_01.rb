@@ -40,7 +40,7 @@ describe "(New DTK client) Test Case 1: Smoke test of new dtk client" do
   end
 
   context "Uninstall module" do
-    include_context "Uninstall module", module_name
+    include_context "Uninstall module", module_name, module_location
   end
 
   context "Delete initial module on filesystem" do

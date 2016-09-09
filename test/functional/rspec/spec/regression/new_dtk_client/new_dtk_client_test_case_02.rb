@@ -5,8 +5,8 @@ initial_master_module_location = "./spec/regression/new_dtk_client/resources/new
 initial_version_module_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_02_2_dtk.module.yaml"
 module_location = '/tmp/new_dtk_client_test_case_02'
 module_name = 'test/new_dtk_client_test_case_02'
-master_assembly_name = 'master_module_assembly'
-version_assembly_name = 'version_module_assembly'
+master_assembly_name = 'master_assembly_name'
+version_assembly_name = 'version_assembly_name'
 
 remote_module = 'test/new_client_module'
 remote_master_module_assembly_name = 'master_module_assembly'
@@ -35,7 +35,7 @@ describe "(New DTK client) Test Case 2: Test various module installation options
   end
 
   context "Uninstall module" do
-    include_context "Uninstall module", module_name
+    include_context "Uninstall module", module_name, module_location
   end
 
   context "Delete initial module on filesystem" do
@@ -56,7 +56,7 @@ describe "(New DTK client) Test Case 2: Test various module installation options
   end
 
   context "Uninstall module" do
-    include_context "Uninstall module", module_name
+    include_context "Uninstall module", module_name, module_location
   end
 
   context "Delete initial module on filesystem" do
@@ -73,7 +73,7 @@ describe "(New DTK client) Test Case 2: Test various module installation options
   end
 
   context "Uninstall module" do
-    include_context "Uninstall module", remote_module
+    include_context "Uninstall module", remote_module, remote_module_location
   end
 
   context "Delete initial module on filesystem" do
@@ -90,7 +90,7 @@ describe "(New DTK client) Test Case 2: Test various module installation options
   end
 
   context "Uninstall module" do
-    include_context "Uninstall module", remote_module
+    include_context "Uninstall module", remote_module, remote_module_location
   end
 
   context "Delete initial module on filesystem" do

@@ -19,7 +19,7 @@ GIT
 
 GIT
   remote: git://github.com/dtk/dtk-dsl.git
-  revision: e7fa124659f3ebc142996b24335d0341a3818061
+  revision: 4c30bf4e8b3488ff7c9dcc3ca7e025a162ea41a3
   specs:
     dtk-dsl (0.0.1)
 

@@ -533,6 +533,10 @@ module DTK; class  Assembly
       }
       opts.merge!(skip_running_check: true)
 
+      if opts[:recursive].nil? && is_target_service_instance?
+          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it. Please use flag '-r' to remove all."
+      end
+
       if opts[:recursive]
         fail ErrorUsage, "You can use recursive delete with target service instances only!" unless is_target_service_instance?
         delete_recursive(self, task, opts)

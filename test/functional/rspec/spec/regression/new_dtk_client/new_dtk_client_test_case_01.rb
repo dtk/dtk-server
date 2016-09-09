@@ -1,18 +1,18 @@
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
 
-initial_module_location = "./spec/regression/dtk_cli/resources/dtk_cli_test_case_01_dtk.module.yaml"
-module_location = '/tmp/dtk_cli_test_case_01'
-module_name = 'test/dtk_cli_test_case_01'
+initial_module_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_01_dtk.module.yaml"
+module_location = '/tmp/new_dtk_client_test_case_01'
+module_name = 'test/new_dtk_client_test_case_01'
 assembly_name = 'new_module_assembly'
-service_name = 'dtk_cli_test_case_01'
+service_name = 'new_dtk_client_test_case_01'
 service_location = "~/dtk/"
 
 dtk_common = Common.new('', '')
 
-describe "(DTK CLI) Test Case 1: Smoke test of dtk cli" do
+describe "(New DTK client) Test Case 1: Smoke test of new dtk client" do
   before(:all) do
-    puts '********************************************', ''
+    puts '**********************************************************', ''
   end
 
   context "Setup initial module on filesystem" do

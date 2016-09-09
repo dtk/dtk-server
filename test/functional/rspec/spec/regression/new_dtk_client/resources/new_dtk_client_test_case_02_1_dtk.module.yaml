@@ -1,6 +1,6 @@
 ---
 dsl_version: 1.0.0
-module: test/new_dtk_client_test_case_01
+module: test/new_dtk_client_test_case_02
 version: master
 keywords: bootstrap
 description: test123
@@ -9,7 +9,7 @@ license: Apache 2.0
 dependencies:
 - puppetlabs/stdlib
 assemblies:
-  new_module_assembly:
+  master_assembly_name:
     description: test assembly
     nodes:
       node:

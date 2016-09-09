@@ -20,6 +20,25 @@ shared_context 'Install module' do |module_name, module_location|
   end
 end
 
+shared_context 'Install module from dtkn' do |remote_module, remote_module_location, version|
+  it "installs #{remote_module} module from dtkn to server" do
+    puts 'Install module from dtkn:', '-----------------------------'
+    pass = true
+    if version == 'master'
+      value = `dtk module install #{remote_module}`
+      puts value
+    else
+      value = `dtk module install -v #{version} #{remote_module}`
+      puts value
+    end
+    pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
+    puts "Install of module #{remote_module} was completed successfully!" if pass == true
+    puts "Install of module #{remote_module} did not complete successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context 'List assemblies' do |module_name, assembly_name, dtk_common|
   it "checks that assembly: #{assembly_name} exists as part of module: #{module_name}" do
     puts 'List assemblies:', '----------------------'

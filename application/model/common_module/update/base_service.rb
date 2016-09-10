@@ -79,15 +79,10 @@ module DTK
               module_branch
             else
               repo = service_module.get_repo
-              module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, return_module_branch: true)
-              # TODO: DTK-2650; Aldin: Below is commented out; there might not be a base branch and also call
-              # service_module.get_module_branches.first is non determinstic if multiple branches. Need to always match on a version field to
-              # get right branch
-              # module_branch = module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, return_module_branch: true)
-              # repo.merge!(branch_name: module_branch[:branch])
-              # base_branch = service_module.get_module_branches.first
-              # RepoManager.add_branch_and_push?(module_branch[:branch], {}, base_branch)
-              # module_branch
+              module_branch = module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, return_module_branch: true)
+              repo.merge!(branch_name: module_branch[:branch])
+              RepoManager.add_branch_and_push?(module_branch[:branch], { empty: true }, module_branch)
+              module_branch
             end
           else
             module_class.create_module(project, local_params, return_module_branch: true)

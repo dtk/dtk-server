@@ -45,6 +45,7 @@ module DTK
           service_module: service_module,
           service_name: service_name,
           no_auto_complete: boolean_request_params(:no_auto_complete),
+          version: version
         }
         opts = Opts.new(opts)
 
@@ -54,8 +55,8 @@ module DTK
             Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
           else
             target_service = ret_target_service_with_default(:target_service, new_client: true)
-            # TODO: for testing; might remove
-            opts = opts.merge!(allow_existing_service: true, version: version) # TODO: for testing; might remove
+            # TODO: for testing
+            #opts = opts.merge!(allow_existing_service: true)
             target_service.stage_service(assembly_template, CommonModule::ServiceInstance, opts)
           end
         rest_ok_response response

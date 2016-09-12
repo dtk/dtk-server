@@ -24,29 +24,17 @@ module DTK
         #  :parse_object
         #  :service_instance
         def initialize(qualified_key, opts = {})
-          super(qualified_key)
-          unless @parse_object = opts[:parse_object]
-            fail Error, "Unexpected that opts[:parse_object] is nil"
-          end
-          unless @service_instance = opts[:service_instance]
-            fail Error, "Unexpected that opts[:service_instance] is nil"
-          end
+          fail Error, "Unexpected that opts[:parse_object] is nil" unless opts[:parse_object]
+          fail Error, "Unexpected that opts[:service_instance] is nil" unless opts[:service_instance]
+
+          super(qualified_key, service_instance: opts[:service_instance])
+          @parse_object = opts[:parse_object]
         end
 
         def serialize(serialized_hash)
           serialized_hash.serialize_add_element(self)
         end
         
-        private
-        
-        def assembly_instance
-          @service_instance.assembly_instance
-        end
-
-        def project
-          @project ||= assembly_instance.get_target.get_project
-        end
-
       end
     end
   end

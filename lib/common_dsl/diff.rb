@@ -29,7 +29,7 @@ module DTK
       require_relative('diff/base')
       require_relative('diff/set')
 
-      attr_reader :qualified_key
+      attr_reader :qualified_key, :service_instance
       # opts can have keys
       #   :qualified_key 
       #   :service_instance

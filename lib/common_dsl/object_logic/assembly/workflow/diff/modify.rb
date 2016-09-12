@@ -20,10 +20,26 @@ module DTK; module CommonDSL
     class Workflow::Diff
       class Modify < CommonDSL::Diff::Element::Modify
         def process(result)
-          # parse_error = Task::Template::ConfigComponents.find_parse_error?(hash_content, assembly: @assembly, keys_are_in_symbol_form: true)
+          # TODO: parse here or netter in dsl pasring
+          # parse_error = Task::Template::ConfigComponents.find_parse_error?(new_workflow, assembly: assembly_instance, keys_are_in_symbol_form: true)
           # even if there is a parse error savings so user can go back and update what user justed edited
-           Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(), hash_content, @task_action)
-nil
+          Task::Template.update_from_serialized_content(assembly_instance.id_handle, new_workflow, task_action_name)
+          nil
+        end
+
+        private
+
+        def new_workflow
+          @new_val
+        end
+
+
+        MAPPING_TO_TAKS_ACTION_NAMES = {
+          'create' => nil 
+        }
+        def task_action_name
+          workflow_name = name
+          MAPPING_TO_TAKS_ACTION_NAMES.has_key?(workflow_name) ?  MAPPING_TO_TAKS_ACTION_NAMES[workflow_name] : workflow_name
         end
 
       end

@@ -32,10 +32,12 @@ module DTK
       attr_reader :qualified_key
       # opts can have keys
       #   :qualified_key 
+      #   :service_instance
       #   :type
       def initialize(opts = {})
         @qualified_key = opts[:qualified_key]
-        @type          = opts[:type] || self.class.type?
+        @service_instance = opts[:service_instance]
+        @type             = opts[:type] || self.class.type?
       end
       private :initialize
 

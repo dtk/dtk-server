@@ -20,7 +20,10 @@ module DTK; module CommonDSL
     class Workflow::Diff
       class Modify < CommonDSL::Diff::Element::Modify
         def process(result)
-          raise 'here'
+          # parse_error = Task::Template::ConfigComponents.find_parse_error?(hash_content, assembly: @assembly, keys_are_in_symbol_form: true)
+          # even if there is a parse error savings so user can go back and update what user justed edited
+           Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(), hash_content, @task_action)
+nil
         end
 
       end

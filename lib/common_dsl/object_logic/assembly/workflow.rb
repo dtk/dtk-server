@@ -44,8 +44,10 @@ module DTK; module CommonDSL
         end
 
         ### For diffs
+        # opts can have keys
+        #   :service_instance
         def diff?(workflow_parse, qualified_key, opts = {})
-          create_diff?(self, workflow_parse, qualified_key)
+          create_diff?(self, workflow_parse, qualified_key, opts)
         end
 
         # opts can have keys:

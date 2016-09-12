@@ -26,20 +26,23 @@ module DTK
       # opts can have keys
       #   :qualified_key (required)
       #   :id_handle (required)
+      #   :service_instance
       #   :type
       def initialize(current_val, new_val, opts = {})
         fail Error, "Unexpected that opts[:qualified_key] is nil" unless opts[:qualified_key]
         fail Error, "Unexpected that opts[:id_handle] is nil" unless opts[:id_handle]
 
-        super(qualified_key: opts[:qualified_key], type: opts[:type])
+        super(qualified_key: opts[:qualified_key], type: opts[:type], service_instance: opts[:service_instance])
         @id_handle   = opts[:id_handle]
         @current_val = current_val
         @new_val     = new_val
       end
+      private :initialize
 
       # opts can have keys
       #   :qualified_key
       #   :id_handle
+      #   :service_instance
       def self.diff?(current_val, new_val, opts = {})
         new(current_val, new_val, opts) if has_diff?(current_val, new_val)
       end

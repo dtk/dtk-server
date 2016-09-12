@@ -29,7 +29,7 @@ module DTK
       #   :qualified_key
       #   :service_instance
       def initialize(opts = {})
-        super(qualified_key: opts[:qualified_key], type: opts[:type])
+        super(qualified_key: opts[:qualified_key], type: opts[:type], service_instance: opts[:service_instance])
         # The object attributes are
         #  @added - array, possibly empty, of Diff::Element::Add objects
         #  @deleted - array, possibly empty, of Diff::Element::Delete objects
@@ -44,7 +44,6 @@ module DTK
           @deleted  = triplet[1] || []
           @modified = triplet[2] || []
         end
-        @service_instance = opts[:service_instance]
 
       end
       private :initialize

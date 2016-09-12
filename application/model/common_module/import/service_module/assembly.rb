@@ -44,7 +44,11 @@ module DTK
             @db_updates_assemblies['component'].merge!(assembly_ref => db_update_hash)          
             assembly_ref_pointer = @db_updates_assemblies['component'][assembly_ref] 
 
-            if workflows_db_update_hash = parsed_assembly.val(:Workflows)
+            if workflows_parse = parsed_assembly.val(:Workflows)
+              workflows_db_update_hash = workflows_parse.inject({}) do |h, (workflow_name, workflow_content)| 
+                task_action_name = task_action_name(workflow_name)
+                h.merge(task_action_name => { 'task_action' => task_action_name, 'content' => workflow_content })
+              end
               assembly_ref_pointer.merge!('task_template' => DBUpdateHash.new(workflows_db_update_hash).mark_as_complete)
             end
 
@@ -57,6 +61,14 @@ module DTK
             @ndx_assembly_hashes[assembly_ref] ||= parsed_assembly
           end
 
+          private
+
+          WORKFLOW_TO_TASK_NAMES = {
+            'create' => '__create_action'
+          }
+          def task_action_name(workflow_name)
+            WORKFLOW_TO_TASK_NAMES[workflow_name] || workflow_name
+          end
           
         end
       end

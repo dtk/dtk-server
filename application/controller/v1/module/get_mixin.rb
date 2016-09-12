@@ -32,7 +32,7 @@ module DTK
 
       def exists
         namespace, module_name, module_type = required_request_params(:namespace, :module_name, :module_type)
-        version = request_params(:version)||'master'
+        version = request_params(:version) || 'master'
         rest_ok_response CommonModule.exists(get_default_project, module_type, namespace, module_name, version)
       end
 

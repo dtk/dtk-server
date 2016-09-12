@@ -29,6 +29,16 @@ module DTK
       require_relative('diff/base')
       require_relative('diff/set')
 
+      attr_reader :qualified_key
+      # opts can have keys
+      #   :qualified_key 
+      #   :type
+      def initialize(opts = {})
+        @qualified_key = opts[:qualified_key]
+        @type          = opts[:type] || self.class.type?
+      end
+      private :initialize
+
       def self.process_service_instance(service_instance, module_branch)
         diff_result = Result.new
         unless dsl_file_obj = Parse.matching_service_instance_file_obj?(module_branch)
@@ -69,38 +79,39 @@ Aux.stop_for_testing?(:push_diff) # TODO: for debugging
       # opts can have keys
       #   :qualified_key
       #   :id_handle
-      def self.diff?(current_val, new_val, opts = {})
-        bass_class.diff?(current_val, new_val, opts)
-      end
-      
-      def self.aggregate?(diff_sets)
-        set_class.aggregate?(diff_sets)
+      def self.aggregate?(diff_sets, opts = {}, &body)
+        fail Error::NoMethodForConcreteClass.new(self)
       end
       
       # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse 
       # with values being elements of same type
       # Returns a Diff::Set object
-      def self.between_hashes(gen_hash, parse_hash, qualified_key)
-        set_class.between_hashes(gen_hash, parse_hash, qualified_key)
+      # opts can have keys:
+      #  :service_instance
+      #  :diff_class
+      def self.between_hashes(_gen_hash, _parse_hash, _qualified_key, _opts = {})
+        fail Error::NoMethodForConcreteClass.new(self)
       end
-      
+
       # The arguments gen_array is canonical array produced by generation and parse_array is canonical array produced by parse 
       # with values being elements of same type
       # Returns a Diff::Set object
-      def self.between_arrays(gen_array, parse_array, qualified_key)
-        set_class.between_arrays(gen_array, parse_array,qualified_key)
+      # opts can have keys:
+      #  :service_instance
+      #  :diff_class
+      def self.between_arrays(_gen_array, _parse_array, _qualified_key, _opts = {})
+        fail Error::NoMethodForConcreteClass.new(self)
       end
       
       # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse 
       # with values being elements of same type
       # Returns an array of Diff objects onjust matching keys; does not look for one hash have keys not in otehr hash
-      
-      def self.array_of_diffs_on_matching_keys(gen_hash, parse_hash, qualified_key)
-        set_class.array_of_diffs_on_matching_keys(gen_hash, parse_hash, qualified_key)
+      def self.array_of_diffs_on_matching_keys(_gen_hash, _parse_hash, _qualified_key)
+        fail Error::NoMethodForConcreteClass.new(self)
       end
 
       def type
-        self.class.type
+        @type || fail(Error, "Cannot compute type")
       end
 
       private
@@ -116,20 +127,16 @@ Aux.stop_for_testing?(:push_diff) # TODO: for debugging
       end      
 
       def self.type
-        split = to_s.split('::')
-        unless split.size > 2 and split.last == 'Diff'
-          fail Error, "Unexpected class fomat: #{self}" 
-        end
-        split[-2].downcase.to_sym
+        type? || fail(Error, "Cannot compute type")
       end
 
-      def self.bass_class
-        kind_of?(Base) ? self : Base
+      def self.type?
+        split = to_s.split('::')
+        if split.size > 2 and split.last == 'Diff'
+          split[-2].downcase.to_sym
+        end
       end
-      
-      def self.set_class
-        kind_of?(Set) ? self : Set
-      end
+
     end
   end
 end

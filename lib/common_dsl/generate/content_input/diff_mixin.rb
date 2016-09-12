@@ -19,7 +19,7 @@ module DTK; module CommonDSL::Generate
   class ContentInput
     module DiffMixin
       # Main template-specific diff instance method call; Concrete classes overwrite this
-      def diff?(_parse_object, _qualified_key)
+      def diff?(_parse_object, _qualified_key, _opts = {})
         fail Error::NoMethodForConcreteClass.new(self.class)
       end
       

@@ -29,6 +29,8 @@ module DTK
         def serialize(serialized_hash)
           serialized_hash.serialize_delete_element(self)
         end
+        private
+        attr_reader :id_handle
       end
     end
   end

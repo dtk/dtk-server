@@ -30,9 +30,9 @@ module DTK
 
       private
 
-
       IDENT = 2
       def error_msg(error_msgs)
+        error_msgs = [error_msgs] unless error_msgs.kind_of?(::Array)
         if error_msgs.size == 1
           error_msgs.first
         else

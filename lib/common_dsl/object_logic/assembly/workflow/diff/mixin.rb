@@ -29,11 +29,19 @@ module DTK; module CommonDSL
         private
 
 
+        def workflow_name
+          name
+        end
+
+        CREATE_WORKFLOW_NAME = 'create'
         MAPPING_TO_TAKS_ACTION_NAMES = {
-          'create' => nil 
+          CREATE_WORKFLOW_NAME => nil 
         }
+        def is_create_workflow?
+          workflow_name == CREATE_WORKFLOW_NAME 
+        end
+
         def task_action_name
-          workflow_name = name
           MAPPING_TO_TAKS_ACTION_NAMES.has_key?(workflow_name) ?  MAPPING_TO_TAKS_ACTION_NAMES[workflow_name] : workflow_name
         end
 

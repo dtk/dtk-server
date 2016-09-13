@@ -21,10 +21,16 @@ module DTK; module CommonDSL
       class Delete < CommonDSL::Diff::Element::Delete
         include Mixin
 
-        def process(result)
-          raise 'here'
+        def process(_result)
+          fail Diff::DiffErrors.new("The create workflow cannot be deleted") if is_create_workflow?
+          Model.delete_instance(workflow_id_handle)
+          nil
         end
 
+        private
+        def workflow_id_handle
+          id_handle
+        end
       end
     end
   end

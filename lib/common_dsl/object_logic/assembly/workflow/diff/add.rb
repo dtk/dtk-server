@@ -19,10 +19,18 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly
     class Workflow::Diff
       class Add < CommonDSL::Diff::Element::Add
+        include Mixin
+
         def process(result)
-          raise 'here'
+          raise_error_if_workflow_parsing_error(new_workflow)
+          Task::Template.create_from_serialized_content(assembly_instance.id_handle, new_workflow, task_action_name)
         end
 
+        private
+
+        def new_workflow
+          @parse_object
+        end
       end
     end
   end

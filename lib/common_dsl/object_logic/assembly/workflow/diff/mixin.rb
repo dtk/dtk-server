@@ -18,11 +18,23 @@
 module DTK; module CommonDSL 
   class ObjectLogic::Assembly
     class Workflow::Diff
-      class Delete < CommonDSL::Diff::Element::Delete
-        include Mixin
+      module Mixin
+        private
+        def raise_error_if_workflow_parsing_error(workflow)
+          # TODO: move this logic earlier when doing pasing as opposed to processing diffs
+          if parse_error = Task::Template::ConfigComponents.find_parse_error?(workflow, assembly: assembly_instance, keys_are_in_symbol_form: true)
+            raise parse_error
+          end
+        end
+        private
 
-        def process(result)
-          raise 'here'
+
+        MAPPING_TO_TAKS_ACTION_NAMES = {
+          'create' => nil 
+        }
+        def task_action_name
+          workflow_name = name
+          MAPPING_TO_TAKS_ACTION_NAMES.has_key?(workflow_name) ?  MAPPING_TO_TAKS_ACTION_NAMES[workflow_name] : workflow_name
         end
 
       end

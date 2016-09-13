@@ -19,10 +19,10 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly
     class Workflow::Diff
       class Modify < CommonDSL::Diff::Element::Modify
+        include Mixin
+
         def process(result)
-          # TODO: parse here or netter in dsl pasring
-          # parse_error = Task::Template::ConfigComponents.find_parse_error?(new_workflow, assembly: assembly_instance, keys_are_in_symbol_form: true)
-          # even if there is a parse error savings so user can go back and update what user justed edited
+          raise_error_if_workflow_parsing_error(new_workflow)
           Task::Template.update_from_serialized_content(assembly_instance.id_handle, new_workflow, task_action_name)
           nil
         end
@@ -31,15 +31,6 @@ module DTK; module CommonDSL
 
         def new_workflow
           @new_val
-        end
-
-
-        MAPPING_TO_TAKS_ACTION_NAMES = {
-          'create' => nil 
-        }
-        def task_action_name
-          workflow_name = name
-          MAPPING_TO_TAKS_ACTION_NAMES.has_key?(workflow_name) ?  MAPPING_TO_TAKS_ACTION_NAMES[workflow_name] : workflow_name
         end
 
       end

@@ -19,7 +19,7 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly::Node
     class Diff
       class Delete < CommonDSL::Diff::Element::Delete
-        def process(_result)
+        def process(_result, _opts = {})
           # TODO: stub 
         end
 

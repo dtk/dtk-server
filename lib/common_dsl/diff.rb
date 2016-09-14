@@ -61,6 +61,8 @@ module DTK
         return diff_result unless collated_diffs
 
         dsl_version = service_instance_gen.req(:DSLVersion)
+        # TODO: DTK-2665: look at moving setting semantic_diffs because process_diffs can remove items
+        #  alternatively have items removed (e.g., create workflow rejected) in compute_base_diffs
         diff_result.semantic_diffs = collated_diffs.serialize(dsl_version)
 
         process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules])

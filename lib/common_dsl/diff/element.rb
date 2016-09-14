@@ -30,7 +30,7 @@ module DTK
         @service_instance =  opts[:service_instance]
       end
 
-      def process(_result)
+      def process(_result, _opts = {})
         fail Error::NoMethodForConcreteClass.new(self.class)
       end
 

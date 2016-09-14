@@ -18,31 +18,55 @@
 module DTK
   class CommonDSL::Diff
     class Result
-      attr_writer :repo_updated
+      attr_writer :repo_updated, :semantic_diffs
       attr_reader :items_to_update, :error_msgs
       def initialize
         @repo_updated    = false # if true, means repo updated by server
         @items_to_update = [] # items in repo that server needs to update
+        @info_msgs       = []
         @warning_msgs    = []
         @error_msgs      = []
+        @backup_files    = {}
+        @semantic_diffs  = {}
+      end
+
+      def add_info_msg(msg)
+        @info_msgs << msg
+        self
       end
 
       def add_warning_msg(msg)
         @warning_msgs << msg
+        self
       end
 
       def add_error_msg(msg)
         @error_msgs << msg
+        self
       end
 
       def any_errors?
         !@error_msgs.empty?
       end
 
+      def add_backup_file(file_path, content_text_file)
+        @backup_files.merge!(file_path => content_text_file)
+        self
+      end
+
+      def clear_semantic_diffs!
+        @semantic_diffs  = {}
+      end
+
       def hash_for_response
         {
+          # purposely omitting attributes (e.g., @items_to_update)
           repo_updated: @repo_updated,
+          info_msgs: @info_msgs,
           warning_msgs: @warning_msgs,
+          error_msgs: @error_msgs,
+          backup_files: @backup_files,
+          semantic_diffs: @semantic_diffs
         }
       end
 

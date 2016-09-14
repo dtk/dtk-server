@@ -30,10 +30,8 @@ module DTK
         self
       end
 
-      # Returns a Diff::Result object
-      def process
-        result = Result.new
-        ret = Result.new
+      # Parameter result is a Diff::Result object
+      def process(result)
         Sort::ForProcess.sort_keys(@diffs.keys).each do |collate_key|
           diffs_of_same_type = @diffs[collate_key]
           diffs_of_same_type.each { |diff| diff.process(result) }
@@ -41,10 +39,8 @@ module DTK
         result
       end
 
-      # opts can have keys
-      #   :dsl_version (required)
-      def serialize(opts = {})
-        SerializedHash.create(opts) do |serialized_hash|
+      def serialize(dsl_version)
+        SerializedHash.create(dsl_version: dsl_version) do |serialized_hash|
           Sort::ForSerialize.sort_keys(@diffs.keys).each do |collate_key|
             diffs_of_same_type = @diffs[collate_key]
             serialized_hash.add_collate_level_elements?(collate_key, diffs_of_same_type)

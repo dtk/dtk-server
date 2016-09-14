@@ -19,14 +19,20 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly
     class Component::Diff
       class Add < CommonDSL::Diff::Element::Add
-        def process(result)
+        def process(result, opts = {})
           matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component_name) 
           pp [:matching_aug_cmp_templates, component_name, matching_aug_cmp_templates]
           if matching_aug_cmp_templates.empty?
             result.add_error_msg("Component '#{qualified_key.print_form}' does not match any installed component templates")
           elsif matching_aug_cmp_templates.size > 1
             # TODO: put in message the name of matching component templates
-            result.add_error_msg("Component '#{qualified_key.print_form}' matches multiple installed component templates")
+            if aug_cmp_template = find_matching_dependency(matching_aug_cmp_templates, opts[:dependent_modules])
+              return aug_cmp_template
+            else
+              error_msg = "Component '#{qualified_key.print_form}' matches multiple installed component templates. Please select one of the following templates by adding under dependencies key inside 'dtk.service.yaml' file:"
+              error_msg += "\n#{pretty_print_templates(matching_aug_cmp_templates).join(",\n")}"
+              result.add_error_msg(error_msg)
+            end
           else
             aug_cmp_template = matching_aug_cmp_templates.first
             # TODO: use this and node to add component to node
@@ -41,8 +47,33 @@ module DTK; module CommonDSL
           relative_distinguished_name
         end
 
+        def find_matching_dependency(matching_aug_cmp_templates, dependencies = {})
+          return if dependencies.empty?
+
+          ret = nil
+          dependencies.each do |name, version|
+            ret = match_templates_against_dependency(matching_aug_cmp_templates, name, version)
+            break if ret
+          end
+
+          ret
+        end
+
+        def match_templates_against_dependency(templates, dep_name, dep_version = 'master')
+          templates.find{ |template| "#{template[:namespace][:display_name]}/#{template[:display_name]}".eql?(dep_name) && template[:version].eql?(dep_version) }
+        end
+
+        def pretty_print_templates(templates)
+          temp_array = []
+
+          templates.each do |template|
+            temp_array << "#{template[:namespace][:display_name]}/#{template[:display_name]}: #{template[:version]}"
+          end
+
+          temp_array
+        end
+
       end
-      
     end
   end
 end; end

@@ -63,7 +63,7 @@ module DTK
         dsl_version = service_instance_gen.req(:DSLVersion)
         diff_result.semantic_diffs = collated_diffs.serialize(dsl_version)
 
-        process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen)
+        process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules])
       end
 
 
@@ -114,10 +114,10 @@ module DTK
       end
 
       # returns object of type Diff::Result 
-      def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen)
+      def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, opts = {})
         DiffErrors.process_diffs_error_handling(diff_result, service_instance_gen) do
           Model.Transaction do
-            collated_diffs.process(diff_result)
+            collated_diffs.process(diff_result, opts)
             DiffErrors.raise_if_any_errors(diff_result)
 
             # items_to_update are things that need to be updated in repo from what at this point are in object model

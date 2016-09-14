@@ -31,10 +31,10 @@ module DTK
       end
 
       # Parameter result is a Diff::Result object
-      def process(result)
+      def process(result, opts = {})
         Sort::ForProcess.sort_keys(@diffs.keys).each do |collate_key|
           diffs_of_same_type = @diffs[collate_key]
-          diffs_of_same_type.each { |diff| diff.process(result) }
+          diffs_of_same_type.each { |diff| diff.process(result, opts) }
         end
         result
       end

@@ -21,7 +21,7 @@ module DTK; module CommonDSL
       class Add < CommonDSL::Diff::Element::Add
         include Mixin
 
-        def process(result)
+        def process(result, opts = {})
           raise_error_if_workflow_parsing_error(new_workflow)
           Task::Template.create_from_serialized_content(assembly_instance.id_handle, new_workflow, task_action_name)
         end

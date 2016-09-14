@@ -31,9 +31,16 @@ module DTK
         get_obj(model_handle, sp_filter(:eq, :ref, ref))
       end
 
-      def assembly_template?(assembly_name, version)
-        assembly_version   = (version.nil? || version.eql?('base')) ? 'master' : version
-        get_assembly_templates.find { |template| template[:display_name] == assembly_name and template[:version] == assembly_version }
+      # opts can have keys:
+      #   :assembly_name
+      #   :version      
+      def assembly_template(opts = {})
+        matching_templates = matching_assembly_templates(opts)
+        if matching_templates.size == 1
+          matching_templates.first
+        else
+          raise_error_when_no_unique_assembly_template(matching_templates, opts)
+        end
       end
 
       def name_with_namespace
@@ -73,6 +80,46 @@ module DTK
           super
         end
       end
+
+      # opts can have keys:
+      #   :assembly_name
+      #   :version
+      def matching_assembly_templates(opts = {})
+        template_version = opts[:version] || 'master'
+        assembly_name = opts[:assembly_name]
+        get_assembly_templates.select do |aug_template|
+          template_version == aug_template[:version] and (assembly_name.nil? or assembly_name == aug_template.display_name)
+        end
+      end
+
+      # opts can have keys:
+      #   :assembly_name
+      #   :version
+      def raise_error_when_no_unique_assembly_template(matching_templates, opts = {})
+        mod_ref = name_with_namespace
+        mod_ref << "(#{opts[:version]})" if opts[:version]
+        valid_names_list = matching_assembly_templates(version: opts[:version]).map(&:display_name).join(', ')
+        if valid_names_list.empty?
+          fail ErrorUsage, "The module '#{mod_ref}' has no assemblies"
+        end
+        if matching_templates.empty?
+          if opts[:assembly_name]
+            fail ErrorUsage, "The module '#{mod_ref}' has no assemblies that match '#{opts[:assembly_name]}'. Valid names are: #{valid_names_list}" 
+          else
+            # This should not be reached
+            fail ErrorUsage, "The module '#{mod_ref}' has no assemblies"
+          end
+        else
+          # only use version and not assembly name
+          if opts[:assembly_name]
+            fail ErrorUsage, "The assembly '#{opts[:assembly_name]}' does not exist in module '#{mod_ref}'. Valid asssembly template names are: #{valid_names_list}"
+          else
+            fail ErrorUsage, "The module '#{mod_ref}' has more than one assembly template. Please use 'dtk module stage' command with an assembly name. Legal names are: #{valid_names_list}"
+
+          end
+        end
+      end
+
     end
   end
 end

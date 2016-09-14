@@ -19,6 +19,8 @@ module DTK; module CommonDSL
   module ObjectLogic
     class Assembly
       class Workflow < Generate::ContentInput::Hash
+        require_relative('workflow/diff')
+
         def initialize(workflow)
           super()
           @workflow = workflow
@@ -36,7 +38,22 @@ module DTK; module CommonDSL
         end
 
         def generate_content_input!
-          change_symbols_to_strings(new_input_hash(@workflow[:content]))
+          set_id_handle(@workflow)
+          merge!(change_symbols_to_strings(new_input_hash(@workflow[:content])))
+          self
+        end
+
+        ### For diffs
+        # opts can have keys
+        #   :service_instance
+        def diff?(workflow_parse, qualified_key, opts = {})
+          create_diff?(self, workflow_parse, qualified_key, opts)
+        end
+
+        # opts can have keys:
+        #   :service_instance
+        def self.diff_set(workflows_gen, workflows_parse, qualified_key, opts = {})
+          diff_set_from_hashes(workflows_gen, workflows_parse, qualified_key, opts)
         end
 
         private

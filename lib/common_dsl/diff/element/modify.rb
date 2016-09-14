@@ -21,7 +21,7 @@ module DTK
       class Modify < self
         attr_reader :current_val, :new_val
         def initialize(base_diff)
-          super(base_diff.qualified_key)
+          super(base_diff.qualified_key, service_instance: base_diff.service_instance)
           @id_handle   = base_diff.id_handle
           @current_val = base_diff.current_val
           @new_val     = base_diff.new_val

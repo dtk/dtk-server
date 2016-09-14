@@ -81,8 +81,7 @@ module DTK
               repo = service_module.get_repo
               module_branch = module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace, return_module_branch: true)
               repo.merge!(branch_name: module_branch[:branch])
-              base_branch = service_module.get_module_branches.first
-              RepoManager.add_branch_and_push?(module_branch[:branch], {}, base_branch)
+              RepoManager.add_branch_and_push?(module_branch[:branch], { empty: true }, module_branch)
               module_branch
             end
           else

@@ -57,6 +57,7 @@ module DTK
           aggregate_diffs?(qualified_key, opts) do |diff_set|
             diff_set.add_diff_set? Node, val(:Nodes), assembly_parse.val(:Nodes)
             diff_set.add_diff_set? Component, val(:Components), assembly_parse.val(:Components)
+            diff_set.add_diff_set? Workflow, val(:Workflows), assembly_parse.val(:Workflows)
             # TODO: need to add diffs on all subobjects
             # ...
           end

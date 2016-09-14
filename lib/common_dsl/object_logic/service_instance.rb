@@ -23,15 +23,20 @@ module DTK
           super()
           @service_instance = service_instance
           @module_branch    = module_branch
+          @dsl_version      = module_branch.dsl_version
         end
         
         def generate_content_input!
           assembly_instance = @service_instance.assembly_instance
-          set(:DSLVersion, @module_branch.dsl_version)
+          set(:DSLVersion, @dsl_version)
           set(:Name, assembly_instance.display_name)
           set(:DependentModules, Dependency.generate_content_input(assembly_instance, @module_branch))
           set(:Assembly, Assembly.generate_content_input(assembly_instance))
           self
+        end
+
+        def yaml_dsl_text
+          Generate::FileGenerator.generate_yaml_text(:service_instance, self, @dsl_version)
         end
         
       end

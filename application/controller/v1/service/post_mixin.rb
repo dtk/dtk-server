@@ -29,32 +29,23 @@ module DTK
       ##   :no_auto_complete(optional) - Boolean
       def create
         service_module    = ret_service_module
-        version           = request_params(:version) || compute_latest_version(service_module)
         is_target_service = boolean_request_params(:is_target)
-        list              = service_module.get_assembly_templates
-        display_names     = list.map(&:display_name)
+        assembly_name     = request_params(:assembly_name) # could be empty means look for unique assembly in service module
 
-        unless assembly_name = request_params(:assembly_name)
-          if list.empty?
-            fail ErrorUsage, "Service module has no assemblies."
-          elsif list.size > 1
-            fail ErrorUsage, "Service module has more then one assembly template, please choose which one to stage: #{display_names.join(', ')}"
-          else
-            assembly_name = list.first[:display_name]
-          end
+        if version = request_params(:version)
+          version = nil if BASE_VERSION_STRING.include?(version)
+        else
+           version = compute_latest_version(service_module)
         end
-
-        service_name = request_params(:service_name) || generate_new_service_name(assembly_name, service_module)
-
-        unless assembly_template = service_module.assembly_template?(assembly_name, version)
-          fail ErrorUsage, "The assembly '#{assembly_name}' does not exist in module '#{service_module.name_with_namespace}'. Valid names: #{display_names.join(', ')}"
-        end
+        assembly_template = service_module.assembly_template(assembly_name: assembly_name, version: version)
+        service_name = request_params(:service_name) || generate_new_service_name(assembly_template, service_module)
 
         opts = {
           project: get_default_project,
           service_module: service_module,
           service_name: service_name,
           no_auto_complete: boolean_request_params(:no_auto_complete),
+          version: version
         }
         opts = Opts.new(opts)
 
@@ -64,12 +55,13 @@ module DTK
             Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
           else
             target_service = ret_target_service_with_default(:target_service, new_client: true)
-            # TODO: for testing; might remove
-            opts = opts.merge!(allow_existing_service: true, version: version) # TODO: for testing; might remove
+            # TODO: for testing
+            #opts = opts.merge!(allow_existing_service: true)
             target_service.stage_service(assembly_template, CommonModule::ServiceInstance, opts)
           end
         rest_ok_response response
       end
+      BASE_VERSION_STRING = ['base', 'master'] #TODO: settle on one
 
       ### Service instance specific
       def cancel_last_task

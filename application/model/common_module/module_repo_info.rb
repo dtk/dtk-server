@@ -37,7 +37,8 @@ module DTK
           module: {
             id: dtk_info[:module_id],
             name: dtk_info[:module_name],
-            namespace: dtk_info[:module_namespace]
+            namespace: dtk_info[:module_namespace],
+            version: dtk_info[:version]
           },
           branch: {
             name: dtk_info[:workspace_branch],

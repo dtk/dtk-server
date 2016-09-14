@@ -15,11 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module XYZ
+module DTK
   class DB
     module DataProcessingDelete
       def delete_instance(id_handle, _opts = {}) #TBD: if include opts would be for example whether containers are deleted
-  # TODO: more efficient to remove this call to IDInfoTable.get_row_from_id_handl
+  # TODO: more efficient to remove this call to IDInfoTable.get_row_from_id_handle
   id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: true
   #TBD: best practices says that one stores all resources that were present and return 200 if was to support idempotent delete
   ds = dataset(id_info[:db_rel]).where(id: id_info[:id])

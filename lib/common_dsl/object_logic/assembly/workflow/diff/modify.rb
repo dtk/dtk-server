@@ -15,27 +15,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  class CommonDSL::Diff
-    class Element
-      class Add < self
-        attr_reader :parse_object
-        # opts can have keys
-        #  :parse_object
-        #  :service_instance
-        def initialize(qualified_key, opts = {})
-          fail Error, "Unexpected that opts[:parse_object] is nil" unless opts[:parse_object]
-          fail Error, "Unexpected that opts[:service_instance] is nil" unless opts[:service_instance]
+module DTK; module CommonDSL 
+  class ObjectLogic::Assembly
+    class Workflow::Diff
+      class Modify < CommonDSL::Diff::Element::Modify
+        include Mixin
 
-          super(qualified_key, service_instance: opts[:service_instance])
-          @parse_object = opts[:parse_object]
+        def process(result)
+          raise_error_if_workflow_parsing_error(new_workflow)
+          Task::Template.update_from_serialized_content(assembly_instance.id_handle, new_workflow, task_action_name)
+          nil
         end
 
-        def serialize(serialized_hash)
-          serialized_hash.serialize_add_element(self)
+        private
+
+        def new_workflow
+          @new_val
         end
-        
+
       end
     end
   end
-end
+end; end

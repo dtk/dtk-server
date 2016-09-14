@@ -15,23 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  class CommonDSL::Diff
-    class Element
-      class Delete < self
-        # opts can have keys
-        #  :gen_object
-        def initialize(qualified_key, opts = {})
-          super(qualified_key)
-          @id_handle = opts[:gen_object].id_handle
-        end
-
-        def serialize(serialized_hash)
-          serialized_hash.serialize_delete_element(self)
-        end
-        private
-        attr_reader :id_handle
-      end
+module DTK; module CommonDSL 
+  class ObjectLogic::Assembly::Workflow
+    class Diff < CommonDSL::Diff::Base 
+      require_relative('diff/mixin')
+      # mixin must be loaded first
+      require_relative('diff/add')
+      require_relative('diff/delete')
+      require_relative('diff/modify')
     end
   end
-end
+end; end

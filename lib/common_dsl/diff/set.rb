@@ -23,10 +23,13 @@ module DTK
       include Collate::Mixin
 
       # opts can have keys
-      #   :triplet - array with elememts [added, deleted, modified]
+      #   :triplet - array with elements [added, deleted, modified]
       #   :diff_set
+      #   :type
+      #   :qualified_key
+      #   :service_instance
       def initialize(opts = {})
-        super()
+        super(qualified_key: opts[:qualified_key], type: opts[:type], service_instance: opts[:service_instance])
         # The object attributes are
         #  @added - array, possibly empty, of Diff::Element::Add objects
         #  @deleted - array, possibly empty, of Diff::Element::Delete objects
@@ -41,32 +44,23 @@ module DTK
           @deleted  = triplet[1] || []
           @modified = triplet[2] || []
         end
-        @qualified_key    = opts[:qualified_key]
-        @service_instance = opts[:service_instance]
+
       end
       private :initialize
       attr_accessor :added, :deleted, :modified
 
-      # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash 
-      # produced by parse with values being elements of same type
-      # opts can have keys:
-      #  :service_instance
       def self.between_hashes(gen_hash, parse_hash, qualified_key, opts = {})
         between_arrays_or_hashes(:hash, gen_hash, parse_hash, qualified_key, opts)
       end
-      
-      # The arguments gen_array is canonical array produced by generation and parse_array is canonical array 
-      # produced by parse with values being elements of same type
-      # opts can have keys:
-      #  :service_instance
+
       def self.between_arrays(gen_array, parse_array, qualified_key, opts = {})
         ndx_gen_array = (gen_array || []).inject({}) { |h, gen_object| h.merge(gen_object.diff_key => gen_object) }
         ndx_parse_array = (parse_array || []).inject({}) { |h, parse_object| h.merge(parse_object.diff_key => parse_object) }
         between_arrays_or_hashes(:array, ndx_gen_array, ndx_parse_array, qualified_key, opts) 
       end
-      
 
       # opts can have keys:
+      #  :qualified_key
       #  :service_instance
       def self.aggregate?(qualified_key, opts = {}, &body)
         diff_set = new(opts.merge(qualified_key: qualified_key))
@@ -122,6 +116,7 @@ module DTK
       
       # opts can have keys:
       #  :service_instance
+      #  :diff_class
       def self.between_arrays_or_hashes(array_or_hash, gen_hash, parse_hash, parent_qualified_key, opts = {})
         added    = []
         deleted  = []
@@ -129,32 +124,35 @@ module DTK
         
         gen_hash   ||= {}
         parse_hash ||= {}
-        
+
+        diff_class = opts[:diff_class] || self
+        type       = diff_class.type
+
         parse_hash.each do |key, parse_object|
-          qualified_key =  parent_qualified_key.create_with_new_element?(type_print_form, key)
+          qualified_key =  parent_qualified_key.create_with_new_element?(type, key)
           if gen_hash.has_key?(key)
             if diff = gen_hash[key].diff?(parse_object, qualified_key, opts)
               modified << diff
             end
           else
-            added << self::Add.new(qualified_key, parse_object: parse_object, service_instance: opts[:service_instance])
+            added << diff_class::Add.new(qualified_key, parse_object: parse_object, service_instance: opts[:service_instance])
           end
         end
         
         gen_hash.each do |key, gen_object|
           unless gen_object.skip_for_generation?
             unless parse_hash.has_key?(key)
-              qualified_key =  parent_qualified_key.create_with_new_element?(type_print_form, key)
-              deleted << self::Delete.new(qualified_key, gen_object: gen_object) 
+              qualified_key =  parent_qualified_key.create_with_new_element?(type, key)
+              deleted << diff_class::Delete.new(qualified_key, gen_object: gen_object) 
             end
           end
         end
           
         case array_or_hash
         when :hash
-          new(:triplet => [added, deleted, modified])
+          new(type: type, triplet: [added, deleted, modified])
         when :array
-          new(:triplet => [added.values, deleted.values, modified.values])
+          new(type: type, triplet: [added.values, deleted.values, modified.values])
         end
       end
       

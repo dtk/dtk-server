@@ -347,10 +347,14 @@ module DTK; class  Assembly
         return { violations: violation_table.uniq } unless violation_table.empty?
       end
 
-      task = create_task(params)
-      return task if task.has_key?(:confirmation_message) || task.has_key?(:message)
+      create_task_response = create_task(params)
+      if create_task_response.has_key?(:empty_workflow) or
+          # TODO: remove below for semantic conditions like :empty_workflow
+          create_task_response.has_key?(:confirmation_message) or create_task_response.has_key?(:message)
+        return create_task_response
+      end
 
-      execute_service_action(task[:task_id])
+      execute_service_action(create_task_response[:task_id])
     end
 
     # TODO: Aldin - need to create mixin to put delete, delete-component, node-node common code in one place 
@@ -613,8 +617,9 @@ module DTK; class  Assembly
         end
       end
 
-      task = Task.create_from_assembly_instance?(self, opts)
-      return { message: "There are no steps in the workflow to execute" } unless task
+      unless task = Task.create_from_assembly_instance?(self, opts)
+        return { empty_workflow: true }
+      end
 
       task.save!()
       Node.start_instances(opts[:ret_nodes_to_start]) unless (opts[:ret_nodes_to_start]||[]).empty?

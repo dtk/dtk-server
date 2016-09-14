@@ -177,20 +177,31 @@ module DTK; class Task
     private
 
     def self.ref(task_action)
-      task_action || default_task_action()
+      task_action || default_task_action
     end
 
     def self.create_or_update_from_serialized_content?(assembly_idh, serialized_content, task_action = nil)
+      update_from_serialized_content?(assembly_idh, serialized_content, task_action) ||
+        create_from_serialized_content(assembly_idh, serialized_content, task_action)
+    end
+
+    def self.update_from_serialized_content(assembly_idh, serialized_content, task_action = nil)
+      update_from_serialized_content?(assembly_idh, serialized_content, task_action) || fail(Error, "Unexpected that pdate_from_serialized_content? is nil")
+    end
+
+    def self.update_from_serialized_content?(assembly_idh, serialized_content, task_action = nil)
       if task_template = get_matching_task_template?(assembly_idh, task_action)
         task_template.update(content: serialized_content)
-        task_template.id_handle()
-      else
-        task_action ||= default_task_action()
-        ref, create_hash = ref_and_create_hash(serialized_content, task_action)
-        create_hash.merge!(ref: ref, component_component_id: assembly_idh.get_id())
-        task_template_mh = assembly_idh.create_childMH(:task_template)
-        create_from_row(task_template_mh, create_hash, convert: true)
+        task_template.id_handle
       end
+    end
+
+    def self.create_from_serialized_content(assembly_idh, serialized_content, task_action = nil)
+      task_action ||= default_task_action
+      ref, create_hash = ref_and_create_hash(serialized_content, task_action)
+      create_hash.merge!(ref: ref, component_component_id: assembly_idh.get_id)
+      task_template_mh = assembly_idh.create_childMH(:task_template)
+      create_from_row(task_template_mh, create_hash, convert: true)
     end
 
     # def self.create_from_service_module(assembly_idh, serialized_content, task_action, ancestor_id)

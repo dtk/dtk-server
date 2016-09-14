@@ -19,7 +19,7 @@ module DTK; module CommonDSL::Generate
   class ContentInput
     module DiffMixin
       # Main template-specific diff instance method call; Concrete classes overwrite this
-      def diff?(_parse_object, _qualified_key)
+      def diff?(_parse_object, _qualified_key, _opts = {})
         fail Error::NoMethodForConcreteClass.new(self.class)
       end
       
@@ -28,9 +28,11 @@ module DTK; module CommonDSL::Generate
       def aggregate_diffs?(qualified_key, opts = {}, &body)
         self.class::Diff.aggregate?(qualified_key, opts, &body)
       end
-      
-      def create_diff?(cur_val, new_val, qualified_key)
-        self.class::Diff.diff?(cur_val, new_val, qualified_key: qualified_key, id_handle: id_handle)
+
+      # opts can have keys:
+      #  :service_instance
+      def create_diff?(cur_val, new_val, qualified_key, opts = {})
+        self.class::Diff.diff?(cur_val, new_val, qualified_key: qualified_key, id_handle: id_handle, service_instance: opts[:service_instance])
       end
 
       # The method skip_for_generation? can be overwritten

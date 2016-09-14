@@ -29,86 +29,113 @@ module DTK
       require_relative('diff/base')
       require_relative('diff/set')
 
+      attr_reader :qualified_key, :service_instance
+      # opts can have keys
+      #   :qualified_key 
+      #   :service_instance
+      #   :type
+      def initialize(opts = {})
+        @qualified_key = opts[:qualified_key]
+        @service_instance = opts[:service_instance]
+        @type             = opts[:type] || self.class.type?
+      end
+      private :initialize
+
+      # returns object of type Diff::Result 
       def self.process_service_instance(service_instance, module_branch)
         diff_result = Result.new
+
         unless dsl_file_obj = Parse.matching_service_instance_file_obj?(module_branch)
           fail Error, "Unexpected that 'dsl_file_obj' is nil"
         end
+        
         service_instance_parse = dsl_file_obj.parse_content(:service_instance)
         service_instance_gen   = Generate.generate_service_instance_canonical_form(service_instance, module_branch)
 
-        if base_diffs = compute_base_diffs(service_instance, service_instance_parse, service_instance_gen)
-          if collated_diffs = base_diffs.collate
-            dsl_version = service_instance_gen.req(:DSLVersion)
-# for debug
-STDOUT << YAML.dump(collated_diffs.serialize(dsl_version: dsl_version))
-            Model.Transaction do
-              diff_result = collated_diffs.process
-              DiffErrors.raise_if_any_errors(diff_result)
+        # compute base diffs
+        base_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen)
+        return diff_result unless base_diffs 
 
-              # items_to_update are things that need to be updated in repo from what at this point are in object model
-              items_to_update = diff_result.items_to_update
-              unless items_to_update.empty?
-                # Treat updates to repo from object model as transaction that rolls back git repo to what client set it as
-                # If error,  RepoUpdate.Transaction wil throw error
-                RepoUpdate.Transaction module_branch do
-                  # Items in repo that need updating by generating from the server's object model
-                  # TODO: logic that updates the repo from the object model
-                  diff_result.repo_updated = true # means repo updated by server
-                end
-              end
-# for debug
-pp [:diff_result, diff_result]
-Aux.stop_for_testing?(:push_diff) # TODO: for debugging
-            end
-          end
-        end  
-        diff_result
+        # collate the diffs
+        collated_diffs = base_diffs.collate
+        return diff_result unless collated_diffs
+
+        dsl_version = service_instance_gen.req(:DSLVersion)
+        diff_result.semantic_diffs = collated_diffs.serialize(dsl_version)
+
+        process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen)
       end
+
 
       # opts can have keys
       #   :qualified_key
       #   :id_handle
-      def self.diff?(current_val, new_val, opts = {})
-        bass_class.diff?(current_val, new_val, opts)
-      end
-      
-      def self.aggregate?(diff_sets)
-        set_class.aggregate?(diff_sets)
+      def self.aggregate?(diff_sets, opts = {}, &body)
+        fail Error::NoMethodForConcreteClass.new(self)
       end
       
       # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse 
       # with values being elements of same type
       # Returns a Diff::Set object
-      def self.between_hashes(gen_hash, parse_hash, qualified_key)
-        set_class.between_hashes(gen_hash, parse_hash, qualified_key)
+      # opts can have keys:
+      #  :service_instance
+      #  :diff_class
+      def self.between_hashes(_gen_hash, _parse_hash, _qualified_key, _opts = {})
+        fail Error::NoMethodForConcreteClass.new(self)
       end
-      
+
       # The arguments gen_array is canonical array produced by generation and parse_array is canonical array produced by parse 
       # with values being elements of same type
       # Returns a Diff::Set object
-      def self.between_arrays(gen_array, parse_array, qualified_key)
-        set_class.between_arrays(gen_array, parse_array,qualified_key)
+      # opts can have keys:
+      #  :service_instance
+      #  :diff_class
+      def self.between_arrays(_gen_array, _parse_array, _qualified_key, _opts = {})
+        fail Error::NoMethodForConcreteClass.new(self)
       end
       
       # The arguments gen_hash is canonical hash produced by generation and parse_hash is canonical hash produced by parse 
       # with values being elements of same type
       # Returns an array of Diff objects onjust matching keys; does not look for one hash have keys not in otehr hash
-      
-      def self.array_of_diffs_on_matching_keys(gen_hash, parse_hash, qualified_key)
-        set_class.array_of_diffs_on_matching_keys(gen_hash, parse_hash, qualified_key)
+      def self.array_of_diffs_on_matching_keys(_gen_hash, _parse_hash, _qualified_key)
+        fail Error::NoMethodForConcreteClass.new(self)
       end
 
       def type
-        self.class.type
+        @type || fail(Error, "Cannot compute type")
       end
 
       private
 
-      def self.compute_base_diffs(service_instance, service_instance_parse, service_instance_gen)
+      def self.compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen)
         assembly_gen   = service_instance_gen.req(:Assembly)
         assembly_parse = service_instance_parse # assembly parse and service_instance parse are identical
         assembly_gen.diff?(assembly_parse, QualifiedKey.new, service_instance: service_instance)
+      end
+
+      # returns object of type Diff::Result 
+      def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen)
+        DiffErrors.process_diffs_error_handling(diff_result, service_instance_gen) do
+          Model.Transaction do
+            collated_diffs.process(diff_result)
+            DiffErrors.raise_if_any_errors(diff_result)
+
+            # items_to_update are things that need to be updated in repo from what at this point are in object model
+            items_to_update = diff_result.items_to_update
+            unless items_to_update.empty?
+              # Treat updates to repo from object model as transaction that rolls back git repo to what client set it as
+              # If error,  RepoUpdate.Transaction wil throw error
+              RepoUpdate.Transaction module_branch do
+                # Items in repo that need updating by generating from the server's object model
+                # TODO: logic that updates the repo from the object model
+                diff_result.repo_updated = true # means repo updated by server
+              end
+            end
+            # for debug
+            Aux.stop_for_testing?(:push_diff) 
+          end
+        end
+        diff_result
       end
 
       def self.type_print_form
@@ -116,20 +143,16 @@ Aux.stop_for_testing?(:push_diff) # TODO: for debugging
       end      
 
       def self.type
-        split = to_s.split('::')
-        unless split.size > 2 and split.last == 'Diff'
-          fail Error, "Unexpected class fomat: #{self}" 
-        end
-        split[-2].downcase.to_sym
+        type? || fail(Error, "Cannot compute type")
       end
 
-      def self.bass_class
-        kind_of?(Base) ? self : Base
+      def self.type?
+        split = to_s.split('::')
+        if split.size > 2 and split.last == 'Diff'
+          split[-2].downcase.to_sym
+        end
       end
-      
-      def self.set_class
-        kind_of?(Set) ? self : Set
-      end
+
     end
   end
 end

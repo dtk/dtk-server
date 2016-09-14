@@ -15,27 +15,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  class CommonDSL::Diff
-    class Element
-      class Add < self
-        attr_reader :parse_object
-        # opts can have keys
-        #  :parse_object
-        #  :service_instance
-        def initialize(qualified_key, opts = {})
-          fail Error, "Unexpected that opts[:parse_object] is nil" unless opts[:parse_object]
-          fail Error, "Unexpected that opts[:service_instance] is nil" unless opts[:service_instance]
+module DTK; module CommonDSL 
+  class ObjectLogic::Assembly
+    class Workflow::Diff
+      class Delete < CommonDSL::Diff::Element::Delete
+        include Mixin
 
-          super(qualified_key, service_instance: opts[:service_instance])
-          @parse_object = opts[:parse_object]
+        def process(_result)
+          fail Diff::DiffErrors.new("The create workflow cannot be deleted", create_backup_file: true) if is_create_workflow?
+          Model.delete_instance(workflow_id_handle)
+          nil
         end
 
-        def serialize(serialized_hash)
-          serialized_hash.serialize_add_element(self)
+        private
+        def workflow_id_handle
+          id_handle
         end
-        
       end
     end
   end
-end
+end; end

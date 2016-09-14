@@ -22,9 +22,12 @@ module DTK
       require_relative('element/add')
       require_relative('element/delete')
 
-      attr_reader :qualified_key
-      def initialize(qualified_key)
-        @qualified_key = qualified_key
+      attr_reader :qualified_key, :service_instance
+      # opts can have keys:
+      #   :service_instance
+      def initialize(qualified_key, opts = {})
+        @qualified_key    = qualified_key
+        @service_instance =  opts[:service_instance]
       end
 
       def process(_result)
@@ -41,7 +44,13 @@ module DTK
         @qualified_key.relative_distinguished_name
       end
 
-      
+      def assembly_instance
+        (@service_instance && @service_instance.assembly_instance) || fail(Error, "Unexpected that @service_instance is nil") 
+      end
+
+      def project
+        @project ||= assembly_instance.get_target.get_project
+      end
 
     end
   end

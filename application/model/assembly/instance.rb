@@ -457,10 +457,11 @@ module DTK; class  Assembly
     end
 
     def exec__delete_node(node_idh, opts = {})
-      task = Task.create_top_level(model_handle(:task), self, task_action: 'delete node')
+      assembly_instance = opts[:assembly_instance] || self
+      task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete node')
       ret = {
-        assembly_instance_id: self.id(),
-        assembly_instance_name: self.display_name_print_form
+        assembly_instance_id: assembly_instance.id(),
+        assembly_instance_name: assembly_instance.display_name_print_form
       }
 
       node = node_idh.create_object().update_object!(:display_name)
@@ -470,14 +471,14 @@ module DTK; class  Assembly
         cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
 
         # order components by 'delete' action inside assembly workflow if exists
-        ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(self))
+        ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
         ordered_components.each do |component|
           cmp_action = nil
-          cmp_top_task = Task.create_top_level(model_handle(:task), self, task_action: 'delete component')
+          cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
           cmp_opts.merge!(delete_params: [component.id_handle, node.id()])
 
           begin
-           cmp_action = Task.create_for_ad_hoc_action(self, component, cmp_opts) if node.get_admin_op_status.eql?'running'
+           cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if node.get_admin_op_status.eql?'running'
           rescue Task::Template::ParsingError => e
             Log.info("Ignoring component 'delete' action does not exist.")
           end
@@ -489,8 +490,8 @@ module DTK; class  Assembly
         end
       end
 
-      command_and_control_action = Task.create_for_command_and_control_action(self, 'destroy_node?', node_idh.get_id(), node, opts)
-      delete_from_database = Task.create_for_delete_from_database(self, nil, node, opts)
+      command_and_control_action = Task.create_for_command_and_control_action(assembly_instance, 'destroy_node?', node_idh.get_id(), node, opts)
+      delete_from_database = Task.create_for_delete_from_database(assembly_instance, nil, node, opts)
 
       task.add_subtask(command_and_control_action) if command_and_control_action
       return task if opts[:return_task]
@@ -587,7 +588,7 @@ module DTK; class  Assembly
 
       if nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
         nodes.each do |node|
-          node_top_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true))
+          node_top_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true, assembly_instance: assembly_instance))
           task.add_subtask(node_top_task) if node_top_task
         end
       end

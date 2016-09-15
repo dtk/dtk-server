@@ -67,7 +67,7 @@ module DTK
         #  alternatively have items removed (e.g., create workflow rejected) in compute_base_diffs
         diff_result.semantic_diffs = collated_diffs.serialize(dsl_version)
 
-        process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules])
+        process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules], service_instance: service_instance)
       end
 
       # opts can have keys
@@ -129,8 +129,8 @@ module DTK
               # Treat updates to repo from object model as transaction that rolls back git repo to what client set it as
               # If error,  RepoUpdate.Transaction wil throw error
               RepoUpdate.Transaction module_branch do
-                # Items in repo that need updating by generating from the server's object model
-                # TODO: DTK-2650: put in logic that updates the repo from the object model
+                # update dtk.service.yaml with data from object model
+                Generate.generate_service_instance_dsl(opts[:service_instance], module_branch)
                 diff_result.repo_updated = true # means repo updated by server
               end
             end

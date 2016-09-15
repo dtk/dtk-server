@@ -35,7 +35,7 @@ module DTK; module CommonDSL
 
           add_node_properties_component(new_node)
 
-          result.add_item_to_update(:assembly) # workflow updated to add a node
+          result.add_item_to_update(:workflow) # workflow updated to add a node
         end
 
         private 

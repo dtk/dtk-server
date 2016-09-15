@@ -38,7 +38,9 @@ module DTK
       end
 
       def add_collate_level_elements?(collate_key, diffs)
-        serialized_diffs = diffs.map { |diff| diff.serialize(self) }
+        serialized_diffs = diffs.map do |diff| 
+          diff.serialize(self) 
+        end
         unless serialized_diffs.empty?
           merge!(serialize_collate_key(collate_key) => serialized_diffs)
         end
@@ -46,8 +48,7 @@ module DTK
       end
       
       def serialize_add_element(add_diff)
-        serialized_content = serialize_add_parse_object(add_diff.parse_object)
-        { serialize_qualified_key(add_diff)  => serialized_content }
+        serialize_qualified_key(add_diff)
       end
       
       def serialize_delete_element(delete_diff)
@@ -67,22 +68,6 @@ module DTK
 
       def serialize_collate_key(collate_key) 
         Term.diff_element_type(collate_key.type, collate_key.operation)
-      end
-
-      def serialize_add_parse_object(parse_object)
-        # TODO: use @dsl_version to render yaml for parse_object
-        serialize_add_parse_object_aux(parse_object)
-      end
-
-      # TODO: temp hack
-      def serialize_add_parse_object_aux(obj)
-        if obj.kind_of?(::Hash)
-          obj.inject({}) { |h, (k, v)| h.merge(k => serialize_add_parse_object_aux(v)) }
-        elsif obj.kind_of?(::Array)
-          obj.map { |el| serialize_add_parse_object_aux(el) }
-        else
-          obj
-        end
       end
 
       def serialize_qualified_key(diff_element)

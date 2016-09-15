@@ -19,8 +19,9 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly::Node
     class Diff
       class Delete < CommonDSL::Diff::Element::Delete
-        def process(_result)
-          # TODO: stub 
+        def process(_result, _opts = {})
+          # TODO: DTK-2665: treat this
+          Diff::DiffErrors::ChangeNotSupported.raise_error(self.class, create_backup_file: true)
         end
 
       end

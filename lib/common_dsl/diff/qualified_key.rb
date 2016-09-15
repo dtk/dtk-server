@@ -18,6 +18,7 @@
 module DTK
   class CommonDSL::Diff
     class QualifiedKey < ::DTK::DSL::QualifiedKey 
+      attr_reader :key_elements
     end
   end
 end

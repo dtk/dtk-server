@@ -132,7 +132,7 @@ module DTK
 
         # if module_branch belongs to service instance assembly_module_version? will not be nil
         assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
-        if assembly_branch.assembly_module_version?
+        if assembly_branch && assembly_branch.assembly_module_version?
           # add violation if module_branch[:dsl_parsed] == false
           ret << Violation::ComponentParsingError.new(self[:display_name], 'Service instance') unless assembly_branch[:dsl_parsed]
         end

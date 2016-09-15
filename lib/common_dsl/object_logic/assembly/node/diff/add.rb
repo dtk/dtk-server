@@ -19,7 +19,7 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly
     class Node::Diff
       class Add < CommonDSL::Diff::Element::Add
-        def process(result)
+        def process(result, opts = {})
           new_node = 
             case node_type
             when :node
@@ -35,7 +35,7 @@ module DTK; module CommonDSL
 
           add_node_properties_component(new_node)
 
-          result.add_item_to_update(:workflow) # workflow updated to add a node
+          result.add_item_to_update(:assembly) # workflow updated to add a node
         end
 
         private 
@@ -51,9 +51,16 @@ module DTK; module CommonDSL
         def add_node_properties_component(node)
           image         = node_attribute(:image)
           instance_size = node_attribute(:size)
-          pp(image: image, instance_size: instance_size)
-          # TODO: hard coded to ec2_properties
-          assembly_instance.add_ec2_properties_and_set_attributes(project, node, image, instance_size)
+          begin 
+            # TODO: hard coded to ec2_properties
+            assembly_instance.add_ec2_properties_and_set_attributes(project, node, image, instance_size)
+          rescue => e
+            if e.respond_to?(:message)
+              Diff::DiffErrors.raise_error(error_msg: e.message)
+            else
+              fail e
+            end
+          end
         end
 
         def add_nested_components(node, result)

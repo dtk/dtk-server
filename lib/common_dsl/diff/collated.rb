@@ -31,10 +31,10 @@ module DTK
       end
 
       # Parameter result is a Diff::Result object
-      def process(result)
+      def process(result, opts = {})
         Sort::ForProcess.sort_keys(@diffs.keys).each do |collate_key|
           diffs_of_same_type = @diffs[collate_key]
-          diffs_of_same_type.each { |diff| diff.process(result) }
+          diffs_of_same_type.each { |diff| diff.process(result, opts) }
         end
         result
       end
@@ -58,9 +58,16 @@ module DTK
         private
 
         def self.order_collate_keys(a_key, b_key)
-          # lexigraphic ordering using type following by operation
-          [type_order_mapping[a_key.type] || -1, op_order_mapping[a_key.operation] || -1] <=> 
-            [type_order_mapping[b_key.type] || -1, op_order_mapping[b_key.operation] || -1]
+          # lexigraphic ordering using type followed by operation
+          [type_index(a_key.type), op_index(a_key.operation)] <=> [type_index(b_key.type), op_index(b_key.operation)]
+        end
+
+        def self.type_index(type)
+          type_order_mapping[type] || self::TYPE_ORDER.size
+        end
+
+        def self.op_index(op)
+          op_order_mapping[op] || self::OP_ORDER.size
         end
 
         def self.order_mapping(elements)
@@ -69,7 +76,7 @@ module DTK
 
         class ForSerialize < self
           private
-          TYPE_ORDER = [:node, :component, :attribute]
+          TYPE_ORDER = [:node, :component, :attribute, :workflow]
           OP_ORDER   = [:added, :deleted, :modified]
 
           def self.type_order_mapping
@@ -82,8 +89,9 @@ module DTK
 
         class ForProcess < self
           private
-          TYPE_ORDER = [:node, :component, :attribute]
-          OP_ORDER   = [:added, :deleted, :modified]
+          # :workflow must be before ops that add and delete nodes and components
+          TYPE_ORDER = [:workflow, :node, :component, :attribute]
+          OP_ORDER   = [:deleted, :modified, :added]
 
           def self.type_order_mapping
             @type_order_mapping ||= order_mapping(TYPE_ORDER)

@@ -41,10 +41,12 @@ module DTK
       end
       private :initialize
 
-      # returns object of type Diff::Result 
+      # returns object of type Diff::Result  or raises error
+      # TODO: DTK-2665: look at more consistently eithr putting error messages on results
+      # or throwing errors
+      # also look at doing pinpointed violation chaecking leveraging violation code
       def self.process_service_instance(service_instance, module_branch)
         diff_result = Result.new
-
         unless dsl_file_obj = Parse.matching_service_instance_file_obj?(module_branch)
           fail Error, "Unexpected that 'dsl_file_obj' is nil"
         end
@@ -61,11 +63,12 @@ module DTK
         return diff_result unless collated_diffs
 
         dsl_version = service_instance_gen.req(:DSLVersion)
+        # TODO: DTK-2665: look at moving setting semantic_diffs because process_diffs can remove items
+        #  alternatively have items removed (e.g., create workflow rejected) in compute_base_diffs
         diff_result.semantic_diffs = collated_diffs.serialize(dsl_version)
 
-        process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen)
+        process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules])
       end
-
 
       # opts can have keys
       #   :qualified_key
@@ -114,10 +117,10 @@ module DTK
       end
 
       # returns object of type Diff::Result 
-      def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen)
+      def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, opts = {})
         DiffErrors.process_diffs_error_handling(diff_result, service_instance_gen) do
           Model.Transaction do
-            collated_diffs.process(diff_result)
+            collated_diffs.process(diff_result, opts)
             DiffErrors.raise_if_any_errors(diff_result)
 
             # items_to_update are things that need to be updated in repo from what at this point are in object model
@@ -127,7 +130,7 @@ module DTK
               # If error,  RepoUpdate.Transaction wil throw error
               RepoUpdate.Transaction module_branch do
                 # Items in repo that need updating by generating from the server's object model
-                # TODO: logic that updates the repo from the object model
+                # TODO: DTK-2650: put in logic that updates the repo from the object model
                 diff_result.repo_updated = true # means repo updated by server
               end
             end

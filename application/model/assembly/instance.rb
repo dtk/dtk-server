@@ -752,17 +752,27 @@ module DTK; class  Assembly
       return av_pairs if image.nil? && instance_size.nil?
 
       if image
-        current_image = vpc_images[image]
-        fail ErrorUsage.new("Node '#{node_name}' has been created but image attribute has invalid value '#{image}' and has not been set! You can set image using 'set-attribute' command.") unless current_image
+        unless current_image = vpc_images[image]
+          legal_value_list = vpc_images.keys.join(', ')
+          fail ErrorUsage, "Image attribute on node '#{node_name}' has invalid value '#{image}'. Legal values are: #{legal_value_list}"
+        end
         av_pairs << { pattern: "#{node_name}/image", value: image }
       end
 
       if instance_size
         if current_image
-          fail ErrorUsage.new("Node '#{node_name}' has been created but size attribute has invalid value '#{instance_size}' for image '#{image}' and has not been set! You can set size using 'set-attribute' command.") unless current_image['sizes'].keys.include?(instance_size)
+          legal_sizes = current_image['sizes'].keys
+          unless legal_sizes.include?(instance_size)
+            legal_value_list = legal_sizes.join(', ')
+            fail ErrorUsage, "Size attribute on node '#{node_name}' has invalid value '#{instance_size}' for image '#{image}'. Legal values are: #{legal_value_list}"
+          end
         else
-          all_image_sizes = vpc_images.map{ |_k, vpc_image| vpc_image['sizes'].keys }.uniq.flatten
-          fail ErrorUsage.new("Node '#{node_name}' has been created but size attribute has invalid value '#{instance_size}' and has not been set! You can set size using 'set-attribute' command.") unless all_image_sizes.include?(instance_size)
+          legal_sizes = vpc_images.map{ |_k, vpc_image| vpc_image['sizes'].keys }.uniq.flatten
+          unless legal_sizes.include?(instance_size)
+             legal_value_list = legal_sizes.join(', ')
+            fail ErrorUsage, "Size attribute on node '#{node_name}' has invalid value '#{instance_size}'. Legal values are: #{legal_value_list}" 
+
+          end
         end
         av_pairs << { pattern: "#{node_name}/size", value: instance_size } if instance_size
       end

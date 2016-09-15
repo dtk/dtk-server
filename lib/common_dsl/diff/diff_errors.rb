@@ -18,21 +18,31 @@
 module DTK
   module CommonDSL
     class Diff
+      # TODO: DTK-2665: in this class or in a new class that has single error put in the diff change reference (i.e, qualified_key, change_type and operation)
       class DiffErrors < ErrorUsage
+        require_relative('diff_errors/change_not_supported')
+
         attr_reader :error_msgs, :create_backup_file
         # opts can have keys:
-        #   :create_backup_file
-        def initialize(error_msgs, opts = {})
+        #   :error_msg - string
+        #   :error_msgs - array of strings
+        #   :create_backup_file (Boolean)
+        def initialize(opts = {})
+          error_msgs = opts[:error_msg] || opts[:error_msgs] || []
           error_msgs = [error_msgs] unless error_msgs.kind_of?(::Array)
           super(error_msg(error_msgs))
           @error_msgs         = error_msgs
           @create_backup_file = opts[:create_backup_file]
         end
         private :initialize
+
+        def self.raise_error(*args)
+          fail new(*args)
+        end
         
         def self.raise_if_any_errors(diff_result)
           error_msgs = diff_result.error_msgs
-          fail new(error_msgs) unless error_msgs.empty?
+          fail new(error_msgs: error_msg) unless error_msgs.empty?
         end
         
         def self.process_diffs_error_handling(diff_result, service_instance_gen, &block)
@@ -61,14 +71,16 @@ module DTK
         end
         
         IDENT = 2
+        GENERIC_ERROR = 'Error duing update to service instance'
         def error_msg(error_msgs)
-          if error_msgs.size == 1
+          if error_msgs.empty?
+            GENERIC_ERROR
+          elsif error_msgs.size == 1
             error_msgs.first
           else
             error_msgs.inject("\n") { |str, error_msg| "#{str}#{' ' * IDENT}#{error_msg}\n" }
           end
         end
-
       end
     end
   end

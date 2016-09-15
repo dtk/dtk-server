@@ -66,7 +66,7 @@ shared_context 'Converge service instance' do |service_location, dtk_common, ser
     puts 'Converge service instance', '-------------------------'
     pass = true
     service_location = service_location + service_instance
-    value = `cd #{service_location} && dtk service converge && cd -`
+    value = `dtk service converge -d #{service_location}`
     puts value
     if value.include? 'ERROR'
       pass = false

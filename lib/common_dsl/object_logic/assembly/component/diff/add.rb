@@ -28,7 +28,6 @@ module DTK; module CommonDSL
           if matching_aug_cmp_templates.empty?
             result.add_error_msg("Component '#{qualified_key.print_form}' does not match any installed component templates")
           elsif matching_aug_cmp_templates.size > 1
-            # TODO: DTK-2665:  put in message the name of matching component templates
             aug_cmp_template = find_matching_dependency(matching_aug_cmp_templates, opts[:dependent_modules])
 
             unless aug_cmp_template
@@ -63,10 +62,10 @@ module DTK; module CommonDSL
           return if attributes_semantic_parse_hash.empty?
           
           ndx_existing_attributes = ndx_existing_component_attributes(new_component_idh, attributes_semantic_parse_hash.keys)
-          
+
           attributes_semantic_parse_hash.each do |attr_name, attr_content|
             unless existing_attribute = ndx_existing_attributes[attr_name]
-              # TODO: 2650: raise error indicating that an invalid attribute is given; indicate error by using qualified_key.printname and name of attribute
+              Diff::DiffErrors.raise_error(error_msg: "Invalid attribute '#{attr_name}' is provided for component '#{qualified_key.print_form}'")
             end
             existing_attr_value = existing_attribute.get_field?(:attribute_value)
             new_attr_value      = attr_content.req(:Value)
@@ -85,7 +84,13 @@ module DTK; module CommonDSL
         # Returns attribute values indexed by attribute name
         def ndx_existing_component_attributes(component_idh, attr_names)
           ret = {}
-          # TODO: 2650: write code that looks up on component_idh to get all attributes on this component that match a name in attr_names
+
+          (component_idh.create_object.get_attributes || []).each do |cmp_attribute|
+            cmp_attr_name = cmp_attribute[:display_name]
+            ret.merge!(cmp_attr_name => cmp_attribute) if attr_names.include?(cmp_attr_name)
+          end
+
+          ret
         end
         
         def attributes_semantic_parse_hash

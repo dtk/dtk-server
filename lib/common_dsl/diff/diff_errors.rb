@@ -18,6 +18,7 @@
 module DTK
   module CommonDSL
     class Diff
+      # TODO: DTK-2665: in this class or in a new class that has single error put in the diff change reference (i.e, qualified_key, change_type and operation)
       class DiffErrors < ErrorUsage
         require_relative('diff_errors/change_not_supported')
 

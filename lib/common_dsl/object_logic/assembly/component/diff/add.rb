@@ -19,14 +19,19 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly
     class Component::Diff
       class Add < CommonDSL::Diff::Element::Add
+        include Mixin
+
         def process(result, opts = {})
+          # TODO: DTK-2665: look at whether should instead use Diff::DiffErrors.raise_error, rather than result.add_error_msg 
+          # and whether should trap errors, e.g., when call assembly_instance.add_component so can augment error message with
+          # diff change reference (i.e, qualified_key, change_type=component and operation=add)
           matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component_name) 
           aug_cmp_template = nil
 
           if matching_aug_cmp_templates.empty?
             result.add_error_msg("Component '#{qualified_key.print_form}' does not match any installed component templates")
           elsif matching_aug_cmp_templates.size > 1
-            # TODO: put in message the name of matching component templates
+            # TODO: DTK-2665:  put in message the name of matching component templates
             aug_cmp_template = find_matching_dependency(matching_aug_cmp_templates, opts[:dependent_modules])
 
             unless aug_cmp_template
@@ -39,16 +44,32 @@ module DTK; module CommonDSL
           end
 
           if aug_cmp_template
-            # TODO: use this and node to add component to node
+            # TODO: DTK-2650:  use this and node to add component to node
             # node is gotten by looking at qualified_key
             # case on whether assembly or node level
-          end
+            if node = parent_node?
+              add_component_to_node(node, aug_cmp_template, component_title: component_title?)
+              result.add_item_to_update(:workflow) # workflow will be updated with spliced in new component
+            else
+              # TODO: DTK-2650:  need to call method that adds the component to top level assembly
+            end
+            raise 'got here' # TODO: DTK-2650: This will undo transactions so can retest a change to dtk.service.yaml that adds a component
+            # TODO: DTK-2650: if comment this out and do push twiced second time wil not see a component added change, but wil see a diff in workflows unti            # logic is put in lib/common_dsl/diff.rb as noted that updates the dsl from the object model and signals the client to pull the changes
+            # a temporary thing to also consider is calling assembly_instance.add_component
+            # as assembly_instance.add_component(node.id_handle, aug_cmp_template, opts[:component_title], :donot_update_workflow: true)
+            
+            # TODO: DTK-2650: Put in logic to see if any attributes are part of the component add and if so then process; a sketch of this: adding method
+            # def add_component_attributes(result)
+            # modeled after add_nested_components in node/add.rb
+          end 
         end
 
         private
 
-        def component_name
-          relative_distinguished_name
+        # opts can have keys:
+        #   :component_title
+        def add_component_to_node(node, aug_cmp_template, opts = {})
+          assembly_instance.add_component(node.id_handle, aug_cmp_template, opts[:component_title])
         end
 
         def find_matching_dependency(matching_aug_cmp_templates, dependencies = {})

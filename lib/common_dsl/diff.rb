@@ -130,7 +130,7 @@ module DTK
               # If error,  RepoUpdate.Transaction wil throw error
               RepoUpdate.Transaction module_branch do
                 # Items in repo that need updating by generating from the server's object model
-                # TODO: logic that updates the repo from the object model
+                # TODO: DTK-2650: put in logic that updates the repo from the object model
                 diff_result.repo_updated = true # means repo updated by server
               end
             end

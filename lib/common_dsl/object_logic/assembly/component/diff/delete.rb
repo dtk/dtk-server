@@ -19,8 +19,11 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly
     class Component::Diff
       class Delete < CommonDSL::Diff::Element::Delete
+        include Mixin
+
         def process(_result, _opts = {})
-          # TODO: stub 
+          # TODO: DTK-2665: treat this. initilly may case on whether component has a dleet action in which case teh process can be a no op
+          Diff::DiffErrors::ChangeNotSupported.raise_error(self.class, create_backup_file: true)
         end
 
       end

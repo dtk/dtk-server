@@ -27,7 +27,7 @@ module DTK; class Node
       end
 
       def get_node_attributes(opts = {})
-        Node.get_node_level_attributes([id_handle()], cols: opts[:cols], add_filter: opts[:filter])
+        Node.get_node_level_attributes([id_handle], cols: opts[:cols], add_filter: opts[:filter])
       end
 
       # TODO: stub; see if can use get_node_attributes
@@ -36,7 +36,7 @@ module DTK; class Node
       end
       # TODO: once see calling contex, remove stub call
       def get_node_and_component_attributes(_opts = {})
-        node_attrs = get_node_attributes_stub()
+        node_attrs = get_node_attributes_stub
         component_attrs = get_objs(cols: [:component_attrs]).map { |r| r[:attribute] }
         component_attrs + node_attrs
       end
@@ -49,22 +49,22 @@ module DTK; class Node
         if filter = opts[:filter]
           case filter
           when :required_unset_attributes
-            get_attributes_print_form_aux(lambda { |a| a.required_unset_attribute?() })
+            get_attributes_print_form_aux(lambda { |a| a.required_unset_attribute? })
           else
             fail Error.new("not treating filter (#{filter}) in Assembly::Instance#get_attributes_print_form")
           end
         else
-          get_attributes_print_form_aux()
+          get_attributes_print_form_aux
         end
       end
 
       def get_attributes_print_form_aux(filter_proc = nil)
-        node_attrs = get_node_attributes_stub()
+        node_attrs = get_node_attributes_stub
         component_attrs = get_objs(cols: [:component_attrs]).map do |r|
           attr = r[:attribute]
           # TODO: more efficient to have sql query do filtering
           if filter_proc.nil? || filter_proc.call(attr)
-            display_name_prefix = "#{r[:component].display_name_print_form()}/"
+            display_name_prefix = "#{r[:component].display_name_print_form}/"
             attr.print_form(Opts.new(display_name_prefix: display_name_prefix))
           end
         end.compact
@@ -135,12 +135,12 @@ module DTK; class Node
       private
 
       def check_and_ret_title_attribute_name?(component_template, component_title)
-        title_attr_name = component_template.get_title_attribute_name?()
+        title_attr_name = component_template.get_title_attribute_name?
         if component_title && title_attr_name.nil?
-          fail ErrorUsage.new("Component (#{component_template.component_type_print_form()}) is given a title, but should not have one")
+          fail ErrorUsage.new("Component '#{component_template.component_type_print_form}' is given the title '#{component_title}', but should not have one")
         elsif component_title.nil? && title_attr_name
-          cmp_name = component_template.component_type_print_form()
-          fail ErrorUsage.new("Component (#{cmp_name}) needs a title; use form #{cmp_name}[TITLE]")
+          cmp_name = component_template.component_type_print_form
+          fail ErrorUsage.new("Component '#{cmp_name}' needs a title; use form #{cmp_name}[TITLE]")
         end
         title_attr_name
       end

@@ -19,6 +19,8 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly::Component
     class Diff < CommonDSL::Diff::Set 
       class Add < CommonDSL::Diff::Element::Add
+        require_relative('diff/mixin')
+        # mixin must be loaded first
         require_relative('diff/add')
         require_relative('diff/delete')
       end

@@ -51,9 +51,16 @@ module DTK; module CommonDSL
         def add_node_properties_component(node)
           image         = node_attribute(:image)
           instance_size = node_attribute(:size)
-          pp(image: image, instance_size: instance_size)
-          # TODO: hard coded to ec2_properties
-          assembly_instance.add_ec2_properties_and_set_attributes(project, node, image, instance_size)
+          begin 
+            # TODO: hard coded to ec2_properties
+            assembly_instance.add_ec2_properties_and_set_attributes(project, node, image, instance_size)
+          rescue => e
+            if e.respond_to?(:message)
+              Diff::DiffErrors.raise_error(error_msg: e.message)
+            else
+              fail e
+            end
+          end
         end
 
         def add_nested_components(node, result)

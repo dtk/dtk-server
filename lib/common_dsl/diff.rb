@@ -41,10 +41,12 @@ module DTK
       end
       private :initialize
 
-      # returns object of type Diff::Result 
+      # returns object of type Diff::Result  or raises error
+      # TODO: DTK-2665: look at more consistently eithr putting error messages on results
+      # or throwing errors
+      # also look at doing pinpointed violation chaecking leveraging violation code
       def self.process_service_instance(service_instance, module_branch)
         diff_result = Result.new
-
         unless dsl_file_obj = Parse.matching_service_instance_file_obj?(module_branch)
           fail Error, "Unexpected that 'dsl_file_obj' is nil"
         end
@@ -67,7 +69,6 @@ module DTK
 
         process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules])
       end
-
 
       # opts can have keys
       #   :qualified_key

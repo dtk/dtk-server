@@ -34,6 +34,21 @@ module DTK
         fail Error::NoMethodForConcreteClass.new(self.class)
       end
 
+      TypeAndOperation = Struct.new(:object_type, :operation)
+      def self.diff_type_and_operation
+        ret = nil
+        split = to_s.split('::')
+        # assuming form that ends with TYPE::Diff::OP
+        if split.size > 3
+          if split[-2] == 'Diff'
+            type = split[-3].downcase.to_sym
+            operation = split[-1].downcase.to_sym
+            ret = TypeAndOperation.new(type, operation)
+          end
+        end
+        ret || TypeAndOperation.new(nil, nil) # TypeAndOperation.new(nil, nil) from protection if unexpected form
+      end
+
       private
 
       def name

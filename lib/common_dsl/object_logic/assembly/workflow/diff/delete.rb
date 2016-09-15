@@ -22,7 +22,7 @@ module DTK; module CommonDSL
         include Mixin
 
         def process(_result, _opts = {})
-          fail Diff::DiffErrors.new("The create workflow cannot be deleted", create_backup_file: true) if is_create_workflow?
+          Diff::DiffErrors.raise_error(error_msg: "The create workflow cannot be deleted", create_backup_file: true) if is_create_workflow?
           Model.delete_instance(workflow_id_handle)
           nil
         end

@@ -20,7 +20,7 @@ module DTK; module CommonDSL
     class Diff
       class Delete < CommonDSL::Diff::Element::Delete
         def process(_result, _opts = {})
-          # TODO: stub 
+          Diff::DiffErrors::ChangeNotSupported.raise_error(self.class, create_backup_file: true)
         end
 
       end

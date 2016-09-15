@@ -91,7 +91,7 @@ module DTK
           private
           # :workflow must be before ops that add and delete nodes and components
           TYPE_ORDER = [:workflow, :node, :component, :attribute]
-          OP_ORDER   = [:added, :deleted, :modified]
+          OP_ORDER   = [:deleted, :modified, :added]
 
           def self.type_order_mapping
             @type_order_mapping ||= order_mapping(TYPE_ORDER)

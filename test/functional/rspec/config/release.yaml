@@ -4,14 +4,14 @@ properties:
  aws_access_key_id: 
  aws_secret_access_key: 
  dtk-server: v0.10.0
- dtk-repo-manager: v0.9.1
- dtk-repo-manager-admin: v0.9.0
- dtk-common: v0.9.1
- dtk-common-core: v0.9.0
- dtk-client: cp09-13-2016
- dtk-node-agent: v0.9.1
- dtk-provisioning: v0.9.1
- dtk-arbiter: v0.9.1
+ dtk-repo-manager: v0.10.0
+ dtk-repo-manager-admin: v0.10.0
+ dtk-common: v0.10.0
+ dtk-common-core: v0.10.0
+ dtk-client: v0.10.0
+ dtk-node-agent: v0.10.0
+ dtk-provisioning: v0.10.0
+ dtk-arbiter: v0.10.0
  jenkins_node: release
  release: true
  smtp_username: test

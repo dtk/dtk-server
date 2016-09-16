@@ -123,8 +123,18 @@ function tag_code() {
 			  git tag $next_tag
 			  git push --tags
 			fi
-		elif [[ $repo_name == "dtk-common" || $repo_name == "dtk-shell" || $repo_name == "dtk-client" ]]; then
+		elif [[ $repo_name == "dtk-common" || $repo_name == "dtk-shell" ]]; then
 			cd lib/$repo_name
+			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
+			cd ../..
+      cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+      gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
+			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
+			git add .; git commit -m "bump version"; git push origin master
+			git tag $next_tag
+			git push --tags
+		elif [[ $repo_name == "dtk-client" ]]; then
+			cd lib/cli
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
       cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
@@ -183,16 +193,26 @@ function tag_code() {
       git merge master
       git push origin stable
 			git tag $dtk_major_tag
-			#git push --tags
-		elif [[ $repo_name == "dtk-client" || $repo_name == "dtk-common" || $repo_name == "dtk-shell" ]]; then
+			git push --tags
+		elif [[ $repo_name == "dtk-common" || $repo_name == "dtk-shell" ]]; then
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
       cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
       gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
-      sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
+			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
-			git tag $dtk_major_tag
+			git tag $next_tag
+			git push --tags
+		elif [[ $repo_name == "dtk-client" ]]; then
+			cd lib/cli
+			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
+			cd ../..
+      cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+      gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
+			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
+			git add .; git commit -m "bump version"; git push origin master
+			git tag $next_tag
 			git push --tags
 		elif [[ $repo_name == "dtk-common-core" || $repo_name == "dtk-dsl" ]]; then
 			cd lib/$repo_name

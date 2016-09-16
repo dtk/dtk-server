@@ -36,7 +36,14 @@ module DTK; class Task
       end
 
       def execute_command_and_control_action(top_task_idh, task_idh)
-        if assembly = top_task_idh.create_object().assembly
+        assembly = nil
+
+        if assembly_in_task_action = self[:assembly]
+          action_assembly_idh = top_task_idh.createIDH(id: assembly_in_task_action[:id], model_name: :assembly)
+          assembly = action_assembly_idh.create_object if action_assembly_idh
+        end
+
+        if assembly ||= top_task_idh.create_object().assembly
           assembly_instance = assembly.copy_as_assembly_instance
 
           leaf_nodes = assembly_instance.get_leaf_nodes()

@@ -22,16 +22,12 @@ module DTK; module CommonDSL
         include Mixin
 
         def process(result, opts = {})
-          # TODO: DTK-2665: look at whether should instead use Diff::DiffErrors.raise_error, rather than result.add_error_msg 
-          # and whether should trap errors, e.g., when call assembly_instance.add_component so can augment error message with
-          # diff change reference (i.e, qualified_key, change_type=component and operation=add)
           matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component_name) 
           aug_cmp_template = nil
 
           if matching_aug_cmp_templates.empty?
             result.add_error_msg("Component '#{qualified_key.print_form}' does not match any installed component templates")
           elsif matching_aug_cmp_templates.size > 1
-            # TODO: DTK-2665:  put in message the name of matching component templates
             aug_cmp_template = find_matching_dependency(matching_aug_cmp_templates, opts[:dependent_modules])
 
             unless aug_cmp_template
@@ -42,28 +38,18 @@ module DTK; module CommonDSL
           else
             aug_cmp_template = matching_aug_cmp_templates.first
           end
-
+          
           if aug_cmp_template
-            # TODO: DTK-2650:  use this and node to add component to node
-            # node is gotten by looking at qualified_key
-            # case on whether assembly or node level
-            if node = parent_node?
-              add_component_to_node(node, aug_cmp_template, component_title: component_title?)
-              result.add_item_to_update(:workflow) # workflow will be updated with spliced in new component
-            else
-              # TODO: DTK-2650:  need to call method that adds the component to top level assembly
-            end
-            raise 'got here' # TODO: DTK-2650: This will undo transactions so can retest a change to dtk.service.yaml that adds a component
-            # TODO: DTK-2650: if comment this out and do push twiced second time wil not see a component added change, but wil see a diff in workflows unti            # logic is put in lib/common_dsl/diff.rb as noted that updates the dsl from the object model and signals the client to pull the changes
-            # a temporary thing to also consider is calling assembly_instance.add_component
-            # as assembly_instance.add_component(node.id_handle, aug_cmp_template, opts[:component_title], :donot_update_workflow: true)
-            
-            # TODO: DTK-2650: Put in logic to see if any attributes are part of the component add and if so then process; a sketch of this: adding method
-            # def add_component_attributes(result)
-            # modeled after add_nested_components in node/add.rb
+            node = parent_node? || assembly_instance.create_assembly_wide_node?
+            new_component_idh = add_component_to_node(node, aug_cmp_template, component_title: component_title?)
+            result.add_item_to_update(:workflow) # workflow will be updated with spliced in new component
+            result.add_item_to_update(:assembly) # this is to account for fact that when component is added, default attributes will also be added
+            # any attributes that all in diff are overrides that subsume the component's default attributes
+            set_attribute_overrides(result, new_component_idh)
+            # raise 'got here'
           end 
         end
-
+        
         private
 
         # opts can have keys:
@@ -71,33 +57,72 @@ module DTK; module CommonDSL
         def add_component_to_node(node, aug_cmp_template, opts = {})
           assembly_instance.add_component(node.id_handle, aug_cmp_template, opts[:component_title])
         end
+        
+        def set_attribute_overrides(result, new_component_idh)
+          return if attributes_semantic_parse_hash.empty?
+          
+          ndx_existing_attributes = ndx_existing_component_attributes(new_component_idh, attributes_semantic_parse_hash.keys)
 
+          attributes_semantic_parse_hash.each do |attr_name, attr_content|
+            unless existing_attribute = ndx_existing_attributes[attr_name]
+              Diff::DiffErrors.raise_error(error_msg: "Invalid attribute '#{attr_name}' is provided for component '#{qualified_key.print_form}'")
+            end
+            existing_attr_value = existing_attribute.get_field?(:attribute_value)
+            new_attr_value      = attr_content.req(:Value)
+            find_diff_opts      = {
+              qualified_key: qualified_key.create_with_new_element?(:attribute, attr_name),
+              id_handle: existing_attribute.id_handle,
+              service_instance: @service_instance
+            }
+            if base_attribute_diff = Diff::Base.diff?(existing_attr_value, new_attr_value, find_diff_opts)
+              attribute_add_diff = Attribute::Diff::Modify.new(base_attribute_diff)
+              attribute_add_diff.process(result)
+            end
+          end
+        end
+        
+        # Returns attribute values indexed by attribute name
+        def ndx_existing_component_attributes(component_idh, attr_names)
+          ret = {}
+
+          (component_idh.create_object.get_attributes || []).each do |cmp_attribute|
+            cmp_attr_name = cmp_attribute[:display_name]
+            ret.merge!(cmp_attr_name => cmp_attribute) if attr_names.include?(cmp_attr_name)
+          end
+
+          ret
+        end
+        
+        def attributes_semantic_parse_hash
+          @attributes_semantic_parse_hash ||= @parse_object.val(:Attributes) || {}
+        end
+        
         def find_matching_dependency(matching_aug_cmp_templates, dependencies = {})
           return if dependencies.empty?
-
+          
           ret = nil
           dependencies.each do |name, version|
             ret = match_templates_against_dependency(matching_aug_cmp_templates, name, version)
             break if ret
           end
-
+          
           ret
         end
-
+        
         def match_templates_against_dependency(templates, dep_name, dep_version = 'master')
           templates.find{ |template| "#{template[:namespace][:display_name]}/#{template[:display_name]}".eql?(dep_name) && template[:version].eql?(dep_version) }
         end
-
+        
         def pretty_print_templates(templates)
           temp_array = []
-
+          
           templates.each do |template|
             temp_array << "#{template[:namespace][:display_name]}/#{template[:display_name]}: #{template[:version]}"
           end
-
+          
           temp_array
         end
-
+        
       end
     end
   end

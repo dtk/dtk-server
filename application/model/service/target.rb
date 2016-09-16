@@ -63,7 +63,7 @@ module DTK
           target = create_target_mock(opts[:target_name], opts[:project])
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
           fixup_target_name_and_ref!(new_assembly_instance, target)
-          module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance)
+          module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance, opts)
           new_service_info(new_assembly_instance, module_repo_info)
         end
       end

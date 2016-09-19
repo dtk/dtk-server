@@ -29,24 +29,10 @@ module DTK
           components = ObjectLogic.new_content_input_hash
           dependencies = ObjectLogic.new_content_input_hash
 
-          Assembly::Node.generate_content_input(assembly_instance).each do | key, content_input_node |
-            components = content_input_node.val(:Components)
-          end
-
-          unless components.empty?
-            module_refs = module_branch.get_module_refs
-            components.each do |name, _component|
-              match = module_refs.select{ |mr| mr[:display_name].eql?(name) }
-              if match.empty?
-                # TODO: should return error that no matches found
-                next
-              elsif match.size == 1
-                mr_match = match.first
-                dependencies.merge!({ "#{mr_match[:namespace_info]}/#{mr_match[:display_name]}" => (mr_match[:version_info] || 'master') })
-              else
-                # TODO: should return error that multiple matches are found
-                next
-              end
+          dependent_modules = assembly_instance.info_about(:modules, Opts.new(detail_to_include: [:version_info]))
+          unless dependent_modules.empty?
+            dependent_modules.each do |d_module|
+              dependencies.merge!({ "#{d_module[:namespace_name]}/#{d_module[:display_name]}" => (d_module[:version] || 'master') })
             end
           end
 

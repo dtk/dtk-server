@@ -75,7 +75,7 @@ module DTK
           module_class = get_class_from_type(type)
           
           if service_module = module_class.find_from_name?(project.model_handle(type), namespace_name, module_name)
-            if module_branch = module_class.get_workspace_module_branch(project, module_name, version, namespace)
+            if module_branch = module_class.get_workspace_module_branch(project, module_name, version, namespace, no_error_if_does_not_exist: true)
               module_branch
             else
               repo = service_module.get_repo

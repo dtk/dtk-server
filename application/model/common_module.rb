@@ -102,7 +102,7 @@ module DTK
 
     def self.delete_associated_service_module_version(common_module, version)
       if service_module = BaseService.find_from_name?(common_module.model_handle(:service_module), common_module.module_namespace, common_module.module_name)
-        service_module.delete_version(version)
+        service_module.delete_version(version, no_error_if_does_not_exist: true)
       end
     end
 

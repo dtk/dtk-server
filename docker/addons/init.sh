@@ -35,6 +35,9 @@ PUBLIC_ADDRESS=dtk1.dtk.io
 EOF
 }
 
+# make sure HOST_VOLUME is owned by root
+chown root:root $HOST_VOLUME
+
 # validate env variables
 if [[ -f ${HOST_VOLUME}/dtk.config ]]; then
   # load the configuration

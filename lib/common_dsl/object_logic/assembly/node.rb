@@ -73,9 +73,32 @@ module DTK; module CommonDSL
               node_id = r[:node_node_id]
               (ndx_nodes[node_id][:attributes] ||= []) << r
             end
+            add_type_node_level_attribute!(ndx_nodes)
           end
         end
 
+        def self.add_type_node_level_attribute!(ndx_nodes)
+          # add 'type: group' for node groups
+          node_groups = ndx_nodes.values.select { |node| node.is_node_group? }
+          node_groups.each do |node_group|
+            type_attribute = node_level_attribute(node_group, 'type', 'group')
+            (ndx_nodes[node_group.id][:attributes] ||= []) << type_attribute
+          end
+        end
+
+        def self.node_level_attribute(node, name, value)
+          hash = {
+            display_name: name,
+            node_node_id: node.id,
+            data_type: 'string',
+            hidden: false,
+            dynamic: false,
+            value_asserted: value,
+            value_derived: nil
+          }
+          DTK::Attribute.create_stub(node.model_handle(:attribute), hash)
+        end
+        
         def self.add_augmented_components!(ndx_nodes)
           DTK::Node::Instance.add_augmented_components!(ndx_nodes)
         end

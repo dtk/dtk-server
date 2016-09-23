@@ -42,7 +42,7 @@ module DTK
         
         def self.raise_if_any_errors(diff_result)
           error_msgs = diff_result.error_msgs
-          fail new(error_msgs: error_msg) unless error_msgs.empty?
+          fail new(error_msgs: error_msgs) unless error_msgs.empty?
         end
         
         def self.process_diffs_error_handling(diff_result, service_instance_gen, &block)

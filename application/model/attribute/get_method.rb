@@ -16,6 +16,8 @@
 # limitations under the License.
 #
 # TODO: will move get methods that will not be deprecating to here or some file underneath a file directory
+require 'rest-client'
+
 module DTK; class Attribute
   module GetMethod
     module Mixin
@@ -150,6 +152,31 @@ end
         end
         attrs
       end
+
+      AWS_METADATA_URL = "http://169.254.169.254/latest/meta-data"
+      def get_attributes_from_aws_metadata(attr_names = [])
+        ret = {}
+        attr_names  = [attr_names] unless attr_names.is_a?(Array)
+        mac_address = ::RestClient::Resource.new("#{AWS_METADATA_URL}/network/interfaces/macs/").get
+
+        attr_names.each do |attr_name|
+          ret.merge!( attr_name => ::RestClient::Resource.new("#{AWS_METADATA_URL}/network/interfaces/macs/#{mac_address}#{metadata_valid_name(attr_name)}").get )
+        end
+
+        ret
+      end
+
+      private
+
+      def metadata_valid_name(name)
+        MetadataValidNames[name] || name
+      end
+      MetadataValidNames = {
+        'group_id'   => 'security-group-ids',
+        'group_name' => 'security-groups',
+        'vpc_id'     => 'vpc-id',
+        'subnet_id'  => 'subnet-id'
+      }
     end
   end
 end; end

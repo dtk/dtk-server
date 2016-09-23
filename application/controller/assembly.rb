@@ -879,6 +879,11 @@ module DTK
       assembly = ret_assembly_instance_object
       opts     = ret_boolean_params_hash(:ret_objects)
 
+      # if target service instance and starting for the first time set vpc and subnet attributes if not set
+      if assembly.is_target_service_instance? && assembly.node_admin_status_all_pending?
+        Attribute.set_aws_required_attributes?(assembly)
+      end
+
       violations = assembly.find_violations
       response = opts[:ret_objects] ? violations.hash_form : violations.table_form
       rest_ok_response response

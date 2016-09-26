@@ -92,6 +92,7 @@ class Main < PageContainer
   end
 
   def search_for_object(name)
+    sleep 1
     @session.fill_in('search_term', :with => name + "\n")
   end
 

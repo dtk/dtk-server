@@ -143,7 +143,7 @@ module DTK
           unless gen_object.skip_for_generation?
             unless parse_hash.has_key?(key)
               qualified_key =  parent_qualified_key.create_with_new_element?(type, key)
-              deleted << diff_class::Delete.new(qualified_key, gen_object: gen_object) 
+              deleted << diff_class::Delete.new(qualified_key, gen_object: gen_object, service_instance: opts[:service_instance])
             end
           end
         end

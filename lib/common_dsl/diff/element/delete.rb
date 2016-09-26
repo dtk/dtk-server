@@ -22,7 +22,7 @@ module DTK
         # opts can have keys
         #  :gen_object
         def initialize(qualified_key, opts = {})
-          super(qualified_key)
+          super(qualified_key, service_instance: opts[:service_instance])
           @id_handle = opts[:gen_object].id_handle
         end
 

@@ -33,8 +33,9 @@ module DTK
       # if component is asembly level
       def parent_node?
         return @parent_node if @parent_node
+
         key_elements = qualified_key.key_elements
-        if key_elements.size == 2 and key_elements[0].type == :node and key_elements[1].type == :component
+        if key_elements.size == 2 and key_elements[0].type.to_sym == :node and key_elements[1].type.to_sym == :component
           node_name = key_elements[0].key
           unless @parent_node =  assembly_instance.get_node?([:eq, :display_name, node_name])
             fail Error, "Unexpected that assembly '#{assembly_instance.display_name}' does not have a node with name '#{node_name}'"

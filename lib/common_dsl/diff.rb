@@ -50,7 +50,7 @@ module DTK
         unless dsl_file_obj = Parse.matching_service_instance_file_obj?(module_branch)
           fail Error, "Unexpected that 'dsl_file_obj' is nil"
         end
-        
+
         service_instance_parse = dsl_file_obj.parse_content(:service_instance)
         service_instance_gen   = Generate.generate_service_instance_canonical_form(service_instance, module_branch)
 

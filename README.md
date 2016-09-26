@@ -12,7 +12,7 @@ ___
 Fastest way to deploy  DTK Server is with a Docker container. Docker image [getdtk/dtk-server](https://hub.docker.com/r/getdtk/dtk-server/) contains all required services and components for deploying DTK Server.
 
 #### Preparation
-- Install Docker
+- [Install Docker](https://docs.docker.com/engine/installation/)
 
 - Pull the latest DTK Server Docker image with `docker pull getdtk/dtk-server`
 

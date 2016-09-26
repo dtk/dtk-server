@@ -179,6 +179,10 @@ module DTK; class Assembly; class Instance
       rows.first
     end
 
+    def get_node_by_name?(node_name)
+      get_node?([:eq, :display_name, node_name])
+    end
+
     # TODO: rename to reflect that not including node group members, just node groups themselves and top level nodes
     # This is equivalent to saying that this does not return target_refs
     def get_nodes(*alt_cols)

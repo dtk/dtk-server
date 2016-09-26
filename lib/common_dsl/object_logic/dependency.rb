@@ -32,7 +32,7 @@ module DTK
           dependent_modules = assembly_instance.info_about(:modules, Opts.new(detail_to_include: [:version_info]))
           unless dependent_modules.empty?
             dependent_modules.each do |d_module|
-              dependencies.merge!({ "#{d_module[:namespace_name]}/#{d_module[:display_name]}" => (d_module[:version] || 'master') })
+              dependencies.merge!({ "#{d_module[:namespace_name]}/#{d_module[:display_name]}" => (d_module[:display_version] || 'master') })
             end
           end
 

@@ -26,7 +26,7 @@ module DTK
     end
 
     def self.delete_modules?(assembly, opts = {})
-      Component.new(assembly).delete_modules?()
+      Component.new(assembly).delete_modules?(skip_service_module_branch: true)
       Service.new(assembly).delete_module?(opts)
     end
 

@@ -130,13 +130,7 @@ module DTK
       end
 
       def violations
-        assembly = assembly_instance
-        # if target service instance and starting for the first time set vpc and subnet attributes if not set
-        if assembly.is_target_service_instance? && assembly.node_admin_status_all_pending?
-          Attribute.set_aws_required_attributes?(assembly)
-        end
-
-        violations = assembly.find_violations
+        violations = assembly_instance.find_violations
         rest_ok_response violations.table_form, datatype: :violation
       end
 

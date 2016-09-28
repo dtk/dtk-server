@@ -33,8 +33,10 @@ function get_home {
   ostype=`uname -s`
   if [[ "$ostype" == 'Darwin' ]]; then
     homedir=$(dscl . -read /Users/$1 NFSHomeDirectory | cut -d' ' -f2)
+    binpath_arg='-n/usr/local/bin'
   else
     homedir=$(getent passwd $1 | cut -f6 -d:)
+    binpath_arg=''
   fi
 }
 
@@ -95,7 +97,7 @@ fi
 # install dtk-client only if it's executable cannot be found
 if ! command -v dtk-shell; then
   echo "Installing dtk-client gem"
-  $sudo $gem_path install dtk-client --no-rdoc --no-ri
+  $sudo $gem_path install dtk-client --no-rdoc --no-ri $binpath_arg
 fi 
 
 if [[ "$s" != true ]]; then

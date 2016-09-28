@@ -38,15 +38,19 @@ module DTK; module CommonDSL
         end
 
         def delete_node(node, result)
-          delete_nested_components(node, result)
-          assembly_instance.delete_node(node.id_handle, destroy_nodes: true)
+          if node.get_admin_op_status == 'pending'
+            delete_nested_components(node, result)
+            assembly_instance.delete_node(node.id_handle, destroy_nodes: true)
+          else
+            # TODO: DTK-2680: add code that generates node delete task and add it to converge task
+          end
         end
 
         def delete_nested_components(node, result)
           node.get_components.each do |component|
             cmp_qualified_key = qualified_key.create_with_new_element?(:component, component[:display_name])
             component_delete_diff = ObjectLogic::Assembly::Component::Diff::Delete.new(cmp_qualified_key, gen_object: component, service_instance: @service_instance)
-            component_delete_diff.process(result)
+            component_delete_diff.process(result, force_delete: true)
           end
         end
       end

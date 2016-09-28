@@ -124,7 +124,7 @@ backups_location=backups
 server_port=${port}
 secure_connection_server_port=443
 secure_connection=false
-server_host=localhost
+server_host=${PUBLIC_ADDRESS}
 EOF
 
 cat <<EOF | tee ${homedir}/dtk/.connection > /dev/null

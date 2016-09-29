@@ -2,10 +2,8 @@
  
 usage_config() {
   echo $1
-  echo -e "\nUsage:\n$0 [-u user] [-p port] configuration_path\n"
+  echo -e "\nUsage:\n$0 [-p port] configuration_path\n"
   echo    "configuration_path   - location of dtk.config file"
-  echo    "user                 - user on which to install and configure dtk-client"
-  echo    "                       defaults to new user named 'dtk-client"
   echo    "port                 - port where DTK server is listening"
   echo -e "                       defaults to 8080\n"
 } 
@@ -17,9 +15,6 @@ fi
 
 while getopts ":u:p:s:" o; do
     case "${o}" in
-        u)
-            u=${OPTARG}
-            ;;
         p)
             p=${OPTARG}
             ;;
@@ -33,10 +28,23 @@ while getopts ":u:p:s:" o; do
 done
 shift $((OPTIND-1))
 
-# set default value for user
-user=${u-dtk-client}
+# return specified user's home directory
+function get_home {
+  ostype=`uname -s`
+  if [[ "$ostype" == 'Darwin' ]]; then
+    homedir=$(dscl . -read /Users/$1 NFSHomeDirectory | cut -d' ' -f2)
+    binpath_arg='-n/usr/local/bin'
+  else
+    homedir=$(getent passwd $1 | cut -f6 -d:)
+    binpath_arg=''
+  fi
+}
+
+user=`whoami`
+get_home $user
+
 config_path=$1
-confdir=/home/${user}/dtk
+confdir=${homedir}/dtk
 port=${p-8080}
 
 if [[ "${user}" != "$(whoami)" ]] && [[ "$(whoami)" != "root" ]]; then
@@ -44,12 +52,12 @@ if [[ "${user}" != "$(whoami)" ]] && [[ "$(whoami)" != "root" ]]; then
   exit 1
 fi
 
-if [[ "${user}" != "$(whoami)" ]]; then
-  su_c="su - ${user} -c"
-  sudo=''
-else
-  su_c=''
+# if gem executable is outside of home
+# assume RVM etc is not used and sudo is required
+if ! which gem | grep $homedir; then
   sudo='sudo'
+else
+  sudo=''
 fi
 
 if [[ ! -f ${config_path}/dtk.config ]] && [[ "$s" != true ]]; then
@@ -69,8 +77,8 @@ fi
 
 echo -e "This script will do the following:\n"
 echo    "* Install the dtk-client gem"
-echo    "* Add the '${user}' user if it does not already exist"
-echo -e "* Genereate an SSH keypair for the selected user (if it does not exist)\n"
+echo -e "* Genereate an SSH keypair for the selected user (if it does not exist)"
+echo -e "* Genereate dtk-client configuration files\n"
 
 if [[ "$s" != true ]]; then
 read -n1 -rsp $'Press any key to continue or Ctrl+C to exit...\n'
@@ -86,15 +94,13 @@ else
   gem_path=$(which gem)
 fi
 
-# install dtk-client only if it's executable cannot be found
-if ! command -v dtk-shell; then
-  echo "Installing dtk-client gem"
-  $sudo $gem_path install dtk-client --no-rdoc --no-ri
-fi 
+# install dtk-client gem
+echo "Installing dtk-client gem"
+$sudo $gem_path install dtk-client --no-rdoc --no-ri $binpath_arg
 
 if [[ "$s" != true ]]; then
-$su_c "mkdir -p /home/${user}/dtk"
-cat <<EOF | $su_c "tee /home/${user}/dtk/client.conf > /dev/null"
+mkdir -p ${homedir}/dtk
+cat <<EOF | tee ${homedir}/dtk/client.conf > /dev/null
 development_mode=false
 meta_table_ttl=7200000            # time to live (ms)
 meta_constants_ttl=7200000        # time to live (ms)
@@ -116,22 +122,22 @@ backups_location=backups
 server_port=${port}
 secure_connection_server_port=443
 secure_connection=false
-server_host=localhost
+server_host=${PUBLIC_ADDRESS}
 EOF
 
-cat <<EOF | $su_c "tee /home/${user}/dtk/.connection > /dev/null"
+cat <<EOF | tee ${homedir}/dtk/.connection > /dev/null
 username=${USERNAME}
 password=${PASSWORD}
 EOF
 
 # generate ssh keys
-if [[ ! -f /home/${user}/.ssh/id_rsa ]]; then
-  $su_c "ssh-keygen -t rsa -f /home/${user}/.ssh/id_rsa -P ''"
+if [[ ! -f ${homedir}/.ssh/id_rsa ]]; then
+ssh-keygen -t rsa -f ${homedir}/.ssh/id_rsa -N ''
 fi
 fi
 
 if [[ -n $GIT_USER ]] && [[ -n $GIT_EMAIL ]]; then
-cat <<EOF | $su_c "tee /home/${user}/.gitconfig > /dev/null"
+cat <<EOF | tee ${homedir}/.gitconfig > /dev/null
 [user]
         email = ${GIT_EMAIL}
         name = ${GIT_USER}

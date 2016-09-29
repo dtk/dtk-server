@@ -19,11 +19,40 @@ module DTK; module CommonDSL
   class ObjectLogic::Assembly::Node
     class Diff
       class Delete < CommonDSL::Diff::Element::Delete
-        def process(_result, _opts = {})
-          # TODO: DTK-2665: treat this
-          Diff::DiffErrors::ChangeNotSupported.raise_error(self.class, create_backup_file: true)
+        def process(result, opts = {})
+          node = assembly_instance.get_node_by_name?(node_name)
+
+          if node.is_node_group?
+            fail Error "TODO: need to write delete for node groups"
+          else
+            delete_node(node, result)
+          end
+
+          result.add_item_to_update(:workflow)
         end
 
+        private
+
+        def node_name
+          relative_distinguished_name
+        end
+
+        def delete_node(node, result)
+          if node.get_admin_op_status == 'pending'
+            delete_nested_components(node, result)
+            assembly_instance.delete_node(node.id_handle, destroy_nodes: true)
+          else
+            # TODO: DTK-2680: add code that generates node delete task and add it to converge task
+          end
+        end
+
+        def delete_nested_components(node, result)
+          node.get_components.each do |component|
+            cmp_qualified_key = qualified_key.create_with_new_element?(:component, component[:display_name])
+            component_delete_diff = ObjectLogic::Assembly::Component::Diff::Delete.new(cmp_qualified_key, gen_object: component, service_instance: @service_instance)
+            component_delete_diff.process(result, force_delete: true)
+          end
+        end
       end
     end
   end

@@ -21,30 +21,32 @@ module DTK; module CommonDSL
       class Delete < CommonDSL::Diff::Element::Delete
         include Mixin
 
+        ##
+        ## valid 'opts' arguments are
+        ##   :force_delete - delete without generating workflow
+        ##
         def process(result, opts = {})
-          new_opts = Opts.new(filter_component: component_name)
-          augmented_cmps = assembly_instance.get_augmented_components(new_opts)
+          augmented_cmps = assembly_instance.get_augmented_components(Opts.new(filter_component: component_name))
 
           if augmented_cmps.empty?
             result.add_error_msg("Component '#{qualified_key.print_form}' does not match any components")
           else
-            if augmented_cmps.size > 1
+            node          = parent_node? || assembly_instance.has_assembly_wide_node?
+            matching_cmps = augmented_cmps.select{|cmp| cmp[:node][:display_name] == node[:display_name]}
+
+            if matching_cmps.size > 1
               result.add_error_msg("Unexpected that component name '#{qualified_key.print_form}' match multiple components")
             else
-              node = parent_node? || assembly_instance.has_assembly_wide_node?
-
-              if component_delete_action_exists?(node)
-                # TODO: Aldin: add code that generates component delete task and add it to converge task
+              if component_delete_action_exists?(node) && !opts[:force_delete]
+                # TODO: DTK-2680: add code that generates component delete task and add it to converge task
               else
-                assembly_instance.delete_component(augmented_cmps.first.id_handle, node[:id])
+                assembly_instance.delete_component(matching_cmps.first.id_handle, node[:id])
               end
 
-              result.add_item_to_update(:workflow)
               result.add_item_to_update(:assembly)
+              result.add_item_to_update(:workflow)
             end
           end
-          # TODO: DTK-2665: treat this. initilly may case on whether component has a dleet action in which case teh process can be a no op
-          # Diff::DiffErrors::ChangeNotSupported.raise_error(self.class, create_backup_file: true)
         end
 
         private

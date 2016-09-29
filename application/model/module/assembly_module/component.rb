@@ -74,7 +74,7 @@ module DTK; class AssemblyModule
       ModuleRefs::Lock.create_or_update(@assembly, opts)
     end
 
-    def delete_modules?
+    def delete_modules?(opts = {})
       am_version = assembly_module_version()
       sp_hash = {
         cols: [:id, :group_id, :display_name, :component_id],
@@ -86,7 +86,7 @@ module DTK; class AssemblyModule
       Model.get_objs(@assembly.model_handle(:module_branch), sp_hash).each do |module_branch|
         # if module_branch[:component_id] is nil then this is a service module branch, otherwise it is a component module branch
         if module_branch[:component_id].nil?
-          Model.delete_instance(module_branch.id_handle())
+          Model.delete_instance(module_branch.id_handle()) unless opts[:skip_service_module_branch]
         else
           component_module = component_module_mh.createIDH(id: module_branch[:component_id]).create_object()
           component_module.delete_version?(am_version)

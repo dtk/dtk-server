@@ -16,10 +16,6 @@ require './lib/component_module_versions_spec'
 require './lib/service_modules_spec'
 require './lib/service_module_versions_spec'
 
-
-target_name = 'target'
-workspace_assembly_template = 'workspace'
-module_dir = '~/dtk'
 namespace = 'aws'
 ec2_component_module_name = 'ec2'
 image_component_module_name = 'image_aws'
@@ -32,11 +28,8 @@ network_service_required_modules = [image_component_module_name]
 aws_access_key = ENV['AWS_ACCESS_KEY']
 aws_secret_key = ENV['AWS_SECRET_KEY']
 default_keypair = 'testing_use1'
-security_group_name = 'default'
-security_group_id = 'sg-2282f747'
-subnet_id = 'subnet-af44b8d8'
-target_service_name = "target-new"
-target_assembly_name = 'network::single-subnet'
+target_service_name = 'target-new'
+target_assembly_name = 'network::target'
 is_target = true
 
 smoke_namespace = 'r8'
@@ -69,18 +62,6 @@ describe "DTK Image Lifecycle Smoke test" do
 
   context "Set keypair attribute" do
     include_context "Set attribute", target, 'network_aws::vpc[vpc1]/default_keypair', default_keypair
-  end
-
-  context "Set subnet id attribute" do
-    include_context "Set attribute", target, 'network_aws::vpc_subnet[vpc1-public]/subnet_id', subnet_id
-  end
-
-  context "Set security group name attribute" do
-    include_context "Set attribute", target, 'network_aws::security_group[vpc1-default]/group_name', security_group_name
-  end
-
-  context "Set security group id attribute" do
-    include_context "Set attribute", target, 'network_aws::security_group[vpc1-default]/group_id', security_group_id
   end
 
   context "Converge function" do

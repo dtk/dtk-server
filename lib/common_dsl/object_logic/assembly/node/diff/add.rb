@@ -29,6 +29,7 @@ module DTK; module CommonDSL
             else
               fail "Unexpected type '#{node_type}'"
             end
+
           add_nested_components(new_node, result)
           # dont process anything more if any errors in add_nested_components
           return if result.any_errors?
@@ -36,6 +37,7 @@ module DTK; module CommonDSL
           add_node_properties_component(new_node)
 
           result.add_item_to_update(:workflow) # workflow updated to add a node
+          result.add_item_to_update(:assembly)
         end
 
         private 

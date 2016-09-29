@@ -38,15 +38,16 @@ module DTK; module CommonDSL
           else
             aug_cmp_template = matching_aug_cmp_templates.first
           end
-          
+
           if aug_cmp_template
             node = parent_node? || assembly_instance.create_assembly_wide_node?
             new_component_idh = add_component_to_node(node, aug_cmp_template, component_title: component_title?)
+
             result.add_item_to_update(:workflow) # workflow will be updated with spliced in new component
             result.add_item_to_update(:assembly) # this is to account for fact that when component is added, default attributes will also be added
+
             # any attributes that all in diff are overrides that subsume the component's default attributes
             set_attribute_overrides(result, new_component_idh)
-            # raise 'got here'
           end 
         end
         

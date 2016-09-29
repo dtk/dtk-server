@@ -37,11 +37,7 @@ module DTK; module CommonDSL
             if matching_cmps.size > 1
               result.add_error_msg("Unexpected that component name '#{qualified_key.print_form}' match multiple components")
             else
-              if component_delete_action_exists?(node) && !opts[:force_delete]
-                # TODO: DTK-2680: add code that generates component delete task and add it to converge task
-              else
-                assembly_instance.delete_component(matching_cmps.first.id_handle, node[:id])
-              end
+              delete_component(matching_cmps.first.id_handle, node, opts)
 
               result.add_item_to_update(:assembly)
               result.add_item_to_update(:workflow)
@@ -50,6 +46,15 @@ module DTK; module CommonDSL
         end
 
         private
+
+        def delete_component(matching_cmp, node, opts = {})
+          # if node not created or component does not have .delete action then just delete it
+          if node.get_admin_op_status == 'pending' || opts[:force_delete] || !component_delete_action_exists?(node)
+            assembly_instance.delete_component(matching_cmp, node[:id])
+          else
+            # TODO: DTK-2680: add code that generates component delete task and add it to converge task
+          end
+        end
 
         def component_delete_action_exists?(node)
           action_list = Task::Template::ActionList::ConfigComponents.get(assembly_instance)

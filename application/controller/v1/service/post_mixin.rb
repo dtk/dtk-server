@@ -75,6 +75,20 @@ module DTK
         rest_ok_response task_id: top_task_id
       end
 
+      def generate_service_name
+        service_module    = ret_service_module
+        assembly_name     = request_params(:assembly_name)
+
+        if version = request_params(:version)
+          version = nil if BASE_VERSION_STRING.include?(version)
+        else
+           version = compute_latest_version(service_module)
+        end
+
+        assembly_template = service_module.assembly_template(assembly_name: assembly_name, version: version)
+        rest_ok_response generate_new_service_name(assembly_template, service_module)
+      end
+
       def converge
         assembly_instance = assembly_instance()
         if running_task = most_recent_task_is_executing?(assembly_instance)

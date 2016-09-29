@@ -73,7 +73,8 @@ DTK::ReactorRoute.draw do
   ########## Modules
   get 'api/v1/modules'                           => 'v1::module/exists'
   get 'api/v1/modules/list'                      => 'v1::module/list'
-  get 'api/v1/modules/list_assemblies'           => 'v1::module/list_assemblies'
+  get 'api/v1/modules/assemblies'                => 'v1::module/assemblies'
+  get 'api/v1/modules/remote_modules'            => 'v1::module/remote_modules'
   get 'api/v1/modules/module_dependencies'       => 'v1::module/module_dependencies'
   get 'api/v1/modules/remote_module_info'        => 'v1::module/remote_module_info'
 

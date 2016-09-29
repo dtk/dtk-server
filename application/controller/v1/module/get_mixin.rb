@@ -29,6 +29,9 @@ module DTK
       end
 
       ### Module specific
+      def remote_modules
+        # TODO: stub for DTK-2694
+      end
 
       def exists
         namespace, module_name, module_type = required_request_params(:namespace, :module_name, :module_type)
@@ -36,8 +39,8 @@ module DTK
         rest_ok_response CommonModule.exists(get_default_project, module_type, namespace, module_name, version)
       end
 
-      def list_assemblies
-        # TODO: if  module_name, namespace gievn filter on this
+      def assemblies
+        # TODO: if  module_name, namespace given filter on this
         module_name, namespace, version = request_params(:module_name, :namespace, :version)
         datatype = :assembly_template_with_module
 

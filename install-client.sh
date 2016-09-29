@@ -94,11 +94,9 @@ else
   gem_path=$(which gem)
 fi
 
-# install dtk-client only if it's executable cannot be found
-if ! command -v dtk-shell; then
-  echo "Installing dtk-client gem"
-  $sudo $gem_path install dtk-client --no-rdoc --no-ri $binpath_arg
-fi 
+# install dtk-client gem
+echo "Installing dtk-client gem"
+$sudo $gem_path install dtk-client --no-rdoc --no-ri $binpath_arg
 
 if [[ "$s" != true ]]; then
 mkdir -p ${homedir}/dtk

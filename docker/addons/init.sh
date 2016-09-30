@@ -36,7 +36,7 @@ EOF
 }
 
 # make sure HOST_VOLUME is owned by root
-chown root:root $HOST_VOLUME
+chown $TENANT_USER:$TENANT_USER $HOST_VOLUME
 
 # validate env variables
 if [[ -f ${HOST_VOLUME}/dtk.config ]]; then

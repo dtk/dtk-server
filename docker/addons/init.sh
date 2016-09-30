@@ -57,8 +57,6 @@ REMOTE_REPO_HOST=${REMOTE_REPO_HOST-dtknet.servicecatalog.it}
 REMOTE_REPO_REST_PORT=${REMOTE_REPO_REST_PORT-7001}
 # set mco port to default
 MCOLLECTIVE_PORT=${MCOLLECTIVE_PORT-6163}
-# set instance name to default
-INSTANCE_NAME=${INSTANCE_NAME-dtk1}
 # install dtk-client
 INSTALL_CLIENT=${INSTALL_CLIENT-true}
 
@@ -74,7 +72,7 @@ STOMP_PASSWORD=${STOMP_PASSWORD-marionette}
 
 # export the variables
 export USERNAME PASSWORD PUBLIC_ADDRESS GIT_PORT REMOTE_REPO_HOST \
-       REMOTE_REPO_REST_PORT MCOLLECTIVE_PORT INSTANCE_NAME ARBITER_QUEUE ARBITER_TOPIC STOMP_USERNAME STOMP_PASSWORD
+       REMOTE_REPO_REST_PORT MCOLLECTIVE_PORT ARBITER_QUEUE ARBITER_TOPIC STOMP_USERNAME STOMP_PASSWORD
 
 # start necessary services
 /usr/sbin/sshd -D &
@@ -173,6 +171,12 @@ if [[ ! -d ${HOST_VOLUME}/activemq ]]; then
   rm -rf /opt/activemq/data
 fi
 /opt/activemq/bin/activemq start &
+
+# generate instance name (unique DTK server id for DTK Repo Manager)
+if [[ ! -f ${HOST_VOLUME}/.instance_name ]]; then
+  echo "${USERNAME}-`date +%s`" > ${HOST_VOLUME}/.instance_name
+fi
+export INSTANCE_NAME=`cat ${HOST_VOLUME}/.instance_name`
 
 # generate salts
 if [[ ! -f ${HOST_VOLUME}/.cookie_salt ]]; then

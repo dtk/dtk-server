@@ -293,6 +293,7 @@ module DTK; class  Assembly
 
     def set_attributes(av_pairs, opts = {})
       attr_patterns = nil
+
       Transaction do
         # super does the processing that sets the actual attributes then if opts[:update_meta] set
         # then if opts[:update_meta] set meta info can be changed on the assembly module
@@ -307,6 +308,14 @@ module DTK; class  Assembly
             AssemblyModule::Component::Attribute.update(self, created_cmp_level_attrs)
           end
         end
+
+        # generate dtk.service.yaml file again to reflect changes in required attributes
+        if opts[:update_dsl]
+          assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
+          CommonDSL::Generate.generate_service_instance_dsl(self, assembly_branch)
+          return CommonModule::ModuleRepoInfo.new(assembly_branch)
+        end
+
       end
       attr_patterns
     end

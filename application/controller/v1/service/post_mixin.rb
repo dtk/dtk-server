@@ -127,8 +127,7 @@ module DTK
       end
 
       def set_attributes
-        assembly_instance.set_attributes(ret_params_av_pairs, update_meta: true)
-        rest_ok_response
+        rest_ok_response assembly_instance.set_attributes(ret_params_av_pairs, update_meta: true, update_dsl: true)
       end
 
       def start

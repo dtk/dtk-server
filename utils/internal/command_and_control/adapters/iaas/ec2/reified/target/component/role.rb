@@ -32,8 +32,8 @@ module DTK; module CommandAndControlAdapter
             if error_array = asserted_credentials_errors?
               ret = error_array
             end
-          else !credentials_through_aws_role_meta_info?
-            ret = [Violation::InvalidIAMRole.new(role_name)]
+          else 
+            ret = [Violation::InvalidIAMRole.new(role_name)] if credentials_through_aws_role_meta_info?.nil?
           end
           ret
         end

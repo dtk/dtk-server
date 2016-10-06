@@ -26,17 +26,23 @@ module DTK
       end
 
       def get_connected_component(component_type, reified_target)
+        get_connected_component?(component_type, reified_target) || raise_violation("No matching component for '#{component_type}'")
+      end
+
+      def get_connected_component?(component_type, reified_target)
         link_def_type = Target::ComponentType.name(component_type)
         dtk_component_ids = get_connected_dtk_component_ids(link_def_type)
         components = reified_target.matching_components(dtk_component_ids)
-        if components.size === 0
-          # TODO: change to return violation or trap this to return violation
-          fail ErrorUsage, "No matching components for '#{component_type}'"
-        elsif components.size > 1
-          # TODO: change to return violation or tarp this to return violation
-          fail ErrorUsage, "Multiple matching components  for '#{component_type}'"
+        if components.size > 1
+          raise_violation("Multiple matching components for '#{component_type}'")
+        else
+          components.first
         end
-        components.first
+      end
+
+      def raise_violation(error_msg)
+        # TODO: change to return violation or trap this to return violation
+        fail ErrorUsage, error_msg
       end
 
     end

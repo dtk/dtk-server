@@ -549,7 +549,7 @@ module DTK; class  Assembly
 
       staged_instances = get_staged_service_instances(self)
       if opts[:recursive].nil? && is_target_service_instance?
-          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it. Please use flag '-r' to remove all." unless staged_instances.empty?
+          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it. Please use flag '-f' to remove all." unless staged_instances.empty?
       end
 
       if opts[:recursive]

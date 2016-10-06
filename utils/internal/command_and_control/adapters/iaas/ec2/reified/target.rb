@@ -19,17 +19,17 @@
 module DTK; class CommandAndControlAdapter::Ec2
   module Reified
     class Target < DTK::Service::Reified::Components
-      r8_nested_require('target', 'component')
-      r8_nested_require('target', 'violation_processor')
-      r8_nested_require('target', 'violation')
+      require_relative('target/component')
+      require_relative('target/violation_processor')
+      require_relative('target/violation')
 
       class ComponentType < Reified::ComponentType  
-        module_name = 'network_aws'
         Mapping = {
-          :iam_user       => "#{module_name}::iam_user",
-          :vpc            => "#{module_name}::vpc",
-          :vpc_subnet     => "#{module_name}::vpc_subnet",
-          :security_group => "#{module_name}::security_group"
+          :role           => 'identity_aws::role',
+          :iam_user       => 'network_aws::iam_user',
+          :vpc            => 'network_aws::vpc',
+          :vpc_subnet     => 'network_aws::vpc_subnet',
+          :security_group => 'network_aws::security_group'
         }
       end
 

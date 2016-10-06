@@ -27,41 +27,71 @@ module DTK; module CommandAndControlAdapter
 
         # Returns an array of violations; if no violations [] is returned
         def validate_and_fill_in_values!
-          ret = [] # meaning no errors
-          if !credentials?
-            ret
-          elsif Ec2.credentials_ok?(credentials_with_default_region)
-            ret
-          else
-            [Violation::InvalidCredentials.new(self, :aws_access_key_id, :aws_secret_access_key)]
+          ret = [] # meanng no errors
+          if any_asserted_credential?
+            if error_array = asserted_credentials_errors?
+              ret = error_array
+            end
+          else !credentials_through_aws_role_meta_info?
+            ret = [Violation::InvalidIAMRole.new(role_name)]
           end
+          ret
         end
-
+        
         def credentials?
           asserted_credentials? || credentials_through_aws_role_meta_info?
         end
-
+        
         def credentials(opts = {})
           credentials? || fail(Error, "Unexpected that credentials are nil")
         end
-
+        
         private
-
-        def credentials_with_default_region
-          credentials.merge(region: Ec2::DefaultRegion) 
+        
+        def role_name
+          name
         end
 
+        def type
+          :role
+        end
+
+        def any_asserted_credential?
+          !aws_access_key_id.nil? or !aws_secret_access_key.nil?
+        end
+        
         def asserted_credentials?
           aws_access_key_id     = aws_access_key_id()
           aws_secret_access_key = aws_secret_access_key()
           credentials_hash(aws_access_key_id, aws_secret_access_key) if aws_access_key_id and aws_secret_access_key
+        end
+        
+        def credentials_hash(aws_access_key_id, aws_secret_access_key)
+          {
+            aws_access_key_id: aws_access_key_id,
+            aws_secret_access_key: aws_secret_access_key
+          }
+        end
+
+        # returns nil or an array of errors
+        def asserted_credentials_errors?
+          aws_access_key_id     = aws_access_key_id()
+          aws_secret_access_key = aws_secret_access_key()
+          if aws_access_key_id and aws_secret_access_key.nil?
+            [Violation::MissingCredential.new(type, name, :aws_secret_access_key)]
+          elsif aws_access_key_id.nil? and aws_secret_access_key
+            [Violation::MissingCredential.new(type, name, :aws_access_key_id)]
+          elsif aws_access_key_id and aws_secret_access_key
+            unless Ec2.credentials_ok?(credentials_hash(aws_access_key_id, aws_secret_access_key).merge(region: Ec2::DefaultRegion))
+              [Violation::InvalidCredentials.new(self, :aws_access_key_id, :aws_secret_access_key)]
+            end
+          end
         end
 
         METADATA_URL = 'http://169.254.169.254/latest/meta-data'
         ENDPOINT_ROOT = 'iam/security-credentials'
         def credentials_through_aws_role_meta_info?
           ret = nil
-          role_name = name
           begin
             # String.new needed because of the issue in rest-client: no _dump_data is defined for class OpenSSL::X509::Store
             response = String.new(RestClient.get("#{METADATA_URL}/#{ENDPOINT_ROOT}/#{role_name}"))
@@ -76,12 +106,6 @@ module DTK; module CommandAndControlAdapter
           ret
         end
 
-        def credentials_hash(aws_access_key_id, aws_secret_access_key)
-          {
-            aws_access_key_id: aws_access_key_id,
-            aws_secret_access_key: aws_secret_access_key
-          }
-        end
 
       end
     end

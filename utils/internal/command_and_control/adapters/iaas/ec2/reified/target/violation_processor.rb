@@ -29,6 +29,8 @@ module DTK
           @reified_target = Target.new(target_service)
         end
 
+        CHECK_FIRST_CREDENTIAL_CMPS = [:role, :iam_user]
+        OTEHR_CMPS = [:vpc]
         def validate_and_fill_in_values!(params = {})
           ret = []
           any_unset_attributes = params[:any_unset_attributes]
@@ -48,11 +50,12 @@ module DTK
 
           # validate_and_fill_in_values each reified_component
           # Need to do this in following order due to using earlier in order components to fill in gaps of later ones
-          # Do this first for iam_user and stop theer since error will be invalid credentials
-
-          iam_user_viols = ndx_components[:iam_user].map { |reified_component| reified_component.validate_and_fill_in_values! }.flatten(1)
-          ret += iam_user_viols
-          return ret unless iam_user_viols.empty?
+          # Do this first for credential components and stop there since error will be invalid credentials
+          CHECK_FIRST_CREDENTIAL_CMPS.each do |cmp_type|
+            viols = ndx_components[cmp_type].map { |reified_component| reified_component.validate_and_fill_in_values! }.flatten(1)
+            ret += viols
+            return ret unless viols.empty?
+          end
           ordered_cmp_type = [:vpc]
           ordered_cmp_type.each do |cmp_type|
             ndx_components[cmp_type].each do |reified_component|

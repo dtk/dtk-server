@@ -19,8 +19,8 @@
 module DTK; module CommandAndControlAdapter
   class Ec2; class Reified::Target
     class Component
-      class IamUser < self
-        Attributes = [:aws_access_key_id, :aws_secret_access_key, :default_keypair]
+      class Role < self
+        Attributes = [:aws_access_key_id, :aws_secret_access_key]
         def initialize(reified_target, vpc_service_component)
           super(reified_target, vpc_service_component)
         end 
@@ -44,6 +44,7 @@ module DTK; module CommandAndControlAdapter
             credentials(aws_access_key_id: aws_access_key_id, aws_secret_access_key: aws_secret_access_key) 
           end
         end
+
         def credentials(opts = {})
           {
             aws_access_key_id: opts[:aws_access_key_id] || aws_access_key_id,

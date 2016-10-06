@@ -20,7 +20,10 @@ module DTK; module CommandAndControlAdapter
   class Ec2::Reified::Target
     class Component
       class Vpc < self
-        Attributes = [:vpc_id, :region, :aws_access_key_id, :aws_secret_access_key, :default_keypair, :cidr_block]
+        require_relative('vpc/credentials')
+        include Credentials::Mixin
+
+        Attributes = [:vpc_id, :region, :default_keypair, :cidr_block]
 
         def initialize(reified_target, vpc_service_component)
           super(reified_target, vpc_service_component)
@@ -60,11 +63,7 @@ module DTK; module CommandAndControlAdapter
         end
 
         def credentials_with_region
-          { 
-            aws_access_key_id: aws_access_key_id,
-            aws_secret_access_key: aws_secret_access_key,
-            region: region
-          }
+          credentials.merge(region: region)
         end
 
         def aws_conn

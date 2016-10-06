@@ -38,17 +38,17 @@ module DTK
             h.merge(cmp_type => @reified_target.get_all_components_of_type(cmp_type))
           end
           
-          missing_cmp_types = ComponentType.all.select { |cmp_type| ndx_components[cmp_type].empty? }
-          unless missing_cmp_types.empty?
-            missing_cmp_names = missing_cmp_types.map{ |cmp_type| ComponentType.name(cmp_type) }
-            return [Violation::TargetServiceCmpsMissing.new(missing_cmp_names)]
-          end        
+#          missing_cmp_types = ComponentType.all.select { |cmp_type| ndx_components[cmp_type].empty? }
+#          unless missing_cmp_types.empty?
+#            missing_cmp_names = missing_cmp_types.map{ |cmp_type| ComponentType.name(cmp_type) }
+#            return [Violation::TargetServiceCmpsMissing.new(missing_cmp_names)]
+#          end        
           
           return ret if any_unset_attributes
 
           # validate_and_fill_in_values each reified_component
-          # Need to do this in following order due to using earlier in oredr components to fil in gaps of ;ater ones
-          # Do this first for iam_user and stop theersince error will be invalid credentials
+          # Need to do this in following order due to using earlier in order components to fill in gaps of later ones
+          # Do this first for iam_user and stop theer since error will be invalid credentials
 
           iam_user_viols = ndx_components[:iam_user].map { |reified_component| reified_component.validate_and_fill_in_values! }.flatten(1)
           ret += iam_user_viols

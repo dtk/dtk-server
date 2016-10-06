@@ -18,10 +18,10 @@
 module DTK
   class Assembly::Instance
     class Violation
-      r8_nested_require('violation', 'sort_order')
+      require_relative('violation/sort_order')
       extend SortOrderClassMixin
       # above need to be before including the violation subclasses
-      r8_nested_require('violation', 'sub_classes')
+      require_relative('violation/sub_classes')
 
       def table_form(opts = {})
         type_and_description(opts)

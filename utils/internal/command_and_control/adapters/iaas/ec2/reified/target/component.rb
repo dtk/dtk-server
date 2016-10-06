@@ -19,10 +19,11 @@
 module DTK module CommandAndControlAdapter::Ec2::Reified
   class Target
     class Component < DTK::Service::Reified::Component
-      r8_nested_require('component', 'iam_user')
-      r8_nested_require('component', 'vpc')
-      r8_nested_require('component', 'vpc_subnet')
-      r8_nested_require('component', 'security_group')
+      require_relative('component/role')
+      require_relative('component/iam_user')
+      require_relative('component/vpc')
+      require_relative('component/vpc_subnet')
+      require_relative('component/security_group')
 
       include ConnectedComponentMixin
 
@@ -43,6 +44,10 @@ module DTK module CommandAndControlAdapter::Ec2::Reified
 
       def connected_component(conn_cmp_type)
         connected_component_aux(conn_cmp_type, @reified_target)
+      end
+
+      def connected_component?(conn_cmp_type)
+        get_connected_component?(conn_cmp_type, @reified_target)
       end
 
       private

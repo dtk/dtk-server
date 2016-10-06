@@ -15,12 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+require 'rest_client'
 module DTK; module CommandAndControlAdapter
   class Ec2; class Reified::Target
     class Component
       class Role < self
-        Attributes = [:aws_access_key_id, :aws_secret_access_key]
+        Attributes = [:name, :aws_access_key_id, :aws_secret_access_key]
         def initialize(reified_target, vpc_service_component)
           super(reified_target, vpc_service_component)
         end 
@@ -38,24 +38,49 @@ module DTK; module CommandAndControlAdapter
         end
 
         def credentials?
-          aws_access_key_id     = aws_access_key_id()
-          aws_secret_access_key = aws_secret_access_key()
-          if aws_access_key_id and aws_secret_access_key
-            credentials(aws_access_key_id: aws_access_key_id, aws_secret_access_key: aws_secret_access_key) 
-          end
+          asserted_credentials? || credentials_through_aws_role_meta_info?
         end
 
         def credentials(opts = {})
-          {
-            aws_access_key_id: opts[:aws_access_key_id] || aws_access_key_id,
-            aws_secret_access_key: opts[:aws_secret_access_key] || aws_secret_access_key
-          }
+          credentials? || fail(Error, "Unexpected that credentials are nil")
         end
 
         private
 
         def credentials_with_default_region
           credentials.merge(region: Ec2::DefaultRegion) 
+        end
+
+        def asserted_credentials?
+          aws_access_key_id     = aws_access_key_id()
+          aws_secret_access_key = aws_secret_access_key()
+          credentials_hash(aws_access_key_id, aws_secret_access_key) if aws_access_key_id and aws_secret_access_key
+        end
+
+        METADATA_URL = 'http://169.254.169.254/latest/meta-data'
+        ENDPOINT_ROOT = 'iam/security-credentials'
+        def credentials_through_aws_role_meta_info?
+          ret = nil
+          role_name = name
+          begin
+            # String.new needed because of the issue in rest-client: no _dump_data is defined for class OpenSSL::X509::Store
+            response = String.new(RestClient.get("#{METADATA_URL}/#{ENDPOINT_ROOT}/#{role_name}"))
+            role_details = JSON.parse(response)
+            if role_details['Code'] == 'Success'
+              ret = credentials_hash(role_details['AccessKeyId'], role_details['SecretAccessKey'])
+            end
+          rescue RestClient::ResourceNotFound
+            # This is legitimate response if role not found
+            ret = nil
+          end
+          ret
+        end
+
+        def credentials_hash(aws_access_key_id, aws_secret_access_key)
+          {
+            aws_access_key_id: aws_access_key_id,
+            aws_secret_access_key: aws_secret_access_key
+          }
         end
 
       end

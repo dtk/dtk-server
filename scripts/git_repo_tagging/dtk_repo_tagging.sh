@@ -17,6 +17,22 @@
 # limitations under the License.
 #
 
+usage_config() {
+  echo -e "Usage:\n$0 dtk_major_tag output_dir\n"
+} 
+
+if [[ $# -lt 2 ]]; then 
+  usage_config
+  exit 1
+fi 
+
+# make sure git v2.x is used
+git_version=`git --version | awk '{print $3}' | cut -d'.' -f1`
+if [[ $git_version -lt 2 ]]; then
+	echo "git 2.x is required. please upgrade."
+	exit 1
+fi
+
 ## Properties
 # Major release tag
 dtk_major_tag=$1
@@ -67,7 +83,7 @@ function set_release_yaml_file() {
 	for repo in ${dtk_repos[@]}; do
 		repo_name=`echo ${repo} | cut -d/ -f2 | sed 's/.git//'`
 		cd $repo_name
-		tag=`git tag | tail -1`
+		tag=`git tag --sort=v:refname | tail -1`
 		cd ..
 		if [[ $repo_name == "dtk-server" ]]; then
 			if [[ $dtk_major_tag == "not_set" ]]; then
@@ -92,7 +108,7 @@ function tag_code() {
 
 	if [[ $commit_message != *"ump version"* && $dtk_major_tag == "not_set" ]]; then
 		# get latest tag
-		current_tag=`git tag | tail -1`
+		current_tag=`git tag --sort=v:refname | tail -1`
 		next_tag=`increase_version_number $current_tag`
 		tag=`echo $next_tag | sed 's/v//'`
 		echo "Needed bump of version for ${dtk_repo} to version ${next_tag}..."
@@ -127,7 +143,7 @@ function tag_code() {
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-      cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+      cd ../dtk-common-core && dtk_common_core_tag=`git tag --sort=v:refname | tail -1` && cd ../$repo_name
       gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
 			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
@@ -137,7 +153,7 @@ function tag_code() {
 			cd lib/cli
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-      cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+      cd ../dtk-common-core && dtk_common_core_tag=`git tag --sort=v:refname | tail -1` && cd ../$repo_name
       gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
 			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
@@ -198,7 +214,7 @@ function tag_code() {
 			cd lib/$repo_name
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-      cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+      cd ../dtk-common-core && dtk_common_core_tag=`git tag --sort=v:refname | tail -1` && cd ../$repo_name
       gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
 			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master
@@ -208,7 +224,7 @@ function tag_code() {
 			cd lib/cli
 			sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
 			cd ../..
-      cd ../dtk-common-core && dtk_common_core_tag=`git tag | tail -1` && cd ../$repo_name
+      cd ../dtk-common-core && dtk_common_core_tag=`git tag --sort=v:refname | tail -1` && cd ../$repo_name
       gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
 			sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
 			git add .; git commit -m "bump version"; git push origin master

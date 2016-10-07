@@ -547,8 +547,9 @@ module DTK; class  Assembly
       }
       opts.merge!(skip_running_check: true)
 
+      staged_instances = get_staged_service_instances(self)
       if opts[:recursive].nil? && is_target_service_instance?
-          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it. Please use flag '-r' to remove all."
+          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it. Please use flag '-r' to remove all." unless staged_instances.empty?
       end
 
       if opts[:recursive]
@@ -913,14 +914,20 @@ module DTK; class  Assembly
     end
 
     def delete_recursive(service, parent_task, opts = {})
-      staged_instances = Assembly::Instance.get(model_handle, target_idhs: [service.get_target.id_handle])
-      staged_instances.reject!{ |si| si[:id] == service[:id] }
+      staged_instances = get_staged_service_instances(service)
 
       staged_instances.each do |staged_instance|
         instance_subtask = delete_instance_task(staged_instance, opts)
         parent_task.add_subtask(instance_subtask)
       end
     end
+    
+    def get_staged_service_instances(service)
+      staged_instances = Assembly::Instance.get(model_handle, target_idhs: [service.get_target.id_handle])
+      staged_instances.reject!{ |si| si[:id] == service[:id] }
+      staged_instances 
+    end
+     
   end
 end
 # TODO: hack to get around error in lib/model.rb:31:in `const_get

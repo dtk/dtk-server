@@ -129,6 +129,7 @@ module DTK; module ModuleCommonMixin
     end
 
     def list_remotes(_model_handle, rsa_pub_key = nil, opts = {})
+      # TODO: add :component_module and :service_module as
       Repo::Remote.new.list_module_info(module_type(), rsa_pub_key, opts.merge!(ret_versions_array: true))
     end
 

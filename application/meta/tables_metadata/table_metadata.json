@@ -282,6 +282,18 @@
       "version(s)": "versions"
     }
   },
+   "remote_module": {
+    "order": [
+      "name",
+      "last_updated",
+      "version(s)"
+    ],
+    "mapping": {
+      "name": "display_name",
+      "last_updated": "last_updated",
+      "version(s)": "versions"
+    }
+  },
   "library": {
     "order": [
       "id",

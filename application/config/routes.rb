@@ -83,6 +83,7 @@ DTK::ReactorRoute.draw do
   post 'api/v1/modules/install_component_module' => 'v1::module/install_component_module'
   post 'api/v1/modules/install_service_module'   => 'v1::module/install_service_module'
   post 'api/v1/modules/update_from_repo'         => 'v1::module/update_from_repo'
+  post 'api/v1/modules/list_remote'              => 'v1::module/list_remote'
   ########## end: Modules
 
   # TODO: DTK-2554; temp while initial testing

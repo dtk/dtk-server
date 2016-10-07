@@ -21,9 +21,9 @@ module DTK
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
     require_relative('common_module/import')
-    require_relative('common_module/module_repo_info') 
-    require_relative('common_module/update') 
-    require_relative('common_module/base_service') 
+    require_relative('common_module/module_repo_info')
+    require_relative('common_module/update')
+    require_relative('common_module/base_service')
     require_relative('common_module/base_component')
     require_relative('common_module/service_instance')
 
@@ -55,6 +55,14 @@ module DTK
       BaseService.list_assembly_templates(project)
     end
 
+
+    def self.list_remotes(project, opts = {})
+      rsa_pub_key = opts[:rsa_pub_key]
+      component_module_list = Repo::Remote.new.list_module_info(:component_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
+      service_module_list = Repo::Remote.new.list_module_info(:service_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
+      component_module_list.concat(service_module_list)
+    end
+
     def self.get_module_dependencies(project, rsa_pub_key, remote_params)
       BaseComponent.get_module_dependencies(project, rsa_pub_key, remote_params)
     end
@@ -81,8 +89,8 @@ module DTK
     #   :local_params
     #   :repo_name
     #   :service_instance
-    #   :force_pull - Boolean (default false) 
-    #   :force_parse - Boolean (default false) 
+    #   :force_pull - Boolean (default false)
+    #   :force_parse - Boolean (default false)
     def self.update_from_repo(common_module_type, project, commit_sha, opts = {})
       Update.update_class(common_module_type).update_from_repo(project, commit_sha, opts)
     end

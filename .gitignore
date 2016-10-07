@@ -17,3 +17,6 @@ application/log/
 list_of_files.txt
 .byebug_history
 .vscode
+.tags
+.remote-sync.json
+.tags1

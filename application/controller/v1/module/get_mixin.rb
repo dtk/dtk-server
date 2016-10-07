@@ -31,6 +31,11 @@ module DTK
       ### Module specific
       def remote_modules
         # TODO: stub for DTK-2694
+        opts = Opts.new(remote_repo_base: ret_remote_repo_base)
+        opts[:rsa_pub_key] = required_request_params(:rsa_pub_key)
+        datatype  = :remote_module
+        module_list = CommonModule.list_remotes(get_default_project, opts)
+        rest_ok_response filter_by_namespace(module_list), datatype: datatype
       end
 
       def exists

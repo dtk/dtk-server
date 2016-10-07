@@ -57,8 +57,6 @@ REMOTE_REPO_HOST=${REMOTE_REPO_HOST-dtknet.servicecatalog.it}
 REMOTE_REPO_REST_PORT=${REMOTE_REPO_REST_PORT-7001}
 # set mco port to default
 MCOLLECTIVE_PORT=${MCOLLECTIVE_PORT-6163}
-# install dtk-client
-INSTALL_CLIENT=${INSTALL_CLIENT-true}
 
 # set arbiter topic and queue
 ARBITER_TOPIC="/topic/arbiter.${TENANT_USER}.broadcast"
@@ -231,18 +229,6 @@ if [[ ! -L /home/${TENANT_USER}/.ssh/authorized_keys ]]; then
   # put authorized_keys on the host volume to preserve it
   su - ${TENANT_USER} -c "mv /home/${TENANT_USER}/.ssh/authorized_keys ${HOST_VOLUME}/ssh/"
   ln -s ${HOST_VOLUME}/ssh/authorized_keys /home/${TENANT_USER}/.ssh/authorized_keys
-fi
-
-if [[ "$INSTALL_CLIENT" == true ]] && [[ ! -L /home/dtk-client/dtk ]]; then
-  # install dtk-client
-  /home/${TENANT_USER}/server/current/install-client.sh -p 80 /host_volume
-  mv /home/dtk-client/dtk ${HOST_VOLUME}/client
-fi
-
-# persist client data
-if [[ -d /home/dtk-client ]]; then
-  chown dtk-client:dtk-client ${HOST_VOLUME}/client
-  ln -sfn ${HOST_VOLUME}/client /home/dtk-client/dtk
 fi
 
 # persist nginx confs

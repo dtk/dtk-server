@@ -95,11 +95,10 @@ module DTK; module CommandAndControlAdapter
             return ret
           end
           
-          # Bakir: commented out since this fails when aws credentials not specified even though role exists
-          #unless aws_conn.keypair?(default_keypair)
-          #  keypair_names = aws_conn.keypairs.map { |keypair| keypair[:name] }
-          #  ret += [Violation::InvalidKeypair.new(self, :default_keypair, default_keypair, region: region, legal_values: keypair_names)]
-          #end
+          unless aws_conn.keypair?(default_keypair)
+            keypair_names = aws_conn.keypairs.map { |keypair| keypair[:name] }
+            ret += [Violation::InvalidKeypair.new(self, :default_keypair, default_keypair, region: region, legal_values: keypair_names)]
+          end
           ret
         end
       end

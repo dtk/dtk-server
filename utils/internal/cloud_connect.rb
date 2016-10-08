@@ -30,20 +30,7 @@ module DTK
     r8_nested_require('cloud_connect', 'ec2')
     r8_nested_require('cloud_connect', 'route53')
 
-    #TODO: this should be deprecated
-    def get_compute_params(opts = {})
-      ENV['FOG_RC'] ||= R8::Config[:ec2][:fog_credentials_path]
-      ret = Fog.credentials()
-      unless opts[:just_credentials]
-        if region = R8::Config[:ec2][:region]
-          ret = ret.merge(region: region)
-        end
-      end
-      ret
-    end
-
     private
-
     def hash_form(x)
       # this is supposed to fix [#<NoMethodError: undefined method `attributes' for #<Excon::Response:0x0000000529aec8>>,
       ret = nil

@@ -18,7 +18,7 @@
 module DTK; module CommandAndControlAdapter
   class Ec2
     class CreateNode
-      r8_nested_require('create_node', 'create_options')
+      require_relative('create_node/create_options')
 
       # TODO: can remove these mixins and put directly in this file      
       #using include on class mixins because this class is instance based, not class based
@@ -42,7 +42,7 @@ module DTK; module CommandAndControlAdapter
       private :initialize
       
       def run
-        run_aux()
+        run_aux
       end
       
       private
@@ -52,7 +52,7 @@ module DTK; module CommandAndControlAdapter
         begin
           create_options = CreateOptions.new(self)
           Log.info_pp(create_options: Aux.hash_subset(create_options, AttributesForLogInfo))
-          response = @reified_node.aws_conn.server_create(create_options)
+          response = aws_conn.server_create(create_options)
           response[:status] ||= 'succeeded'
         rescue => e
           # append region to error message
@@ -70,7 +70,7 @@ module DTK; module CommandAndControlAdapter
       def self.create_node_object_per_node(task_action)
         nodes = task_action.nodes(cols: NodeCols)
         reified_target = Reified::Target.new(task_action.target_service)
-        base_node = task_action.base_node()
+        base_node = task_action.base_node
         nodes.map { |node| new(base_node, node, reified_target) }
       end
       
@@ -101,9 +101,9 @@ module DTK; module CommandAndControlAdapter
         end
         
         if create_node
-          generate_client_token?()
+          generate_client_token?
           
-          response = create_ec2_instance()
+          response = create_ec2_instance
           if response[:status] == 'failed'
             return response
           end
@@ -127,7 +127,7 @@ module DTK; module CommandAndControlAdapter
       def generate_client_token?
         unless @external_ref[:client_token]
           # generate client token
-          client_token = @external_ref[:client_token] = Ec2::ClientToken.generate()
+          client_token = @external_ref[:client_token] = Ec2::ClientToken.generate
           Log.info("Generated client token '#{client_token}' for node '#{node_print_form}'")
           updated_external_ref = @external_ref.merge(client_token: client_token)
           update_node!(external_ref: updated_external_ref)
@@ -143,18 +143,23 @@ module DTK; module CommandAndControlAdapter
         @node.merge!(node_update_hash)
       end
       
-      # TODO: DTK-2489: convert below to use reified node
       def get_node_status(instance_id)
         ret = nil
         begin
-          target_aws_creds = Ec2.get_target_credentials(node)
-          response = Ec2.conn(target_aws_creds).get_instance_status(instance_id)
+          response = aws_conn.get_instance_status(instance_id)
           ret = response[:status] && response[:status].to_sym
         rescue => e
           Log.error_pp([e, e.backtrace[0..10]])
         end
         ret
-        end
+      end
+
+      private
+
+      # This returns a CloudConnect::EC2 object
+      def aws_conn
+        @reified_node.aws_conn
+      end
 
       def node_print_form
         Ec2.node_print_form(node)

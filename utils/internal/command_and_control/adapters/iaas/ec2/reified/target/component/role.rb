@@ -42,8 +42,8 @@ module DTK; module CommandAndControlAdapter
           asserted_credentials? || credentials_through_aws_role_meta_info?
         end
         
-        def credentials(opts = {})
-          credentials? || fail(Error, "Unexpected that credentials are nil")
+        def credentials(_opts = {})
+          @credentials ||= credentials? || fail(Error, "Unexpected that credentials are nil")
         end
         
         private
@@ -97,7 +97,7 @@ module DTK; module CommandAndControlAdapter
             response = String.new(RestClient.get("#{METADATA_URL}/#{ENDPOINT_ROOT}/#{role_name}"))
             role_details = JSON.parse(response)
             if role_details['Code'] == 'Success'
-              ret = credentials_hash(role_details['AccessKeyId'], role_details['SecretAccessKey'])
+              ret = { use_iam_profile: true }
             end
           rescue RestClient::ResourceNotFound
             # This is legitimate response if role not found

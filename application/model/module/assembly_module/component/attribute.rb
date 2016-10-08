@@ -42,7 +42,7 @@ module DTK; class AssemblyModule
         cmp_template = ndx_aug_cmp_templates.values.first[:component_template]
 
         component_module = cmp_template.get_component_module()
-        module_branch = create_assembly_branch?(component_module, ret_module_branch: true)
+        module_branch = create_module_for_service_instance?(component_module, ret_module_branch: true)
         branch_cmp_template = get_branch_template(module_branch, cmp_template)
         cmp_level_attr_pattern.create_attribute_on_template(branch_cmp_template, update_dsl: { module_branch: module_branch })
       end

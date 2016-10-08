@@ -19,16 +19,26 @@ module DTK
   module CommonDSL::Generate
     class DirectoryGenerator
       class Git < self
-        def initialize(file_type, module_branch)
-          @file_type     = file_type
+        def initialize(module_branch)
           @module_branch = module_branch
         end
-        def add_file?(file_content, opts = {})
-          if any_changes = RepoManager.add_file(@file_type.canonical_path, file_content, opts[:commit_msg], @module_branch)
-            unless opts[:donot_push_changes]
-              RepoManager.push_changes(@module_branch)
-            end
+
+        def add_file?(file_path, file_content, opts = {})
+          if any_changes = RepoManager.add_file(file_path, file_content, opts[:commit_msg], @module_branch)
+            RepoManager.push_changes(@module_branch) unless opts[:donot_push_changes]
           end
+          any_changes
+        end
+
+        def add_files(file_path__content_array, opts = {})
+          if any_changes = RepoManager.add_files(@module_branch, file_path__content_array, opts)
+            RepoManager.push_changes(@module_branch) unless opts[:donot_push_changes]
+          end
+          any_changes
+        end
+
+        def add_remote_files(add_remote_files_info)
+          RepoManager.add_remote_files(add_remote_files_info, @module_branch)
         end
 
       end

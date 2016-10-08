@@ -18,22 +18,34 @@
 # TODO: replace as many git checkout calls with either qualified calls raw object model ops taht work in both clone and bare repos
 require 'grit'
 require 'fileutils'
-require_relative('git/manage_git_server')
+::Grit.debug = R8::Config[:grit][:debug]
+::Grit::Git.git_timeout = R8::Config[:grit][:git_timeout]
+::Grit::Git.git_max_size = R8::Config[:grit][:git_max_size]
 
-Grit.debug = R8::Config[:grit][:debug]
-Grit::Git.git_timeout = R8::Config[:grit][:git_timeout]
-Grit::Git.git_max_size = R8::Config[:grit][:git_max_size]
+module DTK; class RepoManager
+  class Git < self
+    require_relative('git/linux')
+    require_relative('git/git_command')
+    require_relative('git/manage_git_server')
 
-module DTK
-  class RepoManagerGit < RepoManager
-    extend RepoGitManageClassMixin
+    extend ManageGitServer::ClassMixin
+
+    attr_reader :path
+    def initialize(path, branch, opts = {})
+      @branch = branch
+      @path = path
+      unless opts[:repo_does_not_exist]
+        @grit_repo = ::Grit::Repo.new(path)
+      end
+    end
+    private :initialize
 
     # opts can have keys:
     #  :delete_if_exists - Boolean (default: false)
     #  :push_created_branch  - Boolean (default: false)
     #  :donot_create_master_branch - Boolean (default: false)
     #  :create_branch  - branch to create (f non nil)
-    #  :copy_files - Hash with key: source_directory
+    #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     def self.create_repo_clone(repo_obj, opts)
       local_repo_dir = repo_obj[:local_dir]
       repo_name = repo_obj[:repo_name]
@@ -48,7 +60,7 @@ module DTK
       local_repo.create_local_repo(repo_name, opts)
       if create_branch = opts[:create_branch]
         opts_add_branch = { empty: true }
-        opts_add_branch.merge!(Aux.hash_subset(opts, [:copy_files]))
+        opts_add_branch.merge!(Aux.hash_subset(opts, [:add_remote_files_info]))
         if opts[:push_created_branch]
           local_repo.add_branch_and_push?(create_branch, opts_add_branch)
         else
@@ -60,10 +72,10 @@ module DTK
     # for binding to existing local repo
     def self.create(path, branch, opts = {})
       full_path = repo_full_path(path, opts)
-      if Aux.platform_is_linux?()
-        RepomanagerGitLinux.new(full_path, branch, opts)
+      if Aux.platform_is_linux?
+        Linux.new(full_path, branch, opts)
       else
-        fail Error.new("platform #{Aux.platform} not treated")
+        fail Error, "platform #{Aux.platform} not treated"
       end
     end
     def self.create_without_branch(path, opts = {})
@@ -90,7 +102,7 @@ module DTK
       unless R8::Config[:git_server_on_dtk_server]
         fail Error.new('Not implemented yet: repo_server_fingerprint when R8::Config[:git_server_on_dtk_server] is not true')
       end
-      @ssh_rsa_fingerprint ||= get_tenant_rsa_key()
+      @ssh_rsa_fingerprint ||= get_tenant_rsa_key
       @ssh_rsa_fingerprint
     end
 
@@ -99,7 +111,7 @@ module DTK
       result = nil
       begin
         number_of_retries ||= 3
-        result = `ssh-keyscan -H -p #{git_port} #{repo_server_dns()}`
+        result = `ssh-keyscan -H -p #{git_port} #{repo_server_dns}`
         raise Exception, "Try again ssh keyscan" if result.empty?
       rescue Exception
         unless (number_of_retries -= 1).zero?
@@ -115,13 +127,13 @@ module DTK
     # Returns boolean indicating if remote git url exists
     #
     def self.git_remote_exists?(remote_url)
-      git_object = Grit::Git.new('')
+      git_object = ::Grit::Git.new('')
 
       !git_object.native('ls-remote', {}, remote_url).empty?
     end
 
     def self.repo_url(repo_name = nil)
-      @git_url ||= "ssh://#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns()}:#{R8::Config[:repo][:git][:port]}"
+      @git_url ||= "ssh://#{R8::Config[:repo][:git][:server_username]}@#{repo_server_dns}:#{R8::Config[:repo][:git][:port]}"
       if repo_name
         "#{@git_url}/#{repo_name}"
       else
@@ -130,18 +142,18 @@ module DTK
     end
 
     def repo_url
-      @git_url ||= self.class.repo_url()
+      @git_url ||= self.class.repo_url
     end
 
     # opts can have keys:
     #  :donot_create_master_branch - Boolean (default: false)
     def create_local_repo(repo_name, opts = {})
-      remote_repo = "#{repo_url()}/#{repo_name}"
+      remote_repo = "#{repo_url}/#{repo_name}"
 
       git_command__clone(remote_repo, @path)
-      @grit_repo = Grit::Repo.new(@path)
+      @grit_repo = ::Grit::Repo.new(@path)
       unless opts[:donot_create_master_branch]
-        git_command__empty_commit()
+        git_command__empty_commit
       end
     end
 
@@ -208,7 +220,10 @@ module DTK
     end
 
     # returns a Boolean: true if any change made
-    def add_files(file_path__content_array, commit_msg = nil)
+    # opts can have keys:
+    #  :commit_msg
+    #  :no_commit
+    def add_files(file_path__content_array, opts = {})
       ret = false
       added_file_paths = []
       file_path__content_array.each do |el|
@@ -218,7 +233,7 @@ module DTK
           ret = true
         end
       end
-      if ret
+      if ret and ! opts[:no_commit]
         commit_msg ||= "Adding files: #{added_file_paths.join(', ')}"
         checkout(@branch) { commit(commit_msg) }
       end
@@ -226,6 +241,8 @@ module DTK
     end
 
     # returns a Boolean: true if any change made
+    # opts can have keys:
+    #   :no_commit - Boolean
     def add_file(file_asset, content, commit_msg = nil, opts = {})
       ret = false
       path = file_asset[:path]
@@ -236,7 +253,7 @@ module DTK
         File.open(path, 'w') { |f| f << content }
         git_command__add(path)
         # diff(nil) looks at diffs with respect to the working dir
-        unless diff(nil).ret_summary().no_diffs?()
+        unless diff(nil).ret_summary.no_diffs?
           commit(commit_msg) unless opts[:no_commit]
           ret = true
         end
@@ -246,7 +263,7 @@ module DTK
 
     def file_changed_since_specified_sha(initial_service_module_sha, path)
       diffs = diff(initial_service_module_sha)
-      diffs_summary = diffs.ret_summary()
+      diffs_summary = diffs.ret_summary
       diffs_summary.file_changed?(path)
     end
 
@@ -294,7 +311,7 @@ module DTK
       end
       commit(message)
       if opts[:push_changes]
-        push_changes()
+        push_changes
       end
     end
     private :delete_tree__body
@@ -342,7 +359,7 @@ module DTK
 
     # returns :no_change, :changed, :merge_needed
     def fast_foward_pull(remote_branch, force = false, remote_name = nil)
-      remote_name ||= default_remote_name()
+      remote_name ||= default_remote_name
       remote_ref = "#{remote_name}/#{remote_branch}"
       merge_rel = ret_merge_relationship(:remote_branch, remote_ref, fetch_if_needed: true)
       ret =
@@ -355,7 +372,7 @@ module DTK
 
       if force
         checkout(@branch) do
-          git_command__fetch_all()
+          git_command__fetch_all
           git_command__hard_reset(remote_ref)
         end
         ret = :changed
@@ -382,7 +399,7 @@ module DTK
       return ret unless ret == :changed
       checkout(@branch) do
         git_command__merge(branch_to_merge_from) #TODO: should put in semantic commit message
-        push_changes()
+        push_changes
       end
       ret
     end
@@ -399,7 +416,7 @@ module DTK
       add_remote?(remote_name, remote_url)
 
       # initial branch from which we create new empty branch; first one is master but next one is version branch
-      init_branch = current_branch()
+      init_branch = current_branch
 
       # create branch with history from remote and not merge
       git_command__create_empty_branch(@branch) #, use_branch_name: true)
@@ -414,7 +431,7 @@ module DTK
       pull_changes(remote_name, remote_branch, force)
 
       # push to local
-      push_changes()
+      push_changes
     end
 
     def pull_from_remote_repo(remote_name, remote_url, remote_branch)
@@ -452,7 +469,7 @@ module DTK
     end
 
     def remote_exists?(remote_name)
-      ret_config_keys().include?("remote.#{remote_name}.url")
+      ret_config_keys.include?("remote.#{remote_name}.url")
     end
 
     def branch_head_sha
@@ -562,7 +579,7 @@ module DTK
     end
 
     def fetch_all
-      git_command__fetch_all()
+      git_command__fetch_all
     end
 
     def push_implementation
@@ -590,19 +607,19 @@ module DTK
     # opts can have keys:
     #  :empty - Booelan (default: false)
     #  :sha
+    #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     def add_branch?(new_branch, opts = {})
-      unless get_branches().include?(new_branch)
-        # if :copy_files; do it here and not in add_branch
-        add_branch(new_branch, opts.merge(copy_files: nil))
+      unless get_branches.include?(new_branch)
+        # if :add_remote_files_info; do it here and not in add_branch
+        add_branch(new_branch, opts.merge(add_remote_files_info: nil))
       end
-      if copy_files_info = opts[:copy_files]
-        copy_and_add_all_files(new_branch, copy_files_info)
-      end
+      add_remote_files?(new_branch, opts[:add_remote_files_info])
     end
 
     # opts can have keys:
     #  :empty - Booelan (default: false)
     #  :sha
+    #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     def add_branch(new_branch, opts = {})
       if opts[:empty]
         git_command__create_empty_branch(new_branch)
@@ -612,26 +629,31 @@ module DTK
           git_command__add_branch(new_branch)
         end
       end
-      if copy_files_info = opts[:copy_files]
-        copy_and_add_all_files(new_branch, copy_files_info)
-      end
+      add_remote_files?(new_branch, opts[:add_remote_files_info])
     end
 
-    def copy_and_add_all_files(branch, copy_files_info)
-      source_dir = copy_files_info[:source_directory]
-      FileUtils.cp_r("#{source_dir}/.", @path)
-      Log.info("Copied files from temp Puppet Forge directory #{source_dir} to #{@path}")
-      add_all_files(branch)
+    def add_remote_files(add_remote_files_info)
+      add_remote_files?(@branch, add_remote_files_info)
     end
-    private :copy_and_add_all_files
+
+    # If add_remote_files_info is not nil then it is a subclass of DTK::RepoManager::AddRemoteFilesInfo
+    # and we use that to add remote files to the repo branch
+    def add_remote_files?(branch, add_remote_files_info)
+      return if add_remote_files_info.nil?
+      checkout(branch) do 
+        add_remote_files_info.add_files(git_repo_manager: self, branch: branch)
+      end
+      add_all_files(branch) if add_remote_files_info.git_add_needed?
+    end
+    private :add_remote_files?
 
     # deletes both local and remote branch
     def delete_branch(remote_name = nil)
-      if @branch != current_branch()
+      if @branch != current_branch
         delete_branch_aux(remote_name)
       else
         # need to checkout to some other branch since on branch taht is being deleted
-        unless other_branch = get_branches().find { |br| br != @branch }
+        unless other_branch = get_branches.find { |br| br != @branch }
           fail Error.new("Cannot delete the last remanining branch (#{@branch})")
         end
         checkout(other_branch) do
@@ -656,7 +678,7 @@ module DTK
 
     def self.get_branches(repo)     #TODO: deprecate
       path = "#{R8::Config[:repo][:base_directory]}/#{repo}"
-      Grit::Repo.new(path).branches.map(&:name)
+      ::Grit::Repo.new(path).branches.map(&:name)
     end
 
     def ret_config_keys
@@ -674,14 +696,6 @@ module DTK
     private
 
     attr_reader :grit_repo
-
-    def initialize(path, branch, opts = {})
-      @branch = branch
-      @path = path
-      unless opts[:repo_does_not_exist]
-        @grit_repo = Grit::Repo.new(path)
-      end
-    end
 
     def current_branch
       @grit_repo.head && @grit_repo.head.name
@@ -716,7 +730,7 @@ module DTK
       ret = nil
       mutex.synchronize do
         Dir.chdir(@path) do
-          current_head = current_branch()
+          current_head = current_branch
           git_command__checkout(branch_name) unless current_head == branch_name
           return ret unless block
           ret = yield
@@ -734,8 +748,8 @@ module DTK
 
     def commit(message, *array_opts)
       Dir.chdir(@path) do
-        set_author?()
-        git_command.commit(cmd_opts(), '-m', message, *array_opts)
+        set_author?
+        git_command.commit(cmd_opts, '-m', message, *array_opts)
       end
     end
 
@@ -746,18 +760,18 @@ module DTK
     # sets author if not set already for repo
     def set_author?(name = nil, email = nil)
       return if @author_set
-      name ||= default_author_name()
-      email ||= default_author_email()
+      name ||= default_author_name
+      email ||= default_author_email
       set_config_key_value('user.name', name)
       set_config_key_value('user.email', email)
     end
 
     def default_author_name
-      @default_author_name ||= Common::Aux.running_process_user()
+      @default_author_name ||= Common::Aux.running_process_user
     end
 
     def default_author_email
-      "#{default_author_name()}@reactor8.com"
+      "#{default_author_name}@reactor8.com"
     end
 
     def branch_exists?(branch_name)
@@ -765,16 +779,16 @@ module DTK
     end
 
     def remote_branch_exists?(branch_name, remote_name = nil)
-      remote_name ||= default_remote_name()
+      remote_name ||= default_remote_name
       qualified_branch_name = "#{remote_name}/#{branch_name}"
       ref_matching_branch_name?(:remote, qualified_branch_name) ? true : nil
     end
 
     def git_command
       # TODO: not sure why this does not work:
-      # GitCommand.new(@grit_repo ? @grit_repo.git : Grit::Git.new(""))
+      # GitCommand.new(@grit_repo ? @grit_repo.git : ::Grit::Git.new(""))
       # only thing losing with below is visbility into failure on clone commands (where @grit_repo.nil? is true)
-      @grit_repo ? GitCommand.new(@grit_repo.git) : Grit::Git.new('')
+      @grit_repo ? GitCommand.new(@grit_repo.git) : ::Grit::Git.new('')
     end
 
     def recursive_create_dir?(path)
@@ -784,184 +798,10 @@ module DTK
       end
     end
 
-    class GitCommand
-      def initialize(grit_git)
-        @grit_git = grit_git
-      end
-
-      def method_missing(name, *args, &block)
-        @grit_git.send(name, *args, &block)
-      rescue ::Grit::Git::CommandFailed => e
-        # e.err empty is being interpretad as no error
-        if e.err.nil? || e.err.empty?
-          Log.info("Grit non zero exit status #{e.exitstatus} but grit err field is empty for command='#{e.command}'")
-        else
-          # write more info to server log, but to client return user friendly message
-          Log.info("Grit error: #{e.err} exitstatus=#{e.exitstatus}; command='#{e.command}'")
-          error_msg = "Grit error: #{e.err.strip()}"
-          raise ErrorUsage.new(error_msg)
-        end
-       rescue => e
-        raise e
-      end
-
-      def respond_to?(name)
-        !!(@grit_git.respond_to?(name) || super)
-      end
-    end
-
     def full_path(relative_path)
       "#{@path}/#{relative_path}"
     end
   end
 
-  class RepomanagerGitLinux < RepoManagerGit
-    private
 
-    def git_command__clone(remote_repo, local_dir)
-      git_command.clone(cmd_opts(), remote_repo, local_dir)
-    end
-
-    def git_command__checkout(branch_name)
-      git_command.checkout(cmd_opts(), branch_name)
-    end
-
-    def git_command__add_branch(branch_name)
-      git_command.branch(cmd_opts(), branch_name)
-    end
-
-    def git_command__create_empty_branch(branch_name, opts = {})
-      name = opts[:use_branch_name] ? "#{branch_name}" : 'HEAD'
-      git_command.symbolic_ref(cmd_opts(), name, "refs/heads/#{branch_name}")
-    end
-
-    def git_command__add(file_path)
-      # put in -f to avoid error being thrown if try to add an ignored file
-      git_command.add(cmd_opts(), file_path, '-f')
-      # took out because could not pass in time out @grit_repo.add(file_path)
-    end
-
-    def git_command__rm(file_path)
-      # git_command.rm uses form /usr/bin/git --git-dir=.. rm <file>; which does not delete the working directory file, so
-      # need to use os comamdn to dleet file and just delete the file from the index
-      git_command.rm(cmd_opts(), '--cached', file_path)
-      FileUtils.rm_f full_path(file_path)
-    end
-
-    def git_command__rm_r(dir)
-      git_command.rm(cmd_opts(), '-r', '--cached', dir)
-      FileUtils.rm_rf full_path(dir)
-    end
-
-    def git_command__mv(source, destination, files, folders)
-      require 'fileutils'
-      FileUtils.mkdir_p(destination)
-
-      files.each do |file|
-        git_command.mv(cmd_opts(), '--force', "#{source}/#{file}", "#{destination}/#{file}")
-      end
-
-      folders.each do |folder|
-        git_command.mv(cmd_opts(), '--force', "#{source}/#{folder}", "#{destination}/")
-        FileUtils.rmdir("#{source}/#{folder}")
-      end
-    end
-
-    def git_command__mv_file(source_name, destination_name)
-      git_command.mv(cmd_opts(), '--force', "#{source_name}", "#{destination_name}")
-    end
-
-    def git_command__remote_add(remote_name, remote_url)
-      git_command.remote(cmd_opts(), :add, remote_name, remote_url)
-    end
-
-    def git_command__remote_rm(remote_name)
-      git_command.remote(cmd_opts(), :rm, remote_name)
-    end
-
-    def git_command__fetch(remote_name)
-      git_command.fetch(cmd_opts(), remote_name)
-    end
-
-    def git_command__fetch_all
-      git_command.fetch(cmd_opts(), '--all')
-    end
-
-    # TODO: see what other commands needs mutex and whether mutex across what boundaries
-    Git_command__push_mutex = Mutex.new
-    # returns sha of remote haed
-    def git_command__push(branch_name, remote_name = nil, remote_branch = nil, opts = {})
-      ret = nil
-      Git_command__push_mutex.synchronize do
-        remote_name ||= default_remote_name()
-        remote_branch ||= branch_name
-        args = [cmd_opts(), remote_name, "#{branch_name}:refs/heads/#{remote_branch}"]
-        args << '-f' if opts[:force]
-        git_command.push(*args)
-        remote_name = "#{remote_name}/#{remote_branch}"
-        ret = sha_matching_branch_name(:remote, remote_name)
-      end
-      ret
-    end
-
-    def git_command__rev_list_contains?(container_sha, index_sha)
-      rev_list = git_command.rev_list(cmd_opts(), container_sha)
-      !rev_list.split("\n").grep(index_sha).empty?
-    end
-
-    def git_command__pull(local_branch, remote_branch, remote_name = nil, force = false)
-      remote_name ||= default_remote_name()
-      args = [cmd_opts(), remote_name, "#{remote_branch}:#{local_branch}"]
-      args << '-f' if force
-      git_command.pull(*args)
-    end
-
-    # MOD_RESTRUCT-NEW deprecate below
-    def git_command__pull__checkout_form(branch_name, remote_name = nil)
-      remote_name ||= default_remote_name()
-      git_command.pull(cmd_opts(), remote_name, branch_name)
-    end
-
-    def git_command__rebase(branch_name, remote_name = nil)
-      remote_name ||= default_remote_name()
-      git_command.rebase(cmd_opts(), "#{remote_name}/#{branch_name}")
-    end
-
-    def git_command__merge(branch_to_merge_from)
-      git_command.merge(cmd_opts(), branch_to_merge_from)
-    end
-
-    def git_command__hard_reset(branch_to_reset_from)
-      git_command.reset(cmd_opts(), '--hard', branch_to_reset_from)
-    end
-
-    def git_command__create_local_branch(branch_name)
-      git_command.branch(cmd_opts(), branch_name)
-    end
-
-    def git_command__delete_local_branch?(branch_name)
-      if get_branches().include?(branch_name)
-        git_command__delete_local_branch(branch_name)
-      end
-    end
-
-    def git_command__delete_local_branch(branch_name)
-      git_command.branch(cmd_opts(), '-D', branch_name)
-    end
-
-    def git_command__delete_remote_branch?(branch_name, remote_name = nil)
-      if remote_branch_exists?(branch_name, remote_name)
-        git_command__delete_remote_branch(branch_name, remote_name)
-      end
-    end
-
-    def git_command__delete_remote_branch(branch_name, remote_name)
-      remote_name ||= default_remote_name()
-      git_command.push(cmd_opts(), remote_name, ":refs/heads/#{branch_name}")
-    end
-
-    def cmd_opts
-      { raise: true, timeout: 60 }
-    end
-  end
-end
+end; end

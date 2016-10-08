@@ -15,13 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require 'fileutils'
-
 module DTK
   class RepoManager
+    require_relative('repo_manager/add_remote_files_info')
+
     class << self
       # admin and repo methods that just pass to lower level object or class
-      RepoMethods = [:move_file, :file_changed_since_specified_sha, :add_all_files, :push_changes, :push_implementation, :add_branch, :add_branch?, :add_branch_and_push?, :merge_from_branch, :delete_branch, :add_remote, :pull_changes, :diff, :ls_r, :fast_foward_merge_from_branch, :hard_reset_to_branch, :fetch_all, :rebase_from_remote, :diff, :fast_foward_pull, :delete_file?, :delete_directory?, :branch_head_sha, :move_content, :file_exists?]
+      RepoMethods = [:move_file, :file_changed_since_specified_sha, :add_all_files, :add_remote_files, :push_changes, :push_implementation, :add_branch, :add_branch?, :add_branch_and_push?, :merge_from_branch, :delete_branch, :add_remote, :pull_changes, :diff, :ls_r, :fast_foward_merge_from_branch, :hard_reset_to_branch, :fetch_all, :rebase_from_remote, :diff, :fast_foward_pull, :delete_file?, :delete_directory?, :branch_head_sha, :move_content, :file_exists?]
       AdminMethods = [:list_repos, :repo_url, :repo_server_dns, :repo_server_ssh_rsa_fingerprint, :repo_name, :set_user_rights_in_repos, :remove_user_rights_in_repos, :add_user, :delete_user, :get_keydir]
 
       def method_missing(name, *args, &block)
@@ -45,7 +45,7 @@ module DTK
       end
 
       def files(context)
-        get_adapter_repo(context).ls_r()
+        get_adapter_repo(context).ls_r
       end
 
       # signature is
@@ -78,7 +78,7 @@ module DTK
       end
 
       def class_if_admin_method?(name)
-        load_and_return_adapter_class() if AdminMethods.include?(name)
+        load_and_return_adapter_class if AdminMethods.include?(name)
       end
     end
 
@@ -88,7 +88,7 @@ module DTK
       delete_branches(*repo_names)
     end
     def self.delete_branches(*repo_names)
-      klass = load_and_return_adapter_class()
+      klass = load_and_return_adapter_class
       repo_names.each do |repo_name|
         # TODO: change so this from Repo if want to put in hooks for per branch auth
         klass.get_branches(repo_name).each do |branch|
@@ -100,7 +100,7 @@ module DTK
               branch: branch
             }
           }
-          get_adapter_repo(context).delete_branch()
+          get_adapter_repo(context).delete_branch
         end
       end
     end
@@ -160,7 +160,7 @@ module DTK
       end
 
       def git_remote_exists?(remote_url)
-        klass = load_and_return_adapter_class()
+        klass = load_and_return_adapter_class
         klass.git_remote_exists?(remote_url)
       end
 
@@ -199,9 +199,9 @@ module DTK
     #  :push_created_branch  - Boolean (default: false)
     #  :donot_create_master_branch - Boolean (default: false)
     #  :create_branch  - branch to create (f non nil)
-    #  :copy_files - Hash with key: source_directory
+    #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     def self.create_workspace_repo(repo_obj, repo_user_acls, opts)
-      klass = load_and_return_adapter_class()
+      klass = load_and_return_adapter_class
       # create repo on repo server
       klass.create_server_repo(repo_obj, repo_user_acls, opts)
       if R8::Config[:repo][:workspace][:use_local_clones]
@@ -214,14 +214,14 @@ module DTK
     end
 
     def self.delete_all_repos
-      klass = load_and_return_adapter_class()
+      klass = load_and_return_adapter_class
       # delete all repos on repo server
-      klass.delete_all_server_repos()
-      delete_all_local_repos()
+      klass.delete_all_server_repos
+      delete_all_local_repos
     end
 
     def self.delete_repo(repo)
-      klass = load_and_return_adapter_class()
+      klass = load_and_return_adapter_class
       repo.update_object!(:repo_name, :local_dir)
       klass.delete_server_repo(repo[:repo_name])
       delete_local_repo(repo[:local_dir])
@@ -247,13 +247,12 @@ module DTK
     def self.get_adapter_repo(context)
       repo_dir, branch = ret_repo_dir_and_branch(context)
       fail Error.new('cannot find branch in context') unless branch
-      CachedRepoObjects[repo_dir] ||= {}
-      CachedRepoObjects[repo_dir][branch] ||= load_and_create(repo_dir, branch)
+      (CachedRepoObjects[repo_dir] ||= {})[branch] ||= load_and_create(repo_dir, branch)
     end
 
     def self.repo_full_path_and_branch(context)
       repo_rel_path, branch = ret_repo_dir_and_branch(context)
-      adapter_class = load_and_return_adapter_class()
+      adapter_class = load_and_return_adapter_class
       [adapter_class.repo_full_path(repo_rel_path), branch]
     end
 
@@ -264,7 +263,7 @@ module DTK
       repo_dir = branch = nil
 
       if context.is_a?(ModuleBranch)
-        repo_dir, branch = context.repo_and_branch()
+        repo_dir, branch = context.repo_and_branch
       elsif context.is_a?(Repo)
         context.update_object!(:repo_name)
         repo_dir = context[:repo_name]
@@ -290,24 +289,17 @@ module DTK
       return @cached_adapter_class if @cached_adapter_class
       adapter_name = (R8::Config[:repo] || {})[:type]
       fail Error.new('No repo adapter specified') unless adapter_name
-      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class('repo_manager', adapter_name)
+      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class('repo_manager', adapter_name, subclass_adapter_name: true)
     end
 
     def self.load_and_create(repo_dir, branch)
-      klass = load_and_return_adapter_class()
+      klass = load_and_return_adapter_class
       klass.create(repo_dir, branch)
     end
 
     def self.get_all_repo_names(model_handle)
       Repo.get_all_repo_names(model_handle)
     end
-  end
 
-  class RemoteRepoManager < RepoManager
-    def self.load_and_return_adapter_class
-      return @cached_adapter_class if @cached_adapter_class
-      adapter_name = 'remote_repo'
-      @cached_adapter_class = DynamicLoader.load_and_return_adapter_class('repo_manager', adapter_name)
-    end
   end
 end

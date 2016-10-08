@@ -27,7 +27,7 @@ module DTK; class AssemblyModule
       new(assembly).prepare_for_edit(component_module)
     end
     def prepare_for_edit(component_module)
-      create_assembly_branch?(component_module)
+      create_module_for_service_instance?(component_module)
     end
 
     def self.finalize_edit(assembly, component_module, module_branch)
@@ -98,10 +98,10 @@ module DTK; class AssemblyModule
 
     private
 
-    def create_assembly_branch?(component_module, opts = {})
+    def create_module_for_service_instance?(component_module, opts = {})
       am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)
-        create_assembly_branch(component_module, am_version)
+        create_module_for_service_instance(component_module, am_version)
       end
       ret = component_module.get_workspace_branch_info(am_version)
       if opts[:ret_module_branch]
@@ -111,7 +111,7 @@ module DTK; class AssemblyModule
       end
     end
 
-    def create_assembly_branch(component_module, am_version)
+    def create_module_for_service_instance(component_module, am_version)
       base_version = component_module.get_field?(:version) #TODO: is this right; shouldnt version be on branch, not module
       component_module.create_new_version(base_version, am_version)
     end

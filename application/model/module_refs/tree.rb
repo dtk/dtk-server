@@ -39,7 +39,7 @@ module DTK
       #   :components - a set of component instances to contrain what is returned
       #   :version
       def self.create(assembly_instance, opts = {})
-        module_branch = AssemblyModule::Service.get_assembly_or_base_branch(assembly_instance, opts)
+        module_branch = AssemblyModule::Service.get_service_instance_or_base_branch(assembly_instance, opts)
         components = opts[:components] || assembly_instance.get_component_instances
         create_module_refs_starting_from_assembly(assembly_instance, module_branch, components)
       end

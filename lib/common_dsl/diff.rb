@@ -52,7 +52,7 @@ module DTK
         end
 
         service_instance_parse = dsl_file_obj.parse_content(:service_instance)
-        service_instance_gen   = Generate.generate_service_instance_canonical_form(service_instance, module_branch)
+        service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
 
         # compute base diffs
         base_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen)
@@ -130,7 +130,7 @@ module DTK
               # If error,  RepoUpdate.Transaction wil throw error
               RepoUpdate.Transaction module_branch do
                 # update dtk.service.yaml with data from object model
-                Generate.generate_service_instance_dsl(opts[:service_instance], module_branch)
+                Generate::ServiceInstance.generate_dsl(opts[:service_instance], module_branch)
                 diff_result.repo_updated = true # means repo updated by server
               end
             end

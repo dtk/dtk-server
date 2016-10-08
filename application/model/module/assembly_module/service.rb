@@ -17,33 +17,32 @@
 #
 module DTK; class AssemblyModule
   class Service < self
-    r8_nested_require('service', 'workflow')
+    require_relative('service/workflow')
 
     def initialize(assembly, opts = {})
       super(assembly)
       @assembly_template_name = assembly_template_name?(assembly)
       @service_module = opts[:service_module] || get_service_module(assembly)
-      @am_version = assembly_module_version(assembly)
       # dynamically computed
       @module_branches = nil
     end
     private :initialize
 
-    def self.get_assembly_branch(assembly)
-      new(assembly).get_assembly_branch
+    def self.get_service_instance_branch(assembly)
+      new(assembly).get_service_instance_branch
     end
 
-    def get_assembly_branch
-      module_branches.find { |mb| mb.matches_version?(@am_version) }
+    def get_service_instance_branch
+      module_branches.find { |mb| mb.matches_version?(assembly_module_version) }
     end
 
     # opts can have keys:
     #   :version - version of base branch otherwise base is base_version
-    def self.get_assembly_or_base_branch(assembly, opts = {})
-      new(assembly).get_assembly_or_base_branch(opts)
+    def self.get_service_instance_or_base_branch(assembly, opts = {})
+      new(assembly).get_service_instance_or_base_branch(opts)
     end
-    def get_assembly_or_base_branch(opts = {})
-      if ret = get_assembly_branch
+    def get_service_instance_or_base_branch(opts = {})
+      if ret = get_service_instance_branch
         return ret
       end
 
@@ -57,11 +56,11 @@ module DTK; class AssemblyModule
       end
     end
 
-    def self.get_or_create_assembly_branch(assembly)
-       new(assembly).get_or_create_assembly_branch()
+    def self.get_or_create_module_for_service_instance(assembly)
+       new(assembly).get_or_create_module_for_service_instance()
     end
-    def get_or_create_assembly_branch(opts = {})
-      @service_module.get_module_branch_matching_version(@am_version) || create_assembly_branch(opts)
+    def get_or_create_module_for_service_instance(opts = {})
+      @service_module.get_module_branch_matching_version(assembly_module_version) || create_module_for_service_instance(opts)
     end
 
     # returns a ModuleRepoInfo object
@@ -89,10 +88,11 @@ module DTK; class AssemblyModule
       @module_branches ||= @service_module.get_module_branches
     end
 
-    # returns new module branch
-    def create_assembly_branch(opts = {})
-      base_version = @service_module.get_field?(:version) || opts[:version] #TODO: is this right; shouldnt version be on branch, not module
-      @service_module.create_new_version(base_version, @am_version)
+    # Creates a repo, repo branch if needed for service and new module branch and returns module branch
+    # :version - base version
+    def create_module_for_service_instance(opts = {})
+      base_version = opts[:version]
+      @service_module.create_new_version(base_version, assembly_module_version)
     end
 
     def assembly_template_name?(assembly)

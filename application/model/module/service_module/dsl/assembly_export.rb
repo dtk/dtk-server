@@ -94,8 +94,8 @@ module DTK
           return ret
         end
 
-        assembly_branch = AssemblyModule::Service.get_assembly_branch(assembly_instance)
-        assembly_instance_latest_change = assembly_branch ? assembly_branch.get_field?(:updated_at) : (assembly_instance.get_field?(:updated_at) || assembly_instance.get_field?(:created_at))
+        service_instance_branch = AssemblyModule::Service.get_service_instance_branch(assembly_instance)
+        assembly_instance_latest_change = service_instance_branch ? service_instance_branch.get_field?(:updated_at) : (assembly_instance.get_field?(:updated_at) || assembly_instance.get_field?(:created_at))
 
         return ret unless file_changed_since_specified_sha(initial_sha, assembly_dsl_path, instance_lock, assembly_instance_latest_change)
 

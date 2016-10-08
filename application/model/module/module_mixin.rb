@@ -295,7 +295,7 @@ module DTK
       # add and commit these files
       final_doc_paths = doc_generator.file_paths
       commit_msg = "Adding generated document files: #{final_doc_paths.join(', ')}"
-      RepoManager.add_files(module_branch, file_path__content_array, commit_msg)
+      RepoManager.add_files(module_branch, file_path__content_array, commit_msg: commit_msg)
 
       # finally we push these changes
       RepoManager.push_changes(module_branch)

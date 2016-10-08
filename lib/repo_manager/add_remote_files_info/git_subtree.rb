@@ -16,13 +16,31 @@
 # limitations under the License.
 #
 module DTK
-  module CommonDSL
-    module Generate
-      require_relative('generate/service_instance')
-      require_relative('generate/content_input')
-      require_relative('generate/file_generator')
-      require_relative('generate/directory_generator')
+  class RepoManager
+    class AddRemoteFilesInfo
+      class GitSubtree < self
+        def initialize
+          @git_subtree_info_array = []
+        end
+        
+        def add_git_subtree_info!(prefix, external_repo, external_branch)
+          @git_subtree_info_array << GitSubtreeInfo.new(prefix, external_repo, external_branch)
+          self
+        end
+        
+        def git_add_needed?
+          false
+        end
+        
+        private
+
+        GitSubtreeInfo = Struct.new(:prefix, :external_repo, :external_branch)
+        
+        def add_files_git_repo_manager(git_repo_manager)
+          # TODO: stub
+        end
+        
+      end
     end
   end
 end
-

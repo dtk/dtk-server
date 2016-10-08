@@ -23,7 +23,7 @@ module DTK; module ModuleCommonMixin
     #  :no_error_if_exists - Booelean (default: false)
     #  :no_initial_commit - Booelean (default: false)
     #  :return_module_branch - Boolean (default: false)
-    #  :copy_files - Hash with key: source_director
+    #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     def create_module(project, local_params, opts = {})
       local = local_params.create_local(project)
       namespace = local_params.namespace
@@ -56,8 +56,8 @@ module DTK; module ModuleCommonMixin
         }
         create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
 
-        if copy_files_info = opts[:copy_files]
-          create_opts.merge!(copy_files: copy_files_info)
+        if add_remote_files_info = opts[:add_remote_files_info]
+          create_opts.merge!(add_remote_files_info: add_remote_files_info)
         end
         repo_user_acls = RepoUser.authorized_users_acls(project_idh)
         local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
@@ -151,9 +151,13 @@ module DTK; module ModuleCommonMixin
   end
 
   module Create::Instance
-    # returns new module branch
+    # Creates a new repo and repo branch if needed from base version and creates abd returns teh associated new module branch
+    # It does specfic processing dependending on module type
     # opts can have keys:
     #  :sha - this is base sha to branch from
+    #  :version_branch #TODO: see if still used
+    #  :base_version
+    #  :checkout_branch
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_workspace_branch(Opts.new(filter: { version: base_version }))
         fail ErrorUsage.new("There is no module (#{pp_module_name}) in the workspace")

@@ -45,7 +45,8 @@ module DTK
           service_module: service_module,
           service_name: service_name,
           no_auto_complete: boolean_request_params(:no_auto_complete),
-          version: version
+          version: version,
+          add_nested_modules: true 
         }
         opts = Opts.new(opts)
 

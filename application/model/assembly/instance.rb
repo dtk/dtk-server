@@ -311,9 +311,9 @@ module DTK; class  Assembly
 
         # generate dtk.service.yaml file again to reflect changes in required attributes
         if opts[:update_dsl]
-          assembly_branch = AssemblyModule::Service.get_assembly_branch(self)
-          CommonDSL::Generate.generate_service_instance_dsl(self, assembly_branch)
-          return CommonModule::ModuleRepoInfo.new(assembly_branch)
+          service_instance_branch = AssemblyModule::Service.get_service_instance_branch(self)
+          CommonDSL::Generate.generate_service_instance_dsl(self, service_instance_branch)
+          return CommonModule::ModuleRepoInfo.new(service_instance_branch)
         end
 
       end
@@ -872,9 +872,9 @@ module DTK; class  Assembly
     end
 
     def add_component__update_component_module_refs?(component_module, namespace, version_info = nil)
-      assembly_branch = AssemblyModule::Service.get_or_create_assembly_branch(self)
-      assembly_branch.set_dsl_parsed!(true)
-      component_module_refs = ModuleRefs.get_component_module_refs(assembly_branch)
+      service_instance_branch = AssemblyModule::Service.get_or_create_module_for_service_instance(self)
+      service_instance_branch.set_dsl_parsed!(true)
+      component_module_refs = ModuleRefs.get_component_module_refs(service_instance_branch)
 
       # TODO: not sure if the best way to handle using different version of component module
       # unless we delete existing it will not update if version is changed

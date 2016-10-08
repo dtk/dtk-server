@@ -23,7 +23,7 @@ module DTK
       #  :push_created_branch  - Boolean (default: false)
       #  :donot_create_master_branch - Boolean (default: false)
       #  :create_branch  - branch to create (f non nil)
-      #  :copy_files - Hash with key: source_directory
+      #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
       def self.create_workspace_repo(project_idh, local, repo_user_acls, opts = {})
         repo_mh = project_idh.createMH(:repo)
         ret = create_obj?(repo_mh, local)

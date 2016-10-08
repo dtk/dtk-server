@@ -16,13 +16,10 @@
 # limitations under the License.
 #
 module DTK
-  module CommonDSL
-    module Generate
-      require_relative('generate/service_instance')
-      require_relative('generate/content_input')
-      require_relative('generate/file_generator')
-      require_relative('generate/directory_generator')
-    end
-  end
+  require_relative('common_dsl')
+  require_relative('doc_generator')
+  require_relative('model')
+  require_relative('parsed_dsl')
+  require_relative('repo_manager')
+  require_relative('response_info')
 end
-

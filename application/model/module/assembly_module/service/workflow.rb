@@ -26,7 +26,7 @@ module DTK; class AssemblyModule
 
       # returns a ModuleRepoInfo object
       def create_and_update_assembly_branch?(opts = {})
-        module_branch = get_or_create_assembly_branch()
+        module_branch = get_or_create_module_for_service_instance()
 
         unless opts[:trap_error]
           update_assembly_branch(module_branch)
@@ -41,7 +41,7 @@ module DTK; class AssemblyModule
           end
         end
 
-        @service_module.get_workspace_branch_info(@am_version).merge(edit_file: meta_file_path())
+        @service_module.get_workspace_branch_info(assembly_module_version).merge(edit_file: meta_file_path())
       end
 
       def finalize_edit(module_branch, diffs_summary)

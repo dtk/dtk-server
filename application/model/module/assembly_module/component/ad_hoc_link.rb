@@ -33,7 +33,7 @@ module DTK; class AssemblyModule
         antec_cmp_template = parsed_adhoc_link_info.antec_component_template
 
         component_module = dep_cmp_template.get_component_module()
-        module_branch = create_assembly_branch?(component_module, ret_module_branch: true)
+        module_branch = create_module_for_service_instance?(component_module, ret_module_branch: true)
 
         opts_create_dep = {
           source_attr_pattern: parsed_adhoc_link.attribute_pattern(:source),

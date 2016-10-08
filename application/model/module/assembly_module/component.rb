@@ -17,9 +17,9 @@
 #
 module DTK; class AssemblyModule
   class Component < self
-    r8_nested_require('component', 'ad_hoc_link')
-    r8_nested_require('component', 'attribute')
-    r8_nested_require('component', 'get')
+    require_relative('component/ad_hoc_link')
+    require_relative('component/attribute')
+    require_relative('component/get')
     include Get::Mixin
     extend Get::ClassMixin
 
@@ -29,11 +29,11 @@ module DTK; class AssemblyModule
       new(assembly).prepare_for_edit(component_module, opts)
     end
     def prepare_for_edit(component_module, opts = {})
-      create_assembly_branch?(component_module, opts)
+      create_module_for_service_instance?(component_module, opts)
     end
 
-    def self.create_assembly_module_branch?(assembly, component_module)
-      new(assembly).create_assembly_module_branch?(component_module)
+    def self.create_assembly_module_branch?(assembly, component_module, opts = {})
+      new(assembly).create_assembly_module_branch?(component_module, opts)
     end
     def create_assembly_module_branch?(component_module)
       am_version = assembly_module_version()
@@ -44,7 +44,7 @@ module DTK; class AssemblyModule
       end
 
       unless local_branch = component_module.get_workspace_module_branch(am_version)
-        create_assembly_branch?(component_module)
+        create_module_for_service_instance?(component_module)
         local_branch = component_module.get_workspace_module_branch(am_version)
       end
 
@@ -152,10 +152,13 @@ module DTK; class AssemblyModule
     #  :sha - base sha to create branch from
     #  :ret_module_branch - Boolean
     #  :module_branch_idh (required if ret_module_branch == true)
-    def create_assembly_branch?(component_module, opts = {})
+    #  :version_branch #TODO: see if still used
+    #  :base_version
+    #  :checkout_branch
+    def create_module_for_service_instance?(component_module, opts = {})
       am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)
-        create_assembly_branch(component_module, am_version, Aux.hash_subset(opts, [:sha, :version_branch, :base_version, :checkout_branch]))
+        create_module_for_service_instance(component_module, am_version, Aux.hash_subset(opts, [:sha, :version_branch, :base_version, :checkout_branch]))
       end
       ret = component_module.get_workspace_branch_info(am_version)
       opts[:ret_module_branch] ? ret[:module_branch_idh].create_object() : ret
@@ -163,7 +166,10 @@ module DTK; class AssemblyModule
 
     # opts can have keys
     #  :sha - base sha to create branch from
-    def create_assembly_branch(component_module, am_version, opts = {})
+    #  :version_branch #TODO: see if still used
+    #  :base_version
+    #  :checkout_branch
+    def create_module_for_service_instance(component_module, am_version, opts = {})
       base_version = opts[:base_version]
       opts.merge!(inherit_frozen_from_base: true)
       component_module.create_new_version(base_version, am_version, opts)

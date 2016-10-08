@@ -45,6 +45,17 @@ module DTK
         get(assembly_instance, opts[:types] || AllTypes, Aux.hash_subset(opts, [:with_module_branches]))
       end
 
+      def self.get_corresponding_aug_module_branches(assembly_instance)
+        locked_module_refs = get_all(assembly_instance, with_module_branches: true)
+        module_branch_mh = assembly_instance.model_handle(:module_branch)
+        module_branches = locked_module_refs.values.map do |locked_module_ref|
+          info = locked_module_ref[:info]
+          module_branch_hash = info[:module_branch].merge(namespace: info[:namespace], module_name: info[:module_name])
+          ModuleBranch.create_stub(module_branch_mh, module_branch_hash)
+        end
+        augment_with_repos!(module_branches)
+      end
+
       def self.get_implementations(assembly_instance, module_names)
         get(assembly_instance, :locked_dependencies).get_implementations(module_names)
       end
@@ -103,6 +114,20 @@ module DTK
       end
 
       private
+
+      def self.augment_with_repos!(module_branches)
+        return module_branches if module_branches.empty?
+        repo_mh = module_branches.first.model_handle(:repo)
+        sp_hash = {
+          cols: [:id, :group_id, :display_name, :repo_name, :local_dir],
+          filter: [:oneof, :id, module_branches.map { |mb| mb[:repo_id] }]
+        }
+        ndx_repos = Model.get_objs(repo_mh, sp_hash).inject({}) { |h, repo| h.merge(repo.id => repo) }
+        module_branches.each do |module_branch|
+          module_branch[:repo] = ndx_repos[module_branch[:repo_id]]
+        end
+        module_branches
+      end
 
       def self.get_module_refs_lock?(assembly_instance)
         module_ref_locks = ModuleRef::Lock.get(assembly_instance)

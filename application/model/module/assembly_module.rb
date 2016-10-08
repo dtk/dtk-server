@@ -18,11 +18,12 @@
 module DTK
   class AssemblyModule
     extend Aux::CommonClassMixin
-    r8_nested_require('assembly_module', 'component')
-    r8_nested_require('assembly_module', 'service')
+    require_relative('assembly_module/component')
+    require_relative('assembly_module/service')
 
     def initialize(assembly)
-      @assembly = assembly
+      @assembly                = assembly
+      @assembly_module_version = self.class.assembly_module_version(assembly)
     end
 
     def self.delete_modules?(assembly, opts = {})
@@ -36,15 +37,11 @@ module DTK
 
     private
 
+    attr_reader :assembly_module_version
+
     def self.assembly_module_version(assembly)
       ModuleVersion.ret(assembly)
     end
-    def assembly_module_version(assembly = nil)
-      assembly ||= @assembly
-      unless assembly
-        fail Error.new('@assembly should not be null')
-      end
-      self.class.assembly_module_version(assembly)
-    end
+
   end
 end

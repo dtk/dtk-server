@@ -70,8 +70,6 @@ module DTK
           end
         end
 
-Aux.stop_for_testing?(:stage) # TODO: for debugging
-
         if opts[:ret_clone_copy_output]
           clone_copy_output
         elsif opts[:ret_new_obj_with_cols]

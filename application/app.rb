@@ -69,12 +69,12 @@ UTILS_DIR = "#{UTILS_BASE_DIR}/internal"
 
 # TODO: make that log  dont need config values
 r8_require("#{UTILS_DIR}/log")
-r8_require("#{LIB_DIR}/error")
+r8_require("#{LIB_DIR}/error") #TODO: see if can move this to be a require in lib/dtk_server.rb
 r8_require("#{UTILS_DIR}/hash_object")
 r8_require("#{UTILS_DIR}/message_queue")
 r8_require("#{UTILS_DIR}/ssh_cipher")
 
-r8_require("#{LIB_DIR}/configuration")
+r8_require("#{LIB_DIR}/configuration") #TODO: see if can move this to be a require in lib/dtk_server.rb
 DTK::Configuration.instance.set_configuration()
 
 APPLICATION_DIR = File.expand_path("../#{R8::Config[:application_name]}", File.dirname(__FILE__))
@@ -83,10 +83,7 @@ SYSTEM_DIR = File.expand_path('../system', File.dirname(__FILE__))
 r8_require("#{SYSTEM_DIR}/utility")
 r8_require("#{SYSTEM_DIR}/common_mixin")
 r8_require("#{UTILS_BASE_DIR}/utils")
-
-%w{model response_info doc_generator common_dsl parsed_dsl}.each { |r| r8_require("#{LIB_DIR}/#{r}") }
-
-
+r8_require("#{LIB_DIR}/dtk_server")
 r8_require('config/routes.rb')
 
 # r8_require("#{SYSTEM_DIR}/view")

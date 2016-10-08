@@ -19,7 +19,7 @@ module DTK
   class Service
     # Class for target service instances
     # Wraps older objectsL DTK::Assembly::Instance and DTK::Target
-    # TODO: DTK-2489: after we move verything off of DTK::Target we can remove this class or make it
+    # TODO: DTK-2489: after we move everything off of DTK::Target we can remove this class or make it
     # a very simple root abstract class
     class Target < self
       r8_nested_require('target', 'node_template')
@@ -53,17 +53,20 @@ module DTK
 
       ###### Just called from v1 controller ######
       # This method stages a target service
+      # opts can have keys
       #   :project (required)
       #   :target_name (required)
       #   :service_module
       #   :service_name
       #   :no_auto_complete - Boolean (default: false)
+      #   :add_nested_modules - Boolean (default: false)
       def self.stage_target_service(assembly_template, service_module_class, opts = Opts.new)
         Model.Transaction do
           target = create_target_mock(opts[:target_name], opts[:project])
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
           fixup_target_name_and_ref!(new_assembly_instance, target)
-          module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance, opts)
+          module_repo_info = service_module_class.create_service_instance_and_nested_modules(new_assembly_instance, opts)
+          Aux.stop_for_testing?(:stage)
           new_service_info(new_assembly_instance, module_repo_info)
         end
       end
@@ -75,15 +78,16 @@ module DTK
       #   :service_name
       #   :no_auto_complete - Boolean (default: false)
       #   :allow_existing_service - Boolean (default: false)
+      #   :add_nested_modules - Boolean (default: false)
       def stage_service(assembly_template, service_module_class, opts = Opts.new)
         unless is_converged? 
           fail ErrorUsage, "Cannot stage a service instance in a target service instance '#{target}' that is not converged."
         end
         Model.Transaction do
-          # if :allow_existing_service is true then new_assembly_instance wil be existing assembly_instance
+          # if :allow_existing_service is true then new_assembly_instance can be existing assembly_instance
           new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
-          module_repo_info = service_module_class.create_branch_and_generate_dsl(new_assembly_instance, opts)
-Aux.stop_for_testing?(:create_service_instance) # TODO: for debugging
+          module_repo_info = service_module_class.create_service_instance_and_nested_modules(new_assembly_instance, opts)
+          Aux.stop_for_testing?(:stage) 
           self.class.new_service_info(new_assembly_instance, module_repo_info)
         end
       end

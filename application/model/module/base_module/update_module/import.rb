@@ -32,7 +32,7 @@ module DTK; class BaseModule; class UpdateModule
       config_agent_type = :puppet
       opts_create_mod = Opts.new(
         config_agent_type: config_agent_type,
-        copy_files: { source_directory: source_directory },
+        add_remote_files_info: RepoManager::AddRemoteFilesInfo::Copy.new(source_dir: source_directory),
         no_error_if_exists: true
       )
 

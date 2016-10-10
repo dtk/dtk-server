@@ -57,8 +57,8 @@ module DTK; class AssemblyModule
       end
     end
 
-    def self.get_or_create_assembly_branch(assembly)
-       new(assembly).get_or_create_assembly_branch()
+    def self.get_or_create_assembly_branch(assembly, opts = {})
+       new(assembly).get_or_create_assembly_branch(opts)
     end
     def get_or_create_assembly_branch(opts = {})
       @service_module.get_module_branch_matching_version(@am_version) || create_assembly_branch(opts)

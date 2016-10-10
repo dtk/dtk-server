@@ -37,7 +37,12 @@ module DTK
         GitSubtreeInfo = Struct.new(:prefix, :external_repo, :external_branch)
         
         def add_files_git_repo_manager(git_repo_manager)
-          # TODO: stub
+          @git_subtree_info_array.each do |git_subtree_info|
+            prefix             = git_subtree_info.prefix
+            external_repo      = git_subtree_info.external_repo
+            external_branch    = git_subtree_info.external_branch
+            git_repo_manager.git_command__add_squashed_subtree(prefix, external_repo, external_branch)
+          end
         end
         
       end

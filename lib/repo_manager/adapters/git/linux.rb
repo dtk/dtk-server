@@ -18,6 +18,10 @@
 module DTK
   class RepoManager::Git
     class Linux < self
+      def git_command__add_squashed_subtree(prefix, external_repo, external_branch)
+        external_repo_url = self.class.repo_url(external_repo.display_name)
+        git_command.subtree(cmd_opts, 'add', '--prefix', prefix, external_repo_url, external_branch, '--squash')
+      end
       private
 
       def git_command__clone(remote_repo, local_dir)

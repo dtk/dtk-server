@@ -400,7 +400,10 @@ module DTK
     # returns repo for new branch; this just creates repo branch and does not update object model
     # opts can have keys
     #  :sha - sha on base branch to branch from
-    #
+    #  :base_version
+    #  :version_branch #TODO: see if still used
+    #  :checkout_branch, 
+    #  :delete_existing_branch
     # This method returns [new_branch_repo, new_branch_sha]
     def create_new_branch_from_this_branch?(project, base_repo, new_version, opts = {})
       branch_name = Location::Server::Local.workspace_branch_name(project, new_version, opts)

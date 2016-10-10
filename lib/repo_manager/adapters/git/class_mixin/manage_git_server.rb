@@ -17,8 +17,8 @@
 #
 module DTK
   class RepoManager::Git 
-    class ManageGitServer
-      module ClassMixin
+    module ClassMixin
+      module ManageGitServer
         def method_missing(name, *args, &block)
           if git_server_class.respond_to?(name)
             git_server_class.send(name, *args, &block)
@@ -43,7 +43,7 @@ module DTK
         def delete_server_repo(repo)
           git_server_class.delete_server_repo(repo)
         end
-
+        
         private
         
         def git_server_class
@@ -53,7 +53,7 @@ module DTK
           @git_server_class = DynamicLoader.load_and_return_adapter_class('manage_git_server', adapter_name, base_class: RepoManager::Git, subclass_adapter_name: true)
           @git_server_class.set_git_class(self)
         end
-
+        
       end
     end
   end

@@ -26,9 +26,11 @@ module DTK; class RepoManager
   class Git < self
     require_relative('git/linux')
     require_relative('git/git_command')
-    require_relative('git/manage_git_server')
+    require_relative('git/mixin')
+    require_relative('git/class_mixin')
 
-    extend ManageGitServer::ClassMixin
+    include Mixin::AddBranch
+    extend ClassMixin::ManageGitServer
 
     attr_reader :path
     def initialize(path, branch, opts = {})
@@ -592,85 +594,32 @@ module DTK; class RepoManager
       end
     end
 
-    # retruns sha of new branch
-    def add_branch_and_push?(new_branch, opts = {})
-      new_branch_sha = nil
-      add_branch?(new_branch, opts)
-      branch_or_sha = opts[:checkout_branch] ? new_branch : (opts[:sha] || new_branch)
-      checkout(branch_or_sha) do
-        # new_branch_sha = git_command__push(new_branch)
-        new_branch_sha = git_command__push(new_branch, nil, nil, force: true)
-      end
-      new_branch_sha
-    end
-
-    # opts can have keys:
-    #  :empty - Booelan (default: false)
-    #  :sha
-    #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
-    def add_branch?(new_branch, opts = {})
-      unless get_branches.include?(new_branch)
-        # if :add_remote_files_info; do it here and not in add_branch
-        add_branch(new_branch, opts.merge(add_remote_files_info: nil))
-      end
-      add_remote_files?(new_branch, opts[:add_remote_files_info])
-    end
-
-    # opts can have keys:
-    #  :empty - Booelan (default: false)
-    #  :sha
-    #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
-    def add_branch(new_branch, opts = {})
-      if opts[:empty]
-        git_command__create_empty_branch(new_branch)
-        git_command__empty_commit 
-      else
-        checkout(opts[:sha] || @branch) do
-          git_command__add_branch(new_branch)
-        end
-      end
-      add_remote_files?(new_branch, opts[:add_remote_files_info])
-    end
-
-    def add_remote_files(add_remote_files_info)
-      add_remote_files?(@branch, add_remote_files_info)
-    end
-
-    # If add_remote_files_info is not nil then it is a subclass of DTK::RepoManager::AddRemoteFilesInfo
-    # and we use that to add remote files to the repo branch
-    def add_remote_files?(branch, add_remote_files_info)
-      return if add_remote_files_info.nil?
-      checkout(branch) do 
-        add_remote_files_info.add_files(git_repo_manager: self, branch: branch)
-      end
-      add_all_files(branch) if add_remote_files_info.git_add_needed?
-    end
-    private :add_remote_files?
-
     # deletes both local and remote branch
-    def delete_branch(remote_name = nil)
-      if @branch != current_branch
-        delete_branch_aux(remote_name)
-      else
-        # need to checkout to some other branch since on branch taht is being deleted
-        unless other_branch = get_branches.find { |br| br != @branch }
-          fail Error.new("Cannot delete the last remanining branch (#{@branch})")
-        end
-        checkout(other_branch) do
-          delete_branch_aux(remote_name)
-        end
+    # Opts can have keys:
+    #  :local_branch
+    #  :remote_branch
+    def delete_branch(opts = {})
+      local_branch_to_delete  = opts[:local_branch] || @branch
+      remote_branch_to_delete = opts[:remote_branch] || local_branch_to_delete
+      checkout_other_branch?(local_branch_to_delete) do
+        git_command__delete_local_branch?(local_branch_to_delete)
+        git_command__delete_remote_branch?(local_branch_to_delete, remote_branch_to_delete)
       end
     end
 
-    def delete_local_brach(branch_name)
-      git_command__delete_local_branch?(branch_name)
+    def checkout_other_branch?(branch, &body)
+      if branch != current_branch
+        yield
+      else
+        unless other_branch = get_branches.find { |br| br != branch }
+          fail Error.new("Cannot find branch other than '#{branch}' to checkout")
+        end
+        checkout(other_branch) do        
+          yield
+        end
+      end
     end
-
-    def delete_branch_aux(remote_name = nil)
-      git_command__delete_local_branch?(@branch)
-      git_command__delete_remote_branch?(@branch, remote_name)
-    end
-    private :delete_branch_aux
+    private :checkout_other_branch?
 
     def get_branches
       @grit_repo.branches.map(&:name)

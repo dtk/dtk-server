@@ -30,7 +30,7 @@ module DTK
           if aug_nested_module_branches = opts[:aug_nested_module_branches]
             add_nested_modules_dsl_files(aug_nested_module_branches, service_module_branch)
           end
-          DirectoryGenerator.commit_and_push_changes(service_instance)
+          RepoManager.push_changes(service_module_branch)
         end
         
         private
@@ -40,18 +40,18 @@ module DTK
           content_input = generate_canonical_form(service_instance, service_module_branch)
           yaml_text = FileGenerator.generate_yaml_text(:service_instance, content_input, service_module_branch.dsl_version)
           file_type__content_array = [{ file_type: FileType::ServiceInstance, content: yaml_text }]
-          DirectoryGenerator.add_files(service_module_branch, file_type__content_array, no_commit: true, donot_push_changes: true)
+          DirectoryGenerator.add_files(service_module_branch, file_type__content_array, donot_push_changes: true)
         end
         
         def self.add_nested_modules_dsl_files(aug_nested_module_branches, service_module_branch)
           return if aug_nested_module_branches.empty?
           
-          add_remote_files_info = RepoManager::AddRemoteFilesInfo::Copy.new
+          add_remote_files_info = RepoManager::AddRemoteFilesInfo::GitSubtree.new
           aug_nested_module_branches.each do |aug_nested_module_branch|
-            repo       = aug_nested_module_branch[:repo]
-            source_dir = repo[:local_dir]
-            target_dir = FileType::ServiceInstanceNestedModule.new(aug_nested_module_branch[:module_name]).base_dir
-            add_remote_files_info.add_source_target_dir_pair!(source_dir, target_dir)
+            source_repo         = aug_nested_module_branch[:repo]
+            source_branch_name  = aug_nested_module_branch[:branch]
+            target_relative_dir = FileType::ServiceInstanceNestedModule.new(aug_nested_module_branch[:module_name]).base_dir
+            add_remote_files_info.add_git_subtree_info!(target_relative_dir, source_repo, source_branch_name) 
           end
           DirectoryGenerator.add_remote_files(service_module_branch, add_remote_files_info)
         end

@@ -158,6 +158,7 @@ module DTK; module ModuleCommonMixin
     #  :version_branch #TODO: see if still used
     #  :base_version
     #  :checkout_branch
+    #  :delete_existing_branch (Boolean; default: false)
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_workspace_branch(Opts.new(filter: { version: base_version }))
         fail ErrorUsage.new("There is no module (#{pp_module_name}) in the workspace")
@@ -168,7 +169,7 @@ module DTK; module ModuleCommonMixin
         fail VersionExist.new(new_version, pp_module_name)
       end
 
-      opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :version_branch, :checkout_branch])
+      opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :version_branch, :checkout_branch, :delete_existing_branch])
       new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project, aug_base_branch[:repo], new_version, opts_repo_update)
       
       opts_create_branch = opts.merge(

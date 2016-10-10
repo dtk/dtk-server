@@ -92,7 +92,7 @@ module DTK; class AssemblyModule
     # :version - base version
     def create_module_for_service_instance(opts = {})
       base_version = opts[:version]
-      @service_module.create_new_version(base_version, assembly_module_version)
+      @service_module.create_new_version(base_version, assembly_module_version, delete_existing_branch: true)
     end
 
     def assembly_template_name?(assembly)

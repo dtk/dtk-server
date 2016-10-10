@@ -31,7 +31,7 @@ locale-gen en_US.UTF-8
 apt-get install -y \
   apt-transport-https ca-certificates \
   git cron \
-  ruby ruby-dev \
+  ruby2.0 \
   lsb-release openssh-server \
   sudo curl supervisor postgresql-client libxslt-dev \
   gettext-base
@@ -40,7 +40,7 @@ mkdir -p /var/run/sshd
 
 # install puppet
 echo "gem: --no-ri --no-rdoc" > ~/.gemrc
-gem install puppet -v 3.6.2
+gem2.0 install puppet -v 3.6.2
 
 # install RVM and Ruby
 RUBY_VERSION=1.9.3-p484

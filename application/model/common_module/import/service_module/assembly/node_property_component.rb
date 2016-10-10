@@ -19,7 +19,7 @@ module DTK
   class CommonModule
     module Import::ServiceModule::Assembly
       module NodePropertyComponent
-        # For each node, it creates a node_property_component if needed using the relevant nod attributes in paresd node
+        # For each node, it creates a node_property_component if needed using the relevant node attributes in paresd node
         def self.create_node_property_components?(parsed_nodes)
           parsed_nodes.each do |name, parsed_node|
             node_property_component = find_or_add_node_property_component!(parsed_node)

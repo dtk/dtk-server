@@ -32,22 +32,9 @@ module DTK
       # This method will either return a node object if component is under node or node group or nil
       # if component is asembly level
       def parent_node?
-        return @parent_node if @parent_node
-
-        key_elements = qualified_key.key_elements
-        if key_elements.size == 2 and key_elements[0].type.to_sym == :node and key_elements[1].type.to_sym == :component
-          node_name = key_elements[0].key
-          unless @parent_node =  assembly_instance.get_node?([:eq, :display_name, node_name])
-            fail Error, "Unexpected that assembly '#{assembly_instance.display_name}' does not have a node with name '#{node_name}'"
-          end
-          @parent_node
-        elsif key_elements.size == 1 and key_elements.first.type == :component
-          nil # this is assembly level component
-        else
-          fail Error, "Unexpected form for key_elements: #{key_elements.inspect}"
-        end
+        qualified_key.parent_node?(assembly_instance)
       end
-      
+
     end
   end
 end

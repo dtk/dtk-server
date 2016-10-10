@@ -131,6 +131,11 @@ module DTK
       node_property_component_names.map { |n| n.gsub(/::/,'__') }
     end
 
+    def self.node_property_component_type
+      types = node_property_component_types
+      types.size == 1 ? types.first : fail(Error, "Unexepectd that node_property_component_types.size != 1")
+    end
+
     def self.node_property_legal_attributes
       TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_legal_attributes }
     end

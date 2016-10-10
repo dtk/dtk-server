@@ -18,7 +18,36 @@
 module DTK
   class CommonDSL::Diff
     class QualifiedKey < ::DTK::DSL::QualifiedKey 
+
+      # If this refers to element under a node than node object wil be returned; otherwise nil will be returned
+      # if component is asembly level
+      def parent_node?(assembly_instance)
+        return @parent_node if @parent_node
+        if key_elements.size == 2 and key_elements[0].type.to_sym == :node
+          node_name = key_elements[0].key
+          unless @parent_node = assembly_instance.get_node?([:eq, :display_name, node_name])
+            fail Error, "Unexpected that assembly '#{assembly_instance.display_name}' does not have a node with name '#{node_name}'"
+          end
+          @parent_node
+        end
+      end
+
+      def parent_node(assembly_instance)
+        parent_node?(assembly_instance) || fail(Error, "Unexepected that parent_node?(assembly_instance) is nil")
+      end
+
+      # if node attribute returns [node_name, attribute_name]; otherwise returns nil
+      def is_node_attribute?
+        if key_elements.size == 2 and key_elements[0].type.to_sym == :node and key_elements[1].type.to_sym == :attribute
+          node_name      = key_elements[0].key
+          attribute_name = key_elements[1].key
+          [node_name, attribute_name]
+        end
+      end
+
+      private
       attr_reader :key_elements
+
     end
   end
 end

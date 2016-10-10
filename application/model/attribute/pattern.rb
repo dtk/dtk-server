@@ -182,14 +182,27 @@ module DTK; class Attribute
         tokens = pattern.split('/')
         return unless tokens.size == 2
 
-        node      = tokens[0]
-        attribute = tokens[1]
+        node_name, attribute_name = tokens
 
-        np_component = CommandAndControl.node_property_component()
-        legal_attrs  = CommandAndControl.node_property_legal_attributes()
-
-        av_pair[:pattern] = "#{node}/#{np_component}/#{attribute}" if legal_attrs.include?(attribute.to_sym)
+        np_component = CommandAndControl.node_property_component
+        av_pair[:pattern] = "#{node_name}/#{np_component}/#{attribute_name}" if is_node_component_attribute?(attribute_name)
       end
     end
+
+    def self.node_component_attribute?(node, attribute_name)
+      if is_node_component_attribute?(attribute_name)
+        component_type = CommandAndControl.node_property_component_type
+        attributes = node.get_components(with_attributes: true, filter: [:eq, :component_type, component_type]).map do |cmp_with_attributes|
+          cmp_with_attributes[:attributes]
+        end.flatten(1)
+        attributes.find { |attribute| attribute.display_name == attribute_name }
+      end
+    end
+    
+    private
+    def self.is_node_component_attribute?(attribute_name)
+      CommandAndControl.node_property_legal_attributes.include?(attribute_name.to_sym)
+    end
+
   end
 end; end

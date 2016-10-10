@@ -60,13 +60,9 @@ module DTK; class Attribute
         }
         ret = Node.get_obj(model_handle(:node), sp_hash)
         if subclass_model_name = opts[:subclass_model_name]
-        ret = ret.create_subclass_obj(subclass_model_name)
+          ret = ret.create_subclass_obj(subclass_model_name)
         end
         ret
-      end
-
-      def self.get_port_info(id_handles)
-        get_objects_in_set_from_sp_hash(id_handles, { cols: [:port_info] }, keep_ref_cols: true)
       end
 
       def get_service_node_group(opts = {})

@@ -104,8 +104,7 @@ module DTK; class Assembly
         assembly_instance_lock = Assembly::Instance::Lock.create_from_element(assembly_instance, service_module, opts)
         assembly_instance_lock.save_to_model
 
-        # create service instance branch because of compatibility with new dtk-client
-        AssemblyModule::Service.get_or_create_assembly_branch(assembly_instance, opts)
+        AssemblyModule::Service.get_or_create_module_for_service_instance(assembly_instance)
 
         # user can provide custom node-size and os-type attribute, we proccess them here and assign to nodes
         set_custom_node_attributes(assembly_instance, opts) if opts[:node_size] || opts[:os_type]

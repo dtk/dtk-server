@@ -28,7 +28,7 @@ module DTK
         def self.generate_dsl(service_instance, service_module_branch, opts = {})
           add_service_dsl_files(service_instance, service_module_branch)
           if aug_nested_module_branches = opts[:aug_nested_module_branches]
-            add_nested_modules_dsl_files(aug_nested_module_branches, service_module_branch)
+            #TODO: DTK-2686: took out before commited to master; add_nested_modules_dsl_files(aug_nested_module_branches, service_module_branch)
           end
           RepoManager.push_changes(service_module_branch)
         end

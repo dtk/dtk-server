@@ -548,8 +548,13 @@ module DTK; class  Assembly
       opts.merge!(skip_running_check: true)
 
       staged_instances = get_staged_service_instances(self)
+      service_instances = []
+      staged_instances.each do |v|
+        service_instances << v[:display_name]
+      end
+      
       if opts[:recursive].nil? && is_target_service_instance?
-          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it. Please use flag '-r' to remove all." unless staged_instances.empty?
+          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-r' to remove all." unless staged_instances.empty?
       end
 
       if opts[:recursive]

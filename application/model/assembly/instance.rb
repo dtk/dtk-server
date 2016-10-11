@@ -312,7 +312,7 @@ module DTK; class  Assembly
         # generate dtk.service.yaml file again to reflect changes in required attributes
         if opts[:update_dsl]
           service_instance_branch = AssemblyModule::Service.get_service_instance_branch(self)
-          CommonDSL::Generate.generate_service_instance_dsl(self, service_instance_branch)
+          CommonDSL::Generate::ContentInput.generate_for_service_instance(self, service_instance_branch)
           return CommonModule::ModuleRepoInfo.new(service_instance_branch)
         end
 

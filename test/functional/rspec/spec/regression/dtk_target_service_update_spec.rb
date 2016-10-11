@@ -46,16 +46,17 @@ describe 'DTK Target Service Instance update' do
     puts '**********************************', ''
   end
 
-  context 'Delete workspace service instances in default target' do
-    include_context 'Delete workspace instances in default target', target
-  end
+  #context 'Delete workspace service instances in default target' do
+  #  include_context 'Delete workspace instances in default target', target
+  #end
 
-  context 'Delete default target service instance' do
-    include_context 'Delete default target', target
-  end
-  context "Delete #{namespace}/#{network_service_module_name} service module" do
-    include_context 'Delete all service module versions', target, "#{namespace}:#{network_service_module_name}"
-  end
+  #context 'Delete default target service instance' do
+  #  include_context 'Delete default target', target
+  #end
+
+  #context "Delete #{namespace}/#{network_service_module_name} service module" do
+  #  include_context 'Delete all service module versions', target, "#{namespace}:#{network_service_module_name}"
+  #end
 
   context "Delete #{namespace}/#{network_service_module_name} service module from local filesystem" do
     include_context 'Delete all local service module versions', "#{module_dir}/service_modules/#{namespace}", "#{network_service_module_name}"

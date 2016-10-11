@@ -152,13 +152,12 @@ module DTK; class AssemblyModule
     #  :sha - base sha to create branch from
     #  :ret_module_branch - Boolean
     #  :module_branch_idh (required if ret_module_branch == true)
-    #  :version_branch #TODO: see if still used
     #  :base_version
     #  :checkout_branch
     def create_module_for_service_instance?(component_module, opts = {})
       am_version = assembly_module_version()
       unless component_module.get_workspace_module_branch(am_version)
-        create_module_for_service_instance(component_module, am_version, Aux.hash_subset(opts, [:sha, :version_branch, :base_version, :checkout_branch]))
+        create_module_for_service_instance(component_module, am_version, Aux.hash_subset(opts, [:sha, :base_version, :checkout_branch]))
       end
       ret = component_module.get_workspace_branch_info(am_version)
       opts[:ret_module_branch] ? ret[:module_branch_idh].create_object() : ret
@@ -166,7 +165,6 @@ module DTK; class AssemblyModule
 
     # opts can have keys
     #  :sha - base sha to create branch from
-    #  :version_branch #TODO: see if still used
     #  :base_version
     #  :checkout_branch
     def create_module_for_service_instance(component_module, am_version, opts = {})

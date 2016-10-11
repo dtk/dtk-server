@@ -363,9 +363,8 @@ module DTK
             opts = {}
             opts.merge!(sha: sha) if sha
             if version_branch && !version_branch[:version].eql?('master')
-              opts.merge!(version_branch: version_branch[:branch], base_version: version_branch[:version], checkout_branch: true)
+              opts.merge!(version: version_branch[:version], checkout_branch: true)
             end
-            # AssemblyModule::Component.prepare_for_edit(assembly, component_module, sha ? {sha: sha } : {})
             AssemblyModule::Component.prepare_for_edit(assembly, component_module, opts)
           when :service_module
             modification_type = ret_non_null_request_params(:modification_type).to_sym

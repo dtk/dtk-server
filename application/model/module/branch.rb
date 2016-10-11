@@ -401,7 +401,6 @@ module DTK
     # opts can have keys
     #  :sha - sha on base branch to branch from
     #  :base_version
-    #  :version_branch #TODO: see if still used
     #  :checkout_branch, 
     #  :delete_existing_branch
     # This method returns [new_branch_repo, new_branch_sha]

@@ -56,8 +56,10 @@ module DTK; class AssemblyModule
       end
     end
 
-    def self.get_or_create_module_for_service_instance(assembly)
-       new(assembly).get_or_create_module_for_service_instance()
+    # opts can have keys
+    # :version - base version
+    def self.get_or_create_module_for_service_instance(assembly, opts = {})
+       new(assembly).get_or_create_module_for_service_instance(opts)
     end
     def get_or_create_module_for_service_instance(opts = {})
       @service_module.get_module_branch_matching_version(assembly_module_version) || create_module_for_service_instance(opts)
@@ -89,6 +91,7 @@ module DTK; class AssemblyModule
     end
 
     # Creates a repo, repo branch if needed for service and new module branch and returns module branch
+    # opts can have keys
     # :version - base version
     def create_module_for_service_instance(opts = {})
       base_version = opts[:version]

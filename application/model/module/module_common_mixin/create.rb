@@ -155,7 +155,6 @@ module DTK; module ModuleCommonMixin
     # It does specfic processing dependending on module type
     # opts can have keys:
     #  :sha - this is base sha to branch from
-    #  :version_branch #TODO: see if still used
     #  :base_version
     #  :checkout_branch
     #  :delete_existing_branch (Boolean; default: false)
@@ -169,7 +168,7 @@ module DTK; module ModuleCommonMixin
         fail VersionExist.new(new_version, pp_module_name)
       end
 
-      opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :version_branch, :checkout_branch, :delete_existing_branch])
+      opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :checkout_branch, :delete_existing_branch])
       new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project, aug_base_branch[:repo], new_version, opts_repo_update)
       
       opts_create_branch = opts.merge(

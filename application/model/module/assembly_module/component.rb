@@ -25,6 +25,7 @@ module DTK; class AssemblyModule
 
     # opts can have keys
     #  :sha
+    #  :version
     def self.prepare_for_edit(assembly, component_module, opts = {})
       new(assembly).prepare_for_edit(component_module, opts)
     end

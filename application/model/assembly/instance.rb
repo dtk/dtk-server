@@ -233,8 +233,8 @@ module DTK; class  Assembly
         cmp_instance_idh = node.add_component(aug_cmp_template, opts.merge(component_title: component_title))
         component = cmp_instance_idh.create_object()
 
-        # update the mnodule refs
-        add_component__update_component_module_refs?(aug_cmp_template[:component_module], aug_cmp_template[:namespace], aug_cmp_template[:version])
+        # update the module refs
+        add_component__update_component_module_refs?(aug_cmp_template[:component_module], aug_cmp_template[:namespace], version: aug_cmp_template[:version])
 
         # recompute the locked module refs
         ModuleRefs::Lock.create_or_update(self)
@@ -876,8 +876,11 @@ module DTK; class  Assembly
       get_obj(target.model_handle(:assembly_instance), sp_hash)
     end
 
-    def add_component__update_component_module_refs?(component_module, namespace, version_info = nil)
-      service_instance_branch = AssemblyModule::Service.get_or_create_module_for_service_instance(self)
+    # opts can have keys:
+    #  :version
+    def add_component__update_component_module_refs?(component_module, namespace, opts = {})
+      # TODO: should below instead be get_service_instance_branch
+      service_instance_branch = AssemblyModule::Service.get_or_create_module_for_service_instance(self, opts)
       service_instance_branch.set_dsl_parsed!(true)
       component_module_refs = ModuleRefs.get_component_module_refs(service_instance_branch)
 

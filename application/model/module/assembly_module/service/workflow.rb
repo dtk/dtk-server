@@ -25,8 +25,10 @@ module DTK; class AssemblyModule
       end
 
       # returns a ModuleRepoInfo object
+      # opts can have keys:
+      #  :trap_error (Boolean)
       def create_and_update_assembly_branch?(opts = {})
-        module_branch = get_or_create_module_for_service_instance()
+        module_branch = get_or_create_module_for_service_instance
 
         unless opts[:trap_error]
           update_assembly_branch(module_branch)
@@ -41,12 +43,12 @@ module DTK; class AssemblyModule
           end
         end
 
-        @service_module.get_workspace_branch_info(assembly_module_version).merge(edit_file: meta_file_path())
+        @service_module.get_workspace_branch_info(assembly_module_version).merge(edit_file: meta_file_path)
       end
 
       def finalize_edit(module_branch, diffs_summary)
         parse_errors = nil
-        file_path = meta_file_path()
+        file_path = meta_file_path
         if diffs_summary.file_changed?(file_path)
           file_content = RepoManager.get_file_content(file_path, module_branch)
           format_type = Aux.format_type(file_path)
@@ -54,7 +56,7 @@ module DTK; class AssemblyModule
           return hash_content if ServiceModule::ParsingError.is_error?(hash_content)
           parse_error = Task::Template::ConfigComponents.find_parse_error?(hash_content, assembly: @assembly, keys_are_in_symbol_form: true)
           # even if there is a parse error savings so user can go back and update what user justed edited
-          Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle(), hash_content, @task_action)
+          Task::Template.create_or_update_from_serialized_content?(@assembly.id_handle, hash_content, @task_action)
         end
         fail parse_error if parse_error
       end
@@ -69,8 +71,8 @@ module DTK; class AssemblyModule
       end
 
       def splice_in_workflow(module_branch, template_content)
-        hash_content = template_content.serialization_form()
-        module_branch.serialize_and_save_to_repo?(meta_file_path(), hash_content)
+        hash_content = template_content.serialization_form
+        module_branch.serialize_and_save_to_repo?(meta_file_path, hash_content)
       end
 
       def meta_file_path

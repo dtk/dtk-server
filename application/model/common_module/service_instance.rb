@@ -36,8 +36,7 @@ module DTK
       end
 
       def get_repo_info
-        service_module_branch = get_or_create_module_for_service_instance
-        module_repo_info = ModuleRepoInfo.new(service_module_branch)
+        module_repo_info = ModuleRepoInfo.new(get_service_instance_branch)
         assembly_instance = self.assembly_instance
         {
           service: {

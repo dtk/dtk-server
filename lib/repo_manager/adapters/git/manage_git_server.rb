@@ -17,8 +17,8 @@
 #
 module DTK
   class RepoManager::Git 
-    module ClassMixin
-      module ManageGitServer
+    class ManageGitServer
+      module ClassMixin
         def method_missing(name, *args, &block)
           if git_server_class.respond_to?(name)
             git_server_class.send(name, *args, &block)
@@ -26,7 +26,7 @@ module DTK
             super
           end
         end
-
+        
         def respond_to?(name)
           !!(git_server_class.respond_to?(name) || super)
         end
@@ -53,7 +53,6 @@ module DTK
           @git_server_class = DynamicLoader.load_and_return_adapter_class('manage_git_server', adapter_name, base_class: RepoManager::Git, subclass_adapter_name: true)
           @git_server_class.set_git_class(self)
         end
-        
       end
     end
   end

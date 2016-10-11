@@ -27,10 +27,10 @@ module DTK; class RepoManager
     require_relative('git/linux')
     require_relative('git/git_command')
     require_relative('git/mixin')
-    require_relative('git/class_mixin')
+    require_relative('git/manage_git_server')
 
     include Mixin::AddBranch
-    extend ClassMixin::ManageGitServer
+    extend ManageGitServer::ClassMixin
 
     attr_reader :path
     def initialize(path, branch, opts = {})

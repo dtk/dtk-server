@@ -51,7 +51,7 @@ module DTK
         def self.pull_repo_changes?(project, local_params, commit_sha, opts = {})
           namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
           module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace)
-          pull_was_needed = module_branch.pull_repo_changes?(commit_sha, opts[:force_pull])
+          pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force: opts[:force_pull])
           [module_branch, pull_was_needed]
         end
 

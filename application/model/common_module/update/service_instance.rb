@@ -30,7 +30,7 @@ module DTK
           end
           module_branch = service_instance.get_service_instance_branch
           
-          unless pull_was_needed = module_branch.pull_repo_changes?(commit_sha, opts[:force_pull])
+          unless pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force: opts[:force_pull])
             # TODO: removed for testing
             # return ret
           end

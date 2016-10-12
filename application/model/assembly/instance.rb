@@ -240,7 +240,13 @@ module DTK; class  Assembly
         ModuleRefs::Lock.create_or_update(self)
 
         unless opts[:donot_update_workflow]
-          Task::Template::ConfigComponents.update_when_added_component?(self, node, component, component_title, skip_if_not_found: true)
+          update_opts = { skip_if_not_found: true }
+          if opts[:splice_in_delete_action]
+            cmp_instance = Component::Instance.create_from_component(component)
+            action_def = cmp_instance.get_action_def?('delete')
+            update_opts.merge!(:action_def => action_def)
+          end
+          Task::Template::ConfigComponents.update_when_added_component?(self, node, component, component_title, update_opts)
         end
 
         if opts[:auto_complete_links]

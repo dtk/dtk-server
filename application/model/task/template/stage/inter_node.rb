@@ -165,7 +165,7 @@ module DTK; class Task; class Template
 
       def add_new_execution_block_for_action!(action)
         # leveraging Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list) for this
-        node_actions = { Constant::OrderedComponents => [action.component_type()] }
+        node_actions = { Constant::OrderedComponents => [calculate_ordered_components(action)] }
         node_name = action.node_name()
         action_list = ActionList.new([action])
         merge!(action.node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions, node_name, action_list))
@@ -180,6 +180,14 @@ module DTK; class Task; class Template
       end
 
       private
+
+      def calculate_ordered_components(action)
+        if action.component_type.eql?("ec2::node[#{action.node_name}]")
+          "#{action.component_type}.delete"
+        else
+          action.component_type
+        end
+      end
 
       def serialized_form_with_name
         @name ? OrderedHash.new(name: @name) : OrderedHash.new

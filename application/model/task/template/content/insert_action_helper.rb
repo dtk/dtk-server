@@ -34,7 +34,8 @@ module DTK; class Task; class Template
       private
 
       def initialize(new_action, action_list, gen_constraints_proc = nil, _insert_strategy = nil)
-        @new_action = action_list.find { |a| a.match_action?(new_action) }
+        opts = new_action.is_a?(Action::WithMethod) ? { class: Action::WithMethod } : {}
+        @new_action = action_list.find { |a| a.match_action?(new_action, opts) }
         @new_action_node_id = new_action.node_id
         @gen_constraints_proc = gen_constraints_proc
         @ndx_action_indexes = NdxActionIndexes.new()

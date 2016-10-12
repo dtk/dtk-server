@@ -58,8 +58,8 @@ module DTK; class Task; class Template
         self[:action_defs] || []
       end
 
-      def match_action?(action)
-        action.is_a?(self.class) &&
+      def match_action?(action, opts = {})
+        action.is_a?(opts[:class]||self.class) &&
         node_name() == action.node_name &&
         component_type() == action.component_type()
       end

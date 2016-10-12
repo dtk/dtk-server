@@ -41,7 +41,8 @@ module DTK; module CommonDSL
           if node.get_admin_op_status == 'pending'
             delete_node_and_nested_components(node, result, force_delete: true)
           else
-            # TODO: DTK-2680: add code that generates node delete task and add it to converge task
+            ec2_node_component = Component::Template.get_augmented_component_template?(assembly_instance, 'ec2::node', namespace: 'aws', use_base_template: true)
+            new_component_idh = assembly_instance.add_component(node.id_handle, ec2_node_component, node[:display_name], splice_in_delete_action: true)
           end
         end
 

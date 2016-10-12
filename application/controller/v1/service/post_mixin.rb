@@ -130,6 +130,30 @@ module DTK
       def set_attributes
         rest_ok_response assembly_instance.set_attributes(ret_params_av_pairs, update_meta: true, update_dsl: true)
       end
+      
+      def set_attribute
+       assembly       = assembly_instance()
+       opts           = ret_params_hash(:service_instance, :pattern, :value)
+       av_pairs       = ret_params_av_pairs()
+       
+       if semantic_data_type = ret_request_params(:datatype)
+         unless Attribute::SemanticDatatype.isa?(semantic_data_type)
+           fail ErrorUsage.new("The term (#{semantic_data_type}) is not a valid data type")
+         end
+         create_options.merge!(semantic_data_type: semantic_data_type)
+       end
+
+       # update_meta == true is the default
+       update_meta = ret_request_params(:update_meta)
+       opts.merge!(update_meta: true) unless !update_meta.nil? && !update_meta
+       opts.merge!(update_dsl: true)
+       
+       response = assembly.set_attributes(av_pairs, opts)
+       response.merge!(repo_updated: true)
+
+       rest_ok_response response    
+      end
+
 
       def start
         assembly_instance = assembly_instance()

@@ -94,7 +94,7 @@ module DTK; module ModuleCommonMixin
 
       # TODO: not sure if needed
       # delete master branch if not deleted after initial sync with remote
-      repo_with_branch.delete_local_brach_only('master')
+      # repo_with_branch.delete_local_brach_only('master')
 
       if ErrorUsage::Parsing.is_error?(non_nil_if_parsing_error)
         response[:dsl_parse_error] = non_nil_if_parsing_error

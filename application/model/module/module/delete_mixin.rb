@@ -90,8 +90,6 @@ module DTK; class BaseModule
           fail ErrorUsage.new("Version '#{version}' for specified component module does not exist!") if version
           fail ErrorUsage.new("Base version for specified component module does not exist. You have to specify version you want to delete!")
         end
-        # check if this module is dependency to other component/service module
-        raise_error_if_dependency(module_branch, version)
         CommonModule.delete_associated_service_module(self)
         delete_object(skip_validations: true)
       end

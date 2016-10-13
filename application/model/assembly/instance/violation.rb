@@ -36,6 +36,9 @@ module DTK
       def self.type
         Aux.underscore(Aux.demodulize(to_s)).to_sym
       end
+      def type
+        self.class.type
+      end
 
       # could be overwritten
       def self.impacted_by 
@@ -47,10 +50,6 @@ module DTK
       # must be overwritten
       def fix_text
         fail Error, "Missing method '#{self.class}#fix_text'"
-      end
-
-      def type 
-        self.class.type
       end
 
       def attr_display_name(attr, print_level = :component)

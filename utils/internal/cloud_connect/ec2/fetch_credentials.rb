@@ -53,7 +53,11 @@ module DTK
               connection = Excon.new(CONTAINER_CREDENTIALS_HOST)
               credential_path = ENV["AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"]
               role_data = connection.get(:path => credential_path, :expects => 200).body
+<<<<<<< d45f9ee53f775cd95853e96501bdf98d14e669b7
 
+=======
+
+>>>>>>> DTK-2712: fix
               connection = Excon.new(INSTANCE_METADATA_HOST)
               az_data = connection.get(:path => INSTANCE_METADATA_AZ, :expects => 200).body
             else
@@ -62,9 +66,15 @@ module DTK
               role_data = connection.get(:path => INSTANCE_METADATA_PATH+role_name, :expects => 200).body
               az_data = connection.get(:path => INSTANCE_METADATA_AZ, :expects => 200).body
             end
+<<<<<<< d45f9ee53f775cd95853e96501bdf98d14e669b7
 
             session = Fog::JSON.decode(role_data)
 
+=======
+
+            session = Fog::JSON.decode(role_data)
+
+>>>>>>> DTK-2712: fix
             {
               region: region,
               aws_access_key_id: session['AccessKeyId'],
@@ -78,7 +88,15 @@ module DTK
           end
         end
       end
+<<<<<<< d45f9ee53f775cd95853e96501bdf98d14e669b7
 
     end
   end
 end
+
+=======
+
+    end
+  end
+end
+>>>>>>> DTK-2712: fix

@@ -28,7 +28,7 @@ module DTK
           tries -= 1
           ret = fetch_credentials_without_retry(region)
           if ret.nil? and tries > 0
-            Log.info("Retrying fetch_credentials") 
+            Log.info("Retrying fetch_credentials")
             sleep RETRY_SLEEP
           end
         end
@@ -53,7 +53,11 @@ module DTK
               connection = Excon.new(CONTAINER_CREDENTIALS_HOST)
               credential_path = ENV["AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"]
               role_data = connection.get(:path => credential_path, :expects => 200).body
+<<<<<<< 9e5d2db88986e7334648210f29ee6e50103c34c5
               
+=======
+
+>>>>>>> DTK-2712: fix
               connection = Excon.new(INSTANCE_METADATA_HOST)
               az_data = connection.get(:path => INSTANCE_METADATA_AZ, :expects => 200).body
             else
@@ -62,9 +66,15 @@ module DTK
               role_data = connection.get(:path => INSTANCE_METADATA_PATH+role_name, :expects => 200).body
               az_data = connection.get(:path => INSTANCE_METADATA_AZ, :expects => 200).body
             end
+<<<<<<< 9e5d2db88986e7334648210f29ee6e50103c34c5
             
             session = Fog::JSON.decode(role_data)
             
+=======
+
+            session = Fog::JSON.decode(role_data)
+
+>>>>>>> DTK-2712: fix
             {
               region: region,
               aws_access_key_id: session['AccessKeyId'],
@@ -78,8 +88,15 @@ module DTK
           end
         end
       end
+<<<<<<< 9e5d2db88986e7334648210f29ee6e50103c34c5
       
     end
   end
 end
 
+=======
+
+    end
+  end
+end
+>>>>>>> DTK-2712: fix

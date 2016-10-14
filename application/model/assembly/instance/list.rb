@@ -157,6 +157,8 @@ module DTK; class  Assembly
                 target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
             end
           end
+          set_os_type_on_node_group_member!(node) if node[:os_type].nil? and is_node_group_member?(node.id_handle)
+
           node.sanitize!()
 
           is_assembly_wide_node = node.is_assembly_wide_node?
@@ -176,8 +178,25 @@ module DTK; class  Assembly
 
         nodes.sort { |a, b| a[:display_name] <=> b[:display_name] }
       end
-
       private :list_nodes
+
+      # TODO: change so that node group members have os_type set, rather than neding to fill it in
+      def set_os_type_on_node_group_member!(node_group_member)
+        if node_group_parent = find_parent_of_node_group_member?(node_group_member)
+          node_group_member[:os_type] = node_group_parent.get_field?(:os_type)
+        end
+      end
+      private :set_os_type_on_node_group_member!
+      def find_parent_of_node_group_member?(node_group_member)
+        ng_mh = node_group_member.model_handle(:node_group)
+        if ndx_node_group = NodeGroup.get_node_groups_containing_nodes(ng_mh, Node::Filter::NodeList.new([node_group_member.id_handle]))
+          if node_group_id__node_group = ndx_node_group[node_group_member.id]
+            node_group_id__node_group.values.first
+          end
+        end
+      end
+      private :find_parent_of_node_group_member?
+      
       def set_node_display_name!(node)
         node[:display_name] = node.assembly_node_print_form()
       end

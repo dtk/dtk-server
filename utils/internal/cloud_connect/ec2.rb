@@ -19,13 +19,14 @@
 module DTK
   class CloudConnect
     class EC2 < self
-      r8_nested_require('ec2', 'image_info_cache')
+      require_relative('ec2/image_info_cache')
+      require_relative('ec2/fetch_credentials')
 
       WAIT_FOR_NODE = 10 # seconds
 
       def initialize(credentials_with_region)
         Log.info("Setting up AWS connection ...")
-        @conn = Fog::Compute::AWS.new(credentials_with_region)
+        @conn = Fog::Compute::AWS.new(fetch_credentials_if_needed(credentials_with_region))
         @override_conns = OverrideConnectionOptions.inject({}) do |h, (k, conn_opts)|
           h.merge(k => Fog::Compute::AWS.new(credentials_with_region.merge(connection_options: conn_opts)))
         end
@@ -153,7 +154,6 @@ module DTK
         fail Error, "Node (Instance ID: '#{instance_id}') not ready after #{tries * WAIT_FOR_NODE} seconds."
       end
 
-
       def server_stop(instance_id)
         request_context do
           hash_form(conn.stop_instances(instance_id))
@@ -252,6 +252,16 @@ module DTK
       end
 
       private
+
+      def fetch_credentials_if_needed(credentials_with_region)
+# TODO: DTK-2712: see if better without FetchCredentials.fetch_credentials
+#return credentials_with_region
+        if credentials_with_region[:use_iam_profile]
+          FetchCredentials.fetch_credentials(credentials_with_region[:region])
+        else
+          credentials_with_region
+        end
+      end
 
       def conn(key = nil)
         key.nil? ? @conn : (@override_conns[key] || @conn)

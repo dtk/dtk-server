@@ -503,8 +503,9 @@ module DTK; class  Assembly
       delete_from_database = Task.create_for_delete_from_database(assembly_instance, nil, node, opts)
 
       task.add_subtask(command_and_control_action) if command_and_control_action
-      return task if opts[:return_task]
       task.add_subtask(delete_from_database) if delete_from_database
+      return task if opts[:return_task]
+
       task = task.save_and_add_ids()
 
       workflow = Workflow.create(task)
@@ -603,12 +604,16 @@ module DTK; class  Assembly
 
       if nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
         nodes.each do |node|
-          node_top_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true, assembly_instance: assembly_instance))
+          #args = Opts.new(delete_action: 'delete_node', delete_params: [node.id_handle()]))
+          node_top_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle()]))
           task.add_subtask(node_top_task) if node_top_task
         end
       end
 
-      delete_assembly_from_database = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
+      unless opts[:uninstall].nil?
+        delete_assembly_from_database = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
+      end
+
       task.add_subtask(delete_assembly_from_database) if delete_assembly_from_database
 
       task

@@ -118,7 +118,11 @@ module DTK
       end
 
       def delete
-        Assembly::Instance.delete(assembly_instance.id_handle, destroy_nodes: true)
+        uninstall = request_params(:uninstall)
+        opts = Opts.new(delete_action: 'delete', delete_params: [assembly_instance.id_handle()])
+        opts.merge!(recursive: false, uninstall: uninstall)
+        assembly_instance.exec__delete(opts)
+
         rest_ok_response
       end
 

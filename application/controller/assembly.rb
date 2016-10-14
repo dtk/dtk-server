@@ -30,7 +30,7 @@ module DTK
         # returning module_repo_info so client can update this in its local module
         rest_ok_response Assembly::Template.delete_and_ret_module_repo_info(id_handle(assembly_id))
       else #subtype == :instance
-        Assembly::Instance.delete(id_handle(assembly_id), destroy_nodes: true)
+        Assembly::Instance.delete(id_handle(assembly_id), destroy_nodes: true, uninstall: true)
         rest_ok_response
       end
     end
@@ -40,6 +40,7 @@ module DTK
 
       opts = Opts.new(delete_action: 'delete', delete_params: [assembly.id_handle()])
       opts.merge!(recursive: true) if ret_request_params(:recursive)
+      opts.merge!(uninstall: true)
 
       rest_ok_response assembly.exec__delete(opts)
     end

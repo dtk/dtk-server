@@ -34,9 +34,11 @@ module DTK; class  Assembly
 
         Delete.contents(assembly_idhs, opts)
 
-        ret = delete_instances(assembly_idhs)
-        delete_instances(target_idhs_to_delete) unless target_idhs_to_delete.empty?
-        ret
+        unless opts[:uninstall].nil?
+          ret = delete_instances(assembly_idhs)
+          delete_instances(target_idhs_to_delete) unless target_idhs_to_delete.empty?
+          ret
+        end
       end
 
       def delete_contents(assembly_idhs, opts = {})

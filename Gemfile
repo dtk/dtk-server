@@ -6,7 +6,6 @@ gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
 gem 'dtk-dsl', :github => 'dtk/dtk-dsl'
 
 # required to start a server
-gem 'bundler'
 gem 'fog'
 gem 'ramaze', '2012.04.14'
 gem 'sequel', '3.25.0'

@@ -34,7 +34,7 @@ module DTK; class AssemblyModule
     end
 
     def self.create_assembly_module_branch?(assembly, component_module, opts = {})
-      new(assembly).create_assembly_module_branch?(component_module, opts)
+      new(assembly).create_assembly_module_branch?(component_module)
     end
     def create_assembly_module_branch?(component_module)
       am_version = assembly_module_version()

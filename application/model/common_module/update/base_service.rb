@@ -108,7 +108,7 @@ module DTK
         private
 
         def self.dsl_file_obj_from_repo(module_branch)
-          CommonDSL::Parse.matching_common_module_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
+          CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
         end
         
       end

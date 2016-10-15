@@ -360,9 +360,13 @@ module DTK; class RepoManager
     end
 
     # returns :no_change, :changed, :merge_needed
-    def fast_foward_pull(remote_branch, force = false, remote_name = nil)
-      remote_name ||= default_remote_name
-      remote_ref = "#{remote_name}/#{remote_branch}"
+    # opts can have keys:
+    #   :force
+    #   :remote_name
+    def fast_foward_pull(remote_branch, opts = {})
+      remote_name = opts[:remote_name] || default_remote_name
+      remote_ref  = "#{remote_name}/#{remote_branch}"
+
       merge_rel = ret_merge_relationship(:remote_branch, remote_ref, fetch_if_needed: true)
       ret =
         case merge_rel
@@ -372,7 +376,7 @@ module DTK; class RepoManager
          else fail Error.new("Unexpected merge relation (#{merge_rel})")
         end
 
-      if force
+      if opts[:force]
         checkout(@branch) do
           git_command__fetch_all
           git_command__hard_reset(remote_ref)

@@ -169,18 +169,42 @@ module DTK
     # opts can have keys:
     #   :force
     def pull_repo_changes?(commit_sha, opts = {})
-      update_object!(:branch, :current_sha)
-      if is_set_to_sha?(commit_sha)
+      if commit_sha == current_sha
         nil
       else
-        merge_result = RepoManager.fast_foward_pull(self[:branch], opts[:force] || false, self)
-        if merge_result == :merge_needed
-          fail Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_name()})")
-        end
+        fast_foward_pull_raise_error_if_merge_needed(opts)
         set_sha(commit_sha)
         true
       end
     end
+
+    # returns nil if no changes, otherwise returns diffs
+    # opts can have keys:
+    #   :force
+    def pull_repo_changes_and_return_diffs_summary(commit_sha, opts = {})
+      diffs_summary = nil
+      update_object!(:branch, :current_sha)
+      current_sha = current_sha()
+      fail Error, "Unexpected that commit_sha == current_sha" if commit_sha == current_sha
+
+      fast_foward_pull_raise_error_if_merge_needed(opts)
+
+      if rev_diffs_summary = RepoManager.diff(current_sha, self).ret_summary
+        diffs_summary = rev_diffs_summary.reverse
+      end
+
+      diffs_summary 
+    end
+
+    # opts can have keys:
+    #   :force
+    def fast_foward_pull_raise_error_if_merge_needed(opts = {})
+      merge_result = RepoManager.fast_foward_pull(self[:branch], opts, self)
+      if merge_result == :merge_needed
+        fail Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_name()})")
+      end
+    end
+    private :fast_foward_pull_raise_error_if_merge_needed
 
     def current_sha
       get_field?(:current_sha)

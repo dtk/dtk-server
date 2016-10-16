@@ -27,6 +27,8 @@ module DTK
           response = ConfigAgent.load(:delete_from_database).execute(task_action, top_task_idh)
         elsif type = ConfigAgent::Type.is_a?(config_agent_type, [:command_and_control_action])
           response = ConfigAgent.load(:command_and_control_action).execute(task_action, top_task_idh, task_idh)
+        elsif type = ConfigAgent::Type.is_a?(config_agent_type, [:cleanup])
+          response = ConfigAgent.load(:cleanup).execute(task_action, top_task_idh)
         else
           Log.error("Not treating server execution of config_agent_type '#{config_agent_type}'")
         end

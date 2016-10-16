@@ -17,7 +17,7 @@
 #
 module DTK; class Task
   class Action
-    class DeleteFromDatabase < self
+    class Cleanup < self
       def initialize(_type, hash, task_idh = nil)
         super(hash)
       end
@@ -35,7 +35,7 @@ module DTK; class Task
         new(:hash, hash)
       end
 
-      def execute_delete_action(top_task_idh)
+      def execute_cleanup_action(top_task_idh)
         top_task = top_task_idh.create_object()
 
         assembly =
@@ -50,6 +50,8 @@ module DTK; class Task
 
           if self[:node] || self[:component]
             assembly_instance.send(self[:delete_action], *self[:delete_params])
+            module_branch = AssemblyModule::Service.get_service_instance_branch(assembly_instance)
+            CommonDSL::Generate::ServiceInstance.generate_dsl(assembly_instance, module_branch)
           else
             component_idh = assembly.id_handle.createIDH(id: assembly.id(), model_name: :component)
             assembly_instance.class.send(self[:delete_action], component_idh, self[:opts])
@@ -84,7 +86,7 @@ module DTK; class Task
       end
 
       def config_agent_type
-        ConfigAgent::Type::Symbol.delete_from_database
+        ConfigAgent::Type::Symbol.cleanup
       end
 
       def update_state_change_status(task_mh, status)

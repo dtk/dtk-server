@@ -164,6 +164,10 @@ module DTK
       [:node_config, nil]
     end
 
+    def set_inter_node_stage!(internode_stage_index)
+      self[:inter_node_stage] = internode_stage_index && internode_stage_index.to_s
+    end
+
 
     private
 

@@ -41,11 +41,34 @@ module DTK; class Task; class Template
       def add_subtasks!(parent_task, internode_stage_index, assembly_idh = nil)
         ret = []
         each_node_actions do |node_actions|
-          if action = node_actions.add_subtask!(parent_task, internode_stage_index, assembly_idh)
-            ret << action
+          if node_actions.is_ec2_node_component_task?
+            add_ec2_node_subtasks(parent_task, node_actions, ret)
+          else
+            if action = node_actions.add_subtask!(parent_task, internode_stage_index, assembly_idh)
+              ret << action
+            end
           end
         end
         ret
+      end
+
+      def add_ec2_node_subtasks(parent_task, node_actions, ret)
+        n_node            = node_actions.node
+        assembly_instance = n_node.get_assembly?
+        opts              = Opts.new(delete_action: 'delete_node', delete_params: [n_node.id_handle])
+
+        parent_task[:display_name] = "delete node #{n_node.get_field?(:display_name)}"
+        parent_task[:temporal_order] = 'sequential'
+
+        command_and_control_action = Task.create_for_command_and_control_action(assembly_instance, 'destroy_node?', n_node[:id], n_node, opts.merge(return_executable_action: true))
+        sub_task = Task.create_stub(parent_task.model_handle(), executable_action: command_and_control_action, display_name: 'destroy node')
+        parent_task.add_subtask(sub_task)
+        ret << command_and_control_action
+
+        cleanup  = Task::Action::Cleanup.create_hash(assembly_instance, nil, n_node, opts)
+        sub_task = Task.create_stub(parent_task.model_handle(), executable_action: cleanup, display_name: 'cleanup')
+        parent_task.add_subtask(sub_task)
+        ret << cleanup
       end
 
       def find_earliest_match?(action_match, ndx_action_indexes)

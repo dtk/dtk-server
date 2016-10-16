@@ -47,6 +47,7 @@ module DTK; class Task
 
     def create_for_delete_from_database(assembly, component, node, opts = {})
       task = Create.create_for_delete_from_database(assembly, component, node, opts)
+      return task if opts[:return_executable_action]
       # ret = NodeGroupProcessing.decompose_node_groups!(task, opts)
 
       unless opts[:skip_running_check]
@@ -64,6 +65,7 @@ module DTK; class Task
 
     def create_for_command_and_control_action(assembly, action, params, node, opts = {})
       task = Create.create_for_command_and_control_action(assembly, action, params, node, opts)
+      return task if opts[:return_executable_action]
       NodeGroupProcessing.decompose_node_groups!(task, opts)
     end
 
@@ -122,6 +124,7 @@ module DTK; class Task
 
       # node = node.eql?('assembly_wide') ? assembly.has_assembly_wide_node? : assembly.get_node?([:eq, :display_name, node])
       executable_action = Action::DeleteFromDatabase.create_hash(assembly, component, node, opts)
+      return executable_action if opts[:return_executable_action]
       subtask = create_new_task(task_mh, executable_action: executable_action)
       ret.add_subtask(subtask)
       ret
@@ -131,6 +134,7 @@ module DTK; class Task
       task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
       ret = create_top_level_task(task_mh, assembly, task_action: (opts[:task_action]||'delete_nodes'))
       executable_action = Action::CommandAndControlAction.create_hash(assembly, action, params, node, opts)
+      return executable_action if opts[:return_executable_action]
       subtask = create_new_task(task_mh, executable_action: executable_action)
       ret.add_subtask(subtask)
       ret

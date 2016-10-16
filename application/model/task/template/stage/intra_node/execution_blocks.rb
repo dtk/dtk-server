@@ -27,6 +27,12 @@ module DTK; class Task; class Template
         executable_action
       end
 
+      def is_ec2_node_component_task?
+        if component = has_action_with_method? && (components.size == 1) && components.first
+          component[:component_type].eql?('ec2__node')
+        end
+      end
+
       def find_earliest_match?(action_match, action_indexes)
         each_with_index do |eb, i|
           if eb.find_earliest_match?(action_match, action_indexes)

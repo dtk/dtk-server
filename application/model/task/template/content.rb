@@ -66,7 +66,11 @@ module DTK; class Task
       # if action is explicitly included in task template then delete the action from this object and return updated object
       # else return nil
       def delete_explicit_action?(action, action_list)
-        if indexed_action = action_list.find { |a| a.match_action?(action) }
+        opts = action.is_a?(Action::WithMethod) ? { class: Action::WithMethod } : {}
+        if indexed_action = action_list.find { |a| a.match_action?(action, opts) }
+          if action.is_a?(Action::WithMethod)
+            indexed_action = action if indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]")
+          end
           if action_match = includes_action?(indexed_action)
             unless action_match.in_multinode_stage
               delete_action!(action_match)

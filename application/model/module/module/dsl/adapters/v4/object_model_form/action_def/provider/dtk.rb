@@ -31,10 +31,12 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
 
         Docker = 'docker'
         Variations::Docker = ['docker_image', 'docker_run_params', 'docker_file_template']
+
+        DeleteNode = 'delete_node'
       end
 
       def self.matches_input_hash?(input_hash)
-        !!Constant.matches?(input_hash, :Commands) || !!Constant.matches?(input_hash, :Functions) || !!Constant.matches?(input_hash, :Docker)
+        !!Constant.matches?(input_hash, :Commands) || !!Constant.matches?(input_hash, :Functions) || !!Constant.matches?(input_hash, :Docker) || !!Constant.matches?(input_hash, :DeleteNode)
       end
 
       def provider_specific_fields(input_hash)
@@ -46,6 +48,9 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
           elsif docker = Constant.matches?(input_hash, :Docker)
             # { docker: docker.is_a?(Array) ? docker : [docker] }
             { docker: [input_hash]}
+          elsif delete_node = Constant.matches?(input_hash, :DeleteNode)
+            # { docker: docker.is_a?(Array) ? docker : [docker] }
+            { delete_node: [delete_node]}
           end
 
         stdout_err = input_hash['stdout_and_stderr']
@@ -69,6 +74,10 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
 
       def external_ref_from_docker
         { type: 'docker' }
+      end
+
+      def external_ref_from_delete_node
+        { type: 'delete_node' }
       end
     end
   end; end

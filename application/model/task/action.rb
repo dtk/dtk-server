@@ -49,6 +49,7 @@ module DTK; class Task
           when 'Hash' then InstallAgent.new(:hash, hash, task_idh) #RICH-WF; Aldin compensating form bug in task creation
           when 'DeleteFromDatabase' then DeleteFromDatabase.new(:hash, hash, task_idh)
           when 'CommandAndControlAction' then CommandAndControlAction.new(:hash, hash, task_idh)
+          when 'Cleanup' then Cleanup.new(:hash, hash, task_idh)
           else fail Error.new("Unexpected task_action_type (#{task_action_type})")
         end
       end
@@ -236,6 +237,7 @@ module DTK; class Task
     r8_nested_require('action', 'execute_smoketest')
     r8_nested_require('action', 'delete_from_database')
     r8_nested_require('action', 'command_and_control_action')
+    r8_nested_require('action', 'cleanup')
 
     class Result < HashObject
       def initialize(hash = {})

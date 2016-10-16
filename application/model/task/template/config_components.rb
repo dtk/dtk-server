@@ -39,7 +39,14 @@ module DTK; class Task
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
         task_action = DefaultTaskActionForUpdates
         if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, task_action)
-          action_to_delete = Action.create(component.add_title_field?().merge(node: node))
+          update_opts = {}
+          # special case for ec2_node component used for generating delete-node workflow
+          if component.get_field?(:component_type).eql?('ec2__node')
+            cmp_instance = Component::Instance.create_from_component(component)
+            action_def = cmp_instance.get_action_def?('delete')
+            update_opts.merge!(:action_def => action_def)
+          end
+          action_to_delete = Action.create(component.add_title_field?().merge(node: node), update_opts)
           if updated_template_content = task_template_content.delete_explicit_action?(action_to_delete, assembly_cmp_actions)
             Persistence::AssemblyActions.persist(assembly, updated_template_content)
           end

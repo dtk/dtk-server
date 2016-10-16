@@ -69,6 +69,8 @@ module DTK
       foreign_key :implementation_id, :implementation, FK_SET_NULL_OPT
       foreign_key :module_branch_id, :module_branch, FK_CASCADE_OPT #treated as containment
 
+      column :to_be_deleted, :boolean, default: false
+
       # TODO: thionk this can be deprecated
       column :link_defs, :json
       # deprecate below for above

@@ -54,6 +54,7 @@ module DTK
       column :ordered_component_ids, :text
       column :agent_git_commit_id, :text
       column :ng_member_deleted, :boolean
+      column :to_be_deleted, :boolean, default: false
 
       virtual_column :status, type: :varchar, local_dependencies: [:is_deployed, :operational_status]
       column :ui, :json

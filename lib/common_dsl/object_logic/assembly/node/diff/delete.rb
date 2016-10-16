@@ -43,6 +43,7 @@ module DTK; module CommonDSL
           else
             ec2_node_component = Component::Template.get_augmented_component_template?(assembly_instance, 'ec2::node', namespace: 'aws', use_base_template: true)
             new_component_idh = assembly_instance.add_component(node.id_handle, ec2_node_component, node[:display_name], splice_in_delete_action: true)
+            node.update_from_hash_assignments(to_be_deleted: true)
           end
         end
 

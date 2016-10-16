@@ -31,11 +31,15 @@ module DTK
         self[:component_module]
       end
       def component_module
-        component_module? || fail(Error, "Unexpected that component_module? is nil")
+        component_module? ||  raise_unexpected_nil('component_module?')
       end
 
       def repo
-        self[:repo]  || fail(Error, "Unexpected that self[:repo] is nil")
+        self[:repo]  || raise_unexpected_nil('self[:repo]')
+      end
+
+      def branch_name
+        self[:branch]  || raise_unexpected_nil('self[:branch]')
       end
 
       # opts can have keys:
@@ -73,6 +77,7 @@ module DTK
       end
 
       private
+
       # assumed that all raw_module_rows agree on all except repo_remote
       def self.aggregate_by_remote_namespace(raw_module_rows, opts = {})
         ret = nil
@@ -97,6 +102,11 @@ module DTK
         
         raw_module_rows.first.merge(repo_remotes: repo_remotes)
       end
+
+      def raise_unexpected_nil(what)
+        fail(Error, "Unexpected that #{what} is nil")
+      end
+
     end
   end
 end

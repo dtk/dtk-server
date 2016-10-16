@@ -572,7 +572,7 @@ module DTK; class RepoManager
     end
 
     def pull_changes(remote_name = nil, remote_branch = nil, force = false)
-      # note: even though generated git comamdn hash --git-dor set, need to chdir
+      # note: even though generated git comamdn hash --git-dir set, need to chdir
       Dir.chdir(@path) do
         git_command__pull(@branch, remote_branch || @branch, remote_name, force)
       end
@@ -624,6 +624,18 @@ module DTK; class RepoManager
       end
     end
     private :checkout_other_branch?
+
+    def add_squashed_subtree(prefix, external_repo, external_branch)
+      checkout(@branch) do
+        git_command__add_squashed_subtree(prefix, external_repo, external_branch)
+      end
+    end
+
+    def push_squashed_subtree(prefix, external_repo, external_branch)
+      checkout(@branch) do
+        git_command__push_squashed_subtree(prefix, external_repo, external_branch)
+      end
+    end
 
     def get_branches
       @grit_repo.branches.map(&:name)

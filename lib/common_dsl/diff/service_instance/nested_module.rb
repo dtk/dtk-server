@@ -18,24 +18,11 @@
 module DTK; module CommonDSL
   class Diff
     module ServiceInstance
-      class NestedModule
-        def initialize(nested_module_info, aug_module_branch, service_instance, service_module_branch)
-          @module_name            = nested_module_info.module_name
-          @impacted_files         = nested_module_info.impacted_files
-          @aug_module_branch      = aug_module_branch
-          @service_instance       = service_instance
-          @service_module_branch  = service_module_branch
-        end
-        private :initialize
-
+      module NestedModule
         def self.process_nested_modules?(diff_result, service_instance, service_module_branch, impacted_files)
           if nested_modules_info = impacted_nested_modules_info?(impacted_files)
             process_nested_modules(diff_result, nested_modules_info, service_instance, service_module_branch)
           end
-        end
-
-        def process(diff_result)
-          pp [:aug_module_branch, @aug_module_branch]
         end
 
         private
@@ -54,14 +41,16 @@ module DTK; module CommonDSL
               fail Error, "Unexpected that ndx_existing_aug_module_branches[#{module_name}] is nil"
             end
             base_version = existing_aug_mb.version
-            aug_module_branch = service_instance.get_or_create_service_specific_aug_module_branch(existing_aug_mb.component_module, base_version:  base_version)
-            new(nested_module_info, aug_module_branch, service_instance, service_module_branch).process(diff_result)
+            aug_nested_module_branch = service_instance.get_or_create_service_specific_aug_module_branch(existing_aug_mb.component_module, base_version:  base_version)
+            process_nested_module(diff_result, service_module_branch, nested_module_info, aug_nested_module_branch)
           end
-          raise 'here'
         end
-
-        def self.get_or_create_service_specific_aug_module_branch(service_instance, existing_aug_module_branch)
-
+        
+        def self.process_nested_module(diff_result, service_module_branch, nested_module_info, aug_nested_module_branch) 
+          # TODO: process component_module_dsl_info if dsl file impacted
+          subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: nested_module_info.module_name).base_dir
+          service_module_branch.push_subtree_to_nested_module(subtree_prefix, aug_nested_module_branch)
+          # TODO: update diff_result to indicate module taht was updated 
         end
 
       end

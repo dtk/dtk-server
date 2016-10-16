@@ -28,11 +28,11 @@ module DTK; module CommonDSL
         diff_result = Result.new(repo_diffs_summary)
         impacted_files = repo_diffs_summary.impacted_files
 
-        process_top_dsl_file(diff_result, service_instance, module_branch, impacted_files)
+        process_top_dsl_file?(diff_result, service_instance, module_branch, impacted_files)
         pp [:diff_result, diff_result]
         return diff_result if diff_result.any_errors?
 
-        NestedModule.process_nested_modules(diff_result, service_instance, module_branch, impacted_files)
+        NestedModule.process_nested_modules?(diff_result, service_instance, module_branch, impacted_files)
         diff_result
       end
 
@@ -42,7 +42,7 @@ module DTK; module CommonDSL
       # TODO: DTK-2665: look at more consistently either putting error messages on results
       # or throwing errors
       # also look at doing pinpointed violation chaecking leveraging violation code
-      def self.process_top_dsl_file(diff_result, service_instance, module_branch, impacted_files)
+      def self.process_top_dsl_file?(diff_result, service_instance, module_branch, impacted_files)
         if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
           service_instance_parse = dsl_file_obj.parse_content(:service_instance)
           service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)

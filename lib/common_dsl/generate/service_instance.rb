@@ -59,7 +59,7 @@ module DTK
         end
 
         def self.target_relative_dir(module_name)
-          FileType::ServiceInstance::NestedModule.new(module_name).base_dir
+          FileType::ServiceInstance::NestedModule.new(module_name: module_name).base_dir
         end
         
       end

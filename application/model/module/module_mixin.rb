@@ -160,18 +160,23 @@ module DTK
       ret
     end
 
+    # opts can have keys:
+    #   :force
+    #   :generate_docs
+    #   :do_not_raise_if_exist
+    #   :do_not_raise
+    #   :force_parse
+    #   :update_from_includes
     def create_new_module_version(version, diffs_summary, opts = {})
       ret = ModuleDSLInfo.new
       # do pull and see if any changes need the model to be updated
       force         = opts[:force]
       generate_docs = opts[:generate_docs]
 
-      # set frozen field in module branch object to true for new version
-      opts.merge!(frozen: true)
-
       # create module branch for new version
       begin
-        module_branch = self.create_new_version(nil, version, opts)
+        # set frozen field in module branch object to true for new version
+        module_branch = self.create_new_version(nil, version, frozen: true)
       rescue VersionExist => e
         return {version_exist: true} if opts[:do_not_raise_if_exist]
         fail e
@@ -183,7 +188,8 @@ module DTK
       parse_needed = (opts[:force_parse] || generate_docs || !module_branch.dsl_parsed?())
       update_from_includes = opts[:update_from_includes]
 
-      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
+      opts_update = Aux.hash_subset(opts, [:do_not_raise, :force_parse, :update_from_includes])
+      # TODO: took this out; maksing sure not removing any needed options: opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
       opts_update.merge!(ret_parsed_dsl: ParsedDSL.create(self)) if generate_docs
       ret = update_model_from_clone_changes(nil, diffs_summary, module_branch, version, opts_update)
 

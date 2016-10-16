@@ -62,21 +62,6 @@ TODO: see if still can be levereged
           }
         end
 
-        def augment_with_component_modules!(module_branches)
-          component_module_mh = assembly_instance.model_handle(:component_module)
-          sp_hash = {
-            cols: [:id, :group_id, :display_name],
-            filter: [:oneof, :id, module_branches.map { |mb| mb[:component_id] }]
-          }
-          ndx_component_modules = Model.get_objs(component_module_mh, sp_hash).inject({}) do |h, component_module| 
-            h.merge(component_module.id => component_module) 
-          end
-          module_branches.each do |module_branch|
-            module_branch[:component_module] = ndx_component_modules[module_branch[:component_id]]
-          end
-          module_branches
-        end
-
         def project
           @project ||= assembly_instance.get_target.get_project
         end

@@ -27,7 +27,7 @@ module DTK
     #   ....
     # }
     class Lock < Hash
-      r8_nested_require('lock', 'missing_information')
+      require_relative('lock/missing_information')
 
       attr_reader :assembly_instance
       def initialize(assembly_instance)
@@ -45,15 +45,24 @@ module DTK
         get(assembly_instance, opts[:types] || AllTypes, Aux.hash_subset(opts, [:with_module_branches]))
       end
 
-      def self.get_corresponding_aug_module_branches(assembly_instance)
+      # opts can have keys
+      #  :augment_with_component_modules (Boolean)
+      def self.get_corresponding_aug_module_branches(assembly_instance, opts = {})
         locked_module_refs = get_all(assembly_instance, with_module_branches: true)
         module_branch_mh = assembly_instance.model_handle(:module_branch)
         module_branches = locked_module_refs.values.map do |locked_module_ref|
           info = locked_module_ref[:info]
-          module_branch_hash = info[:module_branch].merge(namespace: info[:namespace], module_name: info[:module_name])
-          ModuleBranch.create_stub(module_branch_mh, module_branch_hash)
-        end
+          unless (info || {})[:module_branch]
+            Log.error_pp(['Unexpected that locked_module_ref[:info] is missing :module_branch for', locked_module_ref[:info]])
+            nil
+          else
+            module_branch_hash = info[:module_branch].merge(namespace: info[:namespace], module_name: info[:module_name])
+            ModuleBranch.create_stub(module_branch_mh, module_branch_hash)
+          end
+        end.compact
         augment_with_repos!(module_branches)
+        augment_with_component_modules!(module_branches) if opts[:augment_with_component_modules]
+        module_branches
       end
 
       def self.get_implementations(assembly_instance, module_names)
@@ -114,20 +123,6 @@ module DTK
       end
 
       private
-
-      def self.augment_with_repos!(module_branches)
-        return module_branches if module_branches.empty?
-        repo_mh = module_branches.first.model_handle(:repo)
-        sp_hash = {
-          cols: [:id, :group_id, :display_name, :repo_name, :local_dir],
-          filter: [:oneof, :id, module_branches.map { |mb| mb[:repo_id] }]
-        }
-        ndx_repos = Model.get_objs(repo_mh, sp_hash).inject({}) { |h, repo| h.merge(repo.id => repo) }
-        module_branches.each do |module_branch|
-          module_branch[:repo] = ndx_repos[module_branch[:repo_id]]
-        end
-        module_branches
-      end
 
       def self.get_module_refs_lock?(assembly_instance)
         module_ref_locks = ModuleRef::Lock.get(assembly_instance)
@@ -258,6 +253,37 @@ module DTK
         element.implementation ||
           (Log.error("Unexpected that the module '#{element.namespace}:#{element.module_name}' does not have an corresponding implementation object"); nil)
       end
+
+      def self.augment_with_repos!(module_branches)
+        return module_branches if module_branches.empty?
+        repo_mh = module_branches.first.model_handle(:repo)
+        sp_hash = {
+          cols: [:id, :group_id, :display_name, :repo_name, :local_dir],
+          filter: [:oneof, :id, module_branches.map { |mb| mb[:repo_id] }]
+        }
+        ndx_repos = Model.get_objs(repo_mh, sp_hash).inject({}) { |h, repo| h.merge(repo.id => repo) }
+        module_branches.each do |module_branch|
+          module_branch[:repo] = ndx_repos[module_branch[:repo_id]]
+        end
+        module_branches
+      end
+
+      def self.augment_with_component_modules!(module_branches)
+        return module_branches if module_branches.empty?
+        component_module_mh = module_branches.first.model_handle(:component_module)
+        sp_hash = {
+          cols: [:id, :group_id, :display_name],
+          filter: [:oneof, :id, module_branches.map { |mb| mb[:component_id] }]
+        }
+        ndx_component_modules = Model.get_objs(component_module_mh, sp_hash).inject({}) do |h, component_module| 
+          h.merge(component_module.id => component_module) 
+        end
+        module_branches.each do |module_branch|
+          module_branch[:component_module] = ndx_component_modules[module_branch[:component_id]]
+        end
+        module_branches
+      end
+
     end
   end
 end

@@ -125,7 +125,7 @@ module DTK
     end
 
     def get_linked_remote_repos(opts = {})
-      (get_augmented_workspace_branch(opts.merge(include_repo_remotes: true)) || {})[:repo_remotes] || []
+      (get_augmented_module_branch(opts.merge(include_repo_remotes: true)) || {})[:repo_remotes] || []
     end
 
     def default_linked_remote_repo
@@ -261,31 +261,6 @@ module DTK
     end
     def dsl_parsed?
       get_field?(:dsl_parsed)
-    end
-
-    # assumed that all raw_module_rows agree on all except repo_remote
-    def aggregate_by_remote_namespace(raw_module_rows, opts = {})
-      ret = nil
-      # raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
-      if raw_module_rows.empty?()
-        fail Error.new('Unexepected that raw_module_rows is empty')
-      end
-      namespace = (opts[:filter] || {})[:remote_namespace]
-
-      repo_remotes = raw_module_rows.map do |e|
-        if repo_remote = e.delete(:repo_remote)
-          if namespace.nil? || namespace == repo_remote[:repo_namespace]
-            repo_remote
-          end
-        end
-      end.compact
-      # if filtering by namespace (tested by namespace is non-null) and nothing matched then return ret (which is nil)
-      # TODO: should we return nil when just repo_remotes.empty?
-      if namespace && repo_remotes.empty?
-        return ret
-      end
-
-      raw_module_rows.first.merge(repo_remotes: repo_remotes)
     end
 
     private

@@ -25,7 +25,7 @@ module DTK; class ModuleBranch; class Location
           version: version,
           remote_namespace: namespace
         }
-        module_obj.get_augmented_workspace_branch(filter: filter)
+        module_obj.get_augmented_module_branch(filter: filter)
       end
 
       private

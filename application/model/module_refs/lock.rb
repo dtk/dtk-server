@@ -47,22 +47,23 @@ module DTK
 
       # opts can have keys
       #  :augment_with_component_modules (Boolean)
+      # Returns array of ModuleBranch::Augmented objects
       def self.get_corresponding_aug_module_branches(assembly_instance, opts = {})
         locked_module_refs = get_all(assembly_instance, with_module_branches: true)
         module_branch_mh = assembly_instance.model_handle(:module_branch)
-        module_branches = locked_module_refs.values.map do |locked_module_ref|
+        aug_module_branches = locked_module_refs.values.map do |locked_module_ref|
           info = locked_module_ref[:info]
           unless (info || {})[:module_branch]
             Log.error_pp(['Unexpected that locked_module_ref[:info] is missing :module_branch for', locked_module_ref[:info]])
             nil
           else
-            module_branch_hash = info[:module_branch].merge(namespace: info[:namespace], module_name: info[:module_name])
-            ModuleBranch.create_stub(module_branch_mh, module_branch_hash)
+            aug_mb_hash = info[:module_branch].merge(namespace: info[:namespace], module_name: info[:module_name])
+            ModuleBranch.create_stub(module_branch_mh, aug_mb_hash).create_as_subclass_object(ModuleBranch::Augmented)
           end
         end.compact
-        augment_with_repos!(module_branches)
-        augment_with_component_modules!(module_branches) if opts[:augment_with_component_modules]
-        module_branches
+        augment_with_repos!(aug_module_branches)
+        augment_with_component_modules!(aug_module_branches) if opts[:augment_with_component_modules]
+        aug_module_branches
       end
 
       def self.get_implementations(assembly_instance, module_names)

@@ -32,8 +32,9 @@ module DTK
 
       # opts can have keys:
       #   :base_version
-      def create_nested_module?(component_module, opts = {})
-        AssemblyModule::Component.new(assembly_instance).create_module_for_service_instance?(component_module, { ret_module_branch: true }.merge(opts))
+      # Returns a ModuleBranch::Augmented object 
+      def get_or_create_service_specific_aug_module_branch(component_module, opts = {})
+        AssemblyModule::Component.new(assembly_instance).create_module_for_service_instance?(component_module, { ret_augmented_module_branch: true }.merge(opts))
       end
       
       def self.create_empty_module(project, local_params, opts = {})

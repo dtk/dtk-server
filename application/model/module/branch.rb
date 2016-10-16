@@ -20,6 +20,7 @@ require_relative('../branch_names')
 module DTK
   class ModuleBranch < Model
     require_relative('branch/location')
+    require_relative('branch/augmented')
 
     include BranchNames::Mixin
     extend BranchNames::ClassMixin

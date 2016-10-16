@@ -19,12 +19,12 @@ module DTK; module CommonDSL
   class Diff
     module ServiceInstance
       class NestedModule
-        def initialize(nested_module_info, aug_nested_module_branch, service_instance, service_module_branch)
-          @module_name              = nested_module_info.module_name
-          @impacted_files           = nested_module_info.impacted_files
-          @aug_nested_module_branch = aug_nested_module_branch
-          @service_instance         = service_instance
-          @service_module_branch = service_module_branch
+        def initialize(nested_module_info, aug_module_branch, service_instance, service_module_branch)
+          @module_name            = nested_module_info.module_name
+          @impacted_files         = nested_module_info.impacted_files
+          @aug_module_branch      = aug_module_branch
+          @service_instance       = service_instance
+          @service_module_branch  = service_module_branch
         end
         private :initialize
 
@@ -35,8 +35,7 @@ module DTK; module CommonDSL
         end
 
         def process(diff_result)
-          pp [self.class, { module_name: @module_name, impacted_files: @impacted_files }]
-          assembly_module_branch = create_module_for_service_instance?
+          pp [:aug_module_branch, @aug_module_branch]
         end
 
         private
@@ -46,28 +45,25 @@ module DTK; module CommonDSL
         end
 
         def self.process_nested_modules(diff_result, nested_modules_info, service_instance, service_module_branch)
-          ndx_aug_nested_module_branches = service_instance.aug_nested_module_branches(augment_with_component_modules: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
+          # Find existing aug_module_branches for service instance nested modules and for each one impacted create a service isnatnce specfic branch
+          # if needed
+          ndx_existing_aug_module_branches = service_instance.aug_nested_module_branches(augment_with_component_modules: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
           nested_modules_info.each do |nested_module_info|
             module_name = nested_module_info.module_name
-            unless aug_nested_module_branch = ndx_aug_nested_module_branches[module_name]
-              fail Error, "Unexpected that ndx_aug_nested_module_branches[#{module_name}] is nil"
+            unless existing_aug_mb = ndx_existing_aug_module_branches[module_name]
+              fail Error, "Unexpected that ndx_existing_aug_module_branches[#{module_name}] is nil"
             end
-            new(nested_module_info, aug_nested_module_branch, service_instance, service_module_branch).process(diff_result)
+            base_version = existing_aug_mb.version
+            aug_module_branch = service_instance.get_or_create_service_specific_aug_module_branch(existing_aug_mb.component_module, base_version:  base_version)
+            new(nested_module_info, aug_module_branch, service_instance, service_module_branch).process(diff_result)
           end
           raise 'here'
         end
 
-        def create_module_for_service_instance?
-          @service_instance.create_nested_module?(component_module, base_version: base_version)
+        def self.get_or_create_service_specific_aug_module_branch(service_instance, existing_aug_module_branch)
+
         end
 
-        def component_module 
-          @aug_nested_module_branch[:component_module]
-        end
-
-        def base_version
-          @aug_nested_module_branch[:version]
-        end
       end
     end
   end

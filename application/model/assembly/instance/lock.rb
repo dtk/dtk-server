@@ -39,9 +39,9 @@ module DTK; class Assembly; class Instance
         if opts[:version]
           service_module.get_module_branch_matching_version(opts[:version])
         else
-          service_module.get_augmented_workspace_branch
+          service_module.get_augmented_module_branch
         end
-      # ret.service_module_sha = service_module.get_augmented_workspace_branch.get_field?(:current_sha)
+      # ret.service_module_sha = service_module.get_augmented_module_branch.get_field?(:current_sha)
       ret.service_module_sha = branch.get_field?(:current_sha)
       ret
     end

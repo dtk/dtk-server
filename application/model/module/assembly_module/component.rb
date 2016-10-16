@@ -26,9 +26,11 @@ module DTK; class AssemblyModule
     # opts can have keys
     #  :sha - base sha to create branch from
     #  :ret_module_branch - Boolean
+    #  :ret_augmented_module_branch - Boolean
     #  :base_version
     #  :checkout_branch
     def create_module_for_service_instance?(component_module, opts = {})
+      fail Error, "Both opts[:ret_augmented_module_branch] and opts[:ret_module_branch] cannot be non null" if opts[:ret_augmented_module_branch] and opts[:ret_module_branch]
       am_version = assembly_module_version
       unless component_module.get_workspace_module_branch(am_version)
         base_version = opts[:base_version]        
@@ -39,8 +41,12 @@ module DTK; class AssemblyModule
         }
         component_module.create_new_version(base_version, am_version, create_opts)
       end
-      ret = component_module.get_workspace_branch_info(am_version)
-      opts[:ret_module_branch] ? ret[:module_branch_idh].create_object : ret
+      if opts[:ret_augmented_module_branch]
+        component_module.get_augmented_module_branch_with_version(am_version)
+      else
+        ret = component_module.get_module_repo_info(am_version)
+        opts[:ret_module_branch] ? ret[:module_branch_idh].create_object : ret
+      end
     end
 
     # opts can have keys

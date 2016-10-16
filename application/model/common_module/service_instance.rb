@@ -46,11 +46,9 @@ module DTK
         }.merge(module_repo_info)
       end
 
-      private
-
       def aug_nested_module_branches
         aug_dependent_module_branches = ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance)
-        # TODO: add in entry for base module being staged if it has component module
+        # TODO: DTK-2707: add in entry for base module being staged if it has component module
       end
         
     end

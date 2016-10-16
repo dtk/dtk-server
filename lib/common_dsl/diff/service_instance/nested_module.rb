@@ -19,23 +19,31 @@ module DTK; module CommonDSL
   class Diff
     module ServiceInstance
       class NestedModule
-        def initialize(nested_module_name, impacted_files)
-          @nested_module_name = nested_module_name
-          @impacted_files     = impacted_files
+        def initialize(module_name, impacted_files)
+          @module_name    = module_name
+          @impacted_files = impacted_files
         end
         private :initialize
 
-        def self.process_nested_modules(diff_result, service_instance, module_branch, impacted_files)
-          impacted_nested_modules(impacted_files).each do | nested_mdoule|
-            nested_mdoule.process(diff_result, service_instance, module_branch)
+        def self.process_nested_modules(diff_result, service_instance, service_module_branch, impacted_files)
+          nested_modules = impacted_nested_modules(impacted_files)
+          unless nested_modules.empty?
+            ndx_aug_nested_module_branches = service_instance.aug_nested_module_branches.inject({}) { |h, r| h.merge(r[:module_name] => r) }
+            nested_modules.each do | nested_module|
+              unless aug_nested_module_branch = ndx_aug_nested_module_branches[nested_module.module_name]
+                fail Error, "Unexpected that ndx_aug_nested_module_branches[#{nested_module.module_name}] is nil"
+              end
+              nested_module.process(diff_result, aug_nested_module_branch, service_module_branch)
+            end
           end
+          raise 'here'
         end
 
-        def process(diff_result, service_instance, module_branch)
-          #TODO: stub
-          pp [self.class, self]
+        def process(diff_result, aug_nested_module_branch, service_module_branch)
+          pp [self.class, self, aug_nested_module_branch]
         end
-        
+
+        attr_reader :module_name
 
         private
 

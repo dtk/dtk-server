@@ -22,6 +22,7 @@ module DTK; class Repo
       DiffNames  = [:renamed, :added, :deleted, :modified]
       DiffTypes  = DiffNames.map { |n| "files_#{n}".to_sym }
       DiffIgnore = [:are_there_changes]
+      RenamedDiffType = :files_renamed
 
       def initialize(diffs_hash = nil)
         super()
@@ -43,8 +44,12 @@ module DTK; class Repo
       def impacted_files
         ret = []
         DiffTypes.each do |diff_type|
-          if files = self[diff_type]
-            ret += files.map {|file| file[:path]}
+          if diffs_for_type = self[diff_type]
+            if diff_type == RenamedDiffType
+              diffs_for_type.each { |r| ret += [r[:old_path], r[:new_path]] }
+            else
+              ret += diffs_for_type.map {|file| file[:path]}
+            end
           end
         end
         ret
@@ -53,7 +58,7 @@ module DTK; class Repo
       def reverse
         reverse_hash = {
           files_modified: self[:files_modified], 
-          files_renamed: self[:files_renamed], 
+          files_renamed: self[:files_renamed],
           files_added: self[:files_deleted],
           files_deleted: self[:files_added]
         }
@@ -96,7 +101,7 @@ module DTK; class Repo
         types = (opts[:type] ? [opts[:type]] : [:module_dsl, :module_refs])
         !!files_info.find do |r|
           (types.include?(:module_dsl) && ModuleDSL.isa_dsl_filename?(path(r))) ||
-            (types.include?(:module_refs) && ModuleRefs.isa_dsl_filename?(path(r)))
+          (types.include?(:module_refs) && ModuleRefs.isa_dsl_filename?(path(r)))
         end
       end
 

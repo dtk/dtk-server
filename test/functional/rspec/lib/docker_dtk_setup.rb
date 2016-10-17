@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-# Create Provider and Target, pull r8:bootstrap from remote repo.
 require 'rubygems'
 require 'rest_client'
 require 'pp'
@@ -17,16 +16,15 @@ namespace="r8"
 
 # Target specific properties
 target_service_module = 'aws/network'
-target_component_module = 'aws/ec2'
+target_service_module_name = 'aws:network'
 aws_access_key = ENV['AWS_ACCESS_KEY']
 aws_secret_key = ENV['AWS_SECRET_KEY']
 default_keypair = 'testing_use1'
-security_group_name = 'default'
-security_group_id = 'sg-2282f747'
-subnet_id = 'subnet-af44b8d8'
-target_service_name = 'target'
-target_assembly_name = 'network::single-subnet'
+target_service_name = 'target_dev'
+target_instance = 'network-target_dev'
+target_assembly_name = 'network::target_dev-v1.0.0'
 is_target = true
+target_location = "/tmp/network"
 
 target = Common.new(target_service_name, target_assembly_name, is_target)
 
@@ -35,20 +33,17 @@ credentials_status=target.send_request('/rest/account/set_catalog_credentials', 
 ssh_key_status=target.send_request('/rest/account/add_user_direct_access', rsa_pub_key: target.ssh_key, username: repo_user, first_registration: false)
 
 # Install aws:network service module with required component modules
-system("dtk-run service-module install #{target_service_module} --update-none")
-system("dtk-run component-module install #{target_component_module}")
+system("mkdir #{target_location}")
+system("dtk module install -d #{target_location} #{target_service_module}")
 
 # Stage target service, set attributes and converge
-target_staged = target.stage_service
+target_staged = target.stage_service_instance(target_service_module_name, target_instance)
 if target.check_if_service_exists(target.service_id)
   puts "Set attributes for staged target..."
   set_attributes_array = []
-  set_attributes_array << target.set_attribute(target.service_id, 'network_aws::iam_user[default]/aws_access_key_id', aws_access_key)
-  set_attributes_array << target.set_attribute(target.service_id, 'network_aws::iam_user[default]/aws_secret_access_key', aws_secret_key)
+  set_attributes_array << target.set_attribute(target.service_id, 'identity_aws::role[na]/aws_access_key_id', aws_access_key)
+  set_attributes_array << target.set_attribute(target.service_id, 'identity_aws::role[na]/aws_secret_access_key', aws_secret_key)
   set_attributes_array << target.set_attribute(target.service_id, 'network_aws::vpc[vpc1]/default_keypair', default_keypair)
-  set_attributes_array << target.set_attribute(target.service_id, 'network_aws::vpc_subnet[vpc1-public]/subnet_id', subnet_id)
-  set_attributes_array << target.set_attribute(target.service_id, 'network_aws::security_group[vpc1-default]/group_name', security_group_name)
-  set_attributes_array << target.set_attribute(target.service_id, 'network_aws::security_group[vpc1-default]/group_id', security_group_id)
   if !set_attributes_array.include? false
     service_converged = target.converge_service(target.service_id, 10)
     if service_converged == true
@@ -63,6 +58,3 @@ if target.check_if_service_exists(target.service_id)
 else
   fail "[ERROR] Failed to stage target #{target_service_name}"
 end
-
-# Install r8:bootstrap service module with required component modules
-system("dtk-run service-module install #{service_module} --update-none")

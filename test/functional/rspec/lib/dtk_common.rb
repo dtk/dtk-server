@@ -43,7 +43,7 @@ class Common
 
 		@service_name = service_name
 		#Fixed current format of assembly name
-		@assembly = assembly_name.gsub!("::","/")
+		@assembly = assembly_name.gsub("::","/")
 		@server = config_yml['r8server']['server']
 		@port = config_yml['r8server']['port']
 		@endpoint = "#{@server}:#{@port}"

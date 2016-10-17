@@ -29,8 +29,6 @@ fi
 
 DTK_IMAGE=getdtk/dtk-server
 ARBITER_IMAGE=getdtk/dtk-arbiter
-REPO_HOST=repoman1.internal.r8network.com
-REPO_PORT=443
 MCO_PORT=6163
 SSH_PORT=2222
 HTTP_PORT=8080
@@ -105,7 +103,7 @@ echo -e "\nStarting a new Docker Container: ${ARBITER_CONTAINER}"
 HOST_VOLUME="/${CONTAINER}"
 
 # start the dtk-server container
-docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}
+docker run --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}
 
 # wait for dtk-arbiter ssh keypair to be generated
 while [[ ! -f $HOST_VOLUME/arbiter/arbiter_remote ]]; do

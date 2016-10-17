@@ -31,6 +31,48 @@ module AssemblyAndServiceOperationsMixin
     service_converged
   end
 
+  def stage_service_instance(service_instance_name, target = nil)
+		#Get list of assemblies, extract selected assembly, stage service and return its id
+		puts "Stage service:", "--------------"
+		service_id = nil
+		extract_id_regex = /id: (\d+)/
+		assembly_list = send_request('/rest/assembly/list', {:subtype=>'template'})
+ 
+		puts "List of avaliable assemblies: "
+		pretty_print_JSON(assembly_list)
+		test_template = assembly_list['data'].select { |x| x['display_name'] == @assembly }.first
+
+		if (!test_template.nil?)
+			puts "Assembly #{@assembly} found!"
+			assembly_id = test_template['id']
+			puts "Assembly id: #{assembly_id}"
+
+      if @is_target
+			  stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :is_target => @is_target})	
+			else
+				unless target
+          stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name})
+        else
+        	stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :target_id=>target})
+        end
+			end
+
+			pretty_print_JSON(stage_service_response)
+
+			if (stage_service_response['data'].include? "name: #{@service_name}")
+				puts "Stage of #{@service_name} assembly completed successfully!"
+				service_id_match = stage_service_response['data'].match(extract_id_regex)
+				self.service_id = service_id_match[1].to_i
+				puts "Service id for a staged service: #{self.service_id}"
+			else
+				puts "Stage service didnt pass!"
+			end
+		else
+			puts "Assembly #{@service_name} not found!"
+		end
+		puts ""
+	end
+
   # Commands used from old dtk client
 	def stage_service(target = nil)
 		#Get list of assemblies, extract selected assembly, stage service and return its id

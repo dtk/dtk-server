@@ -53,7 +53,7 @@ if [[ $UPGRADE -eq 0 ]]; then
 	echo -e "Root Container directory /${CONTAINER} removed."
 fi
 
-echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}\nGIT_PORT=${SSH_PORT}\nSTOMP_PASSWORD=${STOMP_PASSWORD}\nSTOMP_USERNAME=${STOMP_USERNAME}" > "/${CONTAINER}/dtk.config"
+echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nGIT_PORT=${SSH_PORT}" > "/${CONTAINER}/dtk.config"
 
 docker ps | grep dtk > /dev/null
 RUNNING=$?

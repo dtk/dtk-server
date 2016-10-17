@@ -158,7 +158,7 @@ eos
               end
             end
           end
-          OSNeedsRestart =  ['ubuntu', 'debian']
+          OSNeedsRestart =  ['ubuntu', 'debian', 'amazon-linux']
 
           def puppet_version(node)
             @puppet_version ||= {}

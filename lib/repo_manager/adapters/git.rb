@@ -29,7 +29,7 @@ module DTK; class RepoManager
     require_relative('git/mixin')
     require_relative('git/manage_git_server')
 
-    include Mixin::AddBranch
+    include Mixin::AddAndDeleteBranch
     extend ManageGitServer::ClassMixin
 
     attr_reader :path
@@ -597,33 +597,6 @@ module DTK; class RepoManager
         git_command__merge(branch_to_merge_from)
       end
     end
-
-    # deletes both local and remote branch
-    # Opts can have keys:
-    #  :local_branch
-    #  :remote_branch
-    def delete_branch(opts = {})
-      local_branch_to_delete  = opts[:local_branch] || @branch
-      remote_branch_to_delete = opts[:remote_branch] || local_branch_to_delete
-      checkout_other_branch?(local_branch_to_delete) do
-        git_command__delete_local_branch?(local_branch_to_delete)
-        git_command__delete_remote_branch?(local_branch_to_delete, remote_branch_to_delete)
-      end
-    end
-
-    def checkout_other_branch?(branch, &body)
-      if branch != current_branch
-        yield
-      else
-        unless other_branch = get_branches.find { |br| br != branch }
-          fail Error.new("Cannot find branch other than '#{branch}' to checkout")
-        end
-        checkout(other_branch) do        
-          yield
-        end
-      end
-    end
-    private :checkout_other_branch?
 
     def add_squashed_subtree(prefix, external_repo, external_branch)
       checkout(@branch) do

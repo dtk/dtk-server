@@ -18,7 +18,7 @@
 module DTK
   class RepoManager::Git 
     module Mixin
-      module AddBranch
+      module AddAndDeleteBranch
         # returns sha of new branch
         # opts can have keys:
         #  :empty (Booelan; default: false) - Create empty branch
@@ -45,7 +45,7 @@ module DTK
           add_branch = true
           if get_branches.include?(new_branch)
             if opts[:delete_existing_branch]
-              delete_branch(local_branch: new_branch)
+              delete_local_and_remote_branch(new_branch)
             else
               add_branch = false
             end
@@ -74,6 +74,13 @@ module DTK
         def add_remote_files(add_remote_files_info)
           add_remote_files?(@branch, add_remote_files_info)
         end
+
+        def delete_local_and_remote_branch(branch = nil, remote_name = nil)
+          checkout_other_branch?(branch || @branch) do
+            git_command__delete_local_branch?(branch)
+            git_command__delete_remote_branch?(branch, remote_name)
+          end
+        end
         
         private
 
@@ -86,7 +93,20 @@ module DTK
           end
           add_all_files(branch) if add_remote_files_info.git_add_needed?
         end
-        
+
+        def checkout_other_branch?(branch, &body)
+          if branch != current_branch
+            yield
+          else
+            unless other_branch = get_branches.find { |br| br != branch }
+              fail Error.new("Cannot find branch other than '#{branch}' to checkout")
+            end
+            checkout(other_branch) do        
+              yield
+            end
+          end
+        end
+ 
       end
     end
   end

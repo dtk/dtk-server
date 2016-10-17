@@ -15,11 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require 'fileutils'
+
 module DTK
   class RepoManager::Git
     class Linux < self
       def git_command__add_squashed_subtree(prefix, external_repo, external_branch)
         external_repo_url = self.class.repo_url(external_repo.display_name)
+        git_command__rm_r(prefix) #just to be safe
         git_command.subtree(cmd_opts, 'add', '--prefix', prefix, external_repo_url, external_branch, '--squash')
       end
       private
@@ -60,12 +63,14 @@ module DTK
       end
       
       def git_command__rm_r(dir)
-        git_command.rm(cmd_opts, '-r', '--cached', dir)
-        FileUtils.rm_rf full_path(dir)
+        full_path = full_path(dir)
+        if File.exists?(full_path)
+          git_command.rm(cmd_opts, '-r', '--cached', dir)
+          FileUtils.rm_rf full_path
+        end
       end
       
       def git_command__mv(source, destination, files, folders)
-        require 'fileutils'
         FileUtils.mkdir_p(destination)
         
         files.each do |file|

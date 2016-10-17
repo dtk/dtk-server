@@ -164,7 +164,7 @@ module DTK; module ModuleCommonMixin
       end
 
       # make sure there is a not an existing branch that matches the new one
-      if get_module_branch_matching_version(new_version)
+      if !opts[:delete_existing_branch] and get_module_branch_matching_version(new_version)
         fail VersionExist.new(new_version, pp_module_name)
       end
 

@@ -50,6 +50,7 @@ module DTK; class Assembly
     #  :no_auto_complete - Boolean (default false)
     #  :is_target_service - Boolean (default false)
     #  :service_name_globally_scoped - Boolean (default false); alternative is unique wrt to target
+    #  :donot_create_modules
     #  :allow_existing_service - Boolean (default false)
     #  TODO: see if any others used when passing opts to get_augmented_components(opts) and autocomplete_component_links(assembly_instance, aug_cmps, opts)
     def stage(target, opts = Opts.new)
@@ -104,7 +105,7 @@ module DTK; class Assembly
         assembly_instance_lock = Assembly::Instance::Lock.create_from_element(assembly_instance, service_module, opts)
         assembly_instance_lock.save_to_model
 
-        AssemblyModule::Service.get_or_create_module_for_service_instance(assembly_instance, version: version)
+        AssemblyModule::Service.get_or_create_module_for_service_instance(assembly_instance, version: version) unless opts[:donot_create_modules]
 
         # user can provide custom node-size and os-type attribute, we proccess them here and assign to nodes
         set_custom_node_attributes(assembly_instance, opts) if opts[:node_size] || opts[:os_type]

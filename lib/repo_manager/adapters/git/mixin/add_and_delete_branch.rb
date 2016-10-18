@@ -75,8 +75,8 @@ module DTK
           add_remote_files?(@branch, add_remote_files_info)
         end
 
-        def delete_local_and_remote_branch(branch = nil, remote_name = nil)
-          checkout_other_branch?(branch || @branch) do
+        def delete_local_and_remote_branch(branch, remote_name = nil)
+          checkout_other_branch?(branch) do
             git_command__delete_local_branch?(branch)
             git_command__delete_remote_branch?(branch, remote_name)
           end

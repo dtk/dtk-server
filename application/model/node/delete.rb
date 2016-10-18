@@ -116,6 +116,7 @@ end
           target_ref = target_ref_info.target_ref
           if target_ref && target_ref_info.ref_count == 1
             # this means to delete target ref also
+            # TODO: below is a bug since below does nothing
             opts_delete.merge(delete_target_ref: target_ref.id_handle())
           end
           execute_destroy_and_delete(opts)

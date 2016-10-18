@@ -43,6 +43,14 @@ module DTK
         ModuleRepoInfo.new(service_module_branch)
       end
 
+      # opts can have keys:
+      #   :destroy_nodes
+      def self.delete(assembly_instance, opts = {})
+        Model.Transaction do
+          Assembly::Instance.delete(assembly_instance.id_handle, destroy_nodes: opts[:destroy_nodes], delete_service_module_branch: true)
+        end
+      end
+
       def get_repo_info
         module_repo_info = ModuleRepoInfo.new(get_service_instance_branch)
         assembly_instance = self.assembly_instance

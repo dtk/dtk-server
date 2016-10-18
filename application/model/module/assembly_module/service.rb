@@ -82,6 +82,8 @@ module DTK; class AssemblyModule
       modification_type_obj.finalize_edit(module_branch, diffs_summary)
     end
 
+    # opts can have keys:
+    #   :do_not_raise
     def delete_module?(opts = {})
       service_module = get_service_module(@assembly, opts)
       return if service_module == false
@@ -125,6 +127,8 @@ module DTK; class AssemblyModule
       end
     end
 
+    # opts can have keys:
+    #   :do_not_raise
     def get_service_module(assembly, opts = {})
       unless ret = assembly.get_service_module()
         assembly_name = assembly.display_name_print_form()

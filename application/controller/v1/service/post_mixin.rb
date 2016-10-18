@@ -118,7 +118,7 @@ module DTK
       end
 
       def delete
-        Assembly::Instance.delete(assembly_instance.id_handle, destroy_nodes: true)
+        CommonModule::ServiceInstance.delete(assembly_instance, destroy_nodes: true)
         rest_ok_response
       end
 

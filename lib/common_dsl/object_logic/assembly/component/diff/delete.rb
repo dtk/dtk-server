@@ -49,17 +49,28 @@ module DTK; module CommonDSL
 
         def delete_component(matching_cmp, node, opts = {})
           # if node not created or component does not have .delete action then just delete it
-          if node.get_admin_op_status == 'pending' || opts[:force_delete] || !component_delete_action_exists?(node)
+          if node.get_admin_op_status == 'pending' || opts[:force_delete] || !component_delete_action_exists?(node, matching_cmp)
             assembly_instance.delete_component(matching_cmp, node[:id])
           else
-            # TODO: DTK-2680: add code that generates component delete task and add it to converge task
+            matching_cmp_obj = matching_cmp.create_object
+            unless matching_cmp_obj.get_field?(:to_be_deleted)
+              update_opts = { skip_if_not_found: true, add_delete_action: true }
+              cmp_instance = DTK::Component::Instance.create_from_component(matching_cmp_obj)
+              action_def = cmp_instance.get_action_def?('delete')
+              update_opts.merge!(:action_def => action_def)
+
+              Task::Template::ConfigComponents.update_when_added_component?(assembly_instance, node, cmp_instance, nil, update_opts)
+              cmp_instance.update_from_hash_assignments(to_be_deleted: true)
+            end
           end
         end
 
-        def component_delete_action_exists?(node)
-          action_list = Task::Template::ActionList::ConfigComponents.get(assembly_instance)
-          delete_action = Task::Template::Content.parse_and_reify({ :node => node[:display_name], actions: ["#{component_name}.delete"] }, action_list, skip_if_not_found: true)
-          !delete_action.empty?
+        def component_delete_action_exists?(node, matching_cmp)
+          cmp_instance = DTK::Component::Instance.create_from_component(matching_cmp.create_object)
+          cmp_instance.get_action_def?('delete')
+          # action_list = Task::Template::ActionList::ConfigComponents.get(assembly_instance)
+          # delete_action = Task::Template::Content.parse_and_reify({ :node => node[:display_name], actions: ["#{component_name}.delete"] }, action_list, skip_if_not_found: true)
+          # !delete_action.empty?
         end
       end
     end

@@ -19,7 +19,7 @@ module DTK; class Task; class Template
   class Content
     class InsertActionHelper
       class InsertAtEnd < self
-        def insert_action!(template_content)
+        def insert_action!(template_content, opts = {})
           template_content.each_internode_stage do |internode_stage, stage_index|
             if action_match = find_earliest_match?(internode_stage, stage_index, :internode, :after)
               # if match here then need to put in stage earlier than matched one
@@ -36,7 +36,7 @@ module DTK; class Task; class Template
           # TODO: was using
           # template_content.splice_in_action!(action_match,:end_last_internode_stage)
           # but switched to below because it would group together actions in same stage that probably should be seperate stages
-          template_content.splice_in_action!(action_match, :add_as_new_last_internode_stage)
+          template_content.splice_in_action!(action_match, :add_as_new_last_internode_stage, opts)
           template_content
         end
       end

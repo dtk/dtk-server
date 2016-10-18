@@ -41,9 +41,7 @@ module DTK; module CommonDSL
           if node.get_admin_op_status == 'pending'
             delete_node_and_nested_components(node, result, force_delete: true)
           else
-            ec2_node_component = Component::Template.get_augmented_component_template?(assembly_instance, 'ec2::node', namespace: 'aws', use_base_template: true)
-            new_component_idh = assembly_instance.add_component(node.id_handle, ec2_node_component, node[:display_name], splice_in_delete_action: true)
-            node.update_from_hash_assignments(to_be_deleted: true)
+            generate_delete_node_workflow(node, result)
           end
         end
 
@@ -53,11 +51,20 @@ module DTK; module CommonDSL
         end
 
         def delete_nested_components(node, result, opts = {})
-          node.get_components.each do |component|
+          node_components = node.get_components.reject{ |cmp| IgnoreComponents.include?(cmp[:component_type]) }
+          node_components.each do |component|
             cmp_qualified_key = qualified_key.create_with_new_element?(:component, component[:display_name])
             component_delete_diff = ObjectLogic::Assembly::Component::Diff::Delete.new(cmp_qualified_key, gen_object: component, service_instance: @service_instance)
             component_delete_diff.process(result, opts)
           end
+        end
+        IgnoreComponents = ['ec2__properties', 'ec2__node']
+
+        def generate_delete_node_workflow(node, result, opts = {})
+          delete_nested_components(node, result, opts)
+          ec2_node_component = Component::Template.get_augmented_component_template?(assembly_instance, 'ec2::node', namespace: 'aws', use_base_template: true)
+          new_component_idh = assembly_instance.add_component(node.id_handle, ec2_node_component, node[:display_name], splice_in_delete_action: true)
+          node.update_from_hash_assignments(to_be_deleted: true)
         end
       end
     end

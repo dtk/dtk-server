@@ -58,18 +58,18 @@ module DTK; class Task
 
       # if action is not included in task template than insert the action in this object and return updated object
       # else return nil
-      def insert_action?(new_action, action_list, gen_constraints_proc = nil)
+      def insert_action?(new_action, action_list, gen_constraints_proc = nil, opts = {})
         insert_action_helper = InsertActionHelper.create(new_action, action_list, gen_constraints_proc)
-        insert_action_helper.insert_action?(self)
+        insert_action_helper.insert_action?(self, opts)
       end
 
       # if action is explicitly included in task template then delete the action from this object and return updated object
       # else return nil
-      def delete_explicit_action?(action, action_list)
-        opts = action.is_a?(Action::WithMethod) ? { class: Action::WithMethod } : {}
+      def delete_explicit_action?(action, action_list, opts = {})
+        opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod)
         if indexed_action = action_list.find { |a| a.match_action?(action, opts) }
           if action.is_a?(Action::WithMethod)
-            indexed_action = action if indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]")
+            indexed_action = action if indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]") || opts[:remove_delete_action]
           end
           if action_match = includes_action?(indexed_action)
             unless action_match.in_multinode_stage
@@ -80,11 +80,11 @@ module DTK; class Task
         end
       end
 
-      def splice_in_action!(action_match, insert_point)
+      def splice_in_action!(action_match, insert_point, opts = {})
         case insert_point
           when :before_internode_stage
             if action_match.internode_stage_index == 1
-              new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
+              new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action, opts)
               insert(action_match.internode_stage_index - 1, new_internode_stage)
             else
               internode_stage(action_match.internode_stage_index).splice_in_action!(action_match, :end_last_execution_block)
@@ -100,13 +100,13 @@ module DTK; class Task
             # - has explicit actions
             if last_internode_stage.is_a?(Stage::InterNode::MultiNode) ||
                 last_internode_stage.has_action_with_method?()
-              new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
+              new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action, opts)
               self << new_internode_stage
             else
               last_internode_stage.splice_in_action!(action_match, :end_last_execution_block)
             end
           when :add_as_new_last_internode_stage
-            new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action)
+            new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action, opts)
             self << new_internode_stage
           else fail Error.new("Unexpected insert_point (#{insert_point})")
         end

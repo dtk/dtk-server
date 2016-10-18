@@ -27,13 +27,14 @@ module DTK; class Task
         if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, task_action, opts)
           new_action = Action.create(new_component.merge(node: node, title: component_title), opts)
           gen_constraints_proc = proc { TemporalConstraints::ConfigComponents.get(assembly, assembly_cmp_actions) }
-          if updated_template_content = task_template_content.insert_action?(new_action, assembly_cmp_actions, gen_constraints_proc)
+          insert_opts = opts[:add_delete_action] ? { add_delete_action: true } : {}
+          if updated_template_content = task_template_content.insert_action?(new_action, assembly_cmp_actions, gen_constraints_proc, insert_opts)
             Persistence::AssemblyActions.persist(assembly, updated_template_content)
           end
         end
       end
 
-      def self.update_when_deleted_component?(assembly, node, component)
+      def self.update_when_deleted_component?(assembly, node, component, opts = {})
         # TODO: currently only updating the create action task template and only if it is persisted
         # makes sense to also automtically delete component in other actions
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
@@ -41,13 +42,13 @@ module DTK; class Task
         if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, task_action)
           update_opts = {}
           # special case for ec2_node component used for generating delete-node workflow
-          if component.get_field?(:component_type).eql?('ec2__node')
+          if component.get_field?(:component_type).eql?('ec2__node') || opts[:remove_delete_action]
             cmp_instance = Component::Instance.create_from_component(component)
             action_def = cmp_instance.get_action_def?('delete')
             update_opts.merge!(:action_def => action_def)
           end
           action_to_delete = Action.create(component.add_title_field?().merge(node: node), update_opts)
-          if updated_template_content = task_template_content.delete_explicit_action?(action_to_delete, assembly_cmp_actions)
+          if updated_template_content = task_template_content.delete_explicit_action?(action_to_delete, assembly_cmp_actions, opts)
             Persistence::AssemblyActions.persist(assembly, updated_template_content)
           end
         end

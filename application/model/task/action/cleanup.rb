@@ -49,7 +49,7 @@ module DTK; class Task
           assembly_instance = assembly.copy_as_assembly_instance
 
           if self[:node] || self[:component]
-            assembly_instance.send(self[:delete_action], *self[:delete_params])
+            assembly_instance.send(self[:delete_action], *self[:delete_params]+[self[:opts]])
             module_branch = AssemblyModule::Service.get_service_instance_branch(assembly_instance)
             CommonDSL::Generate::ServiceInstance.generate_dsl(assembly_instance, module_branch)
           else

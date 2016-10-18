@@ -24,8 +24,13 @@ module DTK; class Task; class Template
         insert_strategy_class(insert_strategy).new(new_action, action_list, gen_constraints_proc)
       end
 
-      def insert_action?(template_content)
-        unless template_content.includes_action?(@new_action)
+      def insert_action?(template_content, opts = {})
+        if template_content.includes_action?(@new_action) && opts[:add_delete_action]
+          template_content.delete_explicit_action?(@new_action, @action_list)
+          compute_before_after_relations!()
+          insert_action!(template_content, opts)
+        else
+        # unless template_content.includes_action?(@new_action)
           compute_before_after_relations!()
           insert_action!(template_content)
         end
@@ -39,6 +44,7 @@ module DTK; class Task; class Template
         @new_action_node_id = new_action.node_id
         @gen_constraints_proc = gen_constraints_proc
         @ndx_action_indexes = NdxActionIndexes.new()
+        @action_list = action_list
       end
 
       class NdxActionIndexes < Hash

@@ -28,12 +28,16 @@ module DTK; class Task; class Template
       end
       attr_accessor :name
 
-      def self.create_from_single_action(action)
-        new(stage_name(action)).add_new_execution_block_for_action!(action)
+      def self.create_from_single_action(action, opts = {})
+        new(stage_name(action, opts)).add_new_execution_block_for_action!(action, opts)
       end
 
-      def self.stage_name(action)
-        "component #{action.component_type()}"
+      def self.stage_name(action, opts = {})
+        if opts[:add_delete_action]
+          "delete component #{action.component_type()}"
+        else
+          "component #{action.component_type()}"
+        end
       end
       private_class_method :stage_name
 
@@ -46,6 +50,9 @@ module DTK; class Task; class Template
           else
             if action = node_actions.add_subtask!(parent_task, internode_stage_index, assembly_idh)
               ret << action
+              if is_component_delete_action?(action)
+                add_component_cleanup_task?(parent_task, node_actions, ret, action)
+              end
             end
           end
         end
@@ -69,6 +76,30 @@ module DTK; class Task; class Template
         sub_task = Task.create_stub(parent_task.model_handle(), executable_action: cleanup, display_name: 'cleanup')
         parent_task.add_subtask(sub_task)
         ret << cleanup
+      end
+
+      def is_component_delete_action?(action)
+        if action_method = action.action_method?
+          action_method[:method_name].eql?('delete')
+        end
+      end
+
+      def add_component_cleanup_task?(parent_task, node_actions, ret, action)
+        if cmp_action = action.component_actions.first
+          component         = cmp_action.component
+          if component.get_field?(:to_be_deleted)
+            n_node            = node_actions.node
+            assembly_instance = n_node.get_assembly?
+            opts = Opts.new(delete_action: 'delete_component', delete_params: [component.id_handle.merge(guid: component[:id]), n_node[:id]])
+
+            parent_task[:temporal_order] = 'sequential'
+
+            cleanup  = Task::Action::Cleanup.create_hash(assembly_instance, component, n_node, opts.merge(remove_delete_action: true))
+            sub_task = Task.create_stub(parent_task.model_handle(), executable_action: cleanup, display_name: 'cleanup')
+            parent_task.add_subtask(sub_task)
+            ret << cleanup
+          end
+        end
       end
 
       def find_earliest_match?(action_match, ndx_action_indexes)
@@ -186,9 +217,9 @@ module DTK; class Task; class Template
         !ret.empty? && ret
       end
 
-      def add_new_execution_block_for_action!(action)
+      def add_new_execution_block_for_action!(action, opts = {})
         # leveraging Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions,node_name,action_list) for this
-        node_actions = { Constant::OrderedComponents => [calculate_ordered_components(action)] }
+        node_actions = { Constant::OrderedComponents => [calculate_ordered_components(action, opts)] }
         node_name = action.node_name()
         action_list = ActionList.new([action])
         merge!(action.node_id => Stage::IntraNode::ExecutionBlocks.parse_and_reify(node_actions, node_name, action_list))
@@ -204,8 +235,8 @@ module DTK; class Task; class Template
 
       private
 
-      def calculate_ordered_components(action)
-        if action.component_type.eql?("ec2::node[#{action.node_name}]")
+      def calculate_ordered_components(action, opts = {})
+        if action.component_type.eql?("ec2::node[#{action.node_name}]") || opts[:add_delete_action]
           "#{action.component_type}.delete"
         else
           action.component_type

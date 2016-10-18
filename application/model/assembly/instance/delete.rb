@@ -94,7 +94,7 @@ module DTK; class  Assembly
         node_group.delete_object(update_task_template: true, assembly: self)
       end
 
-      def delete_component(component_idh, node_id = nil)
+      def delete_component(component_idh, node_id = nil, opts = {})
         unless component_idh.is_a?(IDHandle)
           component_idh = id_handle().createIDH(model_name: :component, id: component_idh[:guid])
         end
@@ -130,7 +130,7 @@ module DTK; class  Assembly
           node.update_dangling_links(component_idhs: [component.id_handle()])
           # TODO: update_when_deleted_component? and this method should have option not to update the 
           # workflow
-          Task::Template::ConfigComponents.update_when_deleted_component?(self, node, component)
+          Task::Template::ConfigComponents.update_when_deleted_component?(self, node, component, opts)
 
           ret = Model.delete_instance(component_idh)
 

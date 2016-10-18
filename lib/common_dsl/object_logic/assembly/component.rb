@@ -28,7 +28,8 @@ module DTK; module CommonDSL
         end
         private :initialize
 
-        def self.generate_content_input(aug_components)
+        def self.generate_content_input(aug_components, opts = {})
+          aug_components.reject!{ |aug_cmp| aug_cmp[:to_be_deleted] } if opts[:without_soft_deleted_components]
           aug_components.inject(ObjectLogic.new_content_input_hash) do |h, aug_component|
             h.merge(component_name(aug_component) => new(aug_component).generate_content_input!)
           end

@@ -23,12 +23,12 @@ module DTK; module CommonDSL
         require_relative('node/attribute')
 
         def self.generate_content_input(assembly_instance)
-          get_augmented_nodes(assembly_instance).inject(ObjectLogic.new_content_input_hash) do |h, aug_node| 
-            h.merge(aug_node.display_name => new.generate_content_input!(aug_node))
+          get_augmented_nodes(assembly_instance, without_soft_deleted_nodes: true).inject(ObjectLogic.new_content_input_hash) do |h, aug_node|
+            h.merge(aug_node.display_name => new.generate_content_input!(aug_node, without_soft_deleted_components: true))
           end
         end
         
-        def generate_content_input!(aug_node)
+        def generate_content_input!(aug_node, opts = {})
           set_id_handle(aug_node)
           aug_components = aug_node[:components] || []
           attributes = aug_node[:attributes] || []
@@ -36,7 +36,7 @@ module DTK; module CommonDSL
           self[:is_assembly_wide_node] = true if aug_node.is_assembly_wide_node?
           
           set?(:Attributes, Attribute.generate_content_input?(:node, attributes)) unless attributes.empty?
-          set(:Components, Component.generate_content_input(aug_components)) unless aug_components.empty?
+          set(:Components, Component.generate_content_input(aug_components, opts)) unless aug_components.empty?
           self
         end
 
@@ -59,8 +59,14 @@ module DTK; module CommonDSL
 
         private
 
-        def self.get_augmented_nodes(assembly_instance)
-          ndx_nodes = assembly_instance.get_nodes.inject({}) { |h, r| h.merge(r.id => r) }
+        def self.get_augmented_nodes(assembly_instance, opts = {})
+          assembly_instance_nodes = assembly_instance.get_nodes(:to_be_deleted)
+
+          if opts[:without_soft_deleted_nodes]
+            assembly_instance_nodes.reject!{ |node| node[:to_be_deleted] }
+          end
+
+          ndx_nodes = assembly_instance_nodes.inject({}) { |h, r| h.merge(r.id => r) }
           add_node_level_attributes!(ndx_nodes)
           add_augmented_components!(ndx_nodes)
           ndx_nodes.values

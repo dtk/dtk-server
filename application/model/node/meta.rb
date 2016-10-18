@@ -336,7 +336,7 @@ module DTK
       virtual_column :components_and_their_attrs, type: :json, hidden: true,
         remote_dependencies:         
           lambda__components_and_their_attrs.call(
-            cmp_cols: FactoryObject::CommonCols + [:ancestor_id, :component_type, :only_one_per_node],
+            cmp_cols: FactoryObject::CommonCols + [:ancestor_id, :component_type, :only_one_per_node, :to_be_deleted],
             attr_cols: FactoryObject::CommonCols + [:is_instance_value, :attribute_value, :external_ref, :data_type, :tags, :hidden, :dynamic])
 
       virtual_column :input_attribute_links_cmp, type: :json, hidden: true,

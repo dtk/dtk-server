@@ -36,6 +36,15 @@ module DTK
         parent_node?(assembly_instance) || fail(Error, "Unexepected that parent_node?(assembly_instance) is nil")
       end
 
+      # temp workaround for node = parent_node?
+      def self.parent_node?(key, assembly_instance)
+        if key.respond_to?(:parent_node?)
+          key.parent_node?(assembly_instance)
+        else
+          new(key.key_elements).parent_node?(assembly_instance)
+        end
+      end
+
       # if node attribute returns [node_name, attribute_name]; otherwise returns nil
       def is_node_attribute?
         if key_elements.size == 2 and key_elements[0].type.to_sym == :node and key_elements[1].type.to_sym == :attribute

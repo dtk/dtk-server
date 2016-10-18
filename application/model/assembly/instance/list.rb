@@ -158,6 +158,7 @@ module DTK; class  Assembly
             end
           end
           set_os_type_on_node_group_member!(node) if node[:os_type].nil? and is_node_group_member?(node.id_handle)
+          set_ec2_properties_attributes?(node)
 
           node.sanitize!()
 
@@ -196,6 +197,21 @@ module DTK; class  Assembly
         end
       end
       private :find_parent_of_node_group_member?
+
+      def set_ec2_properties_attributes?(node)
+        node_property_cmp = node.ret_node_property_component
+        attribute_values  = node_property_cmp.get_direct_attribute_values(:value)
+        external_ref      = node[:external_ref]||{}
+
+        NodePropertyAttributes.each do |np_attribute|
+          if !node[np_attribute] && external_ref[np_attribute]
+            if value = attribute_values[np_attribute][:value]
+              external_ref.merge!(np_attribute => value)
+            end
+          end
+        end
+      end
+      NodePropertyAttributes = [:os_type, :size, :image]
       
       def set_node_display_name!(node)
         node[:display_name] = node.assembly_node_print_form()

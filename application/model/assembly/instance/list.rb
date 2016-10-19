@@ -199,12 +199,19 @@ module DTK; class  Assembly
       private :find_parent_of_node_group_member?
 
       def set_ec2_properties_attributes?(node)
-        node_property_cmp = node.ret_node_property_component
+        node_property_cmp =
+          if node.node_group_member?
+            parent_ng = find_parent_of_node_group_member?(node)
+            parent_ng.ret_node_property_component
+          else
+            node.ret_node_property_component
+          end
+
         attribute_values  = node_property_cmp.get_direct_attribute_values(:value)
         external_ref      = node[:external_ref]||{}
 
         NodePropertyAttributes.each do |np_attribute|
-          if !node[np_attribute] && external_ref[np_attribute]
+          if !node[np_attribute] && !external_ref[np_attribute]
             if value = attribute_values[np_attribute][:value]
               external_ref.merge!(np_attribute => value)
             end

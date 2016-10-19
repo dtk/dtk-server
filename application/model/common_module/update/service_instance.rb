@@ -29,13 +29,16 @@ module DTK
             fail Error, "opts[:service_instance] should not be nil"
           end
           module_branch = service_instance.get_service_instance_branch
-          
-          unless pull_was_needed = module_branch.pull_repo_changes?(commit_sha, opts[:force_pull])
-            # TODO: removed for testing
-            # return ret
-          end
 
-          CommonDSL::Diff.process_service_instance(service_instance, module_branch)
+          unless module_branch.is_set_to_sha?(commit_sha)
+            repo_diffs_summary = module_branch.pull_repo_changes_and_return_diffs_summary(commit_sha, force: opts[:force_pull])
+            if repo_diffs_summary
+              ret = CommonDSL::Diff::ServiceInstance.process(service_instance, module_branch, repo_diffs_summary)
+            end
+            # This sets sha on branch only after all processing goes through
+            module_branch.set_sha(commit_sha)
+          end
+          ret
         end
 
       end

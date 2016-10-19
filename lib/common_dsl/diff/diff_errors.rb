@@ -62,8 +62,8 @@ module DTK
         
         def self.set_result_when_create_backup_file!(diff_result, diff_errors, service_instance_gen)
           diff_errors.error_msgs.each { |error_msg| diff_result.add_error_msg(error_msg) }
-          backup_path = FileType::ServiceInstance.backup_path
-          canonical_path = FileType::ServiceInstance.canonical_path
+          backup_path = FileType::ServiceInstance::DSLFile::Top.backup_path
+          canonical_path = FileType::ServiceInstance::DSLFile::Top.canonical_path
           diff_result.add_info_msg("Previous state of file '#{canonical_path}' stored as '#{backup_path}'") 
           diff_result.add_backup_file(backup_path, service_instance_gen.yaml_dsl_text)
           diff_result.clear_semantic_diffs!

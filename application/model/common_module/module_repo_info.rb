@@ -17,7 +17,7 @@
 #
 module DTK
   class CommonModule
-    # TODO: DTK-2587: ModuleRepoInfo with replace Dtk::ModuleRepoInfo 
+    # TODO: DTK-2587: ModuleRepoInfo will replace Dtk::ModuleRepoInfo 
     class ModuleRepoInfo < ::Hash
       def initialize(module_branch)
         dtk_module_branch_info =  module_branch.get_module_repo_info

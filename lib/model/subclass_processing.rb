@@ -48,10 +48,10 @@ module DTK
         SubclassProcessing.concrete_model_name(model_name) || model_name
       end
 
-      # TODO: cleanup
+      # TODO: cleanup; this should be data driven
       def find_subtype_model_name(id_handle, opts = {})
         model_name = id_handle[:model_name]
-        return model_name unless SubclassProcessing.subclass_targets().include?(model_name)
+        return model_name unless SubclassProcessing.subclass_targets.include?(model_name)
         if shortcut = subclass_controllers(model_name, opts)
           return shortcut
         end
@@ -64,6 +64,8 @@ module DTK
            %w(node_group_instance).include?(type) ? :node_group : model_name
           when :target
            :target
+          when :module_branch
+           :module_branch
           else
             Log.error("not implemented: finding subclass of relation #{model_name}")
             model_name
@@ -97,7 +99,11 @@ module DTK
     end
     module SubclassProcessingMixin
       def create_subclass_obj(subclass_model_name)
-        id_handle().create_object(model_name: subclass_model_name).merge(self)
+        id_handle.create_object(model_name: subclass_model_name).merge(self)
+      end
+
+      def create_as_subclass_object(subclass_model_class)
+        id_handle.create_object(model_class: subclass_model_class).merge(self)
       end
     end
 

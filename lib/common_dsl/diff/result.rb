@@ -20,14 +20,15 @@ module DTK
     class Result
       attr_writer :repo_updated, :semantic_diffs
       attr_reader :items_to_update, :error_msgs
-      def initialize
-        @repo_updated    = false # if true, means repo updated by server
-        @items_to_update = [] # items in repo that server needs to update
-        @info_msgs       = []
-        @warning_msgs    = []
-        @error_msgs      = []
-        @backup_files    = {}
-        @semantic_diffs  = {}
+      def initialize(repo_diffs_summary = nil)
+        @repo_diffs_summary = repo_diffs_summary
+        @repo_updated       = false # if true, means repo updated by server
+        @items_to_update    = [] # items in repo that server needs to update
+        @info_msgs          = []
+        @warning_msgs       = []
+        @error_msgs         = []
+        @backup_files       = {}
+        @semantic_diffs     = {}
       end
 
       def add_info_msg(msg)

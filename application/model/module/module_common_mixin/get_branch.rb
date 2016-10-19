@@ -31,12 +31,11 @@ module DTK
       end
 
       def get_workspace_repo(version = nil)
-        aug_branch = get_augmented_workspace_branch(filter: { version: version })
-        aug_branch[:repo]
+        get_augmented_module_branch_with_version(version)[:repo]
       end
 
-      def get_workspace_branch_info(version = nil, opts = {})
-        if aug_branch = get_augmented_workspace_branch({ filter: { version: version } }.merge(opts))
+      def get_module_repo_info(version = nil, opts = {})
+        if aug_branch = get_augmented_module_branch_with_version(version, opts)
           module_name = aug_branch[:module_name]
           module_namespace = aug_branch[:module_namespace]
           opts_info = { version: version, module_namespace: module_namespace }
@@ -44,33 +43,16 @@ module DTK
         end
       end
 
-      def get_augmented_workspace_branch(opts = {})
-        version = (opts[:filter] || {})[:version]
-        version_field = ModuleBranch.version_field(version) #version can be nil
-        sp_hash = {
-          cols: [:display_name, :augmented_branch_info, :namespace]
-        }
-        module_rows = get_objs(sp_hash).select do |r|
-          r[:module_branch][:version] == version_field
-        end
+      def get_augmented_module_branch(opts = {})
+        ModuleBranch::Augmented.get_augmented_module_branch(self, opts)
+      end
+      def get_augmented_module_branch_with_version(version = nil, opts = {})
+        get_augmented_module_branch(opts.merge(filter: { version: version }))
+      end
 
-        if module_rows.size == 0
-          unless opts[:donot_raise_error]
-            fail ErrorUsage.new("Module #{pp_module_name(version)} does not exist")
-          end
-          return nil
-        end
-
-        # aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
-        unless module_obj = aggregate_by_remote_namespace(module_rows, opts)
-          fail ErrorUsage.new("The module (#{pp_module_name(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
-        end
-
-        ret = module_obj[:module_branch].merge(repo: module_obj[:repo], module_name: module_obj[:display_name], module_namespace: module_obj[:namespace][:display_name])
-        if opts[:include_repo_remotes]
-          ret.merge!(repo_remotes: module_obj[:repo_remotes])
-        end
-        ret
+      # TODO: deprecate get_workspace_branch_info for get_module_repo_info
+      def get_workspace_branch_info(version = nil, opts = {})
+        get_module_repo_info(version, opts)
       end
 
       # TODO: :library call should be deprecated

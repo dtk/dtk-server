@@ -25,6 +25,7 @@ module DTK
       #   :branch - Module::Branch
       #   :file_path - string
       #   :dir_path - string
+      #   :impacted_files - array
       # Returns a FileObj that matches a file_type object that matches a file_type in file_types
       #   or returns nil if no match found
       def self.matching_file_obj?(file_types, opts = {})

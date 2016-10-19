@@ -22,7 +22,7 @@ module DTK
     # TODO: DTK-2489: after we move everything off of DTK::Target we can remove this class or make it
     # a very simple root abstract class
     class Target < self
-      r8_nested_require('target', 'node_template')
+      require_relative('target/node_template')
       include NodeTemplateMixin
 
       # opts can have keys
@@ -63,7 +63,8 @@ module DTK
       def self.stage_target_service(assembly_template, service_module_class, opts = Opts.new)
         Model.Transaction do
           target = create_target_mock(opts[:target_name], opts[:project])
-          new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: true))
+          stage_opts = common_stage_opts.merge(is_target_service: true).merge(opts)
+          new_assembly_instance = assembly_template.stage(target, stage_opts)
           fixup_target_name_and_ref!(new_assembly_instance, target)
           module_repo_info = service_module_class.create_service_instance_and_nested_modules(new_assembly_instance, opts)
           Aux.stop_for_testing?(:stage)
@@ -85,15 +86,26 @@ module DTK
         end
         Model.Transaction do
           # if :allow_existing_service is true then new_assembly_instance can be existing assembly_instance
-          new_assembly_instance = assembly_template.stage(target, opts.merge(is_target_service: false, parent_service_instance: @assembly_instance))
+          stage_opts = common_stage_opts.merge(is_target_service: false, parent_service_instance: @assembly_instance).merge(opts)
+          new_assembly_instance = assembly_template.stage(target, stage_opts)
           module_repo_info = service_module_class.create_service_instance_and_nested_modules(new_assembly_instance, opts)
           Aux.stop_for_testing?(:stage) 
           self.class.new_service_info(new_assembly_instance, module_repo_info)
         end
       end
 
+      private
+
+      def self.common_stage_opts
+        Opts.new(donot_create_modules: true)
+      end
+      def common_stage_opts
+        self.class.common_stage_opts
+      end
+
       ###### end: Just called from v1 controller ######
 
+      public
 
       def target
         Log.error("Unexpected that @target is nil") unless @target

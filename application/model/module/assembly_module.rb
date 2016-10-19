@@ -26,9 +26,11 @@ module DTK
       @assembly_module_version = self.class.assembly_module_version(assembly)
     end
 
+    # opts can have keys:
+    #   :do_not_raise
     def self.delete_modules?(assembly, opts = {})
       Component.new(assembly).delete_modules?(skip_service_module_branch: true)
-      Service.new(assembly).delete_module?(opts)
+      Service.new(assembly).delete_module?(do_not_raise: opts[:do_not_raise])
     end
 
     def assembly_instance

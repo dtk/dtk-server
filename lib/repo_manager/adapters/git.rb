@@ -29,7 +29,7 @@ module DTK; class RepoManager
     require_relative('git/mixin')
     require_relative('git/manage_git_server')
 
-    include Mixin::AddBranch
+    include Mixin::AddAndDeleteBranch
     extend ManageGitServer::ClassMixin
 
     attr_reader :path
@@ -360,9 +360,13 @@ module DTK; class RepoManager
     end
 
     # returns :no_change, :changed, :merge_needed
-    def fast_foward_pull(remote_branch, force = false, remote_name = nil)
-      remote_name ||= default_remote_name
-      remote_ref = "#{remote_name}/#{remote_branch}"
+    # opts can have keys:
+    #   :force
+    #   :remote_name
+    def fast_foward_pull(remote_branch, opts = {})
+      remote_name = opts[:remote_name] || default_remote_name
+      remote_ref  = "#{remote_name}/#{remote_branch}"
+
       merge_rel = ret_merge_relationship(:remote_branch, remote_ref, fetch_if_needed: true)
       ret =
         case merge_rel
@@ -372,7 +376,7 @@ module DTK; class RepoManager
          else fail Error.new("Unexpected merge relation (#{merge_rel})")
         end
 
-      if force
+      if opts[:force]
         checkout(@branch) do
           git_command__fetch_all
           git_command__hard_reset(remote_ref)
@@ -568,7 +572,7 @@ module DTK; class RepoManager
     end
 
     def pull_changes(remote_name = nil, remote_branch = nil, force = false)
-      # note: even though generated git comamdn hash --git-dor set, need to chdir
+      # note: even though generated git comamdn hash --git-dir set, need to chdir
       Dir.chdir(@path) do
         git_command__pull(@branch, remote_branch || @branch, remote_name, force)
       end
@@ -594,32 +598,17 @@ module DTK; class RepoManager
       end
     end
 
-    # deletes both local and remote branch
-    # Opts can have keys:
-    #  :local_branch
-    #  :remote_branch
-    def delete_branch(opts = {})
-      local_branch_to_delete  = opts[:local_branch] || @branch
-      remote_branch_to_delete = opts[:remote_branch] || local_branch_to_delete
-      checkout_other_branch?(local_branch_to_delete) do
-        git_command__delete_local_branch?(local_branch_to_delete)
-        git_command__delete_remote_branch?(local_branch_to_delete, remote_branch_to_delete)
+    def add_squashed_subtree(prefix, external_repo, external_branch)
+      checkout(@branch) do
+        git_command__add_squashed_subtree(prefix, external_repo, external_branch)
       end
     end
 
-    def checkout_other_branch?(branch, &body)
-      if branch != current_branch
-        yield
-      else
-        unless other_branch = get_branches.find { |br| br != branch }
-          fail Error.new("Cannot find branch other than '#{branch}' to checkout")
-        end
-        checkout(other_branch) do        
-          yield
-        end
+    def push_squashed_subtree(prefix, external_repo, external_branch)
+      checkout(@branch) do
+        git_command__push_squashed_subtree(prefix, external_repo, external_branch)
       end
     end
-    private :checkout_other_branch?
 
     def get_branches
       @grit_repo.branches.map(&:name)

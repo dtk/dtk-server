@@ -24,12 +24,15 @@ module DTK
           @module_branch = module_branch
         end
 
+        # opts can have keys
+        #  :impacted_files - array
         def matching_file_obj?(opts = {})
           ret = nil
           [:file_path, :dir_path].each do |key|
             fail Error, "Treatment of option :#{key} is not yet supported" if opts[key]
           end
-          files = list_files_in_repo
+          # if opts[:impacted_files] given then only iterate over them
+          files = opts[:impacted_files] || list_files_in_repo
           @file_types.each do |file_type|
             files.each do |file_path|
               if file_type.matches?(file_path, exact: true)

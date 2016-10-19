@@ -57,12 +57,17 @@ module DTK; class AssemblyModule
     end
 
     # opts can have keys
-    # :version - base version
+    #   :version - base version
+    #   :delete_existing_branch
     def self.get_or_create_module_for_service_instance(assembly, opts = {})
        new(assembly).get_or_create_module_for_service_instance(opts)
     end
     def get_or_create_module_for_service_instance(opts = {})
-      @service_module.get_module_branch_matching_version(assembly_module_version) || create_module_for_service_instance(opts)
+      if existing_branch = @service_module.get_module_branch_matching_version(assembly_module_version)
+        return existing_branch unless opts[:delete_existing_branch]
+        # existing_branch.delete_instance
+      end
+      create_module_for_service_instance(opts)
     end
 
     # returns a ModuleRepoInfo object
@@ -77,6 +82,8 @@ module DTK; class AssemblyModule
       modification_type_obj.finalize_edit(module_branch, diffs_summary)
     end
 
+    # opts can have keys:
+    #   :do_not_raise
     def delete_module?(opts = {})
       service_module = get_service_module(@assembly, opts)
       return if service_module == false
@@ -92,10 +99,11 @@ module DTK; class AssemblyModule
 
     # Creates a repo, repo branch if needed for service and new module branch and returns module branch
     # opts can have keys
-    # :version - base version
+    #   :version - base version
+    #   :delete_existing_branch
     def create_module_for_service_instance(opts = {})
       base_version = opts[:version]
-      @service_module.create_new_version(base_version, assembly_module_version, delete_existing_branch: true)
+      @service_module.create_new_version(base_version, assembly_module_version, delete_existing_branch: opts[:delete_existing_branch])
     end
 
     def assembly_template_name?(assembly)
@@ -119,6 +127,8 @@ module DTK; class AssemblyModule
       end
     end
 
+    # opts can have keys:
+    #   :do_not_raise
     def get_service_module(assembly, opts = {})
       unless ret = assembly.get_service_module()
         assembly_name = assembly.display_name_print_form()

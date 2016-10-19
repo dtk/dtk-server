@@ -50,7 +50,7 @@ module DTK
 
   class CloneUpdateInfo < ModuleRepoInfo
     def initialize(module_obj, version = nil)
-      aug_branch = module_obj.get_augmented_workspace_branch(filter: { version: version })
+      aug_branch = module_obj.get_augmented_module_branch(filter: { version: version })
       opts = { version: version, module_namespace: module_obj.module_namespace() }
       opts.merge!(merge_warning_message: module_obj[:merge_warning_message]) if module_obj[:merge_warning_message]
       super(aug_branch[:repo], aug_branch[:module_name], module_obj.id_handle(), aug_branch, opts)

@@ -29,6 +29,8 @@ module DTK; class ModuleBranch
       end
 
       class Server < self
+        # opts can have keys:
+        #   :new_branch_name
         def create_local(project, opts = {})
           Location::Server::Local.new(project, self, opts[:new_branch_name])
         end

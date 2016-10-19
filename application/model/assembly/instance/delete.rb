@@ -29,14 +29,12 @@ module DTK; class  Assembly
         end
         # first check if target with service instances, then Delete.contents
         target_idhs_to_delete = Delete.target_idhs_to_delete?(assembly_idhs)
-
+        
         Delete.contents(assembly_idhs, opts)
 
-        unless opts[:uninstall].nil?
-          ret = delete_instances(assembly_idhs)
-          delete_instances(target_idhs_to_delete) unless target_idhs_to_delete.empty?
-          ret
-        end
+        ret = delete_instances(assembly_idhs)
+        delete_instances(target_idhs_to_delete) unless target_idhs_to_delete.empty?
+        ret
       end
 
       def delete_contents(assembly_idhs, opts = {})

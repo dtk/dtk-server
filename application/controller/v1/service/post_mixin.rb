@@ -121,11 +121,20 @@ module DTK
         # TODO: see if still need 
         # CommonModule::ServiceInstance.delete(assembly_instance, destroy_nodes: true)
         # after update below which seperated delete from uninstall behavior
-        uninstall = request_params(:uninstall)
+        new_client = boolean_request_params(:new_client)
         opts = Opts.new(delete_action: 'delete', delete_params: [assembly_instance.id_handle()])
-        opts.merge!(recursive: false, uninstall: uninstall)
+        opts.merge!(recursive: false, new_client: new_client)
         assembly_instance.exec__delete(opts)
         rest_ok_response
+      end
+
+      def uninstall
+          if running_task = most_recent_task_is_executing?(assembly_instance)
+            fail ErrorUsage, "Task with id '#{running_task.id}' is already running. Please wait until task is complete or  cancel task."
+          end
+
+          Assembly::Instance.delete(assembly_instance.id_handle(), destroy_nodes: true)
+          rest_ok_response
       end
 
       def exec

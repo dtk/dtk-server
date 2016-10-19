@@ -7,7 +7,8 @@ description: test123
 license: Apache 2.0
 
 dependencies:
-- puppetlabs/stdlib
+  aws/ec2: 0.0.1
+  puppetlabs/stdlib: master
 assemblies:
   new_module_assembly:
     description: test assembly

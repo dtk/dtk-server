@@ -91,7 +91,7 @@ shared_context 'Destroy service instance' do |service_location, service_instance
     puts 'Destroy instance', '--------------------'
     pass = true
     service_location = service_location + service_instance
-    value = `dtk service destroy --purge -d #{service_location} -y`
+    value = `dtk service uninstall --purge -d #{service_location} -y`
     puts value
     pass = false if value.include? 'ERROR'
     puts ''

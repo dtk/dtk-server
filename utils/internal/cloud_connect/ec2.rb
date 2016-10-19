@@ -255,7 +255,7 @@ module DTK
 
       def fetch_credentials_if_needed(credentials_with_region)
 # TODO: DTK-2712: see if better without FetchCredentials.fetch_credentials
-#return credentials_with_region
+return credentials_with_region
         if credentials_with_region[:use_iam_profile]
           FetchCredentials.fetch_credentials(credentials_with_region[:region])
         else

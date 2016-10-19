@@ -118,7 +118,13 @@ module DTK
       end
 
       def delete
-        CommonModule::ServiceInstance.delete(assembly_instance, destroy_nodes: true)
+        # TODO: see if still need 
+        # CommonModule::ServiceInstance.delete(assembly_instance, destroy_nodes: true)
+        # after update below which seperated delete from uninstall behavior
+        uninstall = request_params(:uninstall)
+        opts = Opts.new(delete_action: 'delete', delete_params: [assembly_instance.id_handle()])
+        opts.merge!(recursive: false, uninstall: uninstall)
+        assembly_instance.exec__delete(opts)
         rest_ok_response
       end
 

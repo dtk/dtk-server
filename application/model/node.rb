@@ -130,6 +130,14 @@ module DTK
       ndx_components.values
     end
 
+    def ret_node_property_component
+      if node_property_component_name = CommandAndControl.node_property_component
+        node_components = get_components(filter: [:eq, :display_name, node_property_component_name.gsub('::', '__')])
+        return nil if node_components.empty?
+        node_components.first
+      end
+    end
+
     def self.assembly_node_print_form?(obj)
       if obj.is_a?(Node)
         if obj.get_field?(:display_name)

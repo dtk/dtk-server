@@ -579,7 +579,7 @@ module DTK; class  Assembly
       task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
 
       nodes = assembly_instance.get_leaf_nodes()
-      if !opts[:uninstall] && nodes.empty?
+      if nodes.empty?
         fail ErrorUsage, "Service instance has no nodes or components to be deleted."
       end
 
@@ -613,7 +613,7 @@ module DTK; class  Assembly
         task.add_subtask(node_top_task) if node_top_task
       end
 
-      unless opts[:uninstall].nil?
+      unless opts[:new_client]
         delete_assembly_from_database = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
       end
 

@@ -61,6 +61,7 @@ DTK::ReactorRoute.draw do
   get    'api/v1/services/:service_id/required_attributes'    => 'v1::service#required_attributes'
 
   post 'api/v1/services/delete'      => 'v1::service#delete'
+    post 'api/v1/services/uninstall'      => 'v1::service#uninstall'
   # TODO: should we use below instead?
   # delete 'api/v1/services/:service_id' => 'v1::service#delete'
 

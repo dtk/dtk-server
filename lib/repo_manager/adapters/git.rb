@@ -421,7 +421,7 @@ module DTK; class RepoManager
       init_branch = current_branch
 
       # create branch with history from remote and not merge
-      git_command__create_empty_branch(@branch) #, use_branch_name: true)
+      git_command__create_empty_branch(@branch, use_branch_name: true)
 
       # when pulling version after base branch is pulled there are untracked changes in newly created empty branch
       # we need to add and commit them and then use pull --force to override them if not the same as remote files

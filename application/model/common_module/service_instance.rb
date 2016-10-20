@@ -43,12 +43,18 @@ module DTK
         ModuleRepoInfo.new(service_module_branch)
       end
 
-      # opts can have keys:
-      #   :destroy_nodes
-      def self.delete(assembly_instance, opts = {})
-        Model.Transaction do
-          Assembly::Instance.delete(assembly_instance.id_handle, destroy_nodes: opts[:destroy_nodes], delete_service_module_branch: true)
+      def self.delete_from_model_and_repo(assembly_instance)
+        if running_task = assembly_instance.most_recent_task_is_executing?
+          fail ErrorUsage, "Task with id '#{running_task.id}' is already running. Please wait until the task is complete or cancel the task."
         end
+        
+        # TODO: Put in logic to check if teher are any nodes or components and raise error unless an option passed
+        # If ther are nodes we want to destroy the nodes, i.e., terminate
+        delete_opts = {
+          destroy_nodes: true, 
+          delete_service_module_branch: true
+        }
+        Assembly::Instance.delete(assembly_instance.id_handle, delete_opts) 
       end
 
       def get_repo_info

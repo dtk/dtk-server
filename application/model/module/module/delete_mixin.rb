@@ -79,7 +79,7 @@ module DTK; class BaseModule
       end
     end
 
-    def delete_common_module_version_or_module(version)
+    def delete_common_module_version_or_module(version, opts = {})
       module_branches = get_module_branches()
 
       if module_branches.size > 1
@@ -91,7 +91,7 @@ module DTK; class BaseModule
           fail ErrorUsage.new("Base version for specified component module does not exist. You have to specify version you want to delete!")
         end
         CommonModule.delete_associated_service_module(self)
-        delete_object(skip_validations: true)
+        delete_object(opts.merge(skip_validations: true))
       end
     end
 

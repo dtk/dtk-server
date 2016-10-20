@@ -105,6 +105,10 @@ module DTK
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
       unless assoc_assemblies.empty?
         assembly_names = assoc_assemblies.map { |a| a[:display_name] }
+        require 'debugger'
+        Debugger.wait_connection = true
+        Debugger.start_remote
+        debugger
         error_msg =
           if opts[:from_common_module]
             "Cannot uninstall a module if one or more service instances (#{assembly_names.join(',')}) created from it exist"

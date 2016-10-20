@@ -28,7 +28,8 @@ module DTK
       def delete
         namespace, module_name, = required_request_params(:namespace, :module_name)
         version = request_params(:version) || 'master'
-        rest_ok_response CommonModule.delete(get_default_project, namespace, module_name, version)
+        opts = { from_common_module: true }
+        rest_ok_response CommonModule.delete(get_default_project, namespace, module_name, version, opts)
       end
 
       def install_component_module

@@ -36,7 +36,7 @@ module DTK
       private :initialize
 
       # opts can have
-      #   :components - a set of component instances to contrain what is returned
+      #   :components - a set of component instances to constrain what is returned
       #   :version
       def self.create(assembly_instance, opts = {})
         module_branch = AssemblyModule::Service.get_service_instance_or_base_branch(assembly_instance, opts)

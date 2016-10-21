@@ -18,6 +18,9 @@
 module DTK; class AssemblyModule
   class Service
     class Workflow < self
+      # opts can have keys:
+      #  :service_module
+      #  :task_action
       def initialize(assembly, opts = {})
         super(assembly, opts)
         #  opts[:task_action] can be nil

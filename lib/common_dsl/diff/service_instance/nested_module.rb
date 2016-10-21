@@ -42,17 +42,14 @@ module DTK; module CommonDSL
             end
             base_version = existing_aug_mb.version
             aug_nested_module_branch = service_instance.get_or_create_service_specific_aug_module_branch(existing_aug_mb.component_module, base_version:  base_version)
-            process_nested_module(diff_result, service_module_branch, nested_module_info, aug_nested_module_branch)
+            # TODO: process component_module_dsl_info if dsl file impacted
+            subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: nested_module_info.module_name).base_dir
+            service_module_branch.push_subtree_to_nested_module(subtree_prefix, aug_nested_module_branch)
+            ModuleRefs::Lock.create_or_update(service_instance.assembly_instance)
+            # TODO: update diff_result to indicate module taht was updated 
           end
         end
         
-        def self.process_nested_module(diff_result, service_module_branch, nested_module_info, aug_nested_module_branch) 
-          # TODO: process component_module_dsl_info if dsl file impacted
-          subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: nested_module_info.module_name).base_dir
-          service_module_branch.push_subtree_to_nested_module(subtree_prefix, aug_nested_module_branch)
-          # TODO: update diff_result to indicate module taht was updated 
-        end
-
       end
     end
   end

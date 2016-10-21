@@ -19,6 +19,8 @@ module DTK; class AssemblyModule
   class Service < self
     require_relative('service/workflow')
 
+    # opts can have keys:
+    #  :service_module
     def initialize(assembly, opts = {})
       super(assembly)
       @assembly_template_name = assembly_template_name?(assembly)
@@ -87,7 +89,7 @@ module DTK; class AssemblyModule
     def delete_module?(opts = {})
       service_module = get_service_module(@assembly, opts)
       return if service_module == false
-      am_version = assembly_module_version()
+      am_version = assembly_module_version
       service_module.delete_version?(am_version, donot_delete_meta: true)
     end
 
@@ -107,15 +109,18 @@ module DTK; class AssemblyModule
     end
 
     def assembly_template_name?(assembly)
-      if assembly_template = assembly.get_parent()
+      if assembly_template = assembly.get_parent
         assembly_template.get_field?(:display_name)
       else
-        assembly_name = assembly.display_name_print_form()
+        assembly_name = assembly.display_name_print_form
         Log.info("Assembly (#{assembly_name}) is not tied to an assembly template")
         nil
       end
     end
 
+    # opts can have keys:
+    #  :service_module
+    #  :task_action
     def self.create_modification_type_object(assembly, modification_type, opts = {})
       modification_type_class(modification_type).new(assembly, opts)
     end
@@ -130,8 +135,8 @@ module DTK; class AssemblyModule
     # opts can have keys:
     #   :do_not_raise
     def get_service_module(assembly, opts = {})
-      unless ret = assembly.get_service_module()
-        assembly_name = assembly.display_name_print_form()
+      unless ret = assembly.get_service_module
+        assembly_name = assembly.display_name_print_form
         return false if opts[:do_not_raise]
         fail ErrorUsage.new("Assembly (#{assembly_name}) is not tied to a service")
       end

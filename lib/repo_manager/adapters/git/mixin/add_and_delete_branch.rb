@@ -61,8 +61,7 @@ module DTK
         #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
         def add_branch(new_branch, opts = {})
           if opts[:empty]
-            # TODO: do we want option use_branch_name: true
-            git_command__create_empty_branch(new_branch)
+            git_command__change_head_symbolic_ref(new_branch)
             git_command__empty_commit 
           else
             checkout(opts[:sha] || @branch) do

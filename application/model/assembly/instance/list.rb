@@ -142,8 +142,10 @@ module DTK; class  Assembly
         opts.merge!(remove_node_groups: false)
         nodes = get_nodes__expand_node_groups(opts)
 
-        # we don't want to show soft-deleted node group members
-        nodes.delete_if{ |node| node[:ng_member_deleted]}
+        # remove assembly wide nodes
+        nodes.reject!{ |node| node.is_assembly_wide_node? }
+        # remove soft-deleted node group members
+        nodes.reject!{ |node| node[:ng_member_deleted] }
 
         nodes.each do |node|
           set_node_display_name!(node)

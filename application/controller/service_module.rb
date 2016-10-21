@@ -36,6 +36,7 @@ module DTK
 
     #### actions to interact with remote repos ###
     def rest__list_remote
+  
       rsa_pub_key = ret_request_params(:rsa_pub_key)
       datatype_opts = { datatype: :module_remote }
       module_list = ServiceModule.list_remotes(model_handle, rsa_pub_key)

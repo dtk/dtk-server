@@ -95,11 +95,11 @@ module DTK
       Update.update_class(common_module_type).update_from_repo(project, commit_sha, opts)
     end
 
-    def self.delete(project, namespace, module_name, version)
+    def self.delete(project, namespace, module_name, version, opts = {})
       unless common_module = get_common_module?(project, namespace, module_name, version)
         fail ErrorUsage.new("DTK module '#{namespace}:#{module_name}' does not exist!")
       end
-      common_module.delete_common_module_version_or_module(version)
+      common_module.delete_common_module_version_or_module(version, opts)
     end
 
     def self.delete_associated_service_module(common_module)

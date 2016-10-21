@@ -209,13 +209,15 @@ module DTK; class  Assembly
             node.ret_node_property_component
           end
 
-        attribute_values  = node_property_cmp.get_direct_attribute_values(:value)
-        external_ref      = node[:external_ref]||{}
+        if node_property_cmp
+          attribute_values  = node_property_cmp.get_direct_attribute_values(:value)
+          external_ref      = node[:external_ref]||{}
 
-        NodePropertyAttributes.each do |np_attribute|
-          if !node[np_attribute] && !external_ref[np_attribute]
-            if value = attribute_values[np_attribute][:value]
-              external_ref.merge!(np_attribute => value)
+          NodePropertyAttributes.each do |np_attribute|
+            if !node[np_attribute] && !external_ref[np_attribute]
+              if value = attribute_values[np_attribute][:value]
+                external_ref.merge!(np_attribute => value)
+              end
             end
           end
         end

@@ -65,17 +65,11 @@ module DTK; class AssemblyModule
       base_branch.merge(version: am_version, local_branch: local_branch[:display_name], current_branch_sha: local_branch[:current_sha])
     end
 
-    # opts can have keys
-    #  :sha
-    #  :version # TODO: change to :base_version
-    def self.prepare_for_edit(assembly, component_module, opts = {})
-      new(assembly).create_module_for_service_instance?(component_module, sha: opts[:sha], base_version: opts[:version])
+    def self.update_impacted_component_instances(assembly, component_module, nested_module_branch, opts = {})
+      new(assembly).update_impacted_component_instances(component_module, nested_module_branch, opts)
     end
 
-    def self.finalize_edit(assembly, component_module, module_branch, opts = {})
-      new(assembly).finalize_edit(component_module, module_branch, opts)
-    end
-    def finalize_edit(component_module, module_branch, opts = {})
+    def update_impacted_component_instances(component_module, module_branch, opts = {})
       # Update any impacted component instance
       cmp_instances = get_applicable_component_instances(component_module)
       project_idh = component_module.get_project.id_handle
@@ -92,7 +86,7 @@ module DTK; class AssemblyModule
       end
       # Recompute and persist the module ref locks
       # This must be done after any impacted component instances have been updated
-      ModuleRefs::Lock.create_or_update(@assembly, opts)
+      ModuleRefs::Lock.create_or_update(@assembly, opts) unless opts[:donot_update_module_refs_lock]
     end
 
     def delete_modules?(opts = {})
@@ -114,6 +108,18 @@ module DTK; class AssemblyModule
         end
       end
     end
+
+    # opts can have keys
+    #  :sha
+    #  :version # TODO: change to :base_version
+    def self.prepare_for_edit(assembly, component_module, opts = {})
+      new(assembly).create_module_for_service_instance?(component_module, sha: opts[:sha], base_version: opts[:version])
+    end
+
+    def self.finalize_edit(assembly, component_module, module_branch, opts = {})
+      new(assembly).update_impacted_component_instances(component_module, module_branch, opts)
+    end
+
 
     def self.promote_module_updates(assembly, component_module, opts = {})
       new(assembly).promote_module_updates(component_module, opts)

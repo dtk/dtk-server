@@ -18,18 +18,20 @@
 module DTK; module CommonDSL
   class Diff
     module ServiceInstance
-      require_relative('service_instance/top_dsl_file')
+      require_relative('service_instance/dsl')
       require_relative('service_instance/nested_module')
 
-      # returns object of type Diff::Result  or raises error
-      # TODO: DTK-2665: look at more consistently eithr putting error messages on results
-      # or throwing errors
-      # also look at doing pinpointed violation chaecking leveraging violation code
+      # returns object of type Diff::Result or raises error
       def self.process(service_instance, module_branch, repo_diffs_summary)
+
+        # TODO: DTK-2665: look at more consistently eithr putting error messages on results
+        # or throwing errors
+        # also look at doing pinpointed violation chaecking leveraging violation code
         diff_result = Result.new(repo_diffs_summary)
         impacted_files = repo_diffs_summary.impacted_files
         Model.Transaction do
-          TopDslFile.process_top_dsl_file?(diff_result, service_instance, module_branch, impacted_files)
+          # Parses service isnatnce dsl if has changed; can update diff_result
+          DSL.parse_service_instance_dsl?(diff_result, service_instance, module_branch, impacted_files)
           pp [:diff_result, diff_result]
           unless diff_result.any_errors?
             NestedModule.process_nested_modules?(diff_result, service_instance, module_branch, impacted_files)

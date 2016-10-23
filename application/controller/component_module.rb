@@ -113,10 +113,6 @@ module DTK
         opts.merge!(generate_docs: generate_docs)
       end
 
-      if use_impl_id = ret_request_param_boolean(:use_impl_id)
-        opts.merge!(use_impl_id: use_impl_id)
-      end
-
       module_dsl_info = component_module.update_model_from_clone_changes?(commit_sha, diffs_summary, version, opts)
       response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs)
       # the possible keys in response are (with the subkeys) are

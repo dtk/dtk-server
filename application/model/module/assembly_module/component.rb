@@ -69,8 +69,8 @@ module DTK; class AssemblyModule
       new(assembly).update_impacted_component_instances(component_module, nested_module_branch, opts)
     end
 
+    # Update any impacted component instance and recompute module ref locks
     def update_impacted_component_instances(component_module, module_branch, opts = {})
-      # Update any impacted component instance
       cmp_instances = get_applicable_component_instances(component_module)
       project_idh = component_module.get_project.id_handle
       begin
@@ -86,7 +86,7 @@ module DTK; class AssemblyModule
       end
       # Recompute and persist the module ref locks
       # This must be done after any impacted component instances have been updated
-      ModuleRefs::Lock.create_or_update(@assembly, opts) unless opts[:donot_update_module_refs_lock]
+      ModuleRefs::Lock.create_or_update(@assembly, opts)
     end
 
     def delete_modules?(opts = {})

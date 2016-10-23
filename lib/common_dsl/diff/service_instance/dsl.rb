@@ -18,12 +18,9 @@
 module DTK; module CommonDSL
   class Diff
     module ServiceInstance
-      module TopDslFile
-        # updates diff_result  or raises error
-        # TODO: DTK-2665: look at more consistently either putting error messages on results
-        # or throwing errors
-        # also look at doing pinpointed violation chaecking leveraging violation code
-        def self.process_top_dsl_file?(diff_result, service_instance, module_branch, impacted_files)
+      module DSL
+        # Parses service instance dsl if has changes; if dsl updated then updates diff_result or raises error
+        def self.parse_service_instance_dsl?(diff_result, service_instance, module_branch, impacted_files)
           if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
             service_instance_parse = dsl_file_obj.parse_content(:service_instance)
             service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)

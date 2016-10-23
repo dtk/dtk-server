@@ -72,11 +72,8 @@ module DTK
         str =~ @regexp
       end
 
-      # TODO: DTK2267: need to see what format is for assembly module version with seamntic version
-      # for example is it "version part" followed by "-" followed by term that matches @regexp ?
-      def strip_assembly_module_part(str)
-        ret = str.gsub(@regexp, '')
-        ret.empty? ? MasterVersion : ret
+      def corresponding_base_version(str)
+        strip_assembly_module_part(str)
       end
 
       def get_assembly(mh)
@@ -118,6 +115,14 @@ module DTK
       def version_string(assembly_name)
         "assembly--#{assembly_name}"
       end
+
+      # TODO: DTK2267: need to see what format is for assembly module version with seamntic version
+      # for example is it "version part" followed by "-" followed by term that matches @regexp ?
+      def strip_assembly_module_part(str)
+        ret = str.gsub(@regexp, '')
+        ret.empty? ? MasterVersion : ret
+      end
+
     end
   end
 end

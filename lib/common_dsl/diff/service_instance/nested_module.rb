@@ -30,10 +30,10 @@ module DTK; module CommonDSL
         private :initialize
 
         # Processes changes to the nested module content and dsl 
-        def self.process_nested_module_changes(diff_result, service_instance, service_module_branch, impacted_files)
-          if nested_modules_info = impacted_nested_modules_info?(impacted_files)
+        def self.process_nested_module_changes(diff_result, service_instance, service_module_branch, all_impacted_file_paths)
+          if nested_modules_info = impacted_nested_modules_info?(all_impacted_file_paths)
             # Find existing aug_module_branches for service instance nested modules and for each one impacted 
-            # create a service instance speicfic branch if needed; ndx_existing_aug_module_branches is indexed by nested module name
+            # create a service instance specfic branch if needed; ndx_existing_aug_module_branches is indexed by nested module name
             ndx_existing_aug_module_branches = service_instance.aug_nested_module_branches(augment_with_component_modules: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
             nested_modules_info.each do |nested_module_info|
               nested_module_name = nested_module_info.module_name
@@ -56,8 +56,12 @@ module DTK; module CommonDSL
           # parsing just looks at component module repo
           # Parses and processes any nested module dsl changes; can update diff_result
           # if does not raise error then returns true if the dsl file(s) is/are changed
-          dsl_changed = DSL.process_nested_module_dsl_changes(diff_result, @service_instance, aug_service_specific_mb, impacted_files)
-          
+          dsl_changed = false
+          if impacted_dsl_files = @nested_modules_info.restrict_to_dsl_files?
+            pp [:impacted_dsl_files, impacted_dsl_files]
+            DSL.process_nested_module_dsl_changes(diff_result, @service_instance, aug_service_specific_mb, impacted_dsl_files)
+            dsl_changed = true
+          end
           # Update the impacted component instancesm which includes updating the module_refs locks
           # This has to be done after all changes have been pushed to nested modules
           update_opts =  { meta_file_changed: dsl_changed, service_instance_module: true }
@@ -68,12 +72,13 @@ module DTK; module CommonDSL
 
         private
 
-        def self.impacted_nested_modules_info?(impacted_files)
-          Parse::NestedModule.matching_files_array(impacted_files)
+        # returns array of Parse::NestedModuleInfo objects or nil if none
+        def self.impacted_nested_modules_info?(all_impacted_file_paths)
+          Parse::NestedModuleInfo.impacted_modules_info?(all_impacted_file_paths)
         end
         
         def push_subtree_to_nested_module(aug_service_specific_mb)
-          subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: nested_module_name).base_dir
+          subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: @nested_modules_info.module_name).base_dir
           @service_module_branch.push_subtree_to_nested_module(subtree_prefix, aug_service_specific_mb) do 
             
           end
@@ -89,14 +94,6 @@ module DTK; module CommonDSL
 
         def nested_component_module
           @existing_aug_mb.component_module
-        end
-
-        def nested_module_name
-          @nested_modules_info.module_name
-        end
-
-        def impacted_files
-          @nested_modules_info.impacted_files
         end
 
       end

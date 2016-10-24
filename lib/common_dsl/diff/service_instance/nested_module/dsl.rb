@@ -19,22 +19,13 @@ module DTK; module CommonDSL
   class Diff
     class ServiceInstance::NestedModule
       module DSL
-        # Parses and processes any nested module dsl changes; can update diff_result
-        # if does not raise error then returns true if the dsl file(s) is/are changed
+        # Parses and processes anested module dsl changes; can update diff_result
         def self.process_nested_module_dsl_changes(diff_result, service_instance, aug_service_specific_mb, impacted_files)
-          if dsl_file_modified?(impacted_files)
-            # TODO: DTK-2727 use dtk-dsl library for parsing
-            Legacy.parse_and_update_nested_module(aug_service_specific_mb)
-            true # indicating dsl file changed
-          end
+          # TODO: DTK-2727 use dtk-dsl library for parsing
+          Legacy.parse_and_update_nested_module(aug_service_specific_mb)
         end
         
         private
-
-        def self.dsl_file_modified?(impacted_files)
-          # TODO: DTK-2707  use dtk-dsl library
-          !! impacted_files.find { |path| path =~ /dtk\.model\.yaml$/ }
-        end
 
         module Legacy
           def self.parse_and_update_nested_module(aug_service_specific_mb)

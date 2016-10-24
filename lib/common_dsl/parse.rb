@@ -22,6 +22,7 @@ module DTK
      require_relative('parse/directory_parser')
      require_relative('parse/file_parser')
      require_relative('parse/canonical_input')
+     require_relative('parse/nested_module_info')
 
      # opts can have keys
      #  :impacted_files - array
@@ -37,16 +38,6 @@ module DTK
 
      def self.set_dsl_version!(module_branch, parsed_common_module)
        module_branch.set_dsl_version!(parsed_common_module.req(:DSLVersion))
-     end
-     
-     module NestedModule
-       Info = Struct.new(:module_name, :impacted_files) 
-       def self.matching_files_array(all_impacted_files)
-         # Returns array of DTK::DSL::FileType::MatchingFiles
-         FileType::MatchingFiles.matching_files_array(FileType::ServiceInstance::NestedModule, all_impacted_files).map do |dsl_matching_files_obj|
-           Info.new(dsl_matching_files_obj.file_type_instance.module_name, dsl_matching_files_obj.file_paths)
-         end
-       end
      end
      
    end

@@ -214,7 +214,11 @@ module DTK; class  Assembly
           NodePropertyAttributes.each do |np_attribute|
             if !node[np_attribute] && !external_ref[np_attribute]
               if value = attribute_values[np_attribute][:value]
-                external_ref.merge!(np_attribute => value)
+                if np_attribute == :os_type
+                  node[np_attribute] = value
+                else
+                  external_ref.merge!(np_attribute => value)
+                end
               end
             end
           end

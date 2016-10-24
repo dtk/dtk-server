@@ -71,6 +71,7 @@ module DTK
       end
     end
 
+    # For dtk shell
     # parses and creates dsl_object form file in implementation
     # or content if passed in opts
     def self.create_dsl_object_from_impl(impl_obj, opts = {})

@@ -30,11 +30,12 @@ module DTK; module CommonDSL
         diff_result = Result.new(repo_diffs_summary)
         impacted_files = repo_diffs_summary.impacted_files
         Model.Transaction do
-          # Parses service isnatnce dsl if has changed; can update diff_result
-          DSL.parse_service_instance_dsl?(diff_result, service_instance, module_branch, impacted_files)
+          # Parses and processes any service instance dsl changes; can update diff_result
+          DSL.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
           pp [:diff_result, diff_result]
           unless diff_result.any_errors?
-            NestedModule.process_nested_modules?(diff_result, service_instance, module_branch, impacted_files)
+            # Processes the changes to the nested module content and dsl 
+            NestedModule.process_nested_module_changes(diff_result, service_instance, module_branch, impacted_files)
           end
         end
         diff_result

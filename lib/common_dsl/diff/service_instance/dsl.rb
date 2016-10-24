@@ -19,8 +19,8 @@ module DTK; module CommonDSL
   class Diff
     module ServiceInstance
       module DSL
-        # Parses service instance dsl if has changes; if dsl updated then updates diff_result or raises error
-        def self.parse_service_instance_dsl?(diff_result, service_instance, module_branch, impacted_files)
+        #Parses and processes any service instance dsl changes; if dsl updated then updates diff_result or raises error
+        def self.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
           if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
             service_instance_parse = dsl_file_obj.parse_content(:service_instance)
             service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)

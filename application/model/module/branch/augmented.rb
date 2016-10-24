@@ -70,13 +70,50 @@ module DTK
         end
 
         aug_module_branch = module_obj[:module_branch].merge(repo: module_obj[:repo], module_name: module_obj[:display_name], module_namespace: module_obj[:namespace][:display_name])
+
         if opts[:include_repo_remotes]
           aug_module_branch.merge!(repo_remotes: module_obj[:repo_remotes])
         end
         aug_module_branch.create_as_subclass_object(self)
       end
 
+      def self.augment_with_repos!(module_branches)
+        return module_branches if module_branches.empty?
+        repo_mh = module_branches.first.model_handle(:repo)
+        sp_hash = {
+          cols: [:id, :group_id, :display_name, :repo_name, :local_dir],
+          filter: [:oneof, :id, module_branches.map { |mb| mb[:repo_id] }]
+        }
+        ndx_repos = Model.get_objs(repo_mh, sp_hash).inject({}) { |h, repo| h.merge(repo.id => repo) }
+        module_branches.each do |module_branch|
+          module_branch[:repo] = ndx_repos[module_branch[:repo_id]]
+        end
+        module_branches
+      end
+
+      def augment_with_component_module!
+        self.class.augment_with_component_modules!([self])
+        self
+      end
+
       private
+
+      def self.augment_with_component_modules!(module_branches)
+        return module_branches if module_branches.empty?
+        component_module_mh = module_branches.first.model_handle(:component_module)
+        sp_hash = {
+          cols: [:id, :group_id, :display_name],
+          filter: [:oneof, :id, module_branches.map { |mb| mb[:component_id] }]
+        }
+        ndx_component_modules = Model.get_objs(component_module_mh, sp_hash).inject({}) do |h, component_module| 
+          h.merge(component_module.id => component_module) 
+        end
+        module_branches.each do |module_branch|
+          module_branch[:component_module] = ndx_component_modules[module_branch[:component_id]]
+        end
+        module_branches
+      end
+
 
       # assumed that all raw_module_rows agree on all except repo_remote
       def self.aggregate_by_remote_namespace(raw_module_rows, opts = {})

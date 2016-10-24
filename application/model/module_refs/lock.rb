@@ -61,8 +61,8 @@ module DTK
             ModuleBranch.create_stub(module_branch_mh, aug_mb_hash).create_as_subclass_object(ModuleBranch::Augmented)
           end
         end.compact
-        augment_with_repos!(aug_module_branches)
-        augment_with_component_modules!(aug_module_branches) if opts[:augment_with_component_modules]
+        ModuleBranch::Augmented.augment_with_repos!(aug_module_branches)
+        ModuleBranch::Augmented.augment_with_component_modules!(aug_module_branches) if opts[:augment_with_component_modules]
         aug_module_branches
       end
 
@@ -255,36 +255,7 @@ module DTK
           (Log.error("Unexpected that the module '#{element.namespace}:#{element.module_name}' does not have an corresponding implementation object"); nil)
       end
 
-      def self.augment_with_repos!(module_branches)
-        return module_branches if module_branches.empty?
-        repo_mh = module_branches.first.model_handle(:repo)
-        sp_hash = {
-          cols: [:id, :group_id, :display_name, :repo_name, :local_dir],
-          filter: [:oneof, :id, module_branches.map { |mb| mb[:repo_id] }]
-        }
-        ndx_repos = Model.get_objs(repo_mh, sp_hash).inject({}) { |h, repo| h.merge(repo.id => repo) }
-        module_branches.each do |module_branch|
-          module_branch[:repo] = ndx_repos[module_branch[:repo_id]]
-        end
-        module_branches
-      end
-
-      def self.augment_with_component_modules!(module_branches)
-        return module_branches if module_branches.empty?
-        component_module_mh = module_branches.first.model_handle(:component_module)
-        sp_hash = {
-          cols: [:id, :group_id, :display_name],
-          filter: [:oneof, :id, module_branches.map { |mb| mb[:component_id] }]
-        }
-        ndx_component_modules = Model.get_objs(component_module_mh, sp_hash).inject({}) do |h, component_module| 
-          h.merge(component_module.id => component_module) 
-        end
-        module_branches.each do |module_branch|
-          module_branch[:component_module] = ndx_component_modules[module_branch[:component_id]]
-        end
-        module_branches
-      end
-
     end
   end
 end
+

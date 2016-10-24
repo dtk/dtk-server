@@ -42,7 +42,7 @@ module DTK; class AssemblyModule
         component_module.create_new_version(base_version, am_version, create_opts)
       end
       if opts[:ret_augmented_module_branch]
-        component_module.get_augmented_module_branch_with_version(am_version)
+        component_module.get_augmented_module_branch_with_version(am_version).augment_with_component_module!
       else
         ret = component_module.get_module_repo_info(am_version)
         opts[:ret_module_branch] ? ret[:module_branch_idh].create_object : ret

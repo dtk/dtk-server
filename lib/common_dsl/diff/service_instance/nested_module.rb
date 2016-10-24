@@ -29,7 +29,8 @@ module DTK; module CommonDSL
         end
         private :initialize
 
-        def self.process_nested_modules?(diff_result, service_instance, service_module_branch, impacted_files)
+        # Processes changes to the nested module content and dsl 
+        def self.process_nested_module_changes(diff_result, service_instance, service_module_branch, impacted_files)
           if nested_modules_info = impacted_nested_modules_info?(impacted_files)
             # Find existing aug_module_branches for service instance nested modules and for each one impacted 
             # create a service instance speicfic branch if needed; ndx_existing_aug_module_branches is indexed by nested module name
@@ -48,15 +49,19 @@ module DTK; module CommonDSL
           # Create if needed the objects for a service instance specific modules
           aug_service_specific_mb = @service_instance.get_or_create_service_specific_module_objects(nested_component_module, base_version:  base_version)
 
-          # Parses service instance dsl if has changed; can update diff_result of raise error
-          DSL.parse_nested_module_dsl?(diff_result, @service_instance, aug_service_specific_mb, impacted_files)
-          
           # Push changes to impacted nested modules repo
           push_subtree_to_nested_module(aug_service_specific_mb)
           
+          # TODO: DTK-2708: until use dtk-dsl to parse nested module dsl; need to do push first since'
+          # parsing just looks at component module repo
+          # Parses and processes any nested module dsl changes; can update diff_result
+          # if does not raise error then returns true if the dsl file(s) is/are changed
+          dsl_changed = DSL.process_nested_module_dsl_changes(diff_result, @service_instance, aug_service_specific_mb, impacted_files)
+          
           # Update the impacted component instancesm which includes updating the module_refs locks
           # This has to be done after all changes have been pushed to nested modules
-          AssemblyModule::Component.update_impacted_component_instances(assembly_instance, nested_component_module, aug_service_specific_mb)
+          update_opts =  { meta_file_changed: dsl_changed, service_instance_module: true }
+          AssemblyModule::Component.update_impacted_component_instances(assembly_instance, nested_component_module, aug_service_specific_mb, update_opts)
           
           # TODO: update diff_result to indicate module taht was updated 
         end

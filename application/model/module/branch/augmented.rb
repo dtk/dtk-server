@@ -31,11 +31,25 @@ module DTK
         self[:component_module]
       end
       def component_module
-        component_module? ||  raise_unexpected_nil('component_module?')
+        component_module? || raise_unexpected_nil('component_module?')
+      end
+
+      def component_module_name?
+        if component_module = component_module?
+          pp [:component_module, component_module]
+          component_module.get_field?(:display_name)
+        end
+      end
+      def component_module_name
+        component_module_name? || raise_unexpected_nil('component_module_name?') 
+      end
+
+      def component_module
+        component_module? || raise_unexpected_nil('component_module?')
       end
 
       def repo
-        self[:repo]  || raise_unexpected_nil('self[:repo]')
+        self[:repo] || raise_unexpected_nil('self[:repo]')
       end
 
       def branch_name

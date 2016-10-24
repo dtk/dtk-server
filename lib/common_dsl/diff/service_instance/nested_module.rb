@@ -50,7 +50,7 @@ module DTK; module CommonDSL
           aug_service_specific_mb = @service_instance.get_or_create_service_specific_module_objects(nested_component_module, base_version:  base_version)
 
           # Push changes to impacted nested modules repo
-          push_subtree_to_nested_module(aug_service_specific_mb)
+          NestedModuleRepoSync.push_to_nested_module(@service_module_branch, aug_service_specific_mb)
           
           # TODO: DTK-2708: until use dtk-dsl to parse nested module dsl; need to do push first since'
           # parsing just looks at component module repo
@@ -74,7 +74,9 @@ module DTK; module CommonDSL
         
         def push_subtree_to_nested_module(aug_service_specific_mb)
           subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: nested_module_name).base_dir
-          @service_module_branch.push_subtree_to_nested_module(subtree_prefix, aug_service_specific_mb)
+          @service_module_branch.push_subtree_to_nested_module(subtree_prefix, aug_service_specific_mb) do 
+            
+          end
         end
         
         def assembly_instance 

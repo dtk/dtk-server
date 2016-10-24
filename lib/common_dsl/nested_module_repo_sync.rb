@@ -17,14 +17,16 @@
 #
 module DTK
   module CommonDSL
-    require_relative('common_dsl/file_type')
-    require_relative('common_dsl/diff')
-    # diff must be before generate
-    require_relative('common_dsl/generate')
-    require_relative('common_dsl/parse')
-    require_relative('common_dsl/nested_module_repo_sync')
-
-    # object_logic must go last
-    require_relative('common_dsl/object_logic')
+    # Methods to sync to and from the service instance repo to teh nested module repos using git subtree operations
+    module NestedModuleRepoSync
+      def self.push_to_nested_module(service_module_branch, aug_nested_module_branch)
+        nested_module_name = aug_nested_module_branch.component_module_name
+        subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: nested_module_name).base_dir
+        service_module_branch.push_subtree_to_nested_module(subtree_prefix, aug_nested_module_branch) do 
+          # transform_to_nseted_module_repo_form
+        end
+      end
+    end
   end
 end
+

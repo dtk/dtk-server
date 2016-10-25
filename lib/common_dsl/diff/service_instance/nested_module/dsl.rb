@@ -30,7 +30,7 @@ module DTK; module CommonDSL
         module Legacy
           def self.parse_and_update_nested_module(aug_service_specific_mb)
             component_module = aug_service_specific_mb.component_module
-            impl_obj         = aug_service_specific_mb.get_implementation
+            impl_obj         = aug_service_specific_mb.implementation
             version          = aug_service_specific_mb.version
 
             aug_service_specific_mb.set_dsl_parsed!(false)

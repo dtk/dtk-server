@@ -17,15 +17,41 @@
 #
 module DTK
   module CommonDSL
-    # Methods to sync to and from the service instance repo to teh nested module repos using git subtree operations
+    # Methods to sync to and from the service instance repo to the nested module repos using git subtree operations
     module NestedModuleRepoSync
+      require_relative('nested_module_repo_sync/component_module_transform')
+      
       def self.push_to_nested_module(service_module_branch, aug_nested_module_branch)
         nested_module_name = aug_nested_module_branch.component_module_name
         subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: nested_module_name).base_dir
         service_module_branch.push_subtree_to_nested_module(subtree_prefix, aug_nested_module_branch) do 
-          # transform_to_nseted_module_repo_form
+          # TODO: transform_to_component_module_repo_form
         end
       end
+
+      def self.pull_from_nested_modules(service_module_branch, aug_nested_module_branches)
+        return if aug_nested_module_branches.empty?
+        add_remote_files_info = RepoManager::AddRemoteFilesInfo::GitSubtree.new
+        aug_nested_module_branches.each do |aug_nested_module_branch|
+          source_repo         = aug_nested_module_branch.repo
+          source_branch_name  = aug_nested_module_branch.branch_name
+          target_relative_dir = target_relative_dir(aug_nested_module_branch[:module_name])
+
+          add_remote_files_info.add_git_subtree_info!(target_relative_dir, source_repo, source_branch_name) 
+        end
+
+        Generate::DirectoryGenerator.add_remote_files(service_module_branch, add_remote_files_info)
+
+        ComponentModuleTransform.transform_from_component_module_form(service_module_branch, aug_nested_module_branches)
+      end
+
+      private
+        
+
+      def self.target_relative_dir(module_name)
+        FileType::ServiceInstance::NestedModule.new(module_name: module_name).base_dir
+      end
+        
     end
   end
 end

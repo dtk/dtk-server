@@ -56,6 +56,10 @@ module DTK
         self[:branch]  || raise_unexpected_nil('self[:branch]')
       end
 
+      def implementation
+        @implementation ||= get_implementation
+      end
+
       # opts can have keys:
       #   :filter
       #   :donot_raise_error

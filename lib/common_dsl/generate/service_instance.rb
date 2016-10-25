@@ -27,12 +27,11 @@ module DTK
         #  :aug_nested_module_branches
         def self.generate_dsl(service_instance, service_module_branch, opts = {})
           add_service_dsl_files(service_instance, service_module_branch)
-          service_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
           if aug_nested_module_branches = opts[:aug_nested_module_branches]
-            add_nested_modules_dsl_files(aug_nested_module_branches, service_module_branch)
-            service_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
+            NestedModuleRepoSync.pull_from_nested_modules(service_module_branch, aug_nested_module_branches)
           end
           RepoManager.push_changes(service_module_branch)
+          service_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
         end
         
         private
@@ -43,23 +42,6 @@ module DTK
           yaml_text = FileGenerator.generate_yaml_text(:service_instance, content_input, service_module_branch.dsl_version)
           file_type__content_array = [{ file_type: FileType::ServiceInstance::DSLFile::Top, content: yaml_text }]
           DirectoryGenerator.add_files(service_module_branch, file_type__content_array, donot_push_changes: true)
-        end
-        
-        def self.add_nested_modules_dsl_files(aug_nested_module_branches, service_module_branch)
-          return if aug_nested_module_branches.empty?
-          
-          add_remote_files_info = RepoManager::AddRemoteFilesInfo::GitSubtree.new
-          aug_nested_module_branches.each do |aug_nested_module_branch|
-            source_repo         = aug_nested_module_branch[:repo]
-            source_branch_name  = aug_nested_module_branch[:branch]
-            target_relative_dir = target_relative_dir(aug_nested_module_branch[:module_name])
-            add_remote_files_info.add_git_subtree_info!(target_relative_dir, source_repo, source_branch_name) 
-          end
-          DirectoryGenerator.add_remote_files(service_module_branch, add_remote_files_info)
-        end
-
-        def self.target_relative_dir(module_name)
-          FileType::ServiceInstance::NestedModule.new(module_name: module_name).base_dir
         end
         
       end

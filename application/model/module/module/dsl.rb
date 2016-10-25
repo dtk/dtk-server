@@ -17,13 +17,13 @@
 #
 module DTK
   class ModuleDSL
-    r8_nested_require('dsl', 'parsing_error')
-    r8_nested_require('dsl', 'update_model')
-    r8_nested_require('dsl', 'generate_from_impl')
-    r8_nested_require('dsl', 'object_model_form')
-    r8_nested_require('dsl', 'incremental_generator')
+    require_relative('dsl/parsing_error')
+    require_relative('dsl/update_model')
+    require_relative('dsl/generate_from_impl')
+    require_relative('dsl/object_model_form')
+    require_relative('dsl/incremental_generator')
     # TODO: this needs to be after object_model_form, because object_model_form loads errors; should move errors to parent and include first here
-    r8_nested_require('dsl', 'ref_integrity')
+    require_relative('dsl/ref_integrity')
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
@@ -33,7 +33,7 @@ module DTK
       @version_specific_input_hash = version_specific_input_hash
       @input_hash                  = version_parse_check_and_normalize(version_specific_input_hash)
       @impl_idh                    = impl_idh
-      @project_idh                 = impl_idh.get_parent_id_handle_with_auth_info()
+      @project_idh                 = impl_idh.get_parent_id_handle_with_auth_info
       @ref_integrity_snapshot      = opts[:ref_integrity_snapshot]
       @component_module            = opts[:component_module]
       # TODO: deprecate <config_agent_type>
@@ -60,14 +60,14 @@ module DTK
       # problems within transaction after do update; transaction is aborted if any errors found
       Model.Transaction do
         update_opts = {
-          override_attrs: { 'module_branch_id' => @module_branch.id() },
-          namespace: component_module().module_namespace()
+          override_attrs: { 'module_branch_id' => @module_branch.id },
+          namespace: component_module.module_namespace
         }
         update_opts.merge!(version: opts[:version]) if opts[:version]
         update_model(update_opts)
 
-        ref_integrity_snapshot.raise_error_if_any_violations()
-        ref_integrity_snapshot.integrity_post_processing()
+        ref_integrity_snapshot.raise_error_if_any_violations
+        ref_integrity_snapshot.integrity_post_processing
       end
     end
 
@@ -102,8 +102,8 @@ module DTK
       return ports if ParsingError.is_error?(ports)
 
       ParsingError.trap do
-        module_branch = impl_obj.get_module_branch()
-        new(impl_obj.id_handle(), module_branch, input_hash, opts)
+        module_branch = impl_obj.get_module_branch
+        new(impl_obj.id_handle, module_branch, input_hash, opts)
       end
     end
 
@@ -157,6 +157,22 @@ module DTK
       VersionIntegerToVersion[integer_version]
     end
 
+    def self.get_dsl_file_input_hash(impl_obj)
+      info = get_dsl_file_raw_content_and_info(impl_obj)
+      ret = convert_to_hash(info[:content], info[:format_type], file_path: info[:file_path])
+      fail input_hash if ParsingError.is_error?(ret)
+      ret
+    end
+
+    # TODO: this might move to a more common area
+    def self.convert_attribute_mapping(input_am, base_cmp, dep_cmp, opts = {})
+      integer_version = 2 #TODO: fix this being hard coded
+      klass = load_and_return_version_adapter_class(integer_version)
+      klass.convert_attribute_mapping_helper(input_am, base_cmp, dep_cmp, opts)
+    end
+
+    private
+
     def self.name_attribute_integrity_check(components)
       return unless components
       names = []
@@ -191,16 +207,7 @@ module DTK
       end
       names
     end
-    # returns parsing_error if parsing error
 
-    # TODO: this might move to a more common area
-    def self.convert_attribute_mapping(input_am, base_cmp, dep_cmp, opts = {})
-      integer_version = 2 #TODO: fix this being hard coded
-      klass = load_and_return_version_adapter_class(integer_version)
-      klass.convert_attribute_mapping_helper(input_am, base_cmp, dep_cmp, opts)
-    end
-
-    private
 
     def ref_integrity_snapshot
       unless @ref_integrity_snapshot
@@ -220,7 +227,7 @@ module DTK
       def initialize(augmented_objects)
         @object_class = object_class(augmented_objects)
 
-        integer_version = self.class.default_integer_version()
+        integer_version = self.class.default_integer_version
         base_klass = self.class.load_and_return_version_adapter_class(integer_version)
         @version_klass = base_klass.const_get('IncrementalGenerator')
       end
@@ -258,7 +265,7 @@ module DTK
         if impl_or_module_branch_obj.is_a?(Implementation)
           impl_or_module_branch_obj
         elsif impl_or_module_branch_obj.is_a?(ModuleBranch)
-          impl_or_module_branch_obj.get_implementation()
+          impl_or_module_branch_obj.get_implementation
         else fail Error.new("Unexpected object type for impl_or_module_branch_obj (#{impl_or_module_branch_obj.class})")
         end
       info = get_dsl_file_raw_content_and_info(impl_obj, dsl_integer_version, format_type)
@@ -328,10 +335,10 @@ module DTK
         return @cached_adapter_class[integer_version] if @cached_adapter_class[integer_version]
         adapter_name = "v#{integer_version}"
         opts = {
-          class_name: { adapter_type: adapter_type() },
+          class_name: { adapter_type: adapter_type },
           subclass_adapter_name: true
         }
-        @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class(adapter_dir(), adapter_name, opts)
+        @cached_adapter_class[integer_version] = DynamicLoader.load_and_return_adapter_class(adapter_dir, adapter_name, opts)
       end
 
       def isa_dsl_filename?(filename, dsl_integer_version = nil)
@@ -353,7 +360,7 @@ module DTK
       end
 
       def integer_version(pos_val = nil)
-        pos_val ? pos_val.to_i : default_integer_version()
+        pos_val ? pos_val.to_i : default_integer_version
       end
 
       # returns hash with keys: :format_type
@@ -383,7 +390,7 @@ module DTK
              ParsingError.new("Unexpected module_type (#{type})")
           end
         else
-          ConfigAgent::Type.default_symbol()
+          ConfigAgent::Type.default_symbol
         end
       end
 

@@ -55,7 +55,50 @@ shared_context 'Stage assembly from module' do |module_name, module_location, as
     puts value
     pass = false if value.include? 'ERROR'
     puts "Assembly #{assembly_name} is staged successfully!" if pass == true
-    puts "Assembly #{assembly_name} did not stage successfully!" if pass == false
+    puts "Assembly #{assembly_name} is not staged successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Stage assembly from module to specific target' do |module_name, module_location, assembly_name, service_name, target_name|
+  it "stages assembly #{assembly_name} from module #{module_name} in target #{target_name}" do
+    puts 'Stage assembly from module to specific target', '---------------------------------------------'
+    pass = true
+    value = `dtk service stage --parent #{target_name} -d #{module_location} -n #{service_name} #{assembly_name}`
+    puts value
+    pass = false if value.include? 'ERROR'
+    puts "Assembly #{assembly_name} is staged to #{target_name} successfully!" if pass == true
+    puts "Assembly #{assembly_name} is not staged to #{target_name} successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Stage target from module' do |target_name, target_location, assembly_name, service_name|
+  it "stages target #{assembly_name} from module #{target_name}" do
+    puts 'Stage target from module', '-------------------------'
+    pass = true
+    value = `dtk service stage --target -d #{target_location} -n #{service_name} #{assembly_name} `
+    puts value
+    pass = false if value.include? 'ERROR'
+    puts "Target #{assembly_name} is staged successfully!" if pass == true
+    puts "Target #{assembly_name} is not staged successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Set attribute' do |service_location, target_service_name, attribute_name, attribute_value|
+  it "sets attribute for #{attribute_name}" do
+    puts 'Set attribute', '---------------'
+    pass = true
+    service_location = service_location + target_service_name
+    value = `dtk service set-attribute -d #{service_location} #{attribute_name} #{attribute_value}`
+    puts value
+    pass = false if value.include? 'ERROR'
+    puts "Attribute #{attribute_name} is set correctly on #{target_service_name} service instance" if pass == true
+    puts "Attribute #{attribute_name} is not set correctly on #{target_service_name} service instance" if pass == false
     puts ''
     expect(pass).to eq(true)
   end
@@ -94,6 +137,43 @@ shared_context 'Destroy service instance' do |service_location, service_instance
     value = `dtk service uninstall --purge -d #{service_location} -y`
     puts value
     pass = false if value.include? 'ERROR'
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Uninstall service instance' do |service_location, service_instance|
+  it "uninstalls service instance" do
+    puts 'Uninstall instance', '--------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service uninstall --purge -d #{service_location} -y`
+    puts value
+    pass = false if value.include? 'ERROR'
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Delete service instance' do |service_location, service_instance, dtk_common|
+  it "deletes service instance content and triggers delete actions if any" do
+    puts 'Delete instance', '--------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service delete -d #{service_location} -y`
+    if value.include? 'ERROR'
+      pass = false
+      puts "Service instance was not deleted successfully!"
+    else
+      delete_succeeded = dtk_common.check_delete_task_status(service_instance)
+      if delete_succeeded
+        pass = true
+        puts "Service instance is deleted successfully!"
+      else
+        pass = false
+        puts "Service instance is not deleted successfully!"
+      end
+    end
     puts ''
     expect(pass).to eq(true)
   end

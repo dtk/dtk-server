@@ -31,7 +31,7 @@ module DTK; class  Assembly
 
         # first check if target with service instances, then Delete.contents
         target_idhs_to_delete = Delete.target_idhs_to_delete?(assembly_idhs)
-
+        
         Delete.contents(assembly_idhs, opts)
 
         unless opts[:uninstall].nil?

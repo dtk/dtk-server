@@ -413,28 +413,28 @@ module DTK; class RepoManager
       end
     end
 
-    def initial_sync_with_remote_repo(remote_name, remote_url, remote_branch, opts = {})
-      force = false
+    def initial_sync_with_remote_repo(remote_name, remote_url, remote_branch)
       add_remote?(remote_name, remote_url)
 
-      # initial branch from which we create new empty branch; first one is master but next one is version branch
-      init_branch = current_branch
-
-      # create branch with history from remote and not merge
-      git_command__create_empty_branch(@branch, use_branch_name: true)
-
-      # when pulling version after base branch is pulled there are untracked changes in newly created empty branch
-      # we need to add and commit them and then use pull --force to override them if not the same as remote files
-      if !init_branch.eql?('master') && opts[:hard_reset_on_pull_version]
-        force = true
-        add_all_files(@branch)
-      end
-
-      pull_changes(remote_name, remote_branch, force)
+      # create branch with history from just remote and not merge from existing branch
+      create_branch_from_from_just_remote(remote_name, remote_branch)
 
       # push to local
       push_changes
     end
+    def create_branch_from_from_just_remote(remote_name, remote_branch)
+      # if no branch current_branch will return 'master'
+      init_branch = current_branch
+
+      git_command__change_head_symbolic_ref(@branch)
+
+      # when pulling version after base branch is pulled there are untracked changes in newly created empty branch
+      # we need to add and commit them and then use pull --force to override them if not the same as remote files
+      add_all_files(@branch) unless init_branch.eql?('master') 
+      force = true
+      pull_changes(remote_name, remote_branch, force)
+    end
+    private :create_branch_from_from_just_remote
 
     def pull_from_remote_repo(remote_name, remote_url, remote_branch)
       add_remote?(remote_name, remote_url)

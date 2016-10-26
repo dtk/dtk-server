@@ -33,26 +33,26 @@ module DTK
         ret
       end
 
-      def initial_sync_with_remote(remote, remote_repo_info, opts = {})
+      def initial_sync_with_remote(remote, remote_repo_info)
         unless R8::Config[:repo][:workspace][:use_local_clones]
           fail Error.new('Not implemented yet: initial_sync_with_remote_repo w/o local clones')
         end
 
-        remote_url = remote.repo_url()
-        remote_ref = remote.remote_ref()
-        remote_branch =  remote.branch_name()
+        remote_url = remote.repo_url
+        remote_ref = remote.remote_ref
+        remote_branch =  remote.branch_name
 
         if remote_branches = remote_repo_info[:branches]
           unless remote_branches.include?(remote_branch)
             fail ErrorUsage.new("Cannot find selected version on remote repo #{remote_repo_info[:full_name] || ''}")
           end
         end
-        commit_sha = RepoManager.initial_sync_with_remote_repo(branch_name(), get_field?(:repo_name), remote_ref, remote_url, remote_branch, opts)
+        commit_sha = RepoManager.initial_sync_with_remote_repo(branch_name, get_field?(:repo_name), remote_ref, remote_url, remote_branch)
         commit_sha
       end
 
       def delete_local_brach_only(branch_name)
-        RepoManager.delete_local_brach(branch_name, get_field?(:repo_name), branch_name())
+        RepoManager.delete_local_brach(branch_name, get_field?(:repo_name), branch_name)
       end
 
       private
@@ -61,7 +61,7 @@ module DTK
         repo_name = repo_name(local)
         branch_name = local.branch_name
         sp_hash = {
-          cols: common_columns(),
+          cols: common_columns,
           filter: [:eq, :repo_name, repo_name]
         }
         unless repo_obj = get_obj(model_handle, sp_hash)
@@ -82,13 +82,13 @@ module DTK
       end
       def branch_name
         unless ret = self[:branch_name]
-          fail Error.new("Unexpected that self[:branch_name] is null for: #{inspect()}")
+          fail Error.new("Unexpected that self[:branch_name] is null for: #{inspect}")
         end
         ret
       end
 
       def self.repo_name(local)
-        local.private_user_repo_name()
+        local.private_user_repo_name
       end
 
       def self.get_objs(mh, sp_hash, opts = {})

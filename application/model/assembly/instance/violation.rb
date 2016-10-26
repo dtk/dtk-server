@@ -36,7 +36,7 @@ module DTK
       def self.type
         Aux.underscore(Aux.demodulize(to_s)).to_sym
       end
-      def type
+      def type 
         self.class.type
       end
 

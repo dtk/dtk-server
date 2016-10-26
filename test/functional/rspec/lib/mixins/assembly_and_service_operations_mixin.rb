@@ -31,13 +31,50 @@ module AssemblyAndServiceOperationsMixin
     service_converged
   end
 
+  def check_delete_task_status(service_instance_name)
+  	puts "Check delete task status", "------------------------"
+  	service_deleted = false
+  	end_loop = false
+		count = 0
+		max_num_of_retries = 50
+
+    while (count < max_num_of_retries)
+			sleep 5
+			count += 1	
+      task_status_response = send_request("/rest/api/v1/services/#{service_instance_name}/task_status", {}, 'get')
+
+      if task_status_response['status'] == 'ok'
+        if task_status_response['data'].first['status'] == 'succeeded'
+        	puts "Service was deleted successfully!"
+          service_deleted = true
+          break
+        elsif task_status_response['data'].first['status'] == 'failed'
+          puts 'Service was not deleted successfully!'
+          service_deleted = false
+          break
+        end
+      else
+      	if task_status_response['errors'].first['message'] == "No object of type service with name '#{service_instance_name}' exists"
+          puts "Service was deleted successfully!"
+          service_deleted = true
+        else
+          puts "Service was not deleted successfully!"
+          service_deleted = false
+        end
+        break
+      end
+    end
+    puts ''
+    service_deleted
+  end
+
   def stage_service_instance(service_instance_name, target = nil)
 		#Get list of assemblies, extract selected assembly, stage service and return its id
 		puts "Stage service:", "--------------"
 		service_id = nil
 		extract_id_regex = /id: (\d+)/
 		assembly_list = send_request('/rest/assembly/list', {:subtype=>'template'})
-
+ 
 		puts "List of avaliable assemblies: "
 		pretty_print_JSON(assembly_list)
 		test_template = assembly_list['data'].select { |x| x['display_name'] == @assembly }.first
@@ -48,12 +85,12 @@ module AssemblyAndServiceOperationsMixin
 			puts "Assembly id: #{assembly_id}"
 
       if @is_target
-			  stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :is_target => @is_target})
+			  stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :is_target => @is_target})	
 			else
 				unless target
           stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name})
         else
-		stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :target_id=>target})
+        	stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :target_id=>target})
         end
 			end
 

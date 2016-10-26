@@ -36,9 +36,8 @@ module DTK
         git_command.branch(cmd_opts, branch_name)
       end
       
-      def git_command__create_empty_branch(branch_name, opts = {})
-        name = opts[:use_branch_name] ? "#{branch_name}" : 'HEAD'
-        git_command.symbolic_ref(cmd_opts, name, "refs/heads/#{branch_name}")
+      def git_command__change_head_symbolic_ref(branch_name)
+        git_command.symbolic_ref(cmd_opts, 'HEAD', "refs/heads/#{branch_name}")
       end
       
       def git_command__add(file_path)

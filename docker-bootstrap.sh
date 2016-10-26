@@ -16,13 +16,40 @@ HOST_VOLUME=$1
 PBUILDERID=$2
 GIT_PORT=${GIT_PORT-2222}
 
+server_image="getdtk/dtk-server"
+arbiter_image="getdtk/dtk-arbiter"
+server_container_name="dtk"
+arbiter_container_name="dtk-arbiter"
+
 # set pbuilder argument if provided
 if [[ -n $PBUILDERID ]]; then
   PBUILDER_ARG="-e PBUILDERID=${PBUILDERID}"
 fi
 
-# start the dtk-server container
-docker run --name dtk -v $HOST_VOLUME:/host_volume -p 8080:80 -p 6163:6163 -p $GIT_PORT:22 --restart=on-failure -d getdtk/dtk-server
+# pull latest docker images
+docker pull $server_image
+docker pull $arbiter_image
+
+# check if upgrades are necessary
+server_image_latest=`docker inspect --format="{{ .Id }}" ${server_image}:latest`
+arbiter_image_latest=`docker inspect --format="{{ .Id }}" ${arbiter_image}:latest`
+server_image_running=`docker inspect --format="{{ .Image }}" ${server_container_name}`
+arbiter_image_running=`docker inspect --format="{{ .Image }}" ${arbiter_container_name}`
+
+# if newer images are available, stop and remove existing containers
+if [[ "$server_image_running" != "$server_image_latest" ]]; then
+  docker stop $server_container_name
+  docker rm $server_container_name
+fi
+if [[ "$arbiter_image_running" != "$arbiter_image_latest" ]]; then
+  docker stop $arbiter_container_name
+  docker rm $arbiter_container_name
+fi
+
+# start the dtk-server container if it doesn't already exist
+if ! docker inspect '--format={{ .Image }}' $server_container_name >/dev/null 2>&1; then
+  docker run --name $server_container_name -v $HOST_VOLUME:/host_volume -p 8080:80 -p 6163:6163 -p $GIT_PORT:22 --restart=on-failure -d $server_image
+fi
 
 # wait for dtk-arbiter ssh keypair to be generated
 while [[ ! -f $HOST_VOLUME/arbiter/arbiter_remote ]]; do
@@ -36,5 +63,7 @@ if [[ -e /var/run/docker.sock ]]; then
   additional_args="-v /var/run/docker.sock:/var/run/docker.sock "
 fi
 
-# start the dtk-arbiter container
-docker run --name dtk-arbiter $PBUILDER_ARG -v $HOST_VOLUME:/host_volume -e HOST_VOLUME=$HOST_VOLUME $additional_args --restart=on-failure -td getdtk/dtk-arbiter
+# start the dtk-arbiter container if it doesn't already exist
+if ! docker inspect '--format={{ .Image }}' $arbiter_container_name >/dev/null 2>&1; then
+  docker run --name $arbiter_container_name $PBUILDER_ARG -v $HOST_VOLUME:/host_volume -e HOST_VOLUME=$HOST_VOLUME $additional_args --restart=on-failure -td $arbiter_image
+fi

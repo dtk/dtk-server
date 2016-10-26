@@ -19,7 +19,7 @@ module DTK
   class ModuleRefs
     # This class is used to build a hierarchical dependency tree and to detect conflicts
     class Tree
-      r8_nested_require('tree', 'collapsed')
+      require_relative('tree/collapsed')
       include Collapsed::Mixin
 
       MISSING_MODULE__REF_TYPE = '-- MISSING MODULE REF --'
@@ -40,7 +40,7 @@ module DTK
       #   :version
       def self.create(assembly_instance, opts = {})
         module_branch = AssemblyModule::Service.get_service_instance_or_base_branch(assembly_instance, opts)
-        components = opts[:components] || assembly_instance.get_component_instances
+        components = opts[:components] || assembly_instance.get_component_instances(cols: [:id, :group_id, :display_name, :component_type, :module_branch_id])
         create_module_refs_starting_from_assembly(assembly_instance, module_branch, components)
       end
 
@@ -55,7 +55,7 @@ module DTK
       def violations?
         missing   = {}
         multi_ns  = {}
-        refs      = hash_form()
+        refs      = hash_form
 
         refs.each do |k, v|
           if k == :refs
@@ -97,25 +97,25 @@ module DTK
         if @context.is_a?(Assembly)
           ret[:type] = Workspace.is_workspace?(@context) ? 'Workspace' : 'Assembly::Instance'
           ret[:name] = @context.get_field?(:display_name)
-        elsif isa_module_ref?()
+        elsif isa_module_ref?
           ret[:type] = 'ModuleRef'
-          ret[:namespace] = namespace()
-          if version = version?()
+          ret[:namespace] = namespace
+          if version = version?
             ret[:version] = version
           end
-          if external_ref = external_ref?()
+          if external_ref = external_ref?
             ret[:external_ref]  = external_ref
           end
-        elsif isa_missing_module_ref?()
+        elsif isa_missing_module_ref?
           ret[:type] = MISSING_MODULE__REF_TYPE
-          ret[:namespace] = namespace()
+          ret[:namespace] = namespace
         else
           ret[:type] = @context.class
           ret[:content] = @context
         end
 
         refs = @module_refs.inject({}) do |h, (module_name, subtree)|
-          h.merge(module_name => subtree && subtree.hash_form())
+          h.merge(module_name => subtree && subtree.hash_form)
         end
         ret[:refs] = refs unless refs.empty?
 
@@ -127,7 +127,7 @@ module DTK
       end
 
       def namespace
-        namespace?() || (Log.error_pp(['Unexpected that no namespace_info for', self]); nil)
+        namespace? || (Log.error_pp(['Unexpected that no namespace_info for', self]); nil)
       end
 
       def namespace?
@@ -155,7 +155,7 @@ module DTK
       end
 
       def recursive_add_module_refs!(parent_path = [])
-        get_children([module_branch()]) do |module_name, namespace, child|
+        get_children([module_branch]) do |module_name, namespace, child|
           ns_module_name = self.class.namespace_model_name_path_el(namespace, module_name)
           path = parent_path + [ns_module_name]
           if parent_path.include?(ns_module_name)
@@ -194,7 +194,7 @@ module DTK
         cmp_module_branch_ids = ndx_cmps.keys
 
         sp_hash = {
-          cols: ModuleBranch.common_columns(),
+          cols: ModuleBranch.common_columns,
           filter: [:oneof, :id, cmp_module_branch_ids]
         }
         cmp_module_branches = Model.get_objs(assembly_instance.model_handle(:module_branch), sp_hash)
@@ -232,7 +232,7 @@ module DTK
         # TODO: can bulk up; look also at using
         # assembly_instance.get_objs(:cols=> [:instance_component_module_branches])
         ndx_mod_name_branches = cmp_module_branches.inject({}) do |h, module_branch|
-          h.merge(module_branch.get_module()[:display_name] => module_branch)
+          h.merge(module_branch.get_module[:display_name] => module_branch)
         end
 
         ndx_mod_name_branches.each_pair do |module_name, module_branch|
@@ -254,15 +254,22 @@ module DTK
 
         #ndx_module_branches is component module branches indexed by module ref id
         ndx_module_branches = {}
-        ModuleRef.find_ndx_matching_component_modules(module_refs).each_pair do |mod_ref_id, cmp_module|
-          version = nil #TODO: stub; need to change when treat service isnatnce branches
-          ndx_module_branches[mod_ref_id] = cmp_module.get_module_branch_matching_version(version)
+        ModuleRef.find_module_refs_matching_component_modules(module_refs).each do |module_ref_component_module_pair|
+          component_module = module_ref_component_module_pair.component_module
+          module_ref       = module_ref_component_module_pair.module_ref
+
+          ndx_module_branches[module_ref.id] = component_module.get_module_branch_matching_version(module_ref.version_string)
         end
 
         module_refs.each do |module_ref|
-          module_branch = ndx_module_branches[module_ref[:id]]
+          unless module_branch = ndx_module_branches[module_ref[:id]]
+            err_msg = "A module '#{module_ref.module_name}' with namespace '#{module_ref.namespace}'"
+            err_msg << " with version '#{version}'" if version = module_ref.version_string
+            err_msg << " is referenced in a dependency, but does not exist"
+            fail ErrorUsage, err_msg
+          end
           child = module_branch && self.class.new(module_branch, module_ref)
-          block.call(module_ref[:module_name], module_ref[:namespace_info], child)
+          block.call(module_ref.module_name, module_ref.namespace, child)
         end
       end
     end

@@ -29,7 +29,8 @@ dtk_common = Common.new('', '')
 describe "(Target) Test Case 02: Specified subnet length, vpc and security group name" do
   before(:all) do
     puts '***************************************************************************', ''
-    # Install aws:network module with required dependency modules
+    # Install/clone aws:network module with required dependency modules
+    system("dtk module clone #{target_module} #{target_location}")
     system("dtk module install -d #{target_location} #{target_module}")
   end
 
@@ -82,7 +83,7 @@ describe "(Target) Test Case 02: Specified subnet length, vpc and security group
   end
 
   context "Stage assembly from module" do
-    include_context "Stage assembly from module to specific target", module_name, module_location, assembly_name, service_name, target_name
+    include_context "Stage assembly from module to specific target", module_name, module_location, assembly_name, service_name, target_service_name
   end
 
   context "Converge service instance" do

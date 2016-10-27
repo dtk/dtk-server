@@ -302,6 +302,9 @@ module DTK; class  Assembly
         # return if ambiguous attributes (component and node have same name and attribute)
         return attr_patterns if attr_patterns.is_a?(Hash) && attr_patterns[:ambiguous]
 
+        # set os_type if image attribute is changed; also validate size attribute if set
+        validate_and_fill_image_or_size_attributes?(attr_patterns, opts)
+
         if opts[:update_meta]
           created_cmp_level_attrs = attr_patterns.select { |r| r.type == :component_level && r.created?() }
           unless created_cmp_level_attrs.empty?
@@ -315,10 +318,58 @@ module DTK; class  Assembly
           CommonDSL::Generate::ServiceInstance.generate_dsl(self, service_instance_branch)
           return CommonModule::ModuleRepoInfo.new(service_instance_branch)
         end
-
       end
+
       attr_patterns
     end
+
+    def validate_and_fill_image_or_size_attributes?(attr_patterns, opts = {})
+      image_attributes, size_attributes = ret_image_and_size_attributes(attr_patterns)
+      reified_nodes = CommandAndControl.create_nodes_from_service(Service.new(self))
+
+      unless image_attributes.empty?
+        image_attributes.each do |image_attribute|
+          node = reified_nodes.find { |rn| rn.node[:display_name].eql?(image_attribute[:node_name]) }
+          node.validate_and_fill_in_ami_and_os_type!(rewrite_values: true, raise_errors: true)
+        end
+      end
+
+      unless size_attributes.empty?
+        size_attributes.each do |size_attribute|
+          node = reified_nodes.find { |rn| rn.node[:display_name].eql?(size_attribute[:node_name]) }
+          node.validate_and_fill_in_instance_type!(rewrite_values: true, raise_errors: true)
+        end
+      end
+    end
+    private :validate_and_fill_image_or_size_attributes?
+
+    def ret_image_and_size_attributes(attr_patterns)
+      image_attributes = []
+      size_attributes  = []
+
+      attr_patterns.each do |attr_pattern|
+        if attr_pattern.type == :explicit_id
+          attribute_obj  = Attribute.get_augmented(model_handle.createMH(:attribute), [:eq, :id, attr_pattern.id]).first
+          attribute_name = attribute_obj[:display_name]
+
+          if attribute_name.eql?('image')
+            image_attributes << { display_name: attribute_name, node_name: attribute_obj[:node][:display_name] }
+          elsif attribute_name.eql?('size')
+            size_attributes << { display_name: attribute_name, node_name: attribute_obj[:node][:display_name] }
+          end
+        else
+          attribute_name = attr_pattern.attribute_name
+          if attribute_name.eql?('image')
+            image_attributes << { display_name: attribute_name, node_name: attr_pattern.node[:display_name] }
+          elsif attribute_name.eql?('size')
+            size_attributes << { display_name: attribute_name, node_name: attr_pattern.node[:display_name] }
+          end
+        end
+      end
+
+      [image_attributes, size_attributes]
+    end
+    private :ret_image_and_size_attributes
 
     def exec(params)
       task_action = params[:task_action]
@@ -577,12 +628,8 @@ module DTK; class  Assembly
 
 
     def delete_instance_task(assembly_instance, opts = {})
-      task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
-
-      nodes = assembly_instance.get_leaf_nodes()
-      if nodes.empty?
-        fail ErrorUsage, "Service instance has no nodes or components to be deleted."
-      end
+      task  = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
+      nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
 
       if assembly_wide_node = assembly_instance.has_assembly_wide_node?
         if components = assembly_wide_node.get_components
@@ -606,10 +653,11 @@ module DTK; class  Assembly
             task.add_subtask(cmp_top_task)
           end
         end
+      else
+        fail ErrorUsage, "Service instance has no nodes or components to be deleted." if nodes.empty?
       end
 
       nodes.each do |node|
-        #args = Opts.new(delete_action: 'delete_node', delete_params: [node.id_handle()]))
         node_top_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle()]))
         task.add_subtask(node_top_task) if node_top_task
       end

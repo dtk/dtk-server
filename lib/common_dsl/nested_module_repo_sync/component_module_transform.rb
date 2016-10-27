@@ -16,26 +16,23 @@
 # limitations under the License.
 #
 module DTK
-  module CommonDSL::NestedModuleRepoSync
-    # Methods to transform to and from component module form
-    module ComponentModuleTransform
-      def self.transform_from_component_module_form(service_module_branch, aug_nested_module_branches)
-        aug_nested_module_branches.each do |aug_nested_module_branch|
-          dsl_file_input_hash = ModuleDSL.get_dsl_file_input_hash(aug_nested_module_branch.implementation)
-          module_refs         = ModuleRefs.get_component_module_refs(aug_nested_module_branch)
-          transform_to_service_instance_dsl(dsl_file_input_hash, module_refs)
+  module CommonDSL
+    module NestedModuleRepoSync
+      # Methods to transform to and from component module form
+      module ComponentModuleTransform
+        def self.transform_from_component_module_form(service_module_branch, aug_nested_module_branches)
+          aug_nested_module_branches.each { |aug_nested_mb| transform_to_service_instance_dsl(service_module_branch, aug_nested_mb) }
+          # add and commit
         end
-        # add and commit
-      end
-
-      private
-      
-      def self.transform_to_service_instance_dsl(dsl_file_input_hash, module_refs)
-        # TODO: stub
-        pp [:transform_from_component_module_for, dsl_file_input_hash, module_refs]
-        # TODO: ModuleDSL.get_module)refs_hash
-      end
         
+        private
+        
+        def self.transform_to_service_instance_dsl(service_module_branch, aug_nested_module_branch)
+          nested_module_dsl_content = ObjectLogic::NestedModule.generate_content_input(service_module_branch, aug_nested_module_branch)
+          pp [:transform_from_component_module_for, nested_module_dsl_content.class, nested_module_dsl_content]
+        end
+        
+      end
     end
   end
 end

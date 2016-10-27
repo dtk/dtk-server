@@ -15,17 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  module CommonDSL
-    module ObjectLogic
-      require_relative('object_logic/service_instance')
-      require_relative('object_logic/assembly')
-      require_relative('object_logic/dependency')
-      require_relative('object_logic/nested_module')
-
-      def self.new_content_input_hash
-        Generate::ContentInput::Hash.new
+module DTK; module CommonDSL
+  module ObjectLogic
+    class NestedModule
+      class Component < Generate::ContentInput::Hash
+        def self.generate_content_input_from_hash(dsl_input_hash)
+          new.merge(dsl_input_hash)
+        end
       end
     end
   end
-end
+end; end

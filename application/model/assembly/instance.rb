@@ -576,12 +576,8 @@ module DTK; class  Assembly
     end
 
     def delete_instance_task(assembly_instance, opts = {})
-      task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
-
-      nodes = assembly_instance.get_leaf_nodes()
-      if nodes.empty?
-        fail ErrorUsage, "Service instance has no nodes or components to be deleted."
-      end
+      task  = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
+      nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
 
       if assembly_wide_node = assembly_instance.has_assembly_wide_node?
         if components = assembly_wide_node.get_components
@@ -605,10 +601,11 @@ module DTK; class  Assembly
             task.add_subtask(cmp_top_task)
           end
         end
+      else
+        fail ErrorUsage, "Service instance has no nodes or components to be deleted." if nodes.empty?
       end
 
       nodes.each do |node|
-        #args = Opts.new(delete_action: 'delete_node', delete_params: [node.id_handle()]))
         node_top_task = exec__delete_node(node.id_handle(), opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle()]))
         task.add_subtask(node_top_task) if node_top_task
       end

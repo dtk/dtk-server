@@ -34,7 +34,7 @@ module DTK; class Attribute
         :explicit_id
       end
 
-      attr_reader :attribute_idhs
+      attr_reader :attribute_idhs, :id
 
       def set_parent_and_attributes!(parent_idh, _opts = {})
         @attribute_idhs = [parent_idh.createIDH(model_name: :attribute, id: id())]

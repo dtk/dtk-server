@@ -43,12 +43,50 @@ module DTK
             violations
           end
 
+          def validate_and_fill_in_ami_and_os_type!(opts = {})
+            ami_info, violations = AmiInfo.compute?(self)
+
+            if violations.empty?
+              violations = validate_and_fill_in_values__ami!(ami_info, opts)
+              violations += validate_and_fill_in_values__os_type(ami_info, opts) if ami_info
+            end
+
+            if opts[:raise_errors] && !violations.empty?
+              message = "Following violations were found:\n"
+              violations.each do |violation|
+                message += "#{violation.description}\n"
+              end
+              raise ErrorUsage.new(message)
+            end
+
+            violations
+          end
+
+          def validate_and_fill_in_instance_type!(opts = {})
+            ami_info, violations = AmiInfo.compute?(self)
+
+            if violations.empty?
+              violations = validate_and_fill_in_values__ami!(ami_info, opts)
+              violations += validate_and_fill_in_values__instance_type(ami_info, opts) if ami_info
+            end
+
+            if opts[:raise_errors] && !violations.empty?
+              message = "Following violations were found:\n"
+              violations.each do |violation|
+                message += "#{violation.description}"
+              end
+              raise ErrorUsage.new(message)
+            end
+
+            violations
+          end
+
           private
 
           # ami_info can be nil
-          def validate_and_fill_in_values__ami!(ami_info)
+          def validate_and_fill_in_values__ami!(ami_info, opts = {})
             violations = []
-            if ami 
+            if ami && !opts[:rewrite_values]
               # ami value will be validated during create node
               update_image_id!(ami)
             else
@@ -66,9 +104,9 @@ module DTK
           end
 
           # ami_info will not be nil
-          def validate_and_fill_in_values__os_type(ami_info)
+          def validate_and_fill_in_values__os_type(ami_info, opts = {})
             violations = []
-            if os_type
+            if os_type && !opts[:rewrite_values]
               # TODO: may validate os_type
               update_os_type!(os_type)
             elsif ami_info
@@ -79,9 +117,9 @@ module DTK
           end
 
           # ami_info will not be nil
-          def validate_and_fill_in_values__instance_type(ami_info)
+          def validate_and_fill_in_values__instance_type(ami_info, opts = {})
             violations = []
-            if instance_type
+            if instance_type && !opts[:rewrite_values]
               # instance_type value will be validated when create node
               update_instance_type!(instance_type)
             else

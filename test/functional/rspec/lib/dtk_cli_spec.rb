@@ -79,7 +79,7 @@ shared_context 'Stage target from module' do |target_name, target_location, asse
   it "stages target #{assembly_name} from module #{target_name}" do
     puts 'Stage target from module', '-------------------------'
     pass = true
-    value = `dtk service stage --target -d #{target_location} -n #{service_name} #{assembly_name} `
+    value = `dtk service stage --target -d #{target_location} -n #{service_name} #{assembly_name}`
     puts value
     pass = false if value.include? 'ERROR'
     puts "Target #{assembly_name} is staged successfully!" if pass == true

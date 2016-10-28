@@ -36,7 +36,6 @@ module DTK
 
       def component_module_name?
         if component_module = component_module?
-          pp [:component_module, component_module]
           component_module.get_field?(:display_name)
         end
       end
@@ -54,6 +53,10 @@ module DTK
 
       def branch_name
         self[:branch]  || raise_unexpected_nil('self[:branch]')
+      end
+
+      def namespace
+        self[:namespace]  || raise_unexpected_nil('self[:namespace]')
       end
 
       def implementation

@@ -34,7 +34,7 @@ module DTK; module CommonDSL
           if nested_modules_info = impacted_nested_modules_info?(all_impacted_file_paths)
             # Find existing aug_module_branches for service instance nested modules and for each one impacted 
             # create a service instance specfic branch if needed; ndx_existing_aug_module_branches is indexed by nested module name
-            ndx_existing_aug_module_branches = service_instance.aug_nested_module_branches(augment_with_component_modules: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
+            ndx_existing_aug_module_branches = service_instance.aug_component_module_branches.inject({}) { |h, r| h.merge(r[:module_name] => r) }
             nested_modules_info.each do |nested_module_info|
               nested_module_name = nested_module_info.module_name
               unless existing_aug_mb = ndx_existing_aug_module_branches[nested_module_name]
@@ -49,8 +49,8 @@ module DTK; module CommonDSL
           # Create if needed the objects for a service instance specific modules
           aug_service_specific_mb = @service_instance.get_or_create_service_specific_module_objects(nested_component_module, base_version:  base_version)
 
-          # Push changes to impacted nested modules repo
-          NestedModuleRepoSync.push_to_nested_module(@service_module_branch, aug_service_specific_mb)
+          # Push changes to impacted component modules repo
+          ComponentModuleRepoSync.push_to_component_module(@service_module_branch, aug_service_specific_mb)
           
           # TODO: DTK-2708: until use dtk-dsl to parse nested module dsl; need to do push first since'
           # parsing just looks at component module repo

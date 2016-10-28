@@ -24,11 +24,11 @@ module DTK
         end
         
         # opts can have keys:
-        #  :aug_nested_module_branches
+        #  :aug_component_module_branches
         def self.generate_dsl(service_instance, service_module_branch, opts = {})
           add_service_dsl_files(service_instance, service_module_branch)
-          if aug_nested_module_branches = opts[:aug_nested_module_branches]
-            NestedModuleRepoSync.pull_from_nested_modules(service_module_branch, aug_nested_module_branches)
+          if aug_component_module_branches = opts[:aug_component_module_branches]
+            ComponentModuleRepoSync.pull_from_component_modules(service_module_branch, aug_component_module_branches)
           end
           RepoManager.push_changes(service_module_branch)
           service_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in

@@ -384,12 +384,12 @@ module DTK
       set_sha(commit_sha) # returns commit_sha to calling fn
     end
 
-    def push_subtree_to_nested_module(prefix, aug_nested_module_branch)
-      external_repo   = aug_nested_module_branch.repo
-      external_branch = aug_nested_module_branch.branch_name
+    def push_subtree_to_component_module(prefix, aug_component_module_branch)
+      external_repo   = aug_component_module_branch.repo
+      external_branch = aug_component_module_branch.branch_name
       RepoManager.push_squashed_subtree(prefix, external_repo, external_branch, self)
-      RepoManager.pull_changes(aug_nested_module_branch)
-      aug_nested_module_branch.update_current_sha_from_repo!
+      RepoManager.pull_changes(aug_component_module_branch)
+      aug_component_module_branch.update_current_sha_from_repo!
     end
 
     def process_ambiguous_dependencies(ambiguous, hash_content)

@@ -31,7 +31,7 @@ module DTK
         unless module_branch = opts[:branch]
           fail Error, "option :branch is required"
         end
-        adapter(module_branch).add_file?(file_type.canonical_path, file_content, opts)
+        Git.new(module_branch: module_branch).add_file?(file_type.canonical_path, file_content, opts)
       end
 
       # Adds or modifies files in file_type__content_array
@@ -44,18 +44,13 @@ module DTK
         file_path__content_array = file_type__content_array.map do |r| 
           { path: r[:file_type].canonical_path, content: r[:content] }
         end
-        adapter(module_branch).add_files(file_path__content_array, opts)
+        Git.new(module_branch: module_branch).add_files(file_path__content_array, opts)
       end
 
       def self.add_remote_files(module_branch, add_remote_files_info)
-        adapter(module_branch).add_remote_files(add_remote_files_info)
+        Git.new(module_branch: module_branch).add_remote_files(add_remote_files_info)
       end
 
-      private
-
-      def self.adapter(module_branch)
-        Git.new(module_branch)
-      end
     end
   end
 end

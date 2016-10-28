@@ -26,6 +26,7 @@ module DTK
 
         def transform
           nested_module_dsl_hash = ObjectLogic::NestedModule.generate_content_input(@service_module_branch, @aug_component_module_branch)
+          nested_module_dsl_hash = convert_top_level_symbol_keys_to_strings(nested_module_dsl_hash) # Needed because skipping Generate
           yaml_text = DSL::YamlHelper.generate(nested_module_dsl_hash)
           file_type__content_array = [{ file_type: NestedModuleFileType::DSLFile::Top.new(module_name: nested_module_name), content: yaml_text }]
           Generate::DirectoryGenerator.add_files(@service_module_branch, file_type__content_array, donot_push_changes: true)
@@ -50,6 +51,10 @@ module DTK
 
         def delete_nested_module_file(relative_path)
           RepoManager.delete_file?("#{nested_module_dir}/#{relative_path}", @service_module_branch)
+        end
+
+        def convert_top_level_symbol_keys_to_strings(hash)
+          hash.inject({}) { |h, (k, v)| h.merge(k.to_s => v) }
         end
 
       end

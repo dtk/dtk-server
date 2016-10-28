@@ -17,7 +17,7 @@ aws_secret_key = ENV['AWS_SECRET_KEY']
 default_keypair = 'testing_use1'
 target_service_name = 'target'
 target_instance = 'network-target'
-target_assembly_name = 'network::target-v1.0.1'
+target_assembly_name = 'network::target-v1.0.2'
 is_target = true
 target_location = "/tmp/network"
 

@@ -47,10 +47,16 @@ module DTK
         Git.new(module_branch: module_branch).add_files(file_path__content_array, opts)
       end
 
-      def self.add_remote_files(module_branch, add_remote_files_info)
-        Git.new(module_branch: module_branch).add_remote_files(add_remote_files_info)
+      
+      # opts can keys:
+      #  :module_branch
+      #     or
+      #  :repo_dir
+      #  :branch_name
+      def self.add_remote_files(add_remote_files_info, opts = {})
+        Git.new(opts).add_remote_files(add_remote_files_info)
       end
-
+      
     end
   end
 end

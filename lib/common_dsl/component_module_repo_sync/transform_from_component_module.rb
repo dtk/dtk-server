@@ -17,7 +17,7 @@
 #
 module DTK
   module CommonDSL
-    module ComponentModuleRepoSync
+    class ComponentModuleRepoSync
       class TransformFromComponentModule
         def initialize(service_module_branch, aug_component_module_branch)
           @service_module_branch       = service_module_branch
@@ -42,11 +42,11 @@ module DTK
         end
 
         def nested_module_dir           
-          ComponentModuleRepoSync.nested_module_dir(@aug_component_module_branch)
+          Common.nested_module_dir(@aug_component_module_branch)
         end
 
         def nested_module_name
-          ComponentModuleRepoSync.nested_module_name(@aug_component_module_branch)
+          Common.nested_module_name(@aug_component_module_branch)
         end
 
         def delete_nested_module_file(relative_path)

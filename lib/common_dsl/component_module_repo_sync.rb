@@ -18,10 +18,18 @@
 module DTK
   module CommonDSL
     # Methods to sync to and from the service instance repo to the component module repos using git subtree operations
-    module ComponentModuleRepoSync
+    class ComponentModuleRepoSync
       require_relative('component_module_repo_sync/transform_from_component_module')
 
+      def initialize(service_module_branch)
+        @service_module_branch = service_module_branch
+      end
+      private :initialize
+
       def self.push_to_component_module(service_module_branch, aug_component_module_branch)
+        new(service_module_branch).push_to_component_module(aug_component_module_branch)
+      end
+      def push_to_component_module(aug_component_module_branch)
         subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: aug_component_module_branch.component_module_name).base_dir
         service_module_branch.push_subtree_to_component_module(subtree_prefix, aug_component_module_branch) do 
           # TODO: transform_to_component_module_repo_form
@@ -30,37 +38,71 @@ module DTK
 
       def self.pull_from_component_modules(service_module_branch, aug_component_module_branches)
         return if aug_component_module_branches.empty?
-        git_subtree_pull_from_component_modules(service_module_branch, aug_component_module_branches)
-        transform_from_component_module_form(service_module_branch, aug_component_module_branches)
-        # TODO add commit and push
+        new(service_module_branch).pull_from_component_modules(aug_component_module_branches)
+      end
+      def pull_from_component_modules(aug_component_module_branches)
+        git_subtrees_pull_from_component_modules(aug_component_module_branches)
+        transform_from_component_module_form(aug_component_module_branches)
+      end
+
+      NestedModuleFileType = FileType::ServiceInstance::NestedModule
+      module Common
+        def self.nested_module_name(aug_component_module_branch)
+          aug_component_module_branch.component_module_name
+        end
+
+        def self.nested_module_dir(aug_component_module_branch)
+          NestedModuleFileType.new(module_name: nested_module_name(aug_component_module_branch)).base_dir
+        end
       end
 
       private
 
-      def self.git_subtree_pull_from_component_modules(service_module_branch, aug_component_module_branches)
+      attr_reader :service_module_branch
+
+      def git_subtrees_pull_from_component_modules(aug_component_module_branches)
+        # create branch to directly push pull from
+        RepoManager.add_branch?(sync_branch_name, { delete_existing_branch: true }, service_module_branch)
+        git_subtrees_pull_on_to_sync_branch(aug_component_module_branches)
+        RepoManager.merge_from_branch(sync_branch_name, service_module_branch)
+      end
+
+      def git_subtrees_pull_on_to_sync_branch(aug_component_module_branches)
         add_remote_files_info = RepoManager::AddRemoteFilesInfo::GitSubtree.new
         aug_component_module_branches.each do |aug_component_mb|
           source_repo         = aug_component_mb.repo
           source_branch_name  = aug_component_mb.branch_name
-          nested_module_dir   = nested_module_dir(aug_component_mb)
+          nested_module_dir   = Common.nested_module_dir(aug_component_mb)
           add_remote_files_info.add_git_subtree_info!(nested_module_dir, source_repo, source_branch_name) 
         end
-        Generate::DirectoryGenerator.add_remote_files(service_module_branch, add_remote_files_info)
+        Generate::DirectoryGenerator.add_remote_files(add_remote_files_info, repo_dir: service_instance_repo_name, branch_name: sync_branch_name)
       end
 
-      def self.transform_from_component_module_form(service_module_branch, aug_component_module_branches)
+      def transform_from_component_module_form(aug_component_module_branches)
         aug_component_module_branches.each do |aug_component_mb| 
           TransformFromComponentModule.new(service_module_branch, aug_component_mb).transform
         end
       end
 
-      def self.nested_module_name(aug_component_module_branch)
-        aug_component_module_branch.component_module_name
+      SYNC_BRANCH_PREFIX = 'git_subtree_sync'
+      def sync_branch_name 
+        "#{SYNC_BRANCH_PREFIX}_#{service_module_branch[:branch]}"
       end
 
-      NestedModuleFileType = FileType::ServiceInstance::NestedModule
-      def self.nested_module_dir(aug_component_module_branch)
-        NestedModuleFileType.new(module_name: nested_module_name(aug_component_module_branch)).base_dir
+      def service_instance_repo_name
+        service_instance_repo.display_name
+      end
+
+      def service_instance_repo
+        @service_instance_repo ||= get_service_instance_repo
+      end
+      def get_service_instance_repo
+        if service_module_branch.respond_to?(:repo)
+          # succeeds if service_module_branch is augmented branch; repo call more efficient than get_repo
+          service_module_branch.repo
+        else
+          service_module_branch.get_repo
+        end
       end
         
     end

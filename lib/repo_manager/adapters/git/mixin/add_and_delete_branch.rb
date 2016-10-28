@@ -40,7 +40,7 @@ module DTK
         #  :empty (Booelan; default: false) - Create empty branch
         #  :sha
         #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
-        #  :delete_existing_branch (Booelan; default: false)
+        #  :delete_existing_branch (Boolean; default: false)
         def add_branch?(new_branch, opts = {})
           add_branch = true
           if get_branches.include?(new_branch)

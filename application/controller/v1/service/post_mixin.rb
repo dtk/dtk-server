@@ -137,7 +137,12 @@ module DTK
 
       def exec
         params_hash = params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
-        rest_ok_response assembly_instance.exec(params_hash)
+        response = assembly_instance.exec(params_hash)
+        if response[:violations]
+          rest_ok_response response, datatype: :violation
+        else
+          rest_ok_response response
+        end
       end
 
       def set_attributes

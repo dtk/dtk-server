@@ -42,7 +42,7 @@ module DTK
       end
       def pull_from_component_modules(aug_component_module_branches)
         git_subtrees_pull_from_component_modules(aug_component_module_branches)
-        transform_from_component_module_form(aug_component_module_branches)
+        TransformFromComponentModule.transform_nested_modules(service_module_branch, aug_component_module_branches)
       end
 
       NestedModuleFileType = FileType::ServiceInstance::NestedModule
@@ -64,7 +64,7 @@ module DTK
         # create branch to directly push pull from
         RepoManager.add_branch?(sync_branch_name, { delete_existing_branch: true }, service_module_branch)
         git_subtrees_pull_on_to_sync_branch(aug_component_module_branches)
-        RepoManager.merge_from_branch(sync_branch_name, service_module_branch)
+        RepoManager.merge_from_branch(sync_branch_name, { squash: true}, service_module_branch)
       end
 
       def git_subtrees_pull_on_to_sync_branch(aug_component_module_branches)
@@ -76,12 +76,6 @@ module DTK
           add_remote_files_info.add_git_subtree_info!(nested_module_dir, source_repo, source_branch_name) 
         end
         Generate::DirectoryGenerator.add_remote_files(add_remote_files_info, repo_dir: service_instance_repo_name, branch_name: sync_branch_name)
-      end
-
-      def transform_from_component_module_form(aug_component_module_branches)
-        aug_component_module_branches.each do |aug_component_mb| 
-          TransformFromComponentModule.new(service_module_branch, aug_component_mb).transform
-        end
       end
 
       SYNC_BRANCH_PREFIX = 'git_subtree_sync'

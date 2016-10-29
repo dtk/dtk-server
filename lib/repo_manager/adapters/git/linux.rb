@@ -142,8 +142,12 @@ module DTK
         git_command.rebase(cmd_opts, "#{remote_name}/#{branch_name}")
       end
       
-      def git_command__merge(branch_to_merge_from)
-        git_command.merge(cmd_opts, branch_to_merge_from)
+      # opts can have keys:
+      #   :squash
+      def git_command__merge(branch_to_merge_from, opts = {})
+        command_array = [branch_to_merge_from]
+        command_array << '--squash' if opts[:squash]
+        git_command.merge(cmd_opts, *command_array)
       end
       
       def git_command__hard_reset(branch_to_reset_from)

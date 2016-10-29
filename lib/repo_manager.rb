@@ -21,7 +21,7 @@ module DTK
 
     class << self
       # admin and repo methods that just pass to lower level object or class
-      RepoMethods = [:move_file, :file_changed_since_specified_sha, :add_all_files, :add_remote_files, :push_changes, :push_implementation, :add_branch, :add_branch?, :add_branch_and_push?, :merge_from_branch, :delete_local_and_remote_branch, :add_remote, :pull_changes, :diff, :ls_r, :fast_foward_merge_from_branch, :hard_reset_to_branch, :fetch_all, :rebase_from_remote, :diff, :fast_foward_pull, :delete_file?, :delete_directory?, :branch_head_sha, :move_content, :file_exists?, :add_squashed_subtree, :push_squashed_subtree]
+      RepoMethods = [:move_file, :file_changed_since_specified_sha, :add_all_files_and_commit, :add_remote_files, :push_changes, :push_implementation, :add_branch, :add_branch?, :add_branch_and_push?, :merge_from_branch, :delete_local_and_remote_branch, :add_remote, :pull_changes, :diff, :ls_r, :fast_foward_merge_from_branch, :hard_reset_to_branch, :fetch_all, :rebase_from_remote, :diff, :fast_foward_pull, :delete_file?, :delete_directory?, :branch_head_sha, :move_content, :file_exists?, :add_squashed_subtree, :push_squashed_subtree]
       AdminMethods = [:list_repos, :repo_url, :repo_server_dns, :repo_server_ssh_rsa_fingerprint, :repo_name, :set_user_rights_in_repos, :remove_user_rights_in_repos, :add_user, :delete_user, :get_keydir]
 
       def method_missing(name, *args, &block)
@@ -59,8 +59,11 @@ module DTK
         get_adapter_repo(context).add_file(file_path_hash, content, commit_msg)
       end
       
-      def add_files(context, file_path__content_array, commit_msg = nil)
-        get_adapter_repo(context).add_files(file_path__content_array, commit_msg)
+      # opts can have keys:
+      #   :commit_msg
+      #   :no_commit
+      def add_files(context, file_path__content_array, opts = {})
+        get_adapter_repo(context).add_files(file_path__content_array, no_commit: opts[:no_commit], commit_msg: opts[:commit_msg])
       end
 
       def update_file_content(file_path_hash_or_string, content, context)

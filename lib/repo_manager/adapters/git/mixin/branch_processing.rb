@@ -18,7 +18,8 @@
 module DTK
   class RepoManager::Git 
     module Mixin
-      module AddAndDeleteBranch
+      # Instance mixin for adding and deleting branches
+      module BranchProcessing
         # returns sha of new branch
         # opts can have keys:
         #  :empty (Booelan; default: false) - Create empty branch
@@ -91,7 +92,7 @@ module DTK
           checkout(branch) do 
             add_remote_files_info.add_files(git_repo_manager: self, branch: branch)
           end
-          add_all_files(branch) if add_remote_files_info.git_add_needed?
+          add_all_files_and_commit(branch: branch) if add_remote_files_info.git_add_needed?
         end
 
         def checkout_other_branch?(branch, &body)

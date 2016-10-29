@@ -23,18 +23,28 @@ module DTK
           @service_module_branch       = service_module_branch
           @aug_component_module_branch = aug_component_module_branch
         end
+        private :initialize
 
-        def transform
+        def self.transform_nested_modules(service_module_branch, aug_component_module_branches)
+          aug_component_module_branches.each { |aug_component_mb| new(service_module_branch, aug_component_mb).transform_nested_module }
+          commit_all_changes(service_module_branch)
+        end
+
+        def transform_nested_module
           nested_module_dsl_hash = ObjectLogic::NestedModule.generate_content_input(@service_module_branch, @aug_component_module_branch)
           nested_module_dsl_hash = convert_top_level_symbol_keys_to_strings(nested_module_dsl_hash) # Needed because skipping Generate
           yaml_text = DSL::YamlHelper.generate(nested_module_dsl_hash)
           file_type__content_array = [{ file_type: NestedModuleFileType::DSLFile::Top.new(module_name: nested_module_name), content: yaml_text }]
-          Generate::DirectoryGenerator.add_files(@service_module_branch, file_type__content_array, donot_push_changes: true)
+          Generate::DirectoryGenerator.add_files(@service_module_branch, file_type__content_array, donot_push_changes: true, no_commit: true)
           delete_nested_module_file(component_module_dsl_filename)
           delete_nested_module_file(ModuleRefs.meta_filename_path)
         end
 
         private
+
+        def self.commit_all_changes(service_module_branch)
+          RepoManager.add_all_files_and_commit({ commit_msg: "Merging in nested modules" }, service_module_branch)
+        end
 
         COMPONENT_MODULE_DSL_FILENAME = 'dtk.model.yaml'
         def component_module_dsl_filename
@@ -50,7 +60,7 @@ module DTK
         end
 
         def delete_nested_module_file(relative_path)
-          RepoManager.delete_file?("#{nested_module_dir}/#{relative_path}", @service_module_branch)
+          RepoManager.delete_file?("#{nested_module_dir}/#{relative_path}", { no_commit: true }, @service_module_branch)
         end
 
         def convert_top_level_symbol_keys_to_strings(hash)

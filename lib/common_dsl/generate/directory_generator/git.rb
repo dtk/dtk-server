@@ -35,8 +35,12 @@ module DTK
           any_changes
         end
 
+        # opts can have keys:
+        #   :donot_push_changes
+        #   :no_commit
+        #   :commit_msg
         def add_files(file_path__content_array, opts = {})
-          if any_changes = RepoManager.add_files(@repo_manger_context, file_path__content_array, opts)
+          if any_changes = RepoManager.add_files(@repo_manger_context, file_path__content_array, no_commit: opts[:no_commit], commit_msg: opts[:commit_msg])
             RepoManager.push_changes(@repo_manger_context) unless opts[:donot_push_changes]
           end
           any_changes

@@ -18,7 +18,8 @@
 module DTK
   class RepoManager::Git 
     module Mixin
-      require_relative('mixin/add_and_delete_branch')
+      require_relative('mixin/branch_processing')
+      require_relative('mixin/file_processing')
     end
   end
 end

@@ -20,7 +20,7 @@ module DTK; module CommonDSL
     class NestedModule
       class Component < Generate::ContentInput::Hash
         def self.generate_content_input_from_hash(dsl_input_hash)
-          new.merge(dsl_input_hash)
+          new.merge(dsl_input_hash['components'] || {})
         end
       end
     end

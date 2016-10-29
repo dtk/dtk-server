@@ -45,6 +45,10 @@ module DTK
         TransformFromComponentModule.transform_nested_modules(service_module_branch, aug_component_module_branches)
       end
 
+      def self.delete_sync_repo_branch?(service_module_branch)
+        raise Error, "Write delete_sync_branch?"
+      end
+
       NestedModuleFileType = FileType::ServiceInstance::NestedModule
       module Common
         def self.nested_module_name(aug_component_module_branch)

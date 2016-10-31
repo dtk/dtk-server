@@ -101,6 +101,13 @@ end
       hidden: true,
       remote_dependencies: [lambda__segment_module_branches.call(cols: ModuleBranch.common_columns())]
     },
+    module_branches_with_repos: {
+      type: :json,
+      hidden: true,
+      remote_dependencies:       [lambda__segment_module_branches.call(cols: [:id, :repo_id, :version, :dsl_parsed]),
+                                  lambda__segment_repos.call(cols: [:id, :repo_name, :local_dir])
+     ]
+    },
   },
   many_to_one: [:project, :library], #MOD_RESTRUCT: may remove library as parent
   one_to_many: [:module_branch]

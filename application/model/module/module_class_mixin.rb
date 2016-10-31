@@ -92,10 +92,11 @@ module DTK
       remote_repo_base   = opts[:remote_repo_base]
       include_remotes    = opts.array(:detail_to_include).include?(:remotes)
       include_versions   = opts.array(:detail_to_include).include?(:versions)
+      include_cm         = opts[:include_common_modules]
       include_any_detail = ((include_remotes || include_versions) ? true : nil)
 
       cols = [:id, :display_name, :namespace_id, :namespace, include_any_detail && :module_branches_with_repos].compact
-      unsorted_ret = get_all(project_idh, cols: cols, filter: filter)
+      unsorted_ret = get_all(project_idh, cols: cols, filter: filter, include_common_modules: include_cm)
       unless include_versions
         # prune all but the base module branch
         unsorted_ret.reject! { |r| r[:module_branch] && r[:module_branch][:version] != ModuleBranch.version_field_default() }
@@ -145,7 +146,21 @@ module DTK
         filter: filter
       }
       mh = project_idh.createMH(model_type())
-      get_objs(mh, sp_hash)
+      module_list = get_objs(mh, sp_hash)
+
+      if opts[:include_common_modules]
+        return merge_array(module_list, sp_hash, project_idh) 
+      end
+      module_list 
+    end
+    
+    def merge_array(module_list, sp_hash, project_idh)
+      common_module_mh = project_idh.createMH(:common_module)
+      common_module_array = get_objs(common_module_mh, sp_hash)
+      common_module_array.each do |k|
+          module_list.delete_if { |h| h[:display_name] == k[:display_name] }
+      end 
+      module_list += common_module_array
     end
 
     def module_exists(project, namespace, name, version = 'master')

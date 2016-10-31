@@ -48,7 +48,7 @@ module DTK
     #  :remote_repo_base
     #  :detail_to_include
     def self.list(project, opts = Opts.new)
-      BaseService.list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true))
+      BaseService.list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true, include_common_modules: true))
     end
 
     def self.list_assembly_templates(project)

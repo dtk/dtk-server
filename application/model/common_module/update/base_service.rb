@@ -34,11 +34,35 @@ module DTK
           # for testing
           opts[:force_parse] = opts[:force_pull] = true
 
+          local             = local_params.create_local(project)
+          local_branch      = local.branch_name
+  
+          module_obj = module_exists?(project.id_handle(), local[:module_name], local[:namespace])
+          repo = module_obj.get_repo
+          repo.merge!(branch_name: local_branch)
+          repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
+          create_opts = {
+            donot_create_master_branch: true,
+            delete_if_exists: true
+          }
+          repo_with_branch = repo.create_subclass_obj(:repo_with_branch)
+          
           ret = ModuleDSLInfo.new
           common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, opts)
           parse_needed = (opts[:force_parse] || !common_module__module_branch.dsl_parsed?)
           return ret unless parse_needed || pull_was_needed
-          
+
+          remote_params = ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
+            module_type: local_params[:module_type],
+            module_name: local_params[:module_name],
+            namespace: local_params[:namespace],
+            remote_repo_base: RepoRemote.repo_base
+          )
+
+          repo_with_branch.merge!(ref: repo_with_branch[:display_name])
+          remote = remote_params.create_remote(project)
+          create_repo_remote_object(repo_with_branch, remote, opts[:repo_name])
+
           parsed_common_module = dsl_file_obj_from_repo(common_module__module_branch).parse_content(:common_module)
           CommonDSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
           create_or_update_from_parsed_common_module(project, local_params, common_module__module_branch, parsed_common_module)

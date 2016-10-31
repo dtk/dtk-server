@@ -61,7 +61,33 @@ module DTK; module CommonDSL
         IgnoreComponents = ['ec2__properties', 'ec2__node']
 
         def generate_delete_node_workflow(node, result, opts = {})
-          delete_nested_components(node, result, opts)
+          if has_cmps_with_delete_action?(node)
+            delete_nested_components(node, result, opts)
+            add_delete_node_subtask(node)
+          else
+            add_delete_node_subtask(node)
+            delete_nested_components(node, result, opts)
+          end
+        end
+
+        private
+
+        def has_cmps_with_delete_action?(node)
+          has_delete_action = false
+          node_components   = node.get_components.reject{ |cmp| IgnoreComponents.include?(cmp[:component_type]) }
+
+          node_components.each do |component|
+            cmp_instance = DTK::Component::Instance.create_from_component(component)
+            if cmp_instance.get_action_def?('delete')
+              has_delete_action = true
+              break
+            end
+          end
+
+          has_delete_action
+        end
+
+        def add_delete_node_subtask(node)
           ec2_node_component = Component::Template.get_augmented_component_template?(assembly_instance, 'ec2::node', namespace: 'aws', use_base_template: true)
           new_component_idh = assembly_instance.add_component(node.id_handle, ec2_node_component, node[:display_name], splice_in_delete_action: true)
           node.update_from_hash_assignments(to_be_deleted: true)

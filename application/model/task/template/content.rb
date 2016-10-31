@@ -263,7 +263,9 @@ module DTK; class Task
         serialized_content_array.each do |a|
           if stage = Stage::InterNode.parse_and_reify?(a, actions, opts)
             unless stage.empty?
-              self << stage
+              stage.each do |st|
+                self << st
+              end
             else
               # if opts[:just_parse] then stage will be empty
               unless opts[:just_parse]

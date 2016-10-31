@@ -197,7 +197,16 @@ module DTK; class Task; class Template
           return MultiNode.parse_and_reify(multi_node_type, serialized_content, action_list, opts)
         end
 
+        ret = []
         normalized_content = serialized_content[Field::Subtasks] || [serialized_content]
+        normalized_content.each do |n_content|
+          ret << parse_and_ret_normalized_content([n_content], serialized_content, action_list, opts = {})
+        end
+
+        !ret.empty? && ret
+      end
+
+      def self.parse_and_ret_normalized_content(normalized_content, serialized_content, action_list, opts = {})
         ret = normalized_content.inject(new(serialized_content[:name])) do |h, serialized_node_actions|
           unless node_name = Constant.matches?(serialized_node_actions, :Node)
             if Constant.matches?(serialized_node_actions, :Nodes)
@@ -214,7 +223,7 @@ module DTK; class Task; class Template
           node_actions = parse_and_reify_node_actions?(serialized_node_actions, node_name, node_id, action_list, opts)
           node_actions ? h.merge(node_actions) : {}
         end
-        !ret.empty? && ret
+        ret
       end
 
       def add_new_execution_block_for_action!(action, opts = {})

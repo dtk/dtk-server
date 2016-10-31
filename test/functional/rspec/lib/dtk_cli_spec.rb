@@ -221,7 +221,7 @@ end
 shared_context "Clone module on filesystem" do |module_name, module_location|
   it "clones module to local filesystem on location #{module_location}" do
     puts 'Clone module to filesystem', '---------------------------------'
-    pass = false
+    pass = true
     value = `dtk module clone #{module_name} #{module_location}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'does not exist'))
@@ -251,7 +251,7 @@ end
 shared_context "Push module changes" do |module_name, module_location|
   it "pushes changes module for module #{module_name}" do
     puts 'Push module changes', '-------------------------'
-    pass = false
+    pass = true
     value = `dtk module push -d #{module_location}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
@@ -265,23 +265,21 @@ end
 shared_context 'Check component exist in service instance' do |dtk_common, service_name, component_to_check|
   it "verifies that #{component_to_check} exists in service instance #{service_name}" do
     puts 'Check component exist in service instance', '-----------------------------------------------'
-    pass = true
     component_exists = dtk_common.check_if_component_exists_in_service_instance(service_name, component_to_check)
-    puts "Component #{component_to_check} exists on service instance #{service_name}" if pass == true
-    puts "Component #{component_to_check} does not exist on service instance #{service_name}" if pass == false
+    puts "Component #{component_to_check} exists on service instance #{service_name}" if component_exists == true
+    puts "Component #{component_to_check} does not exist on service instance #{service_name}" if component_exists == false
     puts ''
-    expect(pass).to eq(true)
+    expect(component_exists).to eq(true)
   end
 end
 
 shared_context 'NEG - Check component exist in service instance' do |dtk_common, service_name, component_to_check|
   it "verifies that #{component_to_check} does not exist in service instance #{service_name}" do
     puts 'NEG - Check component exist in service instance', '---------------------------------------------------'
-    pass = true
     component_exists = dtk_common.check_if_component_exists_in_service_instance(service_name, component_to_check)
-    puts "Component #{component_to_check} exists on service instance #{service_name}" if pass == true
-    puts "Component #{component_to_check} does not exist on service instance #{service_name}" if pass == false
+    puts "Component #{component_to_check} exists on service instance #{service_name}" if component_exists == true
+    puts "Component #{component_to_check} does not exist on service instance #{service_name}" if component_exists == false
     puts ''
-    expect(pass).to eq(false)
+    expect(component_exists).to eq(false)
   end
 end

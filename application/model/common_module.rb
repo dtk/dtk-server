@@ -48,7 +48,7 @@ module DTK
     #  :remote_repo_base
     #  :detail_to_include
     def self.list(project, opts = Opts.new)
-      BaseService.list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true))
+      BaseService.list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true, include_common_modules: true))
     end
 
     def self.list_assembly_templates(project)
@@ -58,9 +58,7 @@ module DTK
 
     def self.list_remotes(project, opts = {})
       rsa_pub_key = opts[:rsa_pub_key]
-      component_module_list = Repo::Remote.new.list_module_info(:component_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
-      service_module_list = Repo::Remote.new.list_module_info(:service_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
-      component_module_list.concat(service_module_list)
+      Repo::Remote.new.list_module_info(:service_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
     end
 
     def self.get_module_dependencies(project, rsa_pub_key, remote_params)

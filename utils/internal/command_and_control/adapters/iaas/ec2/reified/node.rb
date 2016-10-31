@@ -85,6 +85,10 @@ module DTK; module CommandAndControlAdapter
           [security_group_id]
         end
 
+        def node
+          @node ||= @service_component.dtk_component.get_node
+        end
+
         private
 
         def update_os_type!(os_type, opts = {})
@@ -98,10 +102,6 @@ module DTK; module CommandAndControlAdapter
 
         def update_instance_type!(instance_type)
           update_external_ref!(size: instance_type)
-        end
-
-        def node
-          @node ||= @service_component.dtk_component.get_node
         end
 
         def external_ref

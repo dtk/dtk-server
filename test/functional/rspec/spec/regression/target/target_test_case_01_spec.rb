@@ -6,6 +6,7 @@ require './lib/dtk_common'
 service_location = '~/dtk/'
 target_location = "/tmp/network"
 target_module = 'aws/network'
+target_assembly_template = 'target'
 target_service_name = 'target_test_case_01'
 target_name = 'target'
 
@@ -26,12 +27,13 @@ dtk_common = Common.new('', '')
 describe "(Target) Test Case 01: Auto-generated vpc data" do
   before(:all) do
     puts '**********************************************', ''
-    # Install aws:network module with required dependency modules
+    # Install/clone aws:network module with required dependency modules
+    system("dtk module clone #{target_module} #{target_location}")
     system("dtk module install -d #{target_location} #{target_module}")
   end
 
   context "List assemblies contained in this module" do
-    include_context "List assemblies", target_module, target_service_name, dtk_common
+    include_context "List assemblies", target_module, target_assembly_template, dtk_common
   end
 
   context "Stage target from module" do
@@ -67,7 +69,7 @@ describe "(Target) Test Case 01: Auto-generated vpc data" do
   end
 
   context "Stage assembly from module" do
-    include_context "Stage assembly from module to specific target", module_name, module_location, assembly_name, service_name, target_name
+    include_context "Stage assembly from module to specific target", module_name, module_location, assembly_name, service_name, target_service_name
   end
 
   context "Converge service instance" do

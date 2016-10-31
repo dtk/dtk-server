@@ -58,9 +58,7 @@ module DTK
 
     def self.list_remotes(project, opts = {})
       rsa_pub_key = opts[:rsa_pub_key]
-      component_module_list = Repo::Remote.new.list_module_info(:component_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
-      service_module_list = Repo::Remote.new.list_module_info(:service_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
-      component_module_list.concat(service_module_list)
+      Repo::Remote.new.list_module_info(:service_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
     end
 
     def self.get_module_dependencies(project, rsa_pub_key, remote_params)

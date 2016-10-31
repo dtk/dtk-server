@@ -72,7 +72,10 @@ module DTK; class Task
             indexed_action = action if indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]") || opts[:remove_delete_action]
           end
           if action_match = includes_action?(indexed_action)
-            unless action_match.in_multinode_stage
+            # TODO: DTK-2732: look at whether when it is not in_multinode_stage whether we should still delete if this component is only instance
+            # that matches this step. 
+            # note: in_multinode_stage is somehwta in misnomer in that it can be true when step only refers to assembly wide
+            if action_match.is_assembly_wide? or !action_match.in_multinode_stage
               delete_action!(action_match)
               self
             end
@@ -263,9 +266,7 @@ module DTK; class Task
         serialized_content_array.each do |a|
           if stage = Stage::InterNode.parse_and_reify?(a, actions, opts)
             unless stage.empty?
-              stage.each do |st|
-                self << st
-              end
+              self << stage
             else
               # if opts[:just_parse] then stage will be empty
               unless opts[:just_parse]

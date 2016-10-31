@@ -50,7 +50,7 @@ describe "(New DTK client) Test Case 3: Test various options for module push" do
   end
 
   context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_location, service_name, component_to_check
+    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
   end
 
   context "Uninstall service instance" do
@@ -70,7 +70,7 @@ describe "(New DTK client) Test Case 3: Test various options for module push" do
   end
 
   context "NEG - Check component exist in service instance" do
-    include_context "NEG - Check component exist in service instance", service_location, service_name, component_to_check
+    include_context "NEG - Check component exist in service instance", dtk_common, service_name, component_to_check
   end
 
   context "Uninstall service instance" do

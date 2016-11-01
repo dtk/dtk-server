@@ -71,6 +71,7 @@ module DTK
 
       # TODO: thionk this can be deprecated
       column :link_defs, :json
+      column :tags, :json
       # deprecate below for above
       # TODO: for efficiency materialize and if so have two variants of :component_parent for attribute; one for input, which brings in :connectivity_profile and other for output which deos not
       virtual_column :link_defs_external, type: :json, local_dependencies: [:link_defs, :component_type, :specific_type, :basic_type]

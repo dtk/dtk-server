@@ -95,22 +95,24 @@ module DTK; class ServiceModule
     end
 
     def self.import_assembly_top(assembly_ref, assembly_hash, module_branch, module_name, opts = {})
-      if assembly_hash.empty?
-        fail ParsingError.new('Empty assembly dsl file', opts_file_path(opts))
-      end
+      fail ParsingError.new('Empty assembly dsl file', opts_file_path(opts)) if assembly_hash.empty?
+
       unless assembly_name = assembly_hash['name'] || opts[:default_assembly_name]
         fail ParsingError.new('No name associated with assembly dsl file', opts_file_path(opts))
       end
 
+      tags = assembly_hash['target'] ? ['target'] : []
+
       {
         assembly_ref => {
-          'display_name' => assembly_name,
-          'type' => 'composite',
-          'description' => assembly_hash['description'],
+          'display_name'     => assembly_name,
+          'type'             => 'composite',
+          'description'      => assembly_hash['description'],
           'module_branch_id' => module_branch[:id],
-          'version' => module_branch.get_field?(:version),
-          'component_type' => Assembly.ret_component_type(module_name, assembly_name),
-          'attribute' => import_assembly_attributes(assembly_hash['attributes'], opts)
+          'version'          => module_branch.get_field?(:version),
+          'component_type'   => Assembly.ret_component_type(module_name, assembly_name),
+          'attribute'        => import_assembly_attributes(assembly_hash['attributes'], opts),
+          'tags'             => tags
         }
       }
     end

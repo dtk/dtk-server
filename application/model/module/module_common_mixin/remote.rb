@@ -69,7 +69,7 @@ module DTK; module ModuleCommonMixin
           create_opts = {
             donot_create_master_branch: true,
             delete_if_exists: true
-            }
+          }
           repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
           repo_with_branch = Repo::WithBranch.create_workspace_repo(project.id_handle(), local, repo_user_acls, create_opts)
         end

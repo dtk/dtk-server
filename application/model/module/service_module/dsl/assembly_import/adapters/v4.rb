@@ -39,6 +39,8 @@ module DTK; class ServiceModule
 
         Workflows = 'workflows'
         Workflow = 'workflow'
+
+        Target = 'target'
       end
 
       def self.assembly_iterate(service_module, hash_content, opts, &block)
@@ -48,7 +50,7 @@ module DTK; class ServiceModule
         node_bindings_hash = Constant.matches?(hash_content, :NodeBindings)
         block.call(assemblies_hash, node_bindings_hash)
       end
-      AssemblyKeys = [:Name, :Description, :Workflows, :Workflow]
+      AssemblyKeys = [:Name, :Description, :Workflows, :Workflow, :Target]
 
       def self.parse_node_bindings_hash!(node_bindings_hash, opts = {})
         if hash = NodeBindings::DSL.parse!(node_bindings_hash, opts)

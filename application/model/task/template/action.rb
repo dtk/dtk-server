@@ -17,10 +17,10 @@
 #
 module DTK; class Task; class Template
   class Action
-    r8_nested_require('action', 'component_action')
-    r8_nested_require('action', 'action_method')
-    r8_nested_require('action', 'with_method')
-    r8_nested_require('action', 'ad_hoc')
+    require_relative('action/component_action')
+    require_relative('action/action_method')
+    require_relative('action/with_method')
+    require_relative('action/ad_hoc')
     
     # opts can have keys
     # :index
@@ -109,7 +109,7 @@ module DTK; class Task; class Template
     #  :params
     def self.add_action_method?(base_action, opts = {})
       if action_def = opts[:action_def] 
-        base_action.class::WithMethod.new(base_action, action_def, Aux.hash_subset(opts,[:params]))
+        base_action.class::WithMethod.new(base_action, action_def, params: opts[:params])
       else 
         base_action
       end

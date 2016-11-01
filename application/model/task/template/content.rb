@@ -58,9 +58,12 @@ module DTK; class Task
 
       # if action is not included in task template than insert the action in this object and return updated object
       # else return nil
-      def insert_action?(new_action, action_list, gen_constraints_proc = nil, opts = {})
-        insert_action_helper = InsertActionHelper.create(new_action, action_list, gen_constraints_proc)
-        insert_action_helper.insert_action?(self, opts)
+      # opts can have keys:
+      #   :gen_constraints_proc
+      #   :insert_strategy
+      def insert_action?(new_action, action_list, opts = {})
+        insert_action_helper = InsertActionHelper.create(new_action, action_list, opts)
+        insert_action_helper.insert_action?(self)
       end
 
       # if action is explicitly included in task template then delete the action from this object and return updated object

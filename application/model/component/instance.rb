@@ -63,7 +63,7 @@ module DTK; class Component
       cmp && create_from_component(cmp)
     end
 
-    def has_title?
+    def title?
       ComponentTitle.title?(self)
     end
 

@@ -145,6 +145,8 @@ module DTK; class Task
       end
     end
 
+    # opts can have keys:
+    #   :task_params
     def self.serialized_content_hash_form(hash, opts = {})
       ret = Serialization::OrderedHash.new(hash)
       if task_params = opts[:task_params]

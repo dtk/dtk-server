@@ -239,6 +239,10 @@ module DTK; class  Assembly
         # recompute the locked module refs
         ModuleRefs::Lock.create_or_update(self)
 
+        # unless opts[:donot_update_workflow]
+        #  Task::Template::ConfigComponents.update_when_added_component_or_action?(self, node, component, component_title: component_title, skip_if_not_found: true)
+        # end
+        # TODO: DTK-2680: Aldin: for below see if we can simplify with above
         unless opts[:donot_update_workflow]
           update_opts = { skip_if_not_found: true }
           if opts[:splice_in_delete_action]
@@ -246,7 +250,8 @@ module DTK; class  Assembly
             action_def = cmp_instance.get_action_def?('delete')
             update_opts.merge!(:action_def => action_def)
           end
-          Task::Template::ConfigComponents.update_when_added_component?(self, node, component, component_title, update_opts)
+          opts[:component_title] = component_title if component_title
+          Task::Template::ConfigComponents.update_when_added_component_or_action?(self, node, component, update_opts)
         end
 
         if opts[:auto_complete_links]

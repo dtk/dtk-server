@@ -18,33 +18,53 @@
 module DTK; class Task; class Template
   class Content
     class InsertActionHelper
-      r8_nested_require('insert_action_helper', 'insert_at_end')
+      require_relative('insert_action_helper/insert_at_end')
+      require_relative('insert_action_helper/insert_at_start_in_subtask')
 
-      def self.create(new_action, action_list, gen_constraints_proc = nil, insert_strategy = nil)
-        insert_strategy_class(insert_strategy).new(new_action, action_list, gen_constraints_proc)
+      # opts can have keys
+      #   :gen_constraints_proc
+      #   :insert_strategy
+      def self.create(new_action, action_list, opts = {})
+        insert_strategy_class(opts[:insert_strategy]).new(new_action, action_list, gen_constraints_proc: opts[:gen_constraints_proc])
       end
 
-      def insert_action?(template_content, opts = {})
-        if template_content.includes_action?(@new_action) && opts[:add_delete_action]
-          template_content.delete_explicit_action?(@new_action, @action_list)
-          compute_before_after_relations!()
-          insert_action!(template_content, opts)
-        else
-        # unless template_content.includes_action?(@new_action)
-          compute_before_after_relations!()
+      def insert_action?(template_content)
+        unless template_content.includes_action?(@new_action)
+          compute_before_after_relations!
           insert_action!(template_content)
         end
       end
+      # TODO: DTK-2680; Aldin: commented below out and temporarily put original in
+      #  Curremtly what needs to be fixed is computing of @new_action
+      #  Think there is a bug that does not match on new_action.method when new_action.is_a?(Action::WithMethod)
+      #  What then happens is template_content.includes_action?(@new_action) succeds when it shouldnt 
+      #  (e.g, there is a component.create action in task template while looking for a delete component
+      # Rich: I may need to explain or even cleanup what is in action list; it was initially created before
+      # we had actions with methods (just create) so create actions and others modeled differently
+
+      # in lib/common_dsl/object_logic/assembly/component/diff/delete.rb  
+#        if template_content.includes_action?(@new_action) && @add_delete_action
+#          template_content.delete_explicit_action?(@new_action, @action_list)
+#          compute_before_after_relations!
+#          insert_action!(template_content, opts)
+#        else
+#        # unless template_content.includes_action?(@new_action)
+#          compute_before_after_relations!
+#          insert_action!(template_content)
+#        end
+
 
       private
 
-      def initialize(new_action, action_list, gen_constraints_proc = nil, _insert_strategy = nil)
-        opts = new_action.is_a?(Action::WithMethod) ? { class: Action::WithMethod } : {}
-        @new_action = action_list.find { |a| a.match_action?(new_action, opts) }
-        @new_action_node_id = new_action.node_id
-        @gen_constraints_proc = gen_constraints_proc
-        @ndx_action_indexes = NdxActionIndexes.new()
-        @action_list = action_list
+      # opts can have keys
+      #   :gen_constraints_proc
+      def initialize(new_action, action_list, opts = {})
+        match_opts            = new_action.is_a?(Action::WithMethod) ? { class: Action::WithMethod } : {}
+        @new_action           = action_list.find { |a| a.match_action?(new_action, match_opts) }
+        @new_action_node_id   = new_action.node_id
+        @gen_constraints_proc = opts[:gen_constraints_proc]
+        @ndx_action_indexes   = NdxActionIndexes.new
+        @action_list          = action_list
       end
 
       class NdxActionIndexes < Hash
@@ -75,7 +95,8 @@ module DTK; class Task; class Template
       end
 
       InsertStrategies = {
-        insert_at_end: InsertAtEnd
+        insert_at_end: InsertAtEnd,
+        insert_at_start_in_subtask: InsertAtStartInSubtask
       }
 
       def compute_before_after_relations!
@@ -85,7 +106,7 @@ module DTK; class Task; class Template
           return
         end
 
-        temporal_constraints = @gen_constraints_proc && @gen_constraints_proc.call()
+        temporal_constraints = @gen_constraints_proc && @gen_constraints_proc.call
         return if (temporal_constraints || []).empty?
 
         temporal_constraints.each do |tc|

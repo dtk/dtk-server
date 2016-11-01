@@ -18,17 +18,29 @@
 module DTK; class Task
   class Template
     class ConfigComponents < self
-      r8_nested_require('config_components', 'persistence')
+      require_relative('config_components/persistence')
 
-      def self.update_when_added_component?(assembly, node, new_component, component_title, opts = {})
+      # opts can have keys:
+      #   :component_title
+      #   :skip_if_not_found
+      #   :insert_strategy
+      #   :add_delete_action
+      #   :action_def
+      # TODO: DTK-2680: Aldin: check if any of the options should be added or removed
+      # It is action if :action_def given
+      def self.update_when_added_component_or_action?(assembly, node, component, opts = {})
         # only updating the create action task template and only if it is persisted
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
         task_action = DefaultTaskActionForUpdates
         if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, task_action, opts)
-          new_action = Action.create(new_component.merge(node: node, title: component_title), opts)
+          new_action = Action.create(component.merge(node: node, title: opts[:component_title]), opts)
           gen_constraints_proc = proc { TemporalConstraints::ConfigComponents.get(assembly, assembly_cmp_actions) }
-          insert_opts = opts[:add_delete_action] ? { add_delete_action: true } : {}
-          if updated_template_content = task_template_content.insert_action?(new_action, assembly_cmp_actions, gen_constraints_proc, insert_opts)
+          insert_opts = { 
+            gen_constraints_proc: gen_constraints_proc,
+            add_delete_action: opts[:add_delete_action],
+            insert_strategy: opts[:insert_strategy]
+          }
+          if updated_template_content = task_template_content.insert_action?(new_action, assembly_cmp_actions, insert_opts)
             Persistence::AssemblyActions.persist(assembly, updated_template_content)
           end
         end

@@ -19,7 +19,7 @@ module DTK; class Task; class Template
   class Action
     # This represents an action with an explicit method, as opposed to other action terms, which just have component reference
     class WithMethod < self
-      r8_nested_require('with_method', 'params')
+      require_relative('with_method/params')
       include Serialization
 
       # opts can have keys
@@ -31,11 +31,12 @@ module DTK; class Task; class Template
         @params = opts[:params]
       end
 
+      # TODO: DTK-2732: get rid of puppet specific logic
       def change_puppet_class_or_definition_for_delete(action, action_def)
         # if delete action, use puppet class/definition from action_def
         if action_def[:method_name].eql?('delete')
           content = action_def.content
-          external_ref = action.external_ref
+          external_ref = action.get_field?(:external_ref) || {}
           if (content[:provider]||'').eql?('puppet')
             class_or_definition = content[:puppet_class] || content[:puppet_definition]
             if external_ref[:definition_name]

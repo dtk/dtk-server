@@ -21,6 +21,10 @@
 module DTK; class Task; class Template; class ConfigComponents
   class Persistence
     class AssemblyActions
+      # opts can have keys:
+      #   :serialized_form
+      #   :task_params
+      #   TODO: add rest of opts
       def self.get_content_for(assembly, cmp_actions, task_action = nil, opts = {})
         # if task_params given cant use ReifiedObjectCache because params can differ from call to call
         unless opts[:serialized_form] || opts[:task_params]
@@ -29,7 +33,7 @@ module DTK; class Task; class Template; class ConfigComponents
           end
         end
 
-        if serialized_content = get_serialized_content_from_assembly(assembly, task_action, opts)
+        if serialized_content = get_serialized_content_from_assembly(assembly, task_action, task_params: opts[:task_params])
           if opts[:serialized_form]
             Content.reify(serialized_content)
           else
@@ -60,9 +64,11 @@ module DTK; class Task; class Template; class ConfigComponents
 
       private
 
+      # opts can have keys
+      #    :task_params
       def self.get_serialized_content_from_assembly(assembly, task_action, opts = {})
         ret = Task::Template.get_task_template(assembly, task_action)
-        ret && ret.serialized_content_hash_form(opts)
+        ret && ret.serialized_content_hash_form(task_params: opts[:task_params])
       end
 
       class ReifiedObjectCache

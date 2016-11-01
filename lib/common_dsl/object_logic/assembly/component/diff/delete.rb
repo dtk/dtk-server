@@ -21,13 +21,10 @@ module DTK; module CommonDSL
       class Delete < CommonDSL::Diff::Element::Delete
         include Mixin
 
-        ##
-        ## valid 'opts' arguments are
-        ##   :force_delete - delete without generating workflow
-        ##
+        # opts can have keys:
+        #   :force_delete - delete without adding delete actions
         def process(result, opts = {})
           augmented_cmps = assembly_instance.get_augmented_components(Opts.new(filter_component: component_name))
-
           if augmented_cmps.empty?
             result.add_error_msg("Component '#{qualified_key.print_form}' does not match any components")
           else
@@ -37,8 +34,8 @@ module DTK; module CommonDSL
             if matching_cmps.size > 1
               result.add_error_msg("Unexpected that component name '#{qualified_key.print_form}' match multiple components")
             else
-              delete_component(matching_cmps.first.id_handle, node, opts)
-
+              component_instance = DTK::Component::Instance.create_from_component(matching_cmps.first)
+              delete_component(component_instance, node, force_delete: opts[:force_delete])
               result.add_item_to_update(:assembly)
               result.add_item_to_update(:workflow)
             end
@@ -47,30 +44,46 @@ module DTK; module CommonDSL
 
         private
 
-        def delete_component(matching_cmp, node, opts = {})
-          # if node not created or component does not have .delete action then just delete it
-          if node.get_admin_op_status == 'pending' || opts[:force_delete] || !component_delete_action_exists?(node, matching_cmp)
-            assembly_instance.delete_component(matching_cmp, node[:id])
-          else
-            matching_cmp_obj = matching_cmp.create_object
-            unless matching_cmp_obj.get_field?(:to_be_deleted)
-              update_opts = { skip_if_not_found: true, add_delete_action: true }
-              cmp_instance = DTK::Component::Instance.create_from_component(matching_cmp_obj)
-              action_def = cmp_instance.get_action_def?('delete')
-              update_opts.merge!(:action_def => action_def)
+        # opts can have keys:
+        #   :force_delete
+        def delete_component(component, node, opts = {})
+          insert_explict_delete_action_in_task_template?(component, node, opts)
+          # assembly_instance.delete_component can update task template by removing step that has componentt 
+          assembly_instance.delete_component(component.id_handle, node.id)
+        end
 
-              Task::Template::ConfigComponents.update_when_added_component?(assembly_instance, node, cmp_instance, nil, update_opts)
-              cmp_instance.update_from_hash_assignments(to_be_deleted: true)
+        # opts can have keys:
+        #   :force_delete
+        def insert_explict_delete_action_in_task_template?(component, node, opts = {})
+          return  if opts[:force_delete]
+          if delete_action_def = component_delete_action_def?(component)
+            # TODO: DTK-2732: Only run delete action on assembly level node if it has been converged
+            # Best way to treat this is by keeping component info on what has been converged
+            if node.is_assembly_wide_node? or  node.get_admin_op_status != 'pending'
+              insert_explict_delete_action_in_task_template(component, node, delete_action_def)
             end
           end
         end
 
-        def component_delete_action_exists?(node, matching_cmp)
-          cmp_instance = DTK::Component::Instance.create_from_component(matching_cmp.create_object)
-          cmp_instance.get_action_def?('delete')
-          # action_list = Task::Template::ActionList::ConfigComponents.get(assembly_instance)
-          # delete_action = Task::Template::Content.parse_and_reify({ :node => node[:display_name], actions: ["#{component_name}.delete"] }, action_list, skip_if_not_found: true)
-          # !delete_action.empty?
+        def insert_explict_delete_action_in_task_template(component, node, delete_action_def)
+          unless component.get_field?(:to_be_deleted)
+            add_delete_action_opts = { 
+              action_def: delete_action_def,
+              skip_if_not_found: true, 
+              insert_strategy: :insert_at_start_in_subtask,
+              # TODO: DTK-2680; Aldin: see if :add_delete_action still needed after we make the other updates
+              add_delete_action: true
+            }
+            if component_title = component.title?
+              add_delete_action_opts[:component_title] = component_title
+            end
+            Task::Template::ConfigComponents.update_when_added_component_or_action?(assembly_instance, node, component, add_delete_action_opts)
+            component.update_from_hash_assignments(to_be_deleted: true)        
+          end
+        end
+
+        def component_delete_action_def?(component)
+          DTK::Component::Instance.create_from_component(component).get_action_def?('delete')
         end
       end
     end

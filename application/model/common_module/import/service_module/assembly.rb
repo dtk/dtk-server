@@ -55,6 +55,9 @@ module DTK
             assembly_attrs_db_update_hash = Assembly::Attributes.db_update_hash(parsed_assembly.val(:Attributes) || [])
             assembly_ref_pointer.merge!('attribute' => assembly_attrs_db_update_hash.mark_as_complete)
 
+            tags = get_assembly_tags(parsed_assembly)
+            assembly_ref_pointer.merge!('tags' => tags)
+
             nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_assembly, @component_module_refs, default_assembly_name: assembly_name)
             @db_updates_assemblies['node'].merge!(nodes_db_update_hash.mark_as_complete)
 
@@ -68,6 +71,10 @@ module DTK
           }
           def task_action_name(workflow_name)
             WORKFLOW_TO_TASK_NAMES[workflow_name] || workflow_name
+          end
+
+          def get_assembly_tags(parsed_assembly)
+            parsed_assembly.val(:Target) ? ['target'] : []
           end
           
         end

@@ -238,6 +238,20 @@ shared_context 'Push to remote changes for service module' do |service_module_na
   end
 end
 
+shared_context 'Pull-dtkn service module' do |service_module_name|
+  it "pulls latest content for #{service_module_name} from repoman" do
+    puts 'Pull-dtkn service module:', '----------------------------'
+    pass = false
+    value = `dtk-run service-module #{service_module_name} pull-dtkn`
+    puts value
+    pass = true unless value.include? 'ERROR'
+    puts "Service module #{service_module_name} pulled from repoman successfully!" if pass == true
+    puts "Service module #{service_module_name} was not pulled from repoman successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context 'Clone service module' do |dtk_common, service_module_name|
   it "clones service module #{service_module_name}" do
     service_module_cloned = dtk_common.clone_service_module(service_module_name)

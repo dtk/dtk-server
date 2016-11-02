@@ -35,6 +35,27 @@ module DTK; class Assembly
       end
     end
 
+    def set_target_key(value)
+      tags = get_field?(:tags) || []
+
+      case value
+       when true
+        tags << 'target' unless tags.include?('target')
+       when false
+        tags.delete('target') if tags.include?('target')
+       else
+        fail ErrorUsage.new("Invalid value #{value} for target key. Valid values are: true, false")
+       end
+
+      Model.update_from_hash_assignments(id_handle, tags: tags)
+    end
+
+    def get_target_key
+      if tags = get_field?(:tags)
+        tags.include?('target')
+      end
+    end
+
     def self.create_from_id_handle(idh)
       idh.create_object(model_name: :assembly_template)
     end
@@ -83,6 +104,9 @@ module DTK; class Assembly
       # only if called from stage-target; we set specific_type field to 'target'
       if opts[:is_target_service]
         override_attrs[:specific_type] = 'target'
+      else
+        # if try to stage target assembly as service instance (non-target service instance)
+        fail ErrorUsage.new("Assembly '#{self}' is marked as target assembly and can only be staged as target service instance!") if get_target_key
       end
 
       clone_opts = { ret_new_obj_with_cols: [:id, :type] }

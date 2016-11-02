@@ -18,8 +18,9 @@
 module DTK; class Task; class Template
   class Stage
     class InterNode < Hash
-      r8_nested_require('inter_node', 'factory')
-      r8_nested_require('inter_node', 'multi_node')
+      require_relative('inter_node/factory')
+      require_relative('inter_node/multi_node')
+      require_relative('inter_node/nested_subtask')
       include Serialization
 
       def initialize(name = nil)
@@ -161,6 +162,7 @@ module DTK; class Task; class Template
         # 1) a concurrent block with multiple nodes,
         # 2) a single node,
         # 3) a multi-node specification
+        # 4) a nested subtask
 
         # action_list nil can be passed if just concerned with parsing
         if action_list.nil?
@@ -170,20 +172,25 @@ module DTK; class Task; class Template
         end
 
         if multi_node_type = parse_and_reify_is_multi_node_type?(serialized_content)
-          return MultiNode.parse_and_reify(multi_node_type, serialized_content, action_list, opts)
+          MultiNode.parse_and_reify(multi_node_type, serialized_content, action_list, opts)
+        elsif serialized_content[Field::Subtasks]
+          NestedSubtask.parse_and_reify(serialized_content, action_list, opts)
+        else
+          # TODO: DTK-2680: This handled nested subtasks, but no longer because of change above;
+          #       it also handles other case
+          #       See if this is stll needed and if so think problem because an array should not be returned but instead
+          #       a subclass of InterNode 
+          ret = []
+          normalized_content = serialized_content[Field::Subtasks] || [serialized_content]
+          normalized_content.each do |n_content|
+            ret << parse_and_ret_normalized_content([n_content], serialized_content, action_list, opts)
+          end
+          !ret.empty? && ret
         end
-
-        ret = []
-        normalized_content = serialized_content[Field::Subtasks] || [serialized_content]
-        normalized_content.each do |n_content|
-          ret << parse_and_ret_normalized_content([n_content], serialized_content, action_list, opts = {})
-        end
-
-        !ret.empty? && ret
       end
 
       def self.parse_and_ret_normalized_content(normalized_content, serialized_content, action_list, opts = {})
-        ret = normalized_content.inject(new(serialized_content[:name])) do |h, serialized_node_actions|
+        ret = normalized_content.inject(InterNode.new(serialized_content[:name])) do |h, serialized_node_actions|
           unless node_name = Constant.matches?(serialized_node_actions, :Node)
             if Constant.matches?(serialized_node_actions, :Nodes)
               fail ParsingError.new("Within nested subtask only '#{Constant::Node}' and not '#{Constant::Nodes}' keyword can be used")

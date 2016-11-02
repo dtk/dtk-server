@@ -82,9 +82,9 @@ module DTK; class Task
             return ParsingError.new('Workflow is ill-formed because it is not a hash: ?1', workflow_hash)
           end
         end
-
+        
         workflow_hash = Aux.convert_keys_to_symbols_recursive(workflow_hash) unless opts[:keys_are_in_symbol_form]
-
+        
         if opts[:service_module_workflow]
           unless workflow_action ||= workflow_hash[:name]
             return ParsingError.new("Unexpected that a service module workflow does not have a 'name' parameter.")
@@ -96,17 +96,21 @@ module DTK; class Task
             return ParsingError.new("Service module workflow cannot have a 'create' action.")
           end
         end
-
+        
         begin
           cmp_actions = (opts[:assembly] && ActionList::ConfigComponents.get(opts[:assembly]))
           serialized_content = serialized_content_hash_form(workflow_hash)
           Content.parse_and_reify(serialized_content, cmp_actions, just_parse: true)
-         rescue ParsingError => parse_error
+        rescue ParsingError => parse_error
           return parse_error
         end
         ret
-     end
-
+      end
+      
+      def self.get_serialized_template_content(assembly, task_action = nil)
+        Persistence::AssemblyActions.get_serialized_content_from_assembly(assembly, task_action)
+      end
+      
       # action_types is scalar or array with elements
       # :assembly
       # :node_centric

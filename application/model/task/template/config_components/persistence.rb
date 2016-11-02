@@ -62,14 +62,14 @@ module DTK; class Task; class Template; class ConfigComponents
         ReifiedObjectCache.remove_any_outdated_items(assembly_update)
       end
 
-      private
-
       # opts can have keys
       #    :task_params
-      def self.get_serialized_content_from_assembly(assembly, task_action, opts = {})
+      def self.get_serialized_content_from_assembly(assembly, task_action = nil, opts = {})
         ret = Task::Template.get_task_template(assembly, task_action)
         ret && ret.serialized_content_hash_form(task_params: opts[:task_params])
       end
+
+      private
 
       class ReifiedObjectCache
         # using task_template_id is cache key

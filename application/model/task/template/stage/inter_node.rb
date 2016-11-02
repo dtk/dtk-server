@@ -78,30 +78,6 @@ module DTK; class Task; class Template
         ret << cleanup
       end
 
-      def is_component_delete_action?(action)
-        if action_method = action.action_method?
-          action_method[:method_name].eql?('delete')
-        end
-      end
-
-      def add_component_cleanup_task?(parent_task, node_actions, ret, action)
-        if cmp_action = action.component_actions.first
-          component         = cmp_action.component
-          if component.get_field?(:to_be_deleted)
-            n_node            = node_actions.node
-            assembly_instance = n_node.get_assembly?
-            opts = Opts.new(delete_action: 'delete_component', delete_params: [component.id_handle.merge(guid: component[:id]), n_node[:id]])
-
-            parent_task[:temporal_order] = 'sequential'
-
-            cleanup  = Task::Action::Cleanup.create_hash(assembly_instance, component, n_node, opts.merge(remove_delete_action: true))
-            sub_task = Task.create_stub(parent_task.model_handle(), executable_action: cleanup, display_name: 'cleanup')
-            parent_task.add_subtask(sub_task)
-            ret << cleanup
-          end
-        end
-      end
-
       def find_earliest_match?(action_match, ndx_action_indexes)
         ndx_action_indexes.each_pair do |node_id, action_indexes|
           if node_actions = self[node_id]
@@ -243,6 +219,30 @@ module DTK; class Task; class Template
       end
 
       private
+
+      def is_component_delete_action?(action)
+        if action_method = action.action_method?
+          action_method[:method_name].eql?('delete')
+        end
+      end
+
+      def add_component_cleanup_task?(parent_task, node_actions, ret, action)
+        if cmp_action = action.component_actions.first
+          component         = cmp_action.component
+          if component.get_field?(:to_be_deleted)
+            n_node            = node_actions.node
+            assembly_instance = n_node.get_assembly?
+            opts = Opts.new(delete_action: 'delete_component', delete_params: [component.id_handle.merge(guid: component[:id]), n_node[:id]])
+
+            parent_task[:temporal_order] = 'sequential'
+
+            cleanup  = Task::Action::Cleanup.create_hash(assembly_instance, component, n_node, opts.merge(remove_delete_action: true))
+            sub_task = Task.create_stub(parent_task.model_handle(), executable_action: cleanup, display_name: 'cleanup')
+            parent_task.add_subtask(sub_task)
+            ret << cleanup
+          end
+        end
+      end
 
       def calculate_ordered_components(action, opts = {})
         if action.component_type.eql?("ec2::node[#{action.node_name}]") || opts[:add_delete_action]

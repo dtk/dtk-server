@@ -655,7 +655,7 @@ module DTK; class  Assembly
             cmp_action = nil
 
             begin
-             cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if assembly_wide_node.get_admin_op_status.eql?'running'
+             cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if assembly_wide_node.get_admin_op_status.eql?('running')
             rescue Task::Template::ParsingError => e
               Log.info("Ignoring component 'delete' action does not exist.")
             end
@@ -675,11 +675,10 @@ module DTK; class  Assembly
         task.add_subtask(node_top_task) if node_top_task
       end
 
-      unless opts[:new_client]
-        delete_assembly_from_database = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
+      unless opts[:donot_delete_assembly_from_database]
+        delete_assembly_subtask = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
+        task.add_subtask(delete_assembly_subtask)
       end
-
-      task.add_subtask(delete_assembly_from_database) if delete_assembly_from_database
 
       task
     end

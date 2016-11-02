@@ -118,21 +118,19 @@ module DTK
       end
 
       def delete
-        new_client = boolean_request_params(:new_client)
-        opts = Opts.new(delete_action: 'delete', delete_params: [assembly_instance.id_handle()])
-        opts.merge!(recursive: false, new_client: new_client)
-        assembly_instance.exec__delete(opts)
-
+        opts_hash = {
+          delete_action: 'delete',
+          delete_params: [assembly_instance.id_handle],
+          recursive: false,
+          donot_delete_assembly_from_database: true
+        }
+        assembly_instance.exec__delete(Opts.new(opts_hash))
         rest_ok_response
       end
 
       def uninstall
-          if running_task = most_recent_task_is_executing?(assembly_instance)
-            fail ErrorUsage, "Task with id '#{running_task.id}' is already running. Please wait until task is complete or  cancel task."
-          end
-
-          Assembly::Instance.delete(assembly_instance.id_handle(), destroy_nodes: true)
-          rest_ok_response
+        CommonModule::ServiceInstance.delete_from_model_and_repo(assembly_instance)
+        rest_ok_response
       end
 
       def exec

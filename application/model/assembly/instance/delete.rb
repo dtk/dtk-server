@@ -18,26 +18,22 @@
 module DTK; class  Assembly
   class Instance
     module DeleteClassMixin
+      # opts can have keys:
+      #   :destroy_nodes
+      #   :uninstall
       def delete(assembly_idhs, opts = {})
         if assembly_idhs.is_a?(Array)
           return if assembly_idhs.empty?
         else
           assembly_idhs = [assembly_idhs]
         end
-        # cannot delete workspaces
-        # if workspace = assembly_idhs.find { |idh| Workspace.is_workspace?(idh.create_object()) }
-          # fail ErrorUsage.new('Cannot delete a workspace')
-        # end
-
         # first check if target with service instances, then Delete.contents
         target_idhs_to_delete = Delete.target_idhs_to_delete?(assembly_idhs)
-        
-        Delete.contents(assembly_idhs, opts)
+        Delete.contents(assembly_idhs, destroy_nodes: opts[:destroy_nodes])
 
-        unless opts[:uninstall].nil?
-          ret = delete_instances(assembly_idhs)
+        if opts[:uninstall]
+          delete_instances(assembly_idhs)
           delete_instances(target_idhs_to_delete) unless target_idhs_to_delete.empty?
-          ret
         end
       end
 

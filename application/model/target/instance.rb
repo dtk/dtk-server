@@ -191,7 +191,7 @@ module DTK
 
               workspace.purge(destroy_nodes: true)
             else
-              Assembly::Instance.delete(assembly.id_handle, destroy_nodes: true)
+              Assembly::Instance.delete(assembly.id_handle, destroy_nodes: true, uninstall: true)
             end
           end
           delete_instance(target.id_handle())

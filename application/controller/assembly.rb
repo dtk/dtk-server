@@ -59,7 +59,7 @@ module DTK
 
     def rest__remove_from_system
       assembly = ret_assembly_instance_object()
-      Assembly::Instance.delete(assembly.id_handle())
+      Assembly::Instance.delete(assembly.id_handle(), uninstall: true)
       rest_ok_response
     end
 

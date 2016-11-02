@@ -243,6 +243,9 @@ module DTK; class  Assembly
         #  Task::Template::ConfigComponents.update_when_added_component_or_action?(self, node, component, component_title: component_title, skip_if_not_found: true)
         # end
         # TODO: DTK-2680: Aldin: for below see if we can simplify with above
+        # TODO: DTK-2680: Rich: We will be able to simplify below with above after we change dtk-server/lib/common_dsl/object_logic/assembly/node/diff/delete.rb:90
+        # where we add ec2::node[node_name].delete component action to workflow; we can change that to use TaskTemplate.insert_explict_delete_action?(assembly_instance, component, node, force_delete: opts[:force_delete])
+        # which we use for other components
         unless opts[:donot_update_workflow]
           update_opts = { skip_if_not_found: true }
           if opts[:splice_in_delete_action]

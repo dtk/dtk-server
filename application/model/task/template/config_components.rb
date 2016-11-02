@@ -26,7 +26,7 @@ module DTK; class Task
       #   :insert_strategy
       #   :add_delete_action
       #   :action_def
-      # TODO: DTK-2680: Aldin: check if any of the options should be added or removed
+      #   :splice_in_delete_action
       # It is action if :action_def given
       def self.update_when_added_component_or_action?(assembly, node, component, opts = {})
         # only updating the create action task template and only if it is persisted

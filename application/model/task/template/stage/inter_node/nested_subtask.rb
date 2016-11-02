@@ -50,6 +50,7 @@ module DTK; class Task; class Template; class Stage
         # TODO: stub
         # TODO: DTK-2680: Aldin: this was changed to get around error where internode_stage is an array
         #       put in logic where not searching for action inside of nested subtask; need to see if this is right
+        # DTK-2680: Rich: don't think we need this; didn't run into issue while testing
         nil
       end
 
@@ -58,6 +59,7 @@ module DTK; class Task; class Template; class Stage
       def self.parse_and_reify(serialized_content, action_list, opts = {})
         new(serialized_content).parse_and_reify!(serialized_content, action_list, opts)
       end
+
       def parse_and_reify!(serialized_content, action_list, opts = {})
         unless subtasks = serialized_content[Field::Subtasks]
           fail Error, "Unexepcetd that serialized_content[Field::Subtasks] is nil"
@@ -65,7 +67,8 @@ module DTK; class Task; class Template; class Stage
         subtasks.each do |subtask|
           @subtasks << self.class.parse_and_ret_normalized_content([subtask], serialized_content, action_list, opts)
         end
-        self
+
+        @subtasks
       end
 
     end

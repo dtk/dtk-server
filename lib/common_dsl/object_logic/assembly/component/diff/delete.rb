@@ -39,7 +39,11 @@ module DTK; module CommonDSL
               component = DTK::Component::Instance.create_from_component(matching_cmps.first)
               TaskTemplate.insert_explict_delete_action?(assembly_instance, component, node, force_delete: opts[:force_delete])
               # assembly_instance.delete_component can update task template by removing step that has componentt 
-              assembly_instance.delete_component(component.id_handle, node.id)
+              # TODO: DTK-2680: Rich: I don't think we should call below when there is .delete action on component because
+              # we don't want to delete component from the database, just want to remove it from config node workflow
+              # we should probably just call somethig like - template_content.delete_explicit_action?(@new_action, @action_list) to delete
+              # create component action from workflow
+              # assembly_instance.delete_component(component.id_handle, node.id)
 
               result.add_item_to_update(:assembly)
               result.add_item_to_update(:workflow)

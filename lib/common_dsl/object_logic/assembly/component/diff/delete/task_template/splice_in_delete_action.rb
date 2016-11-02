@@ -93,7 +93,7 @@ module DTK; module CommonDSL
         end
 
         def raise_error_unexpecetd_form(err_msg, content)
-          fail Error, "#{msg}: #{content.inspect}"
+          fail Error, "#{err_msg}: #{content.inspect}"
         end
 
       end

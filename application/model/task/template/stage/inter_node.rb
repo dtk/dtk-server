@@ -176,15 +176,8 @@ module DTK; class Task; class Template
         elsif serialized_content[Field::Subtasks]
           NestedSubtask.parse_and_reify(serialized_content, action_list, opts)
         else
-          # TODO: DTK-2680: This handled nested subtasks, but no longer because of change above;
-          #       it also handles other case
-          #       See if this is stll needed and if so think problem because an array should not be returned but instead
-          #       a subclass of InterNode 
-          ret = []
           normalized_content = serialized_content[Field::Subtasks] || [serialized_content]
-          normalized_content.each do |n_content|
-            ret << parse_and_ret_normalized_content([n_content], serialized_content, action_list, opts)
-          end
+          ret = parse_and_ret_normalized_content(normalized_content, serialized_content, action_list, opts)
           !ret.empty? && ret
         end
       end

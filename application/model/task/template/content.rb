@@ -267,9 +267,19 @@ module DTK; class Task
       #  ...
       def create_stages_from_serialized_content!(serialized_content_array, actions, opts = {})
         serialized_content_array.each do |a|
+          require 'debugger'
+          Debugger.wait_connection = true
+          Debugger.start_remote(nil, 7020)
+          debugger
           if stage = Stage::InterNode.parse_and_reify?(a, actions, opts)
             unless stage.empty?
-              self << stage
+              # nested_subtask will be returned as array of tasks so going through all of them
+              # we can remove later if decide to execute everything under one subtask
+              if stage.is_a?(Array)
+                stage.each { |st| self << st }
+              else
+                self << stage
+              end
             else
               # if opts[:just_parse] then stage will be empty
               unless opts[:just_parse]

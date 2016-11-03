@@ -134,7 +134,6 @@ module DTK; class  Assembly
 
           # recompute the locked module refs
           ModuleRefs::Lock.create_or_update(self)
-          raise 'here'
         end
         ret
       end

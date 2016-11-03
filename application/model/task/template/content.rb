@@ -17,9 +17,9 @@
 #
 module DTK; class Task
   class Template
-    class Content < Array
-      r8_nested_require('content', 'insert_action_helper')
-      r8_nested_require('content', 'action_match')
+    class Content < ::Array
+      require_relative('content/insert_action_helper')
+      require_relative('content/action_match')
 
       include Serialization
       include Stage::InterNode::Factory::StageName
@@ -266,29 +266,18 @@ module DTK; class Task
       #  :just_parse (Boolean)
       #  ...
       def create_stages_from_serialized_content!(serialized_content_array, actions, opts = {})
-        serialized_content_array.each do |a|
+        serialized_content_array.each do |serialized_content|
           # TODO: DTK-2680: I [Rich] removed this because dont know how to use this
           # require 'debugger'
           # Debugger.wait_connection = true
           # Debugger.start_remote(nil, 7020)
           # debugger
-          if stage = Stage::InterNode.parse_and_reify?(a, actions, opts)
-            unless stage.empty?
-              # nested_subtask will be returned as array of tasks so going through all of them
-              # we can remove later if decide to execute everything under one subtask
-              if stage.is_a?(Array)
-                stage.each { |st| self << st }
-              else
-                self << stage
-              end
-            else
-              # if opts[:just_parse] then stage will be empty
-              unless opts[:just_parse]
-                # TODO: might pass in option to indicate whether this should raise error or not
-                # This is reached if component is not on any nodes
-                Log.info_pp(["The following workflow stage has components not on any node",a])
-              end
-            end
+
+          # TODO: DTK-2680: Aldin: I slightly modified so Stage::InterNode.parse_and_reify?(serialized_content, actions, opts) always returns
+          #       subclass of InterNode, but kept logic that flattens it out
+          #       logic is hidden in Stage::InterNode#add_to_template_content!
+          if stage = Stage::InterNode.parse_and_reify?(serialized_content, actions, opts)
+            stage.add_to_template_content!(self, serialized_content, just_parse: opts[:just_parse])
           end
         end
       end

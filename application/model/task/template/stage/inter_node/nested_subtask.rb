@@ -15,62 +15,80 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class Task; class Template; class Stage
-  class InterNode
-    # TODO: DTK-2680: Aldin: New subclass of InterNode to treat nested subtasks
-    #     This has to be expanded to treat serialized_content which can gave form
-    # 
-    class NestedSubtask < self
-      def initialize(serialized_content)
-        pp ['nested subtask serialized_content', serialized_content] 
-        # Here is example 
-        # {:name=>"delete subtask",
-        # :dsl_location=>".workflow/dtk.workflow.delete_subtask_for_create.yaml",
-        # :flatten=>true,
-        # :subtask_order=>"sequential",
-        # :subtasks=>
-        # [{:name=>"Delete network_aws::vpc_subnet[vpc1-default]",
-        #    :node=>"assembly_wide",
-        #    :action=>"network_aws::vpc_subnet[vpc1-default].delete"}]}]
-        # case above has one element under subtasks; this can have multiple ones
-        super(serialized_content[:name])
-        @subtasks = []
-      end
+module DTK; 
+  class Task::Template::Stage
+    class InterNode
+      class NestedSubtask < self
+        def initialize(serialized_content)
+          # TODO: :name, :dsl_location, and :flatten should instead use Field::XYZ form
+          super(serialized_content[:name])
+          @serialization_form = ret_serialization_form(serialized_content)
+          @dsl_location       = serialized_content[:dsl_location]
+          @flatten            = serialized_content[:flatten] 
 
-      def serialization_form(opts = {})
-        # TODO: put in other fields needed by serialization form; this is all above except 
-        #  think flatten and dsl_location; pr might be that dependening on opts we omit these fields 
-        # dependening on whether this is saved in database contentr field of task template (where we want it vesus used to produce hash
-        # which is writtemn to dsl wheer it is omitted
-        # TODO: stub
-        @subtasks.first.serialization_form(opts)
-      end
-
-      def find_earliest_match?
-        # TODO: stub
-        # TODO: DTK-2680: Aldin: this was changed to get around error where internode_stage is an array
-        #       put in logic where not searching for action inside of nested subtask; need to see if this is right
-        # DTK-2680: Rich: don't think we need this; didn't run into issue while testing
-        nil
-      end
-
-      # opts can have keys:
-      #  :just_parse (Boolean)
-      def self.parse_and_reify(serialized_content, action_list, opts = {})
-        new(serialized_content).parse_and_reify!(serialized_content, action_list, opts)
-      end
-
-      def parse_and_reify!(serialized_content, action_list, opts = {})
-        unless subtasks = serialized_content[Field::Subtasks]
-          fail Error, "Unexepcetd that serialized_content[Field::Subtasks] is nil"
+          # subtasks get dynamically set
+          @subtasks = []
         end
-        subtasks.each do |subtask|
-          @subtasks << self.class.parse_and_ret_normalized_content([subtask], serialized_content, action_list, opts)
+        
+        # opts can have keys:
+        #  :just_parse (Boolean)
+        def self.parse_and_reify(serialized_content, action_list, opts = {})
+          new(serialized_content).parse_and_reify!(serialized_content, action_list, just_parse: opts[:just_parse])
+        end
+        
+        def parse_and_reify!(serialized_content, action_list, opts = {})
+          unless subtasks = serialized_content[Field::Subtasks]
+            fail Error, "Unexpected that serialized_content[Field::Subtasks] is nil"
+          end
+          subtasks.each do |subtask|
+            @subtasks << self.class.parse_and_ret_normalized_content([subtask], serialized_content, action_list, opts)
+          end
+          self
+        end
+        
+        def serialization_form(opts = {})
+          @serialization_form
         end
 
-        @subtasks
-      end
+        def dsl_location?
+          @dsl_location
+        end
 
+        def flatten?
+          @flatten
+        end
+        
+        def find_earliest_match?(action_match, ndx_action_indexes)
+          ret = nil
+          @subtasks.each do |subtask| 
+            if ret = subtask.find_earliest_match?(action_match, ndx_action_indexes)
+              return ret
+            end
+          end
+          ret
+        end
+        
+        # opts can have keys:
+        #  :just_parse
+        def add_to_template_content!(template_content, _serialized_content, _opts = {})
+          template_content << self unless @subtasks.empty?
+          # TODO: DTK-2680: Aldin: This is where the logic you put in that flattens out subtasks is given
+          #   I [Rich] commented it out though because when running methods that convert to reified form, 
+          #   for example to remove components, it needs to have serialized_form give full form back
+          #  @subtasks.each { |subtask| template_content << subtask } 
+        end
+
+        private
+
+        # TODO: :dsl_location, and :flatten in IGNORE_KEYS should instead use Field::XYZ form
+        IGNORE_KEYS = [:dsl_location, :flatten]
+        def ret_serialization_form(serialized_content)
+          serialized_content.inject({}) do |h, (k, v)|
+            IGNORE_KEYS.include?(k) ? h : h.merge(k => v)
+          end
+        end
+
+      end
     end
   end
-end; end; end; end
+end

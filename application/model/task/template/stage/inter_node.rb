@@ -17,7 +17,7 @@
 #
 module DTK; class Task; class Template
   class Stage
-    class InterNode < Hash
+    class InterNode < ::Hash
       require_relative('inter_node/factory')
       require_relative('inter_node/multi_node')
       require_relative('inter_node/nested_subtask')
@@ -58,6 +58,22 @@ module DTK; class Task; class Template
           end
         end
         ret
+      end
+
+      # opts can have keys:
+      #   :just_parse
+      # This can be over-written
+      def add_to_template_content!(template_content, serialized_content, opts = {})
+        unless empty?
+          template_content << self 
+        else
+          # if opts[:just_parse] then stage will be empty
+          unless opts[:just_parse]
+            # TODO: might pass in option to indicate whether this should raise error or not
+            # This is reached if component is not on any nodes
+            Log.info_pp(["The following workflow stage has components not on any node", serialized_content])
+          end
+        end
       end
 
       def add_ec2_node_subtasks(parent_task, node_actions, ret)

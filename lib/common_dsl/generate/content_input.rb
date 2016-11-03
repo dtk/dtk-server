@@ -28,6 +28,11 @@ module DTK
         def self.generate_for_service_instance(service_instance, module_branch)
           ObjectLogic::ServiceInstance.new(service_instance, module_branch).generate_content_input!
         end
+
+        def self.generate_for_nested_module(service_module_branch,  dsl_file_input_hash, module_ref)
+          ObjectLogic::ServiceInstance.new(service_instance, module_branch).generate_content_input!
+        end
+
       end
     end
   end

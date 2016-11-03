@@ -364,7 +364,7 @@ module DTK
             opts = {}
             opts.merge!(sha: sha) if sha
             if version_branch && !version_branch[:version].eql?('master')
-              opts.merge!(base_version: version_branch[:version], checkout_branch: true)
+              opts.merge!(version: version_branch[:version], checkout_branch: true)
             end
             AssemblyModule::Component.prepare_for_edit(assembly, component_module, opts)
           when :service_module
@@ -414,12 +414,14 @@ module DTK
       end
 
       _ns, _lck_sha, version_branch = AssemblyModule::Component.get_namespace_and_locked_branch_sha?(assembly, module_name)
-      if version_branch && version_branch[:frozen]
-        fail ErrorUsage.new("You are not allowed to pull changes for specific component module version!")
+      base_version = nil
+      if version_branch && !version_branch[:version].eql?('master')
+        fail ErrorUsage.new("You are not allowed to pull changes for specific component module version!") if  version_branch[:frozen]
+        base_version = version_branch[:version]
       end
 
       component_module = create_obj(:module_name, ComponentModule, namespace)
-      branch_info = AssemblyModule::Component.create_assembly_module_branch?(assembly, component_module)
+      branch_info = AssemblyModule::Component.create_module_for_service_instance__for_pull?(assembly, component_module, base_version: base_version)
       branch_info.merge!(assembly_name: assembly[:display_name])
 
       rest_ok_response branch_info

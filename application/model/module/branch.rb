@@ -20,6 +20,7 @@ require_relative('../branch_names')
 module DTK
   class ModuleBranch < Model
     require_relative('branch/location')
+    require_relative('branch/augmented')
 
     include BranchNames::Mixin
     extend BranchNames::ClassMixin
@@ -103,7 +104,7 @@ module DTK
 
     # deletes both local and remore branch
     def delete_instance_and_repo_branch
-      RepoManager.delete_branch(self)
+      RepoManager.delete_local_and_remote_branch(get_field?(:branch), self)
       delete_instance(id_handle())
     end
 
@@ -166,19 +167,45 @@ module DTK
     end
 
     # returns true if actual pull was needed
-    def pull_repo_changes?(commit_sha, force = false)
-      update_object!(:branch, :current_sha)
-      if is_set_to_sha?(commit_sha)
+    # opts can have keys:
+    #   :force
+    def pull_repo_changes?(commit_sha, opts = {})
+      if commit_sha == current_sha
         nil
       else
-        merge_result = RepoManager.fast_foward_pull(self[:branch], force, self)
-        if merge_result == :merge_needed
-          fail Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_name()})")
-        end
+        fast_foward_pull_raise_error_if_merge_needed(opts)
         set_sha(commit_sha)
         true
       end
     end
+
+    # returns nil if no changes, otherwise returns diffs
+    # opts can have keys:
+    #   :force
+    def pull_repo_changes_and_return_diffs_summary(commit_sha, opts = {})
+      diffs_summary = nil
+      update_object!(:branch, :current_sha)
+      current_sha = current_sha()
+      fail Error, "Unexpected that commit_sha == current_sha" if commit_sha == current_sha
+
+      fast_foward_pull_raise_error_if_merge_needed(opts)
+
+      if rev_diffs_summary = RepoManager.diff(current_sha, self).ret_summary
+        diffs_summary = rev_diffs_summary.reverse
+      end
+
+      diffs_summary 
+    end
+
+    # opts can have keys:
+    #   :force
+    def fast_foward_pull_raise_error_if_merge_needed(opts = {})
+      merge_result = RepoManager.fast_foward_pull(self[:branch], opts, self)
+      if merge_result == :merge_needed
+        fail Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_name()})")
+      end
+    end
+    private :fast_foward_pull_raise_error_if_merge_needed
 
     def current_sha
       get_field?(:current_sha)
@@ -355,6 +382,14 @@ module DTK
     def push_changes_to_repo
       commit_sha = RepoManager.push_changes(self)
       set_sha(commit_sha) # returns commit_sha to calling fn
+    end
+
+    def push_subtree_to_component_module(prefix, aug_component_module_branch)
+      external_repo   = aug_component_module_branch.repo
+      external_branch = aug_component_module_branch.branch_name
+      RepoManager.push_squashed_subtree(prefix, external_repo, external_branch, self)
+      RepoManager.pull_changes(aug_component_module_branch)
+      aug_component_module_branch.update_current_sha_from_repo!
     end
 
     def process_ambiguous_dependencies(ambiguous, hash_content)

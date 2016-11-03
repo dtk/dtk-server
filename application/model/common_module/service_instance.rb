@@ -18,15 +18,23 @@
 module DTK
   class CommonModule
     class ServiceInstance < AssemblyModule::Service
+      # opts can have keys
+      #   :add_nested_modules
       def self.create_service_instance_and_nested_modules(assembly_instance, opts = {})
         new(assembly_instance).create_service_instance_and_nested_modules(opts)
       end
-
       def create_service_instance_and_nested_modules(opts = {})
-        service_module_branch = get_or_create_module_for_service_instance(opts)
-        generate_dsl_opts = opts[:add_nested_modules] ? { aug_nested_module_branches: aug_nested_module_branches } : {}
+        service_module_branch = get_or_create_module_for_service_instance(opts.merge(delete_existing_branch: true))
+        generate_dsl_opts = opts[:add_nested_modules] ? { aug_component_module_branches: aug_component_module_branches() } : {}
         CommonDSL::Generate::ServiceInstance.generate_dsl(self, service_module_branch, generate_dsl_opts)
         ModuleRepoInfo.new(service_module_branch)
+      end
+
+      # opts can have keys:
+      #   :base_version
+      # Returns a ModuleBranch::Augmented object 
+      def get_or_create_service_specific_module_objects(component_module, opts = {})
+        AssemblyModule::Component.new(assembly_instance).create_module_for_service_instance?(component_module, { ret_augmented_module_branch: true }.merge(opts))
       end
       
       def self.create_empty_module(project, local_params, opts = {})
@@ -60,13 +68,11 @@ module DTK
         }.merge(module_repo_info)
       end
 
-      private
-
-      def aug_nested_module_branches
-        aug_dependent_module_branches = ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance)
-        # TODO: add in entry for base module being staged if it has component module
+      def aug_component_module_branches
+        aug_dependent_module_branches = ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance, augment_with_component_modules: true)
+        # TODO: DTK-2707: add in entry for base module being staged if it has component module
       end
-        
+      
     end
   end
 end

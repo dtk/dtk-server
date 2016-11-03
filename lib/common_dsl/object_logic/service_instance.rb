@@ -30,7 +30,7 @@ module DTK
           assembly_instance = @service_instance.respond_to?(:copy_as_assembly_instance) ? @service_instance.copy_as_assembly_instance : @service_instance.assembly_instance
           set(:DSLVersion, @dsl_version)
           set(:Name, assembly_instance.display_name)
-          set(:DependentModules, Dependency.generate_content_input(assembly_instance, @module_branch))
+          set(:DependentModules, Dependency.generate_content_input(assembly_instance))
           set(:Assembly, Assembly.generate_content_input(assembly_instance))
           self
         end

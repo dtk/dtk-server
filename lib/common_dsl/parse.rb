@@ -22,19 +22,24 @@ module DTK
      require_relative('parse/directory_parser')
      require_relative('parse/file_parser')
      require_relative('parse/canonical_input')
+     require_relative('parse/nested_module_info')
 
-     def self.matching_common_module_file_obj?(module_branch)
-       DirectoryParser.matching_file_obj?(FileType::CommonModule, branch: module_branch)
+     # opts can have keys
+     #  :impacted_files - array
+     def self.matching_common_module_top_dsl_file_obj?(module_branch, opts = {})
+       DirectoryParser.matching_file_obj?(FileType::CommonModule::DSLFile::Top, opts.merge(branch: module_branch))
      end
 
-     def self.matching_service_instance_file_obj?(module_branch)
-       DirectoryParser.matching_file_obj?(FileType::ServiceInstance, branch: module_branch)
+     # opts can have keys
+     #  :impacted_files - array
+     def self.matching_service_instance_top_dsl_file_obj?(module_branch, opts = {})
+       DirectoryParser.matching_file_obj?(FileType::ServiceInstance::DSLFile::Top, opts.merge(branch: module_branch))
      end
 
      def self.set_dsl_version!(module_branch, parsed_common_module)
        module_branch.set_dsl_version!(parsed_common_module.req(:DSLVersion))
      end
-
+     
    end
  end
 end

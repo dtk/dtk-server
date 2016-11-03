@@ -154,22 +154,22 @@ module DTK; module ModuleCommonMixin
     # Creates a new repo and repo branch if needed from base version and creates abd returns teh associated new module branch
     # It does specfic processing dependending on module type
     # opts can have keys:
-    #  :sha - this is base sha to branch from
-    #  :base_version
-    #  :checkout_branch
-    #  :delete_existing_branch (Boolean; default: false)
+    #   :sha - this is base sha to branch from
+    #   :checkout_branch
+    #   :delete_existing_branch (Boolean; default: false)
+    #   :frozen
     def create_new_version(base_version, new_version, opts = {})
-      unless aug_base_branch = get_augmented_workspace_branch(Opts.new(filter: { version: base_version }))
+      unless aug_base_branch = get_augmented_module_branch_with_version(base_version)
         fail ErrorUsage.new("There is no module (#{pp_module_name}) in the workspace")
       end
 
       # make sure there is a not an existing branch that matches the new one
-      if get_module_branch_matching_version(new_version)
+      if !opts[:delete_existing_branch] and get_module_branch_matching_version(new_version)
         fail VersionExist.new(new_version, pp_module_name)
       end
 
-      opts_repo_update = Aux.hash_subset(opts, [:sha, :base_version, :checkout_branch, :delete_existing_branch])
-      new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project, aug_base_branch[:repo], new_version, opts_repo_update)
+      opts_repo_update = Aux.hash_subset(opts, [:sha, :checkout_branch, :delete_existing_branch]).merge(base_version: base_version)
+      new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project, aug_base_branch.repo, new_version, opts_repo_update)
       
       opts_create_branch = opts.merge(
         ancestor_branch_idh: aug_base_branch.id_handle, 
@@ -179,7 +179,7 @@ module DTK; module ModuleCommonMixin
       )
 
       if opts[:inherit_frozen_from_base]
-        opts_create_branch.merge!(frozen: aug_base_branch[:frozen])
+        opts_create_branch[:frozen] = aug_base_branch[:frozen] if opts_create_branch[:frozen].nil?
       end
 
       new_branch = create_new_version__type_specific(new_version_repo, new_version, opts_create_branch)

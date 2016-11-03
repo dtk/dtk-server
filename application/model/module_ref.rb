@@ -17,9 +17,9 @@
 #
 module DTK
   class ModuleRef < Model
-    r8_nested_require('module_ref', 'version_info')
-    r8_nested_require('module_ref', 'lock')
-    r8_nested_require('module_ref', 'missing')
+    require_relative('module_ref/version_info')
+    require_relative('module_ref/lock')
+    require_relative('module_ref/missing')
 
     def self.common_columns
       [:id, :display_name, :group_id, :module_name, :module_type, :version_info, :namespace_info, :external_ref, :branch_id]
@@ -45,8 +45,10 @@ module DTK
       self
     end
 
-    def self.find_ndx_matching_component_modules(cmp_module_refs)
-      ret = {}
+    ModuleRefComponentModulePair = Struct.new(:module_ref, :component_module)
+    #returns an array of ModuleRefComponentModulePair objects
+    def self.find_module_refs_matching_component_modules(cmp_module_refs)
+      ret = []
       return ret if cmp_module_refs.empty?
       sp_hash = {
         cols: [:id, :group_id, :display_name, :namespace_id, :namespace],
@@ -57,7 +59,7 @@ module DTK
         module_name = cmr[:module_name]
         namespace = cmr.namespace
         if cmp_module = cmp_modules.find { |mod| mod[:display_name] == module_name && (mod[:namespace] || {})[:display_name] == namespace }
-          ret[cmr[:id]] = cmp_module
+          ret << ModuleRefComponentModulePair.new(cmr, cmp_module)
         end
       end
       ret
@@ -68,7 +70,7 @@ module DTK
       ret = {}
       return ret if branches.empty?
       sp_hash = {
-        cols: common_columns() + [:branch_id],
+        cols: common_columns + [:branch_id],
         filter: [:oneof, :branch_id, branches.map(&:id)]
       }
       mh = branches.first.model_handle(:module_ref)
@@ -79,8 +81,8 @@ module DTK
     end
     def self.get_component_module_ref_array(branch)
       sp_hash = {
-        cols: common_columns(),
-        filter: [:eq, :branch_id, branch.id()]
+        cols: common_columns,
+        filter: [:eq, :branch_id, branch.id]
       }
       mh = branch.model_handle(:module_ref)
       get_objs(mh, sp_hash)
@@ -97,7 +99,7 @@ module DTK
       case operation
        when :create_or_update
         matching_cols = [:module_name]
-        modify_children_from_rows(model_handle, parent.id_handle(), rows, matching_cols, update_matching: true, convert: true)
+        modify_children_from_rows(model_handle, parent.id_handle, rows, matching_cols, update_matching: true, convert: true)
        when :add
         create_from_rows(model_handle, rows)
        else
@@ -106,7 +108,7 @@ module DTK
     end
 
     def version_string
-      self[:version_info] && self[:version_info].respond_to?(:version_string) && self[:version_info].version_string()
+      self[:version_info] && self[:version_info].respond_to?(:version_string) && self[:version_info].version_string
     end
 
     def namespace
@@ -119,12 +121,16 @@ module DTK
       end
     end
 
+    def module_name
+      get_field?(:module_name)
+    end
+
     def dsl_hash_form
       ret = Aux.hash_subset(self, [])
-      if namespace = namespace()
+      if namespace = namespace
         ret.merge!(namespace: namespace)
       end
-      if version = version_string()
+      if version = version_string
         ret.merge!(version: version)
       end
       ret
@@ -136,7 +142,7 @@ module DTK
       ret = []
       return ret if module_ref_hash_array.empty?
       parent_id_assigns = {
-        parent.parent_id_field_name(:module_ref) => parent.id()
+        parent.parent_id_field_name(:module_ref) => parent.id
       }
       module_ref_hash_array.map do |module_ref_hash|
         el = Aux.hash_subset(module_ref_hash, [:ref, :display_name, :module_name, :module_type, :namespace_info, :external_ref]).merge(parent_id_assigns)

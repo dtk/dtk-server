@@ -125,7 +125,7 @@ module DTK
     end
 
     def get_linked_remote_repos(opts = {})
-      (get_augmented_workspace_branch(opts.merge(include_repo_remotes: true)) || {})[:repo_remotes] || []
+      (get_augmented_module_branch(opts.merge(include_repo_remotes: true)) || {})[:repo_remotes] || []
     end
 
     def default_linked_remote_repo
@@ -140,7 +140,7 @@ module DTK
       generate_docs = opts[:generate_docs]
 
       module_branch = get_workspace_module_branch(version)
-      pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force)
+      pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force: force)
 
       parse_needed = (opts[:force_parse] || generate_docs || !module_branch.dsl_parsed?())
       update_from_includes = opts[:update_from_includes]
@@ -149,7 +149,7 @@ module DTK
       # TODO: if need to generate docs, but not update the model can do something more efficient
       #       than code below, which class update to the model code even if no change to dsl files
       #       Instead would just want to call the parse code
-      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action, :use_impl_id])
+      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
       opts_update.merge!(ret_parsed_dsl: ParsedDSL.create(self)) if generate_docs
       ret = update_model_from_clone_changes(commit_sha, diffs_summary, module_branch, version, opts_update)
 
@@ -160,18 +160,23 @@ module DTK
       ret
     end
 
+    # opts can have keys:
+    #   :force
+    #   :generate_docs
+    #   :do_not_raise_if_exist
+    #   :do_not_raise
+    #   :force_parse
+    #   :update_from_includes
     def create_new_module_version(version, diffs_summary, opts = {})
       ret = ModuleDSLInfo.new
       # do pull and see if any changes need the model to be updated
       force         = opts[:force]
       generate_docs = opts[:generate_docs]
 
-      # set frozen field in module branch object to true for new version
-      opts.merge!(frozen: true)
-
       # create module branch for new version
       begin
-        module_branch = self.create_new_version(nil, version, opts)
+        # set frozen field in module branch object to true for new version
+        module_branch = self.create_new_version(nil, version, frozen: true)
       rescue VersionExist => e
         return {version_exist: true} if opts[:do_not_raise_if_exist]
         fail e
@@ -183,7 +188,8 @@ module DTK
       parse_needed = (opts[:force_parse] || generate_docs || !module_branch.dsl_parsed?())
       update_from_includes = opts[:update_from_includes]
 
-      opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
+      opts_update = Aux.hash_subset(opts, [:do_not_raise, :force_parse, :update_from_includes])
+      # TODO: took this out; maksing sure not removing any needed options: opts_update = Aux.hash_subset(opts, [:do_not_raise, :modification_type, :force_parse, :auto_update_module_refs, :dsl_parsed_false, :update_module_refs_from_file, :update_from_includes, :current_branch_sha, :service_instance_module, :task_action])
       opts_update.merge!(ret_parsed_dsl: ParsedDSL.create(self)) if generate_docs
       ret = update_model_from_clone_changes(nil, diffs_summary, module_branch, version, opts_update)
 
@@ -255,31 +261,6 @@ module DTK
     end
     def dsl_parsed?
       get_field?(:dsl_parsed)
-    end
-
-    # assumed that all raw_module_rows agree on all except repo_remote
-    def aggregate_by_remote_namespace(raw_module_rows, opts = {})
-      ret = nil
-      # raw_module_rows should have morea than 1 row and should agree on all fields aside from :repo_remote
-      if raw_module_rows.empty?()
-        fail Error.new('Unexepected that raw_module_rows is empty')
-      end
-      namespace = (opts[:filter] || {})[:remote_namespace]
-
-      repo_remotes = raw_module_rows.map do |e|
-        if repo_remote = e.delete(:repo_remote)
-          if namespace.nil? || namespace == repo_remote[:repo_namespace]
-            repo_remote
-          end
-        end
-      end.compact
-      # if filtering by namespace (tested by namespace is non-null) and nothing matched then return ret (which is nil)
-      # TODO: should we return nil when just repo_remotes.empty?
-      if namespace && repo_remotes.empty?
-        return ret
-      end
-
-      raw_module_rows.first.merge(repo_remotes: repo_remotes)
     end
 
     private

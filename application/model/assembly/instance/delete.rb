@@ -140,14 +140,18 @@ module DTK; class  Assembly
     end
 
     class Delete < self
+      # opts can have keys:
+      #   :do_not_raise
+      #   :destroy_nodes
       def self.contents(assembly_idhs, opts = {})
         return if assembly_idhs.empty?
+
         delete(get_sub_assemblies(assembly_idhs).map(&:id_handle))
+
         assembly_ids     = assembly_idhs.map(&:get_id)
         idh              = assembly_idhs.first
-        
-        Delete.assembly_modules?(assembly_idhs, opts)
-        Delete.assembly_nodes(idh.createMH(:node), assembly_ids, opts)
+        Delete.assembly_modules?(assembly_idhs, do_not_raise: opts[:do_not_raise])
+        Delete.assembly_nodes(idh.createMH(:node), assembly_ids, destroy_nodes: opts[:destroy_nodes])
         Delete.task_templates(idh.createMH(:task_template), assembly_ids)
       end
 
@@ -166,6 +170,8 @@ module DTK; class  Assembly
         delete_instances(get_objs(task_template_mh, sp_hash).map(&:id_handle))
       end
 
+      # opts can have keys:
+      #   :do_not_raise
       def self.assembly_modules?(assembly_idhs, opts = {})
         assembly_idhs.each do |assembly_idh|
           assembly = create_from_id_handle(assembly_idh)
@@ -178,6 +184,8 @@ module DTK; class  Assembly
         Delete.nodes(node_mh, assembly_ids, opts)
       end
 
+      # opts can have keys:
+      #   :destroy_nodes
       def self.nodes(node_mh, assembly_ids, opts = {})
         nodes = get_nodes_simple(node_mh, assembly_ids)
         nodes.map { |node| Delete.node(node, opts) }

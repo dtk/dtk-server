@@ -29,7 +29,8 @@ module DTK; class RepoManager
     require_relative('git/mixin')
     require_relative('git/manage_git_server')
 
-    include Mixin::AddBranch
+    include Mixin::FileProcessing
+    include Mixin::BranchProcessing
     extend ManageGitServer::ClassMixin
 
     attr_reader :path
@@ -159,186 +160,22 @@ module DTK; class RepoManager
       end
     end
 
-    def ls_r(depth = nil, opts = {})
-      checkout(@branch) do
-        if depth.nil? || (depth.is_a?(String) && depth == '*')
-          all_paths = Dir['**/*']
-        else
-          pattern = '*'
-          all_paths = []
-          depth.times do
-            all_paths += Dir[pattern]
-            pattern = "#{pattern}/*"
-          end
-        end
-        if opts[:file_only]
-          all_paths.select { |p| File.file?(p) }
-        elsif opts[:directory_only]
-          all_paths.select { |p| File.directory?(p) }
-        else
-          all_paths
-        end
-      end
-    end
-
-    def get_file_content(file_asset, opts = {})
-      checkout(@branch) do
-        if opts[:no_error_if_not_found]
-          unless File.exist?(file_asset[:path])
-            return nil
-          end
-        end
-        File.open(file_asset[:path]) { |f| f.read }
-      end
-    end
-
-    def file_exists?(file_path)
-      checkout(@branch) do
-        File.exist?(file_path)
-      end
-    end
-
-    def move_content(source, destination, files, folders, branch = nil)
-      branch ||= @branch
-      checkout(branch) do
-        git_command__mv(source, destination, files, folders)
-      end
-    end
-
-    def move_file(source_name, destination_name, branch = nil)
-      branch ||= @branch
-      checkout(branch) do
-        git_command__mv_file(source_name, destination_name)
-      end
-    end
-
-    def add_all_files(branch = nil)
-      branch ||= @branch
+    # opts can have keys:
+    #  :branch
+    #  :commit_msg
+    def add_all_files_and_commit(opts = {})
+      branch = opts[:branch] || @branch
       checkout(branch) do
         git_command__add('.')
-        message = "Adding . in #{branch}"
+        message = opts[:commit_msg] || "Adding . in #{branch}"
         commit(message)
       end
-    end
-
-    # returns a Boolean: true if any change made
-    # opts can have keys:
-    #  :commit_msg
-    #  :no_commit
-    def add_files(file_path__content_array, opts = {})
-      ret = false
-      added_file_paths = []
-      file_path__content_array.each do |el|
-        path = el[:path]
-        if add_file({ path: path }, el[:content], nil, no_commit: true)
-          added_file_paths << path
-          ret = true
-        end
-      end
-      if ret and ! opts[:no_commit]
-        commit_msg ||= "Adding files: #{added_file_paths.join(', ')}"
-        checkout(@branch) { commit(commit_msg) }
-      end
-      ret
-    end
-
-    # returns a Boolean: true if any change made
-    # opts can have keys:
-    #   :no_commit - Boolean
-    def add_file(file_asset, content, commit_msg = nil, opts = {})
-      ret = false
-      path = file_asset[:path]
-      commit_msg ||= "Adding file '#{path}'"
-      content ||= ''
-      checkout(@branch) do
-        recursive_create_dir?(path)
-        File.open(path, 'w') { |f| f << content }
-        git_command__add(path)
-        # diff(nil) looks at diffs with respect to the working dir
-        unless diff(nil).ret_summary.no_diffs?
-          commit(commit_msg) unless opts[:no_commit]
-          ret = true
-        end
-      end
-      ret
     end
 
     def file_changed_since_specified_sha(initial_service_module_sha, path)
       diffs = diff(initial_service_module_sha)
       diffs_summary = diffs.ret_summary
       diffs_summary.file_changed?(path)
-    end
-
-    def delete_file?(file_path, opts = {})
-      delete_tree?(:file, file_path, opts)
-    end
-
-    def delete_file(file_path, opts = {})
-      delete_tree(:file, file_path, opts)
-    end
-
-    def delete_directory?(dir, opts = {})
-       delete_tree?(:directory, dir, opts)
-    end
-
-    def delete_directory(dir, opts = {})
-      delete_tree(:directory, dir, opts)
-    end
-
-    def delete_tree?(type, tree_path, opts = {})
-      ret = nil
-      checkout(@branch) do
-        ret = File.exist?(full_path(tree_path))
-        delete_tree(type, tree_path, opts.merge(no_checkout: true)) if ret
-      end
-      ret
-    end
-
-    def delete_tree(type, path, opts = {})
-      if opts[:no_checkout]
-        delete_tree__body(type, path, opts)
-      else
-        checkout(@branch) do
-          delete_tree__body(type, path, opts)
-        end
-      end
-    end
-
-    def delete_tree__body(type, path, opts = {})
-      message = "Deleting #{path} in #{@branch}"
-      case type
-        when :file then git_command__rm(path)
-         when :directory then git_command__rm_r(path)
-         else fail Error.new("Unexpected type (#{type})")
-      end
-      commit(message)
-      if opts[:push_changes]
-        push_changes
-      end
-    end
-    private :delete_tree__body
-
-    def update_file_content(file_asset, content)
-      checkout(@branch) do
-        File.open(file_asset[:path], 'w') { |f| f << content }
-        # TODO: commiting because it looks like file change visible in other branches until commit
-        message = "Updating #{file_asset[:path]} in #{@branch}"
-        git_command__add(file_asset[:path])
-        commit(message)
-      end
-    end
-    DiffAttributes = [:new_file, :renamed_file, :deleted_file, :a_path, :b_path, :diff]
-    def diff(other_branch)
-      grit_diffs = @grit_repo.diff(@branch, other_branch)
-      array_diff_hashes = grit_diffs.map do |diff|
-        DiffAttributes.inject({}) do |h, a|
-          val = diff.send(a)
-          val ? h.merge(a => val) : h
-        end
-      end
-      a_sha = branch_sha(@branch)
-      b_sha = branch_sha(other_branch)
-      Repo::Diffs.new(array_diff_hashes, a_sha, b_sha)
     end
 
     def branch_sha(branch)
@@ -360,9 +197,13 @@ module DTK; class RepoManager
     end
 
     # returns :no_change, :changed, :merge_needed
-    def fast_foward_pull(remote_branch, force = false, remote_name = nil)
-      remote_name ||= default_remote_name
-      remote_ref = "#{remote_name}/#{remote_branch}"
+    # opts can have keys:
+    #   :force
+    #   :remote_name
+    def fast_foward_pull(remote_branch, opts = {})
+      remote_name = opts[:remote_name] || default_remote_name
+      remote_ref  = "#{remote_name}/#{remote_branch}"
+
       merge_rel = ret_merge_relationship(:remote_branch, remote_ref, fetch_if_needed: true)
       ret =
         case merge_rel
@@ -372,7 +213,7 @@ module DTK; class RepoManager
          else fail Error.new("Unexpected merge relation (#{merge_rel})")
         end
 
-      if force
+      if opts[:force]
         checkout(@branch) do
           git_command__fetch_all
           git_command__hard_reset(remote_ref)
@@ -430,7 +271,7 @@ module DTK; class RepoManager
 
       # when pulling version after base branch is pulled there are untracked changes in newly created empty branch
       # we need to add and commit them and then use pull --force to override them if not the same as remote files
-      add_all_files(@branch) unless init_branch.eql?('master') 
+      add_all_files_and_commit(branch: @branch) unless init_branch.eql?('master') 
       force = true
       pull_changes(remote_name, remote_branch, force)
     end
@@ -568,7 +409,7 @@ module DTK; class RepoManager
     end
 
     def pull_changes(remote_name = nil, remote_branch = nil, force = false)
-      # note: even though generated git comamdn hash --git-dor set, need to chdir
+      # note: even though generated git comamdn hash --git-dir set, need to chdir
       Dir.chdir(@path) do
         git_command__pull(@branch, remote_branch || @branch, remote_name, force)
       end
@@ -588,38 +429,25 @@ module DTK; class RepoManager
       git_command__push(@branch)
     end
 
-    def merge_from_branch(branch_to_merge_from)
+    # opts can have keys:
+    #   :squash
+    def merge_from_branch(branch_to_merge_from, opts = {})
       checkout(@branch) do
-        git_command__merge(branch_to_merge_from)
+        git_command__merge(branch_to_merge_from, opts)
       end
     end
 
-    # deletes both local and remote branch
-    # Opts can have keys:
-    #  :local_branch
-    #  :remote_branch
-    def delete_branch(opts = {})
-      local_branch_to_delete  = opts[:local_branch] || @branch
-      remote_branch_to_delete = opts[:remote_branch] || local_branch_to_delete
-      checkout_other_branch?(local_branch_to_delete) do
-        git_command__delete_local_branch?(local_branch_to_delete)
-        git_command__delete_remote_branch?(local_branch_to_delete, remote_branch_to_delete)
+    def add_squashed_subtree(prefix, external_repo, external_branch)
+      checkout(@branch) do
+        git_command__add_squashed_subtree(prefix, external_repo, external_branch)
       end
     end
 
-    def checkout_other_branch?(branch, &body)
-      if branch != current_branch
-        yield
-      else
-        unless other_branch = get_branches.find { |br| br != branch }
-          fail Error.new("Cannot find branch other than '#{branch}' to checkout")
-        end
-        checkout(other_branch) do        
-          yield
-        end
+    def push_squashed_subtree(prefix, external_repo, external_branch)
+      checkout(@branch) do
+        git_command__push_squashed_subtree(prefix, external_repo, external_branch)
       end
     end
-    private :checkout_other_branch?
 
     def get_branches
       @grit_repo.branches.map(&:name)

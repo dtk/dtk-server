@@ -37,6 +37,8 @@ module DTK; class Clone
 
       private
 
+      # opts can have keys
+      #   
       def update(components, opts = {})
         # get mapping between component instances and their templates
         # component templates indexed by component type
@@ -80,6 +82,8 @@ module DTK; class Clone
          !cmp.get_field?(:locked_sha).nil?
       end
 
+      # opts can have keys:
+      #   
       def get_instance_template_links(cmps, opts = {})
         ret = InstanceTemplate::Links.new()
         component_types = cmps.map { |cmp| cmp.get_field?(:component_type) }.uniq

@@ -640,6 +640,7 @@ module DTK; class  Assembly
       ret
     end
 
+
     def delete_instance_task(assembly_instance, opts = {})
       task  = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
       nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
@@ -679,7 +680,6 @@ module DTK; class  Assembly
         delete_assembly_subtask = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
         task.add_subtask(delete_assembly_subtask)
       end
-
       task
     end
 

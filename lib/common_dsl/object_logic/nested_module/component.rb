@@ -15,11 +15,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  class RepoManager::Git 
-    module Mixin
-      require_relative('mixin/branch_processing')
-      require_relative('mixin/file_processing')
+module DTK; module CommonDSL
+  module ObjectLogic
+    class NestedModule
+      class Component < Generate::ContentInput::Hash
+        def self.generate_content_input_from_hash(dsl_input_hash)
+          new.merge(dsl_input_hash['components'] || {})
+        end
+      end
     end
   end
-end
+end; end

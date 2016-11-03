@@ -75,7 +75,7 @@ module DTK
         def self.pull_repo_changes?(project, local_params, commit_sha, opts = {})
           namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
           module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace)
-          pull_was_needed = module_branch.pull_repo_changes?(commit_sha, opts[:force_pull])
+          pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force: opts[:force_pull])
           [module_branch, pull_was_needed]
         end
 
@@ -132,7 +132,7 @@ module DTK
         private
 
         def self.dsl_file_obj_from_repo(module_branch)
-          CommonDSL::Parse.matching_common_module_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
+          CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
         end
         
       end

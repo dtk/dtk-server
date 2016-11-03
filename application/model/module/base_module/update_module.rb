@@ -68,7 +68,7 @@ module DTK; class BaseModule
       end
 
       # returns the new module branch
-      # This is caledd when creating a service instance specific component module
+      # This is called when creating a service instance specific component module
       def create_new_version__type_specific(repo_for_new_branch, new_version, opts = {})
         local = UpdateModule.ret_local(self, new_version, opts)
         # TODO: this is expensive in that it creates new version by parsing the dsl and reading back in;
@@ -173,6 +173,8 @@ module DTK; class BaseModule
       ret
     end
 
+    # opts can have keys:
+    #   :new_branch_name
     def self.ret_local(base_module, version, opts = {})
       local_params = ModuleBranch::Location::LocalParams::Server.new(
         module_type: base_module.module_type(),

@@ -24,13 +24,14 @@ module DTK
         end
         
         # opts can have keys:
-        #  :aug_nested_module_branches
+        #  :aug_component_module_branches
         def self.generate_dsl(service_instance, service_module_branch, opts = {})
           add_service_dsl_files(service_instance, service_module_branch)
-          if aug_nested_module_branches = opts[:aug_nested_module_branches]
-            #TODO: DTK-2686: took out before commited to master; add_nested_modules_dsl_files(aug_nested_module_branches, service_module_branch)
+          if aug_component_module_branches = opts[:aug_component_module_branches]
+            ComponentModuleRepoSync.pull_from_component_modules(service_module_branch, aug_component_module_branches)
           end
           RepoManager.push_changes(service_module_branch)
+          service_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
         end
         
         private
@@ -39,21 +40,8 @@ module DTK
           # content_input is a dsl version independent canonical form that has all content needed to
           content_input = generate_canonical_form(service_instance, service_module_branch)
           yaml_text = FileGenerator.generate_yaml_text(:service_instance, content_input, service_module_branch.dsl_version)
-          file_type__content_array = [{ file_type: FileType::ServiceInstance, content: yaml_text }]
+          file_type__content_array = [{ file_type: FileType::ServiceInstance::DSLFile::Top, content: yaml_text }]
           DirectoryGenerator.add_files(service_module_branch, file_type__content_array, donot_push_changes: true)
-        end
-        
-        def self.add_nested_modules_dsl_files(aug_nested_module_branches, service_module_branch)
-          return if aug_nested_module_branches.empty?
-          
-          add_remote_files_info = RepoManager::AddRemoteFilesInfo::GitSubtree.new
-          aug_nested_module_branches.each do |aug_nested_module_branch|
-            source_repo         = aug_nested_module_branch[:repo]
-            source_branch_name  = aug_nested_module_branch[:branch]
-            target_relative_dir = FileType::ServiceInstanceNestedModule.new(aug_nested_module_branch[:module_name]).base_dir
-            add_remote_files_info.add_git_subtree_info!(target_relative_dir, source_repo, source_branch_name) 
-          end
-          DirectoryGenerator.add_remote_files(service_module_branch, add_remote_files_info)
         end
         
       end

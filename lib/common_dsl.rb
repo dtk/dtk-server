@@ -22,6 +22,7 @@ module DTK
     # diff must be before generate
     require_relative('common_dsl/generate')
     require_relative('common_dsl/parse')
+    require_relative('common_dsl/component_module_repo_sync')
 
     # object_logic must go last
     require_relative('common_dsl/object_logic')

@@ -109,19 +109,36 @@ module DTK
   class IDHandle < Hash
     include IdInfoTable::Mixin
 
+    # opts can have keys:
+    #   :model_name
+    #   :model_class
+    #   :donot_find_subtype
     def create_object(opts = {})
-      model_name =
-        if opts[:model_name]
-          opts[:model_name]
-        elsif not opts[:donot_find_subtype]
-          Model.find_subtype_model_name(self, opts)
-        else
-          self[:model_name]
-        end
-      ret = Model.model_class(model_name).new({ id: get_id() }, self[:c], nil, self)
+      ret = ret_model_class(opts).new({ id: get_id() }, self[:c], nil, self)
       ret.update_object!(*opts[:cols]) if opts[:cols]
       ret
     end
+    # opts can have keys:
+    #   :model_name
+    #   :model_class
+    #   :donot_find_subtype
+    def ret_model_class(opts = {})
+      fail Error, "Unexpected that opts[:model_name] and opts[:model_class] are both non nil" if opts[:model_name] and opts[:model_class]
+      if opts[:model_class]
+        opts[:model_class]
+      else
+        model_name =
+          if opts[:model_name]
+            opts[:model_name]
+          elsif not opts[:donot_find_subtype]
+            Model.find_subtype_model_name(self, opts)
+          else
+            self[:model_name]
+          end
+        Model.model_class(model_name)
+      end
+    end
+    private :ret_model_class
 
     def get_field?(field)
       create_object().get_field?(field)

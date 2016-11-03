@@ -24,47 +24,61 @@ module DTK; class AssemblyModule
     extend Get::ClassMixin
 
     # opts can have keys
-    #  :sha
-    #  :version
-    def self.prepare_for_edit(assembly, component_module, opts = {})
-      new(assembly).prepare_for_edit(component_module, opts)
-    end
-    def prepare_for_edit(component_module, opts = {})
-      create_module_for_service_instance?(component_module, opts)
-    end
-
-    def self.create_assembly_module_branch?(assembly, component_module, opts = {})
-      new(assembly).create_assembly_module_branch?(component_module)
-    end
-    def create_assembly_module_branch?(component_module)
-      am_version = assembly_module_version()
-
-      # check if component module base branch exist; it being used to pull component module updates from
-      unless base_branch = component_module.get_workspace_branch_info()
-        fail ErrorNoChangesToModule.new(@assembly, component_module)
+    #  :sha - base sha to create branch from
+    #  :ret_module_branch - Boolean
+    #  :ret_augmented_module_branch - Boolean
+    #  :base_version
+    #  :checkout_branch
+    def create_module_for_service_instance?(component_module, opts = {})
+      fail Error, "Both opts[:ret_augmented_module_branch] and opts[:ret_module_branch] cannot be non null" if opts[:ret_augmented_module_branch] and opts[:ret_module_branch]
+      am_version = assembly_module_version
+      unless component_module.get_workspace_module_branch(am_version)
+        base_version = opts[:base_version]        
+        create_opts = {
+          sha: opts[:sha],
+          inherit_frozen_from_base: true,
+          checkout_branch: opts[:checkout_branch]
+        }
+        component_module.create_new_version(base_version, am_version, create_opts)
       end
+      if opts[:ret_augmented_module_branch]
+        component_module.get_augmented_module_branch_with_version(am_version).augment_with_component_module!
+      else
+        ret = component_module.get_module_repo_info(am_version)
+        opts[:ret_module_branch] ? ret[:module_branch_idh].create_object : ret
+      end
+    end
 
+    # opts can have keys
+    #  :base_version
+    def self.create_module_for_service_instance__for_pull?(assembly, component_module, opts = {})
+      # check if component module base branch exists; it being used to pull component module updates from
+      unless base_branch = component_module.get_workspace_branch_info
+        fail ErrorNoChangesToModule.new(assembly, component_module)
+      end
+      am_version = assembly_module_version(assembly)
       unless local_branch = component_module.get_workspace_module_branch(am_version)
-        create_module_for_service_instance?(component_module)
+        create_module_for_service_instance?(component_module, base_version: opts[:base_version])
         local_branch = component_module.get_workspace_module_branch(am_version)
       end
 
       base_branch.merge(version: am_version, local_branch: local_branch[:display_name], current_branch_sha: local_branch[:current_sha])
     end
 
-    def self.finalize_edit(assembly, component_module, module_branch, opts = {})
-      new(assembly).finalize_edit(component_module, module_branch, opts)
+    def self.update_impacted_component_instances(assembly, component_module, nested_module_branch, opts = {})
+      new(assembly).update_impacted_component_instances(component_module, nested_module_branch, opts)
     end
-    def finalize_edit(component_module, module_branch, opts = {})
-      # Update any impacted component instance
+
+    # Update any impacted component instance and recompute module ref locks
+    def update_impacted_component_instances(component_module, module_branch, opts = {})
       cmp_instances = get_applicable_component_instances(component_module)
-      project_idh = component_module.get_project().id_handle()
+      project_idh = component_module.get_project.id_handle
       begin
         Clone::IncrementalUpdate::Component.new(project_idh, module_branch).update?(cmp_instances, opts)
        rescue Exception => e
         # TODO: DTK-2153: double check that below is still applicable and right
         if sha = opts[:current_branch_sha]
-          repo = module_branch.get_repo()
+          repo = module_branch.get_repo
           repo.hard_reset_branch_to_sha(module_branch, sha)
           module_branch.set_sha(sha)
         end
@@ -76,7 +90,7 @@ module DTK; class AssemblyModule
     end
 
     def delete_modules?(opts = {})
-      am_version = assembly_module_version()
+      am_version = assembly_module_version
       sp_hash = {
         cols: [:id, :group_id, :display_name, :component_id],
         filter: [:eq, :version, am_version]
@@ -87,24 +101,36 @@ module DTK; class AssemblyModule
       Model.get_objs(@assembly.model_handle(:module_branch), sp_hash).each do |module_branch|
         # if module_branch[:component_id] is nil then this is a service module branch, otherwise it is a component module branch
         if module_branch[:component_id].nil?
-          Model.delete_instance(module_branch.id_handle()) unless opts[:skip_service_module_branch]
+          Model.delete_instance(module_branch.id_handle) unless opts[:skip_service_module_branch]
         else
-          component_module = component_module_mh.createIDH(id: module_branch[:component_id]).create_object()
+          component_module = component_module_mh.createIDH(id: module_branch[:component_id]).create_object
           component_module.delete_version?(am_version)
         end
       end
     end
+
+    # opts can have keys
+    #  :sha
+    #  :version # TODO: change to :base_version
+    def self.prepare_for_edit(assembly, component_module, opts = {})
+      new(assembly).create_module_for_service_instance?(component_module, sha: opts[:sha], base_version: opts[:version])
+    end
+
+    def self.finalize_edit(assembly, component_module, module_branch, opts = {})
+      new(assembly).update_impacted_component_instances(component_module, module_branch, opts)
+    end
+
 
     def self.promote_module_updates(assembly, component_module, opts = {})
       new(assembly).promote_module_updates(component_module, opts)
     end
 
     def promote_module_updates(component_module, opts = {})
-      am_version = assembly_module_version()
+      am_version = assembly_module_version
       unless branch = component_module.get_workspace_module_branch(am_version)
         fail ErrorNoChangesToModule.new(@assembly, component_module)
       end
-      unless ancestor_branch = branch.get_ancestor_branch?()
+      unless ancestor_branch = branch.get_ancestor_branch?
         fail Error.new('Cannot find ancestor branch')
       end
       branch_name = branch[:branch]
@@ -126,8 +152,8 @@ module DTK; class AssemblyModule
         else
           [:and,
            [:eq, :type, 'component_module'],
-           [:eq, :version, ModuleBranch.version_field_default()],
-           [:eq, :repo_id, repo.id()],
+           [:eq, :version, ModuleBranch.version_field_default],
+           [:eq, :repo_id, repo.id],
            [:eq, :component_id, module_id]
           ]
         end
@@ -136,7 +162,7 @@ module DTK; class AssemblyModule
         cols: [:id, :group_id, :display_name, :component_type],
         filter: filter
       }
-      base_branch = Model.get_obj(module_branch.model_handle(), sp_hash)
+      base_branch = Model.get_obj(module_branch.model_handle, sp_hash)
       diff = repo.get_local_branches_diffs(module_branch, base_branch, workspace_branch)
 
       diff.each do |diff_obj|
@@ -149,36 +175,11 @@ module DTK; class AssemblyModule
 
     private
 
-    # opts can have keys
-    #  :sha - base sha to create branch from
-    #  :ret_module_branch - Boolean
-    #  :module_branch_idh (required if ret_module_branch == true)
-    #  :base_version
-    #  :checkout_branch
-    def create_module_for_service_instance?(component_module, opts = {})
-      am_version = assembly_module_version()
-      unless component_module.get_workspace_module_branch(am_version)
-        create_module_for_service_instance(component_module, am_version, Aux.hash_subset(opts, [:sha, :base_version, :checkout_branch]))
-      end
-      ret = component_module.get_workspace_branch_info(am_version)
-      opts[:ret_module_branch] ? ret[:module_branch_idh].create_object() : ret
-    end
-
-    # opts can have keys
-    #  :sha - base sha to create branch from
-    #  :base_version
-    #  :checkout_branch
-    def create_module_for_service_instance(component_module, am_version, opts = {})
-      base_version = opts[:base_version]
-      opts.merge!(inherit_frozen_from_base: true)
-      component_module.create_new_version(base_version, am_version, opts)
-    end
-
     class ErrorComponentModule < ErrorUsage
       def initialize(assembly, component_module)
-        @assembly_name = assembly.display_name_print_form()
+        @assembly_name = assembly.display_name_print_form
         @module_name = component_module.get_field?(:display_name)
-        super(error_msg())
+        super(error_msg)
       end
     end
     class ErrorNoChangesToModule < ErrorComponentModule

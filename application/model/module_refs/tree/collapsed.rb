@@ -78,30 +78,15 @@ module DTK; class ModuleRefs
       end
       DefaultStrategy = :pick_first_level
 
-      def add_implementations!(assembly_instance, opts = {})
-        impl_module_name = nil
-        impl_module_id   = nil
-        if impl_obj = opts[:impl_obj]
-          impl_obj.update_object!(:module_name)
-          impl_module_id   = impl_obj[:id]
-          impl_module_name = impl_obj[:module_name]
-        end
-
+      def add_implementations!(assembly_instance)
         ndx_impls = get_relevant_ndx_implementations(assembly_instance)
         each_element do |el|
           version = el.version || Implementation.version_field
           ndx = impl_index(el.namespace, el.module_name, version)
-
-          # this case will only be used when on client we do edit-component-module for versioned module
-          # and try to push changes to server (not to base module)
-          if impl_module_name && el.module_name.eql?(impl_module_name)
-            get_by_id = nil
-            ndx_impls.each{|_name, impl| (get_by_id = impl if impl[:id] == impl_module_id) }
-            el.implementation = get_by_id if get_by_id
+          if impl = ndx_impls[ndx]
+            el.implementation = impl
           else
-            if impl = ndx_impls[ndx]
-              el.implementation = impl
-            end
+            Log.error("Unexpected that cannot find index '#{ndx}' in ndx_impls")
           end
         end
         self
@@ -109,7 +94,7 @@ module DTK; class ModuleRefs
 
       private
 
-      # returns implementations indexed by impl_index
+      # returns implementations indexed by NS:MOD:VERSION
       def get_relevant_ndx_implementations(assembly_instance)
         disjuncts = []
         each_element do |el|
@@ -138,13 +123,12 @@ module DTK; class ModuleRefs
            when :non_matching_assembly_module
              # no op
            when :matching_assembly_module
-            normalized_version = assembly_version.strip_assembly_module_part(version)
-            ndx = impl_index(impl[:module_namespace], impl[:module_name], normalized_version)
-            # '=' so will override
-            ret[ndx] = impl
+            update_if_not_set!(ret, impl)
+            # Also put impl under key that represents base version
+            base_version = assembly_version.corresponding_base_version(version)
+            update_corresponding_base_version!(ret, impl, base_version)
            when :base_version
-            ndx = impl_index(impl[:module_namespace], impl[:module_name], version)
-            ret[ndx] ||= impl
+            update_if_not_set!(ret, impl)
           end
         end
         ret
@@ -156,6 +140,18 @@ module DTK; class ModuleRefs
         else
           assembly_version.match?(version) ? :matching_assembly_module : :non_matching_assembly_module
         end
+      end
+
+
+      def update_if_not_set!(ret, impl)
+        ndx = impl_index(impl[:module_namespace], impl[:module_name], impl[:version])
+        ret[ndx] ||= impl
+      end
+
+      def update_corresponding_base_version!(ret, impl, base_version)
+        base_version_ndx = impl_index(impl[:module_namespace], impl[:module_name], base_version)
+        # '=' so will override
+        ret[base_version_ndx] = impl
       end
 
       def impl_index(namespace, module_name, version)

@@ -133,6 +133,8 @@ module DTK; class LinkDef
       preferences_matching_cmps = []
       if link_type = link_def[:link_type]
         aug_cmps.each do |cmp|
+          # TODO: DTK-2725: update below to have match that handles case where link_type
+          # is a label refering to a choice
           cmp_name = cmp[:component_type].gsub('__','::')
 
           if node = link_type.include?('/') && cmp[:node]

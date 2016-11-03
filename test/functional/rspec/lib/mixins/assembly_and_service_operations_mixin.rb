@@ -8,15 +8,68 @@ module AssemblyAndServiceOperationsMixin
     if components_list['status'] == 'ok' && !components_list['data'].empty?
       components_list['data'].each do |cmp|
         if cmp['display_name'] == component_name
-          puts "Component #{component_name} found!"
+          puts "Component: #{component_name} found!"
           component_exists = true
         end
       end
     else
       puts "Component #{component_name} is not found in #{service_instance_name}"
     end
+    puts "Component #{component_name} is not found in #{service_instance_name}" unless components_exists
     puts ""
     component_exists
+  end
+
+  def check_if_action_exists_in_service_instance(service_instance_name, action_to_check)
+    puts "Check if action exists in service instance", "------------------------------------------"
+    action_exists = false
+    list_of_actions = send_request("/rest/api/v1/services/#{service_instance_name}/actions", {}, 'get')
+    ap list_of_actions
+    if list_of_actions['status'] == 'ok' && !list_of_actions['data'].empty?
+      list_of_actions['data'].each do |action|
+        if action['display_name'] == action_to_check
+          puts "Action: #{action_to_check} found!"
+          action_exists = true
+        end
+      end
+    else
+      puts "Action #{action_to_check} is not found in #{service_instance_name}"
+    end
+    puts "Action #{action_to_check} is not found in #{service_instance_name}" unless action_exists
+    puts ""
+    action_exists
+  end
+
+  def check_if_attributes_exists_in_service_instance(service_instance_name, attributes_to_check)
+    puts "Check if attributes exist and are correct in service instance", "---------------------------------------------------"
+    attributes_exist = false
+    attributes_list = send_request("/rest/api/v1/services/#{service_instance_name}/attributes", {}, 'get')
+    
+    puts "Attributes to check:"
+    ap attributes_to_check
+    puts ""
+    puts "Attributes on service instance:"
+    ap attributes_list
+    puts ""
+
+    if attributes_list['status'] == 'ok' && !attributes_list['data'].empty?
+      attributes_exist_and_values_correct = []
+      attributes_list['data'].each do |attr|
+        if (attributes_to_check.keys.include? attr['display_name']) && (attributes_to_check.values.include? attr['value'])
+          attributes_exist_and_values_correct << true
+        end
+      end
+      if (attributes_exist_and_values_correct.count == attributes_to_check.count) && (!attributes_exist_and_values_correct.include? false)
+        puts "All attributes: #{attributes_to_check} are verified and exist on service instance"
+        attributes_exist = true
+      else
+        puts "Some attributes are missing or they don't have expected values on service instance"
+      end
+    else
+      puts "Attributes #{attributes_to_check} are not found in #{service_instance_name}"
+    end
+    puts ""
+    attributes_exist = true
   end
 
   def check_task_status(service_instance_name)

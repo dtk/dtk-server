@@ -243,8 +243,23 @@ shared_context "Change content of module on local filesystem" do |module_locatio
   end
 end
 
+shared_context "Change content of service instance on local filesystem" do |service_location, update_service_location|
+  it "updates content of service instance on local filesystem" do
+    puts "Update content of service instance on local filesystem", '-----------------------------------------------------'
+    pass = false
+    `cp #{update_service_location} #{service_location}/`
+    `mv #{service_location}/* #{service_location}/dtk.service.yaml`
+    value = `ls #{service_location}/dtk.service.yaml`
+    pass = !value.include?('No such file or directory')
+    puts 'dtk.service.yaml has been updated!' if pass == true
+    puts 'dtk.service.yaml has not been updated!' if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context "Push module changes" do |module_name, module_location|
-  it "pushes changes module for module #{module_name}" do
+  it "pushes changes for module #{module_name}" do
     puts 'Push module changes', '-------------------------'
     pass = true
     value = `dtk module push -d #{module_location}`
@@ -252,6 +267,20 @@ shared_context "Push module changes" do |module_name, module_location|
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
     puts "Push of module #{module_name} was completed successfully!" if pass == true
     puts "Push of module #{module_name} did not complete successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context "Push service instance changes" do |service_name, service_location|
+  it "pushes changes for service instance #{service_name}" do
+    puts 'Push service instance changes', '--------------------------------'
+    pass = true
+    value = `dtk service push -d #{service_location}`
+    puts value
+    pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
+    puts "Push of service instance #{service_name} was completed successfully!" if pass == true
+    puts "Push of service instance #{service_name} did not complete successfully!" if pass == false
     puts ''
     expect(pass).to eq(true)
   end
@@ -265,6 +294,28 @@ shared_context 'Check component exist in service instance' do |dtk_common, servi
     puts "Component #{component_to_check} does not exist on service instance #{service_name}" if component_exists == false
     puts ''
     expect(component_exists).to eq(true)
+  end
+end
+
+shared_context 'Check attributes correct in service instance' do |dtk_common, service_name, attributes_to_check|
+  it "verifies that attributes exists and are correct in service instance #{service_name}" do
+    puts 'Check attributes correct in service instance', '-----------------------------------------------'
+    attributes_exists = dtk_common.check_if_attributes_exists_in_service_instance(service_name, attributes_to_check)
+    puts "Attributes exists and are correct on service instance #{service_name}" if attributes_exists == true
+    puts "Attributes does not exist or are not correct on service instance #{service_name}" if attributes_exists == false
+    puts ''
+    expect(attributes_exists).to eq(true)
+  end
+end
+
+shared_context 'Check workflow exist in service instance' do |dtk_common, service_name, workflow_to_check|
+  it "verifies that workflow exists in service instance #{service_name}" do
+    puts 'Check workflow exists in service instance', '-----------------------------------------------'
+    workflow_exists = dtk_common.check_if_action_exists_in_service_instance(service_name, workflow_to_check)
+    puts "Workflow exists on service instance #{service_name}" if workflow_exists == true
+    puts "Workflow does not exist on service instance #{service_name}" if workflow_exists == false
+    puts ''
+    expect(workflow_exists).to eq(true)
   end
 end
 

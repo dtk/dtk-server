@@ -24,13 +24,8 @@ shared_context 'Install module from dtkn' do |remote_module, remote_module_locat
   it "installs #{remote_module} module from dtkn to server" do
     puts 'Install module from dtkn:', '-----------------------------'
     pass = true
-    if version == 'master'
-      value = `dtk module install -d #{remote_module_location} #{remote_module}`
-      puts value
-    else
-      value = `dtk module install -d #{remote_module_location} -v #{version} #{remote_module}`
-      puts value
-    end
+    value = `dtk module install -d #{remote_module_location} -v #{version} #{remote_module}`
+    puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
     puts "Install of module #{remote_module} was completed successfully!" if pass == true
     puts "Install of module #{remote_module} did not complete successfully!" if pass == false

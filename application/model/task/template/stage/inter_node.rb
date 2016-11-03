@@ -116,6 +116,7 @@ module DTK; class Task; class Template
         !!values.find(&:has_action_with_method?)
       end
 
+      # can be over-written
       def delete_action!(action_match)
         node_id = action_match.action.node_id
         unless node_action = self[node_id]

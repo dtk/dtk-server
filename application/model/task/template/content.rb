@@ -71,6 +71,7 @@ module DTK; class Task
       def delete_explicit_action?(action, action_list, opts = {})
         opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod)
         if indexed_action = action_list.find { |a| a.match_action?(action, opts) }
+          # TODO: DTK-2680: Aldin: put in a few sentences explaing this logic
           if action.is_a?(Action::WithMethod)
             indexed_action = action if indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]") || opts[:remove_delete_action]
           end

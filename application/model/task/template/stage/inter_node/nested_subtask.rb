@@ -27,6 +27,8 @@ module DTK;
           @flatten            = serialized_content[:flatten] 
 
           # subtasks get dynamically set
+          # TODO: DTK-2680: rather than having this as an ::Array might simplify things if this was recursive, i.e., a InterNode
+          # object
           @subtasks = []
         end
         
@@ -70,6 +72,19 @@ module DTK;
              fail Error, "Non flatten nested subtasks not treated"
            end
            ret
+         end
+
+         # TODO: DTK-2680: Aldin; we need to cehck if this is written right
+         def delete_action!(action_match)
+           delete_elements = []
+           @subtasks.each_with_index do |subtask, i| 
+             if :empty == subtask.delete_action!(action_match) 
+               delete_elements << i
+             end
+           end
+           # Need to rerverse order since when delete it shifts order if from beginning
+           delete_elements.reverse.each { |i| @subtasks.delete_at(i) }
+           :empty if @subtasks.empty?
          end
         
         def find_earliest_match?(action_match, ndx_action_indexes)

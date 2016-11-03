@@ -1,0 +1,29 @@
+---
+dsl_version: 1.0.0
+name: new_dtk_client_test_case_04-test_assembly
+dependencies:
+  aws/ec2: master
+  puppetlabs/stdlib: master
+  r8/maven
+nodes:
+  nodes:
+    node:
+      attributes:
+        image: precise_hvm
+        size: micro
+      components:
+      - stdlib
+      - maven
+workflows:
+  create:
+    subtasks:
+    - name: create nodes
+      node: node
+      components:
+      - stdlib
+  install_maven:
+    subtasks:
+    - name: install maven
+      node: node
+      components:
+      - maven

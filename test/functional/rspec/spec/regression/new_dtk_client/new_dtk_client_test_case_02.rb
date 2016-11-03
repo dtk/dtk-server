@@ -8,7 +8,7 @@ module_name = 'test/new_dtk_client_test_case_02'
 master_assembly_name = 'master_assembly_name'
 version_assembly_name = 'version_assembly_name'
 
-remote_module = 'test/new_client_module'
+remote_module = 'mytest/new_client_module'
 remote_master_module_assembly_name = 'master_module_assembly'
 remote_version_module_assembly_name = 'version_module_assembly'
 remote_module_version = '0.0.1'

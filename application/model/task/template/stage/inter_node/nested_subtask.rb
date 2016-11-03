@@ -101,10 +101,6 @@ module DTK;
         #  :just_parse
         def add_to_template_content!(template_content, _serialized_content, _opts = {})
           template_content << self unless @subtasks.empty?
-          # TODO: DTK-2680: Aldin: This is where the logic you put in that flattens out subtasks is given
-          #   I [Rich] commented it out though because when running methods that convert to reified form, 
-          #   for example to remove components, it needs to have serialized_form give full form back
-          #  @subtasks.each { |subtask| template_content << subtask } 
         end
 
         private

@@ -71,7 +71,6 @@ module DTK; module CommonDSL
         def delete_action_subtask
           { 
             ParseTerm::NAME   => "Delete #{component_term}",
-            # TODO: DTK-2680: Aldin: explicitly need node name so that this parses; can remove this when extend parsing
             ParseTerm::NODE   => @node.display_name,
             ParseTerm::ACTION => delete_action_term 
           } 

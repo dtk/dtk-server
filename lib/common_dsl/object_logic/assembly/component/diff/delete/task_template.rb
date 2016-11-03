@@ -54,10 +54,6 @@ module DTK
           serialized_content = Task::Template::ConfigComponents.get_serialized_template_content(@assembly_instance)
           splice_in_delete_action!(serialized_content)
           pp ["DEBUG: task template after splice_in_delete_action", serialized_content]
-          # TODO: DTK-2680: Aldin: make sure below saves the change to database; you can check by tracing the following step
-          # in parent class: assembly_instance.delete_component(component.id_handle, node.id)
-          # where as part of this it reads task template content back from database
-          # TODO: DTK-2680: Rich: traced down and as far as I could see this will update the
           Task::Template.update_from_serialized_content?(@assembly_instance.id_handle, serialized_content)
         end
 =begin

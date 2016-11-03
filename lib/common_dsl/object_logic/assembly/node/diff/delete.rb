@@ -89,7 +89,28 @@ module DTK; module CommonDSL
 
         def add_delete_node_subtask(node)
           ec2_node_component = Component::Template.get_augmented_component_template?(assembly_instance, 'ec2::node', namespace: 'aws', use_base_template: true)
-          new_component_idh = assembly_instance.add_component(node.id_handle, ec2_node_component, node[:display_name], splice_in_delete_action: true)
+          new_component_idh = assembly_instance.add_component(node.id_handle, ec2_node_component, node[:display_name])
+          # node.update_from_hash_assignments(to_be_deleted: true)
+
+          # TODO: DTK-2680: Rich: Above we add ec2::node component (included in aws:ec2 component module) with content:
+          # node:
+          #   attributes:
+          #     name:
+          #       type: string
+          #       require: true
+          #   singleton: false
+          #   actions:
+          #     delete:
+          #       delete_node: 'no_op'
+          # which we will use to mark node to be deleted on next converge
+          # Below we add ec2::node[node_name].delete action
+          # This is not finished yet, for some reason task_template_processor.insert_explict_delete_action? fails
+          return if node.get_field?(:to_be_deleted)
+
+          component = DTK::Component::Instance.create_from_component(new_component_idh.create_object)
+          task_template_processor = ObjectLogic::Assembly::Component::Diff::Delete::TaskTemplate.new(assembly_instance, component, node)
+          task_template_processor.insert_explict_delete_action?
+
           node.update_from_hash_assignments(to_be_deleted: true)
         end
       end

@@ -72,6 +72,12 @@ module DTK; class Task
         opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod)
         if indexed_action = action_list.find { |a| a.match_action?(action, opts) }
           # TODO: DTK-2680: Aldin: put in a few sentences explaing this logic
+          # TODO: DTK-2680: Rich: I think this will be executed on cleanup task, we need to delete .delete action from workflow
+          # I put in this opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod) above and also
+          # this part below because in action_list above it will not match component .delete action but only action for creating component
+          # on config node
+          # So I put this part below which will match component .delete action and delete it, instead of deleting component create action
+          #
           if action.is_a?(Action::WithMethod)
             indexed_action = action if indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]") || opts[:remove_delete_action]
           end
@@ -268,15 +274,6 @@ module DTK; class Task
       #  ...
       def create_stages_from_serialized_content!(serialized_content_array, actions, opts = {})
         serialized_content_array.each do |serialized_content|
-          # TODO: DTK-2680: I [Rich] removed this because dont know how to use this
-          # require 'debugger'
-          # Debugger.wait_connection = true
-          # Debugger.start_remote(nil, 7020)
-          # debugger
-
-          # TODO: DTK-2680: Aldin: I slightly modified so Stage::InterNode.parse_and_reify?(serialized_content, actions, opts) always returns
-          #       subclass of InterNode, but kept logic that flattens it out
-          #       logic is hidden in Stage::InterNode#add_to_template_content!
           if stage = Stage::InterNode.parse_and_reify?(serialized_content, actions, opts)
             stage.add_to_template_content!(self, serialized_content, just_parse: opts[:just_parse])
           end

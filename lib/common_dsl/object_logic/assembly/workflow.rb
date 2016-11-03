@@ -28,6 +28,11 @@ module DTK; module CommonDSL
         private :initialize
 
         def self.generate_content_input(assembly_instance)
+          # TODO: DTK-2680: reqrite this so get the reified workflow computed in
+          #  generate_and_persist_create_workflow_if_needed and then walk this structure
+          #  tagging anything marked as dsl_location  with a new tag which then in rendering
+          #  step will have information to write out to different file and removed from main dsl
+          # here can also remove hidden fields dsl_location and flatten
           generate_and_persist_create_workflow_if_needed(assembly_instance)
 
           workflows = assembly_instance.get_task_templates(set_display_names: true)

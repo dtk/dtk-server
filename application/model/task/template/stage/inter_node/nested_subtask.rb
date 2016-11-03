@@ -80,12 +80,8 @@ module DTK;
 
         private
 
-        # TODO: :dsl_location, and :flatten in IGNORE_KEYS should instead use Field::XYZ form
-        IGNORE_KEYS = [:dsl_location, :flatten]
         def ret_serialization_form(serialized_content)
-          serialized_content.inject({}) do |h, (k, v)|
-            IGNORE_KEYS.include?(k) ? h : h.merge(k => v)
-          end
+          serialized_content
         end
 
       end

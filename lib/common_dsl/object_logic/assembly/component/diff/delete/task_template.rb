@@ -28,16 +28,11 @@ module DTK
           @component         = component
           @node              = node
         end
-        private :initialize
 
         # opts can have keys
         #   :force_delete
-        def self.insert_explict_delete_action?(assembly_instance, component, node, opts = {})
+        def insert_explict_delete_action?(opts = {})
           return if opts[:force_delete]
-          new(assembly_instance, component, node).insert_explict_delete_action?
-        end
-
-        def insert_explict_delete_action?
           if component_delete_action_def?
             # TODO: DTK-2732: Only run delete action on assembly level node if it has been converged
             # Best way to treat this is by keeping component info on what has been converged
@@ -47,24 +42,15 @@ module DTK
           end
         end
 
-        private
-        
-        def insert_explict_delete_action
-          # no op if to_be_deleted is set since this is peristent setting we use to detect whether the task update has been done already
-          unless @component.get_field?(:to_be_deleted)
-            insert_explict_delete_action_aux
-            @component.update_from_hash_assignments(to_be_deleted: true)        
-          end
+        def remove_component_actions?
+          Task::Template::ConfigComponents.update_when_deleted_component?(@assembly_instance, @node, @component) 
         end
 
-        def component_delete_action_def?
-          DTK::Component::Instance.create_from_component(@component).get_action_def?('delete')
-        end
 
         # TODO: DTK-2732: Currently, rather than inserting in a subtask working in refied form using the same method that is 
         #       used in edit-action (edit-workflow) which takes in a modified workflow as input; 
         #       want to see if we shoudl switch to more semantic way of updating
-        def insert_explict_delete_action_aux
+        def insert_explict_delete_action
           serialized_content = Task::Template::ConfigComponents.get_serialized_template_content(@assembly_instance)
           splice_in_delete_action!(serialized_content)
           pp ["DEBUG: task template after splice_in_delete_action", serialized_content]
@@ -89,6 +75,13 @@ module DTK
           end
           Task::Template::ConfigComponents.update_when_added_component_or_action?(@assembly_instance, @node, @component, add_delete_action_opts)
 =end
+
+        private
+        
+        def component_delete_action_def?
+          DTK::Component::Instance.create_from_component(@component).get_action_def?('delete')
+        end
+
       end
     end
   end

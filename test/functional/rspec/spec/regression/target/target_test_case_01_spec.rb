@@ -96,14 +96,6 @@ describe "(Target) Test Case 01: Auto-generated vpc data" do
     include_context "Uninstall service instance", service_location, target_service_name
   end
 
-  context "Uninstall module" do
-    include_context "Uninstall module", target_module, target_location
-  end
-
-  context "Delete initial module on filesystem" do
-    include_context "Delete initial module on filesystem", target_location
-  end  
-
   after(:all) do
     puts '', ''
   end

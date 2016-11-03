@@ -6,6 +6,7 @@ require './lib/dtk_common'
 service_location = '~/dtk/'
 target_location = "/tmp/network"
 target_module = 'aws/network'
+target_assembly_template = 'target'
 target_service_name = 'target_test_case_03'
 target_name = 'target'
 
@@ -35,7 +36,7 @@ describe "(Target) Test Case 03: Specified existing subnet id, vpc and security 
   end
 
   context "List assemblies contained in this module" do
-    include_context "List assemblies", target_module, target_service_name, dtk_common
+    include_context "List assemblies", target_module, target_assembly_template, dtk_common
   end
 
   context "Stage target from module" do
@@ -109,14 +110,6 @@ describe "(Target) Test Case 03: Specified existing subnet id, vpc and security 
   context "Uninstall target instance" do
     include_context "Uninstall service instance", service_location, target_service_name
   end
-
-  context "Uninstall module" do
-    include_context "Uninstall module", target_module, target_location
-  end
-
-  context "Delete initial module on filesystem" do
-    include_context "Delete initial module on filesystem", target_location
-  end  
 
   after(:all) do
     puts '', ''

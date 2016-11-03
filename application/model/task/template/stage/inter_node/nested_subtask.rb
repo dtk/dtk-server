@@ -57,6 +57,20 @@ module DTK;
         def flatten?
           @flatten
         end
+
+        # TODO: DTK-2680: Aldin
+        # Put this in to flatten subtasks when nested subtaskl but this is creating error
+         def add_subtasks!(parent_task, internode_stage_index, assembly_idh = nil)
+           ret = []
+           if @flatten
+            @subtasks.each do |subtask| 
+               ret += subtask.add_subtasks!(parent_task, internode_stage_index, assembly_idh)
+             end
+           else
+             fail Error, "Non flatten nested subtasks not treated"
+           end
+           ret
+         end
         
         def find_earliest_match?(action_match, ndx_action_indexes)
           ret = nil

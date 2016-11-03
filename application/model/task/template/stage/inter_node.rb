@@ -43,6 +43,7 @@ module DTK; class Task; class Template
       private_class_method :stage_name
 
       # returns all actions generated
+      # This can be over-written
       def add_subtasks!(parent_task, internode_stage_index, assembly_idh = nil)
         ret = []
         each_node_actions do |node_actions|
@@ -51,6 +52,10 @@ module DTK; class Task; class Template
           else
             if action = node_actions.add_subtask!(parent_task, internode_stage_index, assembly_idh)
               ret << action
+              # TODO: DTK-2680: Aldin
+              #  Not high priority, but better to take this special purpose logic out of here and
+              #  instead when creating the dlete workflow explicitly put in the cleanup task
+              #   so this would go in lib/common_dsl/object_logic/assembly/component/diff/delete/task_template/splice_in_delete_action.rb
               if is_component_delete_action?(action)
                 add_component_cleanup_task?(parent_task, node_actions, ret, action)
               end

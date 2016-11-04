@@ -2,6 +2,7 @@
 # Things that are under test are:
 # - basic service push ability
 # - ability to change attributes with service push
+# - ability to add new component with service push
 # - ability to add new workflow with service push
 # - ability to exec new workflow
 
@@ -10,7 +11,8 @@ require './lib/dtk_common'
 
 initial_module_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_04_1_dtk.module.yaml"
 update_attribute_service_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_04_2_dtk.service.yaml"
-update_workflow_service_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_04_3_dtk.service.yaml"
+update_component_service_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_04_3_dtk.service.yaml"
+update_workflow_service_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_04_4_dtk.service.yaml"
 
 module_location = '/tmp/new_dtk_client_test_case_04'
 module_name = 'test/new_dtk_client_test_case_04'
@@ -20,8 +22,8 @@ service_location = '~/dtk/'
 full_service_location = service_location + service_name
 
 attributes_to_check = {'node/image' => 'amazon_hvm', 'node/size' => 'small'}
-component_to_check = 'node/maven'
-workflow_to_check = 'install_maven'
+component_to_check = 'node/action_module'
+workflow_to_check = 'install_action_module'
 
 dtk_common = Common.new('', '')
 
@@ -56,6 +58,18 @@ describe "(New DTK client) Test Case 4: Test various options for service push" d
 
   context "Check attributes correct in service instance" do
     include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
+  end
+
+  context "Change content of service instance on local filesystem" do
+    include_context "Change content of service instance on local filesystem", full_service_location, update_component_service_location
+  end
+
+  context "Push service instance changes" do
+    include_context "Push service instance changes", service_name, full_service_location
+  end
+
+  context "Check component exist in service instance" do
+    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
   end
 
   context "Change content of service instance on local filesystem" do

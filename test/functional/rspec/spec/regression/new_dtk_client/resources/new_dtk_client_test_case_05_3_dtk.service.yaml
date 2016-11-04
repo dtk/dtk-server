@@ -1,10 +1,9 @@
 ---
 dsl_version: 1.0.0
-name: new_dtk_client_test_case_04
+module: new_dtk_client_test_case_05
 dependencies:
   aws/ec2: master
   puppetlabs/stdlib: master
-  r8/action_module: master
 nodes:
   node:
     attributes:
@@ -12,12 +11,20 @@ nodes:
       size: micro
     components:
     - stdlib
-    - action_module
+  new_node:
+    attributes:
+      image: precise_hvm
+      size: micro
+    components:
+    - stdlib
 workflows:
   create:
     subtasks:
-    - name: create nodes
+    - name: create node
       node: node
       components:
       - stdlib
-      - action_module
+    - name: create new node
+      node: new_node
+      components:
+      - stdlib

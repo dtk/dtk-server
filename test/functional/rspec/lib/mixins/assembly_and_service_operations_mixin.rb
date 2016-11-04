@@ -1,5 +1,49 @@
 module AssemblyAndServiceOperationsMixin
   # Commands used from new dtk client
+  def check_if_node_exists_in_service_instance(service_instance_name, node_name)
+    puts "Check if node exists in service instance", "---------------------------------------"
+    node_exists = false
+    nodes_list = send_request("/rest/api/v1/services/#{service_instance_name}/nodes", {}, 'get')
+    ap nodes_list
+    if nodes_list['status'] == 'ok' && !nodes_list['data'].empty?
+      nodes_list['data'].each do |node|
+        if node['display_name'] == node_name
+          puts "Node: #{node_name} found!"
+          node_exists = true
+        end
+      end
+    else
+      puts "Node #{node_name} is not found in #{service_instance_name}"
+    end
+    puts "Node #{node_name} is not found in #{service_instance_name}" unless node_exists
+    puts ""
+    node_exists
+  end
+
+  def check_if_node_group_exists_in_service_instance(service_instance_name, node_group_name, cardinality)
+    puts "Check if node group exists in service instance", "-------------------------------------------"
+    node_group_exist = false
+    nodes_list = send_request("/rest/api/v1/services/#{service_instance_name}/nodes", {}, 'get')
+    ap nodes_list
+    if nodes_list['status'] == 'ok' && !nodes_list['data'].empty?
+      node_group_members = []
+      nodes_list['data'].each do |node|
+        if node['display_name'].include? node_group_name + ":" # indicator it is node group member
+          node_group_members << node['display_name']
+        end
+      end
+      if node_group_members.size == cardinality
+        puts "Node group #{node_group_name} is found in #{service_instance_name}"
+        node_group_exist = true
+      end
+    else
+      puts "Node group #{node_group_name} is not found in #{service_instance_name}"
+    end
+    puts "Node group #{node_group_name} is not found in #{service_instance_name}" unless node_group_exist
+    puts ""
+    node_group_exist
+  end
+
   def check_if_component_exists_in_service_instance(service_instance_name, component_name)
     puts "Check if component exists in service instance", "-----------------------------------------"
     component_exists = false

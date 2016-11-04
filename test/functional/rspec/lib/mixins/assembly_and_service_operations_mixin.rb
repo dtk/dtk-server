@@ -15,7 +15,7 @@ module AssemblyAndServiceOperationsMixin
     else
       puts "Component #{component_name} is not found in #{service_instance_name}"
     end
-    puts "Component #{component_name} is not found in #{service_instance_name}" unless components_exists
+    puts "Component #{component_name} is not found in #{service_instance_name}" unless component_exists
     puts ""
     component_exists
   end

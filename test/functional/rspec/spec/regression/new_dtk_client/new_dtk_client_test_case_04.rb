@@ -16,11 +16,11 @@ module_location = '/tmp/new_dtk_client_test_case_04'
 module_name = 'test/new_dtk_client_test_case_04'
 assembly_name = 'test_assembly'
 service_name = 'new_dtk_client_test_case_04'
-service_location = "~/dtk/"
-full_service_location = service_location + service_name + "-" + test_assembly
+service_location = '~/dtk/'
+full_service_location = service_location + service_name
 
 attributes_to_check = {'node/image' => 'amazon_hvm', 'node/size' => 'small'}
-component_to_check = "node/maven"
+component_to_check = 'node/maven'
 workflow_to_check = 'install_maven'
 
 dtk_common = Common.new('', '')

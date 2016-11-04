@@ -273,6 +273,7 @@ shared_context "Change content of service instance on local filesystem" do |serv
     puts "Update content of service instance on local filesystem", '-----------------------------------------------------'
     pass = false
     `cp #{update_service_location} #{service_location}/`
+    `rm -rf #{service_location}/dtk.service.yaml`
     `mv #{service_location}/* #{service_location}/dtk.service.yaml`
     value = `ls #{service_location}/dtk.service.yaml`
     pass = !value.include?('No such file or directory')

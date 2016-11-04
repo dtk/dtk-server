@@ -70,7 +70,6 @@ describe "(New DTK client) Test Case 4: Test various options for service push" d
     include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
   end
 
-  #
   context "Check workflow exist in service instance" do
     include_context "Check workflow exist in service instance", dtk_common, service_name, workflow_to_check
   end
@@ -79,7 +78,6 @@ describe "(New DTK client) Test Case 4: Test various options for service push" d
     include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  #
   context "Exec action/workflow" do
     include_context "Exec action/workflow", dtk_common, service_location, service_name, workflow_to_check
   end

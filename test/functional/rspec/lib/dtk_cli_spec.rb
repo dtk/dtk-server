@@ -124,6 +124,31 @@ shared_context 'Converge service instance' do |service_location, dtk_common, ser
   end
 end
 
+shared_context 'Exec action/workflow' do |dtk_common, service_location, service_instance, action_name|
+  it "executes action/workflow" do
+    puts 'Execute action/workflow', '---------------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service exec -d #{service_location} action_name`
+    puts value
+    if value.include? 'ERROR'
+      pass = false
+      puts "Action was not executed successfully!"
+    else
+      action_succeeded = dtk_common.check_task_status(service_instance)
+      if action_succeeded
+        pass = true
+        puts "Action was executed successfully!"
+      else
+        pass = false
+        puts "Action was not executed successfully!"
+      end
+    end
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context 'Destroy service instance' do |service_location, service_instance|
   it "deletes and destroys service instance" do
     puts 'Destroy instance', '--------------------'

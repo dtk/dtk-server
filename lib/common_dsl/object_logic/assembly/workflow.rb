@@ -18,8 +18,9 @@
 module DTK; module CommonDSL
   module ObjectLogic
     class Assembly
-      class Workflow < Generate::ContentInput::Hash
+      class Workflow < ContentInputHash
         require_relative('workflow/diff')
+        require_relative('workflow/content')
 
         def initialize(workflow)
           super()
@@ -28,23 +29,18 @@ module DTK; module CommonDSL
         private :initialize
 
         def self.generate_content_input(assembly_instance)
-          # TODO: DTK-2680: reqrite this so get the reified workflow computed in
-          #  generate_and_persist_create_workflow_if_needed and then walk this structure
-          #  tagging anything marked as dsl_location  with a new tag which then in rendering
-          #  step will have information to write out to different file and removed from main dsl
-          # here can also remove hidden fields dsl_location and flatten
-          generate_and_persist_create_workflow_if_needed(assembly_instance)
-
+          #  Generates a create workflow if one not explicitly given in dsl which causes this to be written to dsl
+          Task::Template::ConfigComponents.get_or_generate_template_content(:assembly, assembly_instance)
           workflows = assembly_instance.get_task_templates(set_display_names: true)
           unsorted = workflows.inject({}) do |h, workflow| 
             h.merge(workflow.display_name => new(workflow).generate_content_input!)
           end
-          sorted_workflow_names(unsorted.keys).inject(new_input_hash) { |h, workflow_name| h.merge(workflow_name => unsorted[workflow_name]) }
+          sorted_workflow_names(unsorted.keys).inject(ContentInputHash.new) { |h, workflow_name| h.merge(workflow_name => unsorted[workflow_name]) }
         end
 
         def generate_content_input!
           set_id_handle(@workflow)
-          merge!(change_symbols_to_strings(new_input_hash(@workflow[:content])))
+          merge!(Content.generate_content_input!(@workflow[:content]))
           self
         end
 
@@ -62,21 +58,10 @@ module DTK; module CommonDSL
         end
 
         private
+
+        # returns task_template_content associated with create workflow after creating if if needed
         def self.generate_and_persist_create_workflow_if_needed(assembly_instance)
           Task::Template::ConfigComponents.get_or_generate_template_content(:assembly, assembly_instance)
-          nil
-        end
-
-        def change_symbols_to_strings(obj)
-          if obj.kind_of?(::Hash)
-            obj.inject({}) { |h, (k, v)| h.merge(k.to_s => change_symbols_to_strings(v)) }
-          elsif obj.kind_of?(::Array)
-            obj.map { |el| change_symbols_to_strings(el) }
-          elsif obj.kind_of?(::Symbol)
-            obj.to_s
-          else
-            obj
-          end
         end
 
         # alphabetical with create and delete first
@@ -90,12 +75,7 @@ module DTK; module CommonDSL
           ret + names.sort
         end
             
-        def self.new_input_hash(hash = nil)
-          hash ? ObjectLogic.new_content_input_hash.merge(hash) : ObjectLogic.new_content_input_hash
-        end
-        def new_input_hash(hash = nil)
-          self.class.new_input_hash(hash)
-        end
+
       end
     end
   end

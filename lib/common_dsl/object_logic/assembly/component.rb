@@ -18,7 +18,7 @@
 module DTK; module CommonDSL
   module ObjectLogic
     class Assembly
-      class Component < Generate::ContentInput::Hash
+      class Component < ContentInputHash
         require_relative('component/diff')
         require_relative('component/attribute')
 
@@ -30,7 +30,7 @@ module DTK; module CommonDSL
 
         def self.generate_content_input(aug_components, opts = {})
           aug_components.reject!{ |aug_cmp| aug_cmp[:to_be_deleted] } if opts[:without_soft_deleted_components]
-          aug_components.inject(ObjectLogic.new_content_input_hash) do |h, aug_component|
+          aug_components.inject(ContentInputHash.new) do |h, aug_component|
             h.merge(component_name(aug_component) => new(aug_component).generate_content_input!)
           end
         end

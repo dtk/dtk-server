@@ -18,7 +18,7 @@
 module DTK
   module CommonDSL
     module ObjectLogic
-      class NestedModule < Generate::ContentInput::Hash
+      class NestedModule < ContentInputHash
         require_relative('nested_module/component')
 
         def initialize(service_module_branch, aug_component_module_branch)

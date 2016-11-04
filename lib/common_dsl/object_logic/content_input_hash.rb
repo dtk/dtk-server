@@ -18,12 +18,12 @@
 module DTK
   module CommonDSL
     module ObjectLogic
-      require_relative('object_logic/content_input_hash')
-      require_relative('object_logic/service_instance')
-      require_relative('object_logic/assembly')
-      require_relative('object_logic/dependency')
-      require_relative('object_logic/nested_module')
-
+      class ContentInputHash < Generate::ContentInput::Hash
+        def initialize(hash = nil)
+          super()
+          merge!(hash) if hash
+        end
+      end
     end
   end
 end

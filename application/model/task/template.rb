@@ -23,7 +23,7 @@ module DTK; class Task
 
     # TODO: might not need to embed in Serialization
     module Serialization
-      r8_nested_require('template', 'constant')
+      require_relative('template/constant')
       module Field
         Subtasks = :subtasks
         TemporalOrder = :subtask_order
@@ -38,16 +38,16 @@ module DTK; class Task
       end
     end
 
-    r8_nested_require('template', 'parsing_error')
-    r8_nested_require('template', 'task_action_not_found_error')
-    r8_nested_require('template', 'temporal_constraint')
-    r8_nested_require('template', 'temporal_constraints')
-    r8_nested_require('template', 'action')
-    r8_nested_require('template', 'action_list')
-    r8_nested_require('template', 'stage')
-    r8_nested_require('template', 'content')
-    r8_nested_require('template', 'config_components')
-    r8_nested_require('template', 'task_params')
+    require_relative('template/parsing_error')
+    require_relative('template/task_action_not_found_error')
+    require_relative('template/temporal_constraint')
+    require_relative('template/temporal_constraints')
+    require_relative('template/action')
+    require_relative('template/action_list')
+    require_relative('template/stage')
+    require_relative('template/content')
+    require_relative('template/config_components')
+    require_relative('template/task_params')
 
     def self.common_columns
       [:id, :group_id, :display_name, :task_action, :content]
@@ -68,18 +68,23 @@ module DTK; class Task
       end
       DefaultTaskActionExternalName = 'create'
 
+      # opts can have keys:
+      #   :serialized_form
+      #   :set_display_names
       def get_task_templates(assembly, opts = {})
         if opts[:serialized_form]
-          get_task_templates_serialized_form(assembly, opts)
+          get_task_templates_serialized_form(assembly, set_display_names: opts[:set_display_names])
         else
-          get_task_templates_simple_form(assembly, opts)
+          get_task_templates_simple_form(assembly, set_display_names: opts[:set_display_names])
         end
       end
 
+      # opts can have keys:
+      #   :cols
       def get_task_template(assembly, task_action, opts = {})
         sp_hash = {
-          cols: opts[:cols] || common_columns(),
-          filter: [:and, [:eq, :component_component_id, assembly.id()],
+          cols: opts[:cols] || common_columns,
+          filter: [:and, [:eq, :component_component_id, assembly.id],
                    [:eq, :task_action, internal_task_action(task_action)]]
         }
         get_obj(assembly.model_handle(:task_template), sp_hash)
@@ -98,10 +103,13 @@ module DTK; class Task
 
       private
 
+      # opts can have keys:
+      #   :cols
+      #   :set_display_names
       def get_task_templates_simple_form(assembly, opts = {})
         sp_hash = {
-          cols: opts[:cols] || common_columns(),
-          filter: [:eq, :component_component_id, assembly.id()]
+          cols: opts[:cols] || common_columns,
+          filter: [:eq, :component_component_id, assembly.id]
         }
         ret = get_objs(assembly.model_handle(:task_template), sp_hash)
         if opts[:set_display_names]
@@ -132,8 +140,8 @@ module DTK; class Task
 
       def internal_task_action(task_action = nil)
         ret = task_action
-        if ret.nil? || ret == default_task_action_external_name()
-          ret = default_task_action()
+        if ret.nil? || ret == default_task_action_external_name
+          ret = default_task_action
         end
         ret
       end
@@ -167,7 +175,7 @@ module DTK; class Task
 
     # returns [ref, create_hash]
     def self.ref_and_create_hash(serialized_content, task_action = nil)
-      task_action ||= default_task_action()
+      task_action ||= default_task_action
       ref = ref(task_action)
       create_hash = {
         task_action: task_action,
@@ -209,21 +217,21 @@ module DTK; class Task
     # def self.create_from_service_module(assembly_idh, serialized_content, task_action, ancestor_id)
     #   return if get_matching_task_template?(assembly_idh, task_action)
     #   ref, create_hash = ref_and_create_hash(serialized_content, task_action)
-    #   create_hash.merge!(ref: ref, component_component_id: assembly_idh.get_id(), ancestor_id: ancestor_id)
+    #   create_hash.merge!(ref: ref, component_component_id: assembly_idh.get_id, ancestor_id: ancestor_id)
     #   task_template_mh = assembly_idh.create_childMH(:task_template)
     #   create_from_row(task_template_mh, create_hash, convert: true)
     # end
 
     def self.delete_task_template?(assembly_idh, task_action = nil)
       if task_template = get_matching_task_template?(assembly_idh, task_action)
-        task_template_idh = task_template.id_handle()
+        task_template_idh = task_template.id_handle
         delete_instance(task_template_idh)
         task_template_idh
       end
     end
 
     def self.get_matching_task_template?(assembly_idh, task_action = nil)
-      task_action ||= default_task_action()
+      task_action ||= default_task_action
       sp_hash = {
         cols: [:id],
         filter: [:and, [:eq, :component_component_id, assembly_idh.get_id],

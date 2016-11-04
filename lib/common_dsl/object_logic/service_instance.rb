@@ -18,7 +18,7 @@
 module DTK
   module CommonDSL
     module ObjectLogic
-      class ServiceInstance < Generate::ContentInput::Hash
+      class ServiceInstance < ContentInputHash
         def initialize(service_instance, module_branch)
           super()
           @service_instance = service_instance

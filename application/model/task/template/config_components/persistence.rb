@@ -58,10 +58,6 @@ module DTK; class Task; class Template; class ConfigComponents
         end
       end
 
-      def self.remove_any_outdated_items(assembly_update)
-        ReifiedObjectCache.remove_any_outdated_items(assembly_update)
-      end
-
       # opts can have keys
       #    :task_params
       def self.get_serialized_content_from_assembly(assembly, task_action = nil, opts = {})
@@ -89,10 +85,6 @@ module DTK; class Task; class Template; class ConfigComponents
         end
         ###TODO: end: these are in no op mode until implememnt
 
-        def self.remove_any_outdated_items(assembly_update)
-          find_impacted_template_idhs(assembly_update).each { |idh| delete_item?(idh) }
-        end
-
         private
 
         def self.delete_item?(task_template_idh)
@@ -106,18 +98,6 @@ module DTK; class Task; class Template; class ConfigComponents
           task_template_idh.get_id()
         end
 
-        def self.find_impacted_template_idhs(assembly_update)
-          ret = []
-          all_templates = assembly_update.assembly_instance().get_task_templates()
-          return ret if all.empty?
-
-          all_templates.select { |tt| should_be_removed?(tt, assembly_update) }.map(&:id_handle)
-        end
-
-        def self.should_be_removed?(_task_template, _assembly_update)
-          # TODO: stub: conservative clear everything
-          true
-        end
       end
     end
   end

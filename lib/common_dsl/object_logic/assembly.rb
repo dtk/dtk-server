@@ -18,7 +18,7 @@
 module DTK
   module CommonDSL
     module ObjectLogic
-      class Assembly < Generate::ContentInput::Hash
+      class Assembly < ContentInputHash
         require_relative('assembly/diff')
 
         require_relative('assembly/attribute')
@@ -33,8 +33,8 @@ module DTK
         
         def generate_content_input!(assembly_instance)
           set_id_handle(assembly_instance)
-          nodes = ObjectLogic.new_content_input_hash
-          components = ObjectLogic.new_content_input_hash
+          nodes = ContentInputHash.new
+          components = ContentInputHash.new
           Node.generate_content_input(assembly_instance).each do | key, content_input_node |
             if content_input_node[:is_assembly_wide_node]
               components.merge!(content_input_node.val(:Components) || {})

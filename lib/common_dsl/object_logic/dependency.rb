@@ -18,7 +18,7 @@
 module DTK
   module CommonDSL
     module ObjectLogic
-      class Dependency < Generate::ContentInput::Hash
+      class Dependency < ContentInputHash
         def self.generate_content_input(assembly_instance)
           new.generate_content_input!(assembly_instance)
         end
@@ -48,7 +48,7 @@ module DTK
         DependencyInfo = Struct.new(:namespace, :module_name, :version)
         VERSION_WHEN_NIL = 'master'
         def generate_content_input_aux!(dependency_info_array)
-          dependency_info_array.inject(ObjectLogic.new_content_input_hash)  do |h, dep| 
+          dependency_info_array.inject(ContentInputHash.new)  do |h, dep| 
             h.merge("#{dep.namespace}/#{dep.module_name}" => (dep.version || VERSION_WHEN_NIL)) 
           end
         end

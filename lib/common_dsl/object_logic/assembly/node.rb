@@ -18,12 +18,12 @@
 module DTK; module CommonDSL
   module ObjectLogic
     class Assembly
-      class Node < Generate::ContentInput::Hash
+      class Node < ContentInputHash
         require_relative('node/diff')
         require_relative('node/attribute')
 
         def self.generate_content_input(assembly_instance)
-          get_augmented_nodes(assembly_instance, without_soft_deleted_nodes: true).inject(ObjectLogic.new_content_input_hash) do |h, aug_node|
+          get_augmented_nodes(assembly_instance, without_soft_deleted_nodes: true).inject(ContentInputHash.new) do |h, aug_node|
             h.merge(aug_node.display_name => new.generate_content_input!(aug_node, without_soft_deleted_components: true))
           end
         end

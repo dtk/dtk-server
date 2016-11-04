@@ -19,13 +19,13 @@ module DTK
   class CommonDSL::Diff
     # For updationg the dsl files in the repo from the contents of the object model
     class RepoUpdate
-      def self.Transaction(model_branch, &body)
-        sha_before_change = model_branch.current_sha
+      def self.Transaction(module_branch, &body)
+        sha_before_change = module_branch.current_sha
         begin
           yield
         rescue => e
-          # within yield model_branch sha can be changed
-          if sha_before_change != model_branch.current_sha
+          # within yield module_branch sha can be changed
+          if sha_before_change != module_branch.current_sha
             repo = module_branch.get_repo
             repo.hard_reset_branch_to_sha(module_branch, sha_before_change) 
           end

@@ -50,6 +50,11 @@ module DTK
         Reified::Node::ComponentType.names
       end
 
+      def self.ec2_node_component_names
+        # hardcoded for now
+        ["ec2::node"]
+      end
+
       def self.node_property_legal_attributes
         Reified::Node.legal_attributes
       end

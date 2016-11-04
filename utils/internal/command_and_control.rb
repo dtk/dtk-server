@@ -126,6 +126,10 @@ module DTK
       TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_component_names }
     end
 
+    def self.ec2_node_component_names
+      TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).ec2_node_component_names }
+    end
+
     # returns type of all components that capture the node property
     def self.node_property_component_types
       node_property_component_names.map { |n| n.gsub(/::/,'__') }
@@ -146,6 +150,10 @@ module DTK
       else
         fail Error.new("Currently not supported to have multiple node components!")
       end
+    end
+
+    def self.ec2_node_component
+      ec2_node_component_names.first
     end
 
     def self.references_image?(target, node_external_ref)

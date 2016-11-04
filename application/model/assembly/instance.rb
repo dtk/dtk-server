@@ -196,6 +196,19 @@ module DTK; class  Assembly
       node.validate_and_fill_in_values!
     end
 
+    def add_ec2_node_component(project, node)
+      cmp_name  = "ec2::node[#{node.name}]"
+      namespace = 'aws'
+
+      unless aug_component_template = Component::Template.get_augmented_component_template?(self, cmp_name, namespace: namespace, use_base_template: true)
+        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
+      end
+
+      opts = Opts.new(project: project, donot_update_workflow: true)
+      component_title = ComponentTitle.parse_title?(cmp_name)
+      add_component(node.id_handle, aug_component_template, component_title, opts)
+    end
+
     # aug_cmp_template is a component template augmented with keys having objects
     # :module_branch
     # :component_module
@@ -253,7 +266,10 @@ module DTK; class  Assembly
             action_def = cmp_instance.get_action_def?('delete')
             update_opts.merge!(:action_def => action_def)
           end
-          opts[:component_title] = component_title if component_title
+          if component_title
+            update_opts[:component_title] = component_title
+            opts[:component_title] = component_title
+          end
           Task::Template::ConfigComponents.update_when_added_component_or_action?(self, node, component, update_opts)
         end
 

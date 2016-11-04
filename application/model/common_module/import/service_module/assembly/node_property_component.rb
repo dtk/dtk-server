@@ -23,6 +23,7 @@ module DTK
         def self.create_node_property_components?(parsed_nodes)
           parsed_nodes.each do |name, parsed_node|
             node_property_component = find_or_add_node_property_component!(parsed_node)
+            ec2_node_component = find_or_add_ec2_node_component!(parsed_node)
             if parsed_attributes = parsed_node.val(:Attributes)
               attr_val_pairs = {
                 'image' => find_attribute_value?(parsed_attributes, 'image'),
@@ -73,6 +74,22 @@ module DTK
             ret = match
           else
             ret = canonical_hash.merge(node_property_component_name => canonical_hash)
+            unless parsed_components = parsed_node.val(:Components)
+              parsed_components = canonical_hash
+              parsed_node.set(:Components, parsed_components)
+            end
+            parsed_components.merge!(ret)
+          end
+          ret
+        end
+
+        def self.find_or_add_ec2_node_component!(parsed_node)
+          ret = nil
+          ec2_node_component = "#{CommandAndControl.ec2_node_component}"
+          if match = matching_node_property_component?(parsed_node, ec2_node_component)
+            ret = match
+          else
+            ret = canonical_hash.merge(ec2_node_component => canonical_hash)
             unless parsed_components = parsed_node.val(:Components)
               parsed_components = canonical_hash
               parsed_node.set(:Components, parsed_components)

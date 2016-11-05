@@ -16,25 +16,51 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL
-  module ObjectLogic
-    class Assembly::Workflow
+  module ObjectLogic; class Assembly
+    class Workflow
       class Content < ContentInputHash
+        require_relative('content/subtask')
+
         def initialize(content)
           super()
           @content = content
         end
         private :initialize
-
-        def self.generate_content_input!(content)
+        
+        def self.generate_content_input(content)
           new(content).generate_content_input!
         end
 
         def generate_content_input!
-          merge!(change_symbols_to_strings(ContentInputHash.new(@content)))
-        end
+          set?(:SubtaskOrder, @content[:subtask_order])
+          if subtasks = @content[:subtasks]
+            set?(:Subtasks, Subtask.generate_content_input(subtasks))
+          end
 
+          if @content.has_key?(:flatten)
+            #no op; we are pruning out :flatten 
+          end
+          if dsl_location = @content[:dsl_location]
+            add_tags!([:hidden, dsl_location_tag(dsl_location)])
+          end
+
+          merge!(uninterpreted_keys)
+          pp [:debug, self]
+          self
+        end        
+        
         private
 
+        def dsl_location_tag(dsl_location)
+          "dsl_location=#{dsl_location}".to_sym
+        end
+
+        INTERPRETED_KEYS = [:subtask_order, :subtasks, :flatten, :dsl_loaction]
+        def uninterpreted_keys
+          to_add = (@content.keys - INTERPRETED_KEYS).inject(ContentInputHash.new) { |h, k| h.merge(k => @content[k]) }
+          change_symbols_to_strings(to_add)
+        end
+        
         def change_symbols_to_strings(obj)
           if obj.kind_of?(::Hash)
             obj.inject({}) { |h, (k, v)| h.merge(k.to_s => change_symbols_to_strings(v)) }
@@ -46,7 +72,8 @@ module DTK; module CommonDSL
             obj
           end
         end
+
       end
     end
-  end
+  end; end
 end; end

@@ -26,8 +26,7 @@ module DTK; module CommonDSL
           super()
           @workflow = workflow
         end
-        private :initialize
-
+        
         def self.generate_content_input(assembly_instance)
           #  Generates a create workflow if one not explicitly given in dsl which causes this to be written to dsl
           Task::Template::ConfigComponents.get_or_generate_template_content(:assembly, assembly_instance)
@@ -40,25 +39,24 @@ module DTK; module CommonDSL
 
         def generate_content_input!
           set_id_handle(@workflow)
-          merge!(Content.generate_content_input!(@workflow[:content]))
-          self
+          merge!(Content.generate_content_input(@workflow[:content]))
         end
-
+        
         ### For diffs
         # opts can have keys
         #   :service_instance
         def diff?(workflow_parse, qualified_key, opts = {})
           create_diff?(self, workflow_parse, qualified_key, opts)
         end
-
+        
         # opts can have keys:
         #   :service_instance
         def self.diff_set(workflows_gen, workflows_parse, qualified_key, opts = {})
           diff_set_from_hashes(workflows_gen, workflows_parse, qualified_key, opts)
         end
-
+        
         private
-
+        
         # returns task_template_content associated with create workflow after creating if if needed
         def self.generate_and_persist_create_workflow_if_needed(assembly_instance)
           Task::Template::ConfigComponents.get_or_generate_template_content(:assembly, assembly_instance)
@@ -74,8 +72,7 @@ module DTK; module CommonDSL
           end
           ret + names.sort
         end
-            
-
+        
       end
     end
   end

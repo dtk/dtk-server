@@ -61,7 +61,8 @@ module DTK; module CommonDSL
                   # update dtk.service.yaml with data from object model
                   Generate::ServiceInstance.generate_dsl(opts[:service_instance], module_branch)
                   diff_result.repo_updated = true # means repo updated by server
-                 end
+                  raise 'here'
+                end
               end
             end
           end

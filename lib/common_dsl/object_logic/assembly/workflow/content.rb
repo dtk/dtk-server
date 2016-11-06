@@ -32,6 +32,7 @@ module DTK; module CommonDSL
         end
 
         def generate_content_input!
+          set?(:Name, @content[:name])
           set?(:SubtaskOrder, @content[:subtask_order])
           if subtasks = @content[:subtasks]
             set?(:Subtasks, Subtask.generate_content_input(subtasks))
@@ -41,38 +42,24 @@ module DTK; module CommonDSL
             #no op; we are pruning out :flatten 
           end
           if dsl_location = @content[:dsl_location]
-            add_tags!([:hidden, dsl_location_tag(dsl_location)])
+            add_tags!([:hidden, dsl_location_tag_assignment(dsl_location)])
           end
 
           merge!(uninterpreted_keys)
-          pp [:debug, self]
           self
         end        
         
         private
 
-        def dsl_location_tag(dsl_location)
-          "dsl_location=#{dsl_location}".to_sym
+        def dsl_location_tag_assignment(dsl_location)
+          { dsl_location: dsl_location }
         end
 
-        INTERPRETED_KEYS = [:subtask_order, :subtasks, :flatten, :dsl_loaction]
+        INTERPRETED_KEYS = [:name, :subtask_order, :subtasks, :flatten, :dsl_location]
         def uninterpreted_keys
-          to_add = (@content.keys - INTERPRETED_KEYS).inject(ContentInputHash.new) { |h, k| h.merge(k => @content[k]) }
-          change_symbols_to_strings(to_add)
+          (@content.keys - INTERPRETED_KEYS).inject(ContentInputHash.new) { |h, k| h.merge(k => @content[k]) }
         end
         
-        def change_symbols_to_strings(obj)
-          if obj.kind_of?(::Hash)
-            obj.inject({}) { |h, (k, v)| h.merge(k.to_s => change_symbols_to_strings(v)) }
-          elsif obj.kind_of?(::Array)
-            obj.map { |el| change_symbols_to_strings(el) }
-          elsif obj.kind_of?(::Symbol)
-            obj.to_s
-          else
-            obj
-          end
-        end
-
       end
     end
   end; end

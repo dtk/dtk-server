@@ -52,6 +52,11 @@ module DTK
         #       want to see if we shoudl switch to more semantic way of updating
         def insert_explict_delete_action
           serialized_content = Task::Template::ConfigComponents.get_serialized_template_content(@assembly_instance)
+
+          # TODO: DTK-2689: Rich: I've added this to avoid raise of exception in
+          # dtk-server/lib/common_dsl/object_logic/assembly/component/diff/delete/task_template/splice_in_delete_action.rb:44
+          serialized_content = { subtasks: [serialized_content] } unless serialized_content[:subtasks]
+
           splice_in_delete_action!(serialized_content)
           pp ["DEBUG: task template after splice_in_delete_action", serialized_content]
           Task::Template.update_from_serialized_content?(@assembly_instance.id_handle, serialized_content)

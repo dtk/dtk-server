@@ -21,18 +21,10 @@ module DTK; class Task
       Create = '__create_action'
     end
 
-    # TODO: might not need to embed in Serialization
     module Serialization
-      require_relative('template/constant')
-      
       module Field
         # TODO: unifying with dtk-dsl gem (later wil depreecate this poarsing and have it all in dtk-dsl
         include CommonDSL::Parse::CanonicalInput::HashKey
-
-        # Subtasks        = :subtasks
-        # SubtaskOrder   = :subtask_order
-        # ExecutionBlocks = :exec_blocks
-        # Import           
       end
       # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order
       class OrderedHash < ::Hash
@@ -43,6 +35,10 @@ module DTK; class Task
       end
     end
 
+    require_relative('template/constant')
+    # template/constant must go first
+
+    require_relative('template/serialization')
     require_relative('template/parsing_error')
     require_relative('template/task_action_not_found_error')
     require_relative('template/temporal_constraint')
@@ -53,6 +49,7 @@ module DTK; class Task
     require_relative('template/content')
     require_relative('template/config_components')
     require_relative('template/task_params')
+      
 
     def self.common_columns
       [:id, :group_id, :display_name, :task_action, :content]

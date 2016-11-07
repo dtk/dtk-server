@@ -607,38 +607,24 @@ module AssemblyAndServiceOperationsMixin
     return attribute_value
   end
 
-  def check_component_depedency(service_id, source_component, dependency_component, dependency_satisfied_by)
+  # new client
+  def check_component_depedency(service_instance_name, source_component, dependency_component, type)
     puts "Check component dependency:", "---------------------------"
     dependency_found = false
-
     puts "List service components with dependencies:"
-    components_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'components', :subtype=>'instance', :detail_to_include => [:component_dependencies]})
-    component = components_list['data'].select { |x| x['display_name'] == source_component}.first
-
+    components_list = send_request("/rest/api/v1/services/#{service_instance_name}/component_links", {}, 'get')
+    component = components_list['data'].select { |x| x['base_component'] == source_component}.first
     if (!component.nil?)
       puts "Component #{source_component} exists. Check its dependencies..."
-      if (component['depends_on'] == dependency_component)
-        dependency_satisfied_by.each do |dep|
-          if component['satisfied_by'].include? dep
-            dependency_found = true
-          else
-            dependency_found = false
-            break
-          end
-        end
-
-        if dependency_found == true
-          puts "Component #{source_component} has expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
-        else
-          puts "Component #{source_component} does not have expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
-        end
+      if (component['dependent_component'] == dependency_component) && (component['type'] == type)
+        dependency_found = true
+        puts "Component #{source_component} has expected dependency component #{dependency_component} with type #{type}"
       else
-        puts "Component #{source_component} does not have expected dependency component #{dependency_component}"
+        puts "Component #{source_component} does not have expected dependency component #{dependency_component} with type #{type}"
       end
     else
       puts "Component #{source_component} does not exist and therefore it does not have any dependencies"
     end
-
     puts ""
     return dependency_found
   end

@@ -132,7 +132,8 @@ module DTK
 
     # returns type of all components that capture the node property
     def self.node_property_component_types
-      node_property_component_names.map { |n| n.gsub(/::/,'__') }
+      ret = node_property_component_names.map { |n| n.gsub(/::/,'__') }
+      ret.concat(ec2_node_component_names.map { |n| n.gsub(/::/,'__') })
     end
 
     def self.node_property_component_type

@@ -34,8 +34,9 @@ module DTK
           nested_module_dsl_hash = ObjectLogic::NestedModule.generate_content_input(@service_module_branch, @aug_component_module_branch)
           nested_module_dsl_hash = convert_top_level_symbol_keys_to_strings(nested_module_dsl_hash) # Needed because skipping Generate
           yaml_text = DSL::YamlHelper.generate(nested_module_dsl_hash)
-          file_type__content_array = [{ file_type: NestedModuleFileType::DSLFile::Top.new(module_name: nested_module_name), content: yaml_text }]
-          Generate::DirectoryGenerator.add_files(@service_module_branch, file_type__content_array, donot_push_changes: true, no_commit: true)
+          file_path = NestedModuleFileType::DSLFile::Top.new(module_name: nested_module_name).canonical_path
+          file_path__content_array = [{ path: file_path, content: yaml_text }]
+          Generate::DirectoryGenerator.add_files(@service_module_branch, file_path__content_array, donot_push_changes: true, no_commit: true)
           delete_nested_module_file(component_module_dsl_filename)
           delete_nested_module_file(ModuleRefs.meta_filename_path)
         end

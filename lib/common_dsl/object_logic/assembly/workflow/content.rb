@@ -42,7 +42,12 @@ module DTK; module CommonDSL
             #no op; we are pruning out :flatten 
           end
           if dsl_location = @content[:dsl_location]
+            # TODO: DTK-2680: dont think need both set(:DSLLocation ..) and add_tags!([:hidden, dsl_location_tag_assignment(dsl_location)])
+            set(:DSLLocation, dsl_location)
             add_tags!([:hidden, dsl_location_tag_assignment(dsl_location)])
+
+            # TODO: DTK-2680: making this hidden meaning import statement wil now show up in dsl; later want to support in workflow explicit import
+            set(:HiddenDSLLocation, true)
           end
 
           merge!(uninterpreted_keys)

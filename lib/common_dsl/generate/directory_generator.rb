@@ -34,19 +34,15 @@ module DTK
         Git.new(module_branch: module_branch).add_file?(file_type.canonical_path, file_content, opts)
       end
 
-      # Adds or modifies files in file_type__content_array
-      # file_type__content_array - array where each element is a hash with keys :file_type and :content
+      # Adds or modifies files in file_path__content_array
+      # file_path__content_array - array where each element is a hash with keys :file_type and :content
       # opts can have keys
       #   :commit_msg
       #   :donot_push_changes - Boolean (default: false)
       #   :no_commit - Boolean (default: false)
-      def self.add_files(module_branch, file_type__content_array, opts = {})
-        file_path__content_array = file_type__content_array.map do |r| 
-          { path: r[:file_type].canonical_path, content: r[:content] }
-        end
+      def self.add_files(module_branch, file_path__content_array, opts = {})
         Git.new(module_branch: module_branch).add_files(file_path__content_array, opts)
       end
-
       
       # opts can keys:
       #  :module_branch

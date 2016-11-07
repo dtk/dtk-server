@@ -20,15 +20,12 @@ module DTK;
     class InterNode
       class NestedSubtask < self
         def initialize(serialized_content)
-          # TODO: :name, :dsl_location, and :flatten should instead use Field::XYZ form
           super(serialized_content[:name])
           @serialization_form = ret_serialization_form(serialized_content)
-          @dsl_location       = serialized_content[:dsl_location]
-          @flatten            = serialized_content[:flatten] 
+          @import       = serialized_content[Field::Import]
+          @flatten            = serialized_content[Field::Flatten]
 
           # subtasks get dynamically set
-          # TODO: DTK-2680: rather than having this as an ::Array might simplify things if this was recursive, i.e., a InterNode
-          # object
           @subtasks = []
         end
         
@@ -52,8 +49,8 @@ module DTK;
           @serialization_form
         end
 
-        def dsl_location?
-          @dsl_location
+        def import?
+          @import
         end
 
         def flatten?
@@ -74,7 +71,7 @@ module DTK;
            ret
          end
 
-         # TODO: DTK-2680: Aldin; we need to cehck if this is written right
+         # TODO: DTK-2680: Aldin; we need to check if this is written right
          def delete_action!(action_match)
            delete_elements = []
            @subtasks.each_with_index do |subtask, i| 

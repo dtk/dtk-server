@@ -21,6 +21,10 @@ module DTK; module CommonDSL
       class Content < ContentInputHash
         require_relative('content/subtask')
 
+        module HashKey
+          include CommonDSL::Parse::CanonicalInput::HashKey
+        end
+
         def initialize(content)
           super()
           @content = content
@@ -32,22 +36,19 @@ module DTK; module CommonDSL
         end
 
         def generate_content_input!
-          set?(:Name, @content[:name])
-          set?(:SubtaskOrder, @content[:subtask_order])
-          if subtasks = @content[:subtasks]
+          set?(:Name, @content[HashKey::Name])
+          set?(:SubtaskOrder, @content[HashKey::SubtaskOrder])
+          if subtasks = @content[HashKey::Subtasks]
             set?(:Subtasks, Subtask.generate_content_input(subtasks))
           end
 
           if @content.has_key?(:flatten)
             #no op; we are pruning out :flatten 
           end
-          if dsl_location = @content[:dsl_location]
-            # TODO: DTK-2680: dont think need both set(:DSLLocation ..) and add_tags!([:hidden, dsl_location_tag_assignment(dsl_location)])
-            set(:DSLLocation, dsl_location)
-            add_tags!([:hidden, dsl_location_tag_assignment(dsl_location)])
-
+          if dsl_location = @content[HashKey::Import]
+            set(:Import, dsl_location)
             # TODO: DTK-2680: making this hidden meaning import statement wil now show up in dsl; later want to support in workflow explicit import
-            set(:HiddenDSLLocation, true)
+            set(:HideImportStatement, true)
           end
 
           merge!(uninterpreted_keys)
@@ -56,11 +57,7 @@ module DTK; module CommonDSL
         
         private
 
-        def dsl_location_tag_assignment(dsl_location)
-          { dsl_location: dsl_location }
-        end
-
-        INTERPRETED_KEYS = [:name, :subtask_order, :subtasks, :flatten, :dsl_location]
+        INTERPRETED_KEYS = [HashKey::Name, HashKey::SubtaskOrder, HashKey::Subtasks, HashKey::Flatten, HashKey::Import]
         def uninterpreted_keys
           (@content.keys - INTERPRETED_KEYS).inject(ContentInputHash.new) { |h, k| h.merge(k => @content[k]) }
         end

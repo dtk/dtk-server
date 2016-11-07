@@ -50,7 +50,7 @@ module DTK; class Task
         ComponentsOrActions = 'components'
         Variations::ComponentsOrActions = %w(components component ordered_components ordered_component actions action)
         
-        TemporalOrder = 'subtask_order'
+        SubtaskOrder = 'subtask_order'
         
         ActionParams = 'params'
         Variations::ActionParams = ['params', 'parameters']

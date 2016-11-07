@@ -24,10 +24,15 @@ module DTK; class Task
     # TODO: might not need to embed in Serialization
     module Serialization
       require_relative('template/constant')
+      
       module Field
-        Subtasks = :subtasks
-        TemporalOrder = :subtask_order
-        ExecutionBlocks = :exec_blocks
+        # TODO: unifying with dtk-dsl gem (later wil depreecate this poarsing and have it all in dtk-dsl
+        include CommonDSL::Parse::CanonicalInput::HashKey
+
+        # Subtasks        = :subtasks
+        # SubtaskOrder   = :subtask_order
+        # ExecutionBlocks = :exec_blocks
+        # Import           
       end
       # TODO: if support ruby 1.8.7 need to make this fn of a hash class that perserves order
       class OrderedHash < ::Hash

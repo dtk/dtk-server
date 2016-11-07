@@ -172,7 +172,7 @@ module DTK; class Task; class Template
         if subtasks.size == 1
           ret.merge(subtasks.first)
         else
-          ret.merge(Field::TemporalOrder => Constant::Concurrent, Field::Subtasks => subtasks)
+          ret.merge(Field::SubtaskOrder => Constant::Concurrent, Field::Subtasks => subtasks)
         end
       end
 

@@ -150,7 +150,7 @@ module DTK; class Task
           subtasks.first
         else
           {
-            Field::TemporalOrder => Constant::Sequential,
+            Field::SubtaskOrder => Constant::Sequential,
             Field::Subtasks => subtasks
           }
         end
@@ -192,7 +192,7 @@ module DTK; class Task
       end
 
       def self.parse_and_reify__temporal_order(serialized_content)
-        if temporal_order = Constant.matches?(serialized_content, :TemporalOrder)
+        if temporal_order = Constant.matches?(serialized_content, :SubtaskOrder)
           temporal_order.to_sym 
         else
           # Default is Sequential

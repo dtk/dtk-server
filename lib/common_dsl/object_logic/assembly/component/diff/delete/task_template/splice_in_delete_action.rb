@@ -26,27 +26,19 @@ module DTK; module CommonDSL
         end
 
         private
-        # TODO: DTK-2732: if dont convert to using seamntic building blocks to slice in delete subtask then these constants
-        #       should refer to constants where workflow is parsed (which should be put in dtk-dsl)
-        module ParseTerm
-          ACTION_DELIM = '.'
-          SUBTASKS = :subtasks
-          SUBTASK_ORDER = :subtask_order
-          NAME = :name
-          NODE = :node
-          ACTION = :action
-          DSL_LOCATION = :dsl_location
-          FLATTEN = :flatten
+
+        module HashKey
+          include Parse::CanonicalInput::HashKey
         end
 
         def find_or_add_delete_subtask!(serialized_content)
-          unless top_subtasks = serialized_content[ParseTerm::SUBTASKS]
-            raise_error_unexpecetd_form("Unexpected that term does not have :#{ParseTerm::SUBTASKS} key", serialized_content)
+          unless top_subtasks = serialized_content[HashKey::Subtasks]
+            raise_error_unexpecetd_form("Unexpected that term does not have :#{HashKey::Subtasks} key", serialized_content)
           end
 
-          unless ret = top_subtasks.find { |subtask| subtask[ParseTerm::NAME] ==  delete_subtask_name }
+          unless ret = top_subtasks.find { |subtask| subtask[HashKey::Name] ==  delete_subtask_name }
             # if delete subtask is top task - return top task and use it as delete subtask
-            if serialized_content[:dsl_location] && serialized_content[:flatten]
+            if serialized_content[HashKey::Import] && serialized_content[HashKey::Flatten]
               ret = serialized_content
             else
               ret = empty_delete_subtask
@@ -60,16 +52,16 @@ module DTK; module CommonDSL
         DELETE_SUBTASK_LOCATION = '.workflow/dtk.workflow.delete_subtask_for_create.yaml'
         def empty_delete_subtask
           {
-            ParseTerm::NAME          => delete_subtask_name,
-            ParseTerm::DSL_LOCATION  => DELETE_SUBTASK_LOCATION,
-            ParseTerm::FLATTEN       => true,
-            ParseTerm::SUBTASK_ORDER => 'sequential',
-            ParseTerm::SUBTASKS      => []
+            HashKey::Name          => delete_subtask_name,
+            HashKey::Import        => DELETE_SUBTASK_LOCATION,
+            HashKey::Flatten       => true,
+            HashKey::SubtaskOrder  => 'sequential',
+            HashKey::Subtasks      => []
           }
         end
 
         def add_delete_action_in_subtask!(delete_subtask)
-          delete_subtasks = delete_subtask[ParseTerm::SUBTASKS]
+          delete_subtasks = delete_subtask[HashKey::Subtasks]
           delete_subtasks << delete_action_subtask
           delete_subtasks
         end
@@ -77,9 +69,9 @@ module DTK; module CommonDSL
         
         def delete_action_subtask
           { 
-            ParseTerm::NAME   => "Delete #{component_term}",
-            ParseTerm::NODE   => @node.display_name,
-            ParseTerm::ACTION => delete_action_term 
+            HashKey::Name   => "Delete #{component_term}",
+            HashKey::Node   => @node.display_name,
+            HashKey::Action => delete_action_term 
           } 
         end
 
@@ -94,8 +86,9 @@ module DTK; module CommonDSL
           title ? ComponentTitle.print_form_with_title(component_type, title) : component_type
         end
 
+        ACTION_DELIM = '.'
         def delete_action_term
-          "#{component_term}#{ParseTerm::ACTION_DELIM}delete"
+          "#{component_term}#{ACTION_DELIM}delete"
         end
 
         def raise_error_unexpecetd_form(err_msg, content)
@@ -106,19 +99,3 @@ module DTK; module CommonDSL
     end
   end
 end; end
-
-=begin
-{:subtask_order=>"sequential",
- :subtasks=>
-  [{:name=>"aws credentials setup",
-    :ordered_components=>
-     ["identity_aws::credentials",
-      "identity_aws::role[na]",
-      "network_aws::setup"]},
-   {:name=>"aws vpc initialization",
-    :ordered_components=>["network_aws::vpc[vpc1]"]},
-   {:name=>"aws vpc subnet setup",
-    :ordered_components=>["network_aws::vpc_subnet[vpc1-default]"]},
-   {:name=>"aws vpc security group setup",
-    :actions=>["network_aws::security_group[vpc1-default].delete"]}]}
-=end

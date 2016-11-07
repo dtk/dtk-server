@@ -85,7 +85,8 @@ module DTK
 
         def self.find_or_add_ec2_node_component!(parsed_node)
           ret = nil
-          ec2_node_component = "#{CommandAndControl.ec2_node_component}"
+          # ec2_node_component = "#{CommandAndControl.ec2_node_component}"
+          ec2_node_component = "#{CommandAndControl.ec2_node_component}[#{parsed_node.name}]"
           if match = matching_node_property_component?(parsed_node, ec2_node_component)
             ret = match
           else

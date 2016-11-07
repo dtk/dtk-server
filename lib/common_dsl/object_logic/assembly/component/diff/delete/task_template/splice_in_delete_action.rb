@@ -43,10 +43,17 @@ module DTK; module CommonDSL
           unless top_subtasks = serialized_content[ParseTerm::SUBTASKS]
             raise_error_unexpecetd_form("Unexpected that term does not have :#{ParseTerm::SUBTASKS} key", serialized_content)
           end
+
           unless ret = top_subtasks.find { |subtask| subtask[ParseTerm::NAME] ==  delete_subtask_name }
-            ret = empty_delete_subtask
-            top_subtasks.insert(0, ret)
+            # if delete subtask is top task - return top task and use it as delete subtask
+            if serialized_content[:dsl_location] && serialized_content[:flatten]
+              ret = serialized_content
+            else
+              ret = empty_delete_subtask
+              top_subtasks.insert(0, ret)
+            end
           end
+
           ret
         end
 

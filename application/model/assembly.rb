@@ -18,9 +18,9 @@
 # TODO: finish moving the fns and mixins that relate just to template or instance to these files
 module DTK
   class Assembly < Component
-    r8_nested_require('assembly', 'list')
-    r8_nested_require('assembly', 'template')
-    r8_nested_require('assembly', 'instance')
+    require_relative('assembly/list')
+    require_relative('assembly/template')
+    require_relative('assembly/instance')
     include ListMixin
     extend ListClassMixin
 

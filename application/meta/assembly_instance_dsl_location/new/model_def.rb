@@ -15,3 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+{
+  schema: :dsl_location,
+  table: :assembly_instance,
+  columns: {
+    path: { type: :varchar }
+  },
+  many_to_one: [:component]
+}

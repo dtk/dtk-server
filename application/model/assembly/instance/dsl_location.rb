@@ -16,23 +16,20 @@
 # limitations under the License.
 #
 module DTK
-  module CommonDSL::Parse
-    class DirectoryParser < ::DTK::DSL::DirectoryParser
-      require_relative('directory_parser/git')
-
-      # file_types - a single or array of FileType
-      # opts can have keys
-      #   :impacted_files - array
-      # Returns a FileObj that matches a file_type object that matches a file_type in file_types
-      #   or returns nil if no match found
-      def self.matching_file_obj?(file_types, module_branch, opts = {})
-        adapter(file_types, module_branch).matching_file_obj?(impacted_files: opts[:impacted_files])
+  class Assembly::Instance
+    class DSLLocation < Model
+      module Mixin
+        def get_dsl_locations
+          sp_hash = {
+            cols: DSLLocation.common_columns,
+            filter: [:eq, :component_component_id, id]
+          }
+          Model.get_objs(model_handle(:assembly_instance_dsl_location), sp_hash)
+        end
       end
 
-      private
-
-      def self.adapter(file_types, module_branch)
-        Git.new(file_types, module_branch)
+      def self.common_columns
+        [:id, :display_name, :group_id, :component_component_id, :path]
       end
     end
   end

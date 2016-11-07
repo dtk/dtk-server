@@ -27,13 +27,13 @@ module DTK
      # opts can have keys
      #  :impacted_files - array
      def self.matching_common_module_top_dsl_file_obj?(module_branch, opts = {})
-       DirectoryParser.matching_file_obj?(FileType::CommonModule::DSLFile::Top, opts.merge(branch: module_branch))
+       DirectoryParser.matching_file_obj?(FileType::CommonModule::DSLFile::Top, module_branch, impacted_files: opts[:impacted_files])
      end
 
      # opts can have keys
      #  :impacted_files - array
      def self.matching_service_instance_top_dsl_file_obj?(module_branch, opts = {})
-       DirectoryParser.matching_file_obj?(FileType::ServiceInstance::DSLFile::Top, opts.merge(branch: module_branch))
+       DirectoryParser.matching_file_obj?(FileType::ServiceInstance::DSLFile::Top, module_branch, impacted_files: opts[:impacted_files])
      end
 
      def self.set_dsl_version!(module_branch, parsed_common_module)

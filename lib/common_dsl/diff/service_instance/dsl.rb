@@ -21,6 +21,7 @@ module DTK; module CommonDSL
       module DSL
         #Parses and processes any service instance dsl changes; if dsl updated then updates diff_result or raises error
         def self.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
+          pp [:dsl_locations, service_instance.get_dsl_locations]
           if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
             service_instance_parse = dsl_file_obj.parse_content(:service_instance)
             service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
@@ -62,7 +63,7 @@ module DTK; module CommonDSL
                   Generate::ServiceInstance.generate_dsl(opts[:service_instance], module_branch)
                   diff_result.repo_updated = true # means repo updated by server
                   # TODO: DTK-2680: remove after finishing testing
-                  # raise 'here'
+                  raise 'here'
                 end
               end
             end

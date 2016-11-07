@@ -30,6 +30,7 @@ module DTK; class  Assembly
     r8_nested_require('instance', 'service_setting')
     r8_nested_require('instance', 'node_status')
     r8_nested_require('instance', 'lock')
+    r8_nested_require('instance', 'dsl_location')
 
     include ServiceLinkMixin
     include ViolationsMixin
@@ -42,7 +43,7 @@ module DTK; class  Assembly
     include NodeStatusMixin
     extend NodeStatusClassMixin
     include NodeStatusToFixMixin
-
+    include DSLLocation::Mixin
     ACTION_DELIMITER = '.'
 
     def self.create_from_id_handle(idh)

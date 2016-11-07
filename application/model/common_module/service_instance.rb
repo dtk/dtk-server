@@ -57,8 +57,13 @@ module DTK
         Assembly::Instance.delete(assembly_instance.id_handle, delete_opts)
       end
 
+      def get_dsl_locations
+        assembly_instance.get_dsl_locations
+      end
+
       def get_repo_info
         module_repo_info = ModuleRepoInfo.new(get_service_instance_branch)
+        # TODO: do we need 'self' in self.assembly_instance
         assembly_instance = self.assembly_instance
         {
           service: {

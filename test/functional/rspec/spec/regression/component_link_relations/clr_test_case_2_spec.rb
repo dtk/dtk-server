@@ -1,61 +1,56 @@
 #!/usr/bin/env ruby
 # Test Case 2: Fan-out scenario - $node.host_address from sink components on different nodes (sink1, sink2) are linked to upstream attribute of source component
 
-require 'rubygems'
-require 'rest_client'
-require 'pp'
-require 'json'
-require 'awesome_print'
 require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
-require './lib/parameters_setting_spec'
+require './lib/dtk_cli_spec'
 
-STDOUT.sync = true
+module_name = 'dtk18:unit_test'
+module_location = '~/modules/dtk18/unit_test'
+service_location = "~/dtk/"
 
 service_name = 'clr_test_case_2_instance'
-assembly_name = 'unit_test::fan_out'
+assembly_name = 'fan_out'
 node_name = 'source'
 component_name = 'unit_test::source'
-namespace = 'dtk18'
-dependency_component = 'unit_test::sink'
-dependency_satisfied_by = ['sink2/unit_test::sink', 'sink1/unit_test::sink']
-value_to_match_1 = 'nil, nil'
-value_to_match_2 = 'ec2'
-attribute_name = 'upstream'
+type = 'unit_test::sink'
+dependency_component_1 = 'sink1/unit_test::sink'
+dependency_component_2 = 'sink2/unit_test::sink'
+attributes_to_check = {"#{node_name}/unit_test::source/upstream" => '[nil, nil]'}
 
-dtk_common = Common.new(service_name, assembly_name)
+dtk_common = Common.new('', '')
 
 describe '(Component link relations) Test Case 2: Fan-out scenario - $node.host_address from sink components on different nodes (sink1, sink2) are linked to upstream attribute of source component' do
   before(:all) do
     puts '*****************************************************************************************************************************************************************************************', ''
   end
 
-  context "Stage service function on #{assembly_name} assembly" do
-    include_context 'Stage', dtk_common
-  end
-
-  context 'List services after stage' do
-    include_context 'List services after stage', dtk_common
+  context "Stage assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
   context 'List component dependencies' do
-    include_context 'List component dependencies', dtk_common, "#{node_name}/#{component_name}", dependency_component, dependency_satisfied_by
+    include_context 'List component dependencies', dtk_common, service_name, "#{node_name}/#{component_name}", dependency_component_1, type
   end
 
-  context 'Get attribute value from component' do
-    include_context 'Get attribute value from component', dtk_common, node_name, component_name, attribute_name, value_to_match_1
+  context 'List component dependencies' do
+    include_context 'List component dependencies', dtk_common, service_name, "#{node_name}/#{component_name}", dependency_component_2, type
   end
 
-  context 'Converge function' do
-    include_context 'Converge', dtk_common
+  context "Check attributes correct in service instance" do
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
   end
 
-  context 'Get attribute value from component' do
-    include_context 'Get attribute value from component', dtk_common, node_name, component_name, attribute_name, value_to_match_2
+  context "Converge service instance" do
+    include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context 'Delete and destroy service function' do
-    include_context 'Delete services', dtk_common
+  context "NEG - Check attributes correct in service instance" do
+    include_context "NEG - Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
+  end
+
+  context "Destroy service instance" do
+    include_context "Destroy service instance", service_location, service_name
   end
 
   after(:all) do

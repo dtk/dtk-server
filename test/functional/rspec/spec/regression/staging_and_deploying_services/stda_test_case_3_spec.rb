@@ -1,54 +1,50 @@
 #!/usr/bin/env ruby
 # Test Case 3: Deploy from assembly (stage and converge), stop the running instance (nodes) and then delete service
 
-require 'rubygems'
-require 'rest_client'
-require 'pp'
-require 'json'
-require 'awesome_print'
 require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
-require './lib/parameters_setting_spec'
+require './lib/dtk_cli_spec'
 
-STDOUT.sync = true
-
+module_name = 'newclient:bootstrap'
+module_location = '~/modules/newclient/bootstrap'
+service_location = "~/dtk/"
 service_name = 'stda_test_case_3_instance'
-assembly_name = 'bootstrap::node_with_params'
-os = 'precise'
-instance_size = 't1.micro'
-dtk_common = Common.new(service_name, assembly_name)
+assembly_name = 'node_with_params'
+image = 'precise'
+size = 'micro'
+dtk_common = Common.new('', '')
 
 describe '(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (stage and converge), stop the running instance (nodes) and then delete service' do
   before(:all) do
     puts '****************************************************************************************************************************************************', ''
   end
 
-  context "Stage service function on #{assembly_name} assembly" do
-    include_context 'Stage', dtk_common
+  context "Stage assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
-  context 'List services after stage' do
-    include_context 'List services after stage', dtk_common
+  context 'List service instances after stage' do
+    include_context 'List service instances after stage', dtk_common, service_name
   end
 
-  context 'Set image attribute function' do
-    include_context 'Set attribute', dtk_common, 'node1/image', os
+  context "Set attribute for ec2 image" do
+    include_context "Set attribute", service_location, service_name, 'node1/image', image
   end
 
-  context 'Set size attribute function' do
-    include_context 'Set attribute', dtk_common, 'node1/size', instance_size
+  context "Set attribute for ec2 size" do
+    include_context "Set attribute", service_location, service_name, 'node1/size', size
   end
 
-  context 'Converge function' do
-    include_context 'Converge', dtk_common
+  context "Converge service instance" do
+    include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context 'Stop service function' do
-    include_context 'Stop service', dtk_common
+  context 'Stop service instance' do
+    include_context 'Stop service instance', dtk_common, service_location, service_name
   end
 
-  context 'Delete and destroy service function' do
-    include_context 'Delete services', dtk_common
+  context "Destroy service instance" do
+    include_context "Destroy service instance", service_location, service_name
   end
 
   after(:all) do

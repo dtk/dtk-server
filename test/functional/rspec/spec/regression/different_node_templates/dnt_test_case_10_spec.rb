@@ -53,7 +53,7 @@ def index_and_retrieve_document(elasticsearch_host, elasticsearch_http_port)
   es = Elasticsearch::Client.new hosts: ["#{elasticsearch_host}:#{elasticsearch_http_port}"]
   es.index index: 'my_index', type: 'blog', id: 1, body: { title: 'My first blog', content: 'This is some content...' }
 
-  5.downto(1) do |_i|
+  5.downto(1) do |i|
     sleep 1
     document = es.search index: 'my_index', type: 'blog', body: { query: { match: { title: 'My*' } } }
     puts 'Retrieved document:'

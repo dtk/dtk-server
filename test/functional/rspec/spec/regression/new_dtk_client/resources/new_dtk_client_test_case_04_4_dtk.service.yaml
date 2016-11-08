@@ -4,13 +4,15 @@ name: new_dtk_client_test_case_04
 dependencies:
   aws/ec2: master
   puppetlabs/stdlib: master
+  r8/action_module: master
 nodes:
   node:
     attributes:
-      image: amazon_hvm
-      size: small
+      image: precise_hvm
+      size: micro
     components:
     - stdlib
+    - action_module
 workflows:
   create:
     subtasks:
@@ -18,3 +20,9 @@ workflows:
       node: node
       components:
       - stdlib
+  install_action_module:
+    subtasks:
+    - name: install action module
+      node: node
+      components:
+      - action_module

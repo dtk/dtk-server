@@ -42,6 +42,22 @@ shared_context 'List assemblies' do |module_name, assembly_name, dtk_common|
   end
 end
 
+shared_context 'List service instances after stage' do |dtk_common, service_instance|
+  it "checks that service instance #{service_instance} exists" do
+    puts 'List service instances after stage', '-------------------------------------'
+    service_instance_found = dtk_common.check_if_service_instance_exists(service_instance)
+    expect(service_instance_found).to eq(true)
+  end
+end
+
+shared_context 'List service instances after delete' do |dtk_common, service_instance|
+  it "checks that service instance #{service_instance} does not exist" do
+    puts 'List service instances after delete', '-------------------------------------'
+    service_instance_found = dtk_common.check_if_service_instance_exists(service_instance)
+    expect(service_instance_found).to eq(false)
+  end
+end
+
 shared_context 'Stage assembly from module' do |module_name, module_location, assembly_name, service_name|
   it "stages assembly #{assembly_name} from module #{module_name}" do
     puts 'Stage assembly from module', '-------------------------'
@@ -124,6 +140,31 @@ shared_context 'Converge service instance' do |service_location, dtk_common, ser
   end
 end
 
+shared_context 'Exec action/workflow' do |dtk_common, service_location, service_instance, action_name|
+  it "executes action/workflow" do
+    puts 'Execute action/workflow', '---------------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service exec -d #{service_location} #{action_name}`
+    puts value
+    if value.include? 'ERROR'
+      pass = false
+      puts "Action was not executed successfully!"
+    else
+      action_succeeded = dtk_common.check_task_status(service_instance)
+      if action_succeeded
+        pass = true
+        puts "Action was executed successfully!"
+      else
+        pass = false
+        puts "Action was not executed successfully!"
+      end
+    end
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context 'Destroy service instance' do |service_location, service_instance|
   it "deletes and destroys service instance" do
     puts 'Destroy instance', '--------------------'
@@ -132,6 +173,32 @@ shared_context 'Destroy service instance' do |service_location, service_instance
     value = `dtk service uninstall --purge -d #{service_location} -y`
     puts value
     pass = false if value.include? 'ERROR'
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Stop service instance' do |dtk_common, service_location, service_instance|
+  it "stops service instance" do
+    puts 'Stop service instance', '-------------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service stop -d #{service_location}`
+    puts value
+    if value.include? 'ERROR'
+      pass = false
+      puts "Service instance was not stopped successfully!"
+    else
+      # Missing task status output that reports on nodes being stopped
+      stop_succeeded = dtk_common.check_task_status(service_instance)
+      if stop_succeeded
+        pass = true
+        puts "Service instance is stopped successfully!"
+      else
+        pass = false
+        puts "Service instance was not stopped successfully!"
+      end
+    end
     puts ''
     expect(pass).to eq(true)
   end
@@ -248,6 +315,7 @@ shared_context "Change content of service instance on local filesystem" do |serv
     puts "Update content of service instance on local filesystem", '-----------------------------------------------------'
     pass = false
     `cp #{update_service_location} #{service_location}/`
+    `rm -rf #{service_location}/dtk.service.yaml`
     `mv #{service_location}/* #{service_location}/dtk.service.yaml`
     value = `ls #{service_location}/dtk.service.yaml`
     pass = !value.include?('No such file or directory')
@@ -286,6 +354,42 @@ shared_context "Push service instance changes" do |service_name, service_locatio
   end
 end
 
+shared_context "NEG - Push service instance changes" do |service_name, service_location|
+  it "does not push changes for service instance #{service_name} successfully" do
+    puts 'NEG - Push service instance changes', '--------------------------------'
+    pass = true
+    value = `dtk service push -d #{service_location}`
+    puts value
+    pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
+    puts "Push of service instance #{service_name} was completed successfully which is not expected!" if pass == true
+    puts "Push of service instance #{service_name} did not complete successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(false)
+  end
+end
+
+shared_context 'Check node exist in service instance' do |dtk_common, service_name, node_to_check|
+  it "verifies that #{node_to_check} exists in service instance #{service_name}" do
+    puts 'Check node exist in service instance', '-----------------------------------------------'
+    node_exists = dtk_common.check_if_node_exists_in_service_instance(service_name, node_to_check)
+    puts "Node #{node_to_check} exists on service instance #{service_name}" if node_exists == true
+    puts "Node #{node_to_check} does not exist on service instance #{service_name}" if node_exists == false
+    puts ''
+    expect(node_exists).to eq(true)
+  end
+end
+
+shared_context 'Check node group exist in service instance' do |dtk_common, service_name, node_group_to_check, cardinality|
+  it "verifies that #{node_group_to_check} exists in service instance #{service_name}" do
+    puts 'Check node group exist in service instance', '-----------------------------------------------'
+    node_group_exists = dtk_common.check_if_node_group_exists_in_service_instance(service_name, node_group_to_check, cardinality)
+    puts "Node group #{node_group_to_check} exists on service instance #{service_name}" if node_group_exists == true
+    puts "Node group #{node_group_to_check} does not exist on service instance #{service_name}" if node_group_exists == false
+    puts ''
+    expect(node_group_exists).to eq(true)
+  end
+end
+
 shared_context 'Check component exist in service instance' do |dtk_common, service_name, component_to_check|
   it "verifies that #{component_to_check} exists in service instance #{service_name}" do
     puts 'Check component exist in service instance', '-----------------------------------------------'
@@ -316,6 +420,39 @@ shared_context 'Check workflow exist in service instance' do |dtk_common, servic
     puts "Workflow does not exist on service instance #{service_name}" if workflow_exists == false
     puts ''
     expect(workflow_exists).to eq(true)
+  end
+end
+
+shared_context 'NEG - Check attributes correct in service instance' do |dtk_common, service_name, attributes_to_check|
+  it "verifies that attributes are not correct in service instance #{service_name}" do
+    puts 'Check attributes correct in service instance', '-----------------------------------------------'
+    attributes_exists = dtk_common.check_if_attributes_exists_in_service_instance(service_name, attributes_to_check)
+    puts "Attributes exists and are correct on service instance #{service_name} which is not expected" if attributes_exists == true
+    puts "Attributes does not exist or are not correct on service instance #{service_name} which is expected" if attributes_exists == false
+    puts ''
+    expect(attributes_exists).to eq(false)
+  end
+end
+
+shared_context 'NEG - Check node exist in service instance' do |dtk_common, service_name, node_to_check|
+  it "verifies that #{node_to_check} does not exist in service instance #{service_name}" do
+    puts 'NEG - Check node exist in service instance', '-----------------------------------------------'
+    node_exists = dtk_common.check_if_node_exists_in_service_instance(service_name, node_to_check)
+    puts "Node #{node_to_check} exists on service instance #{service_name}" if node_exists == true
+    puts "Node #{node_to_check} does not exist on service instance #{service_name}" if node_exists == false
+    puts ''
+    expect(node_exists).to eq(false)
+  end
+end
+
+shared_context 'NEG - Check node group exist in service instance' do |dtk_common, service_name, node_group_to_check, cardinality|
+  it "verifies that #{node_group_to_check} does not exist in service instance #{service_name}" do
+    puts 'NEG - Check node group exist in service instance', '-----------------------------------------------'
+    node_group_exists = dtk_common.check_if_node_group_exists_in_service_instance(service_name, node_group_to_check, cardinality)
+    puts "Node group #{node_group_to_check} exists on service instance #{service_name}" if node_group_exists == true
+    puts "Node group #{node_group_to_check} does not exist on service instance #{service_name}" if node_group_exists == false
+    puts ''
+    expect(node_group_exists).to eq(false)
   end
 end
 

@@ -1,5 +1,69 @@
 module AssemblyAndServiceOperationsMixin
   # Commands used from new dtk client
+  def check_if_service_instance_exists(service_instance_name)
+    puts "Check if service instance exists", "-----------------------------------"
+    service_instance_exists = false
+    service_instances_list = send_request("/rest/api/v1/services/list", {}, 'get')
+    ap service_instances_list
+    if service_instances_list['status'] == 'ok' && !service_instances_list['data'].empty?
+      service_instances_list['data'].each do |instance|
+        if instance['display_name'] == service_instance_name
+          puts "Service instance: #{service_instance_name} found!"
+          service_instance_exists = true
+        end
+      end
+    else
+      puts "Service instance #{service_instance_name} is not found!"
+    end
+    puts "Service instance #{service_instance_name} is not found!" unless service_instance_exists
+    puts ""
+    service_instance_exists
+  end
+
+  def check_if_node_exists_in_service_instance(service_instance_name, node_name)
+    puts "Check if node exists in service instance", "---------------------------------------"
+    node_exists = false
+    nodes_list = send_request("/rest/api/v1/services/#{service_instance_name}/nodes", {}, 'get')
+    ap nodes_list
+    if nodes_list['status'] == 'ok' && !nodes_list['data'].empty?
+      nodes_list['data'].each do |node|
+        if node['display_name'] == node_name
+          puts "Node: #{node_name} found!"
+          node_exists = true
+        end
+      end
+    else
+      puts "Node #{node_name} is not found in #{service_instance_name}"
+    end
+    puts "Node #{node_name} is not found in #{service_instance_name}" unless node_exists
+    puts ""
+    node_exists
+  end
+
+  def check_if_node_group_exists_in_service_instance(service_instance_name, node_group_name, cardinality)
+    puts "Check if node group exists in service instance", "-------------------------------------------"
+    node_group_exist = false
+    nodes_list = send_request("/rest/api/v1/services/#{service_instance_name}/nodes", {}, 'get')
+    ap nodes_list
+    if nodes_list['status'] == 'ok' && !nodes_list['data'].empty?
+      node_group_members = []
+      nodes_list['data'].each do |node|
+        if node['display_name'].include? node_group_name + ":" # indicator it is node group member
+          node_group_members << node['display_name']
+        end
+      end
+      if node_group_members.size == cardinality
+        puts "Node group #{node_group_name} is found in #{service_instance_name}"
+        node_group_exist = true
+      end
+    else
+      puts "Node group #{node_group_name} is not found in #{service_instance_name}"
+    end
+    puts "Node group #{node_group_name} is not found in #{service_instance_name}" unless node_group_exist
+    puts ""
+    node_group_exist
+  end
+
   def check_if_component_exists_in_service_instance(service_instance_name, component_name)
     puts "Check if component exists in service instance", "-----------------------------------------"
     component_exists = false
@@ -15,7 +79,7 @@ module AssemblyAndServiceOperationsMixin
     else
       puts "Component #{component_name} is not found in #{service_instance_name}"
     end
-    puts "Component #{component_name} is not found in #{service_instance_name}" unless components_exists
+    puts "Component #{component_name} is not found in #{service_instance_name}" unless component_exists
     puts ""
     component_exists
   end
@@ -69,7 +133,7 @@ module AssemblyAndServiceOperationsMixin
       puts "Attributes #{attributes_to_check} are not found in #{service_instance_name}"
     end
     puts ""
-    attributes_exist = true
+    attributes_exist
   end
 
   def check_task_status(service_instance_name)
@@ -563,38 +627,24 @@ module AssemblyAndServiceOperationsMixin
     return attribute_value
   end
 
-  def check_component_depedency(service_id, source_component, dependency_component, dependency_satisfied_by)
+  # new client
+  def check_component_depedency(service_instance_name, source_component, dependency_component, type)
     puts "Check component dependency:", "---------------------------"
     dependency_found = false
-
     puts "List service components with dependencies:"
-    components_list = send_request('/rest/assembly/info_about', {:assembly_id=>service_id, :filter=>nil, :about=>'components', :subtype=>'instance', :detail_to_include => [:component_dependencies]})
-    component = components_list['data'].select { |x| x['display_name'] == source_component}.first
-
+    components_list = send_request("/rest/api/v1/services/#{service_instance_name}/component_links", {}, 'get')
+    component = components_list['data'].select { |x| x['base_component'] == source_component}.first
     if (!component.nil?)
       puts "Component #{source_component} exists. Check its dependencies..."
-      if (component['depends_on'] == dependency_component)
-        dependency_satisfied_by.each do |dep|
-          if component['satisfied_by'].include? dep
-            dependency_found = true
-          else
-            dependency_found = false
-            break
-          end
-        end
-
-        if dependency_found == true
-          puts "Component #{source_component} has expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
-        else
-          puts "Component #{source_component} does not have expected dependency component #{dependency_component} which is satisfied by #{dependency_satisfied_by}"
-        end
+      if (component['dependent_component'] == dependency_component) && (component['type'] == type)
+        dependency_found = true
+        puts "Component #{source_component} has expected dependency component #{dependency_component} with type #{type}"
       else
-        puts "Component #{source_component} does not have expected dependency component #{dependency_component}"
+        puts "Component #{source_component} does not have expected dependency component #{dependency_component} with type #{type}"
       end
     else
       puts "Component #{source_component} does not exist and therefore it does not have any dependencies"
     end
-
     puts ""
     return dependency_found
   end

@@ -1,0 +1,42 @@
+---
+dsl_version: 1.0.0
+module: new_dtk_client_test_case_05
+dependencies:
+  aws/ec2: master
+  puppetlabs/stdlib: master
+nodes:
+  node:
+    attributes:
+      image: precise_hvm
+      size: micro
+    components:
+    - stdlib
+  new_node:
+    attributes:
+      image: precise_hvm
+      size: micro
+    components:
+    - stdlib
+  new_node_group:
+    attributes:
+      cardinality: 2
+      type: group
+      image: precise_hvm
+      size: micro
+    components:
+    - stdlib
+workflows:
+  create:
+    subtasks:
+    - name: create node
+      node: node
+      components:
+      - stdlib
+    - name: create new node
+      node: new_node
+      components:
+      - stdlib
+    - name: create new node group
+      node: new_node
+      components:
+      - stdlib

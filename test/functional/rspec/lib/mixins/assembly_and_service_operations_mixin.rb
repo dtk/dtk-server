@@ -133,7 +133,7 @@ module AssemblyAndServiceOperationsMixin
       puts "Attributes #{attributes_to_check} are not found in #{service_instance_name}"
     end
     puts ""
-    attributes_exist = true
+    attributes_exist
   end
 
   def check_task_status(service_instance_name)

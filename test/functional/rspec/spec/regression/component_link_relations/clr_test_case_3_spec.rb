@@ -16,10 +16,8 @@ node_name_2 = 'source2'
 component_name = 'unit_test::source'
 type = 'unit_test::sink'
 dependency_component = 'sink/unit_test::sink'
-attributes_to_check_1_1 = {"#{node_name_1}/upstream" => 'nil'}
-attributes_to_check_1_2 = {"#{node_name_1}/upstream" => 'ec2'}
-attributes_to_check_2_1 = {"#{node_name_2}/upstream" => 'nil'}
-attributes_to_check_2_2 = {"#{node_name_2}/upstream" => 'ec2'}
+attributes_to_check_1 = {"#{node_name_1}/upstream" => [nil]}
+attributes_to_check_2 = {"#{node_name_2}/upstream" => [nil]}
 
 dtk_common = Common.new(service_name, assembly_name)
 
@@ -41,23 +39,23 @@ describe '(Component link relations) Test Case 3: Fan-in scenario - $node.host_a
   end
 
   context "Check attributes correct in service instance" do
-    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_1_1
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_1
   end
 
   context "Check attributes correct in service instance" do
-    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_2_1
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_2
   end
 
   context "Converge service instance" do
     include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context "Check attributes correct in service instance" do
-    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_1_2
+  context "NEG - Check attributes correct in service instance" do
+    include_context "NEG - Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_1
   end
 
-  context "Check attributes correct in service instance" do
-    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_2_2
+  context "NEG - Check attributes correct in service instance" do
+    include_context "NEG - Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_2
   end
 
   context "Destroy service instance" do

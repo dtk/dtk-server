@@ -423,6 +423,17 @@ shared_context 'Check workflow exist in service instance' do |dtk_common, servic
   end
 end
 
+shared_context 'NEG - Check attributes correct in service instance' do |dtk_common, service_name, attributes_to_check|
+  it "verifies that attributes are not correct in service instance #{service_name}" do
+    puts 'Check attributes correct in service instance', '-----------------------------------------------'
+    attributes_exists = dtk_common.check_if_attributes_exists_in_service_instance(service_name, attributes_to_check)
+    puts "Attributes exists and are correct on service instance #{service_name} which is not expected" if attributes_exists == true
+    puts "Attributes does not exist or are not correct on service instance #{service_name} which is expected" if attributes_exists == false
+    puts ''
+    expect(attributes_exists).to eq(false)
+  end
+end
+
 shared_context 'NEG - Check node exist in service instance' do |dtk_common, service_name, node_to_check|
   it "verifies that #{node_to_check} does not exist in service instance #{service_name}" do
     puts 'NEG - Check node exist in service instance', '-----------------------------------------------'

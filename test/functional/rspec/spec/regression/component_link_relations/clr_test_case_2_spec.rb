@@ -16,8 +16,7 @@ component_name = 'unit_test::source'
 type = 'unit_test::sink'
 dependency_component_1 = 'sink1/unit_test::sink'
 dependency_component_2 = 'sink2/unit_test::sink'
-attributes_to_check_1 = {"#{node_name}/upstream" => 'nil, nil'}
-attributes_to_check_2 = {"#{node_name}/upstream" => 'ec2'}
+attributes_to_check = {"#{node_name}/upstream" => [nil, nil]}
 
 dtk_common = Common.new('', '')
 
@@ -39,15 +38,15 @@ describe '(Component link relations) Test Case 2: Fan-out scenario - $node.host_
   end
 
   context "Check attributes correct in service instance" do
-    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_1
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
   end
 
   context "Converge service instance" do
     include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context "Check attributes correct in service instance" do
-    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_2
+  context "NEG - Check attributes correct in service instance" do
+    include_context "NEG - Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
   end
 
   context "Destroy service instance" do

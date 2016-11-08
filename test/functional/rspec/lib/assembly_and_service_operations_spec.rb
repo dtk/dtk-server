@@ -166,7 +166,7 @@ shared_context 'Grep log command' do |dtk_common, node_name, log_location, grep_
   end
 end
 
-shared_context 'List component dependencies' do |service_instance, source_component, dependency_component, type|
+shared_context 'List component dependencies' do |dtk_common, service_instance, source_component, dependency_component, type|
   it "checks that #{source_component} has dependency on #{dependency_component} and with type #{type}" do
     dependency_found = dtk_common.check_component_depedency(service_istance, source_component, dependency_component, type)
     dependency_found.should eq(true)

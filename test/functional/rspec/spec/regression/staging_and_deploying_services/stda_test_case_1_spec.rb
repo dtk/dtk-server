@@ -9,7 +9,7 @@ module_name = 'newclient:bootstrap'
 module_location = '~/modules/newclient/bootstrap'
 service_location = "~/dtk/"
 service_name = 'stda_test_case_1_instance'
-assembly_name = 'bootstrap::node_with_params'
+assembly_name = 'node_with_params'
 dtk_common = Common.new('', '')
 
 describe '(Staging And Deploying Assemblies) Test Case 1: Stage existing assembly and then delete service' do
@@ -22,7 +22,7 @@ describe '(Staging And Deploying Assemblies) Test Case 1: Stage existing assembl
   end
 
   context 'List service instances after stage' do
-    include_context 'List service instances after stage', service_name
+    include_context 'List service instances after stage', dtk_common, service_name
   end
 
   context "Destroy service instance" do
@@ -30,7 +30,7 @@ describe '(Staging And Deploying Assemblies) Test Case 1: Stage existing assembl
   end
 
   context 'List service instances after delete' do
-    include_context 'List service instances after delete', service_name
+    include_context 'List service instances after delete', dtk_common, service_name
   end
 
   after(:all) do

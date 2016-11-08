@@ -10,7 +10,7 @@ module_location = '~/modules/dtk18/unit_test'
 service_location = "~/dtk/"
 
 service_name = 'clr_test_case_1_instance'
-assembly_name = 'unit_test::simple_link'
+assembly_name = 'simple_link'
 node_name = 'source'
 component_name = 'unit_test::source'
 type = 'unit_test::sink'
@@ -23,9 +23,6 @@ dtk_common = Common.new('', '')
 describe '(Component link relations) Test Case 1: Simple link scenario - $node.host_address from sink component is passed to upstream attribute of source component' do
   before(:all) do
     puts '*********************************************************************************************************************************************************', ''
-    # Install/clone dtk18:unit_test module with required dependency modules
-    system("dtk module clone #{module_name} #{module_location}")
-    system("dtk module install -d #{module_location} #{module_name}")
   end
 
   context "Stage assembly from module" do
@@ -33,7 +30,7 @@ describe '(Component link relations) Test Case 1: Simple link scenario - $node.h
   end
 
   context 'List component dependencies' do
-    include_context 'List component dependencies', service_name, "#{node_name}/#{component_name}", dependency_component, type
+    include_context 'List component dependencies', dtk_common, service_name, "#{node_name}/#{component_name}", dependency_component, type
   end
 
   context "Check attributes correct in service instance" do

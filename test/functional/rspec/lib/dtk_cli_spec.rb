@@ -42,7 +42,7 @@ shared_context 'List assemblies' do |module_name, assembly_name, dtk_common|
   end
 end
 
-shared_context 'List service instances after stage' do |service_instance|
+shared_context 'List service instances after stage' do |dtk_common, service_instance|
   it "checks that service instance #{service_instance} exists" do
     puts 'List service instances after stage', '-------------------------------------'
     service_instance_found = dtk_common.check_if_service_instance_exists(service_instance)
@@ -50,7 +50,7 @@ shared_context 'List service instances after stage' do |service_instance|
   end
 end
 
-shared_context 'List service instances after delete' do |service_instance|
+shared_context 'List service instances after delete' do |dtk_common, service_instance|
   it "checks that service instance #{service_instance} does not exist" do
     puts 'List service instances after delete', '-------------------------------------'
     service_instance_found = dtk_common.check_if_service_instance_exists(service_instance)

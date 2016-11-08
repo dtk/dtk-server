@@ -24,9 +24,6 @@ dtk_common = Common.new('', '')
 describe '(Component link relations) Test Case 2: Fan-out scenario - $node.host_address from sink components on different nodes (sink1, sink2) are linked to upstream attribute of source component' do
   before(:all) do
     puts '*****************************************************************************************************************************************************************************************', ''
-    # Install/clone dtk18:unit_test module with required dependency modules
-    system("dtk module clone #{module_name} #{module_location}")
-    system("dtk module install -d #{module_location} #{module_name}")
   end
 
   context "Stage assembly from module" do
@@ -34,11 +31,11 @@ describe '(Component link relations) Test Case 2: Fan-out scenario - $node.host_
   end
 
   context 'List component dependencies' do
-    include_context 'List component dependencies', service_name, "#{node_name}/#{component_name}", dependency_component_1, type
+    include_context 'List component dependencies', dtk_common, service_name, "#{node_name}/#{component_name}", dependency_component_1, type
   end
 
   context 'List component dependencies' do
-    include_context 'List component dependencies', service_name, "#{node_name}/#{component_name}", dependency_component_2, type
+    include_context 'List component dependencies', dtk_common, service_name, "#{node_name}/#{component_name}", dependency_component_2, type
   end
 
   context "Check attributes correct in service instance" do

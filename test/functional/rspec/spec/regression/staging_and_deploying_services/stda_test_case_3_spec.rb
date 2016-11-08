@@ -1,15 +1,15 @@
 #!/usr/bin/env ruby
 # Test Case 3: Deploy from assembly (stage and converge), stop the running instance (nodes) and then delete service
 
+require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
-require './lib/parameters_setting_spec'
 require './lib/dtk_cli_spec'
 
 module_name = 'newclient:bootstrap'
 module_location = '~/modules/newclient/bootstrap'
 service_location = "~/dtk/"
 service_name = 'stda_test_case_3_instance'
-assembly_name = 'bootstrap::node_with_params'
+assembly_name = 'node_with_params'
 image = 'precise'
 size = 'micro'
 dtk_common = Common.new('', '')
@@ -19,20 +19,20 @@ describe '(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (
     puts '****************************************************************************************************************************************************', ''
   end
 
-  context "Stage service function on #{assembly_name} assembly" do
-    include_context 'Stage', dtk_common
+  context "Stage assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
   context 'List service instances after stage' do
-    include_context 'List service instances after stage', service_name
+    include_context 'List service instances after stage', dtk_common, service_name
   end
 
   context "Set attribute for ec2 image" do
-    include_context "Set attribute", service_location, service_name, 'node/image', image
+    include_context "Set attribute", service_location, service_name, 'node1/image', image
   end
 
   context "Set attribute for ec2 size" do
-    include_context "Set attribute", service_location, service_name, 'node/size', size
+    include_context "Set attribute", service_location, service_name, 'node1/size', size
   end
 
   context "Converge service instance" do

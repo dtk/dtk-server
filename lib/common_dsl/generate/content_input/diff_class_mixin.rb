@@ -20,6 +20,7 @@ module DTK; module CommonDSL::Generate
     module DiffClassMixin
       # opts can haev keys:
       #   :service_instance
+      #   :impacted_files
       def diff_set_from_hashes(gen_hash, parse_hash, quaified_key, opts = {})
         self::Diff.between_hashes(gen_hash, parse_hash, quaified_key, opts)
       end

@@ -43,6 +43,7 @@ module DTK; module CommonDSL
         ### For diffs
         # opts can have keys:
         #  :service_instance
+        #  :impacted_files
         def diff?(node_parse, qualified_key, opts)
           aggregate_diffs?(qualified_key, opts) do |diff_set|
             diff_set.add_diff_set? Attribute, val(:Attributes), node_parse.val(:Attributes)
@@ -53,6 +54,7 @@ module DTK; module CommonDSL
 
         # opts can have keys:
         #   :service_instance
+        #   :impacted_files
         def self.diff_set(nodes_gen, nodes_parse, qualified_key, opts = {})
           diff_set_from_hashes(nodes_gen, nodes_parse, qualified_key, opts)
         end

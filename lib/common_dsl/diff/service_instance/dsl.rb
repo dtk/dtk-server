@@ -21,13 +21,17 @@ module DTK; module CommonDSL
       module DSL
         #Parses and processes any service instance dsl changes; if dsl updated then updates diff_result or raises error
         def self.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
+          # TODO: DTK-2738:  service_instance.get_dsl_locations will have path of any nested dsl file that is in an import
+          #  statement from service_instance_top_dsl_file or any nested dsl file that is recursively broght in throgh imports
+          #  This will be used in Parse.matching_service_instance_top_dsl_file_obj?; it will return non nil if top or any nested
+          #  dsl files are impacted
           pp [:dsl_locations, service_instance.get_dsl_locations]
           if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
             service_instance_parse = dsl_file_obj.parse_content(:service_instance)
             service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
             
             # compute base diffs
-            if base_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen)
+            if base_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen, impacted_files: impacted_files)
               # collate the diffs
               if collated_diffs = base_diffs.collate
                 dsl_version = service_instance_gen.req(:DSLVersion)
@@ -40,10 +44,12 @@ module DTK; module CommonDSL
           end
         end
 
-        def self.compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen)
+        # opts can have keys:
+        #   :impacted_files
+        def self.compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen, opts = {})
           assembly_gen   = service_instance_gen.req(:Assembly)
           assembly_parse = service_instance_parse # assembly parse and service_instance parse are identical
-          assembly_gen.diff?(assembly_parse, QualifiedKey.new, service_instance: service_instance)
+          assembly_gen.diff?(assembly_parse, QualifiedKey.new, service_instance: service_instance, impacted_files: opts[:impacted_files])
         end
         
         def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, opts = {})
@@ -62,8 +68,6 @@ module DTK; module CommonDSL
                   # update dtk.service.yaml with data from object model
                   Generate::ServiceInstance.generate_dsl(opts[:service_instance], module_branch)
                   diff_result.repo_updated = true # means repo updated by server
-                  # TODO: DTK-2680: remove after finishing testing
-                  raise 'here'
                 end
               end
             end

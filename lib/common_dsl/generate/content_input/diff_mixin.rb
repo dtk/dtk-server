@@ -24,13 +24,14 @@ module DTK; module CommonDSL::Generate
       end
       
       # opts can have keys:
-      #  :service_instance
+      #   :service_instance
+      #   :impacted_files
       def aggregate_diffs?(qualified_key, opts = {}, &body)
         self.class::Diff.aggregate?(qualified_key, opts, &body)
       end
 
       # opts can have keys:
-      #  :service_instance
+      #   :service_instance
       def create_diff?(cur_val, new_val, qualified_key, opts = {})
         self.class::Diff.diff?(cur_val, new_val, qualified_key: qualified_key, id_handle: id_handle, service_instance: opts[:service_instance])
       end

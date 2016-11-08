@@ -28,8 +28,11 @@ module DTK
       #   :type
       #   :qualified_key
       #   :service_instance
+      #   :impacted_files
       def initialize(opts = {})
         super(qualified_key: opts[:qualified_key], type: opts[:type], service_instance: opts[:service_instance])
+        @impacted_files = opts[:impacted_files]
+
         # The object attributes are
         #  @added - array, possibly empty, of Diff::Element::Add objects
         #  @deleted - array, possibly empty, of Diff::Element::Delete objects
@@ -49,6 +52,9 @@ module DTK
       private :initialize
       attr_accessor :added, :deleted, :modified
 
+      # opts can have keys
+      #   :service_instance
+      #   :impacted_files
       def self.between_hashes(gen_hash, parse_hash, qualified_key, opts = {})
         between_arrays_or_hashes(:hash, gen_hash, parse_hash, qualified_key, opts)
       end
@@ -60,8 +66,9 @@ module DTK
       end
 
       # opts can have keys:
-      #  :qualified_key
-      #  :service_instance
+      #   :qualified_key
+      #   :service_instance
+      #   :impacted_files
       def self.aggregate?(qualified_key, opts = {}, &body)
         diff_set = new(opts.merge(qualified_key: qualified_key))
         # the code passed into body conditionally will update diff_set
@@ -71,7 +78,7 @@ module DTK
       end
 
       def add_diff_set?(object_klass, gen_object, parse_object)
-        add?(object_klass.diff_set(gen_object, parse_object, @qualified_key, service_instance: @service_instance))
+        add?(object_klass.diff_set(gen_object, parse_object, @qualified_key, service_instance: @service_instance, impacted_files: @impacted_files))
       end
 
       def modified_empty?
@@ -115,8 +122,9 @@ module DTK
       end
       
       # opts can have keys:
-      #  :service_instance
-      #  :diff_class
+      #   :service_instance
+      #   :diff_class
+      #   :impacted_files
       def self.between_arrays_or_hashes(array_or_hash, gen_hash, parse_hash, parent_qualified_key, opts = {})
         added    = []
         deleted  = []

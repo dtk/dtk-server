@@ -53,6 +53,7 @@ module DTK
         ### For diffs
         # opts can have keys:
         #  :service_instance
+        #  :impacted_files
         def diff?(assembly_parse, qualified_key, opts = {})
           aggregate_diffs?(qualified_key, opts) do |diff_set|
             diff_set.add_diff_set? Node, val(:Nodes), assembly_parse.val(:Nodes)

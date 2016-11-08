@@ -36,7 +36,7 @@ end
 shared_context 'Rename service' do |dtk_common, new_service_name|
   it "renames #{dtk_common.service_name} service to #{new_service_name}" do
     service_renamed = dtk_common.rename_service(dtk_common.service_id, new_service_name)
-    service_renamed.should eq(true)
+    expect(service_renamed).to eq(true)
   end
 end
 
@@ -50,7 +50,7 @@ shared_context 'NEG - Rename service to existing name' do |service_name, new_ser
     puts 'Rename did not passed successfully which is expected!' if pass == true
     puts 'Rename passed successfully!' if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
@@ -64,35 +64,35 @@ shared_context 'NEG - Rename service to workspace name' do |service_name|
     puts 'Rename did not passed successfully which is expected!' if pass == true
     puts 'Rename passed successfully!' if pass == false
     puts ''
-    pass.should eq(true)
+    expect(pass).to eq(true)
   end
 end
 
 shared_context 'List services after stage' do |dtk_common|
   it "has staged #{dtk_common.service_name} service in service list" do
     service_exists = dtk_common.check_if_service_exists(dtk_common.service_id)
-    service_exists.should eq(true)
+    expect(service_exists).to eq(true)
   end
 end
 
 shared_context 'NEG - List services' do |dtk_common|
   it "does not have #{dtk_common.service_name} service in service list" do
     service_exists = dtk_common.check_if_service_exists(dtk_common.service_id)
-    service_exists.should eq(false)
+    expect(service_exists).to eq(false)
   end
 end
 
 shared_context 'Converge' do |dtk_common|
   it "converges #{dtk_common.service_name} service" do
     converge = dtk_common.converge_service(dtk_common.service_id)
-    converge.should eq(true)
+    expect(converge).to eq(true)
   end
 end
 
 shared_context 'NEG - Converge' do |dtk_common|
   it "does not converge #{dtk_common.service_name} service" do
     converge = dtk_common.converge_service(dtk_common.service_id)
-    converge.should eq(false)
+    expect(converge).to eq(false)
   end
 end
 
@@ -100,83 +100,77 @@ end
 shared_context 'Converge service' do |dtk_common, max_retries|
   it "converges #{dtk_common.service_name} service" do
     converge = dtk_common.converge_service(dtk_common.service_id, max_retries)
-    converge.should eq(true)
+    expect(converge).to eq(true)
   end
 end
 
 shared_context 'Check if port avaliable' do |dtk_common, port|
   it 'is avaliable' do
     netstat_response = dtk_common.netstats_check(dtk_common.service_id, port)
-    netstat_response.should eq(true)
+    expect(netstat_response).to eq(true)
   end
 end
 
 shared_context 'Check if port avaliable on specific node' do |dtk_common, node_name, port|
   it "is avaliable on #{node_name} node" do
     netstat_response = dtk_common.netstats_check_for_specific_node(dtk_common.service_id, node_name, port)
-    netstat_response.should eq(true)
+    expect(netstat_response).to eq(true)
   end
 end
 
 shared_context 'Stop service' do |dtk_common|
   it "stops #{dtk_common.service_name} service " do
     stop_status = dtk_common.stop_running_service(dtk_common.service_id)
-    stop_status.should eq(true)
+    expect(stop_status).to eq(true)
   end
 end
 
 shared_context 'Delete services' do |dtk_common|
   it "deletes #{dtk_common.service_name} service" do
     service_deleted = dtk_common.delete_and_destroy_service(dtk_common.service_id)
-    service_deleted.should eq(true)
-  end
-end
-
-shared_context 'Delete services with name' do |dtk_common, service_name|
-  it "deletes #{service_name} service" do
-    service_deleted
+    expect(service_deleted).to eq(true)
   end
 end
 
 shared_context 'List services after delete' do |dtk_common|
   it "doesn't have #{dtk_common.service_name} service in service list" do
     service_exists = dtk_common.check_if_service_exists(dtk_common.service_id)
-    service_exists.should eq(false)
+    expect(service_exists).to eq(false)
   end
 end
 
 shared_context 'Delete assembly' do |dtk_common, assembly_name, namespace|
   it "deletes #{assembly_name} assembly" do
     assembly_deleted = dtk_common.delete_assembly(assembly_name, namespace)
-    assembly_deleted.should eq(true)
+    expect(assembly_deleted).to eq(true)
   end
 end
 
 shared_context 'Create assembly from service' do |dtk_common, service_name, assembly_name, namespace|
   it "creates #{assembly_name} assembly in #{service_name} service module from existing service" do
     assembly_created = dtk_common.create_assembly_from_service(dtk_common.service_id, service_name, assembly_name, namespace)
-    assembly_created.should eq(true)
+    expect(assembly_created).to eq(true)
   end
 end
 
 shared_context 'Grep log command' do |dtk_common, node_name, log_location, grep_pattern|
   it "finds #{grep_pattern} pattern in #{log_location} log on converged node" do
     grep_pattern_found = dtk_common.grep_node(dtk_common.service_id, node_name, log_location, grep_pattern)
-    grep_pattern_found.should eq(true)
+    expect(grep_pattern_found).to eq(true)
   end
 end
 
 shared_context 'List component dependencies' do |dtk_common, service_instance, source_component, dependency_component, type|
   it "checks that #{source_component} has dependency on #{dependency_component} and with type #{type}" do
     dependency_found = dtk_common.check_component_depedency(service_instance, source_component, dependency_component, type)
-    dependency_found.should eq(true)
+    expect(dependency_found).to eq(true)
   end
 end
 
 shared_context 'Push assembly updates' do |dtk_common, service_module|
   it 'pushes changes from service back to origin service' do
     assembly_updated = dtk_common.push_assembly_updates(dtk_common.service_id, service_module)
-    assembly_updated.should eq(true)
+    expect(assembly_updated).to eq(true)
   end
 end
 

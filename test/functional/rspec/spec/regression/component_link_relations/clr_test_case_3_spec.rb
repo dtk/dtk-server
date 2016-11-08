@@ -6,7 +6,7 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/dtk_cli_spec'
 
 module_name = 'dtk18:unit_test'
-module_location = '~/modules/unit_test'
+module_location = '~/modules/dtk18/unit_test'
 service_location = "~/dtk/"
 
 service_name = 'clr_test_case_3_instance'
@@ -17,7 +17,7 @@ component_name = 'unit_test::source'
 type = 'unit_test::sink'
 dependency_component = 'sink/unit_test::sink'
 attributes_to_check_1_1 = {"#{node_name_1}/upstream" => 'nil'}
-attributes_to_check_1_2 = {"#{node_name_2}/upstream" => 'ec2'}
+attributes_to_check_1_2 = {"#{node_name_1}/upstream" => 'ec2'}
 attributes_to_check_2_1 = {"#{node_name_2}/upstream" => 'nil'}
 attributes_to_check_2_2 = {"#{node_name_2}/upstream" => 'ec2'}
 

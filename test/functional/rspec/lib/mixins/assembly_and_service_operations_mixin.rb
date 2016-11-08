@@ -1,5 +1,25 @@
 module AssemblyAndServiceOperationsMixin
   # Commands used from new dtk client
+  def check_if_service_instance_exists(service_instance_name)
+    puts "Check if service instance exists", "-----------------------------------"
+    service_instance_exists = false
+    service_instances_list = send_request("/rest/api/v1/services/list", {}, 'get')
+    ap service_instances_list
+    if service_instances_list['status'] == 'ok' && !service_instances_list['data'].empty?
+      service_instances_list['data'].each do |instance|
+        if instance['display_name'] == service_instance_name
+          puts "Service instance: #{service_instance_name} found!"
+          service_instance_exists = true
+        end
+      end
+    else
+      puts "Service instance #{service_instance_name} is not found!"
+    end
+    puts "Service instance #{service_instance_name} is not found!" unless service_instance_exists
+    puts ""
+    service_instance_exists
+  end
+
   def check_if_node_exists_in_service_instance(service_instance_name, node_name)
     puts "Check if node exists in service instance", "---------------------------------------"
     node_exists = false

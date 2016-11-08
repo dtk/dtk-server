@@ -6,7 +6,7 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/dtk_cli_spec'
 
 module_name = 'dtk18:unit_test'
-module_location = '~/modules/unit_test'
+module_location = '~/modules/dtk18/unit_test'
 service_location = "~/dtk/"
 
 service_name = 'clr_test_case_1_instance'

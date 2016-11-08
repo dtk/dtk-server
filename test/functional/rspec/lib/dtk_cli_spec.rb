@@ -42,6 +42,22 @@ shared_context 'List assemblies' do |module_name, assembly_name, dtk_common|
   end
 end
 
+shared_context 'List service instances after stage' do |service_instance|
+  it "checks that service instance #{service_instance} exists" do
+    puts 'List service instances after stage', '-------------------------------------'
+    service_instance_found = dtk_common.check_if_service_instance_exists(service_instance)
+    expect(service_instance_found).to eq(true)
+  end
+end
+
+shared_context 'List service instances after delete' do |service_instance|
+  it "checks that service instance #{service_instance} does not exist" do
+    puts 'List service instances after delete', '-------------------------------------'
+    service_instance_found = dtk_common.check_if_service_instance_exists(service_instance)
+    expect(service_instance_found).to eq(false)
+  end
+end
+
 shared_context 'Stage assembly from module' do |module_name, module_location, assembly_name, service_name|
   it "stages assembly #{assembly_name} from module #{module_name}" do
     puts 'Stage assembly from module', '-------------------------'
@@ -157,6 +173,32 @@ shared_context 'Destroy service instance' do |service_location, service_instance
     value = `dtk service uninstall --purge -d #{service_location} -y`
     puts value
     pass = false if value.include? 'ERROR'
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Stop service instance' do |dtk_common, service_location, service_instance|
+  it "stops service instance" do
+    puts 'Stop service instance', '-------------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service stop -d #{service_location}`
+    puts value
+    if value.include? 'ERROR'
+      pass = false
+      puts "Service instance was not stopped successfully!"
+    else
+      # Missing task status output that reports on nodes being stopped
+      stop_succeeded = dtk_common.check_task_status(service_instance)
+      if stop_succeeded
+        pass = true
+        puts "Service instance is stopped successfully!"
+      else
+        pass = false
+        puts "Service instance was not stopped successfully!"
+      end
+    end
     puts ''
     expect(pass).to eq(true)
   end

@@ -9,12 +9,12 @@ initial_module_location = "./spec/regression/staging_and_deploying_services/reso
 updated_components_location = "./spec/regression/staging_and_deploying_services/resources/stda_test_case_12_2_dtk.service.yaml"
 deleted_components_location = "./spec/regression/staging_and_deploying_services/resources/stda_test_case_12_3_dtk.service.yaml"
 
-module_name = 'newclient:components_test_12'
-module_location = '~/modules/newclient/components_test_12'
+module_name = 'newclient:stda_test_case_12'
+module_location = '~/modules/newclient/stda_test_case_12'
 service_location = "~/dtk/"
-service_name = 'stda_test_case_12_instance'
-assembly_name = 'test1'
-node_name = 'test1'
+service_name = 'stda_test_case_12'
+assembly_name = 'simple'
+node_name = 'sigle_node'
 component_name = 'puppetlabs:wget'
 component_to_check_1 = 'wget'
 component_to_check_2 = 'test1/wget'

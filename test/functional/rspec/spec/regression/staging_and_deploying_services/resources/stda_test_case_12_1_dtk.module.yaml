@@ -1,6 +1,6 @@
 ---
 dsl_version: 1.0.0
-module: newclient/components_test_12
+module: newclient/stda_test_case_12
 version: master
 license: Apache 2.0
 
@@ -22,4 +22,5 @@ assemblies:
         subtasks:
         - name: create node
           node: single_node
+          components:
           - stdlib

@@ -8,13 +8,12 @@ require './lib/dtk_cli_spec'
 initial_module_location = "./spec/regression/staging_and_deploying_services/resources/stda_test_case_7_1_dtk.module.yaml"
 updated_node_group_location = "./spec/regression/staging_and_deploying_services/resources/stda_test_case_7_2_dtk.service.yaml"
 
-module_name = 'newclient:node_group_test_07'
-module_location = '~/modules/newclient/node_group_test_07'
+module_name = 'newclient:stda_test_case_7'
+module_location = '~/modules/newclient/stda_test_case_7'
 service_location = "~/dtk/"
-service_name = 'stda_test_case_7_instance'
+service_name = 'stda_test_case_7'
 assembly_name = 'simple'
-component_to_check_1 = 'slave:1/stdlib'
-component_to_check_2 = 'slave:2/stdlib'
+component_to_check = 'slave/stdlib'
 node_group_to_check = 'slave'
 full_service_location = service_location + service_name
 expected_cardinality_before_delete = 2
@@ -51,11 +50,7 @@ describe '(Staging And Deploying Assemblies) Test Case 7: Stage simple node grou
   end
 
   context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_1
-  end
-
-  context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_2
+    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
   end
 
   context "Change content of service instance on local filesystem" do
@@ -71,11 +66,7 @@ describe '(Staging And Deploying Assemblies) Test Case 7: Stage simple node grou
   end
 
   context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_1
-  end
-
-  context "NEG - Check component exist in service instance" do
-    include_context "NEG - Check component exist in service instance", dtk_common, service_name, component_to_check_2
+    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
   end
 
   context "Uninstall service instance" do

@@ -1,6 +1,6 @@
 ---
 dsl_version: 1.0.0
-module: newclient/components_test_12
+name: stda_test_case_12
 dependencies:
   aws/ec2: master
   puppetlabs/stdlib: master
@@ -16,4 +16,5 @@ workflows:
     subtasks:
     - name: create node
       node: single_node
+      components:
       - stdlib

@@ -8,15 +8,14 @@ require './lib/dtk_cli_spec'
 initial_module_location = "./spec/regression/staging_and_deploying_services/resources/stda_test_case_8_1_dtk.module.yaml"
 updated_node_group_location = "./spec/regression/staging_and_deploying_services/resources/stda_test_case_8_2_dtk.service.yaml"
 
-module_name = 'newclient:node_group_test_08'
-module_location = '~/modules/newclient/node_group_test_08'
+module_name = 'newclient:stda_test_case_8'
+module_location = '~/modules/newclient/stda_test_case_8'
 service_location = "~/dtk/"
-service_name = 'stda_test_case_8_instance'
+service_name = 'stda_test_case_8'
 assembly_name = 'complex'
-component_to_check_1 = 'elements:1/stdlib'
-component_to_check_2 = 'elements:2/stdlib'
-component_to_check_3 = 'single_node/stdlib'
-node_name = 'single_node'
+component_to_check_1 = 'elements/stdlib'
+component_to_check_2 = 'single_node/stdlib'
+node_to_check = 'single_node'
 node_group_to_check = 'elements'
 full_service_location = service_location + service_name
 expected_cardinality_before_delete = 2
@@ -60,10 +59,6 @@ describe '(Staging And Deploying Assemblies) Test Case 8: Stage complex node gro
     include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_2
   end
 
-  context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_3
-  end
-
   context "Change content of service instance on local filesystem" do
     include_context "Change content of service instance on local filesystem", full_service_location, updated_node_group_location
   end
@@ -76,8 +71,8 @@ describe '(Staging And Deploying Assemblies) Test Case 8: Stage complex node gro
     include_context "Check node group exist in service instance", dtk_common, service_name, node_group_to_check, expected_cardinality_after_delete
   end
 
-  context "NEG - Check component exist in service instance" do
-    include_context "NEG - Check component exist in service instance", dtk_common, service_name, component_to_check_2
+  context "Check component exist in service instance" do
+    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_1
   end
 
   context "NEG - Check node exist in service instance" do
@@ -85,7 +80,7 @@ describe '(Staging And Deploying Assemblies) Test Case 8: Stage complex node gro
   end
 
   context "NEG - Check component exist in service instance" do
-    include_context "NEG - Check component exist in service instance", dtk_common, service_name, component_to_check_3
+    include_context "NEG - Check component exist in service instance", dtk_common, service_name, component_to_check_2
   end
 
   context "Uninstall service instance" do

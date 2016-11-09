@@ -1,6 +1,6 @@
 ---
 dsl_version: 1.0.0
-module: newclient/node_group_test_08
+module: newclient/stda_test_case_8
 version: master
 license: Apache 2.0
 
@@ -30,6 +30,7 @@ assemblies:
         subtasks:
         - name: create node
           node: single_node
+          components:
           - stdlib
         - name: create nodes groups
           node_group: elements

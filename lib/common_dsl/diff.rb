@@ -26,6 +26,7 @@ module DTK
       require_relative('diff/repo_update')
       require_relative('diff/diff_errors')
       require_relative('diff/element')
+      require_relative('diff/process_import_statements')
 
       require_relative('diff/base')
       require_relative('diff/set')

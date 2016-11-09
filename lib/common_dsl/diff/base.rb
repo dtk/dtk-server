@@ -43,8 +43,10 @@ module DTK
       #   :qualified_key
       #   :id_handle
       #   :service_instance
+      #   :impacted_files
       def self.diff?(current_val, new_val, opts = {})
-        new(current_val, new_val, opts) if has_diff?(current_val, new_val)
+        new_opts = { qualified_key: opts[:qualified_key], id_handle: opts[:id_handle], service_instance: opts[:service_instance] }
+        new(current_val, new_val, new_opts) if has_diff?(current_val, new_val, impacted_files: opts[:impacted_files])
       end
 
       def self.aggregate?(diff_sets, opts = {}, &body)
@@ -77,38 +79,48 @@ module DTK
         self.class::Modify.new(self)
       end
 
-      def self.has_diff?(current_val, new_val)
-        no_diff = false
+      # opts can have keys:
+      #   :impacted_files
+      #   :donot_process_import_statements
+      def self.has_diff?(current_val, new_val, opts = {})
         if current_val.respond_to?(:to_s) and new_val.respond_to?(:to_s) and current_val.to_s == new_val.to_s
-          no_diff = true
-        elsif current_val.class == new_val.class 
-          if current_val.kind_of?(::Hash)
-            has_diff__hash?(current_val, new_val)
-          elsif current_val.kind_of?(::Array)
-            has_diff__array?(current_val, new_val)
-          elsif current_val == new_val
-            no_diff = true
-          end
+          false
+        elsif current_val.kind_of?(::Hash) and new_val.kind_of?(::Hash)
+          has_diff__hash?(current_val, new_val, opts)
+        elsif current_val.kind_of?(::Array) and new_val.kind_of?(::Array)
+          has_diff__array?(current_val, new_val, opts)
+        else
+          current_val != new_val
         end
-        !no_diff
       end
 
-      def self.has_diff__array?(current_val_array, new_val_array)
+      # opts can have keys:
+      #   :impacted_files
+      #   :donot_process_import_statements
+      def self.has_diff__array?(current_val_array, new_val_array, opts = {})
         ret = true
         if current_val_array.size == new_val_array.size
           current_val_array.each_with_index do |current_val, i|
-            return true if has_diff?(current_val, new_val_array[i])
+            return true if has_diff?(current_val, new_val_array[i], opts)
           end
           ret = false
         end
         ret
       end
-      
-      def self.has_diff__hash?(current_val_hash, new_val_hash)
+
+      # opts can have keys:
+      #   :impacted_files
+      #   :donot_process_import_statements
+      def self.has_diff__hash?(current_val_hash, new_val_hash, opts = {})
         ret = true
+        unless opts[:donot_process_import_statements]
+          ProcessImportStatements.modify_for_syntactic_comparison!(current_val_hash, new_val_hash, impacted_files: opts[:impacted_files])
+          opts = opts.merge(donot_process_import_statements: true)
+        end
+
         if current_val_hash.keys.sort == new_val_hash.keys.sort
           current_val_hash.keys.each do |key|
-            return true if has_diff?(current_val_hash[key], new_val_hash[key])
+            return true if has_diff?(current_val_hash[key], new_val_hash[key], opts)
           end
           ret = false
         end

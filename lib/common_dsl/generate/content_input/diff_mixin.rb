@@ -32,8 +32,10 @@ module DTK; module CommonDSL::Generate
 
       # opts can have keys:
       #   :service_instance
+      #   :impacted_files
       def create_diff?(cur_val, new_val, qualified_key, opts = {})
-        self.class::Diff.diff?(cur_val, new_val, qualified_key: qualified_key, id_handle: id_handle, service_instance: opts[:service_instance])
+        diff_opts = { qualified_key: qualified_key, id_handle: id_handle, service_instance: opts[:service_instance], impacted_files: opts[:impacted_files] }
+        self.class::Diff.diff?(cur_val, new_val, diff_opts)
       end
 
       # The method skip_for_generation? can be overwritten

@@ -1,0 +1,31 @@
+---
+dsl_version: 1.0.0
+module: newclient/components_test_12
+dependencies:
+  aws/ec2: master
+  puppetlabs/stdlib: master
+  puppetlabs/wget: master
+components:
+- wget:
+    attributes:
+      version: 1.0.0
+nodes:
+  single_node:
+    attributes:
+      image: precise_hvm
+      size: micro
+    components:
+    - stdlib
+    - wget:
+        attributes:
+          version: 1.0.0
+workflows:
+  create:
+    subtasks:
+    - name: host aggregator
+      component:
+      - wget
+    - name: create node
+      node: single_node
+      - stdlib
+      - wget

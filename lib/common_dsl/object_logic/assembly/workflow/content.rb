@@ -48,7 +48,7 @@ module DTK; module CommonDSL
           if dsl_location = @content[HashKey::Import]
             set(:Import, dsl_location)
             # TODO: DTK-2680: making this hidden meaning import statement wil now show up in dsl; later want to support in workflow explicit import
-            set(:HideImportStatement, true)
+            set(:HiddenImportStatement, true)
           end
 
           merge!(uninterpreted_keys)

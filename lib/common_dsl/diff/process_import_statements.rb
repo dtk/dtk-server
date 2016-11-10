@@ -49,9 +49,7 @@ module DTK
 
       # returns either file imported at top level or nil
       def imported_file_top_level?(obj)
-        if obj.kind_of?(::Hash) and obj.respond_to?(:val)
-          obj.val(:Import)
-        end
+        hash_value_under_key?(obj, :Import)
       end
 
       # returns either an array of import file in gen_obj or nil if none
@@ -78,25 +76,53 @@ module DTK
       end
 
       def remove_imported_statements!(obj)
-        # TODO: DTK-2738: look if not hidden_import_statement; if that Boolean key not there then rather than deleting just remove all keys
-        #  except import one
         if obj.kind_of?(::Hash)
-          obj.each_pair do |key, nested_obj| 
-            if imported_file_top_level?(nested_obj)
-              obj.delete(key)
-            else
-              remove_imported_statements!(nested_obj)
-            end
-          end
+          remove_imported_statements__hash!(obj)
         elsif obj.kind_of?(::Array)
-          obj.each_with_index do |nested_obj, i| 
-            if imported_file_top_level?(nested_obj)
-              obj.delete_at(i)
-            else
-              remove_imported_statements!(nested_obj) 
-            end 
+          remove_imported_statements__array!(obj)
+        end
+      end
+
+      def remove_imported_statements__hash!(hash_obj)
+        hash_obj.each_pair do |key, nested_obj| 
+          if imported_file_top_level?(nested_obj)
+            if is_hidden_import_statement?(nested_obj)
+              hash_obj.delete(key)
+            else 
+              keep_just_import_statement!(nested_obj)
+            end
+          else
+            remove_imported_statements!(nested_obj)
           end
         end
+      end
+
+      def remove_imported_statements__array!(array_obj)
+        array_obj.each_with_index do |nested_obj, i| 
+          if imported_file_top_level?(nested_obj)
+            if is_hidden_import_statement?(nested_obj)
+              array_obj.delete_at(i)
+            else 
+              keep_just_import_statement!(nested_obj)
+            end
+          else
+            remove_imported_statements!(nested_obj) 
+          end 
+        end
+      end
+
+      def keep_just_import_statement!(obj)
+        if obj.respond_to?(:remove_all_except!)
+          obj.remove_all_except!(:Import)
+        end
+      end
+
+      def is_hidden_import_statement?(obj)
+        hash_value_under_key?(obj, :HiddenImportStatement)
+      end
+
+      def hash_value_under_key?(obj, key)
+        obj.val(key) if obj.kind_of?(::Hash) and obj.respond_to?(:val)
       end
 
     end

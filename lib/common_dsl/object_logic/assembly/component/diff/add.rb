@@ -101,7 +101,7 @@ module DTK; module CommonDSL
         end
         
         def find_matching_dependency(matching_aug_cmp_templates, dependencies = {})
-          return if dependencies.empty?
+          return if dependencies.nil? || dependencies.empty?
           
           ret = nil
           dependencies.each do |name, version|

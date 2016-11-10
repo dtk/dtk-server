@@ -89,26 +89,11 @@ module DTK; module CommonDSL
         end
 
         def add_delete_node_subtask(node, result, opts = {})
-          # TODO: Aldin: we might need to put this inside delete_nested_components
           component             = node.get_components.find{ |nc| nc[:component_type].eql?('ec2__node') }
           cmp_qualified_key     = qualified_key.create_with_new_element?(:component, component[:display_name])
           component_delete_diff = ObjectLogic::Assembly::Component::Diff::Delete.new(cmp_qualified_key, gen_object: component, service_instance: @service_instance)
 
           component_delete_diff.process(result, opts)
-
-          # this should get ec2 node component and add it to delete workflow
-          # maybe we can use this with delete components above as last step
-          # augmented_cmps = assembly_instance.get_augmented_components(Opts.new(filter_component: 'ec2::node'))
-          # matching_cmp = augmented_cmps.first
-          # component = DTK::Component::Instance.create_from_component(matching_cmp)
-
-          # return if node.get_field?(:to_be_deleted)
-
-          # # component = DTK::Component::Instance.create_from_component(new_component_idh.create_object)
-          # task_template_processor = ObjectLogic::Assembly::Component::Diff::Delete::TaskTemplate.new(assembly_instance, component, node)
-          # task_template_processor.insert_explict_delete_action?
-
-          # node.update_from_hash_assignments(to_be_deleted: true)
         end
       end
     end

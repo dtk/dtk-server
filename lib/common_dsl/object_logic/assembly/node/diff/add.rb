@@ -30,7 +30,7 @@ module DTK; module CommonDSL
               fail "Unexpected type '#{node_type}'"
             end
 
-          add_nested_components(new_node, result)
+          add_nested_components(new_node, result, opts)
           # dont process anything more if any errors in add_nested_components
           return if result.any_errors?
 
@@ -78,11 +78,11 @@ module DTK; module CommonDSL
           end
         end
 
-        def add_nested_components(node, result)
+        def add_nested_components(node, result, opts = {})
            components_semantic_parse_array.each do |component|
             # TODO: need to put new node in method called below
             component_add_diff = Component::Diff::Add.new(component.qualified_key, parse_object: component, service_instance: @service_instance)
-            component_add_diff.process(result)
+            component_add_diff.process(result, opts)
           end 
         end
 

@@ -63,8 +63,8 @@ module DTK; module CommonDSL
               items_to_update = diff_result.items_to_update
               unless items_to_update.empty?
                 # Treat updates to repo from object model as transaction that rolls back git repo to what client set it as
-                # If error,  RepoUpdate.Transaction will throw error
-                RepoUpdate.Transaction module_branch do
+                # If error,  RepoManager::Transaction.reset_on_error
+                RepoManager::Transaction.reset_on_error(module_branch) do
                   # update dtk.service.yaml with data from object model
                   Generate::ServiceInstance.generate_dsl(opts[:service_instance], module_branch)
                   diff_result.repo_updated = true # means repo updated by server

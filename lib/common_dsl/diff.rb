@@ -23,7 +23,6 @@ module DTK
       require_relative('diff/serialized_hash')
       require_relative('diff/collated.rb')
       require_relative('diff/qualified_key')
-      require_relative('diff/repo_update')
       require_relative('diff/diff_errors')
       require_relative('diff/element')
       require_relative('diff/process_import_statements')

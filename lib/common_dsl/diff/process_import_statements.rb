@@ -35,8 +35,7 @@ module DTK
       #     splice this info into gen_obj
       #   - otherwise removes from gen_obj all import statements to do a comparison (this part is done)
       #   - looks for import statements in parse_obj recursively
-      #   - for impacted files, rather tahn passing in just file path names, shoudl pass in path/content pair
-      #     also there is a bug now in thinking files updated when they are not after doing second change after an update
+      #   - for impacted files, rather than passing in just file path names, shoudl pass in path/content pair
       def self.modify_for_syntactic_comparison!(gen_obj, parse_obj, opts = {})
         new(opts).modify_for_syntactic_comparison!(gen_obj, parse_obj)
       end

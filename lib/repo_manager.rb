@@ -18,6 +18,7 @@
 module DTK
   class RepoManager
     require_relative('repo_manager/add_remote_files_info')
+    require_relative('repo_manager/transaction')
 
     class << self
       # admin and repo methods that just pass to lower level object or class

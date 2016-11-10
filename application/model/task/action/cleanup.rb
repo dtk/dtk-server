@@ -56,7 +56,9 @@ module DTK; class Task
           if self[:node] || self[:component]
             assembly_instance.send(self[:delete_action], *self[:delete_params]+[self[:opts]])
             module_branch = AssemblyModule::Service.get_service_instance_branch(assembly_instance)
-            CommonDSL::Generate::ServiceInstance.generate_dsl(assembly_instance, module_branch)
+            RepoManager::Transaction.reset_on_error(module_branch) do
+              CommonDSL::Generate::ServiceInstance.generate_dsl(assembly_instance, module_branch)
+            end
           else
             component_idh = assembly.id_handle.createIDH(id: assembly.id(), model_name: :component)
             assembly_instance.class.send(self[:delete_action], component_idh, self[:opts])

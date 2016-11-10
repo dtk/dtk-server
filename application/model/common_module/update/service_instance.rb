@@ -24,7 +24,7 @@ module DTK
         #   :service_instance (required)
         #   :force_pull - Boolean (default false) 
         def self.update_from_repo(project, commit_sha, opts = {})
-          ret = CommonDSL::Diff::Result.new
+          diff_result = CommonDSL::Diff::Result.new
           unless service_instance = opts[:service_instance]
             fail Error, "opts[:service_instance] should not be nil"
           end
@@ -33,12 +33,12 @@ module DTK
           unless module_branch.is_set_to_sha?(commit_sha)
             repo_diffs_summary = module_branch.pull_repo_changes_and_return_diffs_summary(commit_sha, force: opts[:force_pull])
             if repo_diffs_summary
-              ret = CommonDSL::Diff::ServiceInstance.process(service_instance, module_branch, repo_diffs_summary)
+              diff_result = CommonDSL::Diff::ServiceInstance.process(service_instance, module_branch, repo_diffs_summary)
             end
             # This sets sha on branch only after all processing goes through
-            module_branch.set_sha(commit_sha)
+            module_branch.update_current_sha_from_repo!
           end
-          ret
+          diff_result
         end
 
       end

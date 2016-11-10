@@ -16,10 +16,10 @@
 # limitations under the License.
 #
 module DTK
-  class CommonDSL::Diff
-    # For updationg the dsl files in the repo from the contents of the object model
-    class RepoUpdate
-      def self.Transaction(module_branch, &body)
+  class RepoManager
+    # For backing ut of changes to repos on error
+    module Transaction 
+      def self.reset_on_error(module_branch, &body)
         sha_before_change = module_branch.current_sha
         begin
           yield

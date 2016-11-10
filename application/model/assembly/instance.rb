@@ -639,7 +639,7 @@ module DTK; class  Assembly
       end
       
       if opts[:recursive].nil? && is_target_service_instance?
-          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-f' to remove all." unless staged_instances.empty?
+        fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-f' to remove all." unless staged_instances.empty?
       end
 
       if opts[:recursive]
@@ -666,13 +666,14 @@ module DTK; class  Assembly
 
       if assembly_wide_node = assembly_instance.has_assembly_wide_node?
         if components = assembly_wide_node.get_components
-          cmp_opts = { method_name: 'delete' }
+          cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
 
           # order components by 'delete' action inside assembly workflow if exists
           ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
           ordered_components.each do |component|
             cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
-            cmp_action = nil
+            cmp_action   = nil
+            cmp_opts.merge!(delete_params: [component.id_handle, assembly_wide_node.id])
 
             begin
              cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if assembly_wide_node.get_admin_op_status.eql?('running')
@@ -680,7 +681,7 @@ module DTK; class  Assembly
               Log.info("Ignoring component 'delete' action does not exist.")
             end
 
-            delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, assembly_wide_node, opts)
+            delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, assembly_wide_node, cmp_opts)
             cmp_top_task.add_subtask(cmp_action) if cmp_action
             cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
             task.add_subtask(cmp_top_task)

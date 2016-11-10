@@ -112,6 +112,10 @@ module DTK
           Node.start_instances(opts[:ret_nodes_to_start])
         end
 
+        if assembly_wide_node = assembly_instance.has_assembly_wide_node?
+          assembly_wide_node.update_admin_op_status!(:running)
+        end
+
         execute_task(task)
 
         rest_ok_response task_id: task.id

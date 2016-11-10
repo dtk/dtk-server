@@ -110,9 +110,6 @@ module DTK; class Task
     end
 
     def self.create_for_delete_from_database(assembly, component, node, opts = {})
-      task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
-      ret = create_top_level_task(task_mh, assembly, task_action: 'delete_from_database')
-
       unless node.is_a?(Node)
         if node.eql?('assembly_wide')
           node = assembly.has_assembly_wide_node?
@@ -122,12 +119,27 @@ module DTK; class Task
         end
       end
 
-      # node = node.eql?('assembly_wide') ? assembly.has_assembly_wide_node? : assembly.get_node?([:eq, :display_name, node])
+      task_name = delete_from_db_task_name(assembly, component, node)
+      task_mh   = target_idh_from_assembly(assembly).create_childMH(:task)
+      ret       = create_top_level_task(task_mh, assembly, task_action: task_name)
+
       executable_action = Action::DeleteFromDatabase.create_hash(assembly, component, node, opts)
       return executable_action if opts[:return_executable_action]
       subtask = create_new_task(task_mh, executable_action: executable_action)
       ret.add_subtask(subtask)
       ret
+    end
+
+    def self.delete_from_db_task_name(assembly, component, node)
+      what =
+        if component
+          component.get_field?(:display_name)
+        elsif node
+          node.get_field?(:display_name)
+        else
+          assembly.get_field?(:display_name)
+        end
+      "delete '#{what}' from database"
     end
 
     def self.create_for_command_and_control_action(assembly, action, params, node, opts = {})

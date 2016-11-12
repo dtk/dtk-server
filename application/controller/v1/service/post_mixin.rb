@@ -118,9 +118,10 @@ module DTK
       end
 
       def delete
-        new_client = boolean_request_params(:new_client)
+        recursive = boolean_request_params(:recursive)
         opts = Opts.new(delete_action: 'delete', delete_params: [assembly_instance.id_handle()])
-        opts.merge!(recursive: false, new_client: new_client)
+        opts.merge!(:recursive => recursive)
+
         assembly_instance.exec__delete(opts)
 
         rest_ok_response

@@ -1,30 +1,32 @@
 ---
 dsl_version: 1.0.0
-name: new_dtk_client_test_case_05
+name: stda_test_case_12
 dependencies:
   aws/ec2: master
   puppetlabs/stdlib: master
+  puppetlabs/wget: master
+components:
+- wget:
+    attributes:
+      version: 1.0.0
 nodes:
-  node:
+  single_node:
     attributes:
       image: precise_hvm
       size: micro
     components:
     - stdlib
-  new_node:
-    attributes:
-      image: precise_hvm
-      size: micro
-    components:
-    - stdlib
+    - wget:
+        attributes:
+          version: 1.0.0
 workflows:
   create:
     subtasks:
+    - name: host aggregator
+      components:
+      - wget
     - name: create node
-      node: node
+      node: single_node
       components:
       - stdlib
-    - name: create new node
-      node: new_node
-      components:
-      - stdlib
+      - wget

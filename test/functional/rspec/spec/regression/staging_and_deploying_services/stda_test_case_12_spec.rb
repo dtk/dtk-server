@@ -1,74 +1,102 @@
 #!/usr/bin/env ruby
 # Test Case 12: Ability to add and delete components on assembly level and set their attributes
 
-require 'rubygems'
-require 'rest_client'
-require 'pp'
-require 'json'
-require 'awesome_print'
 require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
-require './lib/parameters_setting_spec'
-require './lib/node_operations_spec'
+require './lib/dtk_cli_spec'
 
-STDOUT.sync = true
+initial_module_location = "./spec/regression/staging_and_deploying_services/resources/stda_test_case_12_1_dtk.module.yaml"
+updated_components_location = "./spec/regression/staging_and_deploying_services/resources/stda_test_case_12_2_dtk.service.yaml"
+deleted_components_location = "./spec/regression/staging_and_deploying_services/resources/stda_test_case_12_3_dtk.service.yaml"
 
-service_name = 'stda_test_case_12_instance'
-assembly_name = 'bootstrap::test1'
-node_name = 'test1'
-component_name = 'r8:ruby'
-components = ['ruby', 'test1/ruby']
-attribute_name = 'ruby/version'
-attribute_value = '2.1.2'
-dtk_common = Common.new(service_name, assembly_name)
+module_name = 'newclient:stda_test_case_12'
+module_location = '~/modules/newclient/stda_test_case_12'
+service_location = "~/dtk/"
+service_name = 'stda_test_case_12'
+assembly_name = 'simple'
+node_name = 'sigle_node'
+component_name = 'puppetlabs:wget'
+component_to_check_1 = 'wget'
+component_to_check_2 = 'test1/wget'
+attributes_to_check = {'wget/version' => '1.0.0', 'test1/wget/version' => '1.0.0' }
+full_service_location = service_location + service_name
+dtk_common = Common.new('', '')
 
 describe '(Staging And Deploying Assemblies) Test Case 12: Ability to add and delete components on assembly level and set their attributes' do
   before(:all) do
     puts '********************************************************************************************************************************', ''
   end
 
-  context "Stage service function on #{assembly_name} assembly" do
-    include_context 'Stage', dtk_common
+  context "Setup initial module on filesystem" do
+    include_context "Setup initial module on filesystem", initial_module_location, module_location
   end
 
-  context 'List services after stage' do
-    include_context 'List services after stage', dtk_common
+  context "Install module" do
+    include_context "Install module", module_name, module_location
   end
 
-  context 'Add components to service instance' do
-    include_context 'Add specific component to service instance', dtk_common, component_name
+  context "List assemblies contained in this module" do
+    include_context "List assemblies", module_name, assembly_name, dtk_common
   end
 
-  context 'Add components to service node' do
-    include_context 'Add specific component to service node', dtk_common, node_name, component_name
+  context "Stage assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
-  context "List components on #{service_name} service" do
-    include_context 'List components', dtk_common, components
+  context 'List service instances after stage' do
+    include_context 'List service instances after stage', dtk_common, service_name
   end
 
-  context 'Set attribute on service level component' do
-    include_context 'Set attribute on service level component', dtk_common, attribute_name, attribute_value
+  context "Change content of service instance on local filesystem" do
+    include_context "Change content of service instance on local filesystem", full_service_location, updated_components_location
   end
 
-  context 'Set attribute on node level component' do
-    include_context 'Set attribute', dtk_common, attribute_name, attribute_value
+  context "Push service instance changes" do
+    include_context "Push service instance changes", service_name, full_service_location
   end
 
-  context 'Delete component from service instance' do
-    include_context 'Delete component from service', dtk_common, nil, components[0]
+  context "Check component exist in service instance" do
+    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_1
   end
 
-  context 'Delete component from service node' do
-    include_context 'Delete component from service', dtk_common, node_name, components[0]
+  context "Check component exist in service instance" do
+    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_2
   end
 
-  context 'Delete and destroy service function' do
-    include_context 'Delete services', dtk_common
+  context "Check attributes correct in service instance" do
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
   end
 
-  context 'List services after delete' do
-    include_context 'List services after delete', dtk_common
+  context "Change content of service instance on local filesystem" do
+    include_context "Change content of service instance on local filesystem", full_service_location, deleted_components_location
+  end
+
+  context "Push service instance changes" do
+    include_context "Push service instance changes", service_name, full_service_location
+  end
+
+  context "NEG - Check component exist in service instance" do
+    include_context "NEG - Check component exist in service instance", dtk_common, service_name, component_to_check_1
+  end
+
+  context "NEG - Check component exist in service instance" do
+    include_context "NEG - Check component exist in service instance", dtk_common, service_name, component_to_check_2
+  end
+
+  context "NEG - Check attributes correct in service instance" do
+    include_context "NEG - Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
+  end
+
+  context "Uninstall module" do
+    include_context "Uninstall module", module_name, module_location
+  end
+
+  context "Delete initial module on filesystem" do
+    include_context "Delete initial module on filesystem", module_location
   end
 
   after(:all) do

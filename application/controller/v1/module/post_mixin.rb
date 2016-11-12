@@ -57,6 +57,19 @@ module DTK
         rest_ok_response CommonModule.update_from_repo(:base_service, get_default_project, commit_sha, opts)
       end
 
+      def update_dependency_from_remote
+        namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
+        version = request_params(:version)
+        local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
+        diffs_summary = ret_diffs_summary
+
+        component_module = create_obj(:full_module_name, ComponentModule)
+        module_dsl_info = component_module.update_model_from_clone_changes?(nil, diffs_summary, version)
+        response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs)
+
+        rest_ok_response response
+      end
+
     end
   end
 end

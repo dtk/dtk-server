@@ -80,12 +80,13 @@ DTK::ReactorRoute.draw do
   get 'api/v1/modules/module_dependencies'       => 'v1::module/module_dependencies'
   get 'api/v1/modules/remote_module_info'        => 'v1::module/remote_module_info'
 
-  post 'api/v1/modules/create_empty_module'      => 'v1::module/create_empty_module'
-  post 'api/v1/modules/delete'                   => 'v1::module/delete'
-  post 'api/v1/modules/install_component_module' => 'v1::module/install_component_module'
-  post 'api/v1/modules/install_service_module'   => 'v1::module/install_service_module'
-  post 'api/v1/modules/update_from_repo'         => 'v1::module/update_from_repo'
-  post 'api/v1/modules/list_remote'              => 'v1::module/list_remote'
+  post 'api/v1/modules/create_empty_module'           => 'v1::module/create_empty_module'
+  post 'api/v1/modules/delete'                        => 'v1::module/delete'
+  post 'api/v1/modules/install_component_module'      => 'v1::module/install_component_module'
+  post 'api/v1/modules/install_service_module'        => 'v1::module/install_service_module'
+  post 'api/v1/modules/update_from_repo'              => 'v1::module/update_from_repo'
+  post 'api/v1/modules/list_remote'                   => 'v1::module/list_remote'
+  post 'api/v1/modules/update_dependency_from_remote' => 'v1::module/update_dependency_from_remote'
   ########## end: Modules
 
   # TODO: DTK-2554; temp while initial testing

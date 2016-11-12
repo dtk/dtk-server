@@ -260,7 +260,7 @@ shared_context 'Setup initial module on filesystem' do |initial_module_location,
     puts 'Setup initial module on filesystem', '-------------------------------'
     pass = true
     filename = initial_module_location.split('/').last
-    `mkdir #{module_location} && cp #{initial_module_location} #{module_location} && mv #{module_location}/#{filename} #{module_location}/dtk.module.yaml`
+    `mkdir -p #{module_location} && cp #{initial_module_location} #{module_location} && mv #{module_location}/#{filename} #{module_location}/dtk.module.yaml`
     value = system("ls #{module_location}/dtk.module.yaml")
     pass = false if value == false
     puts ''

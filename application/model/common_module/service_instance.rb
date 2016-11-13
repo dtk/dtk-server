@@ -30,12 +30,8 @@ module DTK
         ModuleRepoInfo.new(service_module_branch)
       end
 
-      # returns [aug_module_branch, was_created(Boolean)]
-      def get_or_create_aug_branch_from_base_branch(component_module, base_version)
-        AssemblyModule::Component.new(assembly_instance).get_or_create_aug_branch_from_base_branch(component_module, base_version)
-      end
-
-      def create_assembly_instance_objects(component_module, base_version)
+      # Returns an augmented module branch pointing to module branch for nested mdoule
+      def get_or_create_for_nested_module(component_module, base_version)
         AssemblyModule::Component.new(assembly_instance).create_module_for_service_instance?(component_module, base_version: base_version, ret_augmented_module_branch: true)
       end
 

@@ -46,14 +46,11 @@ module DTK; module CommonDSL
         end
 
         def process(diff_result)
-          aug_service_specific_mb, first_time_created = @service_instance.get_or_create_aug_branch_from_base_branch(nested_component_module, base_version)
+          aug_service_specific_mb = @service_instance.get_or_create_for_nested_module(nested_component_module, base_version)
           # Push changes to impacted component modules repo
           ComponentModuleRepoSync.push_to_component_module(@service_module_branch, aug_service_specific_mb)
           # TODO: DTK-2708: until use dtk-dsl to parse nested module dsl; need to do push first since'
           # parsing looks at component module not the service isnatnce repo
-          # The method create_instance_objects creates assembly instance objects if needed
-          @service_instance.create_assembly_instance_objects(nested_component_module, base_version) if first_time_created
-
           dsl_changed = false
           if impacted_dsl_files = @nested_modules_info.restrict_to_dsl_files?
             pp [:impacted_dsl_files, impacted_dsl_files]
@@ -64,8 +61,7 @@ module DTK; module CommonDSL
           # This has to be done after all changes have been pushed to nested modules
           update_opts =  { meta_file_changed: dsl_changed, service_instance_module: true }
           AssemblyModule::Component.update_impacted_component_instances(assembly_instance, nested_component_module, aug_service_specific_mb, update_opts)
-          
-          # TODO: update diff_result to indicate module taht was updated 
+          # TODO: update diff_result to indicate module that was updated 
         end
 
         private

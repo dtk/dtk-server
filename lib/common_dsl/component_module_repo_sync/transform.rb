@@ -18,14 +18,16 @@
 module DTK
   module CommonDSL
     class ComponentModuleRepoSync
-      class TransformFromComponentModule
+      class Transform
         def initialize(service_module_branch, aug_component_module_branch)
           @service_module_branch       = service_module_branch
           @aug_component_module_branch = aug_component_module_branch
         end
         private :initialize
 
-        def self.transform_nested_modules(service_module_branch, aug_component_module_branches)
+        # The method transform_service_instance_nested_modules iterates over all the nested modules on the service instances
+        # and converts from 'component module form' to 'nested module form'
+        def self.transform_service_instance_nested_modules(service_module_branch, aug_component_module_branches)
           aug_component_module_branches.each { |aug_component_mb| new(service_module_branch, aug_component_mb).transform_nested_module }
           commit_all_changes(service_module_branch)
         end
@@ -39,6 +41,12 @@ module DTK
           Generate::DirectoryGenerator.add_files(@service_module_branch, file_path__content_array, donot_push_changes: true, no_commit: true)
           delete_nested_module_file(component_module_dsl_filename)
           delete_nested_module_file(ModuleRefs.meta_filename_path)
+        end
+
+        # The method update_and_transform_sync_branch updates the sync on service module with content on service_module_branch
+        # and then transforms to component module form (from nested module form)
+        def self.update_and_transform_sync_branch(service_module_branch, sync_branch_name)
+          Log.error("Need to write update_and_transform_sync_branch")
         end
 
         private

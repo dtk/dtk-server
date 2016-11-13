@@ -159,7 +159,6 @@ module DTK; module ModuleCommonMixin
     #   :delete_existing_branch (Boolean; default: false)
     #   :frozen
     #   :inherit_frozen_from_base
-    #   :no_dsl_processing
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_module_branch_with_version(base_version)
         fail ErrorUsage.new("There is no module (#{pp_module_name}) in the workspace")

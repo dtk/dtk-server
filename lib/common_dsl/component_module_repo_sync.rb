@@ -19,7 +19,7 @@ module DTK
   module CommonDSL
     # Methods to sync to and from the service instance repo to the component module repos using git subtree operations
     class ComponentModuleRepoSync
-      require_relative('component_module_repo_sync/transform_from_component_module')
+      require_relative('component_module_repo_sync/transform')
 
       def initialize(service_module_branch)
         @service_module_branch = service_module_branch
@@ -30,7 +30,7 @@ module DTK
         new(service_module_branch).push_to_component_module(aug_component_module_branch)
       end
       def push_to_component_module(aug_component_module_branch)
-        # TransformFromComponentModule.foo(...)
+        Transform.update_and_transform_sync_branch(@service_module_branch, sync_branch_name)
         git_subtrees_push_from_sync_branch(aug_component_module_branch)
       end
 
@@ -40,7 +40,7 @@ module DTK
       end
       def pull_from_component_modules(aug_component_module_branches)
         git_subtrees_pull_from_component_modules(aug_component_module_branches)
-        TransformFromComponentModule.transform_nested_modules(service_module_branch, aug_component_module_branches)
+        Transform.transform_service_instance_nested_modules(service_module_branch, aug_component_module_branches)
       end
 
       def self.delete_sync_repo_branch?(service_module_branch)

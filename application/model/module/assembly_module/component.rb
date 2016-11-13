@@ -49,19 +49,6 @@ module DTK; class AssemblyModule
       end
     end
 
-    # returns [aug_module_branch, was_created(Boolean)]
-
-    def get_or_create_aug_branch_from_base_branch(component_module, base_version)
-      was_created = false
-      am_version = assembly_module_version
-      unless component_module.get_workspace_module_branch(am_version)
-        component_module.create_new_version(base_version, am_version, inherit_frozen_from_base: true)
-        was_created = true
-      end
-      aug_module_branch = component_module.get_augmented_module_branch_with_version(am_version).augment_with_component_module!
-      [aug_module_branch, was_created]
-    end
-
     # opts can have keys
     #  :base_version
     def self.create_module_for_service_instance__for_pull?(assembly, component_module, opts = {})

@@ -45,10 +45,15 @@ module DTK; module CommonDSL
               # - removes any step that mentions the component
               # - if delete action defined for component then puts an explicit delete action in workflow
               task_template_processor = TaskTemplate.new(assembly_instance, component, node)
-              task_template_processor.insert_explict_delete_action?(force_delete: opts[:force_delete])
-              task_template_processor.remove_component_actions? unless component[:component_type].eql?('ec2__node')
 
-              component.update_from_hash_assignments(to_be_deleted: true)        
+              if opts[:force_delete] || node.get_admin_op_status.eql?('pending') || !task_template_processor.component_delete_action_def?
+                assembly_instance.delete_component(component.id_handle, node[:id])
+              else
+                task_template_processor.insert_explict_delete_action?(force_delete: opts[:force_delete])
+                task_template_processor.remove_component_actions? unless component[:component_type].eql?('ec2__node')
+
+                component.update_from_hash_assignments(to_be_deleted: true)
+              end
 
               result.add_item_to_update(:assembly)
               result.add_item_to_update(:workflow)

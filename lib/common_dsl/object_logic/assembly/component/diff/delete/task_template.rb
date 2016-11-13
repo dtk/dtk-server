@@ -36,7 +36,7 @@ module DTK
           if component_delete_action_def?
             # TODO: DTK-2732: Only run delete action on assembly level node if it has been converged
             # Best way to treat this is by keeping component info on what has been converged
-            if @node.is_assembly_wide_node? or  @node.get_admin_op_status != 'pending'
+            if @node.is_assembly_wide_node? or @node.get_admin_op_status != 'pending'
               insert_explict_delete_action
             end
           end
@@ -77,8 +77,6 @@ module DTK
           Task::Template::ConfigComponents.update_when_added_component_or_action?(@assembly_instance, @node, @component, add_delete_action_opts)
 =end
 
-        private
-        
         def component_delete_action_def?
           DTK::Component::Instance.create_from_component(@component).get_action_def?('delete')
         end

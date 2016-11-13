@@ -158,6 +158,8 @@ module DTK; module ModuleCommonMixin
     #   :checkout_branch
     #   :delete_existing_branch (Boolean; default: false)
     #   :frozen
+    #   :inherit_frozen_from_base
+    #   :no_dsl_processing
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_module_branch_with_version(base_version)
         fail ErrorUsage.new("There is no module (#{pp_module_name}) in the workspace")
@@ -171,7 +173,7 @@ module DTK; module ModuleCommonMixin
       opts_repo_update = Aux.hash_subset(opts, [:sha, :checkout_branch, :delete_existing_branch]).merge(base_version: base_version)
       new_version_repo, new_version_sha, new_branch_name = aug_base_branch.create_new_branch_from_this_branch?(get_project, aug_base_branch.repo, new_version, opts_repo_update)
       
-      opts_create_branch = opts.merge(
+      opts_type_specific_create = opts.merge(
         ancestor_branch_idh: aug_base_branch.id_handle, 
         current_sha: new_version_sha, 
         new_branch_name: new_branch_name,
@@ -179,12 +181,12 @@ module DTK; module ModuleCommonMixin
       )
 
       if opts[:inherit_frozen_from_base]
-        opts_create_branch[:frozen] = aug_base_branch[:frozen] if opts_create_branch[:frozen].nil?
+        opts_type_specific_create[:frozen] = aug_base_branch[:frozen] if opts_type_specific_create[:frozen].nil?
       end
 
-      new_branch = create_new_version__type_specific(new_version_repo, new_version, opts_create_branch)
-      ModuleRefs.clone_component_module_refs(aug_base_branch, new_branch)
-      new_branch
+      new_module_branch = create_new_version__type_specific(new_version_repo, new_version, opts_type_specific_create)
+      ModuleRefs.clone_component_module_refs(aug_base_branch, new_module_branch)
+      new_module_branch
     end
   end
 end; end

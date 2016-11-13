@@ -30,13 +30,15 @@ module DTK
         ModuleRepoInfo.new(service_module_branch)
       end
 
-      # opts can have keys:
-      #   :base_version
-      # Returns a ModuleBranch::Augmented object 
-      def get_or_create_service_specific_module_objects(component_module, opts = {})
-        AssemblyModule::Component.new(assembly_instance).create_module_for_service_instance?(component_module, { ret_augmented_module_branch: true }.merge(opts))
+      # returns [aug_module_branch, was_created(Boolean)]
+      def get_or_create_aug_branch_from_base_branch(component_module, base_version)
+        AssemblyModule::Component.new(assembly_instance).get_or_create_aug_branch_from_base_branch(component_module, base_version)
       end
-      
+
+      def create_assembly_instance_objects(component_module, base_version)
+        AssemblyModule::Component.new(assembly_instance).create_module_for_service_instance?(component_module, base_version: base_version, ret_augmented_module_branch: true)
+      end
+
       def self.create_empty_module(project, local_params, opts = {})
         opts = opts.merge(return_module_branch: true)
         service_module_branch = create_module(project, local_params, opts)

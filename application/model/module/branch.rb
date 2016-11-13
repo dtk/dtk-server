@@ -384,10 +384,16 @@ module DTK
       set_sha(commit_sha) # returns commit_sha to calling fn
     end
 
-    def push_subtree_to_component_module(prefix, aug_component_module_branch)
+    # opts can have keys:
+    #   source_branch_name
+    def push_subtree_to_component_module(prefix, aug_component_module_branch, opts = {})
       external_repo   = aug_component_module_branch.repo
       external_branch = aug_component_module_branch.branch_name
-      RepoManager.push_squashed_subtree(prefix, external_repo, external_branch, self)
+      repo_context = self
+      if opts[:source_branch_name]
+        repo_context = { repo_dir: get_repo.display_name, branch: opts[:source_branch_name] }
+      end
+      RepoManager.push_squashed_subtree(prefix, external_repo, external_branch, repo_context)
       RepoManager.pull_changes(aug_component_module_branch)
       aug_component_module_branch.update_current_sha_from_repo!
     end

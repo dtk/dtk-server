@@ -41,6 +41,9 @@ module DTK; class BaseModule; class UpdateModule
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch = module_branch_idh.create_object()
 
+      ret.merge!(module_branch_idh: module_branch_idh)
+      return ret if opts[:no_dsl_processing]
+
       # process any external refs if one of the flags :process_provider_specific_dependencies,:set_external_refs is true
       opts_external_refs = Aux.hash_subset(opts, [:process_provider_specific_dependencies, :set_external_refs])
       unless opts_external_refs.empty?
@@ -78,7 +81,7 @@ module DTK; class BaseModule; class UpdateModule
         ret.merge!(dsl_updated_info: dsl_updated_info)
       end
 
-      ret.merge(module_branch_idh: module_branch_idh, dsl_created_info: dsl_created_info)
+      ret.merge(dsl_created_info: dsl_created_info)
     end
 
     private

@@ -30,10 +30,8 @@ module DTK
         new(service_module_branch).push_to_component_module(aug_component_module_branch)
       end
       def push_to_component_module(aug_component_module_branch)
-        subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: aug_component_module_branch.component_module_name).base_dir
-        service_module_branch.push_subtree_to_component_module(subtree_prefix, aug_component_module_branch) do 
-          # TODO: transform_to_component_module_repo_form
-        end
+        # TransformFromComponentModule.foo(...)
+        git_subtrees_push_from_sync_branch(aug_component_module_branch)
       end
 
       def self.pull_from_component_modules(service_module_branch, aug_component_module_branches)
@@ -82,6 +80,11 @@ module DTK
         Generate::DirectoryGenerator.add_remote_files(add_remote_files_info, repo_dir: service_instance_repo_name, branch_name: sync_branch_name)
       end
 
+      def git_subtrees_push_from_sync_branch(aug_component_module_branch)
+        subtree_prefix = FileType::ServiceInstance::NestedModule.new(module_name: aug_component_module_branch.component_module_name).base_dir
+        service_module_branch.push_subtree_to_component_module(subtree_prefix, aug_component_module_branch, source_branch_name: sync_branch_name) 
+      end
+
       SYNC_BRANCH_PREFIX = 'git_subtree_sync'
       def sync_branch_name 
         "#{SYNC_BRANCH_PREFIX}_#{service_module_branch[:branch]}"
@@ -102,7 +105,7 @@ module DTK
           service_module_branch.get_repo
         end
       end
-        
+
     end
   end
 end

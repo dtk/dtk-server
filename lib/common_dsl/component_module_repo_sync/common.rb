@@ -18,9 +18,17 @@
 module DTK
   module CommonDSL
     class ComponentModuleRepoSync
-      class Transform
-        require_relative('transform/sync_branch')
-        require_relative('transform/service_instance')
+      module Common
+        NestedModuleFileType = FileType::ServiceInstance::NestedModule
+
+        def self.nested_module_name(aug_component_module_branch)
+          aug_component_module_branch.component_module_name
+        end
+
+        def self.nested_module_dir(aug_component_module_branch)
+          NestedModuleFileType.new(module_name: nested_module_name(aug_component_module_branch)).base_dir
+        end
+
       end
     end
   end

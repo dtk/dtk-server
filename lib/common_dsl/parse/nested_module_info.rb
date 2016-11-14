@@ -19,17 +19,20 @@ module DTK
   module CommonDSL
     module Parse
       class NestedModuleInfo
-        attr_reader :module_name
-        def initialize(module_name, impacted_file_paths) 
-          @module_name    = module_name
-          @impacted_files = impacted_file_paths.map { |path| ImpactedFile.new(path) }
+        require_relative('nested_module_info/impacted_file')
+
+        attr_reader :module_name, :impacted_files 
+        def initialize(service_module_branch, module_name, impacted_file_paths) 
+          @service_module_branch = service_module_branch
+          @module_name           = module_name
+          @impacted_files        = impacted_file_paths.map { |path| ImpactedFile.new(self, path) }
         end
         private :initialize
         
         # returns array of Parse::NestedModule::Info objects or nil if none
-        def self.impacted_modules_info?(all_impacted_file_paths)
+        def self.impacted_modules_info?(service_module_branch, all_impacted_file_paths)
           ret = FileType::MatchingFiles.matching_files_array(FileType::ServiceInstance::NestedModule, all_impacted_file_paths).map do |dsl_matching_files_obj|
-            new(dsl_matching_files_obj.file_type_instance.module_name, dsl_matching_files_obj.file_paths)
+            new(service_module_branch, dsl_matching_files_obj.file_type_instance.module_name, dsl_matching_files_obj.file_paths)
           end
           ret.empty? ? nil : ret
         end
@@ -37,34 +40,17 @@ module DTK
         def restrict_to_dsl_files?
           impacted_dsl_files = @impacted_files.select { |impacted_file| impacted_file.is_dsl_file? }
           unless impacted_dsl_files.empty?
-            self.class.new(@module_name, impacted_dsl_files.map { |impacted_file| ImpactedFile.new(impacted_file.path, is_dsl_file: true) } )
+            impacted_files = impacted_dsl_files.map { |impacted_file| ImpactedFile.new(self, impacted_file.path, is_dsl_file: true) } 
+            self.class.new(@service_module_branch, @module_name, impacted_files)
           end
         end
         
         def impacted_file_paths
           @impacted_files.map { |impacted_file| impacted_file.path }
         end
-        
-        class ImpactedFile
-          attr_reader :path
-          # opts can have keys
-          #  :is_dsl_file
-          def initialize(path, opts = {})
-            @path        = path
-            @is_dsl_file = opts[:is_dsl_file] || ret_is_dsl_file?(path)
-          end
-          
-          def is_dsl_file?
-            @is_dsl_file
-          end
-          
-          private
-         
-          def ret_is_dsl_file?(path)
-            # TODO: DTK-2707  use dtk-dsl library
-            !!(path =~ /dtk\.model\.yaml$/)
-          end
-          
+
+        def top_nested_module_dsl_path
+          @top_nested_module_dsl_path ||= DSL::FileType::ServiceInstance::NestedModule::DSLFile::Top.new(module_name: @module_name).canonical_path
         end
       end
     end

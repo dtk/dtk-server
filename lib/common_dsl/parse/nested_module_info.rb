@@ -21,11 +21,13 @@ module DTK
       class NestedModuleInfo
         require_relative('nested_module_info/impacted_file')
 
-        attr_reader :module_name, :impacted_files 
-        def initialize(service_module_branch, module_name, impacted_file_paths) 
+        attr_reader :service_module_branch, :module_name, :impacted_files 
+        # opts can have keys
+        #  :is_dsl_file
+        def initialize(service_module_branch, module_name, impacted_file_paths, opts = {}) 
           @service_module_branch = service_module_branch
           @module_name           = module_name
-          @impacted_files        = impacted_file_paths.map { |path| ImpactedFile.new(self, path) }
+          @impacted_files        = impacted_file_paths.map { |path| ImpactedFile.new(self, path, is_dsl_file: opts[:is_dsl_file]) }
         end
         private :initialize
         
@@ -40,8 +42,8 @@ module DTK
         def restrict_to_dsl_files?
           impacted_dsl_files = @impacted_files.select { |impacted_file| impacted_file.is_dsl_file? }
           unless impacted_dsl_files.empty?
-            impacted_files = impacted_dsl_files.map { |impacted_file| ImpactedFile.new(self, impacted_file.path, is_dsl_file: true) } 
-            self.class.new(@service_module_branch, @module_name, impacted_files)
+            impacted_file_paths = impacted_dsl_files.map { |impacted_file| impacted_file.path }
+            self.class.new(@service_module_branch, @module_name, impacted_file_paths, is_dsl_file: true)
           end
         end
         

@@ -21,12 +21,16 @@ module DTK
       module Common
         NestedModuleFileType = FileType::ServiceInstance::NestedModule
 
-        def self.nested_module_name(aug_component_module_branch)
-          aug_component_module_branch.component_module_name
+        def self.nested_module_dir(nested_module_name)
+          NestedModuleFileType.new(module_name: nested_module_name).base_dir
         end
 
-        def self.nested_module_dir(aug_component_module_branch)
-          NestedModuleFileType.new(module_name: nested_module_name(aug_component_module_branch)).base_dir
+        def self.nested_module_top_dsl_file_type
+          NestedModuleFileType::DSLFile::Top
+        end
+
+        def self.nested_module_top_dsl_path(nested_module_name)
+          nested_module_top_dsl_file_type.new(module_name: nested_module_name).canonical_path
         end
 
       end

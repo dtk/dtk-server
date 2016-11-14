@@ -21,6 +21,21 @@ module DTK
       class Transform
         require_relative('transform/sync_branch')
         require_relative('transform/service_instance')
+
+        private
+
+        COMPONENT_MODULE_DSL_FILENAME = 'dtk.model.yaml'
+        def component_module_dsl_filename
+          COMPONENT_MODULE_DSL_FILENAME
+        end
+
+        def module_refs_filename
+          self.class.module_refs_filename
+        end
+        def self.module_refs_filename
+          @module_refs_filename ||= ModuleRefs.meta_filename_path
+        end
+
       end
     end
   end

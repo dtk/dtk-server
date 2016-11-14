@@ -15,10 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  class CommonDSL::ComponentModuleRepoSync
+module DTK; module CommonDSL
+  class ComponentModuleRepoSync
     class Transform
-      class SyncBranch 
+      class SyncBranch < self
+        require_relative('sync_branch/syntatic_transform')
+
         def initialize(service_module_branch, sync_branch_name, nested_module_info)
           @service_module_branch = service_module_branch
           @sync_branch_name      = sync_branch_name
@@ -50,18 +52,34 @@ module DTK
           RepoManager.add_all_files_and_commit({ commit_msg: "Synching with service instance changes" }, sync_branch_repo_context)
         end
 
-        NESTED_MODULE_DSL_FILENAME = 'dtk.nested_module.yaml'
         def transform_dsl_files_in_synch_branch(nested_module_dsl_info)
           # TODO: only treating case where this file is not split
           impacted_dsl_files = nested_module_dsl_info.impacted_files
-          not_treating = false
-          if impacted_dsl_files.size == 1
-            pp [:impacted_dsl_file, impacted_dsl_files.first]
-          else
-            not_treating = true 
+          
+          unless impacted_dsl_file = impacted_dsl_files.size == 1 && impacted_dsl_files.first
+            fail Error, "Not handling nested dsl files broken into multiple files" if not_treating
           end
-          fail Error, "Not handling nested dsl files broken into multiple files" if not_treating
-          raise 'here'
+
+          component_module_dsl_text, module_ref_text = SyntaticTransform.transform(impacted_dsl_file)
+          file_path__content_array = [{ path: component_module_dsl_path, content: component_module_dsl_text }]
+          if module_ref_text
+            file_path__content_array << { path: module_ref_path, content: module_ref_text}
+          end
+          pp [:transform_dsl_files_in_synch_branch, file_path__content_array]
+          RepoManager.add_files(sync_branch_repo_context, file_path__content_array)
+          # TODO: delete  dtk.nested_module.yaml; also might want to always put  module_ref_text in since it would have been removed for transform
+          raise 'break to test update to nested module dsl'
+        end
+
+        def component_module_dsl_path
+          "#{nested_module_dir}/#{component_module_dsl_filename}"
+        end
+        def module_ref_path
+          "#{nested_module_dir}/#{module_refs_filename}"
+        end
+
+        def nested_module_dir           
+          @nested_module_dir ||= Common.nested_module_dir(@nested_module_info.module_name)
         end
 
         def sync_branch_repo_context
@@ -86,4 +104,4 @@ module DTK
       end
     end
   end
-end
+end; end

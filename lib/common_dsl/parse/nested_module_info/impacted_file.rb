@@ -34,12 +34,12 @@ module DTK
         def is_dsl_file?
           @is_dsl_file
         end
-        
-        private
 
         def content
           @content ||= RepoManager.get_file_content(@path, @parent.service_module_branch)
         end
+
+        private
 
         # TODO: DTK-2707 use dtk-dsl library rather than hard coding here
         TOP_COMPONENT_MODULE_DSL_FILE_REGEXP = /dtk\.model\.yaml$/

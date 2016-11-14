@@ -64,7 +64,7 @@ module DTK
         aug_component_module_branches.each do |aug_component_mb|
           source_repo         = aug_component_mb.repo
           source_branch_name  = aug_component_mb.branch_name
-          nested_module_dir   = Common.nested_module_dir(aug_component_mb)
+          nested_module_dir   = Common.nested_module_dir(aug_component_mb.component_module)
           add_remote_files_info.add_git_subtree_info!(nested_module_dir, source_repo, source_branch_name) 
         end
         Generate::DirectoryGenerator.add_remote_files(add_remote_files_info, repo_dir: service_instance_repo_name, branch_name: sync_branch_name)

@@ -626,10 +626,6 @@ module DTK; class  Assembly
     end
 
     def exec__delete(opts = {})
-      require 'debugger'
-      Debugger.wait_connection = true
-      Debugger.start_remote(nil, 7020)
-      debugger
       task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
       ret = {
         assembly_instance_id: self.id(),

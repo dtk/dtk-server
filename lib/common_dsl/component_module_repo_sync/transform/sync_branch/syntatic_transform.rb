@@ -18,26 +18,52 @@
 module DTK; module CommonDSL
   class ComponentModuleRepoSync
     class Transform::SyncBranch 
-       # TODO: DTK-2707: replace this with semantic parse in dtk-dsl 
       module SyntaticTransform
-        # returns [component_module_dsl_text, module_ref_text]; module_ref_text can be nil
+        # returns [component_module_dsl_text, module_ref_text]
         def self.transform(impacted_dsl_file)
           hash_content = hash_content(impacted_dsl_file)
-          # TODO: get top keys 'dependent_modules' an d'components' and transform and convert to yaml
-          # TODO: stub
-          [' ', ' ']
+         [component_module_dsl_hash(hash_content), module_ref_hash(hash_content)].map { |hash| yaml_generate(hash) }
         end
-        
-        # "dependent_modules"=>{"dtk/host"=>"master", "puppetlabs/stdlib"=>"4.3.1"},
-        
+
         private
         
         def self.hash_content(impacted_file)
-          # TODO: see if can avoid calling YamlHelper and instead call method on FileObj 
           file_obj = Parse::FileObj.new(Common.nested_module_top_dsl_file_type, impacted_file.path, content: impacted_file.content) 
           ::DTK::DSL::YamlHelper.parse(file_obj)
         end
 
+        def self.yaml_generate(hash)
+          ::DTK::DSL::YamlHelper.generate(hash)
+        end
+
+        DSL_MAPPING = {
+          'dsl_version' => lambda { |dsl_version| dsl_version },
+          'module'      => lambda { |mod| mod.split('/').last }, # first part is naemsapce
+          'components'  => lambda { |components| components}
+        }
+        def self.component_module_dsl_hash(hash_content)
+          DSL_MAPPING.inject({}) do |h, (key, func)| 
+            source_value = hash_content[key]
+            mapped_value = source_value && func.call(source_value)
+            h.merge(key =>  mapped_value)
+          end
+        end
+
+        def self.module_ref_hash(hash_content)
+          dependencies = hash_content['dependent_modules']
+          { 'component_modules' => dependencies && dependencies.inject({}) { |h, (dep, version)| h.merge(transform_dependency(dep, version)) } } 
+        end
+
+        # TODO: might use parse routine in dtk-dsl
+        def self.transform_dependency(dep, version)
+          namespace, mod = dep.split('/')
+          mapped_dep_value = { 'namespace' => namespace }
+          if version and version != 'master'
+            mapped_dep_value.merge!('version' => version)
+          end
+          { mod => mapped_dep_value }
+        end
+        
       end
     end
   end

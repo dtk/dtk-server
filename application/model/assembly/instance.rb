@@ -566,6 +566,7 @@ module DTK; class  Assembly
         # order components by 'delete' action inside assembly workflow if exists
         ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
         ordered_components.each do |component|
+          next if component.get_field?(:component_type).eql?('ec2__node')
           cmp_action = nil
           cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
           cmp_opts.merge!(delete_params: [component.id_handle, node.id()])
@@ -625,6 +626,10 @@ module DTK; class  Assembly
     end
 
     def exec__delete(opts = {})
+      require 'debugger'
+      Debugger.wait_connection = true
+      Debugger.start_remote(nil, 7020)
+      debugger
       task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
       ret = {
         assembly_instance_id: self.id(),
@@ -638,7 +643,7 @@ module DTK; class  Assembly
         service_instances << v[:display_name]
       end
       
-      if opts[:recursive].nil? && is_target_service_instance?
+      if !opts[:recursive] && is_target_service_instance?
         fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-f' to remove all." unless staged_instances.empty?
       end
 
@@ -701,6 +706,29 @@ module DTK; class  Assembly
         task.add_subtask(delete_assembly_subtask)
       end
       task
+    end
+
+    def uninstall(opts)
+      # if target service instance delete all dependent service instances first
+      if is_target_service_instance?
+        staged_instances = get_staged_service_instances(self)
+
+        if opts[:recursive]
+          staged_instances.each{ |instance| instance.uninstall(opts) }
+        elsif !staged_instances.empty?
+          service_instances = []
+          staged_instances.each{ |v| service_instances << v[:display_name] }
+          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-r' to remove all."
+        end
+      end
+
+      # do not allow to uninstall service instance if it's not empty
+      nodes = get_leaf_nodes(remove_assembly_wide_node: true)
+      if nodes.empty? && get_augmented_components.empty?
+        CommonModule::ServiceInstance.delete_from_model_and_repo(self)
+      else
+        fail ErrorUsage, "Service instance cannot be deleted because it is not empty. You have to execute 'dtk service delete' command first."
+      end
     end
 
     def create_task(opts)

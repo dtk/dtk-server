@@ -122,18 +122,22 @@ module DTK
       end
 
       def delete
+        recursive = boolean_request_params(:recursive)
+
         opts_hash = {
           delete_action: 'delete',
           delete_params: [assembly_instance.id_handle],
-          recursive: false,
+          recursive: recursive,
           donot_delete_assembly_from_database: true
         }
         assembly_instance.exec__delete(Opts.new(opts_hash))
+
         rest_ok_response
       end
 
       def uninstall
-        CommonModule::ServiceInstance.delete_from_model_and_repo(assembly_instance)
+        recursive = boolean_request_params(:recursive)
+        assembly_instance.uninstall(recursive: recursive)
         rest_ok_response
       end
 

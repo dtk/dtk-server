@@ -84,7 +84,7 @@ module DTK
       def self.start_instances(nodes)
         nodes.each do |node|
           aws_conn_from_node(node).server_start(node.instance_id())
-          node.update_admin_op_status!(:pending)
+          node.update_admin_op_status!(:pending) unless [:running, 'running'].include?(node.get_admin_op_status)
           Log.debug "Starting instance '#{node[:display_name]}', instance ID: '#{node.instance_id()}'"
         end
       end

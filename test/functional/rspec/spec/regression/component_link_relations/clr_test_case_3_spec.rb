@@ -58,8 +58,12 @@ describe '(Component link relations) Test Case 3: Fan-in scenario - $node.host_a
     include_context "NEG - Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_2
   end
 
-  context "Destroy service instance" do
-    include_context "Destroy service instance", service_location, service_name
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
   end
 
   after(:all) do

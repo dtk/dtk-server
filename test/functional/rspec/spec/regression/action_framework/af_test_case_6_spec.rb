@@ -22,7 +22,7 @@ expected_output_1 = {
   stderr: nil
 }
 
-node_images=['precise','wheezy','trusty','amazon','rhel6']
+node_images=['precise','trusty_hvm','amazon_hvm']
 
 describe '(Action Framework) Test Case 6: Service with five nodes that containt cmp with actions for tailing in nohup' do
   before(:all) do
@@ -51,14 +51,6 @@ describe '(Action Framework) Test Case 6: Service with five nodes that containt 
 
   context "Get task action details for action executed on #{node_images[2]} node" do
     include_context 'Get task action details', dtk_common, '2.3', [expected_output_1]
-  end
-
-  context "Get task action details for action executed on #{node_images[3]} node" do
-    include_context 'Get task action details', dtk_common, '2.4', [expected_output_1]
-  end
-
-  context "Get task action details for action executed on #{node_images[4]} node" do
-    include_context 'Get task action details', dtk_common, '2.5', [expected_output_1]
   end
 
   context 'Delete and destroy service function' do

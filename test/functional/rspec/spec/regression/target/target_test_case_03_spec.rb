@@ -91,6 +91,10 @@ describe "(Target) Test Case 03: Specified existing subnet id, vpc and security 
     include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
   context "Uninstall service instance" do
     include_context "Uninstall service instance", service_location, service_name
   end

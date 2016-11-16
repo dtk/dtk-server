@@ -69,6 +69,10 @@ describe '(Staging And Deploying Assemblies) Test Case 7: Stage simple node grou
     include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
   end
 
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
   context "Uninstall service instance" do
     include_context "Uninstall service instance", service_location, service_name
   end

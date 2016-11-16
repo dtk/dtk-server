@@ -87,6 +87,10 @@ describe '(Staging And Deploying Assemblies) Test Case 12: Ability to add and de
     include_context "NEG - Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
   end
 
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
   context "Uninstall service instance" do
     include_context "Uninstall service instance", service_location, service_name
   end

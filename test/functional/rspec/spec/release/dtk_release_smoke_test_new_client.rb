@@ -46,8 +46,12 @@ describe "DTK Server release smoke test with new client" do
     include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context "Destroy service instance" do
-    include_context "Destroy service instance", service_location, service_name
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
   end
 
   context "Uninstall module" do

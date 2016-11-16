@@ -96,6 +96,10 @@ describe "(New DTK client) Test Case 4: Test various options for service push" d
     include_context "Exec action/workflow", dtk_common, service_location, service_name, workflow_to_check
   end
 
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
   context "Uninstall service instance" do
     include_context "Uninstall service instance", service_location, service_name
   end

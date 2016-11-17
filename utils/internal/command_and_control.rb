@@ -131,13 +131,22 @@ module DTK
     end
 
     # returns type of all components that capture the node property
-    def self.node_property_component_types
-      ret = node_property_component_names.map { |n| n.gsub(/::/,'__') }
-      ret.concat(ec2_node_component_names.map { |n| n.gsub(/::/,'__') })
+    def self.node_property_component_types(type = nil)
+      property_component = node_property_component_names.map { |n| n.gsub(/::/,'__') }
+      node_component = ec2_node_component_names.map { |n| n.gsub(/::/,'__') }
+
+      case type
+      when :properties
+        return property_component
+      when :node
+        return node_component
+      else
+        return property_component.concat(node_component)
+      end
     end
 
-    def self.node_property_component_type
-      types = node_property_component_types
+    def self.node_property_component_type(type = nil)
+      types = node_property_component_types(type)
       types.size == 1 ? types.first : fail(Error, "Unexepectd that node_property_component_types.size != 1")
     end
 

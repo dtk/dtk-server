@@ -191,7 +191,7 @@ module DTK; class Attribute
 
     def self.node_component_attribute?(node, attribute_name)
       if is_node_component_attribute?(attribute_name)
-        component_type = CommandAndControl.node_property_component_type
+        component_type = CommandAndControl.node_property_component_type(:properties)
         attributes = node.get_components(with_attributes: true, filter: [:eq, :component_type, component_type]).map do |cmp_with_attributes|
           cmp_with_attributes[:attributes]
         end.flatten(1)

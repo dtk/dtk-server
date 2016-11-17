@@ -44,8 +44,12 @@ describe '(Component link relations) Test Case 1: Simple link scenario - $node.h
     include_context "NEG - Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
   end
 
-  context "Destroy service instance" do
-    include_context "Destroy service instance", service_location, service_name
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
   end
 
   after(:all) do

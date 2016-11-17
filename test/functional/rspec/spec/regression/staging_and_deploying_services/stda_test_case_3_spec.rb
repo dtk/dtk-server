@@ -43,8 +43,12 @@ describe '(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (
     include_context 'Stop service instance', dtk_common, service_location, service_name
   end
 
-  context "Destroy service instance" do
-    include_context "Destroy service instance", service_location, service_name
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
   end
 
   after(:all) do

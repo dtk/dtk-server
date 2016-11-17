@@ -13,7 +13,7 @@ require './lib/parameters_setting_spec'
 service_name = 'uop_test_case_6_instance'
 assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
-instance_size = 't1.micro'
+instance_size = 'micro'
 node_name = 'node1'
 
 node_param_list = []

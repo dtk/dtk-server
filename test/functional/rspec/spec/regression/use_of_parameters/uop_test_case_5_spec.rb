@@ -13,10 +13,10 @@ require './lib/parameters_setting_spec'
 service_name = 'uop_test_case_5_instance'
 assembly_name = 'bootstrap::node_with_params'
 os = 'precise'
-instance_size = 't1.micro'
+instance_size = 'micro'
 node_name = 'node1'
-rhel_os = 'rhel6'
-rhel_instance_size = 'm1.small'
+rhel_os = 'rhel7_hvm'
+rhel_instance_size = 'small'
 
 dtk_common = Common.new(service_name, assembly_name)
 

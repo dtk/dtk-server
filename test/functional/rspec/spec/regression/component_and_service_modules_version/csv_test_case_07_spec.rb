@@ -16,7 +16,7 @@ component_module_name = 'temp07'
 component_module_namespace = 'version'
 imported_component_module_name = 'version:temp07'
 component_module_filesystem_location = '~/dtk/component_modules/version'
-version = '0.0.1'
+version = '0.0.2'
 
 dtk_common = Common.new('', '')
 

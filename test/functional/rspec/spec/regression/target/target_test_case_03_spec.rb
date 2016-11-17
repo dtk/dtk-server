@@ -16,7 +16,7 @@ aws_secret_key = ENV['AWS_SECRET_KEY']
 default_keypair = 'testing_use1'
 vpc_id = 'vpc-5a63bc3f'
 subnet_id = 'subnet-50211878'
-security_group_id = 'sg-7cf2ee1b'
+security_group_id = 'sg-b4d57ece'
 
 # Module specific properties
 initial_module_location = "./spec/regression/target/resources/test_module_03_dtk.module.yaml"

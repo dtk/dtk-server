@@ -18,6 +18,7 @@ second_full_component_module_name = 'version:temp16_2'
 component_module_namespace = 'version'
 component_module_filesystem_location = '~/dtk/component_modules/version'
 version = '0.0.1'
+component_module_version = '0.0.2'
 file_for_change = 'module_refs.yaml'
 file_for_add = 'module_refs.yaml'
 file_for_remove = 'module_refs.yaml'
@@ -61,6 +62,14 @@ describe '(Component, service and versioning) Test Case 16: Install two componen
 
   context 'Push clone changes to server' do
   	include_context 'Push clone changes to server', first_full_component_module_name, file_for_change
+  end
+
+  context "Create new component module version" do
+    include_context "Create component module version", dtk_common, first_full_component_module_name, component_module_version
+  end
+
+  context "Publish new component module version to remote repo" do
+    include_context "Publish versioned component module", dtk_common, first_full_component_module_name, "#{component_module_namespace}/#{first_component_module_name}", component_module_version
   end
 
   context 'Push to remote changes for component module' do
@@ -126,6 +135,10 @@ describe '(Component, service and versioning) Test Case 16: Install two componen
   context "Delete all component module versions from local filesystem" do
     include_context 'Delete all local component module versions', component_module_filesystem_location, second_component_module_name
   end 
+
+  context "Delete new component module from remote repo" do
+    include_context "Delete remote component module version", dtk_common, first_component_module_name, component_module_namespace, component_module_version
+  end
 
 	after(:all) do
     puts '', ''

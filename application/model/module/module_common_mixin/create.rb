@@ -40,7 +40,7 @@ module DTK; module ModuleCommonMixin
 
 
       if module_obj && opts[:common_module]
-        # Aldin TODO: need to find better way to add additional branch to repo
+        # base_branch just needs to be a random branch on module_obj
         base_branch = module_obj.get_module_branches.first
         repo = module_obj.get_repo
         repo.merge!(branch_name: local.branch_name)

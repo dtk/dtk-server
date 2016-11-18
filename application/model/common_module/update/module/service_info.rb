@@ -17,8 +17,8 @@
 #
 module DTK
   class CommonModule
-    class Update
-      class BaseService < self
+    class Update::Module
+      class ServiceInfo < self
         # opts can have keys
         #   :local_params (required)
         #   :repo_name (required)
@@ -31,6 +31,7 @@ module DTK
           unless local_params = opts[:local_params]
             fail Error, "opts[:local_params] should not be nil"
           end
+          # TODO: should we remove
           # for testing
           opts[:force_parse] = opts[:force_pull] = true
 
@@ -48,7 +49,8 @@ module DTK
           repo_with_branch = repo.create_subclass_obj(:repo_with_branch)
           
           ret = ModuleDSLInfo.new
-          common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, opts)
+          pull_opts =  { force_pull: opts[:force_pull] }
+          common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, pull_opts)
           parse_needed = (opts[:force_parse] || !common_module__module_branch.dsl_parsed?)
           return ret unless parse_needed || pull_was_needed
 
@@ -70,6 +72,7 @@ module DTK
         end
 
         private
+
         # opts can have keys:
         #   :force_pull
         def self.pull_repo_changes?(project, local_params, commit_sha, opts = {})

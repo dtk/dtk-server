@@ -24,6 +24,7 @@ require 'fileutils'
 
 module DTK; class RepoManager
   class Git < self
+    require_relative('git/constant')
     require_relative('git/linux')
     require_relative('git/git_command')
     require_relative('git/mixin')

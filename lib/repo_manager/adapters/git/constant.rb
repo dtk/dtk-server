@@ -16,17 +16,19 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule
-    class Update < self
-      require_relative('update/module')
-      require_relative('update/service_instance')
+  class RepoManager::Git 
+    module Constant
+      REMOTE_NAMES = {
+        :service_info => 'dtk-service-info',
+        :component_info => 'dtk-component-info',
+      }
 
-      def self.update_class(common_module_type)
-        case common_module_type
-        when :module then Module
-        when :service_instance then ServiceInstance
-        else fail Error, "Illegal common_module_type '#{common_module_type}'"
-        end
+      def self.service_info_remote_name
+        REMOTE_NAMES[:service_info]
+      end
+
+      def self.component_info_remote_name
+        REMOTE_NAMES[:component_info]
       end
 
     end

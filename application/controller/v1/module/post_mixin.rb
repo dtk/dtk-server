@@ -107,7 +107,7 @@ module DTK
         version = request_params(:version)
         local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
         opts = { local_params: local_params, repo_name: repo_name, force_pull: true }
-        rest_ok_response CommonModule.update_from_repo(:base_service, get_default_project, commit_sha, opts)
+        rest_ok_response CommonModule.update_from_repo(:module, get_default_project, commit_sha, opts)
       end
 
       def update_dependency_from_remote

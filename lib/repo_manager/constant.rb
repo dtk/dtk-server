@@ -16,19 +16,31 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule
-    class Update < self
-      require_relative('update/module')
-      require_relative('update/service_instance')
-
-      def self.update_class(common_module_type)
-        case common_module_type
-        when :module then Module
-        when :service_instance then ServiceInstance
-        else fail Error, "Illegal common_module_type '#{common_module_type}'"
+  class RepoManager
+    # This has logical name to implementaton specific terms
+    module Constant
+      def self.method_missing(name, *args, &block)
+        if adapter_constant_class.respond_to?(name)
+          adapter_constant_class.send(name, *args, &block)
+        else
+          super
         end
+      end
+      def self.respond_to?(name)
+        !!(adapter_constant_class.respond_to?(name) || super)
+      end
+
+      private
+
+      def self.adapter_constant_class
+        @adapter_constant_class ||= get_adapter_constant_class
+      end
+      def self.get_adapter_constant_class
+        adapter_class = RepoManager.load_and_return_adapter_class
+        adapter_class::Constant
       end
 
     end
   end
 end
+

@@ -59,7 +59,7 @@ describe "(New DTK client) Test Case 5: Test various options for service push" d
   end
 
   context "NEG - Push service instance changes" do
-    include_context "NEG - Push service instance changes", service_name, full_service_location, error_message
+    include_context "NEG - Push service instance changes", service_name, full_service_location
   end
 
   context "Change content of service instance on local filesystem" do

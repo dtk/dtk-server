@@ -1,27 +1,27 @@
 GIT
   remote: git://github.com/dtk/dtk-common-core.git
-  revision: 8dd79939a40886a46ebef34616006f129191f084
+  revision: 4079c61864d7763b48dd98fa37a0d5e7ae1aa476
   specs:
-    dtk-common-core (0.9.0)
+    dtk-common-core (0.10.0)
       rest-client (= 1.6.7)
 
 GIT
   remote: git://github.com/dtk/dtk-common.git
-  revision: 93d50c4a6b32376a2b4b503e8284a1e2bd64f671
+  revision: beb2a9cdcc7b6314a4f0e650b1456d747cc98f04
   specs:
-    dtk-common (0.9.1)
+    dtk-common (0.10.0)
       colorize (~> 0.5.8)
       docker-api (~> 1.26)
-      dtk-common-core (= 0.9.0)
+      dtk-common-core (= 0.10.0)
       erubis (~> 2.7)
       grit (~> 2.5)
       rugged (~> 0.17.0.b7)
 
 GIT
   remote: git://github.com/dtk/dtk-dsl.git
-  revision: f2ca5255a0a21faff612ec45efbb6cd37f40156d
+  revision: aeaf87806825e94133f8c063c44e53f201b1b1fa
   specs:
-    dtk-dsl (1.0.0)
+    dtk-dsl (1.0.1)
 
 GEM
   remote: https://rubygems.org/
@@ -47,7 +47,7 @@ GEM
     debugger-ruby_core_source (1.3.8)
     diff-lcs (1.2.5)
     docile (1.1.3)
-    docker-api (1.31.0)
+    docker-api (1.32.1)
       excon (>= 0.38.0)
       json
     em-ssh (0.6.5)
@@ -55,7 +55,7 @@ GEM
       net-ssh
     erubis (2.7.0)
     eventmachine (1.0.8)
-    excon (0.52.0)
+    excon (0.54.0)
     facter (1.7.6)
     file-tail (1.0.12)
       tins (~> 0.5)
@@ -223,7 +223,7 @@ GEM
       blankslate (~> 2.0)
     pg (0.14.1)
     pkg-config (1.1.7)
-    posix-spawn (0.3.11)
+    posix-spawn (0.3.12)
     puppet (3.4.0)
       facter (~> 1.6)
       hiera (~> 1.0)
@@ -338,6 +338,3 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
-
-BUNDLED WITH
-   1.12.5

@@ -18,12 +18,22 @@
 module DTK; class ModuleBranch
   class Location
     class Params < Hash
+
+      # opts can have keys
+      #  :info_type - which could have value service_info or component_info
+      def initialize(params, opts = {})
+        unless params.is_a?(self.class)
+          validate(params)
+        end
+        replace(info_type_substitution?(params, opts[:info_type]))
+      end
+
       # module_name, version, and namespace are common params for local and remote
       def module_name(opts = {})
         ret = self[:module_name]
         if opts[:with_namespace]
-          unless ns = module_namespace_name()
-            fail Error.new('Unexpected that self does not have namespace set')
+          unless ns = module_namespace_name
+            fail Error, 'Unexpected that self does not have namespace set'
           end
           ret = Namespace.join_namespace(ns, ret)
         end
@@ -50,13 +60,6 @@ module DTK; class ModuleBranch
         self[:source_name]
       end
 
-      def initialize(params)
-        unless params.is_a?(self.class)
-          validate(params)
-        end
-        replace(params)
-      end
-
       def pp_module_name(_opts = {})
         ret = module_name
         if version
@@ -69,21 +72,46 @@ module DTK; class ModuleBranch
       private
 
       def validate(params)
-        unless (bad_keys = params.keys - all_keys()).empty?
-          fail Error.new("Illegal key(s): #{bad_keys.join(',')}")
+        unless (bad_keys = params.keys - all_keys).empty?
+          fail Error, "Illegal key(s): #{bad_keys.join(',')}"
         end
-        missing_required = required_keys().select { |key| params[key].nil? }
+        missing_required = required_keys.select { |key| params[key].nil? }
         unless missing_required.empty?
-          fail Error.new("Required key(s): #{missing_required.join(',')}")
+          fail Error, "Required key(s): #{missing_required.join(',')}"
         end
+      end
+      
+      def info_type_substitution?(params, info_type)
+        if info_type.nil? or params[:module_type] != self.class.combined_module_type
+          params
+        else
+          ret = params.inject({}) { |h, (k, v)|k == :module_type ? h : h.merge(k => v) }
+          if info_type == self.class.service_info_type
+            ret.merge!(:module_type => :service_module)
+          elsif info_type == self.class.component_info_type
+            ret.merge!(:module_type => :component_module)
+          else
+            fail Error, "Illegal info_type '#{info_type}'"
+          end
+        end
+      end
+
+      def self.combined_module_type
+        @combined_module_type ||= CommonModule.combined_module_type
+      end
+      def self.service_info_type
+        @service_info_type ||= CommonModule::ServiceInfo.info_type
+      end
+      def self.component_info_type
+        @component_info_type ||= CommonModule::ComponentInfo.info_type
       end
 
       def all_keys
-        legal_keys().map { |k| optional?(k) || k }
+        legal_keys.map { |k| optional?(k) || k }
       end
 
       def required_keys
-        legal_keys().reject { |k| optional?(k) }
+        legal_keys.reject { |k| optional?(k) }
       end
 
       def optional?(k)

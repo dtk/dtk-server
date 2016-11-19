@@ -44,9 +44,14 @@ module DTK
         get_objs(project.model_handle(model_type), sp_hash).find{ |mod| (mod[:module_branch]||{})[:version] == version }
       end
 
-      def get_remote_module_info(project, rsa_pub_key, remote_params)
-        remote = remote_params.create_remote(project)
-        remote_repo_info = Repo::Remote.new(remote).get_remote_module_info?(rsa_pub_key, raise_error: true)
+      def get_remote_module_info?(project, rsa_pub_key, remote_params)
+        remote = remote_params.create_remote(project, info_type: info_type)
+        if remote_repo_response = Repo::Remote.new(remote).get_remote_module_info?(rsa_pub_key)
+          # Transform so only relevant parsms sent back
+          remote_repo_response
+        else
+          raise 'here'
+        end
       end
     end
   end

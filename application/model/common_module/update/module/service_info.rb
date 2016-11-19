@@ -86,7 +86,7 @@ module DTK
           module_branch = create_or_ret_module_branch(:service_module, project, local_params, common_module__module_branch)
           CommonDSL::Parse.set_dsl_version!(module_branch, parsed_common_module)
           update_component_module_refs_from_parsed_common_module(module_branch, parsed_common_module)
-          CommonModule::BaseService.update_assemblies_from_parsed_common_module(project, module_branch, parsed_common_module)
+          CommonModule::ServiceInfo.update_assemblies_from_parsed_common_module(project, module_branch, parsed_common_module)
         end
 
         # if module does not exist, create it

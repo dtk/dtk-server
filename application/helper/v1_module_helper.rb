@@ -17,6 +17,16 @@
 #
 module Ramaze::Helper
   module V1ModuleHelper
+    def remote_params_dtkn_service_and_component_info(namespace, module_name, version = nil)
+      ::DTK::ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
+          module_type: ::DTK::CommonModule.combined_module_type,
+          module_name: module_name,
+          version: version,
+          namespace: namespace,
+          remote_repo_base: ::DTK::Repo::Remote.default_remote_repo_base
+     )
+    end
+
     def ret_detail_to_include
       if detail = ret_request_params(:detail_to_include)
         if detail.kind_of?(Array)

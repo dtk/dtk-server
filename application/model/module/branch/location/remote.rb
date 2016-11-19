@@ -24,8 +24,10 @@ module DTK; class ModuleBranch
       end
 
       class DTKNCatalog < self
-        def create_remote(project)
-          Remote::DTKNCatalog.new(project, self)
+        # opts can have keys
+        #  :info_type - which could have value service_info or component_info
+        def create_remote(project, opts = {})
+          Remote::DTKNCatalog.new(project, self, opts)
         end
 
         private
@@ -55,8 +57,10 @@ module DTK; class ModuleBranch
 
       module RemoteMixin
         attr_reader :project
-        def initialize(project, remote_params)
-          super(remote_params)
+        # opts can have keys
+        #  :info_type - which could have value service_info or component_info
+        def initialize(project, remote_params, opts = {})
+          super(remote_params, opts)
           @project = project
         end
 

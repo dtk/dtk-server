@@ -17,9 +17,13 @@
 #
 module DTK
   class CommonModule
-    class BaseComponent < ComponentModule
+    class ComponentInfo < ComponentModule
       extend  CommonModule::ClassMixin
       include CommonModule::Mixin
+
+      def self.info_type
+        :component_info
+      end
 
       def self.get_module_dependencies(project, rsa_pub_key, remote_params)
         missing_modules, required_modules, dependency_warnings = get_required_and_missing_modules(project, remote_params, rsa_pub_key)
@@ -41,13 +45,13 @@ module DTK
       end
 
 
-    def self.list_remotes(_model_handle, rsa_pub_key = nil, opts = {})
-      Repo::Remote.new.list_module_info(module_type, rsa_pub_key, opts.merge!(ret_versions_array: true))
-    end
+      def self.list_remotes(_model_handle, rsa_pub_key = nil, opts = {})
+        Repo::Remote.new.list_module_info(module_type, rsa_pub_key, opts.merge!(ret_versions_array: true))
+      end
 
       private
 
-      # This causes all get_obj(s) class an instance methods to return BaseComponent objects, rather than ComponentModule ones
+      # This causes all get_obj(s) class an instance methods to return ComponentInfo objects, rather than ComponentModule ones
       def self.get_objs(model_handle, sp_hash, opts = {})
         if model_handle[:model_name] == :component_module
           super.map { |component_module| copy_as(component_module) }

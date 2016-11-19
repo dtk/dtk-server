@@ -23,8 +23,8 @@ module DTK
     require_relative('common_module/import')
     require_relative('common_module/module_repo_info')
     require_relative('common_module/update')
-    require_relative('common_module/base_service')
-    require_relative('common_module/base_component')
+    require_relative('common_module/service_info')
+    require_relative('common_module/component_info')
     require_relative('common_module/service_instance')
 
     extend  CommonModule::ClassMixin
@@ -33,6 +33,10 @@ module DTK
     extend ModuleClassMixin
     include ModuleMixin
     include BaseModule::DeleteMixin
+
+    def self.combined_module_type
+      :combined_module
+    end
 
     def self.create_empty_module(project, local_params)
       create_module_opts = {
@@ -48,13 +52,12 @@ module DTK
     #  :remote_repo_base
     #  :detail_to_include
     def self.list(project, opts = Opts.new)
-      BaseService.list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true, include_common_modules: true))
+      ServiceInfo.list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true, include_common_modules: true))
     end
 
     def self.list_assembly_templates(project)
-      BaseService.list_assembly_templates(project)
+      ServiceInfo.list_assembly_templates(project)
     end
-
 
     def self.list_remotes(project, opts = {})
       rsa_pub_key = opts[:rsa_pub_key]
@@ -62,15 +65,24 @@ module DTK
     end
 
     def self.get_module_dependencies(project, rsa_pub_key, remote_params)
-      BaseComponent.get_module_dependencies(project, rsa_pub_key, remote_params)
+      ComponentInfo.get_module_dependencies(project, rsa_pub_key, remote_params)
     end
 
     def self.get_remote_module_info(project, rsa_pub_key, remote_params)
-       get_class_from_type(remote_params.module_type).get_remote_module_info(project, rsa_pub_key, remote_params)
+      ret = {}
+      if service_info = ServiceInfo.get_remote_module_info?(project, rsa_pub_key, remote_params)
+        ret.merge!(service_info: service_info)
+      end
+      if component_info = ComponentInfo.get_remote_module_info?(project, rsa_pub_key, remote_params)
+        ret.merge!(component_info: component_info)
+      end
+      if ret.empty?
+      end
+      ret
     end
 
     def self.install_component_module(project, local_params, remote_params, dtk_client_pub_key)
-      BaseComponent.install_module(project, local_params, remote_params, dtk_client_pub_key)
+      ComponentInfo.install_module(project, local_params, remote_params, dtk_client_pub_key)
     end
 
     def self.exists(project, module_type, namespace, module_name, version)
@@ -102,13 +114,13 @@ module DTK
     end
 
     def self.delete_associated_service_module(common_module)
-      if service_module = BaseService.find_from_name?(common_module.model_handle(:service_module), common_module.module_namespace, common_module.module_name)
+      if service_module = ServiceInfo.find_from_name?(common_module.model_handle(:service_module), common_module.module_namespace, common_module.module_name)
         service_module.delete_object(from_common_module: true)
       end
     end
 
     def self.delete_associated_service_module_version(common_module, version)
-      if service_module = BaseService.find_from_name?(common_module.model_handle(:service_module), common_module.module_namespace, common_module.module_name)
+      if service_module = ServiceInfo.find_from_name?(common_module.model_handle(:service_module), common_module.module_namespace, common_module.module_name)
         service_module.delete_version(version, no_error_if_does_not_exist: true)
       end
     end
@@ -122,8 +134,8 @@ module DTK
     def self.get_class_from_type(module_type)
       case module_type.to_sym
       when :common_module then CommonModule
-      when :service_module then BaseService
-      when :component_module then BaseComponent
+      when :service_module then ServiceInfo
+      when :component_module then ComponentInfo
       else fail ErrorUsage.new("Unknown module type '#{module_type}'.")
       end
     end

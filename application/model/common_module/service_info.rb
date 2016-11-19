@@ -17,9 +17,13 @@
 #
 module DTK
   class CommonModule
-    class BaseService < ServiceModule
+    class ServiceInfo < ServiceModule
       extend  CommonModule::ClassMixin
       include CommonModule::Mixin
+
+      def self.info_type
+        :service_info
+      end
 
       def self.find_from_id?(model_handle, module_id)
         get_obj(model_handle, sp_filter(:eq, :id, module_id))
@@ -72,7 +76,7 @@ module DTK
         copy_as(module_branch.get_module)
       end
 
-      # This causes all get_obj(s) class an instance methods to return BaseService objects, rather than ServiceModule ones
+      # This causes all get_obj(s) class an instance methods to return ServiceInfo objects, rather than ServiceModule ones
       def self.get_objs(model_handle, sp_hash, opts = {})
         if model_handle[:model_name] == :service_module
           super.map { |service_module| copy_as(service_module) }

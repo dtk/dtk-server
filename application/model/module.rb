@@ -37,7 +37,7 @@ module DTK
   require_relative('module/base_module')
   require_relative('module/component_module')# TODO DTK-2587: cleaning up and moving fns from  component_module to component (CommonModule::Template::Component)
   require_relative('module/service_module') # TODO DTK-2587: cleaning up and moving fns from service_module to service (CommonModule::Template::Service)
-  require_relative('module/test')
+  require_relative('module/test') # TODO: think can remove
   require_relative('module/node')
   require_relative('module/branch')
   require_relative('module/version')

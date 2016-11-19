@@ -17,33 +17,6 @@
 module DTK
   class V1::ModuleController
     module GetMixin
-      ### For all modules
-      def list
-        opts = Opts.new(remote_repo_base: ret_remote_repo_base)
-        datatype  = :module
-        if detail_to_include = ret_detail_to_include
-          opts.merge!(detail_to_include: detail_to_include)
-          datatype  = :module_with_versions if detail_to_include.include?(:versions)
-        end
-        rest_ok_response CommonModule.list(get_default_project, opts), datatype: datatype
-      end
-
-      ### Module specific
-      def remote_modules
-        # TODO: stub for DTK-2694
-        opts = Opts.new(remote_repo_base: ret_remote_repo_base)
-        opts[:rsa_pub_key] = required_request_params(:rsa_pub_key)
-        datatype  = :remote_module
-        module_list = CommonModule.list_remotes(get_default_project, opts)
-        rest_ok_response filter_by_namespace(module_list), datatype: datatype
-      end
-
-      def exists
-        namespace, module_name, module_type = required_request_params(:namespace, :module_name, :module_type)
-        version = request_params(:version) || 'master'
-        rest_ok_response CommonModule.exists(get_default_project, module_type, namespace, module_name, version)
-      end
-
       def assemblies
         # TODO: if  module_name, namespace given filter on this
         module_name, namespace, version = request_params(:module_name, :namespace, :version)
@@ -60,6 +33,22 @@ module DTK
         rest_ok_response response, datatype: datatype
       end
 
+      def exists
+        namespace, module_name, module_type = required_request_params(:namespace, :module_name, :module_type)
+        version = request_params(:version) || 'master'
+        rest_ok_response CommonModule.exists(get_default_project, module_type, namespace, module_name, version)
+      end
+
+      def list
+        opts = Opts.new(remote_repo_base: ret_remote_repo_base)
+        datatype  = :module
+        if detail_to_include = ret_detail_to_include
+          opts.merge!(detail_to_include: detail_to_include)
+          datatype  = :module_with_versions if detail_to_include.include?(:versions)
+        end
+        rest_ok_response CommonModule.list(get_default_project, opts), datatype: datatype
+      end
+
       def module_dependencies
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)
@@ -67,10 +56,19 @@ module DTK
         rest_ok_response CommonModule.get_module_dependencies(get_default_project, rsa_pub_key, remote_params)
       end
 
+      def remote_modules
+        # TODO: stub for DTK-2694
+        opts = Opts.new(remote_repo_base: ret_remote_repo_base)
+        opts[:rsa_pub_key] = required_request_params(:rsa_pub_key)
+        datatype  = :remote_module
+        module_list = CommonModule.list_remotes(get_default_project, opts)
+        rest_ok_response filter_by_namespace(module_list), datatype: datatype
+      end
+
       def remote_module_info
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)
-        remote_params = remote_params_dtkn(:service_module, namespace, module_name, version)
+        remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
         rest_ok_response CommonModule.get_remote_module_info(get_default_project, rsa_pub_key, remote_params)
       end
     end

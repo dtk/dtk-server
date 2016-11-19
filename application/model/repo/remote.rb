@@ -20,7 +20,7 @@ module DTK
   class Repo
     # TODO: may have better class name; this is really a remote repo server handler
     class Remote
-      r8_nested_require('remote', 'auth')
+      require_relative('remote/auth')
       include AuthMixin
 
       def initialize(remote_or_repo_base = nil)

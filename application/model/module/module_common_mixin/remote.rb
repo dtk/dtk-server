@@ -182,9 +182,7 @@ module DTK; module ModuleCommonMixin
       remote = remote_params.create_remote(project)
 
       repo_remote_handler = Repo::Remote.new(remote)
-      remote_module_info = repo_remote_handler.get_remote_module_info?(
-        client_rsa_pub_key,           raise_error: true,
-                                      module_refs_content: module_refs_content)
+      remote_module_info = repo_remote_handler.get_remote_module_info?(client_rsa_pub_key, raise_error: true, module_refs_content: module_refs_content)
 
       # we also check if user has required permissions
       # TODO: [Haris] We ignore access rights and force them on calls, this will need ot be refactored since it is security risk

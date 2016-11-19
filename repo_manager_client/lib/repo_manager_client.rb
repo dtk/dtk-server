@@ -198,13 +198,20 @@ module DTK
       post_rest_request_data(route, body, raise_error: true)
     end
 
-    def get_module_info(params_hash)
+    # opts can have keys:
+    #   :raise_error_exceptions - array of error types not to raise and instead return nil
+    def get_module_info?(params_hash, opts = {})
       route = collection_route_from_type(params_hash) + '/module_info'
 
-      response = get_rest_request_data(route, params_hash, raise_error: true)
-      # we flatten response (due to rest code expectin flat structure)
-      response.symbolize_keys!
-      {}.merge(response[:repo_module]).merge(dependency_warnings: response[:dependency_warnings])
+      # default is to raise error
+      if response = get_rest_request_data(route, params_hash, raise_error: true, raise_error_exceptions: opts[:raise_error_exceptions])
+        # we flatten response (due to rest code expecting flat structure)
+        response.symbolize_keys!
+        {}.merge(response[:repo_module]).merge(dependency_warnings: response[:dependency_warnings])
+      end
+    end
+    def get_module_info(params_hash)
+      get_module_info?(params_hash)
     end
 
     def get_components_info(params_hash, client_rsa_pub_key = nil)
@@ -351,6 +358,10 @@ module DTK
     NAME_NOT_ALLOWED_CODE   = 1011
     NO_RESOURCE             = 1000
 
+    # opts can have keys:
+    #   :log_error
+    #   :raise_error
+    #   :raise_error_exceptions; array if exists
     def handle_error(opts = {}, &rest_call_block)
       response = rest_call_block.call
 
@@ -372,7 +383,6 @@ module DTK
           {}
         end
       elsif opts[:raise_error] and not response.ok?
-        Log.error_pp(response)
         msg = error_msg(response)
         code = error_code(response)
         if is_internal_error?(response)
@@ -382,6 +392,9 @@ module DTK
           error.add_tag!(:raise_error)
           fail error
         elsif code == NO_RESOURCE
+          if exceptions = opts[:raise_error_exceptions]
+            return  nil if exceptions.include?(:no_resorce)
+          end
           error = ErrorUsage.new("Repo Manager error: #{msg}")
           error.add_tag!(:no_resource)
           fail error

@@ -111,7 +111,7 @@ module DTK
       end
 
       def raise_error_if_module_is_not_accessible(client_rsa_pub_key)
-        get_remote_module_info?(client_rsa_pub_key, raise_error: true)
+        get_remote_module_info(client_rsa_pub_key)
       end
       private :raise_error_if_module_is_not_accessible
 
@@ -124,9 +124,14 @@ module DTK
         }
         client_params.merge!(version: remote.version) if remote.version
 
-        !client.get_module_info?(client_params, raise_error_exceptions: opts[:do_not_raise] && [:no_resource]).nil?
+        !client.get_module_info?(client_params, raise_error_with_exceptions: opts[:do_not_raise] && [:no_resource]).nil?
       end
 
+      # opts can have keys:
+      #   :module_refs_content
+      def get_remote_module_info(client_rsa_pub_key, opts = {})
+        get_remote_module_info?(client_rsa_pub_key, module_refs_content: opts[:module_refs_content], raise_error: true)
+      end
       # opts can have keys:
       #   :module_refs_content
       #   :raise_error
@@ -140,7 +145,8 @@ module DTK
 
         client_params.merge!(version: remote.version) if remote.version
         client_params.merge!(module_refs_content: opts[:module_refs_content]) unless is_empty?(opts[:module_refs_content])
-        response_data = client.get_module_info?(client_params, raise_error_exceptions: opts[:do_not_raise] && [:no_resource])
+        get_opts = opts[:raise_error] ? { raise_error: true } : { raise_error_with_exceptions: [:no_resource] }
+        response_data = client.get_module_info?(client_params, get_opts)
         return nil if response_data.nil?
 
         ret = Aux.convert_keys_to_symbols(response_data)
@@ -150,7 +156,7 @@ module DTK
           # fail Error.new('Not versions not implemented')
           versions = branch_names_to_versions_stripped(ret[:branches])||ret[:versions]
           unless versions && versions.include?(remote.version)
-            fail ErrorUsage.new("Remote module (#{remote.pp_module_name}}) does not have version (#{remote.version || 'CURRENT'})")
+            fail ErrorUsage, "Module '#{remote.pp_module_name}' not found in the DTKN Catalog"
           end
         end
         ret
@@ -181,10 +187,7 @@ module DTK
       end
 
       def remote
-        unless @remote
-          fail Error.new('Should not be called if @remote is nill')
-        end
-        @remote
+        @remote || fail(Error, 'Should not be called if @remote is nil')
       end
       private :remote
 

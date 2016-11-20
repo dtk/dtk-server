@@ -152,7 +152,7 @@ module Ramaze::Helper
       end
 
       remote = remote_params.create_remote(project)
-      remote_repo_info = Repo::Remote.new(remote).get_remote_module_info?(client_pub_key, raise_error: true)
+      remote_repo_info = Repo::Remote.new(remote).get_remote_module_info(client_pub_key)
 
       remote_repo_info.merge!(head_installed: true) if module_exist
       remote_repo_info

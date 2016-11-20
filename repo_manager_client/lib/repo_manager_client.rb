@@ -199,12 +199,12 @@ module DTK
     end
 
     # opts can have keys:
-    #   :raise_error_exceptions - array of error types not to raise and instead return nil
+    #   :raise_with_error_exceptions - if non nil then array of error types not to raise
     def get_module_info?(params_hash, opts = {})
       route = collection_route_from_type(params_hash) + '/module_info'
 
       # default is to raise error
-      if response = get_rest_request_data(route, params_hash, raise_error: true, raise_error_exceptions: opts[:raise_error_exceptions])
+      if response = get_rest_request_data(route, params_hash, raise_error_with_exceptions: opts[:raise_error_with_exceptions])
         # we flatten response (due to rest code expecting flat structure)
         response.symbolize_keys!
         {}.merge(response[:repo_module]).merge(dependency_warnings: response[:dependency_warnings])
@@ -361,7 +361,7 @@ module DTK
     # opts can have keys:
     #   :log_error
     #   :raise_error
-    #   :raise_error_exceptions; array if exists
+    #   :raise_error_with_exceptions; array if exists
     def handle_error(opts = {}, &rest_call_block)
       response = rest_call_block.call
 
@@ -375,6 +375,7 @@ module DTK
         response = rest_call_block.call
       end
 
+      raise_error = opts.has_key?(:raise_error) ? opts[:raise_error] : !opts[:raise_error_with_exceptions].nil?
       if opts[:log_error]
         if response.ok?
           response.data
@@ -382,7 +383,7 @@ module DTK
           Log.error(response.inspect)
           {}
         end
-      elsif opts[:raise_error] and not response.ok?
+      elsif raise_error and not response.ok?
         msg = error_msg(response)
         code = error_code(response)
         if is_internal_error?(response)
@@ -392,8 +393,8 @@ module DTK
           error.add_tag!(:raise_error)
           fail error
         elsif code == NO_RESOURCE
-          if exceptions = opts[:raise_error_exceptions]
-            return  nil if exceptions.include?(:no_resorce)
+          if exceptions = opts[:raise_error_with_exceptions]
+            return  nil if exceptions.include?(:no_resource)
           end
           error = ErrorUsage.new("Repo Manager error: #{msg}")
           error.add_tag!(:no_resource)

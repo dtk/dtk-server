@@ -47,10 +47,8 @@ module DTK
       def get_remote_module_info?(project, rsa_pub_key, remote_params)
         remote = remote_params.create_remote(project, info_type: info_type)
         if remote_repo_response = Repo::Remote.new(remote).get_remote_module_info?(rsa_pub_key)
-          # Transform so only relevant parsms sent back
+          # TODO: prune so only relevant params sent back
           remote_repo_response
-        else
-          raise 'here'
         end
       end
     end

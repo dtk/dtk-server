@@ -17,6 +17,7 @@
 #
 module DTK
   class RepoManager::Git 
+    # TODO: see if still need this"
     module Constant
       REMOTE_NAMES = {
         :service_info => 'dtk-service-info',

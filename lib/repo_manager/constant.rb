@@ -18,6 +18,7 @@
 module DTK
   class RepoManager
     # This has logical name to implementaton specific terms
+    # TODO: see if using this
     module Constant
       def self.method_missing(name, *args, &block)
         if adapter_constant_class.respond_to?(name)

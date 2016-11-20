@@ -77,7 +77,7 @@ module DTK
         ret.merge!(component_info: component_info)
       end
       if ret.empty?
-        fail ErrorUsage, "Module '#{remote_params.pp_module_name}' not found in the DTKN Catalog"
+        fail ErrorUsage, "Module '#{remote_params.pp_module_ref}' not found in the DTKN Catalog"
       end
       ret
     end

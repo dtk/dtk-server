@@ -60,10 +60,8 @@ module DTK; class ModuleBranch
         self[:source_name]
       end
 
-      def pp_module_name(_opts = {})
-        ret = module_namespace_name ? "#{module_namespace_name}/#{module_name}" : module_name
-        ret << "(#{version})" if version
-        ret
+      def pp_module_ref(_opts = {})
+        ::DTK::Common::PrettyPrintForm.module_ref(module_name, namespace: module_namespace_name, version: version)
       end
 
       private

@@ -36,7 +36,7 @@ module DTK; module ModuleCommonMixin
           if opts[:ignore_component_error]
             return module_obj
           else
-            message = "Conflicts with already installed module (#{local_params.pp_module_name()})"
+            message = "Conflicts with already installed module (#{local_params.pp_module_ref()})"
             message += '. To ignore this conflict and use installed module please use -i switch (import-dtkn REMOTE-SERVICE-NAME -i).' if opts[:additional_message]
             fail ErrorUsage.new(message)
           end
@@ -117,7 +117,7 @@ module DTK; module ModuleCommonMixin
         repos.each do |repo|
           # we remove remote repos
           unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote.module_name, remote.namespace)
-            fail ErrorUsage.new("Remote component/service (#{remote.pp_module_name()}) does not exist")
+            fail ErrorUsage.new("Remote component/service (#{remote.pp_module_ref()}) does not exist")
           end
 
           repo.unlink_remote(remote)

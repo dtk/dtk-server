@@ -156,7 +156,7 @@ module DTK
           # fail Error.new('Not versions not implemented')
           versions = branch_names_to_versions_stripped(ret[:branches])||ret[:versions]
           unless versions && versions.include?(remote.version)
-            fail ErrorUsage, "Module '#{remote.pp_module_name}' not found in the DTKN Catalog"
+            fail ErrorUsage, "Module '#{remote.pp_module_ref}' not found in the DTKN Catalog"
           end
         end
         ret

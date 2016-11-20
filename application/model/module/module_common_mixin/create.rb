@@ -161,12 +161,12 @@ module DTK; module ModuleCommonMixin
     #   :inherit_frozen_from_base
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_module_branch_with_version(base_version)
-        fail ErrorUsage.new("There is no module (#{pp_module_name}) in the workspace")
+        fail ErrorUsage.new("There is no module (#{pp_module_ref}) in the workspace")
       end
 
       # make sure there is a not an existing branch that matches the new one
       if !opts[:delete_existing_branch] and get_module_branch_matching_version(new_version)
-        fail VersionExist.new(new_version, pp_module_name)
+        fail VersionExist.new(new_version, pp_module_ref)
       end
 
       opts_repo_update = Aux.hash_subset(opts, [:sha, :checkout_branch, :delete_existing_branch]).merge(base_version: base_version)

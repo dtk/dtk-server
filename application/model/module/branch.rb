@@ -202,7 +202,7 @@ module DTK
     def fast_foward_pull_raise_error_if_merge_needed(opts = {})
       merge_result = RepoManager.fast_foward_pull(self[:branch], opts, self)
       if merge_result == :merge_needed
-        fail Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_name()})")
+        fail Error.new("Merge problem exists between multiple clients editting the module (#{get_module().pp_module_ref()})")
       end
     end
     private :fast_foward_pull_raise_error_if_merge_needed

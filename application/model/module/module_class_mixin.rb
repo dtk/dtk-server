@@ -238,7 +238,7 @@ module DTK
       ModuleRepoInfo.new(repo, info[:module_name], info[:module_idh], branch_obj, opts)
     end
 
-    def pp_module_name(module_name, version = nil)
+    def pp_module_ref(module_name, version = nil)
       version ? "#{module_name} (#{version})" : module_name
     end
 

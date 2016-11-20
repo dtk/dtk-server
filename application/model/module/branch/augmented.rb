@@ -80,14 +80,14 @@ module DTK
 
         if module_rows.size == 0
           unless opts[:donot_raise_error]
-            fail ErrorUsage.new("Module #{parent_module.pp_module_name(version)} does not exist")
+            fail ErrorUsage.new("Module #{parent_module.pp_module_ref(version)} does not exist")
           end
           return ret
         end
 
         # aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
         unless module_obj = aggregate_by_remote_namespace(module_rows, opts)
-          fail ErrorUsage.new("The module (#{parent_module.pp_module_name(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
+          fail ErrorUsage.new("The module (#{parent_module.pp_module_ref(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
         end
 
         aug_module_branch = module_obj[:module_branch].merge(repo: module_obj[:repo], module_name: module_obj[:display_name], module_namespace: module_obj[:namespace][:display_name])

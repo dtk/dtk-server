@@ -245,14 +245,14 @@ module DTK
       get_field?(:namespace)
     end
 
-    def pp_module_name(version = nil)
-      self.class.pp_module_name(module_name(), version)
+    def pp_module_ref(version = nil)
+      self.class.pp_module_ref(module_name(), version)
     end
 
     def pp_module_branch_name(module_branch)
       module_branch.update_object!(:version)
       version = (module_branch.has_default_version?() ? nil : module_branch[:version])
-      self.class.pp_module_name(module_name(), version)
+      self.class.pp_module_ref(module_name(), version)
     end
 
     # TODO: think want to deprecate these since dsl_parsed is on module branch, not module

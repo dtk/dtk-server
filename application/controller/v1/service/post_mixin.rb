@@ -136,8 +136,9 @@ module DTK
       end
 
       def uninstall
-        recursive = boolean_request_params(:recursive)
-        assembly_instance.uninstall(recursive: recursive)
+        opts = ret_boolean_params_hash(:recursive, :force)
+        #recursive = boolean_request_params(:recursive)
+        assembly_instance.uninstall(opts)
         rest_ok_response
       end
 

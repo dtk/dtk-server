@@ -69,7 +69,21 @@ module Ramaze::Helper::Common
       end
     end
 
+    def ret_boolean_params(*args)
+      if obj.kind_of?(Array)
+        obj.map { |el| boolean_form(el) }
+      elsif obj.nil?
+        nil
+      else
+        obj.is_a?(TrueClass) || (obj.is_a?(String) && obj == 'true')
+      end
+    end
+
     ###### TODO: deprecate below for above
+    def ret_boolean_params_hash(*params)
+      ret_boolean_params(*params)
+    end
+
     def ret_request_params(*args)
       request_params(*args)
     end

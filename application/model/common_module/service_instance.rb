@@ -41,7 +41,7 @@ module DTK
         ModuleRepoInfo.new(service_module_branch)
       end
 
-      def self.delete_from_model_and_repo(assembly_instance)
+      def self.delete_from_model_and_repo(assembly_instance, opts={})
         if running_task = assembly_instance.most_recent_task_is_executing?
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running. Please wait until the task is complete or cancel the task."
         end

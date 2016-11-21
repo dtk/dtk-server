@@ -720,8 +720,8 @@ module DTK; class  Assembly
 
       # do not allow to uninstall service instance if it's not empty
       nodes = get_leaf_nodes(remove_assembly_wide_node: true)
-      if nodes.empty? && get_augmented_components.empty?
-        CommonModule::ServiceInstance.delete_from_model_and_repo(self)
+      if opts[:force] || (nodes.empty? && get_augmented_components.empty?)
+        CommonModule::ServiceInstance.delete_from_model_and_repo(self, opts)
       else
         fail ErrorUsage, "Service instance cannot be deleted because it is not empty. You have to execute 'dtk service delete' command first."
       end

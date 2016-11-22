@@ -19,7 +19,7 @@ module DTK
   class CommonDSL::Diff
     class Result
       attr_writer :repo_updated, :semantic_diffs
-      attr_reader :items_to_update, :error_msgs
+      attr_reader :items_to_update, :error_msgs, :semantic_diffs
       def initialize(repo_diffs_summary = nil)
         @repo_diffs_summary = repo_diffs_summary
         @repo_updated       = false # if true, means repo updated by server

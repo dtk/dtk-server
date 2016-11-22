@@ -47,7 +47,9 @@ module DTK; module CommonDSL
               task_template_processor = TaskTemplate.new(assembly_instance, component, node)
 
               if opts[:force_delete] || node.get_admin_op_status.eql?('pending') || !task_template_processor.component_delete_action_def?
-                assembly_instance.delete_component(component.id_handle, node[:id])
+                # if workflow is modified by user, we do not want to change it when deleting component
+                delete_cmp_opts = result.semantic_diffs['WORKFLOWS_MODIFIED'] ? { do_not_update_task_template: true } : {}
+                assembly_instance.delete_component(component.id_handle, node[:id], delete_cmp_opts)
               else
                 task_template_processor.insert_explict_delete_action?(force_delete: opts[:force_delete])
                 task_template_processor.remove_component_actions? unless component[:component_type].eql?('ec2__node')

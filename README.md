@@ -1,20 +1,20 @@
-## DTK Server
+## Dtk Server
 
 What it is?
 --------------
-DTK Server is a Ruby based application that handles requests from DTK Client and sends requests to DTK Repoman. It manages tenant users, installed and imported component and servie modules, creates and converges service instances and performs all node orchestration.
+Dtk Server is a Ruby based application that handles requests from Dtk Client and sends requests to Dtk Repoman. It manages tenant users, installed and imported component and servie modules, creates and converges service instances and performs all node orchestration.
 
 
 ##Usage
 -------------
-## Deploying DTK Server with Docker
+## Deploying Dtk Server with Docker
 ___
-Fastest way to deploy  DTK Server is with a Docker container. Docker image [getdtk/dtk-server](https://hub.docker.com/r/getdtk/dtk-server/) contains all required services and components for deploying DTK Server.
+Fastest way to deploy  Dtk Server is with a Docker container. Docker image [getdtk/dtk-server](https://hub.docker.com/r/getdtk/dtk-server/) contains all required services and components for deploying Dtk Server.
 
 #### Preparation
 - [Install Docker](https://docs.docker.com/engine/installation/)
 
-- Pull the latest DTK Server Docker image with `docker pull getdtk/dtk-server`
+- Pull the latest Dtk Server Docker image with `docker pull getdtk/dtk-server`
 
 - Select a container root directory on host which will be used by the Docker container for persistence (e.g. `/usr/share/docker/dtk`), and create `dtk.config` (e.g. `/usr/share/docker/dtk/dtk.config`) with following content:
 
@@ -34,9 +34,9 @@ Next step is to start the docker container with the directory from above used as
 docker run --name dtk -v /usr/share/docker/dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/dtk-server
 ```
 
-This will pull the latest DTK Server Docker image that was built.
+This will pull the latest Dtk Server Docker image that was built.
 
-Example of starting a DTK Server Docker container from a tagged Docker image.
+Example of starting a Dtk Server Docker container from a tagged Docker image.
 
 ```
 docker run --name dtk -v /usr/share/docker/dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/dtk-server:v0.9.0
@@ -48,26 +48,26 @@ This command will automate all of the steps from above:
 \curl -sSL https://getserver.dtk.io | bash -s /usr/share/docker/dtk
 ```
 
-#### Connecting to DTK Server Docker container
+#### Connecting to Dtk Server Docker container
 
 After the container is up and running (will take a minute on the first start), you can connect to it via [dtk-client](https://github.com/rich-reactor8/dtk-client), by running either `dtk` or `dtk-shell` command.
 
-In the DTK Client prompt you can enter the values set in `dtk.config` (username, password and instance address).
+In the Dtk Client prompt you can enter the values set in `dtk.config` (username, password and instance address).
 
 Unless you have SSL, after the prompt, values for `secure_connection` and `http_port` in `~/dtk/client.conf` should be changed to `false` and forwared http port values respectively.
 
 
 Note that if you need to forward GIT SSH port to a different one, you can use the `-e GIT_PORT=<desired_port>`.
 
-### Installing DTK Client
-Assuming the docker container was started as described above, DTK Client can be installed and configured automatically running the [install-client.sh](https://raw.githubusercontent.com/dtk/dtk-server/master/install-client.sh) script:
+### Installing Dtk Client
+Assuming the docker container was started as described above, Dtk Client can be installed and configured automatically running the [install-client.sh](https://raw.githubusercontent.com/dtk/dtk-server/master/install-client.sh) script:
 ```
 ./install-client.sh [-u user] [-p port] configuration_path
 
 configuration_path   - location of dtk.config file
 user                 - user on which to install and configure dtk-client
                        defaults to new user named 'dtk-client
-port                 - port where DTK server is listening
+port                 - port where Dtk server is listening
                        defaults to 8080
 ```
 
@@ -78,7 +78,7 @@ This command will invoke the script from above directly:
 ```
 
 ##### Upgrading the container
-To upgrade DTK container to a newer version, execute the following commands:
+To upgrade Dtk container to a newer version, execute the following commands:
 
 ```
 docker pull getdtk/dtk-server # pull the latest image

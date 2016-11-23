@@ -18,8 +18,8 @@
 require 'set'
 module DTK
   class Aux
-    r8_nested_require('aux', 'yaml_helper')
-    r8_nested_require('aux', 'parsing_helper')
+    require_relative('aux/yaml_helper')
+    require_relative('aux/parsing_helper')
 
     module CommonClassMixin
       def private_instance_method(class_name)
@@ -50,6 +50,25 @@ module DTK
           obj
         end
       end
+
+      def latest_version?(versions)
+        versions = versions.dup
+        master = versions.delete('master')
+        if versions.empty?
+          master
+        else
+          versions.reject! { |v| ! version_triplet?(v) }
+          versions.sort { |a, b| version_triplet?(a) <=> version_triplet?(b) }.last
+        end
+      end
+      
+      def version_triplet?(str)
+        split = str.split('.')
+        if split.size == 3
+          split.map { |part| part.to_i } rescue nil
+        end
+      end
+      private :version_triplet?
 
       def platform_is_linux?
         RUBY_PLATFORM.downcase.include?('linux')

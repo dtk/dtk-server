@@ -40,17 +40,15 @@ module DTK
             [:eq, :display_name, module_name]
           ]
         }
-
+        
         get_objs(project.model_handle(model_type), sp_hash).find{ |mod| (mod[:module_branch]||{})[:version] == version }
       end
-
+      
       def get_remote_module_info?(project, rsa_pub_key, remote_params)
         remote = remote_params.create_remote(project, info_type: info_type)
-        if remote_repo_response = Repo::Remote.new(remote).get_remote_module_info?(rsa_pub_key)
-          # TODO: prune so only relevant params sent back
-          remote_repo_response
-        end
+        Repo::Remote.new(remote).get_remote_module_info?(rsa_pub_key)
       end
+
     end
   end
 end

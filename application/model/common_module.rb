@@ -70,16 +70,16 @@ module DTK
 
     def self.get_remote_module_info(project, rsa_pub_key, remote_params)
       ret = {}
-      if service_info = ServiceInfo.get_remote_module_info?(project, rsa_pub_key, remote_params)
-        ret.merge!(service_info: service_info)
+      if raw_service_info = ServiceInfo.get_remote_module_info?(project, rsa_pub_key, remote_params)
+        ret.merge!(service_info: transform_from_raw_remote_module_info(raw_service_info))
       end
-      if component_info = ComponentInfo.get_remote_module_info?(project, rsa_pub_key, remote_params)
-        ret.merge!(component_info: component_info)
+      if raw_component_info = ComponentInfo.get_remote_module_info?(project, rsa_pub_key, remote_params)
+        ret.merge!(component_info: transform_from_raw_remote_module_info(raw_component_info))
       end
       if ret.empty?
         fail ErrorUsage, "Module '#{remote_params.pp_module_ref}' not found in the DTKN Catalog"
       end
-      ret
+      ret.merge(version: remote_params.version || intersect_versions(raw_service_info, raw_component_info))
     end
 
     def self.install_component_module(project, local_params, remote_params, dtk_client_pub_key)
@@ -141,6 +141,10 @@ module DTK
       end
     end
 
+    def self.transform_from_raw_remote_module_info(raw_info)
+      { remote_repo_url: raw_info[:remote_repo_url] }
+    end
+
     def self.create_local_params(module_type, module_name, opts = {})
       version   = opts[:version]
       namespace = opts[:namespace] || default_local_namespace_name()
@@ -151,5 +155,25 @@ module DTK
         namespace:   namespace
       )
     end
+
+    def self.intersect_versions(raw_service_info, raw_component_info)
+      if raw_service_info
+        if raw_component_info
+          if raw_service_info[:latest_version] == raw_component_info[:latest_version]
+            raw_service_info[:latest_version]
+          else
+            Aux.latest_version?(raw_service_info[:versions] && raw_component_info[:versions]) || 
+              fail(ErrorUsage, "Mismatch between component info and service info versions")
+          end
+        else
+          raw_service_info[:latest_version]
+        end
+      elsif raw_component_info
+        raw_component_info[:latest_version]
+      else
+        fail ErrorUsage, "Unexpected that both raw_component_info and raw_component_info are nil"
+      end
+    end
+
   end
 end

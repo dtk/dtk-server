@@ -156,6 +156,10 @@ module DTK
       )
     end
 
+    # TODO: DTK-2766: consider handling condition where service module at some version x requires component module
+    #       at another version; in this case want to use the different versions of these modules.
+    #       Need to figure out best version to use for combined; default is the service module version
+    #       Alternative is to fix up modules that have different versions
     def self.intersect_versions(raw_service_info, raw_component_info)
       if raw_service_info
         if raw_component_info

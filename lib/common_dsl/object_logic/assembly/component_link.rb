@@ -18,35 +18,26 @@
 module DTK; module CommonDSL
   module ObjectLogic
     class Assembly
-      class Attribute < ContentInputHash
-        require_relative('attribute/diff')
-
-        def initialize(type, attribute)
+      class ComponentLink < ContentInputHash
+        def initialize(component_link)
           super()
-          @type      = type
-          @attribute = attribute
+          @component_link = component_link
         end
         private :initialize
 
-        # type can be :assembly, :node, :component
-        # opts - depends on type
-        def self.generate_content_input?(type, attributes, opts = {})
-          content_input_attributes = attributes.inject(ContentInputHash.new) do |h, attribute|
-            content_input_attr = create(type, attribute, opts).generate_content_input?
-            content_input_attr ? h.merge!(attribute_name(attribute) => content_input_attr) : h
+        def self.generate_content_input?(component_links, opts = {})
+          content_input_attributes = component_links.inject(ContentInputHash.new) do |h, cmp_link|
+            content_input_attr = new(cmp_link).generate_content_input?
+            content_input_attr ? h.merge!(component_link_name(cmp_link) => content_input_attr) : h
           end
+
           content_input_attributes.empty? ? nil : sort(content_input_attributes)
         end
         
         def generate_content_input?
-          unless prune?
-            set_id_handle(@attribute)
-            set(:Value,  attribute_value)
-            if tags = tags?
-              add_tags!(tags)
-            end
-            self
-          end
+          cmp_link = DTK::Assembly::Instance::ServiceLink.print_form_hash(@component_link, hide_assembly_wide_node: true)
+          set(:Value, cmp_link[:dependent_component])
+          self
         end
 
         def skip_for_generation?
@@ -71,45 +62,18 @@ module DTK; module CommonDSL
 
         private
 
-        # Could be overwritten
-        def prune?
-          false
-        end
-
-        # Could be overwritten
-        def tags?
-          nil
-        end
-        
-        def self.create(type, attribute, opts = {})
-          case type
-          when :assembly
-            new(type, attribute)
-          when :node
-            Node::Attribute.new(type, attribute)
-          when :component
-            Component::Attribute.new(type, attribute, opts)
-          else
-            fail Error, "Illegal type '#{type}'"
-          end
-        end
-
         def self.sort(content_input_attributes)
           content_input_attributes.keys.sort.inject(ContentInputHash.new) do |h, key|
             h.merge(key => content_input_attributes[key])
           end
         end
 
-        def attribute_value
-          @attribute_value ||= @attribute.convert_value_to_ruby_object(value_field: :attribute_value, donot_raise_error: true)
+        def component_link_name
+          @component_link[:display_name]
         end
 
-        def attribute_name
-          self.class.attribute_name(@attribute)
-        end
-
-        def self.attribute_name(attribute)
-          attribute.display_name
+        def self.component_link_name(cmp_link)
+          cmp_link.display_name
         end
 
       end

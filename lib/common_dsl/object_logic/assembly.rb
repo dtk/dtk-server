@@ -22,6 +22,7 @@ module DTK
         require_relative('assembly/diff')
 
         require_relative('assembly/attribute')
+        require_relative('assembly/component_link')
         # attribute must be before node and component
         require_relative('assembly/node')
         require_relative('assembly/component')

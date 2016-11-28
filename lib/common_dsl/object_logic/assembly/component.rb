@@ -25,6 +25,7 @@ module DTK; module CommonDSL
         def initialize(aug_component)
           super()
           @aug_component = aug_component
+          @assembly_instance = aug_component.get_assembly_instance
         end
         private :initialize
 
@@ -39,10 +40,14 @@ module DTK; module CommonDSL
           set_id_handle(@aug_component)
           attributes = @aug_component[:attributes] || []
           set?(:Attributes, Attribute.generate_content_input?(:component, attributes, component: @aug_component)) unless attributes.empty?
-          # TODO: add component links
+
+          component_links = @assembly_instance.get_augmented_port_links(filter: { input_component_id: @aug_component[:id] })
+          set?(:ComponentLinks, ComponentLink.generate_content_input?(component_links)) unless component_links.empty?
+
           if tags = tags?
             add_tags!(tags)
           end
+
           self
         end
 

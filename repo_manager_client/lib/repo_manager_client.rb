@@ -360,7 +360,7 @@ module DTK
 
     # opts can have keys:
     #   :log_error
-    #   :raise_error
+    #   :raise_error (default is true)
     #   :raise_error_with_exceptions; array if exists
     def handle_error(opts = {}, &rest_call_block)
       response = rest_call_block.call
@@ -375,7 +375,8 @@ module DTK
         response = rest_call_block.call
       end
 
-      raise_error = opts.has_key?(:raise_error) ? opts[:raise_error] : !opts[:raise_error_with_exceptions].nil?
+      opts[:raise_error] = true unless opts[:raise_error].kind_of?(FalseClass)
+      raise_error = opts[:raise_error] or !opts[:raise_error_with_exceptions].nil?
       if opts[:log_error]
         if response.ok?
           response.data

@@ -1,8 +1,8 @@
 GIT
   remote: git://github.com/dtk/dtk-common-core.git
-  revision: 4079c61864d7763b48dd98fa37a0d5e7ae1aa476
+  revision: 246e52ea543bfb306e103d6fe7413f0b49639fce
   specs:
-    dtk-common-core (0.10.0)
+    dtk-common-core (0.10.1)
       rest-client (= 1.6.7)
 
 GIT

@@ -87,7 +87,7 @@ module DTK
     end
 
     def self.exists(project, module_type, namespace, module_name, version)
-      if matching_module = get_class_from_type(module_type).find_from_name_with_version?(project, namespace, module_name, version)
+      if matching_module = get_class_from_module_type(module_type).find_from_name_with_version?(project, namespace, module_name, version)
         ModuleRepoInfo.new(matching_module[:module_branch])
       end
     end
@@ -132,7 +132,7 @@ module DTK
 
     private
 
-    def self.get_class_from_type(module_type)
+    def self.get_class_from_module_type(module_type)
       case module_type.to_sym
       when :common_module then CommonModule
       when :service_module then ServiceInfo

@@ -21,6 +21,7 @@ module DTK; module CommonDSL
       class Component < ContentInputHash
         require_relative('component/diff')
         require_relative('component/attribute')
+        require_relative('component/component_link')
 
         def initialize(aug_component)
           super()
@@ -58,6 +59,7 @@ module DTK; module CommonDSL
         def diff?(component_parse, qualified_key, opts = {})
           aggregate_diffs?(qualified_key, opts) do |diff_set|
             diff_set.add_diff_set? Attribute, val(:Attributes), component_parse.val(:Attributes)
+            diff_set.add_diff_set? ComponentLink, val(:ComponentLinks), component_parse.val(:ComponentLinks)
             # TODO: need to add diffs on all subobjects
           end
         end

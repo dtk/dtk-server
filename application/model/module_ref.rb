@@ -127,7 +127,7 @@ module DTK
 
     def dsl_hash_form
       ret = Aux.hash_subset(self, [])
-      if namespace = namespace
+      if namespace = namespace()
         ret.merge!(namespace: namespace)
       end
       if version = version_string

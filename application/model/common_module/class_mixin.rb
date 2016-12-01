@@ -49,6 +49,12 @@ module DTK
         Repo::Remote.new(remote).get_remote_module_info?(rsa_pub_key)
       end
 
+      NS_MOD_DELIM_IN_REF = ':'
+      def  find_from_name?(model_handle, namespace, module_name)
+        ref = "#{namespace}#{NS_MOD_DELIM_IN_REF}#{module_name}"
+        get_obj(model_handle, sp_filter(:eq, :ref, ref))
+      end
+
     end
   end
 end

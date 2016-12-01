@@ -29,12 +29,6 @@ module DTK
         get_obj(model_handle, sp_filter(:eq, :id, module_id))
       end
 
-      NS_MOD_DELIM_IN_REF = ':'
-      def self.find_from_name?(model_handle, namespace, module_name)
-        ref = "#{namespace}#{NS_MOD_DELIM_IN_REF}#{module_name}"
-        get_obj(model_handle, sp_filter(:eq, :ref, ref))
-      end
-
       # opts can have keys:
       #   :assembly_name
       #   :version      
@@ -57,17 +51,13 @@ module DTK
         ModuleRepoInfo.new(module_branch)
       end
 
-      def self.update_assemblies_from_parsed_common_module(project, module_branch, parsed_common_module)
-        if parsed_assemblies = parsed_common_module.val(:Assemblies)
-          module_branch.set_dsl_parsed!(false)
-
-          base_service_module = get_base_service_module(module_branch)
-          import_helper = Import::ServiceModule.new(project, base_service_module, module_branch)
-          import_helper.put_needed_info_into_import_helper!(parsed_assemblies, module_version: parsed_common_module[:version])
-          import_helper.import_into_model
-
-          module_branch.set_dsl_parsed!(true)
-        end
+      def self.update_assemblies_from_parsed_common_module(project, module_branch, parsed_assemblies, module_version)
+        module_branch.set_dsl_parsed!(false)
+        base_service_module = get_base_service_module(module_branch)
+        import_helper = Import::ServiceModule.new(project, base_service_module, module_branch)
+        import_helper.put_needed_info_into_import_helper!(parsed_assemblies, module_version:  module_version)
+        import_helper.import_into_model
+        module_branch.set_dsl_parsed!(true)
       end
 
       private

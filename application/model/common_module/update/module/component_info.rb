@@ -17,22 +17,24 @@
 #
 module DTK
   class CommonModule::Update::Module
-    class ServiceInfo < self
+    class ComponentInfo < self
       def create_or_update_from_parsed_common_module?
-        if parsed_assemblies = parsed_common_module.val(:Assemblies)
-          module_branch = create_or_ret_module_branch
+        if parsed_component_defs = parsed_common_module.val(:ComponentDefs)
+          pp [:parsed_component_defs, parsed_component_defs]
+          module_branch  = create_or_ret_module_branch
+
           CommonDSL::Parse.set_dsl_version!(module_branch, parsed_common_module)
 
           update_component_module_refs_from_parsed_common_module(module_branch)
 
-          CommonModule::ServiceInfo.update_assemblies_from_parsed_common_module(project, module_branch, parsed_assemblies, version)
+          # TODO: use legacy parsing routines for component modules
         end
       end
 
       private
 
       def module_type
-        :service_module
+        :component_module
       end
       
     end

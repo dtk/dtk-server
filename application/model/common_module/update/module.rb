@@ -18,8 +18,11 @@
 module DTK
   class CommonModule::Update
     class Module < self
+      require_relative('module/mixin')
       require_relative('module/service_info')
-      # require_relative('module/component_info')
+      require_relative('module/component_info')
+
+      include Mixin
 
       # opts can have keys
       #   :local_params (required)
@@ -90,56 +93,7 @@ module DTK
       
       def self.create_or_update_from_parsed_common_module(project, local_params, module_version, parsed_common_module)
         ServiceInfo.new(project, local_params, module_version, parsed_common_module).create_or_update_from_parsed_common_module?
-        # ComponentInfo.new(project, local_params, module_version, parsed_common_module).create_or_update_from_parsed_common_module?
-      end
-
-      # instance methods; used by children ServiceInfo and ComponentInfo
-
-      attr_reader :project, :module_name, :namespace_name, :version, :local_params, :parsed_common_module, :module_class
-      def initialize(project, common_module__local_params, module_version, parsed_common_module)
-        @project              = project
-        @module_name          = common_module__local_params.module_name
-        @namespace_name       = common_module__local_params.namespace
-        @version              = module_version
-        @local_params         = self.class.create_local_params(module_type, @module_name, version: @version, namespace: @namespace_name)
-        @parsed_common_module = parsed_common_module
-        @module_class         = self.class.get_class_from_module_type(module_type)
-      end
-
-      # if module does not exist, create it
-      # else if module branch does not exist, create it
-      # else return module branch
-      def create_or_ret_module_branch
-        if module_obj = module_class.find_from_name?(project.model_handle(module_type), namespace_name, module_name)
-          namespace_obj = Namespace.find_by_name(project.model_handle(:namespace), namespace_name)
-          if module_branch = module_class.get_workspace_module_branch(project, module_name, version, namespace_obj, no_error_if_does_not_exist: true)
-            module_branch
-          else
-            repo = module_obj.get_repo
-            module_branch = module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace_obj, return_module_branch: true)
-            repo.merge!(branch_name: module_branch[:branch])
-            RepoManager.add_branch_and_push?(module_branch[:branch], { empty: true }, module_branch)
-            module_branch
-          end
-        else
-          module_class.create_module(project, local_params, return_module_branch: true)
-        end
-      end
-
-      def update_component_module_refs_from_parsed_common_module(module_branch)
-        if dependent_modules = parsed_common_module.val(:DependentModules)
-          component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
-
-          cmp_modules_with_namespaces = dependent_modules.map do |parsed_module_ref|
-            { 
-              display_name: parsed_module_ref.req(:ModuleName), 
-              namespace_name: parsed_module_ref.req(:Namespace), 
-              version_info: parsed_module_ref.val(:ModuleVersion) 
-            }
-          end
-          
-          component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
-        end
+        ComponentInfo.new(project, local_params, module_version, parsed_common_module).create_or_update_from_parsed_common_module?
       end
 
     end

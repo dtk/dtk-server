@@ -17,7 +17,6 @@
 #
 module DTK
   class RepoManager
-    require_relative('repo_manager/constant')
     require_relative('repo_manager/add_remote_files_info')
     require_relative('repo_manager/transaction')
 

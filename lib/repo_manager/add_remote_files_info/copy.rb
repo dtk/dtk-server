@@ -52,7 +52,7 @@ module DTK
         end
         
         TARGET_DIR_DEFAULT = '.'
-        def source_target_pair(source_dir, target_dir = nil)
+        def source_target_dir_pair(source_dir, target_dir = nil)
           fail Error, "Unexpected that source_dir is nil" if source_dir.nil?
           SourceTargetDirPair.new(source_dir, target_dir || TARGET_DIR_DEFAULT) 
         end

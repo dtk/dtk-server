@@ -20,7 +20,7 @@ module DTK
     class ServiceInfo < self
       def create_or_update_from_parsed_common_module?
         if parsed_assemblies = parsed_common_module.val(:Assemblies)
-          module_branch = create_or_ret_module_branch
+          module_branch = create_module_branch_and_repo?
           CommonDSL::Parse.set_dsl_version!(module_branch, parsed_common_module)
 
           update_component_module_refs_from_parsed_common_module(module_branch)

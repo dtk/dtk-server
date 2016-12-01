@@ -45,8 +45,6 @@ module DTK
         repo = module_obj.get_repo
         repo.merge!(branch_name: local_branch)
         
-        RepoUser.authorized_users_acls(project.id_handle)
-        
         common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, force_pull: opts[:force_pull])
         parse_needed = (opts[:force_parse] || !common_module__module_branch.dsl_parsed?)
         return ret unless parse_needed || pull_was_needed
@@ -56,7 +54,7 @@ module DTK
         parsed_common_module = dsl_file_obj_from_repo(common_module__module_branch).parse_content(:common_module)
         CommonDSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
         
-        create_or_update_from_parsed_common_module(project, local_params, common_module__module_branch[:version], parsed_common_module)
+        create_or_update_from_parsed_common_module(project, local_params, repo, common_module__module_branch[:version], parsed_common_module)
         ret
       end
 
@@ -91,9 +89,10 @@ module DTK
         CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
       end
       
-      def self.create_or_update_from_parsed_common_module(project, local_params, module_version, parsed_common_module)
-        ServiceInfo.new(project, local_params, module_version, parsed_common_module).create_or_update_from_parsed_common_module?
-        ComponentInfo.new(project, local_params, module_version, parsed_common_module).create_or_update_from_parsed_common_module?
+      # args has project, local_params, repo, module_version, parsed_common_module)
+      def self.create_or_update_from_parsed_common_module(*args)
+        ServiceInfo.new(*args).create_or_update_from_parsed_common_module?
+        ComponentInfo.new(*args).create_or_update_from_parsed_common_module?
       end
 
     end

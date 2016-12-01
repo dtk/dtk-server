@@ -21,7 +21,9 @@ module DTK
       def create_or_update_from_parsed_common_module?
         if parsed_component_defs = parsed_common_module.val(:ComponentDefs)
           pp [:parsed_component_defs, parsed_component_defs]
-          module_branch  = create_or_ret_module_branch
+          module_branch  = create_module_branch_and_repo?
+
+          # TODO: do a push subtree from common_module__repo_local_dir and use transform_to logic
 
           CommonDSL::Parse.set_dsl_version!(module_branch, parsed_common_module)
 
@@ -36,7 +38,12 @@ module DTK
       def module_type
         :component_module
       end
-      
+
+      # used when do a push subtree
+      def common_module__repo_local_dir
+        @common_module__repo_local_dir ||= common_module__repo.get_field?(:local_dir)
+      end
+
     end
   end
 end

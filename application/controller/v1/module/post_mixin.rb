@@ -17,8 +17,7 @@
 module DTK
   class V1::ModuleController
     module PostMixin
-      
-
+      ### Module specific
       def stage
         service_module    = ret_service_module
         is_target_service = boolean_request_params(:is_target)

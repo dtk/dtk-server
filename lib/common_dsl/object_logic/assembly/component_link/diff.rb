@@ -17,7 +17,8 @@
 #
 module DTK; module CommonDSL 
   class ObjectLogic::Assembly::ComponentLink
-    class Diff < CommonDSL::Diff::Set
+    # class Diff < CommonDSL::Diff::Set
+    class Diff < CommonDSL::Diff::Base
       class Add < CommonDSL::Diff::Element::Add
         require_relative('diff/add')
         require_relative('diff/delete')

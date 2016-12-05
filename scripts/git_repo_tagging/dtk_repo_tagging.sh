@@ -56,15 +56,15 @@ dtk_arbiter="git@github.com:dtk/dtk-arbiter.git"
 dtk_repos=()
 dtk_repos+=($dtk_dsl)
 dtk_repos+=($dtk_common_core)
-#dtk_repos+=($dtk_common)
+dtk_repos+=($dtk_common)
 dtk_repos+=($dtk_client)
-#dtk_repos+=($dtk_shell)
-#dtk_repos+=($dtk_node_agent)
-#dtk_repos+=($dtk_repo_manager_admin)
-#dtk_repos+=($dtk_repo_manager)
-#dtk_repos+=($dtk_provisioning)
-#dtk_repos+=($dtk_arbiter)
-#dtk_repos+=($dtk_server)
+dtk_repos+=($dtk_shell)
+dtk_repos+=($dtk_node_agent)
+dtk_repos+=($dtk_repo_manager_admin)
+dtk_repos+=($dtk_repo_manager)
+dtk_repos+=($dtk_provisioning)
+dtk_repos+=($dtk_arbiter)
+dtk_repos+=($dtk_server)
 
 function increase_version_number() {
   current_tag=$1
@@ -111,40 +111,42 @@ function check_dtk_dsl_version() {
   a=`echo v$current_dtk_dsl_version_in_gemspec | cut -d. -f 1,2`
   b=`echo $dtk_dsl_tag | cut -d. -f 1,2`
 
-  if [[ a == b ]]; then
-    echo "No change is needed in dtk-client.gemspec"
-    echo $current_dtk_dsl_version_in_gemspec
+  if [[ $a == $b ]]; then
+    tag=$current_dtk_dsl_version_in_gemspec
   else
-    echo $dtk_dsl_tag
+    tag=$dtk_dsl_tag
   fi
+  echo $tag
 }
 
 # special logic for dtk-dsl which is not versioned like other dtk repos
 function tag_dtk_dsl() {
   dtk_dsl_major_tag=$1
 
-  if [[ $dtk_dsl_major_tag == "not_set" ]]; then
+  commit_message=`git log --oneline -1`
+
+  if [[ $commit_message != *"ump version"* && $dtk_dsl_major_tag == "not_set" ]]; then
     current_tag=`git tag --sort=v:refname | tail -1`
-    next_tag=`increase_version_number $current_tag`
-    tag=`echo $next_tag | sed 's/v//'`
-    echo "Needed bump of version for dtk-dsl to version ${next_tag}..."
+    incremented_tag=`increase_version_number $current_tag`
+    tag=`echo $incremented_tag | sed 's/v//'`
+    echo "Needed bump of version for dtk-dsl to version ${incremented_tag}..."
 
     cd lib/dsl
     sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
     cd ../..
-    #git add .; git commit -m "bump version"; git push origin master
-    git tag $next_tag
-    #git push --tags
-  else
+    git add .; git commit -m "bump version"; git push origin master
+    git tag $incremented_tag
+    git push --tags
+  elif [[ $dtk_dsl_major_tag != "not_set" ]]; then
     echo "Needed bump of version for dtk-dsl to version ${dtk_dsl_major_tag}..."
     tag=`echo $dtk_dsl_major_tag | sed 's/v//'`
 
     cd lib/dsl
     sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
     cd ../..
-    #git add .; git commit -m "bump version"; git push origin master
+    git add .; git commit -m "bump version"; git push origin master
     git tag $dtk_dsl_major_tag
-    #git push --tags
+    git push --tags
   fi
 }
 
@@ -217,16 +219,16 @@ function tag_code() {
       dtk_client_gemspec_tag=`echo $dtk_dsl_tag | sed 's/v//'`
       sed -i -e "s/'dtk-dsl', '.*'/'dtk-dsl', '~> ${dtk_client_gemspec_tag}'/" $repo_name.gemspec
 
-      #git add .; git commit -m "bump version"; git push origin master
+      git add .; git commit -m "bump version"; git push origin master
       git tag $next_tag
-      #git push --tags
+      git push --tags
     elif [[ $repo_name == "dtk-common-core" ]]; then
       cd lib/$repo_name
       sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
       cd ../..
-      #git add .; git commit -m "bump version"; git push origin master
+      git add .; git commit -m "bump version"; git push origin master
       git tag $next_tag
-      #git push --tags
+      git push --tags
     elif [[ $repo_name == "dtk-server" ]]; then
       set_release_yaml_file "not_set"
       cd $repo_name
@@ -279,7 +281,7 @@ function tag_code() {
       gemspec_tag=`echo $dtk_common_core_tag | sed 's/v//'`
       sed -i -e "s/'dtk-common-core','.*'/'dtk-common-core','${gemspec_tag}'/" $repo_name.gemspec
       git add .; git commit -m "bump version"; git push origin master
-      git tag $next_tag
+      git tag $dtk_major_tag
       git push --tags
     elif [[ $repo_name == "dtk-client" ]]; then
       cd lib/cli
@@ -300,7 +302,7 @@ function tag_code() {
       sed -i -e "s/'dtk-dsl', '.*'/'dtk-dsl', '~> ${dtk_client_gemspec_tag}'/" $repo_name.gemspec
 
       git add .; git commit -m "bump version"; git push origin master
-      git tag $next_tag
+      git tag $dtk_major_tag
       git push --tags
     elif [[ $repo_name == "dtk-common-core" ]]; then
       cd lib/$repo_name
@@ -319,7 +321,7 @@ function tag_code() {
       git push --tags
       export DTK_SERVER_TAG=$next_tag
       cd ..
-    else 
+    else
       git tag $dtk_major_tag
       git push --tags
     fi  

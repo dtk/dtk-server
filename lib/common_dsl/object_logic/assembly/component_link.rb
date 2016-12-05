@@ -19,6 +19,8 @@ module DTK; module CommonDSL
   module ObjectLogic
     class Assembly
       class ComponentLink < ContentInputHash
+        require_relative('component_link/diff')
+
         def initialize(component_link)
           super()
           @component_link = component_link
@@ -27,7 +29,7 @@ module DTK; module CommonDSL
 
         def self.generate_content_input?(component_links, opts = {})
           content_input_attributes = component_links.inject(ContentInputHash.new) do |h, cmp_link|
-            content_input_attr = new(cmp_link).generate_content_input?
+            content_input_attr = Component::ComponentLink.new(cmp_link).generate_content_input?
             content_input_attr ? h.merge!(component_link_name(cmp_link) => content_input_attr) : h
           end
 
@@ -35,6 +37,7 @@ module DTK; module CommonDSL
         end
         
         def generate_content_input?
+          set_id_handle(@component_link)
           cmp_link = DTK::Assembly::Instance::ServiceLink.print_form_hash(@component_link, hide_assembly_wide_node: true)
           set(:Value, cmp_link[:dependent_component])
           self
@@ -45,19 +48,16 @@ module DTK; module CommonDSL
         end
 
         ### For diffs
-        def diff?(attribute_parse, qualified_key)
+        def diff?(attribute_parse, qualified_key, opts = {})
           unless skip_for_generation?
             cur_val = val(:Value)
-            new_val = attribute_parse.val(:Value)
+            new_val = attribute_parse#.val(:Value)
             create_diff?(cur_val, new_val, qualified_key)
           end
         end
 
-        def self.diff_set(attributes_gen, attributes_parse, qualified_key, _opts = {})
-          # The method array_of_diffs_on_matching_keys; so assuming that user is not adding attributes
-          # and by design not erroneously catching hidden attributes, which will show up in self (attribute_gen),
-          # but not attributes_parse
-          array_of_diffs_on_matching_keys(attributes_gen, attributes_parse, qualified_key)
+        def self.diff_set(cmp_links_gen, cmp_links_parse, qualified_key, opts = {})
+          diff_set_from_hashes(cmp_links_gen, cmp_links_parse, qualified_key, opts)
         end
 
         private

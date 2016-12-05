@@ -36,6 +36,21 @@ module DTK
         parent_node?(assembly_instance) || fail(Error, "Unexepected that parent_node?(assembly_instance) is nil")
       end
 
+      def parent_component_name?(opts = {})
+        node_name      = nil
+        component_name = nil
+
+        key_elements.each do |element|
+          if element[:type] == :component
+            component_name = element[:key]
+          elsif element[:type] == :node
+            node_name = element[:key]
+          end
+        end
+
+        opts[:include_node] ? "#{node_name}/#{component_name}" : component_name
+      end
+
       # temp workaround for node = parent_node?
       def self.parent_node?(key, assembly_instance)
         if key.respond_to?(:parent_node?)

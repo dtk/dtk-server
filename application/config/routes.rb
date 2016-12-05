@@ -87,6 +87,9 @@ DTK::ReactorRoute.draw do
   post 'api/v1/modules/update_from_repo'              => 'v1::module/update_from_repo'
   post 'api/v1/modules/list_remote'                   => 'v1::module/list_remote'
   post 'api/v1/modules/update_dependency_from_remote' => 'v1::module/update_dependency_from_remote'
+  post 'api/v1/modules/generate_service_name'         => 'v1::module/generate_service_name'
+  post 'api/v1/modules/stage'                         => 'v1::module/stage'
+
   ########## end: Modules
 
   # TODO: DTK-2554; temp while initial testing
@@ -94,6 +97,7 @@ DTK::ReactorRoute.draw do
   post 'api/v1/account/set_catalog_credentials'   => 'account#set_catalog_credentials'
   post 'api/v1/account/add_user_direct_access'    => 'account#add_user_direct_access'
   post 'api/v1/account/check_catalog_credentials' => 'account#check_catalog_credentials'
+  post 'api/v1/account/list_ssh_keys'             => 'account#list_ssh_keys'
 
   ########### end v1 routes
 

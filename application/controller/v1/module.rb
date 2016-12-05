@@ -25,7 +25,9 @@ module DTK
 
       helper_v1 :module_helper
       helper_v1 :module_ref_helper
+      helper_v1 :service_helper
       helper :module_helper
+      helper :assembly_helper
     end
   end
 end

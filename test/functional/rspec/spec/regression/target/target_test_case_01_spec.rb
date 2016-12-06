@@ -9,6 +9,7 @@ target_module = 'aws/network'
 target_assembly_template = 'target'
 target_service_name = 'target_test_case_01'
 target_name = 'target'
+target_version = '1.0.2'
 
 # Target attributes
 aws_access_key = ENV['AWS_ACCESS_KEY']
@@ -28,7 +29,8 @@ describe "(Target) Test Case 01: Auto-generated vpc data" do
   before(:all) do
     puts '**********************************************', ''
     # Install/clone aws:network module with required dependency modules
-    system("dtk module clone #{target_module} #{target_location}")
+    system("rm -rf /tmp/network && mkdir /tmp/network")
+    system("dtk module clone -v #{target_version} #{target_module} #{target_location}")
     system("dtk module install -d #{target_location} #{target_module}")
   end
 

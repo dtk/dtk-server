@@ -24,7 +24,7 @@ shared_context 'Install module from dtkn' do |remote_module, remote_module_locat
   it "installs #{remote_module} module from dtkn to server" do
     puts 'Install module from dtkn:', '-----------------------------'
     pass = true
-    value = `dtk module install -d #{remote_module_location} -v #{version} #{remote_module} -y`
+    value = `dtk module install -d #{remote_module_location} -v #{version} -y #{remote_module}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
     puts "Install of module #{remote_module} was completed successfully!" if pass == true
@@ -90,7 +90,7 @@ shared_context 'Stage target from module' do |target_name, target_location, asse
   it "stages target #{assembly_name} from module #{target_name}" do
     puts 'Stage target from module', '-------------------------'
     pass = true
-    value = `dtk service stage --target -d #{target_location} -n #{service_name} #{assembly_name}`
+    value = `dtk module stage --target -d #{target_location} -n #{service_name} #{assembly_name}`
     puts value
     pass = false if value.include? 'ERROR'
     puts "Target #{assembly_name} is staged successfully!" if pass == true

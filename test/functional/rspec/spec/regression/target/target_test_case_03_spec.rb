@@ -9,6 +9,7 @@ target_module = 'aws/network'
 target_assembly_template = 'target'
 target_service_name = 'target_test_case_03'
 target_name = 'target'
+target_version = '1.0.2'
 
 # Target attributes
 aws_access_key = ENV['AWS_ACCESS_KEY']
@@ -16,7 +17,7 @@ aws_secret_key = ENV['AWS_SECRET_KEY']
 default_keypair = 'testing_use1'
 vpc_id = 'vpc-5a63bc3f'
 subnet_id = 'subnet-50211878'
-security_group_id = 'sg-b4d57ece'
+security_group_id = 'sg-d9f430a4'
 
 # Module specific properties
 initial_module_location = "./spec/regression/target/resources/test_module_03_dtk.module.yaml"
@@ -29,9 +30,10 @@ dtk_common = Common.new('', '')
 
 describe "(Target) Test Case 03: Specified existing subnet id, vpc and security group name" do
   before(:all) do
-    puts '********************************************************************************', ''
+    puts '**********************************************', ''
     # Install/clone aws:network module with required dependency modules
-    system("dtk module clone #{target_module} #{target_location}")
+    system("rm -rf /tmp/network && mkdir /tmp/network")
+    system("dtk module clone -v #{target_version} #{target_module} #{target_location}")
     system("dtk module install -d #{target_location} #{target_module}")
   end
 

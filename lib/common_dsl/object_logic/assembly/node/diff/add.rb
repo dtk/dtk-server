@@ -57,6 +57,9 @@ module DTK; module CommonDSL
           begin
             # TODO: hard coded to ec2_properties
             assembly_instance.add_ec2_properties_and_set_attributes(project, node, image, instance_size)
+            # workaround if image and size are added after stage; remove when we implement attributes add and delete (now have only modify)
+            attribute_set_opts = { create: true, skip_node_property_check: true, skip_image_and_size_validation: true, do_not_raise: true }
+            assembly_instance.set_attributes([{ pattern: "#{node_name}/image", value: image }, { pattern: "#{node_name}/size", value: instance_size }], attribute_set_opts)
           rescue => e
             if e.respond_to?(:message)
               Diff::DiffErrors.raise_error(error_msg: e.message)

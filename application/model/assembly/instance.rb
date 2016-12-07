@@ -334,7 +334,7 @@ module DTK; class  Assembly
         return attr_patterns if attr_patterns.is_a?(Hash) && attr_patterns[:ambiguous]
 
         # set os_type if image attribute is changed; also validate size attribute if set
-        validate_and_fill_image_or_size_attributes?(attr_patterns, opts)
+        validate_and_fill_image_or_size_attributes?(attr_patterns, opts) unless opts[:skip_image_and_size_validation]
 
         if opts[:update_meta]
           created_cmp_level_attrs = attr_patterns.select { |r| r.type == :component_level && r.created?() }

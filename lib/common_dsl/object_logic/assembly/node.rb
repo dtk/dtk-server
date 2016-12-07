@@ -34,7 +34,7 @@ module DTK; module CommonDSL
           attributes = aug_node[:attributes] || []
           # :is_assembly_wide_node just used internally to server-side processing; so not using 'set' method
           self[:is_assembly_wide_node] = true if aug_node.is_assembly_wide_node?
-          
+
           set?(:Attributes, Attribute.generate_content_input?(:node, attributes)) unless attributes.empty?
           set(:Components, Component.generate_content_input(aug_components, opts)) unless aug_components.empty?
           self

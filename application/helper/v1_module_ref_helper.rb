@@ -22,14 +22,39 @@ module Ramaze::Helper
       unless module_id or (module_name and namespace)
         raise_error_usage("Either 'module_id' or 'module_name and namespace' must be given")
       end
-      if module_id
-        module_id = Integer(module_id) rescue raise_error_usage("Ill-formed module id term '#{module_id}'")
-        ::DTK::CommonModule::ServiceInfo.find_from_id?(model_handle(:service_module), module_id) ||
-          raise_error_usage("No module with id '#{module_id}' exists")
+      
+      if module_id = module_id && Integer(module_id) rescue raise_error_usage("Ill-formed module id term '#{module_id}'")
+        service_info.find_from_id?(model_handle(:service_module), module_id) || raise_error__bad_id(module_id)
       else
-        ::DTK::CommonModule::ServiceInfo.find_from_name?(model_handle(:service_module),  namespace, module_name) ||
-          raise_error_usage("The module '#{namespace}/#{module_name}' does not exist")
+        service_info.find_from_name?(model_handle(:service_module), namespace, module_name) || raise_error__bad_name(namespace, module_name)
       end
     end
+
+    private
+
+    def raise_error__bad_id(module_id)
+      if component_info.find_from_id?(model_handle(:component_module), module_id)
+        raise_error_usage("No service info")
+      else
+        raise_error_usage("No module with id '#{module_id}' exists")
+      end
+    end
+
+    def raise_error__bad_name(namespace, module_name)
+      if component_info.find_from_name?(model_handle(:component_module), namespace, module_name)
+        raise_error_usage("The module '#{namespace}/#{module_name}' does not have any service info")
+      else
+        raise_error_usage("The module '#{namespace}/#{module_name}' does not exist")
+      end
+    end
+
+    def service_info
+      ::DTK::CommonModule::ServiceInfo
+    end
+
+    def component_info
+      ::DTK::CommonModule::ComponentInfo
+    end
+
   end
 end

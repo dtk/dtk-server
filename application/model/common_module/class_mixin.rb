@@ -50,9 +50,13 @@ module DTK
       end
 
       NS_MOD_DELIM_IN_REF = ':'
-      def  find_from_name?(model_handle, namespace, module_name)
+      def find_from_name?(model_handle, namespace, module_name)
         ref = "#{namespace}#{NS_MOD_DELIM_IN_REF}#{module_name}"
         get_obj(model_handle, sp_filter(:eq, :ref, ref))
+      end
+
+      def find_from_id?(model_handle, module_id)
+        get_obj(model_handle, sp_filter(:eq, :id, module_id))
       end
 
     end

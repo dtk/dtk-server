@@ -25,10 +25,6 @@ module DTK
         :service_info
       end
 
-      def self.find_from_id?(model_handle, module_id)
-        get_obj(model_handle, sp_filter(:eq, :id, module_id))
-      end
-
       # opts can have keys:
       #   :assembly_name
       #   :version      

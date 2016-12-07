@@ -71,7 +71,9 @@ module DTK; class  Assembly
           Delete.node(node, opts.merge(update_task_template: true, assembly: self))
           node_group.delete_object(update_task_template: true, assembly: self) if node_group.get_node_group_members.size == 0
         else
-          Delete.node(node, opts.merge(update_task_template: true, assembly: self))
+          delete_node_opts = { assembly: self }
+          delete_node_opts.merge!(update_task_template: true) unless opts[:do_not_update_task_template]
+          Delete.node(node, opts.merge(delete_node_opts))
         end
       end
 

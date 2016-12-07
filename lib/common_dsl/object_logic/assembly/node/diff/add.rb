@@ -25,9 +25,9 @@ module DTK; module CommonDSL
             when :node
               assembly_instance.add_node_from_diff(node_name)
             when :node_group
-              fail Error "TODO: write 'assembly_instance.add_node_group_from_diff(node_name)'"
+              fail DTK::Error, "TODO: write 'assembly_instance.add_node_group_from_diff(node_name)'"
             else
-              fail "Unexpected type '#{node_type}'"
+              fail DTK::Error, "Unexpected type '#{node_type}'"
             end
 
           add_nested_components(new_node, result, opts)

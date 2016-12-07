@@ -48,7 +48,8 @@ module DTK; module CommonDSL
 
         def delete_node_and_nested_components(node, result, opts = {})
           delete_nested_components(node, result, opts)
-          assembly_instance.delete_node(node.id_handle, destroy_nodes: true)
+          delete_node_opts = result.semantic_diffs['WORKFLOWS_MODIFIED'] ? { do_not_update_task_template: true, destroy_nodes: true } : {destroy_nodes: true}
+          assembly_instance.delete_node(node.id_handle, delete_node_opts)
         end
 
         def delete_nested_components(node, result, opts = {})

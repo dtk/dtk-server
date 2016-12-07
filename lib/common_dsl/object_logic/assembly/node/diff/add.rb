@@ -25,7 +25,8 @@ module DTK; module CommonDSL
             when :node
               assembly_instance.add_node_from_diff(node_name)
             when :node_group
-              fail DTK::Error, "TODO: write 'assembly_instance.add_node_group_from_diff(node_name)'"
+              # fail DTK::Error, "TODO: write 'assembly_instance.add_node_group_from_diff(node_name)'"
+              fail ErrorUsage, "Adding of node groups through dsl is not supported yet."
             else
               fail DTK::Error, "Unexpected type '#{node_type}'"
             end

@@ -3,7 +3,7 @@ properties:
  server_password: r8server
  aws_access_key_id: 
  aws_secret_access_key: 
- dtk-server: v1.0.4
+ dtk-server: v1.0.2
  dtk-repo-manager: v0.10.1
  dtk-repo-manager-admin: v0.10.0
  dtk-common: v0.10.1

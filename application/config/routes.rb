@@ -94,10 +94,13 @@ DTK::ReactorRoute.draw do
 
   # TODO: DTK-2554; temp while initial testing
   # routes that need to be put on v1
-  post 'api/v1/account/set_catalog_credentials'   => 'account#set_catalog_credentials'
-  post 'api/v1/account/add_user_direct_access'    => 'account#add_user_direct_access'
-  post 'api/v1/account/check_catalog_credentials' => 'account#check_catalog_credentials'
-  post 'api/v1/account/list_ssh_keys'             => 'account#list_ssh_keys'
+  post 'api/v1/account/set_catalog_credentials'   => 'v1::account/set_catalog_credentials'
+  post 'api/v1/account/register_catalog_account'  => 'v1::account/register_catalog_account'
+  post 'api/v1/account/add_user_direct_access'    => 'v1::account/add_user_direct_access'
+  post 'api/v1/account/check_catalog_credentials' => 'v1::account/check_catalog_credentials'
+  get  'api/v1/account/list_ssh_keys'             => 'v1::account/list_ssh_keys'
+  post 'api/v1/account/delete_ssh_key'            => 'v1::account/delete_ssh_key'
+  post 'api/v1/account/set_password'              => 'v1::account/set_password'
 
   ########### end v1 routes
 
@@ -116,7 +119,7 @@ DTK::ReactorRoute.draw do
 
   # ACCOUNT
   post 'account/set_password' => 'account#set_password'
-  post 'account/list_ssh_keys' => 'account#list_ssh_keys'
+  #post 'account/list_ssh_keys' => 'account#list_ssh_keys'
   post 'account/add_user_direct_access' => 'account#add_user_direct_access'
   post 'account/remove_user_direct_access' => 'account#remove_user_direct_access'
   post 'account/set_default_namespace' => 'account#set_default_namespace'

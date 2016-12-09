@@ -43,6 +43,10 @@ module DTK
 
       def register_catalog_user(username, email, password, first_name = nil, last_name = nil)
         # we also make sure that tenant user is created
+        require 'debugger'
+        Debugger.wait_connection = true
+        Debugger.start_remote
+        debugger
         create_tenant_user()
 
         # than we register catalog user

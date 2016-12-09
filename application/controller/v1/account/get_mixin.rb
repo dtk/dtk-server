@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2010-2016 dtk contributors
 #
 # This file is part of the dtk project.
@@ -16,15 +15,18 @@
 # limitations under the License.
 #
 module DTK
-  module V1
-    class Base < Controller
-      def self.helper_v1(helper)
-        helper("v1_#{helper}".to_sym)
+  class V1::AccountController
+    module GetMixin
+      ### For all modules
+      def list_ssh_keys
+        username = ret_non_null_request_params(:username)
+        model_handle = model_handle_with_private_group()
+        # results = RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), { type: 'client' }, username, ['username'])
+        repo_keys = CurrentSession.new.user_object.public_keys
+        # we send current catalog user info in list ssh key table
+        rest_ok_response repo_keys.each { |ssh_key_obj|  ssh_key_obj.merge!(:current_catalog_username => CurrentSession.catalog_username) if ssh_key_obj.has_repoman_direct_access? }
       end
-    end
-
-    %w(service module authorization metadata account).each do |controller_file|
-      require_relative("v1/#{controller_file}")
     end
   end
 end
+

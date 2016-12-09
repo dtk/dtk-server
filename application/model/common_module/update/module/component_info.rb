@@ -18,18 +18,18 @@
 module DTK
   class CommonModule::Update::Module
     class ComponentInfo < self
+      require_relative('component_info/transform')
+
       def create_or_update_from_parsed_common_module?
         if parsed_component_defs = parsed_common_module.val(:ComponentDefs)
-          pp [:parsed_component_defs, parsed_component_defs]
           module_branch  = create_module_branch_and_repo?
-
-          # TODO: do a push subtree from common_module__repo_local_dir and use transform_to logic
-
           CommonDSL::Parse.set_dsl_version!(module_branch, parsed_common_module)
 
           update_component_module_refs_from_parsed_common_module(module_branch)
 
-          # TODO: use legacy parsing routines for component modules
+          Transform.transform_to_component_module_form(parsed_component_defs, self)
+
+          # TODO: do a push subtree from common_module__repo_local_dir and use transform_to logic
         end
       end
 
@@ -38,6 +38,8 @@ module DTK
       def module_type
         :component_module
       end
+
+
 
       # used when do a push subtree
       def common_module__repo_local_dir

@@ -18,9 +18,11 @@
 module DTK
   class CommonModule::Update::Module
     module Mixin
+      attr_reader :module_name, :namespace_name, :version
+
       private
 
-      attr_reader :project, :module_name, :namespace_name, :version, :local_params, :parsed_common_module, :module_class, :common_module__repo
+      attr_reader :project, :local_params, :parsed_common_module, :module_class, :common_module__repo
       def initialize(project, common_module__local_params, common_module__repo, module_version, parsed_common_module)
         @project              = project
         @module_name          = common_module__local_params.module_name

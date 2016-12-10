@@ -27,7 +27,8 @@ module DTK
 
           update_component_module_refs_from_parsed_common_module(module_branch)
 
-          Transform.transform_to_component_module_form(parsed_component_defs, self)
+          # compute the component module dsl files
+          Transform.transform_to_component_module_form(parsed_common_module, self)
 
           # TODO: do a push subtree from common_module__repo_local_dir and use transform_to logic
         end
@@ -38,8 +39,6 @@ module DTK
       def module_type
         :component_module
       end
-
-
 
       # used when do a push subtree
       def common_module__repo_local_dir

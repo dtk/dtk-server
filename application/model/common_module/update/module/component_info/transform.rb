@@ -19,7 +19,7 @@ module DTK
   class CommonModule::Update::Module::ComponentInfo
     class Transform
       def initialize(parent)
-        @dtk_dsl_info_processor = dtk_dsl_transform_helper(parent).info_processor(:component_info)
+        @dtk_dsl_info_processor   = dtk_dsl_transform_helper(parent).info_processor(:component_info)
       end
       private :initialize
 
@@ -28,10 +28,16 @@ module DTK
       end
 
       def transform_to_component_module_form(parsed_common_module)
-        parsed_common_module_string_keys = parsed_common_module.ret_hash_with_string_keys
-        input_files_processor.add_hash_content!(common_module_top_dsl_path, parsed_common_module_string_keys)
+        input_files_processor.add_canonical_hash_content!(common_module_top_dsl_path, parsed_common_module)
         @dtk_dsl_info_processor.compute_outputs!
-        pp [:transform_to_component_module_form, @dtk_dsl_info_processor]
+
+        @dtk_dsl_info_processor.output_path_text_pairs.each_pair do |path, text|
+          pp '--------------------------------------'
+          pp path
+          STDOUT << text
+          pp '--------------------------------------'
+        end
+nil
       end
 
       private

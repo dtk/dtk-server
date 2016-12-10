@@ -98,13 +98,11 @@ module DTK
         def checkout_other_branch?(branch, &body)
           if branch != current_branch
             yield
+          elsif other_branch = get_branches.find { |br| br != branch }
+            checkout(other_branch) { yield }        
           else
-            unless other_branch = get_branches.find { |br| br != branch }
-              fail Error.new("Cannot find branch other than '#{branch}' to checkout")
-            end
-            checkout(other_branch) do        
-              yield
-            end
+            Log.error("Ignoring content in checkout_other_branch? because cannot find branch other than '#{branch}' in repo '#{@repo}' to checkout")
+            nil
           end
         end
  

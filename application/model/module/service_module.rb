@@ -134,7 +134,7 @@ module DTK
         if opts[:no_error_if_does_not_exist]
           return ret
         else
-          fail ErrorUsage.new("Version '#{version}' for specified component module does not exist")
+          fail ErrorUsage.new("Version '#{version}' for the specified service module does not exist")
         end
       end
 

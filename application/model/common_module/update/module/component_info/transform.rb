@@ -20,7 +20,8 @@ module DTK
     class Transform
       def initialize(parsed_common_module, parent)
         @dtk_dsl_info_processor = dtk_dsl_transform_helper(parent).info_processor(:component_info)
-        input_files_processor(@dtk_dsl_info_processor).add_canonical_hash_content!(common_module_top_dsl_path, parsed_common_module)
+        @input_files_processor  = ret_input_files_processor(@dtk_dsl_info_processor)
+        @input_files_processor.add_canonical_hash_content!(common_module_top_dsl_path, parsed_common_module)
       end
 
       def compute_component_module_outputs!
@@ -28,8 +29,12 @@ module DTK
         self
       end
 
-      def output_path_text_pairs(&body)
-        @dtk_dsl_info_processor.output_path_text_pairs.each_pair { |path, text| body.call(path, text) }
+      def file_path__content_array
+        @dtk_dsl_info_processor.output_path_text_pairs.inject([]) { |a, (path, content)| a + [{ path: path, content: content }] }
+      end
+
+      def input_paths
+        @input_files_processor.input_paths
       end
 
       private
@@ -45,11 +50,7 @@ module DTK
         @common_module_top_dsl_path ||= CommonDSL::FileType::CommonModule::DSLFile::Top.canonical_path
       end
 
-      def input_files_processor(dtk_dsl_info_processor)
-        @input_files_processor ||= input_files_processor_aux(dtk_dsl_info_processor)
-      end
-
-      def input_files_processor_aux(dtk_dsl_info_processor)
+      def ret_input_files_processor(dtk_dsl_info_processor)
         type = :module
         dtk_dsl_info_processor.indexed_input_files[type] || raise(Error, "Unexpected that no indexed_input_files of type '#{type}'")
       end

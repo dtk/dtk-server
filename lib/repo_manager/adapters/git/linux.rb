@@ -32,6 +32,15 @@ module DTK
         git_command.subtree(cmd_opts, 'push', '--prefix', prefix, external_repo_url, external_branch, '--squash')
       end
 
+      def git_command__push_to_external_repo(external_repo, external_branch)
+        # TODO: remove this retrsiction by updating command line in  git_command.push
+        unless @branch == external_branch
+          fail Error, "The method 'push_to_external_repo' not supported when local branch (#{@branch}) and external_branch (#{external_branch}) are different"
+        end
+        external_repo_url = self.class.repo_url(external_repo.display_name)
+        git_command.push(cmd_opts, external_repo_url, '-f')
+      end
+
       def git_command__clone(remote_repo, local_dir)
         git_command.clone(cmd_opts, remote_repo, local_dir)
       end

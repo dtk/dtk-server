@@ -22,16 +22,17 @@ module DTK
 
       private
 
-      attr_reader :project, :local_params, :parsed_common_module, :module_class, :common_module__repo
-      def initialize(project, common_module__local_params, common_module__repo, module_version, parsed_common_module)
-        @project              = project
-        @module_name          = common_module__local_params.module_name
-        @namespace_name       = common_module__local_params.namespace
-        @version              = module_version
-        @local_params         = self.class.create_local_params(module_type, @module_name, version: @version, namespace: @namespace_name)
-        @parsed_common_module = parsed_common_module
-        @common_module__repo  = common_module__repo
-        @module_class         = self.class.get_class_from_module_type(module_type)
+      attr_reader :project, :local_params, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
+      def initialize(project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module)
+        @project                      = project
+        @module_name                  = common_module__local_params.module_name
+        @namespace_name               = common_module__local_params.namespace
+        @common_module__module_branch = common_module__module_branch
+        @version                      = common_module__module_branch[:version]
+        @local_params                 = self.class.create_local_params(module_type, @module_name, version: @version, namespace: @namespace_name)
+        @parsed_common_module         = parsed_common_module
+        @common_module__repo          = common_module__repo
+        @module_class                 = self.class.get_class_from_module_type(module_type)
       end
 
       # if module does not exist, create it

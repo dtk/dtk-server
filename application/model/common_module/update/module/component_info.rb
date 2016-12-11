@@ -25,22 +25,15 @@ module DTK
           component_module_branch = create_module_branch_and_repo?
           CommonDSL::Parse.set_dsl_version!(component_module_branch, parsed_common_module)
 
-          # push subtree to component module
-          prefix = ''
           aug_component_module_branch = component_module_branch.augmented_module_branch
-          # common_module__module_branch.push_subtree_to_component_module(prefix, aug_component_module_branch) # opts = {})
+          common_module__module_branch.push_to_component_module(aug_component_module_branch)
+
+          # transform from common module dsl to component module dsl form 
+          transform_component_module_repo_dsl_files(aug_component_module_branch) 
 
           # TODO: do we need this update_component_module_refs_from_parsed_common_module(component_module_branch)
-
-          # compute the component module dsl files
-          transform = Transform.new(parsed_common_module, self).compute_component_module_outputs!
-          transform.output_path_text_pairs do |path, text|
-            pp '--------------------------------------'
-            pp path
-            STDOUT << text
-            pp '--------------------------------------'
-          end
-          # TODO: do a push subtree from common_module__repo_local_dir and use transform_to logic
+          
+          # TODO: if any dsl changes invoke routine to update object module 
         end
       end
 
@@ -50,9 +43,13 @@ module DTK
         :component_module
       end
 
-      # used when do a push subtree
-      def common_module__repo_local_dir
-        @common_module__repo_local_dir ||= common_module__repo.get_field?(:local_dir)
+
+      def transform_component_module_repo_dsl_files(aug_component_module_branch) 
+        transform = Transform.new(parsed_common_module, self).compute_component_module_outputs!
+        file_path__content_array = transform.file_path__content_array
+
+        transform.input_paths.each { |path| RepoManager.delete_file?(path, {no_commit: true}, aug_component_module_branch) }
+        RepoManager.add_files(aug_component_module_branch, file_path__content_array)
       end
 
     end

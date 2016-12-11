@@ -79,6 +79,10 @@ module DTK
       Task::Template.get_objs(model_handle(:task_template), sp_hash)
     end
 
+    def augmented_module_branch
+      Augmented.augmented_module_branch(self)
+    end
+
     def get_module
       row = get_obj(cols: [:type, :parent_info])
       type = row[:type].to_sym

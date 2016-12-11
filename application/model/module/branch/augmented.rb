@@ -63,6 +63,16 @@ module DTK
         @implementation ||= get_implementation
       end
 
+      def self.augmented_module_branch(module_branch)
+        sp_hash = {
+          cols: [:display_name, :augmented_branch_info, :namespace]
+        }
+        module_branch_id = module_branch.id
+        module_obj = module_branch.get_module.get_objs(sp_hash).find { |r| r[:module_branch][:id] == module_branch_id }
+        aug_module_branch = module_obj[:module_branch].merge(repo: module_obj[:repo], module_name: module_obj[:display_name], module_namespace: module_obj[:namespace][:display_name])
+        aug_module_branch.create_as_subclass_object(self)
+      end
+
       # opts can have keys:
       #   :filter
       #   :donot_raise_error

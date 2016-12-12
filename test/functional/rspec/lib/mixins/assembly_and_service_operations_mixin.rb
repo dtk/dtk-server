@@ -154,6 +154,7 @@ module AssemblyAndServiceOperationsMixin
           break
         elsif task_status_response['data'].first['status'] == 'failed'
           puts 'Service was not converged successfully!'
+          ap task_status_response['data']
           service_converged = false
           break
         end
@@ -186,6 +187,7 @@ module AssemblyAndServiceOperationsMixin
           break
         elsif task_status_response['data'].first['status'] == 'failed'
           puts 'Service was not deleted successfully!'
+          ap task_status_response['data']
           service_deleted = false
           break
         end

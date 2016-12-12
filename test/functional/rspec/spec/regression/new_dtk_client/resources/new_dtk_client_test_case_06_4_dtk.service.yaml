@@ -1,0 +1,52 @@
+---
+dsl_version: 1.0.0
+name: new_dtk_client_test_case_06
+dependencies:
+  puppetlabs/apt: master
+  puppetlabs/concat: master
+  aws/ec2: master
+  puppetlabs/mysql: 1.0.0
+  puppet/nginx: master
+  nanliu/staging: master
+  puppetlabs/stdlib: master
+  dtk-examples/wordpress: 1.2.0
+nodes:
+  wordpress:
+    attributes:
+      image: trusty_hvm
+      size: small
+    components:
+    - mysql::server:
+        attributes:
+          remote_access: false
+    - mysql::db[wordpress]
+    - wordpress::app:
+        attributes:
+          db_name: wordpress
+          db_password: password
+          db_user: user
+          version: '3.8'
+        component_links:
+          mysql::db: wordpress/mysql::db
+          mysql::server: wordpress/mysql::server
+    - wordpress::php_config
+    - wordpress::nginx_config:
+        attributes:
+          wp_content: /opt/wordpress/
+        component_links:
+          wordpress::app: wordpress/wordpress::app
+workflows:
+  create:
+    subtask_order: sequential
+    subtasks:
+    - name: wordpress setup
+      ordered_components:
+      - wordpress::php_config
+      - wordpress::app
+    - name: database setup
+      ordered_components:
+      - mysql::server
+      - mysql::db[wordpress]
+    - name: web server setup
+      ordered_components:
+      - wordpress::nginx_config

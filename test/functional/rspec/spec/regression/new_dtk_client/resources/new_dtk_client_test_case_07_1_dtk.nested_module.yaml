@@ -1,0 +1,80 @@
+---
+module: mysql
+dsl_version: 1.0.0
+components:
+  server:
+    attributes:
+      package_name:
+        type: string
+      override_options:
+        type: hash
+      remote_access:
+        type: boolean
+        default: true
+      new_attribute:
+        type: string
+        default: new_attribute_value
+    actions:
+      create:
+        puppet_class: mysql::server
+
+  db:
+    attributes:
+      name:
+        type: string
+        required: true
+      host:
+        type: string
+      user:
+        type: string
+        required: true
+      password:
+        type: string
+        required: true
+      grant:
+        type: string
+        hidden: true
+    actions:
+      create:
+        puppet_definition: mysql::db
+
+  client:
+    actions:
+      create:
+        puppet_class: mysql::client
+
+  server_backup:
+    attributes:
+      backupuser:
+        type: string
+      backuppassword:
+        type: string
+      backupdir:
+        type: string
+    actions:
+      create:
+        puppet_class: mysql::server::backup
+
+  bindings:
+    attributes:
+      java_enable:
+        type: boolean
+      perl_enable:
+        type: boolean
+      php_enable:
+        type: boolean
+      python_enable:
+        type: boolean
+      ruby_enable:
+        type: boolean
+      client_dev:
+        type: boolean
+      daemon_dev:
+        type: boolean
+    actions:
+      create:
+        puppet_class: mysql::bindings
+
+includes:
+- staging
+- stdlib

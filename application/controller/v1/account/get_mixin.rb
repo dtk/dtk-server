@@ -21,10 +21,11 @@ module DTK
       def list_ssh_keys
         username = ret_non_null_request_params(:username)
         model_handle = model_handle_with_private_group()
+        datatype  = :account_ssh_keys
         # results = RepoUser.get_matching_repo_users(model_handle.createMH(:repo_user), { type: 'client' }, username, ['username'])
         repo_keys = CurrentSession.new.user_object.public_keys
         # we send current catalog user info in list ssh key table
-        rest_ok_response repo_keys.each { |ssh_key_obj|  ssh_key_obj.merge!(:current_catalog_username => CurrentSession.catalog_username) if ssh_key_obj.has_repoman_direct_access? }
+        rest_ok_response repo_keys.each { |ssh_key_obj|  ssh_key_obj.merge!(:current_catalog_username => CurrentSession.catalog_username) if ssh_key_obj.has_repoman_direct_access? }, datatype: datatype
       end
     end
   end

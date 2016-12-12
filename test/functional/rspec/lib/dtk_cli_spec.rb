@@ -326,6 +326,22 @@ shared_context "Change content of service instance on local filesystem" do |serv
   end
 end
 
+shared_context "Change content of dependency module in service instance on local filesystem" do |dependency_module_location, update_dependency_module_location|
+  it "updates content of dependency module in service instance on local filesystem" do
+    puts "Update content of dependency module in service instance on local filesystem", '------------------------------------------------------------------'
+    pass = false
+    `cp #{update_dependency_module_location} #{dependency_module_location}/`
+    `rm -rf #{dependency_module_location}/dtk.nested_module.yaml`
+    `mv #{dependency_module_location}/*.yaml #{dependency_module_location}/dtk.nested_module.yaml`
+    value = `ls #{dependency_module_location}/dtk.nested_module.yaml`
+    pass = !value.include?('No such file or directory')
+    puts 'dtk.nested_module.yaml has been updated!' if pass == true
+    puts 'dtk.nested_module.yaml has not been updated!' if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context "Push module changes" do |module_name, module_location|
   it "pushes changes for module #{module_name}" do
     puts 'Push module changes', '-------------------------'

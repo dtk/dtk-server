@@ -11,24 +11,24 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/dtk_common'
 
 update_1_service_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_06_1_dtk.service.yaml"
-component_link_1_1 = { type: 'mysql::server', component_name: 'wordpress/wordpress::app', :dependency_component: nil }
-component_link_1_2 = { type: 'mysql::db', component_name: 'wordpress/wordpress::app', :dependency_component: 'wordpress/mysql::db' }
-component_link_1_3 = { type: 'wordpress::app', component_name: 'wordpress/wordpress::nginx_config', :dependency_component: 'wordpress/wordpress::app' }
+component_link_1_1 = { type: 'mysql::server', component_name: 'wordpress/wordpress::app', dependency_component: nil }
+component_link_1_2 = { type: 'mysql::db', component_name: 'wordpress/wordpress::app', dependency_component: 'wordpress/mysql::db' }
+component_link_1_3 = { type: 'wordpress::app', component_name: 'wordpress/wordpress::nginx_config', dependency_component: 'wordpress/wordpress::app' }
 
 update_2_service_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_06_2_dtk.service.yaml"
-component_link_2_1 = { type: 'mysql::server', component_name: 'wordpress/wordpress::app', :dependency_component: nil }
-component_link_2_2 = { type: 'mysql::db', component_name: 'wordpress/wordpress::app', :dependency_component: 'wordpress/mysql::db' }
-component_link_2_3 = { type: 'wordpress::app', component_name: 'wordpress/wordpress::nginx_config', :dependency_component: nil }
+component_link_2_1 = { type: 'mysql::server', component_name: 'wordpress/wordpress::app', dependency_component: nil }
+component_link_2_2 = { type: 'mysql::db', component_name: 'wordpress/wordpress::app', dependency_component: 'wordpress/mysql::db' }
+component_link_2_3 = { type: 'wordpress::app', component_name: 'wordpress/wordpress::nginx_config', dependency_component: nil }
 
 update_3_service_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_06_3_dtk.service.yaml"
-component_link_3_1 = { type: 'mysql::server', component_name: 'wordpress/wordpress::app', :dependency_component: 'wordpress/mysql::server' }
-component_link_3_2 = { type: 'mysql::db', component_name: 'wordpress/wordpress::app', :dependency_component: 'wordpress/mysql::db' }
-component_link_3_3 = { type: 'wordpress::app', component_name: 'wordpress/wordpress::nginx_config', :dependency_component: nil }
+component_link_3_1 = { type: 'mysql::server', component_name: 'wordpress/wordpress::app', dependency_component: 'wordpress/mysql::server' }
+component_link_3_2 = { type: 'mysql::db', component_name: 'wordpress/wordpress::app', dependency_component: 'wordpress/mysql::db' }
+component_link_3_3 = { type: 'wordpress::app', component_name: 'wordpress/wordpress::nginx_config', dependency_component: nil }
 
 update_4_service_location = "./spec/regression/new_dtk_client/resources/new_dtk_client_test_case_06_4_dtk.service.yaml"
-component_link_4_1 = { type: 'mysql::server', component_name: 'wordpress/wordpress::app', :dependency_component: 'wordpress/mysql::server' }
-component_link_4_2 = { type: 'mysql::db', component_name: 'wordpress/wordpress::app', :dependency_component: 'wordpress/mysql::db' }
-component_link_4_3 = { type: 'wordpress::app', component_name: 'wordpress/wordpress::nginx_config', :dependency_component: 'wordpress/wordpress::app' }
+component_link_4_1 = { type: 'mysql::server', component_name: 'wordpress/wordpress::app', dependency_component: 'wordpress/mysql::server' }
+component_link_4_2 = { type: 'mysql::db', component_name: 'wordpress/wordpress::app', dependency_component: 'wordpress/mysql::db' }
+component_link_4_3 = { type: 'wordpress::app', component_name: 'wordpress/wordpress::nginx_config', dependency_component: 'wordpress/wordpress::app' }
 
 remote_module = 'dtk-examples/wordpress'
 remote_module_location = '/tmp/new_dtk_client_test_case_06'

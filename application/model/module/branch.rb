@@ -173,14 +173,22 @@ module DTK
     # returns true if actual pull was needed
     # opts can have keys:
     #   :force
+    #   :update_dsl_parsed - if set then regexp that matches dsl file
     def pull_repo_changes?(commit_sha, opts = {})
-      if commit_sha == current_sha
-        nil
-      else
-        fast_foward_pull_raise_error_if_merge_needed(opts)
-        set_sha(commit_sha)
-        true
+      return nil if commit_sha == current_sha
+
+      opts = opts.merge(ret_diffs: nil) if opts[:update_dsl_parsed]
+      fast_foward_pull_raise_error_if_merge_needed(opts)
+
+      update_hash = { current_sha: commit_sha }
+      if diffs =  opts[:ret_diffs]
+        dsl_regexp = opts[:update_dsl_parsed]
+        if diffs.ret_summary.impacted_files.find { |path| path =~ dsl_regexp }
+          update_hash.merge!(dsl_parsed: false)
+        end
       end
+      update(update_hash)
+      true
     end
 
     # returns nil if no changes, otherwise returns diffs
@@ -203,6 +211,7 @@ module DTK
 
     # opts can have keys:
     #   :force
+    #   :ret_diffs - if set then this method will update it with a Repo::Diffs object
     def fast_foward_pull_raise_error_if_merge_needed(opts = {})
       merge_result = RepoManager.fast_foward_pull(self[:branch], opts, self)
       if merge_result == :merge_needed
@@ -579,7 +588,8 @@ module DTK
         repo_id: repo_idh.get_id(),
         is_workspace: true,
         type: local.module_type.to_s,
-        version: version_field(local.version)
+        version: version_field(local.version),
+        dsl_parsed: false
       }
 
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh

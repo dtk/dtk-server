@@ -35,17 +35,16 @@ module DTK
         repo_name    = opts[:repo_name] || fail(Error, "opts[:repo_name] should not be nil")
         local_params = opts[:local_params] || fail(Error, "opts[:local_params] should not be nil")
 
-        # TODO: should we remove
-        opts[:force_parse] = opts[:force_pull] = true # for testing
-        
         local             = local_params.create_local(project)
         local_branch      = local.branch_name
         
         module_obj = module_exists?(project.id_handle, local[:module_name], local[:namespace])
         repo = module_obj.get_repo
         repo.merge!(branch_name: local_branch)
-        
-        common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, force_pull: opts[:force_pull])
+
+        # update_dsl_parsed is set so that common_module__module_branch will have dsl_parsed set to false if a dsl file is changed
+        pull_opts = { force_pull: opts[:force_pull], update_dsl_parsed: CommonDSL::FileType::CommonModule::DSLFile::Top.regexp }
+        common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, pull_opts)
         parse_needed = (opts[:force_parse] || !common_module__module_branch.dsl_parsed?)
         return ret unless parse_needed || pull_was_needed
         
@@ -54,7 +53,7 @@ module DTK
         parsed_common_module = dsl_file_obj_from_repo(common_module__module_branch).parse_content(:common_module)
         CommonDSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
         
-        create_or_update_from_parsed_common_module(project, local_params, repo, common_module__module_branch, parsed_common_module)
+        create_or_update_from_parsed_common_module(project, local_params, repo, common_module__module_branch, parsed_common_module, parse_needed: parse_needed)
         ret
       end
 
@@ -62,10 +61,11 @@ module DTK
 
       # opts can have keys:
       #   :force_pull
+      #   :update_dsl_parsed - if set then regexp that matches dsl file
       def self.pull_repo_changes?(project, local_params, commit_sha, opts = {})
         namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
         module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace)
-        pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force: opts[:force_pull])
+        pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force: opts[:force_pull], update_dsl_parsed: opts[:update_dsl_parsed])
         [module_branch, pull_was_needed]
       end
 
@@ -89,7 +89,7 @@ module DTK
         CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
       end
       
-      # args has project, local_params, repo, module_version, parsed_common_module)
+      # args has project, local_params, repo, module_version, parsed_common_module, opts)
       def self.create_or_update_from_parsed_common_module(*args)
         ServiceInfo.new(*args).create_or_update_from_parsed_common_module?
         ComponentInfo.new(*args).create_or_update_from_parsed_common_module?

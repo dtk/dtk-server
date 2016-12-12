@@ -32,8 +32,8 @@ module DTK
           transform_component_module_repo_dsl_files(aug_component_module_branch) 
 
           # TODO: do we need this update_component_module_refs_from_parsed_common_module(component_module_branch)
-          
-          # TODO: if any dsl changes invoke routine to update object module 
+          update_component_info_in_model_from_dsl if parse_needed?
+
         end
       end
 
@@ -50,6 +50,10 @@ module DTK
 
         transform.input_paths.each { |path| RepoManager.delete_file?(path, {no_commit: true}, aug_component_module_branch) }
         RepoManager.add_files(aug_component_module_branch, file_path__content_array)
+      end
+
+      def update_component_info_in_model_from_dsl
+        Log.error("write 'update_component_info_in_model_from_dsl'")
       end
 
     end

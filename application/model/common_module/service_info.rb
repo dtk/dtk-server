@@ -41,12 +41,6 @@ module DTK
         get_field?(:ref)
       end
 
-      def self.create_empty_module(project, local_params, opts = {})
-        opts = opts.merge(return_module_branch: true)
-        module_branch = create_module(project, local_params, opts)
-        ModuleRepoInfo.new(module_branch)
-      end
-
       def self.update_assemblies_from_parsed_common_module(project, module_branch, parsed_assemblies, module_version)
         module_branch.set_dsl_parsed!(false)
         base_service_module = get_base_service_module(module_branch)

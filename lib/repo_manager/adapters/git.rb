@@ -200,6 +200,7 @@ module DTK; class RepoManager
     # opts can have keys:
     #   :force
     #   :remote_name
+    #   :ret_diffs - if present then this method will update it with a Repo::Diffs object
     def fast_foward_pull(remote_branch, opts = {})
       remote_name = opts[:remote_name] || default_remote_name
       remote_ref  = "#{remote_name}/#{remote_branch}"
@@ -212,6 +213,9 @@ module DTK; class RepoManager
          when :local_behind then :changed
          else fail Error.new("Unexpected merge relation (#{merge_rel})")
         end
+
+      # computed after a fetch and before a merge
+      opts[:ret_diffs] = diff(remote_ref) if opts.has_key?(:ret_diffs)
 
       if opts[:force]
         checkout(@branch) do

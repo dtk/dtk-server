@@ -22,8 +22,9 @@ module DTK
 
       private
 
-      attr_reader :project, :local_params, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
-      def initialize(project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module)
+      # opts can have keys:
+      #   :parse_needed
+      def initialize(project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module, opts = {})
         @project                      = project
         @module_name                  = common_module__local_params.module_name
         @namespace_name               = common_module__local_params.namespace
@@ -33,6 +34,12 @@ module DTK
         @parsed_common_module         = parsed_common_module
         @common_module__repo          = common_module__repo
         @module_class                 = self.class.get_class_from_module_type(module_type)
+        @parse_needed                 = opts[:parse_needed]
+      end
+
+      attr_reader :project, :local_params, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
+      def parse_needed?
+        @parse_needed
       end
 
       # if module does not exist, create it

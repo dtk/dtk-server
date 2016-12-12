@@ -38,12 +38,13 @@ module DTK
       :combined_module
     end
 
-    def self.create_empty_module(project, local_params)
+    def self.create_empty_module_with_branch(project, local_params)
       create_module_opts = {
         return_module_branch: true,
         no_initial_commit: true,
         common_module: true
       }
+      # create_module also creates branch
       module_branch = create_module(project, local_params, create_module_opts)
       ModuleRepoInfo.new(module_branch)
     end

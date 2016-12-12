@@ -38,13 +38,6 @@ module DTK
         ComponentModule.install(project, local_params, remote_params, dtk_client_pub_key)
       end
 
-      def self.create_empty_module(project, local_params, opts = {})
-        opts = opts.merge(return_module_branch: true)
-        module_branch = create_module(project, local_params, opts)
-        ModuleRepoInfo.new(module_branch)
-      end
-
-
       def self.list_remotes(_model_handle, rsa_pub_key = nil, opts = {})
         Repo::Remote.new.list_module_info(module_type, rsa_pub_key, opts.merge!(ret_versions_array: true))
       end

@@ -35,12 +35,6 @@ module DTK
         AssemblyModule::Component.new(assembly_instance).create_module_for_service_instance?(component_module, base_version: base_version, ret_augmented_module_branch: true)
       end
 
-      def self.create_empty_module(project, local_params, opts = {})
-        opts = opts.merge(return_module_branch: true)
-        service_module_branch = create_module(project, local_params, opts)
-        ModuleRepoInfo.new(service_module_branch)
-      end
-
       def self.delete_from_model_and_repo(assembly_instance)
         if running_task = assembly_instance.most_recent_task_is_executing?
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running. Please wait until the task is complete or cancel the task."

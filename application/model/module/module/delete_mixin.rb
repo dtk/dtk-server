@@ -19,23 +19,23 @@ module DTK; class BaseModule
   module DeleteMixin
     def delete_object(opts = {})
       unless opts[:skip_validations]
-        assembly_templates = get_associated_assembly_templates()
+        assembly_templates = get_associated_assembly_templates
         unless assembly_templates.empty?
           assembly_names = assembly_templates.map { |a| a.display_name_print_form(include_namespace: true) }
           fail ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
         end
 
-        components = get_associated_component_instances()
+        components = get_associated_component_instances
         raise_error_component_refs(components) unless components.empty?
       end
 
-      impls = get_implementations()
+      impls = get_implementations
       delete_instances(impls.map(&:id_handle))
-      repos = get_repos()
+      repos = get_repos
       repos.each { |repo| RepoManager.delete_repo(repo) }
       delete_instances(repos.map(&:id_handle))
-      delete_instance(id_handle())
-      { module_name: module_name() }
+      delete_instance(id_handle)
+      { module_name: module_name }
     end
 
     def delete_version?(version)
@@ -43,7 +43,7 @@ module DTK; class BaseModule
     end
 
     def delete_version(version, opts = {})
-      ret = { module_name: module_name() }
+      ret = { module_name: module_name }
       unless module_branch = get_module_branch_matching_version(version)
         if opts[:no_error_if_does_not_exist]
           return ret
@@ -55,16 +55,16 @@ module DTK; class BaseModule
       # check if this module is dependency to other component/service module
       raise_error_if_dependency(module_branch, version)
 
-      if implementation = module_branch.get_implementation()
-        delete_instance(implementation.id_handle())
+      if implementation = module_branch.get_implementation
+        delete_instance(implementation.id_handle)
       end
 
-      module_branch.delete_instance_and_repo_branch()
+      module_branch.delete_instance_and_repo_branch
       ret
     end
 
     def delete_version_or_module(version)
-      module_branches = get_module_branches()
+      module_branches = get_module_branches
 
       if module_branches.size > 1
         delete_version(version)
@@ -75,30 +75,31 @@ module DTK; class BaseModule
         end
         # check if this module is dependency to other component/service module
         raise_error_if_dependency(module_branch, version)
-        delete_object()
+        delete_object
       end
     end
 
     def delete_common_module_version_or_module(version, opts = {})
-      module_branches = get_module_branches()
-
+      module_branches = get_module_branches
+      # TODO: DTK-2766: this does not provide for case where number of component or service modules is different than number of common modules
+      # This can happen for legacy repos
       if module_branches.size > 1
-        CommonModule.delete_associated_service_module_version(self, version)
+        delete_associated_service_and_component_module_version(self, version)
         delete_version(version)
       else
         unless module_branch = get_module_branch_matching_version(version)
           fail ErrorUsage.new("Version '#{version}' for specified component module does not exist!") if version
           fail ErrorUsage.new("Base version for specified component module does not exist. You have to specify version you want to delete!")
         end
-        CommonModule.delete_associated_service_module(self)
+        delete_associated_service_and_component_module(self)
         delete_object(opts.merge(skip_validations: true))
       end
     end
 
-    def delete_versions_except_base()
-      ret = { module_name: module_name() }
+    def delete_versions_except_base
+      ret = { module_name: module_name }
 
-      module_branches = get_module_branches()
+      module_branches = get_module_branches
       module_branches.reject!{ |branch| branch[:version].nil? || branch[:version].eql?('master') }
 
       module_branches.each do |branch|
@@ -109,6 +110,31 @@ module DTK; class BaseModule
     end
 
     private
+
+    def delete_associated_service_and_component_module(common_module)
+      delete_associated_params.each_pair do |module_type, module_class|
+        model_handle = common_module.model_handle(module_type)
+        if module_obj = module_class.find_from_name?(model_handle, common_module.module_namespace, common_module.module_name)
+          module_obj.delete_object(from_common_module: true)
+        end
+      end
+    end
+
+    def delete_associated_service_and_component_module_version(common_module, version)
+      delete_associated_params.each_pair do |module_type, module_class|
+        model_handle = common_module.model_handle(module_type)
+        if module_obj = module_class.find_from_name?(model_handle, common_module.module_namespace, common_module.module_name)
+          module_obj.delete_version(version, no_error_if_does_not_exist: true)
+        end
+      end
+    end
+
+    
+    def delete_associated_params
+      # Import that service_module is first; so it is deleted before component module
+      @delete_associated_params ||= { service_module: CommonModule::ServiceInfo, component_module: CommonModule::ComponentInfo }
+    end
+
 
     def raise_error_component_refs(components)
       ndx_assemblies = {}
@@ -129,7 +155,7 @@ module DTK; class BaseModule
             "Reference to '#{cmp_ref}'"
           end
         if assembly = ndx_assemblies[r[:assembly_id]]
-          ref << " in service instance '#{assembly.display_name_print_form()}'"
+          ref << " in service instance '#{assembly.display_name_print_form}'"
         end
         ref
       end
@@ -137,7 +163,7 @@ module DTK; class BaseModule
     end
 
     def raise_error_if_dependency(branch, version)
-      components, services = ModuleRefs.get_module_refs_by_name_and_version(branch, module_namespace(), module_name(), version)
+      components, services = ModuleRefs.get_module_refs_by_name_and_version(branch, module_namespace, module_name, version)
 
       # remove self from dependencies (component modules can have self set as dependency)
       components.reject!{ |cmp| cmp[:module_branch][:id] == branch[:id] }

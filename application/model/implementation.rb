@@ -33,7 +33,7 @@ module DTK
       # find relevant existing files
       sp_hash = {
         cols: [:id, :display_name, :path],
-        filter: [:and, [:eq, :implementation_implementation_id, id()], [:oneof, :path, paths_to_delete + paths_to_add]]
+        filter: [:and, [:eq, :implementation_implementation_id, id], [:oneof, :path, paths_to_delete + paths_to_add]]
       }
       file_assets = Model.get_objs(model_handle(:file_asset), sp_hash)
       # delete relevant files
@@ -52,7 +52,7 @@ module DTK
       end
     end
 
-    def self.create?(project, local_params, repo, config_agent_type)
+    def self.create?(project, local_params, repo, config_agent_type = nil)
       # was local = local_params.create_local(project) which is fine for import from puppet-forge
       # for import-git we use local object, so this is a temp workaround
       local = local_params.is_a?(ModuleBranch::Location::Server::Local) ? local_params : local_params.create_local(project)
@@ -69,15 +69,15 @@ module DTK
       }
       impl_hash = {
         display_name: version ? "#{module_name}(#{version})" : module_name,
-        type: ImplementationType[config_agent_type],
+        type: ImplementationType[config_agent_type || ConfigAgent::Type.default_symbol],
         repo: repo.get_field?(:repo_name),
         repo_id: repo.id,
         project_project_id: project.id,
         version: version_field(version)
       }
       impl_ref = ref(module_namespace, module_name, branch)
-      impl_mh = project.id_handle().create_childMH(:implementation)
-      create_from_row?(impl_mh, impl_ref, match_assigns, impl_hash).create_object().merge(impl_hash)
+      impl_mh = project.id_handle.create_childMH(:implementation)
+      create_from_row?(impl_mh, impl_ref, match_assigns, impl_hash).create_object.merge(impl_hash)
     end
 
     def self.ref(namespace, module_name, branch)
@@ -96,14 +96,14 @@ module DTK
       update_object!(:type, :repo, :branch)
 
       file_type = ImplTypeToFileType[self[:type]]
-      file_asset_rows = all_file_paths().map do |file_path|
+      file_asset_rows = all_file_paths.map do |file_path|
         content = nil #TODO: to clear model cache of content
         FileAsset.ret_create_hash(self, file_type, file_path, content)
       end
-      return if file_asset_rows.empty?()
+      return if file_asset_rows.empty?
 
       # TODO: need to make create? from rows
-      file_asset_mh = model_handle().create_childMH(:file_asset)
+      file_asset_mh = model_handle.create_childMH(:file_asset)
       Model.modify_children_from_rows(file_asset_mh, id_handle, file_asset_rows)
     end
 
@@ -113,13 +113,13 @@ module DTK
 
     # TODO: Marked for removal [Haris]
     def add_contained_files_and_push_to_repo
-      context = repo_manager_context()
+      context = repo_manager_context
       RepoManager.add_all_files_and_commit(context)
       RepoManager.push_implementation(context)
     end
 
     def move_to_provider_subdir(source, destination)
-      context = repo_manager_context()
+      context = repo_manager_context
 
       files   = (RepoManager.ls_r(1, { file_only: true }, self) || [])
       files.reject! { |f| f =~ DSLFilenameRegexp[1] || f =~ DSLFilenameRegexp[2] || f =~ DSLFilenameRegexp[3] }
@@ -184,7 +184,7 @@ module DTK
       update(updated: true)
       # set updated for the project templates that point to this implemntation
       cmp_mh = model_handle(:component)
-      filter = [:and, [:eq, :implementation_id, id()], [:eq, :type, 'template']]
+      filter = [:and, [:eq, :implementation_id, id], [:eq, :type, 'template']]
       Model.update_rows_meeting_filter(cmp_mh, { updated: true }, filter)
     end
 
@@ -193,11 +193,11 @@ module DTK
       # remove any node groups
       cmp_rows.reject! { |r| r[:node].is_node_group? }
 
-      Component.clear_dynamic_attributes_and_their_dependents(cmp_rows.map { |r| r[:component].id_handle() })
+      Component.clear_dynamic_attributes_and_their_dependents(cmp_rows.map { |r| r[:component].id_handle })
 
       # TODO: make more efficient by using StateChange.create_pending_change_items
       cmp_rows.each do |r|
-        cmp_idh = r[:component].id_handle()
+        cmp_idh = r[:component].id_handle
         parent_idh = cmp_idh.createIDH(model_name: :datacenter, id: r[:node][:datacenter_datacenter_id])
         StateChange.create_pending_change_item(new_item: cmp_idh, parent: parent_idh, type: 'update_implementation')
       end
@@ -214,14 +214,14 @@ module DTK
 
     # ####### TODO below related to UI and may deprecate
 
-    # TODO: unify with project#get_module_tree()
+    # TODO: unify with project#get_module_tree
     def get_module_tree(opts = {})
       sp_hash = { cols: [:id, :display_name, :type, :project_project_id, :component_template] }
       rows_with_cmps = get_objs(sp_hash)
 
       i18n = get_i18n_mappings_for_models(:component)
       cmps = rows_with_cmps.map do |r|
-        cmp = r[:component].materialize!(Component.common_columns())
+        cmp = r[:component].materialize!(Component.common_columns)
         # TODO: see if cleaner way to put in i18n names
         cmp[:name] = i18n_string(i18n, :component, cmp[:name])
         cmp

@@ -94,6 +94,10 @@ describe "(New DTK client) Test Case 8: Test various options for delete and unin
     include_context "Force delete service instance", service_location, service_name, dtk_common
   end
 
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
+  end
+
   # 5: neg - stage assembly template, uninstall
   context "Stage updated assembly from module" do
     include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
@@ -125,8 +129,8 @@ describe "(New DTK client) Test Case 8: Test various options for delete and unin
   end
 
   # cleanup
-  context "Delete service instance" do
-    include_context "Delete service instance", service_location, service_name, dtk_common
+  context "Force delete service instance" do
+    include_context "Force delete service instance", service_location, service_name, dtk_common
   end
 
   context "Uninstall service instance" do

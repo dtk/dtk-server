@@ -37,7 +37,7 @@ module DTK
 
         local             = local_params.create_local(project)
         local_branch      = local.branch_name
-        
+
         module_obj = module_exists?(project.id_handle, local[:module_name], local[:namespace])
         repo = module_obj.get_repo
         repo.merge!(branch_name: local_branch)
@@ -52,7 +52,7 @@ module DTK
 
         parsed_common_module = dsl_file_obj_from_repo(common_module__module_branch).parse_content(:common_module)
         CommonDSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
-        
+
         create_or_update_from_parsed_common_module(project, local_params, repo, common_module__module_branch, parsed_common_module, parse_needed: parse_needed)
         ret
       end

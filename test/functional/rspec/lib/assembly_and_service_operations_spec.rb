@@ -7,7 +7,7 @@ require 'awesome_print'
 shared_context 'Stage' do |dtk_common|
   it "stages #{dtk_common.service_name} service from assembly" do
     dtk_common.stage_service()
-    dtk_common.service_id.should_not eq(nil)
+    expect(dtk_common.service_id).not_to eq(nil)
   end
 end
 
@@ -22,14 +22,14 @@ shared_context 'List components versions' do |dtk_common, components_versions_li
         break
       end
     end
-    components_versions_exist.should eq(true)
+    expect(components_versions_exist).to eq(true)
   end
 end
 
 shared_context 'Stage with namespace' do |dtk_common, namespace|
   it "stages #{dtk_common.service_name} service from assembly in namespace #{namespace}" do
     dtk_common.stage_service_with_namespace(namespace)
-    dtk_common.service_id.should_not eq(nil)
+    expect(dtk_common.service_id).not_to eq(nil)
   end
 end
 
@@ -167,6 +167,22 @@ shared_context 'List component dependencies' do |dtk_common, service_instance, s
   end
 end
 
+shared_context 'Check component dependencies' do |dtk_common, service_instance, dependency_list|
+  it "checks #{dependency_list}" do
+    dependencies_found = []
+    expected_array = []
+    # populate expected values
+    dependency_list.each do |dep|
+      expected_array << true
+    end
+
+    dependency_list.each do |dependency|
+      dependencies_found << dtk_common.check_component_depedency(service_instance, dependency[:component_name], dependency[:dependency_component], dependency[:type])
+    end
+    expect(dependencies_found).to match_array(expected_array)
+  end
+end
+
 shared_context 'Push assembly updates' do |dtk_common, service_module|
   it 'pushes changes from service back to origin service' do
     assembly_updated = dtk_common.push_assembly_updates(dtk_common.service_id, service_module)
@@ -177,7 +193,7 @@ end
 shared_context 'Push component module updates without changes' do |dtk_common, component_module, assembly_name|
   it 'retrieves message that no changes have been made' do
     response = dtk_common.push_component_module_updates_without_changes(dtk_common.service_id, component_module)
-    response['errors'].first['message'].should eq("Changes to component module (#{component_module.split(':').last}) have not been made in service instance '#{assembly_name}'")
+    expect(response['errors'].first['message']).to eq("Changes to component module (#{component_module.split(':').last}) have not been made in service instance '#{assembly_name}'")
   end
 end
 
@@ -191,7 +207,7 @@ shared_context 'List nodes' do |dtk_common, nodes_list|
         break
       end
     end
-    nodes_exist.should eq(true)
+    expect(nodes_exist).to eq(true)
   end
 end
 
@@ -205,21 +221,21 @@ shared_context 'List components' do |dtk_common, components_list|
         break
       end
     end
-    components_exist.should eq(true)
+    expect(components_exist).to eq(true)
   end
 end
 
 shared_context 'Delete node' do |dtk_common, node_name|
   it "deletes #{node_name} node" do
     node_deleted = dtk_common.delete_node(dtk_common.service_id, node_name)
-    node_deleted.should eq(true)
+    expect(node_deleted).to eq(true)
   end
 end
 
 shared_context 'Get cardinality' do |dtk_common, node_name, cardinality_expected|
   it "gets cardinality and verifies it is equal to provided cardinality: #{cardinality_expected}" do
     cardinality = dtk_common.get_cardinality(dtk_common.service_id, node_name)
-    cardinality.should eq(cardinality_expected)
+    expect(cardinality).to eq(cardinality_expected)
   end
 end
 
@@ -230,7 +246,7 @@ shared_context 'Grant access after converge' do |dtk_common, system_user, rsa_pu
     if response['status'] == 'ok'
       access_granted = true
     end
-    access_granted.should eq(true)
+    expect(access_granted).to eq(true)
   end
 end
 
@@ -241,7 +257,7 @@ shared_context 'NEG - Grant access before converge' do |dtk_common, system_user,
     if response['status'] == 'notok'
       access_granted = false
     end
-    access_granted.should eq(false)
+    expect(access_granted).to eq(false)
   end
 end
 
@@ -252,7 +268,7 @@ shared_context 'Revoke access after converge' do |dtk_common, system_user, rsa_p
     if response['status'] == 'ok'
       access_revoked = true
     end
-    access_revoked.should eq(true)
+    expect(access_revoked).to eq(true)
   end
 end
 
@@ -263,7 +279,7 @@ shared_context 'NEG - Revoke access before converge' do |dtk_common, system_user
     if response['status'] == 'notok'
       access_revoked = false
     end
-    access_revoked.should eq(false)
+    expect(access_revoked).to eq(false)
   end
 end
 

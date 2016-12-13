@@ -45,7 +45,9 @@ module DTK
       # if module does not exist, create it
       # else if module branch does not exist, create it
       # else return module branch
-      def create_module_branch_and_repo?
+      # opts can have keys:
+      #   :create_implementation - Boolean (default: false)
+      def create_module_branch_and_repo?(opts = {})
         if module_obj = module_class.find_from_name?(project.model_handle(module_type), namespace_name, module_name)
           namespace_obj = Namespace.find_by_name(project.model_handle(:namespace), namespace_name)
           if module_branch = module_class.get_workspace_module_branch(project, module_name, version, namespace_obj, no_error_if_does_not_exist: true)
@@ -58,9 +60,7 @@ module DTK
             module_branch
           end
         else
-          # TODO: think dont want to have return_module_branch: true so can pass repo craeted to componnet moulde processing
-          # may be a bug once remove return_module_branch: true
-          module_class.create_module(project, local_params, return_module_branch: true)
+          module_class.create_module(project, local_params, return_module_branch: true, create_implementation: opts[:create_implementation])
         end
       end
 

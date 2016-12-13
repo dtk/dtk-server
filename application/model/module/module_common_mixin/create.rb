@@ -24,6 +24,7 @@ module DTK; module ModuleCommonMixin
     #  :no_initial_commit - Booelean (default: false)
     #  :return_module_branch - Boolean (default: false)
     #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
+    #  :create_implementation - Boolean (default: false)
     def create_module(project, local_params, opts = {})
       local = local_params.create_local(project)
       namespace = local_params.namespace
@@ -37,7 +38,6 @@ module DTK; module ModuleCommonMixin
           fail ErrorUsage, "Module '#{full_module_name}' cannot be created since it exists already"
         end
       end
-
 
       if module_obj && opts[:common_module]
         # base_branch just needs to be a random branch on module_obj
@@ -65,6 +65,8 @@ module DTK; module ModuleCommonMixin
 
       repo_idh = local_repo_obj.id_handle()
       module_and_branch_info = create_module_and_branch_obj?(project, repo_idh, local, opts)
+
+      Implementation.create?(project, local, local_repo_obj) if opts[:create_implementation]
 
       return module_and_branch_info if opts[:return_module_branch]
 

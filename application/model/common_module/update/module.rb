@@ -54,6 +54,8 @@ module DTK
         CommonDSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
 
         create_or_update_from_parsed_common_module(project, local_params, repo, common_module__module_branch, parsed_common_module, parse_needed: parse_needed)
+        common_module__module_branch.set_dsl_parsed!(true)
+
         ret
       end
 

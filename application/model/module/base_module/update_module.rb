@@ -20,14 +20,14 @@
 # the statements that check whether responds is a parsing error (an usually return imemdiately; so not detecting multiple erros)
 module DTK; class BaseModule
   class UpdateModule
-    r8_nested_require('update_module', 'puppet_forge')
-    r8_nested_require('update_module', 'import')
-    r8_nested_require('update_module', 'clone_changes')
-    r8_nested_require('update_module', 'update_module_refs')
-    r8_nested_require('update_module', 'external_refs')
-    r8_nested_require('update_module', 'external_refs')
-    r8_nested_require('update_module', 'create')
-    r8_nested_require('update_module', 'scaffold_implementation')
+    require_relative('update_module/puppet_forge')
+    require_relative('update_module/import')
+    require_relative('update_module/clone_changes')
+    require_relative('update_module/update_module_refs')
+    require_relative('update_module/external_refs')
+    require_relative('update_module/external_refs')
+    require_relative('update_module/create')
+    require_relative('update_module/scaffold_implementation')
     include CreateMixin
 
     def initialize(base_module)
@@ -38,7 +38,7 @@ module DTK; class BaseModule
     ####### mixin public methods #########
     module ClassMixin
       def import_from_puppet_forge(project, puppet_forge_local_copy, opts = {})
-        PuppetForge.new(project, puppet_forge_local_copy, opts).import_module_and_missing_dependencies()
+        PuppetForge.new(project, puppet_forge_local_copy, opts).import_module_and_missing_dependencies
       end
     end
 
@@ -75,7 +75,7 @@ module DTK; class BaseModule
         # would be much less expsensive to clone from branch to branch
         opts_update = { update_module_refs_from_file: true }.merge(opts)
         response = UpdateModule.new(self).create_needed_objects_and_dsl?(repo_for_new_branch, local, opts_update)
-        response[:module_branch_idh].create_object()
+        response[:module_branch_idh].create_object
       end
     end
     ####### end: mixin public methods #########
@@ -91,19 +91,25 @@ module DTK; class BaseModule
     end
 
     # only returns non nil if parsing error; it traps parsing errors
+    # opts can contain keys:
+    #   :config_agent_type
+    #   :ret_parsed_dsl
+    #   :update_from_includes
+    #   :update_module_refs_from_file
+    #   :donot_update_module_refs
     def parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts = {})
       ret                  = nil
       update_node_bindings = nil
-      module_branch        = module_branch_idh.create_object()
+      module_branch        = module_branch_idh.create_object
 
       if version && !version.eql?('') && !version.eql?('master')
-        unless version = ::DTK::ModuleVersion.ret(version)
+        unless version = ModuleVersion.ret(version)
           fail ::DTK::ErrorUsage::BadVersionValue.new(remote_params.version)
         end
       end
 
       module_branch.set_dsl_parsed!(false)
-      config_agent_type = opts[:config_agent_type] || config_agent_type_default()
+      config_agent_type = opts[:config_agent_type] || config_agent_type_default
 
       # TODO: for efficiency can change parse_dsl to take option opts[:dsl_created_info]
       dsl_obj = parse_dsl(impl_obj, opts.merge(config_agent_type: config_agent_type))
@@ -134,32 +140,35 @@ module DTK; class BaseModule
       no_errors = true
       if opts[:update_from_includes]
         # Can be both parsing errors, in which case is_parsing_error?(update_from_includes) i strue
-        # or can be dependency errors in which case external_deps.any_errors?() is true
-        # If external_deps.any_errors?() error dont yet return so can execute UpdateModuleRefs.save_dsl?
-        update_from_includes = UpdateModuleRefs.new(dsl_obj, @base_module).validate_includes_and_update_module_refs()
+        # or can be dependency errors in which case external_deps.any_errors? is true
+        # If external_deps.any_errors? error dont yet return so can execute UpdateModuleRefs.save_dsl?
+        update_from_includes = UpdateModuleRefs.new(dsl_obj, @base_module).validate_includes_and_update_module_refs
         return update_from_includes if is_parsing_error?(update_from_includes)
 
         if external_deps = update_from_includes[:external_dependencies]
           opts[:external_dependencies] = external_deps
-          if external_deps.any_errors?()
+          if external_deps.any_errors?
             ret = update_from_includes 
             no_errors = false
           end
         end
       end
 
-      # TODO: double check if opts[:update_from_includes] and opts[:update_module_refs_from_file] mutually exclusive
-      if opts[:update_module_refs_from_file]
-        # updating module refs from the component_module_ref file
-        ModuleRefs::Parse.update_component_module_refs(@module_class, module_branch)
-      else
-        opts_save_dsl = Opts.create?(message?: update_from_includes[:message], external_dependencies?: external_deps)
-        if dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch, opts_save_dsl)
-          if opts[:ret_dsl_updated_info]
-            opts[:ret_dsl_updated_info] = dsl_updated_info
+      unless opts[:donot_update_module_refs]
+        if opts[:update_module_refs_from_file]
+          # updating module refs from the component_module_ref file
+          ModuleRefs::Parse.update_component_module_refs(@module_class, module_branch)
+        else
+          opts_save_dsl = Opts.create?(message?: update_from_includes[:message], external_dependencies?: external_deps)
+          if dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch, opts_save_dsl)
+            if opts[:ret_dsl_updated_info]
+              opts[:ret_dsl_updated_info] = dsl_updated_info
+            end
           end
         end
       end
+
+      # TODO: double check if opts[:update_from_includes] and opts[:update_module_refs_from_file] mutually exclusive
 
       unless opts[:update_from_includes]
         module_branch.set_dsl_parsed!(true) unless opts[:dsl_parsed_false]
@@ -177,12 +186,12 @@ module DTK; class BaseModule
     #   :new_branch_name
     def self.ret_local(base_module, version, opts = {})
       local_params = ModuleBranch::Location::LocalParams::Server.new(
-        module_type: base_module.module_type(),
-        module_name: base_module.module_name(),
-        namespace: base_module.module_namespace(),
+        module_type: base_module.module_type,
+        module_name: base_module.module_name,
+        namespace: base_module.module_namespace,
         version: version
       )
-      local_params.create_local(base_module.get_project(), opts)
+      local_params.create_local(base_module.get_project, opts)
     end
 
     def add_dsl_to_impl_and_create_objects(dsl_created_info, project, impl_obj, module_branch_idh, version, opts = {})
@@ -240,7 +249,7 @@ module DTK; class BaseModule
 
       nodes_info = prepare_nodes_info(images_hash)
 
-      container_idh = @base_module.model_handle(:user).create_top()
+      container_idh = @base_module.model_handle(:user).create_top
       hash_content = LibraryNodes.get_hash(in_library: 'public', content: nodes_info)
       hash_content['library']['public']['display_name'] ||= 'public'
       Model.import_objects_from_hash(container_idh, hash_content)
@@ -287,7 +296,7 @@ module DTK; class BaseModule
     end
 
     def parse_dsl(impl_obj, opts = {})
-      klass().parse_dsl(@base_module, impl_obj, opts)
+      klass.parse_dsl(@base_module, impl_obj, opts)
     end
 
     def update_component_module_refs(module_branch, matching_module_refs)
@@ -299,23 +308,23 @@ module DTK; class BaseModule
     end
 
     def module_namespace
-      @base_module.module_namespace()
+      @base_module.module_namespace
     end
 
     def module_name
-      @base_module.module_name()
+      @base_module.module_name
     end
 
     def module_type
-      @base_module.module_type()
+      @base_module.module_type
     end
 
     def config_agent_type_default
-      @base_module.config_agent_type_default()
+      @base_module.config_agent_type_default
     end
 
     def get_project
-      @base_module.get_project()
+      @base_module.get_project
     end
 
     def is_parsing_error?(response)

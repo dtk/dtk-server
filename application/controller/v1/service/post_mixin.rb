@@ -137,9 +137,9 @@ module DTK
 
       def uninstall
         recursive = boolean_request_params(:recursive)
-        force     = boolean_request_params(:force)
+        delete    = boolean_request_params(:delete)
 
-        assembly_instance.uninstall(recursive: recursive, force: force)
+        assembly_instance.uninstall(recursive: recursive, delete: delete)
         rest_ok_response
       end
 

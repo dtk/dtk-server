@@ -217,12 +217,74 @@ shared_context 'Uninstall service instance' do |service_location, service_instan
   end
 end
 
+shared_context 'NEG - Uninstall service instance' do |service_location, service_instance, error_message|
+  it "does not uninstall service instance" do
+    puts 'NEG - Uninstall instance', '------------------------'
+    pass = false
+    service_location = service_location + service_instance
+    value = `dtk service uninstall --purge -d #{service_location} -y`
+    puts value
+    pass = true if value.include? error_message
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Force uninstall service instance' do |service_location, service_instance|
+  it "uninstalls service instance with --delete flag" do
+    puts 'Force uninstall instance', '-------------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service uninstall --purge --delete -d #{service_location} -y`
+    puts value
+    pass = false if value.include? 'ERROR'
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context 'Delete service instance' do |service_location, service_instance, dtk_common|
   it "deletes service instance content and triggers delete actions if any" do
     puts 'Delete instance', '--------------------'
     pass = true
     service_location = service_location + service_instance
     value = `dtk service delete -d #{service_location} -y`
+    if value.include? 'ERROR'
+      pass = false
+      puts "Service instance was not deleted successfully!"
+    else
+      delete_succeeded = dtk_common.check_delete_task_status(service_instance)
+      if delete_succeeded
+        pass = true
+        puts "Service instance is deleted successfully!"
+      else
+        pass = false
+        puts "Service instance is not deleted successfully!"
+      end
+    end
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'NEG - Delete service instance' do |service_location, service_instance, dtk_common, error_message|
+  it "does not delete service instance content and triggers delete actions if any" do
+    puts 'NEG - Delete instance', '-----------------------'
+    pass = false
+    service_location = service_location + service_instance
+    value = `dtk service delete -d #{service_location} -y`
+    pass = true if value.include? error_message
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Force delete service instance' do |service_location, service_instance, dtk_common|
+  it "deletes service instance content with -f flag" do
+    puts 'Force delete service instance', '-----------------------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service delete -d #{service_location} -f -y`
     if value.include? 'ERROR'
       pass = false
       puts "Service instance was not deleted successfully!"

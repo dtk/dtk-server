@@ -1,5 +1,3 @@
-# test for making modifications on dtk.module.yaml of dependency modules and treating them when doing service push
-
 # This test script is used to test various options for editing dependency module and service push
 # Things that are under test are:
 # - edit value for existing attribute in dtk.nested_module.yaml
@@ -24,9 +22,9 @@ missing_attributes_to_check = {'node/mysql::server/root_password' => ''}
 
 dtk_common = Common.new('', '')
 
-describe "(New DTK client) Test Case 7: Test various options for adding/removing/autogenerating component links and service push" do
+describe "(New DTK client) Test Case 7: Test various options for adding/removing/editing dependency module and service push" do
   before(:all) do
-    puts '**********************************************************************************************************************', ''
+    puts '*****************************************************************************************************************', ''
   end
 
   context "Setup initial module on filesystem" do

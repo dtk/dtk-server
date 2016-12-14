@@ -151,7 +151,7 @@ shared_context 'Exec action/workflow' do |dtk_common, service_location, service_
       pass = false
       puts "Action was not executed successfully!"
     else
-      action_info[:pass] = dtk_common.check_task_status(service_instance)
+      action_info = dtk_common.check_task_status(service_instance)
       if action_info[:pass]
         pass = true
         puts "Action was executed successfully!"
@@ -190,7 +190,7 @@ shared_context 'Stop service instance' do |dtk_common, service_location, service
       puts "Service instance was not stopped successfully!"
     else
       # Missing task status output that reports on nodes being stopped
-      stop_info[:pass] = dtk_common.check_task_status(service_instance)
+      stop_info = dtk_common.check_task_status(service_instance)
       if stop_info[:pass]
         pass = true
         puts "Service instance is stopped successfully!"
@@ -253,7 +253,7 @@ shared_context 'Delete service instance' do |service_location, service_instance,
       pass = false
       puts "Service instance was not deleted successfully!"
     else
-      delete_info[:pass] = dtk_common.check_delete_task_status(service_instance)
+      delete_info = dtk_common.check_delete_task_status(service_instance)
       if delete_info[:pass]
         pass = true
         puts "Service instance is deleted successfully!"
@@ -289,7 +289,7 @@ shared_context 'Force delete service instance' do |service_location, service_ins
       pass = false
       puts "Service instance was not deleted successfully!"
     else
-      delete_info[:pass] = dtk_common.check_delete_task_status(service_instance)
+      delete_info = dtk_common.check_delete_task_status(service_instance)
       if delete_info[:pass]
         pass = true
         puts "Service instance is deleted successfully!"

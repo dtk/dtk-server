@@ -93,8 +93,9 @@ module DTK
       
       # args has project, local_params, repo, module_version, parsed_common_module, opts)
       def self.create_or_update_from_parsed_common_module(*args)
-        ServiceInfo.new(*args).create_or_update_from_parsed_common_module?
+        # Component info must be loaded before service info because assemblies can have dependencies its own componnets
         ComponentInfo.new(*args).create_or_update_from_parsed_common_module?
+        ServiceInfo.new(*args).create_or_update_from_parsed_common_module?
       end
 
     end

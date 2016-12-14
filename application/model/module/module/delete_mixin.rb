@@ -22,7 +22,7 @@ module DTK; class BaseModule
         assembly_templates = get_associated_assembly_templates
         unless assembly_templates.empty?
           assembly_names = assembly_templates.map { |a| a.display_name_print_form(include_namespace: true) }
-          fail ErrorUsage.new("Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it")
+          fail ErrorUsage, "Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it"
         end
 
         components = get_associated_component_instances
@@ -48,7 +48,7 @@ module DTK; class BaseModule
         if opts[:no_error_if_does_not_exist]
           return ret
         else
-          fail ErrorUsage.new("Version '#{version}' for specified component module does not exist")
+          fail ErrorUsage, "Version '#{version}' for specified component module does not exist"
         end
       end
 
@@ -70,8 +70,11 @@ module DTK; class BaseModule
         delete_version(version)
       else
         unless module_branch = get_module_branch_matching_version(version)
-          fail ErrorUsage.new("Version '#{version}' for specified component module does not exist!") if version
-          fail ErrorUsage.new("Base version for specified component module does not exist. You have to specify version you want to delete!")
+          if version
+            fail ErrorUsage, "Version '#{version}' for specified component module does not exist!"
+          else
+            fail ErrorUsage, "Base version for specified component module does not exist. You have to specify version you want to delete!"
+          end
         end
         # check if this module is dependency to other component/service module
         raise_error_if_dependency(module_branch, version)
@@ -80,18 +83,20 @@ module DTK; class BaseModule
     end
 
     def delete_common_module_version_or_module(version, opts = {})
-      module_branches = get_module_branches
-      # TODO: DTK-2766: this does not provide for case where number of component or service modules is different than number of common modules
-      # This can happen for legacy repos
-      if module_branches.size > 1
-        delete_associated_service_and_component_module_version(self, version)
+      unless get_module_branch_matching_version(version)
+        if version
+          fail ErrorUsage, "Version '#{version}' for specified component module does not exist!" 
+        else
+          # TODO: is this still applicable?
+          fail ErrorUsage, "Base version for specified component module does not exist. You have to specify version you want to delete!"
+        end
+      end
+
+      delete_associated_service_and_component_module_objects(self, version)
+
+      if get_module_branches.size > 1
         delete_version(version)
       else
-        unless module_branch = get_module_branch_matching_version(version)
-          fail ErrorUsage.new("Version '#{version}' for specified component module does not exist!") if version
-          fail ErrorUsage.new("Base version for specified component module does not exist. You have to specify version you want to delete!")
-        end
-        delete_associated_service_and_component_module(self)
         delete_object(opts.merge(skip_validations: true))
       end
     end
@@ -111,24 +116,20 @@ module DTK; class BaseModule
 
     private
 
-    def delete_associated_service_and_component_module(common_module)
+    def delete_associated_service_and_component_module_objects(common_module, version)
       delete_associated_params.each_pair do |module_type, module_class|
         model_handle = common_module.model_handle(module_type)
         if module_obj = module_class.find_from_name?(model_handle, common_module.module_namespace, common_module.module_name)
-          module_obj.delete_object(from_common_module: true)
+          if module_obj.get_module_branch_matching_version(version)
+            if module_obj.get_module_branches.size > 1
+              module_obj.delete_version(version, no_error_if_does_not_exist: true)
+            else
+              module_obj.delete_object(from_common_module: true)  
+            end
+          end
         end
       end
     end
-
-    def delete_associated_service_and_component_module_version(common_module, version)
-      delete_associated_params.each_pair do |module_type, module_class|
-        model_handle = common_module.model_handle(module_type)
-        if module_obj = module_class.find_from_name?(model_handle, common_module.module_namespace, common_module.module_name)
-          module_obj.delete_version(version, no_error_if_does_not_exist: true)
-        end
-      end
-    end
-
     
     def delete_associated_params
       # Import that service_module is first; so it is deleted before component module
@@ -159,7 +160,7 @@ module DTK; class BaseModule
         end
         ref
       end
-      fail ErrorUsage.new("Cannot delete the component module because the following:\n  #{refs.join("\n  ")}")
+      fail ErrorUsage, "Cannot delete the component module because the following:\n  #{refs.join("\n  ")}"
     end
 
     def raise_error_if_dependency(branch, version)
@@ -190,7 +191,7 @@ module DTK; class BaseModule
         end
       end
 
-      fail ErrorUsage.new("Cannot delete the component module because the following:\n  #{refs.join("\n  ")}")
+      fail ErrorUsage, "Cannot delete the component module because the following:\n  #{refs.join("\n  ")}"
     end
   end
 end; end

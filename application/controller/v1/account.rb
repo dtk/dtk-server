@@ -17,14 +17,15 @@
 #
 module DTK
   module V1
-    class Base < Controller
-      def self.helper_v1(helper)
-        helper("v1_#{helper}".to_sym)
-      end
-    end
+    class AccountController < V1::Base
+      require_relative('account/get_mixin')
+      require_relative('account/post_mixin')
+      include GetMixin
+      include PostMixin
 
-    %w(service module authorization metadata account).each do |controller_file|
-      require_relative("v1/#{controller_file}")
+      helper_v1 :module_helper
+      helper_v1 :module_ref_helper
+      helper :module_helper
     end
   end
 end

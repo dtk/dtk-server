@@ -126,8 +126,8 @@ shared_context 'Converge service instance' do |service_location, dtk_common, ser
       pass = false
       puts "Service instance was not converged successfully!"
     else
-      converge_succeeded = dtk_common.check_task_status(service_instance)
-      if converge_succeeded
+      converge_info = dtk_common.check_task_status(service_instance)
+      if converge_info[:pass]
         pass = true
         puts "Service instance is converged successfully!"
       else
@@ -136,7 +136,7 @@ shared_context 'Converge service instance' do |service_location, dtk_common, ser
       end
     end
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), converge_info[:error]
   end
 end
 
@@ -151,8 +151,8 @@ shared_context 'Exec action/workflow' do |dtk_common, service_location, service_
       pass = false
       puts "Action was not executed successfully!"
     else
-      action_succeeded = dtk_common.check_task_status(service_instance)
-      if action_succeeded
+      action_info = dtk_common.check_task_status(service_instance)
+      if action_info[:pass]
         pass = true
         puts "Action was executed successfully!"
       else
@@ -161,7 +161,7 @@ shared_context 'Exec action/workflow' do |dtk_common, service_location, service_
       end
     end
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), action_info[:error]
   end
 end
 
@@ -190,8 +190,8 @@ shared_context 'Stop service instance' do |dtk_common, service_location, service
       puts "Service instance was not stopped successfully!"
     else
       # Missing task status output that reports on nodes being stopped
-      stop_succeeded = dtk_common.check_task_status(service_instance)
-      if stop_succeeded
+      stop_info = dtk_common.check_task_status(service_instance)
+      if stop_info[:pass]
         pass = true
         puts "Service instance is stopped successfully!"
       else
@@ -200,7 +200,7 @@ shared_context 'Stop service instance' do |dtk_common, service_location, service
       end
     end
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), stop_info[:error]
   end
 end
 
@@ -253,8 +253,8 @@ shared_context 'Delete service instance' do |service_location, service_instance,
       pass = false
       puts "Service instance was not deleted successfully!"
     else
-      delete_succeeded = dtk_common.check_delete_task_status(service_instance)
-      if delete_succeeded
+      delete_info = dtk_common.check_delete_task_status(service_instance)
+      if delete_info[:pass]
         pass = true
         puts "Service instance is deleted successfully!"
       else
@@ -263,7 +263,7 @@ shared_context 'Delete service instance' do |service_location, service_instance,
       end
     end
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), delete_info[:error]
   end
 end
 
@@ -289,8 +289,8 @@ shared_context 'Force delete service instance' do |service_location, service_ins
       pass = false
       puts "Service instance was not deleted successfully!"
     else
-      delete_succeeded = dtk_common.check_delete_task_status(service_instance)
-      if delete_succeeded
+      delete_info = dtk_common.check_delete_task_status(service_instance)
+      if delete_info[:pass]
         pass = true
         puts "Service instance is deleted successfully!"
       else
@@ -299,7 +299,7 @@ shared_context 'Force delete service instance' do |service_location, service_ins
       end
     end
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), delete_info[:error]
   end
 end
 

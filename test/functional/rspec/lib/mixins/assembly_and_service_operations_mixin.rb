@@ -138,29 +138,28 @@ module AssemblyAndServiceOperationsMixin
 
   def check_task_status(service_instance_name)
     puts "Check task status", "----------------"
-    service_converged = false
+    service_converged = { pass: false, error: nil }
     end_loop = false
     count = 0
     max_num_of_retries = 50
 
     while (count < max_num_of_retries)
       sleep 5
-      count += 1  
+      count += 1
       task_status_response = send_request("/rest/api/v1/services/#{service_instance_name}/task_status", {}, 'get')
       if task_status_response['status'] == 'ok'
         if task_status_response['data'].first['status'] == 'succeeded'
           puts "Service was converged successfully!"
-          service_converged = true
+          service_converged[:pass] = true
           break
         elsif task_status_response['data'].first['status'] == 'failed'
           puts 'Service was not converged successfully!'
           ap task_status_response['data']
-          service_converged = false
+          service_converged[:error] = task_status_response['data']
           break
         end
       else
         puts "Service was not converged successfully!"
-        service_converged = false
         break
       end
     end
@@ -170,34 +169,33 @@ module AssemblyAndServiceOperationsMixin
 
   def check_delete_task_status(service_instance_name)
     puts "Check delete task status", "------------------------"
-    service_deleted = false
+    service_deleted = { pass: false, error: nil }
     end_loop = false
     count = 0
     max_num_of_retries = 50
 
     while (count < max_num_of_retries)
       sleep 5
-      count += 1  
+      count += 1
       task_status_response = send_request("/rest/api/v1/services/#{service_instance_name}/task_status", {}, 'get')
 
       if task_status_response['status'] == 'ok'
         if task_status_response['data'].first['status'] == 'succeeded'
           puts "Service was deleted successfully!"
-          service_deleted = true
+          service_deleted[:pass] = true
           break
         elsif task_status_response['data'].first['status'] == 'failed'
           puts 'Service was not deleted successfully!'
           ap task_status_response['data']
-          service_deleted = false
+          service_deleted[:error] = task_status_response['data']
           break
         end
       else
         if task_status_response['errors'].first['message'] == "No object of type service with name '#{service_instance_name}' exists"
           puts "Service was deleted successfully!"
-          service_deleted = true
+          service_deleted[:pass] = true
         else
           puts "Service was not deleted successfully!"
-          service_deleted = false
         end
         break
       end

@@ -173,18 +173,24 @@ module DTK
     # returns true if actual pull was needed
     # opts can have keys:
     #   :force
-    #   :update_dsl_parsed - if set then regexp that matches dsl file
+    #   :ret_diffs - if set then this method will update it with a Repo::Diffs object
+    #   :update_dsl_parsed - if set then this is regexp that matches dsl file and used to set
+    #                        dsl_parsed to fakse if dsl file is changed
     def pull_repo_changes?(commit_sha, opts = {})
       return nil if commit_sha == current_sha
 
-      opts = opts.merge(ret_diffs: nil) if opts[:update_dsl_parsed]
+      if opts[:update_dsl_parsed]
+        opts = opts.merge(ret_diffs: nil) unless opts.has_key?(:ret_diffs)
+      end 
       fast_foward_pull_raise_error_if_merge_needed(opts)
 
       update_hash = { current_sha: commit_sha }
-      if diffs =  opts[:ret_diffs]
-        dsl_regexp = opts[:update_dsl_parsed]
-        if diffs.ret_summary.impacted_files.find { |path| path =~ dsl_regexp }
-          update_hash.merge!(dsl_parsed: false)
+      if opts[:update_dsl_parsed]
+        if diffs =  opts[:ret_diffs]
+          dsl_regexp = opts[:update_dsl_parsed]
+          if diffs.ret_summary.impacted_files.find { |path| path =~ dsl_regexp }
+            update_hash.merge!(dsl_parsed: false)
+          end
         end
       end
       update(update_hash)

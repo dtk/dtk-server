@@ -55,7 +55,7 @@ module DTK; class BaseModule
       # check if this module is dependency to other component/service module
       raise_error_if_dependency(module_branch, version)
 
-      if implementation = module_branch.get_implementation
+      if implementation = module_branch.get_implementation?
         delete_instance(implementation.id_handle)
       end
 

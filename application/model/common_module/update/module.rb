@@ -105,11 +105,11 @@ module DTK
         CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
       end
       
-      # args has project, local_params, repo, module_version, parsed_common_module, opts)
+      # args has project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module, opts = {})
       def self.create_or_update_from_parsed_common_module(*args)
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
-        ComponentInfo.new(*args).create_or_update_from_parsed_common_module?
-        ServiceInfo.new(*args).create_or_update_from_parsed_common_module?
+        component_info_exists = ComponentInfo.new(*args).create_or_update_from_parsed_common_module?
+        ServiceInfo.new(*(args + [{ component_info_exists: component_info_exists }])).create_or_update_from_parsed_common_module?
       end
 
     end

@@ -20,6 +20,7 @@ module DTK
     class ComponentInfo < self
       require_relative('component_info/transform')
 
+      # returns true if there is component info
       def create_or_update_from_parsed_common_module?
         if parsed_component_defs = parsed_common_module.val(:ComponentDefs)
           #TODO: DTK-2766: see if need to add file objects to the implementation object; check if needed in service instance
@@ -28,9 +29,8 @@ module DTK
           @aug_component_module_branch = component_module_branch.augmented_module_branch.augment_with_component_module!
 
           sync_component_module_from_common_module
-          # TODO: do we need this, which is in service info too 
-          # update_component_module_refs_from_parsed_common_module(@aug_component_module_branch)
           update_component_info_in_model_from_dsl if parse_needed?
+          true
         end
       end
 

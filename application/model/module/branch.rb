@@ -497,6 +497,9 @@ module DTK
     end
 
     def get_implementation(*added_cols)
+      get_implementation?(*added_cols) || fail(Error, "Unexpected that module branch '#{display_name}' does not have an implementation object")
+    end
+    def get_implementation?(*added_cols)
       update_object!(:repo_id, :branch)
       cols = [:id, :display_name, :repo, :branch, :group_id]
       cols += added_cols unless added_cols.empty?

@@ -23,7 +23,7 @@ module DTK; class BaseModule; class UpdateModule
       opts.merge!(ret_dsl_updated_info: {})
       dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
       module_namespace = module_namespace()
-      impl_obj = module_branch.get_implementation()
+      impl_obj = module_branch.get_implementation
       local = ret_local(version)
       project = local.project
       opts.merge!(project: project)

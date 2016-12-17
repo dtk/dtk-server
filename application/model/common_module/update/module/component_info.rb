@@ -28,8 +28,18 @@ module DTK
           CommonDSL::Parse.set_dsl_version!(component_module_branch, parsed_common_module)
           @aug_component_module_branch = component_module_branch.augmented_module_branch.augment_with_component_module!
 
+          # TODO: DTK-2766: update_component_info_in_model_from_dsl is very slow do to the underlying legacy
+          # method to parse; First way to tackle this is to have sync_component_module_from_common_module return whether
+          # the component dsl part of file changed since parse_needed? could be true when service info changed but not
+          # component info
+          # To get that to work we wil also need to replace sync_component_module_from_common_module mechanism from pushing to bare repo
+          # to copying files that are in @diffs_summary
           sync_component_module_from_common_module
-          update_component_info_in_model_from_dsl if parse_needed?
+          if parse_needed?
+            PerformanceService.start('update_component_info_in_model_from_dsl')
+            update_component_info_in_model_from_dsl
+            PerformanceService.end_measurement('update_component_info_in_model_from_dsl')
+          end
           true
         end
       end
@@ -41,8 +51,6 @@ module DTK
       end
 
       def sync_component_module_from_common_module
-        # TODO: DTK-2766: push_to_component_module is expensive; look at using diffs for selected copying
-        # also look at whether faster to copy files rather than using git push
         common_module__module_branch.push_to_component_module(@aug_component_module_branch)
         # transform from common module dsl to component module dsl form 
         transform_component_module_repo_dsl_files
@@ -55,7 +63,7 @@ module DTK
         RepoManager.add_files(@aug_component_module_branch, file_path__content_array)
       end
 
-      # TODO: DTK-2766: this uses the legagcy parsing routines in the dtk-server gem. Port over ti dtk-dsl parsing
+      # TODO: DTK-2766: this uses the legacy parsing routines in the dtk-server gem. Port over ti dtk-dsl parsing
       def update_component_info_in_model_from_dsl
         aug_mb = @aug_component_module_branch # alias
         impl = aug_mb.get_implementation

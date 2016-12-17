@@ -24,6 +24,7 @@ module DTK
 
       # opts can have keys:
       #   :parse_needed
+      #   :diffs_summary
       def initialize(project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module, opts = {})
         @project                      = project
         @module_name                  = common_module__local_params.module_name
@@ -35,11 +36,16 @@ module DTK
         @common_module__repo          = common_module__repo
         @module_class                 = self.class.get_class_from_module_type(module_type)
         @parse_needed                 = opts[:parse_needed]
+        @diffs_summary                = opts[:diffs_summary]
       end
 
       attr_reader :project, :local_params, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
       def parse_needed?
         @parse_needed
+      end
+
+      def diffs_summary?
+        @diffs_summary
       end
 
       # if module does not exist, create it

@@ -47,10 +47,16 @@ module DTK
         pull_opts = { 
           ret_diffs: nil, # means to return diffs
           force_pull: opts[:force_pull], 
-          update_dsl_parsed: CommonDSL::FileType::CommonModule::DSLFile::Top.regexp 
+          update_dsl_parsed: TOP_DSL_FILE_REGEXP
         }
         common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, pull_opts)
-        ret.add_diffs!(pull_opts[:ret_diffs])
+
+        # diffs_summary wil be nbil or object of type Repo::Diffs::Summary with references to dsl file removed
+        diffs_summary = nil
+        if diffs = pull_opts[:ret_diffs]
+          ret.add_diffs!(diffs)
+          diffs_summary = diffs.ret_summary.prune!(TOP_DSL_FILE_REGEXP)
+        end
 
         parse_needed = (opts[:force_parse] || !common_module__module_branch.dsl_parsed?)
         return ret unless parse_needed || pull_was_needed
@@ -60,11 +66,17 @@ module DTK
         parsed_common_module = dsl_file_obj_from_repo(common_module__module_branch).parse_content(:common_module)
         CommonDSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
 
-        create_or_update_from_parsed_common_module(project, local_params, repo, common_module__module_branch, parsed_common_module, parse_needed: parse_needed)
+        create_or_update_opts = {
+          parse_needed: parse_needed,
+          diffs_summary: diffs_summary
+        }
+        create_or_update_from_parsed_common_module(project, local_params, repo, common_module__module_branch, parsed_common_module, create_or_update_opts)
         common_module__module_branch.set_dsl_parsed!(true)
 
         ret
       end
+
+      TOP_DSL_FILE_REGEXP = CommonDSL::FileType::CommonModule::DSLFile::Top.regexp 
 
       private
 
@@ -75,13 +87,14 @@ module DTK
       def self.pull_repo_changes?(project, local_params, commit_sha, opts = {})
         namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
         module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace)
+        ret_diffs = opts.has_key?(:ret_diffs)
         pull_opts = {
           force: opts[:force_pull], 
-          ret_diffs: opts[:ret_diffs],
           update_dsl_parsed: opts[:update_dsl_parsed]
         }
+        pull_opts.merge!(ret_diffs: opts[:ret_diffs]) if ret_diffs
         pull_was_needed = module_branch.pull_repo_changes?(commit_sha, pull_opts)
-        opts[:ret_diffs] = pull_opts[:ret_diffs] if opts.has_key?(:ret_diffs)
+        opts[:ret_diffs] = pull_opts[:ret_diffs] if ret_diffs
         [module_branch, pull_was_needed]
       end
 

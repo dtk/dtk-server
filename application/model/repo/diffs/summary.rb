@@ -90,7 +90,19 @@ module DTK; class Repo
         (self[:files_deleted] || []).map { |r| path(r) } + (self[:files_renamed] || []).map { |r| r[:old_path] }
       end
 
-      private
+      def prune!(regexp)
+        [:files_modified, :files_deleted, :files_added].each do |type|
+          if array = self[type]
+            array.reject! { |el| path(el) =~ regexp }
+            delete(type) if array.empty? 
+          end
+        end
+        if array = self[:files_renamed]
+          array.reject! { |el| el[:new_path] =~ regexp or el[:old_path] =~ regexp }
+          delete(:files_renamed) if array.empty?
+        end
+        self
+      end
 
       def path(r)
         r['path'] || r[:path]
@@ -104,6 +116,8 @@ module DTK; class Repo
           (types.include?(:module_refs) && ModuleRefs.isa_dsl_filename?(path(r)))
         end
       end
+
+      private
 
     end
   end

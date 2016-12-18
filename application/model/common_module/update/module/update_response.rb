@@ -17,15 +17,14 @@
 #
 module DTK
   class CommonModule::Update::Module
-    class UpdateInfo < ::Hash
+    class UpdateResponse < ::Hash
       def initialize(hash = {})
         super()
         replace(hash)
       end
 
-      # if diffs is non nil then it will be of type Repo::Diffs
-      def add_diffs!(diffs)
-        merge!(diffs: diffs && diffs.ret_summary) 
+      def add_diffs_summary!(diffs_summary)
+        merge!(diffs: diffs_summary)
         self
       end
     end

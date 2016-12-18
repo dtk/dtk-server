@@ -97,16 +97,6 @@ module DTK
       find_from_name_with_version?(project, namespace, module_name, version)
     end
 
-    # opts can have keys
-    #   :local_params
-    #   :repo_name
-    #   :service_instance
-    #   :force_pull - Boolean (default false)
-    #   :force_parse - Boolean (default false)
-    def self.update_from_repo(common_module_type, project, commit_sha, opts = {})
-      Update.update_class(common_module_type).update_from_repo(project, commit_sha, opts)
-    end
-
     def self.delete(project, namespace, module_name, version, opts = {})
       unless common_module = get_common_module?(project, namespace, module_name, version)
         print_opts = {:namespace => namespace, :version => version}

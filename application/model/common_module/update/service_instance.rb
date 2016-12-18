@@ -21,13 +21,9 @@ module DTK
       class ServiceInstance < self
         # Returns object of type CommonDSL::Diff::Result
         # opts can have keys
-        #   :service_instance (required)
         #   :force_pull - Boolean (default false) 
-        def self.update_from_repo(project, commit_sha, opts = {})
+        def self.update_from_repo(project, commit_sha, service_instance, opts = {})
           diff_result = CommonDSL::Diff::Result.new
-          unless service_instance = opts[:service_instance]
-            fail Error, "opts[:service_instance] should not be nil"
-          end
           module_branch = service_instance.get_service_instance_branch
 
           unless module_branch.is_set_to_sha?(commit_sha)

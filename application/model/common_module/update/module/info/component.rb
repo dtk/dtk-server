@@ -16,9 +16,9 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule::Update::Module
-    class ComponentInfo < self
-      require_relative('component_info/transform')
+  class CommonModule::Update::Module::Info
+    class Component < self
+      require_relative('component/transform')
 
       # returns true if there is component info
       def create_or_update_from_parsed_common_module?

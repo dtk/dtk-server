@@ -20,15 +20,6 @@ module DTK
     class Update < self
       require_relative('update/module')
       require_relative('update/service_instance')
-
-      def self.update_class(common_module_type)
-        case common_module_type
-        when :module then Module
-        when :service_instance then ServiceInstance
-        else fail Error, "Illegal common_module_type '#{common_module_type}'"
-        end
-      end
-
     end
   end
 end

@@ -17,7 +17,10 @@
 #
 module DTK
   class CommonModule::Update::Module
-    module Mixin
+    class Info < self
+      require_relative('info/service')
+      require_relative('info/component')
+
       attr_reader :module_name, :namespace_name, :version
 
       private

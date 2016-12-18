@@ -18,61 +18,52 @@
 module DTK
   class CommonModule::Update
     class Module < self
-      require_relative('module/mixin')
-      require_relative('module/update_info')
-      require_relative('module/service_info')
-      require_relative('module/component_info')
-
-      include Mixin
+      require_relative('module/info')
+      require_relative('module/update_response')
+      
+      def initialize(project, commit_sha, local_params, repo_name)
+        @project      = project
+        @commit_sha   = commit_sha
+        @local_params = local_params
+        @repo_name    = repo_name
+        
+        #dynamically computed
+        @module_branch = nil # common module branch
+      end
+      private :initialize
 
       # opts can have keys
-      #   :local_params (required)
-      #   :repo_name (required)
-      #   :force_pull - Boolean (default false) 
       #   :force_parse - Boolean (default false) 
-      def self.update_from_repo(project, commit_sha, opts = {})
-        ret = UpdateInfo.new
+      def self.update_from_repo(project, commit_sha, local_params, repo_name, opts = {})
+        new(project, commit_sha, local_params, repo_name).update_from_repo(opts)
+      end
+      def update_from_repo(opts = {})
+        ret = UpdateResponse.new
 
-        repo_name    = opts[:repo_name] || fail(Error, "opts[:repo_name] should not be nil")
-        local_params = opts[:local_params] || fail(Error, "opts[:local_params] should not be nil")
+        module_obj, repo = get_module_obj_and_repo
+        @module_branch = get_common_module__module_branch(module_obj)
 
-        local             = local_params.create_local(project)
-        local_branch      = local.branch_name
+        # TODO: DTK-2766: conditionally create this depedneding on whether doing install from directory versus install from dtkn;
+        #  see if can move this to create empty module
+        # create_common_module_repo_remote(repo)
 
-        module_obj = module_exists?(project.id_handle, local[:module_name], local[:namespace])
-        repo = module_obj.get_repo
-        repo.merge!(branch_name: local_branch)
+        return ret if @module_branch.is_set_to_sha?(@commit_sha)
 
-        # update_dsl_parsed is set so that common_module__module_branch will have dsl_parsed set to false if a dsl file is changed
-        pull_opts = { 
-          ret_diffs: nil, # means to return diffs
-          force_pull: opts[:force_pull], 
-          update_dsl_parsed: TOP_DSL_FILE_REGEXP
-        }
-        common_module__module_branch, pull_was_needed = pull_repo_changes?(project, local_params, commit_sha, pull_opts)
+        if repo_diffs_summary = @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) 
+          ret.add_diffs_summary!(repo_diffs_summary)
+          parse_needed = (repo_diffs_summary =~ TOP_DSL_FILE_REGEXP)
+          repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
 
-        # diffs_summary wil be nbil or object of type Repo::Diffs::Summary with references to dsl file removed
-        diffs_summary = nil
-        if diffs = pull_opts[:ret_diffs]
-          ret.add_diffs!(diffs)
-          diffs_summary = diffs.ret_summary.prune!(TOP_DSL_FILE_REGEXP)
+          # TODO: if not parsing do we have to do this
+          parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
+          CommonDSL::Parse.set_dsl_version!(@module_branch, parsed_common_module)
+
+          parse_needed = (opts[:force_parse] || !@module_branch.dsl_parsed?)
+          create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)
+          @module_branch.set_dsl_parsed!(true)
         end
-
-        parse_needed = (opts[:force_parse] || !common_module__module_branch.dsl_parsed?)
-        return ret unless parse_needed || pull_was_needed
-        
-        create_common_module_repo_remote(project, local_params, repo, repo_name: opts[:repo_name])
-
-        parsed_common_module = dsl_file_obj_from_repo(common_module__module_branch).parse_content(:common_module)
-        CommonDSL::Parse.set_dsl_version!(common_module__module_branch, parsed_common_module)
-
-        create_or_update_opts = {
-          parse_needed: parse_needed,
-          diffs_summary: diffs_summary
-        }
-        create_or_update_from_parsed_common_module(project, local_params, repo, common_module__module_branch, parsed_common_module, create_or_update_opts)
-        common_module__module_branch.set_dsl_parsed!(true)
-
+        # This sets sha on branch only after all processing goes through
+        @module_branch.update_current_sha_from_repo!
         ret
       end
 
@@ -80,49 +71,44 @@ module DTK
 
       private
 
-      # opts can have keys:
-      #   :force_pull
-      #   :update_dsl_parsed - if set then regexp that matches dsl file
-      #   :ret_diffs - if set then this method will update it with a Repo::Diffs object
-      def self.pull_repo_changes?(project, local_params, commit_sha, opts = {})
-        namespace = Namespace.find_by_name(project.model_handle(:namespace), local_params.namespace)
-        module_branch = get_workspace_module_branch(project, local_params.module_name, local_params.version, namespace)
-        ret_diffs = opts.has_key?(:ret_diffs)
-        pull_opts = {
-          force: opts[:force_pull], 
-          update_dsl_parsed: opts[:update_dsl_parsed]
-        }
-        pull_opts.merge!(ret_diffs: opts[:ret_diffs]) if ret_diffs
-        pull_was_needed = module_branch.pull_repo_changes?(commit_sha, pull_opts)
-        opts[:ret_diffs] = pull_opts[:ret_diffs] if ret_diffs
-        [module_branch, pull_was_needed]
+      # returns [module_obj, repo]
+      def get_module_obj_and_repo
+        local = @local_params.create_local(@project)
+        module_obj = self.class.module_exists?(@project.id_handle, local[:module_name], local[:namespace])
+        repo = module_obj.get_repo
+        repo.merge!(branch_name: local.branch_name)
+        [module_obj, repo]
       end
 
-      # opts can have keys:
-      #   :repo_name
-      def self.create_common_module_repo_remote(project, local_params, repo, opts = {})
+      def get_common_module__module_branch(module_obj)
+        namespace_obj = Namespace.find_by_name(@project.model_handle(:namespace), @local_params.namespace)
+        module_branch = self.class.get_workspace_module_branch(@project, @local_params.module_name, @local_params.version, namespace_obj)
+      end
+
+      def create_common_module_repo_remote(repo)
         remote_params = ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
-          module_type: local_params[:module_type],
-          module_name: local_params[:module_name],
-          namespace: local_params[:namespace],
+          module_type: @local_params[:module_type],
+          module_name: @local_params[:module_name],
+          namespace: @local_params[:namespace],
           remote_repo_base: RepoRemote.repo_base
         )
         repo_with_branch = repo.create_subclass_obj(:repo_with_branch)
         repo_with_branch.merge!(ref: repo_with_branch[:display_name])
 
-        remote = remote_params.create_remote(project)
-        create_repo_remote_object(repo_with_branch, remote, opts[:repo_name])
+        remote = remote_params.create_remote(@project)
+        self.class.create_repo_remote_object(repo_with_branch, remote, @repo_name)
       end
 
-      def self.dsl_file_obj_from_repo(module_branch)
-        CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
+      def dsl_file_obj_from_repo
+        CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(@module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
       end
       
       # args has project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module, opts = {})
-      def self.create_or_update_from_parsed_common_module(*args)
+      def create_or_update_from_parsed_common_module(parsed_common_module, repo, opts = {})
+        args = [@project, @local_params, repo, @module_branch, parsed_common_module, opts]
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
-        component_info_exists = ComponentInfo.new(*args).create_or_update_from_parsed_common_module?
-        ServiceInfo.new(*(args + [{ component_info_exists: component_info_exists }])).create_or_update_from_parsed_common_module?
+        component_info_exists = Info::Component.new(*args).create_or_update_from_parsed_common_module?
+        Info::Service.new(*(args + [{ component_info_exists: component_info_exists }])).create_or_update_from_parsed_common_module?
       end
 
     end

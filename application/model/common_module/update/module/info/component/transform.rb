@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule::Update::Module::ComponentInfo
+  class CommonModule::Update::Module::Info::Component
     class Transform
       def initialize(parsed_common_module, parent)
         @dtk_dsl_info_processor = dtk_dsl_transform_helper(parent).info_processor(:component_info)

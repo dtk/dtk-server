@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule::Update::Module
-    class ServiceInfo < self
+  class CommonModule::Update::Module::Info
+    class Service < self
       
       def initialize(*args)
         service_instance_opts = args.pop

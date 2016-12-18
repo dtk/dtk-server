@@ -147,7 +147,15 @@ module DTK
       repo_remotes.each { |rr| rr.delete_instance(rr.id_handle) }
     end
 
-    def self.create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id, opts = Opts.new)
+    # opts can have keys:
+    #   :set_as_default
+    #   :set_as_default_if_first
+    def self.create_repo_remote?(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id, opts = {})
+      unless get_remote_repo?(repo_remote_mh, repo_id, module_name, repo_namespace)
+      create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id, opts)
+      end
+    end
+    def self.create_repo_remote(repo_remote_mh, module_name, repo_name, repo_namespace, repo_id, opts = {})
       is_default =
         if opts[:set_as_default]
           true
@@ -173,7 +181,7 @@ module DTK
       delete_instances(idh_list)
     end
 
-    def self.get_remote_repo(repo_remote_mh, repo_id, module_name, repo_namespace)
+    def self.get_remote_repo?(repo_remote_mh, repo_id, module_name, repo_namespace)
       matches = get_matching_remote_repos(repo_remote_mh, repo_id, module_name, repo_namespace)
       if matches.size > 1
         Log.error("Unexpected to have multiple matches in get_remote_repo (#{matches.inspect})")

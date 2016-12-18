@@ -116,13 +116,13 @@ module DTK; module ModuleCommonMixin
         # module_obj.get_repos().each do |repo|
         repos.each do |repo|
           # we remove remote repos
-          unless repo_remote_db = RepoRemote.get_remote_repo(repo.model_handle(:repo_remote), repo.id, remote.module_name, remote.namespace)
+          unless repo_remote_obj = RepoRemote.get_remote_repo?(repo.model_handle(:repo_remote), repo.id, remote.module_name, remote.namespace)
             fail ErrorUsage.new("Remote component/service (#{remote.pp_module_ref()}) does not exist")
           end
 
           repo.unlink_remote(remote)
 
-          RepoRemote.delete_repos([repo_remote_db.id_handle()])
+          RepoRemote.delete_repos([repo_remote_obj.id_handle()])
         end
       end
       response
@@ -134,9 +134,7 @@ module DTK; module ModuleCommonMixin
     end
 
     def create_repo_remote_object(repo, remote, remote_repo_name)
-      repo_remote_mh = repo.model_handle(:repo_remote)
-      opts = Opts.new(set_as_default_if_first: true)
-      RepoRemote.create_repo_remote(repo_remote_mh, remote.module_name, remote_repo_name, remote.namespace, repo.id, opts)
+      RepoRemote.create_repo_remote(repo.model_handle(:repo_remote), remote.module_name, remote_repo_name, remote.namespace, repo.id, set_as_default_if_first: true)
     end
   end
 

@@ -74,8 +74,10 @@ module DTK
       def create_empty_module
         namespace, module_name = required_request_params(:namespace, :module_name)
         version = request_params(:version) || 'master'
+        has_remote_repo = boolean_request_params(:has_remote_repo)
+
         local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
-        rest_ok_response CommonModule.create_empty_module_with_branch(get_default_project, local_params)
+        rest_ok_response CommonModule.create_empty_module_with_branch(get_default_project, local_params, has_remote_repo: has_remote_repo)
       end
 
       def delete
@@ -103,10 +105,10 @@ module DTK
       end
 
       def update_from_repo
-        namespace, module_name, repo_name, commit_sha = required_request_params(:namespace, :module_name, :repo_name, :commit_sha)
+        namespace, module_name, commit_sha = required_request_params(:namespace, :module_name, :commit_sha)
         version = request_params(:version)
         local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
-        rest_ok_response CommonModule::Update::Module.update_from_repo(get_default_project, commit_sha, local_params, repo_name)
+        rest_ok_response CommonModule::Update::Module.update_from_repo(get_default_project, commit_sha, local_params)
       end
 
       def update_dependency_from_remote

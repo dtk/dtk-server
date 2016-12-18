@@ -21,11 +21,10 @@ module DTK
       require_relative('module/info')
       require_relative('module/update_response')
       
-      def initialize(project, commit_sha, local_params, repo_name)
+      def initialize(project, commit_sha, local_params)
         @project      = project
         @commit_sha   = commit_sha
         @local_params = local_params
-        @repo_name    = repo_name
         
         #dynamically computed
         @module_branch = nil # common module branch
@@ -34,18 +33,14 @@ module DTK
 
       # opts can have keys
       #   :force_parse - Boolean (default false) 
-      def self.update_from_repo(project, commit_sha, local_params, repo_name, opts = {})
-        new(project, commit_sha, local_params, repo_name).update_from_repo(opts)
+      def self.update_from_repo(project, commit_sha, local_params, opts = {})
+        new(project, commit_sha, local_params).update_from_repo(opts)
       end
       def update_from_repo(opts = {})
         ret = UpdateResponse.new
 
         module_obj, repo = get_module_obj_and_repo
         @module_branch = get_common_module__module_branch(module_obj)
-
-        # TODO: DTK-2766: conditionally create this depedneding on whether doing install from directory versus install from dtkn;
-        #  see if can move this to create empty module
-        # create_common_module_repo_remote(repo)
 
         return ret if @module_branch.is_set_to_sha?(@commit_sha)
 
@@ -83,20 +78,6 @@ module DTK
       def get_common_module__module_branch(module_obj)
         namespace_obj = Namespace.find_by_name(@project.model_handle(:namespace), @local_params.namespace)
         module_branch = self.class.get_workspace_module_branch(@project, @local_params.module_name, @local_params.version, namespace_obj)
-      end
-
-      def create_common_module_repo_remote(repo)
-        remote_params = ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
-          module_type: @local_params[:module_type],
-          module_name: @local_params[:module_name],
-          namespace: @local_params[:namespace],
-          remote_repo_base: RepoRemote.repo_base
-        )
-        repo_with_branch = repo.create_subclass_obj(:repo_with_branch)
-        repo_with_branch.merge!(ref: repo_with_branch[:display_name])
-
-        remote = remote_params.create_remote(@project)
-        self.class.create_repo_remote_object(repo_with_branch, remote, @repo_name)
       end
 
       def dsl_file_obj_from_repo

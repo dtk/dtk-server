@@ -25,6 +25,7 @@ module DTK; module ModuleCommonMixin
     #  :return_module_branch - Boolean (default: false)
     #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     #  :create_implementation - Boolean (default: false)
+    #  :has_remote_repo - Boolean (default: false)
     def create_module(project, local_params, opts = {})
       local = local_params.create_local(project)
       namespace = local_params.namespace
@@ -67,6 +68,10 @@ module DTK; module ModuleCommonMixin
       module_and_branch_info = create_module_and_branch_obj?(project, repo_idh, local, opts)
 
       Implementation.create?(project, local, local_repo_obj) if opts[:create_implementation]
+
+      if opts[:has_remote_repo]
+        RepoRemote.create_repo_remote?(project.model_handle(:repo_remote), local.module_name, local_repo_obj.display_name, local.namespace, local_repo_obj.id, set_as_default_if_first: true)
+      end
 
       return module_and_branch_info if opts[:return_module_branch]
 

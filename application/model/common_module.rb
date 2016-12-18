@@ -38,11 +38,14 @@ module DTK
       :combined_module
     end
 
-    def self.create_empty_module_with_branch(project, local_params)
+    # opts can have keys:
+    #   :has_remote_repo
+    def self.create_empty_module_with_branch(project, local_params, opts = {})
       create_module_opts = {
         return_module_branch: true,
         no_initial_commit: true,
-        common_module: true
+        common_module: true,
+        has_remote_repo: opts[:has_remote_repo]
       }
       # create_module also creates branch
       module_branch = create_module(project, local_params, create_module_opts)

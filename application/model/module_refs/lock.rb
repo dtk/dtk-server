@@ -186,7 +186,7 @@ module DTK
         locked_module_refs.each_pair do |_module_name, module_ref_lock|
           if el = module_ref_lock_element(module_ref_lock)
             if mb = el.module_branch
-              if sha = mb[:current_sha]
+              if sha = mb.get_field?(:current_sha)
                 module_ref_lock.locked_branch_sha = sha
               end
             end

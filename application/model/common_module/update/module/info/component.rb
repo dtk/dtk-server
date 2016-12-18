@@ -29,10 +29,10 @@ module DTK
           @aug_component_module_branch = component_module_branch.augmented_module_branch.augment_with_component_module!
 
           # TODO: DTK-2766: update_component_info_in_model_from_dsl is very slow do to the underlying legacy
-          # method to parse; First way to tackle this is to have sync_component_module_from_common_module return whether
-          # the component dsl part of file changed since parse_needed? could be true when service info changed but not
-          # component info
-          # To get that to work we wil also need to replace sync_component_module_from_common_module mechanism from pushing to bare repo
+          # method to parse; First way to tackle this is to only call update_component_info_in_model_from_dsl if the component info
+          # part is updated. We wil leveref the diff reasoning analogous that fro service insatnces lib/common_dsl/diff/service_instance/dsl.rb
+          # add do coarse parsing. Later we will do away with legacy methods and do fine grain diff prasing for component updates
+          # TODO: Might have to get that to work we wil also need to replace sync_component_module_from_common_module mechanism from pushing to bare repo
           # to copying files that are in @diffs_summary
           sync_component_module_from_common_module
           if parse_needed?
@@ -66,7 +66,8 @@ module DTK
       # TODO: DTK-2766: this uses the legacy parsing routines in the dtk-server gem. Port over ti dtk-dsl parsing
       def update_component_info_in_model_from_dsl
         aug_mb = @aug_component_module_branch # alias
-        impl = aug_mb.get_implementation
+        # TODO: for migration purposes needed the  Implementation.create? method. This shoudl be done during initial create
+        impl = aug_mb.get_implementation? || Implementation.create?(project, local_params, aug_mb.repo)
         response = aug_mb.component_module.parse_dsl_and_update_model(impl, aug_mb.id_handle, version, donot_update_module_refs: true)
         fail response if ModuleDSL::ParsingError.is_error?(response)
       end

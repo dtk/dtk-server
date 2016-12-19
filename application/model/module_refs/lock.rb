@@ -140,7 +140,7 @@ module DTK
         types = Array(types)
         if persisted = get_module_refs_lock?(assembly_instance)
           if missing_info = MissingInformation.missing_information?(persisted, types, opts)
-            Log.error_pp(["Unexpected that there is info missing from ModuleRefs::Lock info must be computed for assembly", assembly_instance, missing_info])
+            missing_info.log_error
           end
           persisted
         else

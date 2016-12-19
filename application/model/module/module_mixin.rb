@@ -140,7 +140,7 @@ module DTK
       generate_docs = opts[:generate_docs]
 
       module_branch = get_workspace_module_branch(version)
-      pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force: force)
+      pull_was_needed = module_branch.pull_repo_changes?(commit_sha, force: force, update_sha: true)
 
       parse_needed = (opts[:force_parse] || generate_docs || !module_branch.dsl_parsed?())
       update_from_includes = opts[:update_from_includes]

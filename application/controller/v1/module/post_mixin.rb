@@ -55,8 +55,6 @@ module DTK
       end
       BASE_VERSION_STRING = ['base', 'master'] #TODO: settle on one
 
-
-
       def generate_service_name
         service_module    = ret_service_module
         assembly_name     = request_params(:assembly_name)

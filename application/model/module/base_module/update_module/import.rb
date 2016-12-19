@@ -82,7 +82,7 @@ module DTK; class BaseModule; class UpdateModule
 
     def import_from_file(commit_sha, repo_idh, opts = {})
       ret = UpdateModuleOutput.new()
-      pull_was_needed = @module_branch.pull_repo_changes?(commit_sha)
+      pull_was_needed = @module_branch.pull_repo_changes?(commit_sha, update_sha: true)
 
       parse_needed = !@module_branch.dsl_parsed?()
       return ret unless pull_was_needed || parse_needed
@@ -124,7 +124,7 @@ module DTK; class BaseModule; class UpdateModule
 
     def import_from_git(commit_sha, repo_idh, opts = {})
       ret = UpdateModuleOutput.new()
-      pull_was_needed = @module_branch.pull_repo_changes?(commit_sha)
+      pull_was_needed = @module_branch.pull_repo_changes?(commit_sha, update_sha: true)
 
       parse_needed = !@module_branch.dsl_parsed?()
       return ret unless pull_was_needed || parse_needed

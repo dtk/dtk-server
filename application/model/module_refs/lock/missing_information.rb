@@ -19,12 +19,23 @@
 module DTK; class ModuleRefs
   class Lock
     class MissingInformation < self
+      attr_reader :missing
       def initialize(assembly_instance, missing, complete, types, opts)
         super(assembly_instance)
         @missing = missing
         @complete = complete
         @types = types
         @opts = opts
+      end
+
+      def log_error
+        unless (@missing || {}).empty?
+          if @missing.kind_of?(::Hash)
+            Log.error("Unexpected in computing ModuleRefs::Lock that info missing for modules: #{@missing.keys.join(', ')}")
+          else
+            Log.error_pp(["Unexpected in computing ModuleRefs::Lock that info missing", @missing])
+          end
+        end
       end
 
       # types will be subset of [:locked_dependencies, :locked_branch_shas]

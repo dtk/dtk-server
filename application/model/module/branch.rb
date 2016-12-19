@@ -173,18 +173,18 @@ module DTK
     # returns true if actual pull was needed
     # opts can have keys:
     #   :force
+    #   :update_sha
     def pull_repo_changes?(commit_sha, opts = {})
-      if commit_sha == current_sha
+      force = opts[:force] or commit_sha.nil?
+
+      if commit_sha == current_sha and !force 
         nil
       else
-        fast_foward_pull_raise_error_if_merge_needed(force: opts[:force])
-        set_sha(commit_sha)
+        fast_foward_pull_raise_error_if_merge_needed(force: force)
+        set_sha(commit_sha) if opts[:update_sha]
         true
       end
     end
-    # TODO: look at whether we shoudl make consistent disparity now where above does set_sha and bottom does not
-    # if make consistent would remove set_sha(commit_sha)
-
     # returns nil if no changes, otherwise returns diffs
     # opts can have keys:
     #   :force

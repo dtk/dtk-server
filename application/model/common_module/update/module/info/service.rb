@@ -48,8 +48,12 @@ module DTK
           component_module_refs = ModuleRefs.get_component_module_refs(service_module_branch)
 
           cmp_modules_with_namespaces = dependent_modules.map do |parsed_module_ref|
-            cmp_modules_with_namespaces_hash(parsed_module_ref.req(:ModuleName), parsed_module_ref.req(:Namespace), parsed_module_ref.val(:ModuleVersion)) 
-          end
+            parsed_module_name = parsed_module_ref.req(:ModuleName)
+            # For legacy where dependencies can refer to themselves
+            unless @module_name == parsed_module_name 
+              cmp_modules_with_namespaces_hash(parsed_module_name, parsed_module_ref.req(:Namespace), parsed_module_ref.val(:ModuleVersion)) 
+            end
+          end.compact
 
           # add reference to oneself if not there and there is a corresponding component module ref 
           if @component_info_exists and not base_module_in?(cmp_modules_with_namespaces)

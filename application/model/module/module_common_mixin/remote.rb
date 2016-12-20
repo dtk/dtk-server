@@ -21,6 +21,8 @@ module DTK; module ModuleCommonMixin
   module Remote::Class
     # install from a dtkn repo; directly in this method handles the module/branch and repo level items
     # and then calls process_dsl_and_ret_parsing_errors to handle model and implementaion/files parts depending on what type of module it is
+
+    # TODO: DTK-2766: updated coe so new client does not use this method
     def install(project, local_params, remote_params, client_rsa_pub_key, opts = {})
       version = remote_params.version
 

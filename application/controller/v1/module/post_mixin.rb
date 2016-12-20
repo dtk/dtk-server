@@ -92,27 +92,18 @@ module DTK
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
 
-        rest_ok_response CommonModule.install_component_module(get_default_project, local_params, remote_params, rsa_pub_key)
+        rest_ok_response CommonModule::ComponentInfo::Remote.install(get_default_project, local_params, remote_params, rsa_pub_key)
       end
 
-      def install_service_module
-        namespace, module_name, content = required_request_params(:namespace, :module_name, :content)
-        version = request_params(:version)
-        local_params = local_params(:service_module, module_name, namespace: namespace, version: version)
-        rest_ok_response CommonModule.install_service_module(get_default_project, local_params, content)
-      end
-
-      def update_from_repo
-        namespace, module_name, commit_sha = required_request_params(:namespace, :module_name, :commit_sha)
-        version = request_params(:version)
-        local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
-        rest_ok_response CommonModule::Update::Module.update_from_repo(get_default_project, commit_sha, local_params)
-      end
-
-      def update_dependency_from_remote
+      def pull_component_module_from_remote
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)
+
+        remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
+
+        # TODO: DTK-2795: fix below
+
         diffs_summary = ret_diffs_summary
 
         component_module = create_obj(:full_module_name, ComponentModule)
@@ -120,6 +111,13 @@ module DTK
         response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs)
 
         rest_ok_response response
+      end
+
+      def update_from_repo
+        namespace, module_name, commit_sha = required_request_params(:namespace, :module_name, :commit_sha)
+        version = request_params(:version)
+        local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
+        rest_ok_response CommonModule::Update::Module.update_from_repo(get_default_project, commit_sha, local_params)
       end
 
     end

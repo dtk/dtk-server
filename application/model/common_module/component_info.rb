@@ -18,6 +18,7 @@
 module DTK
   class CommonModule
     class ComponentInfo < ComponentModule
+      require_relative('component_info/remote')
       extend  CommonModule::ClassMixin
       include CommonModule::Mixin
 
@@ -32,10 +33,6 @@ module DTK
           dependency_warnings: dependency_warnings,
           required_modules: required_modules
         }
-      end
-
-      def self.install_module(project, local_params, remote_params, dtk_client_pub_key)
-        ComponentModule.install(project, local_params, remote_params, dtk_client_pub_key)
       end
 
       def self.list_remotes(_model_handle, rsa_pub_key = nil, opts = {})

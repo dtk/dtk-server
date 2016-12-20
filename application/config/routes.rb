@@ -61,7 +61,7 @@ DTK::ReactorRoute.draw do
   get    'api/v1/services/:service_id/required_attributes'    => 'v1::service#required_attributes'
 
   post 'api/v1/services/delete'      => 'v1::service#delete'
-    post 'api/v1/services/uninstall'      => 'v1::service#uninstall'
+  post 'api/v1/services/uninstall'      => 'v1::service#uninstall'
   # TODO: should we use below instead?
   # delete 'api/v1/services/:service_id' => 'v1::service#delete'
 
@@ -80,15 +80,14 @@ DTK::ReactorRoute.draw do
   get 'api/v1/modules/module_dependencies'       => 'v1::module/module_dependencies'
   get 'api/v1/modules/remote_module_info'        => 'v1::module/remote_module_info'
 
-  post 'api/v1/modules/create_empty_module'           => 'v1::module/create_empty_module'
-  post 'api/v1/modules/delete'                        => 'v1::module/delete'
-  post 'api/v1/modules/install_component_module'      => 'v1::module/install_component_module'
-  post 'api/v1/modules/install_service_module'        => 'v1::module/install_service_module'
-  post 'api/v1/modules/update_from_repo'              => 'v1::module/update_from_repo'
-  post 'api/v1/modules/list_remote'                   => 'v1::module/list_remote'
-  post 'api/v1/modules/update_dependency_from_remote' => 'v1::module/update_dependency_from_remote'
-  post 'api/v1/modules/generate_service_name'         => 'v1::module/generate_service_name'
-  post 'api/v1/modules/stage'                         => 'v1::module/stage'
+  post 'api/v1/modules/create_empty_module'                 => 'v1::module/create_empty_module'
+  post 'api/v1/modules/delete'                              => 'v1::module/delete'
+  post 'api/v1/modules/install_component_module'            => 'v1::module/install_component_module'
+  post 'api/v1/modules/pull_component_module_from_remote'   => 'v1::module/pull_component_module_from_remote'
+  post 'api/v1/modules/update_from_repo'                    => 'v1::module/update_from_repo'
+  post 'api/v1/modules/list_remote'                         => 'v1::module/list_remote'
+  post 'api/v1/modules/generate_service_name'               => 'v1::module/generate_service_name'
+  post 'api/v1/modules/stage'                               => 'v1::module/stage'
 
   ########## end: Modules
 

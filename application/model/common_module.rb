@@ -86,10 +86,6 @@ module DTK
       ret.merge(version: remote_params.version || intersect_versions(raw_service_info, raw_component_info))
     end
 
-    def self.install_component_module(project, local_params, remote_params, dtk_client_pub_key)
-      ComponentInfo.install_module(project, local_params, remote_params, dtk_client_pub_key)
-    end
-
     def self.exists(project, module_type, namespace, module_name, version)
       if matching_module = get_class_from_module_type(module_type).find_from_name_with_version?(project, namespace, module_name, version)
         ModuleRepoInfo.new(matching_module[:module_branch])

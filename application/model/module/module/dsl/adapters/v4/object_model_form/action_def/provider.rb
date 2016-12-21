@@ -18,8 +18,9 @@
 module DTK; class ModuleDSL; class V4; class ObjectModelForm
   class ActionDef
     class Provider < OutputHash
-      r8_nested_require('provider', 'puppet')
-      r8_nested_require('provider', 'dtk')
+      require_relative('provider/generic')
+      require_relative('provider/dtk')
+      require_relative('provider/puppet')
 
       def initialize(provider_type, input_hash)
         super(provider: provider_type.to_s).merge!(provider_specific_fields(input_hash))
@@ -32,7 +33,7 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
           fail ParsingError.new(err_msg, cmp_print_form, action_name => input_hash)
         end
         provider_type = provider_type(input_hash, context)
-        unless provider_class = ProviderTypeToClass[provider_type.to_sym]
+        unless provider_class = provider_type_to_class(provider_type)
           err_msg = "The action '?1' on component '?2' has illegal provider type: ?3"
           fail ParsingError.new(err_msg, action_name, cmp_print_form, provider_type)
         end
@@ -46,6 +47,11 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         puppet: Puppet
       }
 
+      def self.provider_type_to_class(provider_type)
+        provider_type = provider_type.to_sym
+        ProviderTypeToClass[provider_type] || (provider_type == Generic.type && Generic)
+      end
+
       # gets overwritten
       def provider_specific_fields(_input_hash)
         fail Error.new('should be overwritten')
@@ -56,10 +62,13 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       end
 
       def self.compute_provider_type(input_hash, context = {})
-        ret = nil
-        if provider_class = ProviderTypeToClass.find { |_provider, klass| klass.matches_input_hash?(input_hash) }
-          ret = provider_class[0]
-        end
+        ret = 
+          if provider_class = ProviderTypeToClass.find { |_provider, klass| klass.matches_input_hash?(input_hash) }
+            provider_class[0]
+          else
+            Generic.matches_input_hash?(input_hash) && Generic.type
+          end
+
         unless ret
           action_name = context[:action_name]
           cmp_print_form = context[:cmp_print_form]

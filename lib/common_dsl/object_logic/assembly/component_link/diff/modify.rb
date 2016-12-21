@@ -16,15 +16,15 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::ComponentLink
-    # class Diff < CommonDSL::Diff::Set
-    class Diff < CommonDSL::Diff::Base
-      class Add < CommonDSL::Diff::Element::Add
-        require_relative('diff/add')
-        require_relative('diff/delete')
-        require_relative('diff/modify')
+  class ObjectLogic::Assembly
+    class ComponentLink::Diff
+      class Modify < CommonDSL::Diff::Element::Modify
+        def process(_result, _opts = {})
+          # result does not need to be updated since attribute changes dont entail service-side
+          # modification to dsl
+          nil
+        end
       end
     end
   end
 end; end
-

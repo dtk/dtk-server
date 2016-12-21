@@ -51,7 +51,7 @@ module DTK; module CommonDSL
         def diff?(attribute_parse, qualified_key, opts = {})
           unless skip_for_generation?
             cur_val = val(:Value)
-            new_val = attribute_parse#.val(:Value)
+            new_val = attribute_parse.respond_to?(:val) ? attribute_parse.val(:Value) : attribute_parse
             create_diff?(cur_val, new_val, qualified_key)
           end
         end

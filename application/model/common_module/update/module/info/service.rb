@@ -31,7 +31,7 @@ module DTK
           service_module_branch = create_module_branch_and_repo?
           CommonDSL::Parse.set_dsl_version!(service_module_branch, parsed_common_module)
           update_component_module_refs_from_parsed_common_module(service_module_branch)
-          CommonModule::ServiceInfo.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, version)
+          CommonModule::ServiceInfo.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, local_params)
           true
         end
       end

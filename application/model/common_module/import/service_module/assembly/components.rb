@@ -21,7 +21,7 @@ module DTK
       module Components
         include ServiceDSLCommonMixin
 
-        def self.db_update_hash(container_idh, parsed_components, component_module_refs, opts = {})
+        def self.db_update_hash(container_idh, parsed_components, component_module_refs, module_local_params, opts = {})
           cmps_with_titles = []
           ret = parsed_components.inject(DBUpdateHash.new) do |h, (component_name, parsed_component)| 
             component_info = component_info(component_name)
@@ -32,7 +32,7 @@ module DTK
             h.merge(component_info[:ref] => component_info)
           end
 
-          component_module_refs.set_matching_component_template_info?(ret.values, donot_set_component_templates: true, set_namespace: true)
+          component_module_refs.set_matching_component_template_info?(ret.values, module_local_params: module_local_params, donot_set_component_templates: true, set_namespace: true)
           CommonModule::Import::ServiceModule.set_attribute_template_ids!(ret, container_idh)
           CommonModule::Import::ServiceModule.add_title_attribute_overrides!(cmps_with_titles, container_idh)
           ret

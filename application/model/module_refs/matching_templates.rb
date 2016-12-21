@@ -21,7 +21,7 @@ module DTK
       # component refs are augmented with :component_template key which points to
       # associated component template or nil
       # This method can be called when assembly is imported or staged
-      # TODO: any other time this can be called
+      # TODO: any other time this can be called?
       def set_matching_component_template_info?(aug_cmp_refs, opts = {})
         ret = aug_cmp_refs
         if aug_cmp_refs.empty?
@@ -89,7 +89,7 @@ module DTK
         # Lookup up modules mapping
         # mappings will have key for each component type referenced and for each key will return hash with keys :component_template and :version;
         # component_template will be null if no match is found
-        mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys)
+        mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys, module_local_params: opts[:module_local_params])
 
         # set the component template ids; raise error if there is a required element that does not have a matching component template
 
@@ -132,6 +132,8 @@ module DTK
         ret
       end
 
+      # opts can have keys: 
+      #  :module_local_params
       def get_component_type_to_template_mappings?(cmp_types, opts = {})
         ret = {}
         return ret if cmp_types.empty?
@@ -152,7 +154,7 @@ module DTK
         end
 
         # get matching component template info and insert matches into ret
-        Component::Template.get_matching_elements(project_idh(), ret.values, opts).each do |cmp_template|
+        Component::Template.get_matching_elements(project_idh(), ret.values, module_local_params: opts[:module_local_params]).each do |cmp_template|
           ret[cmp_template[:component_type]].merge!(component_template: cmp_template)
         end
         ret

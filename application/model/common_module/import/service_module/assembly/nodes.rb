@@ -21,7 +21,7 @@ module DTK
       module Nodes
         extend FactoryObjectClassMixin
 
-        def self.db_update_hash(container_idh, assembly_ref, parsed_assembly, component_module_refs, opts = {})
+        def self.db_update_hash(container_idh, assembly_ref, parsed_assembly, component_module_refs, module_local_params, opts = {})
           parsed_nodes_with_assembly_wide_components(parsed_assembly).inject(DBUpdateHash.new) do |h, (parsed_node_name, parsed_node)|
             node_ref   = assembly_template_node_ref(assembly_ref, parsed_node_name)
             attributes = Attributes.db_update_hash(parsed_node.val(:Attributes) || []).mark_as_complete
@@ -38,7 +38,7 @@ module DTK
             if components = parsed_node.val(:Components)
               node_output['node_binding_rs_id'] = NodePropertyComponent.node_bindings_from_node_property_component(components, container_idh)
 
-              cmps_output = Components.db_update_hash(container_idh, components, component_module_refs, opts)
+              cmps_output = Components.db_update_hash(container_idh, components, component_module_refs,  module_local_params, opts)
               node_output['component_ref'] = cmps_output unless cmps_output.empty?
             end
 

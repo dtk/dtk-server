@@ -117,6 +117,7 @@ module DTK; class Component
     end
     def self.get_matching_elements(project_idh, match_element_array, opts = {})
       ret = []
+      base_module_local_params = opts[:module_local_params]
       cmp_types = match_element_array.map(&:component_type).uniq
       versions = match_element_array.map(&:version_field)
       sp_hash = {
@@ -143,14 +144,18 @@ module DTK; class Component
         elsif matches.size == 1
           ret << matches.first
         else
-          # TODO: may put in logic that sees if one is service modules ns and uses that one when multiple matches
-          module_name = Component.module_name(el.component_type)
-          error_params = {
-            module_type: 'component',
+          if base_match = base_module_local_params && match_base_module?(matches, base_module_local_params)
+            ret << base_match
+          else
+            # TODO: may put in logic that sees if one is service modules ns and uses that one when multiple matches
+            module_name = Component.module_name(el.component_type)
+            error_params = {
+              module_type: 'component',
             module_name: Component.module_name(el.component_type),
-            namespaces: matches.map { |m| m[:namespace] }.compact # compact just to be safe
-          }
-          fail ServiceModule::ParsingError::AmbiguousModuleRef.new(error_params)
+              namespaces: matches.map { |m| m[:namespace] }.compact # compact just to be safe
+            }
+            fail ServiceModule::ParsingError::AmbiguousModuleRef, error_params
+          end
         end
       end
       unless unmatched.empty?()
@@ -173,6 +178,14 @@ module DTK; class Component
       end
       ret
     end
+
+    def self.match_base_module?(matches, base_module_local_params)
+      namespace = base_module_local_params.namespace
+      version   = base_module_local_params.version
+      matches.find { |match| match[:namespace] == namespace and match[:version] = version }
+    end
+    private_class_method :match_base_module? 
+
 
     def self.list(project, opts = {})
       assembly = opts[:assembly_instance]

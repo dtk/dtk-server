@@ -26,14 +26,12 @@ module DTK
         require_relative('assembly/node_property_component')
 
         module Mixin
-          # opts can have keys:
-          #   :module_version
-          def process_assembly!(parsed_assembly, opts = {})
+          def process_assembly!(parsed_assembly, module_local_params)
             if parsed_nodes = parsed_assembly.val(:Nodes)
               NodePropertyComponent.create_node_property_components?(parsed_nodes)
             end
 
-            if module_version = opts[:module_version]
+            if module_version = module_local_params.version
               module_version = nil if module_version.eql?('master')
             end
 
@@ -58,7 +56,7 @@ module DTK
             tags = get_assembly_tags(parsed_assembly)
             assembly_ref_pointer.merge!('tags' => tags)
 
-            nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_assembly, @component_module_refs, default_assembly_name: assembly_name)
+            nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_assembly, @component_module_refs, module_local_params, default_assembly_name: assembly_name)
             @db_updates_assemblies['node'].merge!(nodes_db_update_hash.mark_as_complete)
 
             @ndx_assembly_hashes[assembly_ref] ||= parsed_assembly

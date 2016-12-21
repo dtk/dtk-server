@@ -28,9 +28,9 @@ module DTK
           super(project.id_handle, module_branch, service_module, module_refs)
         end
 
-        def put_needed_info_into_import_helper!(parsed_assemblies, opts = {})
+        def put_needed_info_into_import_helper!(parsed_assemblies, module_local_params)
           parsed_assemblies.each do |parsed_assembly|
-            process_assembly!(parsed_assembly, opts)
+            process_assembly!(parsed_assembly, module_local_params)
           end
         end
 

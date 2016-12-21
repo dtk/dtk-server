@@ -112,14 +112,10 @@ module DTK
 
     ### for dealing with actual repos
     class << self
+      # returns commit_sha
       def initial_sync_with_remote_repo(branch, repo_name, remote_name, remote_url, remote_branch)
         adapter_repo = get_adapter_repo(context(repo_name, branch))
         adapter_repo.initial_sync_with_remote_repo(remote_name, remote_url, remote_branch)
-      end
-
-     def pull_from_remote_repo(branch, repo_name, remote_name, remote_url, remote_branch, opts = {})
-        adapter_repo = get_adapter_repo(context(repo_name, branch))
-        adapter_repo.pull_from_remote_repo(remote_name, remote_url, remote_branch, opts)
       end
 
       # returns :equal, :local_behind, :local_ahead, or :branchpoint

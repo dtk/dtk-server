@@ -34,21 +34,14 @@ module DTK
       end
 
       def initial_sync_with_remote(remote, remote_repo_info)
-        unless R8::Config[:repo][:workspace][:use_local_clones]
-          fail Error.new('Not implemented yet: initial_sync_with_remote_repo w/o local clones')
-        end
+        remote_url    = remote.repo_url
+        remote_ref    = remote.remote_ref
+        remote_branch = remote.branch_name
 
-        remote_url = remote.repo_url
-        remote_ref = remote.remote_ref
-        remote_branch =  remote.branch_name
+        raise_error_if_version_not_on_remote(remote_repo_info, remote_branch)
 
-        if remote_branches = remote_repo_info[:branches]
-          unless remote_branches.include?(remote_branch)
-            fail ErrorUsage.new("Cannot find selected version on remote repo #{remote_repo_info[:full_name] || ''}")
-          end
-        end
-        commit_sha = RepoManager.initial_sync_with_remote_repo(branch_name, get_field?(:repo_name), remote_ref, remote_url, remote_branch)
-        commit_sha
+        # returns commit_sha
+        RepoManager.initial_sync_with_remote_repo(branch_name, get_field?(:repo_name), remote_ref, remote_url, remote_branch)
       end
 
       def delete_local_brach_only(branch_name)
@@ -56,6 +49,12 @@ module DTK
       end
 
       private
+
+      def raise_error_if_version_not_on_remote(remote_repo_info, remote_branch)
+        if remote_branches = remote_repo_info[:branches]
+          fail ErrorUsage.new("Cannot find selected version on remote repo #{remote_repo_info[:full_name] || ''}") unless remote_branches.include?(remote_branch)
+        end
+      end
 
       def self.create_obj?(model_handle, local)
         repo_name = repo_name(local)

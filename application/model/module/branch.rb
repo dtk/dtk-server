@@ -185,7 +185,7 @@ module DTK
         true
       end
     end
-    # returns nil if no changes, otherwise returns diffs
+    # returns nil if no changes, otherwise returns Repo::Difs::Summary object
     # opts can have keys:
     #   :force
     def pull_repo_changes_and_return_diffs_summary(commit_sha, opts = {})
@@ -194,13 +194,39 @@ module DTK
       current_sha = current_sha()
       fail Error, "Unexpected that commit_sha == current_sha" if commit_sha == current_sha
 
-      fast_foward_pull_raise_error_if_merge_needed(opts)
+      fast_foward_pull_raise_error_if_merge_needed(force: opts[:force])
 
       if rev_diffs_summary = RepoManager.diff(current_sha, self).ret_summary
         diffs_summary = rev_diffs_summary.reverse
       end
 
       diffs_summary 
+    end
+
+    # returns nil if no changes, otherwise returns Repo::Difs::Summary object
+    # opts can have keys:
+    #   :force
+    def pull_remote_repo_changes_and_return_diffs_summary(remote, opts = {}) 
+      ret = nil
+      # TODO: DTK-2795: see if instead should compute diffs_summary using mechanism in pull_repo_changes_and_return_diffs_summary
+      opts_fast_foward = {
+        force: opts[:force],
+        remote_name: remote.remote_ref,
+        remote_url: remote.repo_url,
+        ret_diffs: nil
+      }
+      # TODO: DTK-2795: rather than fast_foward_pull look at only giving error if ret_merge_relationship
+      #  returns pull_return_merge_relationship((remote_branch, :conflicts => [:branchpoint] ..)
+      # or change fast_foward_pull to be no change if local_ahead and include extra ket :ret_merge_relationship
+      merge_result = RepoManager.fast_foward_pull(remote.branch_name, opts_fast_foward, self)
+      # TODO: DTK-2795: below is wrong want full module ref no just module name
+      fail ErrorUsage, "Merge problem pulling changes from remote into module '#{get_module.pp_module_ref}'" if merge_result == :merge_needed
+      
+      if repo_diffs = opts_fast_foward[:ret_diffs]
+        repo_diffs_summary = repo_diffs.ret_summary
+        ret = repo_diffs_summary unless repo_diffs_summary.empty?
+      end
+      ret
     end
 
     # opts can have keys:

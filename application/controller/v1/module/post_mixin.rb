@@ -102,10 +102,9 @@ module DTK
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
 
-        # TODO: DTK-2795: fix below
-
+        response = CommonModule::ComponentInfo::Remote.pull(get_default_project, local_params, remote_params, rsa_pub_key)
+        # TODO: stub so compltes to next step
         diffs_summary = ret_diffs_summary
-
         component_module = create_obj(:full_module_name, ComponentModule)
         module_dsl_info = component_module.update_model_from_clone_changes?(nil, diffs_summary, version)
         response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs)

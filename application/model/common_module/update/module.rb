@@ -49,7 +49,7 @@ module DTK
           parse_needed = (repo_diffs_summary =~ TOP_DSL_FILE_REGEXP)
           repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
 
-          # TODO: if not parsing do we have to do this
+          # TODO: make more efficient by just computing parsed_common_module if parsing
           parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
           CommonDSL::Parse.set_dsl_version!(@module_branch, parsed_common_module)
 

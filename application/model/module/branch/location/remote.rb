@@ -65,15 +65,15 @@ module DTK; class ModuleBranch
         end
 
         def branch_name
-          @branch_name ||= ret_branch_name()
+          @branch_name ||= ret_branch_name
         end
 
         def remote_ref
-          @remote_ref ||= ret_remote_ref()
+          @remote_ref ||= ret_remote_ref
         end
 
         def repo_url
-          @repo_url ||= ret_repo_url()
+          @repo_url ||= ret_repo_url
         end
 
         def set_repo_name!(remote_repo_name)
@@ -85,14 +85,12 @@ module DTK; class ModuleBranch
         end
 
         def repo_name
-          if @repo_name.nil?
-            fail Error.new('Not expected that @repo_name is nil')
-          end
-          @repo_name
+          @repo_name || fail(Error, 'Not expected that @repo_name is nil')
         end
       end
-      r8_nested_require('remote', 'dtkn_catalog')
-      r8_nested_require('remote', 'tenant_catalog')
+
+      require_relative('remote/dtkn_catalog')
+      require_relative('remote/tenant_catalog')
     end
   end
 end; end

@@ -196,14 +196,24 @@ module DTK; class RepoManager
       @grit_repo.diff(ref1, ref2)
     end
 
+    # TODO: DTK-2795: put in pull_return_merge_relationship(remote_branch, conflict_merge_relationships, opts = {}) and have fast_foward_pull be
+    # pull_return_merge_relationship((remote_branch, [:branchpoint, :local_ahead]
+    #
+
+
     # returns :no_change, :changed, :merge_needed
     # opts can have keys:
     #   :force
     #   :remote_name
+    #   :remote_url- if set then add_remote?(remote_name, remote_url) done
     #   :ret_diffs - if present then this method will update it with a Repo::Diffs object
     def fast_foward_pull(remote_branch, opts = {})
       remote_name = opts[:remote_name] || default_remote_name
       remote_ref  = "#{remote_name}/#{remote_branch}"
+
+      if remote_url = opts[:remote_url]
+        add_remote?(remote_name, remote_url)
+      end
 
       merge_rel = ret_merge_relationship(:remote_branch, remote_ref, fetch_if_needed: true)
       ret =
@@ -219,7 +229,6 @@ module DTK; class RepoManager
 
       if opts[:force]
         checkout(@branch) do
-          git_command__fetch_all
           git_command__hard_reset(remote_ref)
         end
         ret = :changed
@@ -267,6 +276,7 @@ module DTK; class RepoManager
       # push to local
       push_changes
     end
+
     def create_branch_from_from_just_remote(remote_name, remote_branch)
       # if no branch current_branch will return 'master'
       init_branch = current_branch
@@ -280,11 +290,6 @@ module DTK; class RepoManager
       pull_changes(remote_name, remote_branch, force)
     end
     private :create_branch_from_from_just_remote
-
-    def pull_from_remote_repo(remote_name, remote_url, remote_branch)
-      add_remote?(remote_name, remote_url)
-      pull_changes(remote_name, remote_branch)
-    end
 
     def add_remote?(remote_name, remote_url)
       unless remote_exists?(remote_name)

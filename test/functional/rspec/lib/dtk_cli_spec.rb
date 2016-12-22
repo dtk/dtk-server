@@ -317,6 +317,18 @@ shared_context 'Uninstall module' do |module_name, module_location|
   end
 end
 
+shared_context 'Replace original content of dtk.module.yaml with delta content' do |module_location, delta_module_content|
+  it "updates content of dtk.module.yaml" do
+    puts "Replace original content of dtk.module.yaml with delta content", "----------------------------------------------"
+    pass = true
+    `rm #{module_location}/dtk.module.yaml && mv #{module_location}/#{delta_module_content} #{module_location}/dtk.module.yaml`
+    value = system("ls #{module_location}/dtk.module.yaml")
+    pass = false if value == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context 'Setup initial module on filesystem' do |initial_module_location, module_location|
   it "copies initial module on location #{module_location}" do
     puts 'Setup initial module on filesystem', '-------------------------------'

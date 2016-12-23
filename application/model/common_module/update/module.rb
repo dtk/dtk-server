@@ -46,7 +46,7 @@ module DTK
 
         if repo_diffs_summary = @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) 
           ret.add_diffs_summary!(repo_diffs_summary)
-          top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
+          top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP) if repo_diffs_summary[:files_modified].nil?
           
           # TODO: make more efficient by just computing parsed_common_module if parsing
           parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)

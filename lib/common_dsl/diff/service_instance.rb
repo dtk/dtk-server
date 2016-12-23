@@ -23,7 +23,6 @@ module DTK; module CommonDSL
 
       # returns object of type Diff::Result or raises error
       def self.process(service_instance, module_branch, repo_diffs_summary)
-
         # TODO: DTK-2665: look at more consistently eithr putting error messages on results
         # or throwing errors
         # also look at doing pinpointed violation chaecking leveraging violation code

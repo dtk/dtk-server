@@ -11,6 +11,7 @@ assembly_name = 'test_assembly'
 service_name = 'cmd_test_case_1'
 service_location = "~/dtk/"
 component_to_check = 'node/first_component'
+original_module_name = 'cmd_test_case_1_dtk.module.yaml'
 delta_module_content = 'delta_cmd_test_case_1_dtk.module.yaml'
 
 dtk_common = Common.new("", "")
@@ -20,8 +21,8 @@ describe '(Component Module DSL) Test Case 1: Remove existing component from dtk
     puts '*****************************************************************************************************************************************', ''
   end
 
-  context "Setup initial module on filesystem" do
-    include_context "Setup initial module on filesystem", initial_module_location, module_location
+  context "Add original content of dtk.module.yaml and module content" do
+    include_context "Add original content of dtk.module.yaml and module content", initial_module_location, module_location, original_module_name
   end
 
   context "Install module" do

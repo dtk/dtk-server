@@ -15,16 +15,16 @@ assemblies:
           image: precise_hvm
           size: micro
         components:
-        - first_component
-        - second_component
+        - cmd_test_case_1::first_component
+        - cmd_test_case_1::second_component
     workflows:
       create:
         subtasks:
         - name: create nodes
           node: node
           components:
-          - first_component
-          - second_component
+          - cmd_test_case_1::first_component
+          - cmd_test_case_1::second_component
 component_defs:
   first_component:
     attributes:

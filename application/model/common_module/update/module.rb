@@ -37,30 +37,29 @@ module DTK
         new(project, commit_sha, local_params).update_from_repo(opts)
       end
       def update_from_repo(opts = {})
-        ret = UpdateResponse.new
+       ret = UpdateResponse.new
 
-        module_obj, repo = get_module_obj_and_repo
-        @module_branch = get_common_module__module_branch(module_obj)
+       module_obj, repo = get_module_obj_and_repo
+       @module_branch = get_common_module__module_branch(module_obj)
 
-        return ret if @module_branch.is_set_to_sha?(@commit_sha)
+       return ret if @module_branch.is_set_to_sha?(@commit_sha)
 
-        if repo_diffs_summary = @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) 
-          ret.add_diffs_summary!(repo_diffs_summary)
-          parse_needed = (repo_diffs_summary =~ TOP_DSL_FILE_REGEXP)
-          repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
+       if repo_diffs_summary = @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) 
+         ret.add_diffs_summary!(repo_diffs_summary)
+         top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP) if repo_diffs_summary[:files_modified].nil?
 
-          # TODO: make more efficient by just computing parsed_common_module if parsing
-          parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
-          CommonDSL::Parse.set_dsl_version!(@module_branch, parsed_common_module)
+         # TODO: make more efficient by just computing parsed_common_module if parsing
+         parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
+         CommonDSL::Parse.set_dsl_version!(@module_branch, parsed_common_module)
 
-          parse_needed = (opts[:force_parse] || !@module_branch.dsl_parsed?)
-          create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)
-          @module_branch.set_dsl_parsed!(true)
-        end
-        # This sets sha on branch only after all processing goes through
-        @module_branch.update_current_sha_from_repo!
-        ret
-      end
+         parse_needed = (opts[:force_parse] == true or top_dsl_file_changed)
+         create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)
+         @module_branch.set_dsl_parsed!(true)
+       end
+       # This sets sha on branch only after all processing goes through
+       @module_branch.update_current_sha_from_repo!
+       ret
+     end
 
       TOP_DSL_FILE_REGEXP = CommonDSL::FileType::CommonModule::DSLFile::Top.regexp 
 

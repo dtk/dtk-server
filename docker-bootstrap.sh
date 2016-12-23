@@ -15,6 +15,8 @@ fi
 HOST_VOLUME=$1
 PBUILDERID=$2
 GIT_PORT=${GIT_PORT-2222}
+WEB_PORT=${WEB_PORT-8080}
+STOMP_PORT=${STOMP_PORT-6163}
 
 server_image="getdtk/dtk-server"
 arbiter_image="getdtk/dtk-arbiter"
@@ -48,7 +50,7 @@ fi
 
 # start the dtk-server container if it doesn't already exist
 if ! docker inspect '--format={{ .Image }}' $server_container_name >/dev/null 2>&1; then
-  docker run --name $server_container_name -v $HOST_VOLUME:/host_volume -p 8080:80 -p 6163:6163 -p $GIT_PORT:22 --restart=on-failure -d $server_image
+  docker run --name $server_container_name -v $HOST_VOLUME:/host_volume -p $WEB_PORT:80 -p $STOMP_PORT:6163 -p $GIT_PORT:22 --restart=on-failure -d $server_image
 fi
 
 # wait for dtk-arbiter ssh keypair to be generated

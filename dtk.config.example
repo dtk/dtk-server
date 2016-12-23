@@ -1,0 +1,28 @@
+# username to be created and used to log into dtk
+USERNAME=dtk-user
+
+# password to be used with above user
+PASSWORD=somepassword
+
+# publicly reachable address of the machine where DTK is running
+PUBLIC_ADDRESS=<public address of the docker host>
+
+### optional settings
+## internal git email setting
+# GIT_EMAIL=
+## internal git username setting
+# GIT_USER=
+
+## name of private SSH key used by dtk-arbiter
+# PRIVATE_KEY_NAME=${PRIVATE_KEY_NAME-arbiter_remote}
+
+## stomp usernam used by Dtk and dtk-arbiter
+# STOMP_USERNAME=${STOMP_USERNAME-dtk1}
+## stomp password used by Dtk and dtk-arbiter
+# STOMP_PASSWORD=${STOMP_PASSWORD-marionette}
+## stomp port used by Dtk and dtk-arbiter
+# STOMP_PORT=${STOMP_PORT-6163}
+## allows overriding the either the default pbuilderid
+
+## or hardcoding it in environments where it's generated automatically (e.g. AWS)
+# PBUILDERID=${PBUILDERID-docker-executor}

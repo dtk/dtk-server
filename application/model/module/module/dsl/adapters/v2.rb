@@ -22,8 +22,8 @@ module DTK
       r8_nested_require('v2', 'dsl_object')
       r8_nested_require('v2', 'object_model_form')
       r8_nested_require('v2', 'incremental_generator')
-      def self.normalize(input_hash)
-        object_model_form.convert(object_model_form::InputHash.new(input_hash))
+      def self.normalize(input_hash, opts = {})
+        object_model_form.convert(object_model_form::InputHash.new(input_hash), opts)
       end
 
       def self.convert_attribute_mapping_helper(input_am, base_cmp, dep_cmp, opts = {})

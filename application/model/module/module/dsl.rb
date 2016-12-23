@@ -31,7 +31,7 @@ module DTK
     def initialize(impl_idh, module_branch, version_specific_input_hash, opts = {})
       @module_branch               = module_branch
       @version_specific_input_hash = version_specific_input_hash
-      @input_hash                  = version_parse_check_and_normalize(version_specific_input_hash)
+      @input_hash                  = version_parse_check_and_normalize(version_specific_input_hash, dependent_modules: opts[:dependent_modules])
       @impl_idh                    = impl_idh
       @project_idh                 = impl_idh.get_parent_id_handle_with_auth_info
       @ref_integrity_snapshot      = opts[:ref_integrity_snapshot]
@@ -282,11 +282,13 @@ module DTK
       { content: content, format_type: format_type, dsl_filename: dsl_filename }
     end
 
-    def version_parse_check_and_normalize(version_specific_input_hash)
+    # opts can have keys:
+    #   :dependent_modules - if not nil then array of strings that are depenedent modules
+    def version_parse_check_and_normalize(version_specific_input_hash, opts = {})
       integer_version = integer_version(version_specific_input_hash)
       klass = self.class.load_and_return_version_adapter_class(integer_version)
       # normalize also raises any parse errors
-      klass.normalize(version_specific_input_hash)
+      klass.normalize(version_specific_input_hash, dependent_modules: opts[:dependent_modules])
     end
 
     def self.dsl_filename(format_type, _dsl_integer_version = nil)

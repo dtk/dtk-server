@@ -21,11 +21,12 @@ module DTK; class ModuleDSL; class V2
   class ObjectModelForm < ModuleDSL::ObjectModelForm
     r8_nested_require('object_model_form', 'attribute_fields')
 
-    def self.convert(input_hash)
-      new.convert(input_hash)
+    # :dependent_modules - if not nil then array of strings that are depenedent module
+    def self.convert(input_hash, opts = {})
+      new.convert(input_hash, opts)
     end
-    def convert(input_hash)
-      component().new(input_hash.req(:module)).convert(input_hash['components'], context(input_hash))
+    def convert(input_hash, opts = {})
+      component().new(input_hash.req(:module)).convert(input_hash['components'], context(input_hash, opts))
     end
 
     def self.convert_attribute_mapping(input_am, base_cmp, dep_cmp, opts = {})

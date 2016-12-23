@@ -73,6 +73,44 @@ module DTK
         end
       end
 
+      # For module_refs processng
+      # opts can have keys
+      #   :omit_base_reference
+      def update_component_module_refs(module_branch, parsed_dependent_modules, opts = {})
+        component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
+        cmp_modules_with_namespaces = parsed_dependent_modules.map do |parsed_module_ref|
+          parsed_module_name = parsed_module_ref.req(:ModuleName)
+          # For legacy where dependencies can refer to themselves
+          unless @module_name == parsed_module_name 
+            cmp_modules_with_namespaces_hash(parsed_module_name, parsed_module_ref.req(:Namespace), parsed_module_ref.val(:ModuleVersion)) 
+          end
+        end.compact
+        
+        # add reference to oneself if not there and there is a corresponding component module ref 
+        if opts[:omit_base_reference] and not base_module_in?(cmp_modules_with_namespaces)
+          cmp_modules_with_namespaces << cmp_modules_with_namespaces_hash(module_name, namespace_name, version)
+        end
+        # The call 'component_module_refs.update_object_if_needed!' updates the object component_module_refs and returns true if changed
+        # The call 'component_module_refs.update' updates the object model
+          component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
+      end
+
+      def cmp_modules_with_namespaces_hash(module_name_input, namespace_name_input, version_input)
+        { 
+          display_name: module_name_input,
+          namespace_name: namespace_name_input,
+          version_info: version_input
+        }
+      end
+      
+      def base_module_in?(cmp_modules_with_namespaces)
+        !!cmp_modules_with_namespaces.find do |hash|
+            hash[:display_name] == module_name and  
+            hash[:namespace_name] == namespace_name and 
+            hash[:version_info] == version
+        end    
+      end
+
     end
   end
 end

@@ -90,18 +90,30 @@ module DTK; class Repo
         (self[:files_deleted] || []).map { |r| path(r) } + (self[:files_renamed] || []).map { |r| r[:old_path] }
       end
 
+      # returns true if any element pruned
       def prune!(regexp)
+        ret = false
         [:files_modified, :files_deleted, :files_added].each do |type|
           if array = self[type]
-            array.reject! { |el| path(el) =~ regexp }
+            array.reject! do |el| 
+              if path(el) =~ regexp 
+                ret = true
+                true
+              end
+            end
             delete(type) if array.empty? 
           end
         end
         if array = self[:files_renamed]
-          array.reject! { |el| el[:new_path] =~ regexp or el[:old_path] =~ regexp }
+          array.reject! do |el| 
+            if el[:new_path] =~ regexp or el[:old_path] =~ regexp 
+              ret = true
+              true
+            end
+          end
           delete(:files_renamed) if array.empty?
         end
-        self
+        ret
       end
 
       def path(r)

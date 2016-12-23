@@ -26,6 +26,11 @@ module DTK
           #TODO: DTK-2766: see if need to add file objects to the implementation object; check if needed in service instance
           component_module_branch = create_module_branch_and_repo?(create_implementation: true)
           CommonDSL::Parse.set_dsl_version!(component_module_branch, parsed_common_module)
+
+          if parsed_dependent_modules = parsed_common_module.val(:DependentModules)
+            update_component_module_refs(component_module_branch, parsed_dependent_modules)
+          end
+
           @aug_component_module_branch = component_module_branch.augmented_module_branch.augment_with_component_module!
 
           # TODO: DTK-2766: update_component_info_in_model_from_dsl is very slow do to the underlying legacy
@@ -37,7 +42,7 @@ module DTK
           sync_component_module_from_common_module
           if parse_needed?
             PerformanceService.start('update_component_info_in_model_from_dsl')
-            update_component_info_in_model_from_dsl
+            update_component_info_in_model_from_dsl(parsed_dependent_modules)
             PerformanceService.end_measurement('update_component_info_in_model_from_dsl')
           end
           true
@@ -64,13 +69,24 @@ module DTK
       end
 
       # TODO: DTK-2766: this uses the legacy parsing routines in the dtk-server gem. Port over ti dtk-dsl parsing
-      def update_component_info_in_model_from_dsl
+      def update_component_info_in_model_from_dsl(parsed_dependent_modules)
         aug_mb = @aug_component_module_branch # alias
         # TODO: for migration purposes needed the  Implementation.create? method. This shoudl be done during initial create
         impl = aug_mb.get_implementation? || Implementation.create?(project, local_params, aug_mb.repo)
-        response = aug_mb.component_module.parse_dsl_and_update_model(impl, aug_mb.id_handle, version, donot_update_module_refs: true)
+        parse_opts = {
+          donot_update_module_refs: true
+        }
+        if parsed_dependent_modules
+          parse_opts.merge!(dependent_modules: parsed_dependent_modules.map { |dependent_module| dependent_module.req(:ModuleName) })
+        end
+        response = aug_mb.component_module.parse_dsl_and_update_model(impl, aug_mb.id_handle, version, parse_opts)
         fail response if ModuleDSL::ParsingError.is_error?(response)
       end
+
+      def dependent_modules
+
+      end
+
 
     end
   end

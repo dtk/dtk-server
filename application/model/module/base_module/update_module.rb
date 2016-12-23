@@ -97,6 +97,7 @@ module DTK; class BaseModule
     #   :update_from_includes
     #   :update_module_refs_from_file
     #   :donot_update_module_refs
+    #   :dependent_modules - if not nil then array of strings that are depenedent modules
     def parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts = {})
       ret                  = nil
       update_node_bindings = nil

@@ -24,9 +24,11 @@ module DTK; class ModuleDSL; class V3
 
     private
 
-    def context(input_hash)
-      ret = super
-      if module_level_includes = input_hash['includes']
+    # opts can have keys
+    #   :dependent_modules - if not nil then array of strings that are depenedent modules
+    def context(input_hash, opts = {})
+      ret = super(input_hash)
+      if module_level_includes = input_hash['includes'] || opts[:dependent_modules] 
         ret.merge!(module_level_includes: module_level_includes)
       end
       ret

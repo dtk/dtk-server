@@ -46,14 +46,13 @@ module DTK
 
         if repo_diffs_summary = @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) 
           ret.add_diffs_summary!(repo_diffs_summary)
-          parse_needed = (repo_diffs_summary =~ TOP_DSL_FILE_REGEXP)
-          repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
-
+          top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
+          
           # TODO: make more efficient by just computing parsed_common_module if parsing
           parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
           CommonDSL::Parse.set_dsl_version!(@module_branch, parsed_common_module)
 
-          parse_needed = (opts[:force_parse] || !@module_branch.dsl_parsed?)
+          parse_needed = (opts[:force_parse] == true or top_dsl_file_changed)
           create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)
           @module_branch.set_dsl_parsed!(true)
         end

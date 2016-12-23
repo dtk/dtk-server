@@ -1,10 +1,10 @@
-# username to be created and used to log into dtk
+# username to be created and used to log into Dtk
 USERNAME=dtk-user
 
 # password to be used with above user
 PASSWORD=somepassword
 
-# publicly reachable address of the machine where DTK is running
+# publicly reachable address of the machine where Dtk is running
 PUBLIC_ADDRESS=<public address of the docker host>
 
 ### optional settings
@@ -25,7 +25,7 @@ WEB_PORT=
 # STOMP_PASSWORD=${STOMP_PASSWORD-marionette}
 ## stomp port used by Dtk and dtk-arbiter
 # STOMP_PORT=${STOMP_PORT-6163}
-## allows overriding the either the default pbuilderid
 
+## allows overriding the either the default pbuilderid
 ## or hardcoding it in environments where it's generated automatically (e.g. AWS)
 # PBUILDERID=${PBUILDERID-docker-executor}

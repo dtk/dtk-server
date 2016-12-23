@@ -18,8 +18,8 @@
 module DTK; class ModuleDSL; class V4
   class ObjectModelForm
     class ActionDef < self
-      r8_nested_require('action_def', 'provider')
-      r8_nested_require('action_def', 'parameters')
+      require_relative('action_def/provider')
+      require_relative('action_def/parameters')
 
       module Constant
         module Variations
@@ -74,7 +74,7 @@ module DTK; class ModuleDSL; class V4
         action_body_hash = {
           method_name: action_name,
           display_name: action_name,
-          content: Provider.create(action_body, action_name: action_name, cmp_print_form: cmp_print_form())
+          content: Provider.create(action_body, action_name: action_name, cmp_print_form: cmp_print_form)
         }
         if parameters = Parameters.create?(self, action_body, :action_name => action_name)
           action_body_hash.merge!('attribute' => parameters)
@@ -85,14 +85,14 @@ module DTK; class ModuleDSL; class V4
       def raise_error_if_illegal_action_name(action_name)
         unless action_name =~ LegalActionNameRegex
           err_msg = "The action name '?1' on component '?2' has illegal characters"
-          fail ParsingError.new(err_msg, action_name, cmp_print_form())
+          fail ParsingError.new(err_msg, action_name, cmp_print_form)
         end
       end
       LegalActionNameRegex = /^[a-zA-Z0-9_-]+$/
 
       def raise_error_ill_formed(section_type, obj)
         err_msg = "The following #{section_type} on component '?1' is ill-formed: ?2"
-        fail ParsingError.new(err_msg, cmp_print_form(), obj)
+        fail ParsingError.new(err_msg, cmp_print_form, obj)
       end
 
     end

@@ -323,8 +323,12 @@ module DTK
       self[:library_library_id]
     end
 
+    # TODO: DTK-2805; deprecate use of external_ref and move from conceptthat there is a single config_agent_type,
+    # rather there is type per action
     def config_agent_type
-      case (self[:external_ref] || {})[:type]
+      external_ref = self[:external_ref] || {}
+      return 'generic' if external_ref[:provider] == 'generic'
+      case external_ref[:type]
        when 'chef_recipe' then 'chef'
        when 'puppet_class', 'puppet_definition' then 'puppet'
        when 'bash_command' then 'bash_commands'

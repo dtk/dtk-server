@@ -28,7 +28,7 @@ module DTK; class ModuleDSL; class V4
         end
         cmp_type = ret['display_name'] = ret['component_type'] = qualified_component(cmp)
         # version below refers to component brranch version not metafile version
-        ret['version'] = ::DTK::Component.default_version()
+        ret['version'] = ::DTK::Component.default_version
         ret['basic_type'] = 'service'
         ret.set_if_not_nil('description', input_hash['description'])
         add_attributes!(ret, cmp_type, input_hash)
@@ -53,17 +53,16 @@ module DTK; class ModuleDSL; class V4
       end
 
       def set_action_def_and_external_ref!(ret, input_hash, cmp, _context = {})
-        create_action = nil
-        function = nil
-        docker = nil
+        create_action = function = docker = nil
 
+        # action_def is for action def section has has info for multiple actions
         if action_def = ActionDef.new(cmp).convert_action_defs?(input_hash)
           if validate_action_def_function(action_def)
-            function = action_def.delete_create_action!()
+            function = action_def.delete_create_action!
           elsif validate_action_def_docker(action_def)
-            docker = action_def.delete_create_action!()
+            docker = action_def.delete_create_action!
           else
-            create_action = action_def.delete_create_action!()
+            create_action = action_def.delete_create_action!
           end
         end
 
@@ -92,10 +91,10 @@ module DTK; class ModuleDSL; class V4
       def external_ref_from_create_action?(create_action, cmp, ret)
         if DTK::ActionDef::Constant.matches?(create_action[:method_name], :CreateActionName)
           if create_action[:content].respond_to?(:external_ref_from_create_action)
-            external_ref(create_action[:content].external_ref_from_create_action(), cmp)
+            external_ref(create_action[:content].external_ref_from_create_action, cmp)
           elsif create_action[:content].respond_to?(:external_ref_from_bash_command)
             (ret['action_def'] ||= {}).merge!('create' => create_action)
-            create_action[:content].external_ref_from_bash_command()
+            create_action[:content].external_ref_from_bash_command
           end
         end
       end
@@ -103,7 +102,7 @@ module DTK; class ModuleDSL; class V4
       def external_ref_from_function?(function, _cmp)
         if DTK::ActionDef::Constant.matches?(function[:method_name], :CreateActionName)
           if function[:content].respond_to?(:external_ref_from_function)
-            function[:content].external_ref_from_function()
+            function[:content].external_ref_from_function
           end
         end
       end
@@ -111,7 +110,7 @@ module DTK; class ModuleDSL; class V4
       def external_ref_from_docker?(docker, _cmp)
         if DTK::ActionDef::Constant.matches?(docker[:method_name], :CreateActionName)
           if docker[:content].respond_to?(:external_ref_from_docker)
-            docker[:content].external_ref_from_docker()
+            docker[:content].external_ref_from_docker
           end
         end
       end

@@ -31,10 +31,17 @@ module DTK
       def self.matches_input_hash?(input_hash)
         true
       end
-      
-      def provider_specific_fields(input_hash)
-        input_hash.inject({}) { |h, (k, v)| h.merge(k.to_sym => v) }
+
+      def external_ref_from_create_action
+        provider_specific_fields
       end
+      
+      def provider_specific_fields(input_hash = nil)
+        input_hash ||= self
+        # TODO: DTK-2701: pass on keys inherited from provider section
+        input_hash.inject({}) { |h, (k, v)| h.merge(k.to_s => v) }
+      end
+
     end
   end
 end

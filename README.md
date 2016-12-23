@@ -25,7 +25,8 @@ PUBLIC_ADDRESS=<public address of the docker host>
 ## optionally set git user and email for install-client.sh script
 # GIT_EMAIL=
 # GIT_USER=
-   ```
+   ```  
+More information about the dtk.config file can be found in [dtk.config.example](dtk.config.example)
 
 #### Starting the container
 Next step is to start the docker container with the directory from above used as a volume. The Docker container requires some ports to be forwared, for example: HTTP, ActiveMQ and SSH port. Example of starting a Docker container:

@@ -13,6 +13,9 @@ PUBLIC_ADDRESS=<public address of the docker host>
 ## internal git username setting
 # GIT_USER=
 
+## port where Dtk server container will be exposed
+WEB_PORT=
+
 ## name of private SSH key used by dtk-arbiter
 # PRIVATE_KEY_NAME=${PRIVATE_KEY_NAME-arbiter_remote}
 

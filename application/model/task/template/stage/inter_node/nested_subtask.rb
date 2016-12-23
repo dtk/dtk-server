@@ -22,7 +22,7 @@ module DTK;
         def initialize(serialized_content)
           super(serialized_content[:name])
           @serialization_form = ret_serialization_form(serialized_content)
-          @import       = serialized_content[Field::Import]
+          @import             = serialized_content[Field::Import]
           @flatten            = serialized_content[Field::Flatten]
 
           # subtasks get dynamically set
@@ -62,11 +62,14 @@ module DTK;
          def add_subtasks!(parent_task, internode_stage_index, assembly_idh = nil)
            ret = []
            if @flatten
-            @subtasks.each do |subtask| 
+            @subtasks.each do |subtask|
                ret += subtask.add_subtasks!(parent_task, internode_stage_index, assembly_idh)
              end
            else
-             fail Error, "Non flatten nested subtasks not treated"
+             @subtasks.flatten.each do |subtask|
+               ret += subtask.add_subtasks!(parent_task, internode_stage_index, assembly_idh)
+             end
+             # fail Error, "Non flatten nested subtasks not treated"
            end
            ret
          end

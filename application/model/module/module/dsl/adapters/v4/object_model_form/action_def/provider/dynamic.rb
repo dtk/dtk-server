@@ -17,7 +17,7 @@
 #
 module DTK
   class ModuleDSL::V4::ObjectModelForm::ActionDef::Provider
-    class Generic < self
+    class Dynamic < self
       module Constant
         module Variations
         end
@@ -25,7 +25,7 @@ module DTK
       end
 
       def self.type
-        ConfigAgent::Type::Symbol.generic
+        ConfigAgent::Type::Symbol.dynamic
       end
 
       def self.matches_input_hash?(input_hash)

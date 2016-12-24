@@ -70,7 +70,7 @@ module DTK; class ModuleDSL; class V4
         raise_parsing_error(component_name, input_hash) unless input_hash.is_a?(Hash)
         # TODO: cleanup when port this to dtk-dsl
         # TODO: DTK-2805; deprecate use of external_ref and out this info under action_def
-        return input_hash if input_hash['provider'] == 'generic'
+        return input_hash if input_hash['provider'] == 'dynamic'
         
         raise_parsing_error(component_name, input_hash) unless input_hash.size == 1
         

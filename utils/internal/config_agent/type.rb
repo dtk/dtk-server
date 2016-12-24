@@ -35,7 +35,7 @@ module DTK
       end
 
       module Symbol
-        All = [:puppet, :bash_commands, :no_op, :generic, :ruby_function, :docker, :chef, :serverspec, :test, :node_module, :delete_from_database, :command_and_control_action, :cleanup]
+        All = [:puppet, :bash_commands, :no_op, :dynamic, :ruby_function, :docker, :chef, :serverspec, :test, :node_module, :delete_from_database, :command_and_control_action, :cleanup]
         Default = :puppet
         All.each do |type|
           class_eval("def self.#{type}();:#{type};end")

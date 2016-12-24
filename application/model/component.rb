@@ -327,7 +327,7 @@ module DTK
     # rather there is type per action
     def config_agent_type
       external_ref = self[:external_ref] || {}
-      return 'generic' if external_ref[:provider] == 'generic'
+      return 'dynamic' if external_ref[:provider] == 'dynamic'
       case external_ref[:type]
        when 'chef_recipe' then 'chef'
        when 'puppet_class', 'puppet_definition' then 'puppet'

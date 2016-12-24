@@ -17,17 +17,17 @@
 #
 module DTK; class ConfigAgent
   module Adapter
-    class Generic < ConfigAgent
+    class Dynamic < ConfigAgent
       def ret_msg_content(config_node, opts = {})
         component_action   = config_node[:component_actions].first
         method_name        = component_action.method_name? || 'create'
         component          = component_action[:component]
         component_template = component_template(component)
         
-        unless action_def = ActionDef::Type::Generic.matching_generic_action?(component_template, method_name)
+        unless dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider?(component_template, method_name)
           fail ErrorUsage, "Method '#{method_name}' not defined on component '#{component.display_name_print_form}'"
         end
-        pp [:action_def, action_def]
+        pp [:dynamic_provider, dynamic_provider]
 
         fail 'reached here'
         component_module   = component_action.component_module_name

@@ -34,12 +34,13 @@ module DTK; class Task; class Template
 
       # default is bash_commands unless epxlicit provider method
       def config_agent_type
+        # TODO: DTK-2805: clean up think self[:provider] == :dtk is overloaded and falss through to using provider_symbol_name(:bash_commands)
         config_agent_type_from_provider? || provider_symbol_name(:bash_commands)
       end
 
       private
 
-      ACTION_PROVDER_TYPES = [:puppet, :generic]
+      ACTION_PROVDER_TYPES = [:puppet, :dynamic]
       def config_agent_type_from_provider?
         if provider_string = self[:provider]
           if matching_type = ACTION_PROVDER_TYPES.find { |type| provider_string == provider_string_name(type) }

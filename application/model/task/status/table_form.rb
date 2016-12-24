@@ -162,7 +162,7 @@ module DTK; class Task; class Status
         node = (task[:executable_action] || {})[:node]
         config_agent = task.get_config_agent_type(nil, no_error_if_nil: true)
 
-        if config_agent == 'dtk_provider'
+        if config_agent == 'bash_commands'
           if node && node.is_node_group?()
             type = 'nodegroup actions'
           else

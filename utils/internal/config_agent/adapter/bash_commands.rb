@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 module DTK; class ConfigAgent; module Adapter
-  class DtkProvider < ConfigAgent
-    r8_nested_require('dtk_provider', 'interpret_results')
+  class BashCommands < ConfigAgent
+    require_relative('bash_commands/interpret_results')
     include InterpretResults::Mixin
 
     def ret_msg_content(config_node, opts = {})
@@ -44,7 +44,7 @@ module DTK; class ConfigAgent; module Adapter
     end
 
     def type
-      Type::Symbol.dtk_provider
+      Type::Symbol.bash_commands
     end
 
     private

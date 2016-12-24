@@ -117,7 +117,7 @@ module DTK
         private
 
         def has_action_results?(task, _results)
-          task[:executable_action].config_agent_type.to_sym == ConfigAgent::Type::Symbol.dtk_provider
+          task[:executable_action].config_agent_type.to_sym == ConfigAgent::Type::Symbol.bash_commands
         end
 
         def add_start_task_event?(task)

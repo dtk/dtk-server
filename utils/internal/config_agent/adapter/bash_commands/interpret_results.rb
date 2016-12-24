@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK; class ConfigAgent; module Adapter
-  class DtkProvider
+  class BashCommands
     module InterpretResults
       module Mixin
         def action_results(result, _action)

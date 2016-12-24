@@ -34,7 +34,7 @@ module DTK; class Task; class Template
 
       def config_agent_type
         return :puppet if self[:provider].eql?('puppet')
-        ConfigAgent::Type::Symbol.dtk_provider
+        ConfigAgent::Type::Symbol.bash_commands
       end
     end
   end

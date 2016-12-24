@@ -213,7 +213,7 @@ module DTK; class Task
       end
 
       def action_agent_call?
-        ConfigAgent::Type.is_a?(config_agent_type, [:dtk_provider])
+        ConfigAgent::Type.is_a?(config_agent_type, [:bash_commands])
       end
 
       def puppet_agent_call?

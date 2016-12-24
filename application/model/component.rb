@@ -318,7 +318,7 @@ module DTK
       case (self[:external_ref] || {})[:type]
        when 'chef_recipe' then 'chef'
        when 'puppet_class', 'puppet_definition' then 'puppet'
-       when 'bash_command' then 'dtk_provider'
+       when 'bash_command' then 'bash_commands'
        when 'ruby_function' then 'ruby_function'
        when 'docker' then 'docker'
        else 'no_op'

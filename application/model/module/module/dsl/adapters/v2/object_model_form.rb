@@ -150,12 +150,7 @@ module DTK; class ModuleDSL; class V2
       end
 
       def external_ref(input_hash, cmp)
-        raise_parsing_error(cmp, input_hash) unless input_hash.is_a?(Hash)
-        # TODO: cleanup when port this to dtk-dsl
-        # TODO: DTK-2805; deprecate use of external_ref and out this info under action_def
-        return input_hash if input_hash['provider'] == 'generic'
-
-        raise_parsing_error(cmp, input_hash) unless input_hash.size == 1
+        fail ParsingError.new('Component (?1) external_ref is ill-formed (?2)', cmp, input_hash) unless input_hash.is_a?(Hash) and input_hash.size == 1
 
         type = input_hash.keys.first
         name_key =
@@ -168,11 +163,6 @@ module DTK; class ModuleDSL; class V2
         name = input_hash.values.first
         OutputHash.new('type' => type, name_key => name)
       end
-
-      def raise_parsing_error(cmp, input_hash)
-        fail ParsingError.new('Component (?1) external_ref is ill-formed (?2)', cmp, input_hash)
-      end
-      private :raise_parsing_error
 
       def only_one_per_node(external_ref)
         external_ref['type'] != 'puppet_definition'

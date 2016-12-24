@@ -20,6 +20,8 @@ module DTK; class ModuleDSL; class V4
     class ActionDef < self
       require_relative('action_def/provider')
       require_relative('action_def/parameters')
+      require_relative('action_def/action_def_output_hash')
+      require_relative('action_def/external_ref')
 
       module Constant
         module Variations
@@ -37,37 +39,61 @@ module DTK; class ModuleDSL; class V4
       def initialize(component_name)
         @component_name = component_name
       end
+      private :initialize
 
-      class ActionDefOutputHash < OutputHash
-        def has_create_action?
-          DTK::ActionDef::Constant.matches?(self, :CreateActionName)
-        end
-
-        def delete_create_action!
-          if kv = DTK::ActionDef::Constant.matching_key_and_value?(self, :CreateActionName)
-            delete(kv.keys.first)
-          end
-        end
+      def self.set_action_info!(ret, input_hash, component_name)
+        new(component_name).set_action_info!(ret, input_hash)
       end
 
-      def convert_action_defs?(input_hash)
-        ret = nil
-        unless action_defs = Constant.matches?(input_hash, :ActionDefs)
+      def set_action_info!(ret, input_hash)
+        unless action_defs_input = Constant.matches?(input_hash, :ActionDefs)
           return ret
         end
-        unless action_defs.is_a?(Hash)
-          raise_error_ill_formed('actions section', action_defs)
-        end
-        action_defs.inject(ActionDefOutputHash.new) do |h, (action_name, action_body)|
-          h.merge(convert_action_def(action_name, action_body))
-        end
-      end
+        # action_def is for action def section has has info for multiple actions
+        action_def_info = action_def_info(action_defs_input)
 
-      def cmp_print_form
-        component_print_form(@component_name)
+        set_action_def!(ret, action_def_info)
+
+        # ExternalRef.external_ref? can update ret['action_def']
+        # If ret['external_ref'] is nil that means to use the 'no_op' config adapter 
+        ret['external_ref'] = ExternalRef.external_ref?(ret, @component_name, input_hash, action_def_info)
+
+        ret
       end
 
       private
+
+      # TODO: cleanup so dont need to partition into :non_create_actions, :create_action, :docker, :function
+      ActionDefsInfo = Struct.new(:non_create_actions, :create_action, :docker, :function)
+      #returns ActionDefInfo
+      def action_def_info(action_defs_input)
+        raise_error_ill_formed('actions section', action_defs_input) unless action_defs_input.is_a?(Hash)
+        action_defs = action_defs_input.inject(ActionDefOutputHash.new) do |h, (action_name, action_body)|
+          h.merge(convert_action_def(action_name, action_body))
+        end
+
+        function = docker = create_action = nil
+        if has_action_def_type(:functions, action_defs)
+          function = action_defs.delete_create_action!
+        elsif has_action_def_type(:docker, action_defs)
+          docker = action_defs.delete_create_action!
+        else
+          create_action = action_defs.delete_create_action!
+        end
+        ActionDefsInfo.new(action_defs, create_action, docker, function)
+      end
+
+      def set_action_def!(ret, action_def_info)
+        unless action_def_info.non_create_actions.empty?
+          ret['action_def'] = action_def_info.non_create_actions
+        end
+        if action_def_info.function
+          (ret['action_def'] ||= {}).merge!('create' => action_def_info.function)
+        end
+        if action_def_info.docker
+          (ret['action_def'] ||= {}).merge!('create' => action_def_info.docker)
+        end
+      end
 
       def convert_action_def(action_name, action_body)
         raise_error_if_illegal_action_name(action_name)
@@ -80,6 +106,17 @@ module DTK; class ModuleDSL; class V4
           action_body_hash.merge!('attribute' => parameters)
         end
         { action_name => OutputHash.new(action_body_hash) }
+      end
+
+      def has_action_def_type(type, action_defs)
+        if kv = DTK::ActionDef::Constant.matching_key_and_value?(action_defs, :CreateActionName)
+          create = kv.values.first
+          create[:content] && create[:content].key?(type)
+        end
+      end
+
+      def cmp_print_form
+        component_print_form(@component_name)
       end
 
       def raise_error_if_illegal_action_name(action_name)

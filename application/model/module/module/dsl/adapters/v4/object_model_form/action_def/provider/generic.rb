@@ -25,7 +25,7 @@ module DTK
       end
 
       def self.type
-        :generic
+        ConfigAgent::Type::Symbol.generic
       end
 
       def self.matches_input_hash?(input_hash)

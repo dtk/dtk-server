@@ -32,10 +32,30 @@ module DTK; class Task; class Template
         self[:method_name]
       end
 
+      # default is bash_commands unless epxlicit provider method
       def config_agent_type
-        return :puppet if self[:provider].eql?('puppet')
-        ConfigAgent::Type::Symbol.bash_commands
+        config_agent_type_from_provider? || provider_symbol_name(:bash_commands)
       end
+
+      private
+
+      ACTION_PROVDER_TYPES = [:puppet, :generic]
+      def config_agent_type_from_provider?
+        if provider_string = self[:provider]
+          if matching_type = ACTION_PROVDER_TYPES.find { |type| provider_string == provider_string_name(type) }
+            provider_symbol_name(matching_type)
+          end
+        end
+      end
+
+      def provider_symbol_name(provider_type)
+        ConfigAgent::Type::Symbol.send(provider_type)
+      end
+
+      def provider_string_name(provider_type)
+        provider_symbol_name(provider_type).to_s
+      end
+
     end
   end
 end; end; end

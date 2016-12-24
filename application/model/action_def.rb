@@ -17,9 +17,10 @@
 #
 module DTK
   class ActionDef < Model
-    r8_nested_require('action_def', 'content')
+    require_relative('action_def/content')
+    require_relative('action_def/type')
     def self.common_columns
-      core_columns() + [:method_name, :content, :component_component_id]
+      core_columns + [:method_name, :content, :component_component_id]
     end
 
     module Constant
@@ -43,14 +44,21 @@ module DTK
       end
     end
 
+    def self.get_matching_action_def?(component_template, method_name)
+      if match = get_ndx_action_defs([component_template.id_handle], filter: [:eq, :method_name, method_name])[component_template.id]
+        # will only be one element
+        match.first
+      end
+    end
+
     def self.get_ndx_action_defs(cmp_template_idhs, opts = {})
       ret = {}
       return ret if cmp_template_idhs.empty?
 
-      sp_hash = {
-        cols:   cols_from_opts(opts),
-        filter: [:oneof, :component_component_id, cmp_template_idhs.map { |cmp| cmp.get_id {} }]
-      }
+      filter = [:oneof, :component_component_id, cmp_template_idhs.map { |cmp| cmp.get_id {} }]
+      filter = [:and, filter, opts[:filter]] if opts[:filter]
+      
+      sp_hash = { cols:  cols_from_opts(opts), filter: filter }
       action_def_mh = cmp_template_idhs.first.createMH(:action_def)
       rows = get_objs(action_def_mh, sp_hash)
       aggregate_parameters?(rows, opts).each do |ad|
@@ -58,7 +66,6 @@ module DTK
       end
       ret
     end
-
 
     def commands
       parse_and_reify_content?.commands
@@ -84,7 +91,7 @@ module DTK
     private
 
     def self.cols_from_opts(opts = {})
-      cols = (opts[:cols] ? (opts[:cols] + core_columns() + [:component_component_id]).uniq : common_columns())
+      cols = (opts[:cols] ? (opts[:cols] + core_columns + [:component_component_id]).uniq : common_columns)
       opts[:with_parameters] ? cols + [:parameters] : cols
     end
 

@@ -113,6 +113,10 @@ module DTK; class Task
         (action_method || {})[:method_name]
       end
 
+      def method_name?
+        (action_method? || {})[:method_name]
+      end
+
       def attributes
         self[:attributes] || []
       end

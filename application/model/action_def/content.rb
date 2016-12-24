@@ -19,9 +19,9 @@ module DTK; class ActionDef
   # Top class for content classes which as hash part store raw form and then have
   # instance attributes for the parsed form
   class Content < Hash
-    r8_nested_require('content', 'constant')
-    r8_nested_require('content', 'command')
-    r8_nested_require('content', 'template_processor')
+    require_relative('content/constant')
+    require_relative('content/command')
+    require_relative('content/template_processor')
 
     attr_reader :commands, :functions, :docker
     def initialize(hash_content)

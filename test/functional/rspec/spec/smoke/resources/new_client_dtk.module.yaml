@@ -17,11 +17,11 @@ assemblies:
           image: precise_hvm
           size: micro
         components:
-        - stdlib
+        - wget
     workflows:
       create:
         subtasks:
         - name: create nodes
           node: node
           components:
-          - stdlib
+          - wget

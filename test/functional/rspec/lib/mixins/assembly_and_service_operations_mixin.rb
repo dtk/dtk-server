@@ -191,6 +191,7 @@ module AssemblyAndServiceOperationsMixin
           break
         end
       else
+        ap task_status_response
         if task_status_response['errors'].first['message'] == "No object of type service with name '#{service_instance_name}' exists"
           puts "Service was deleted successfully!"
           service_deleted[:pass] = true

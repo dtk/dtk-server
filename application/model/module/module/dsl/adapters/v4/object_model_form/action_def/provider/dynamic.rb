@@ -22,26 +22,66 @@ module DTK
         module Variations
         end
         extend Aux::ParsingingHelper::ClassMixin
+        Type = 'type'
+      end
+      
+      # opts can have:
+      #  :providers_input_hash: 
+      #  :action_name: 
+      #  :cmp_print_form
+      def initialize(input_hash, opts = {})
+        @input_hash           = input_hash
+        @providers_input_hash = opts[:providers_input_hash] || {}
+        @action_name          = opts[:action_name]
+        @cmp_print_form       = opts[:cmp_print_form]
+        # provider_specific_fields must be done after instance attributes set
+        super(provider: type.to_s).merge!(provider_specific_fields)
       end
 
       def self.type
-        ConfigAgent::Type::Symbol.dynamic
+        :dynamic
       end
 
       def self.matches_input_hash?(input_hash)
         true
       end
+      
+      private
 
-      def external_ref_from_create_action
-        provider_specific_fields
+      # TODO: DTK-2805: here treating provider attributes by preprocessing them and putting them in action def
+      # To best handle incremental diffs might be easier to put provider attributes in object model and normalize dynamicaly
+      def provider_specific_fields
+        dynamic_type = dynamic_type()
+        # so can compare provider_attributes and input hash attributes, normalize provider_attributes to symbol keys
+        provider_attributes = (provider_attributes?(dynamic_type) || {}).inject({}) { |h, (k, v)| h.merge(k.to_sym => v) }
+        keys_as_symbols = (provider_attributes.keys + @input_hash.keys).uniq
+        keys_as_symbols.inject({}) do |h, k|
+          # values in input_hash overwrite values in provider_attributes
+          h.merge(k.to_s => @input_hash[k] || provider_attributes[k])
+        end
       end
       
-      def provider_specific_fields(input_hash = nil)
-        input_hash ||= self
-        # TODO: DTK-2701: pass on keys inherited from provider section
-        input_hash.inject({}) { |h, (k, v)| h.merge(k.to_s => v) }
+      def dynamic_type
+        # TODO: put in dynmaic_type: right now need type field to be explicitly there
+        Constant.matches?(@input_hash, :Type) || raise_error_no_type_key
       end
 
+      def provider_attributes?(dynamic_type)
+        @providers_input_hash[dynamic_type]
+      end
+
+      def raise_error_no_type_key
+        fail ModuleDSL::ParsingError, "The definition for #{action_name_ref} on #{component_ref} is missing the '#{Constant::Type}' key"
+      end
+      
+      def action_name_ref
+        @action_name ? "action '#{@action_name}'" : "an action"
+      end
+      
+      def component_ref
+        @cmp_print_form ? "component '#{@cmp_print_form}'" : "the component"
+      end
     end
   end
 end
+

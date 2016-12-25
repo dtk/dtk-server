@@ -31,18 +31,22 @@ module DTK; class ModuleDSL; class V4
         ActionDefs = 'actions'
         Variations::ActionDefs = ['actions', 'action']
 
+        # DTK-2805: for explicitly giving provider; may deprecate this
         Provider = 'provider'
 
         Parameters = 'parameters'
       end
 
-      def initialize(component_name)
-        @component_name = component_name
+      def initialize(component_name, opts = {})
+        @component_name       = component_name
+        @providers_input_hash = opts[:providers_input_hash]
       end
       private :initialize
 
-      def self.set_action_info!(ret, input_hash, component_name)
-        new(component_name).set_action_info!(ret, input_hash)
+      # opts can have keys:
+      #   :providers_input_hash
+      def self.set_action_info!(ret, input_hash, component_name, opts = {})
+        new(component_name, opts).set_action_info!(ret, input_hash)
       end
 
       def set_action_info!(ret, input_hash)
@@ -100,7 +104,7 @@ module DTK; class ModuleDSL; class V4
         action_body_hash = {
           method_name: action_name,
           display_name: action_name,
-          content: Provider.create(action_body, action_name: action_name, cmp_print_form: cmp_print_form)
+          content: Provider.create(action_body, providers_input_hash: @providers_input_hash, action_name: action_name, cmp_print_form: cmp_print_form)
         }
         if parameters = Parameters.create?(self, action_body, :action_name => action_name)
           action_body_hash.merge!('attribute' => parameters)

@@ -32,11 +32,14 @@ module DTK; class ModuleDSL; class V4
       def self.create_action?(ret, component_name, action_defs_info)
         if create_action = action_defs_info.create_action
           if is_method_name?(create_action[:method_name])
-            if create_action[:content].respond_to?(:external_ref_from_create_action)
-              external_ref_aux(create_action[:content].external_ref_from_create_action, component_name)
-            elsif create_action[:content].respond_to?(:external_ref_from_bash_command)
+            action_content = create_action[:content]
+            if action_content.kind_of?(Provider::Dynamic)
+              action_content
+            elsif action_content.respond_to?(:external_ref_from_create_action)
+              external_ref_aux(action_content.external_ref_from_create_action, component_name)
+            elsif action_content.respond_to?(:external_ref_from_bash_command)
               (ret['action_def'] ||= {}).merge!('create' => create_action)
-              create_action[:content].external_ref_from_bash_command
+              action_content.external_ref_from_bash_command
             end
           end
         end
@@ -66,28 +69,20 @@ module DTK; class ModuleDSL; class V4
         ::DTK::ActionDef::Constant.matches?(string, :CreateActionName)
       end
       
-      def self.external_ref_aux(input_hash, component_name)
-        raise_parsing_error(component_name, input_hash) unless input_hash.is_a?(Hash)
-        # TODO: cleanup when port this to dtk-dsl
-        # TODO: DTK-2805; deprecate use of external_ref and out this info under action_def
-        return input_hash if input_hash['provider'] == 'dynamic'
-        
-        raise_parsing_error(component_name, input_hash) unless input_hash.size == 1
-        
-        type = input_hash.keys.first
-          name_key =
+      def self.external_ref_aux(external_ref, component_name)
+        unless external_ref.is_a?(Hash) and external_ref.size == 1
+          fail ParsingError.new('Component (?1) external_ref is ill-formed (?2)', component_name, external_ref) 
+        end
+
+        type = external_ref.keys.first
+        name_key =
           case type
           when 'puppet_class' then 'class_name'
           when 'puppet_definition' then 'definition_name'
           when 'serverspec_test' then 'test_name'
           else fail ParsingError.new('Component (?1) external_ref has illegal type (?2)', component_name, type)
           end
-        name = input_hash.values.first
-        ObjectModelForm::OutputHash.new('type' => type, name_key => name)
-      end
-      
-      def self.raise_parsing_error(component_name, input_hash)
-        fail ParsingError.new('Component (?1) external_ref is ill-formed (?2)', component_name, input_hash)
+        ObjectModelForm::OutputHash.new('type' => type, name_key => external_ref.values.first)
       end
       
     end

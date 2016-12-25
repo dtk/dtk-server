@@ -23,56 +23,53 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       require_relative('provider/dtk')
       require_relative('provider/puppet')
 
-      def initialize(provider_type, input_hash)
-        super(provider: provider_type.to_s).merge!(provider_specific_fields(input_hash))
-      end
-      def self.create(input_hash, context = {})
-        action_name = context[:action_name]
-        cmp_print_form = context[:cmp_print_form]
+      # opts can have:
+      #  :providers_input_hash: 
+      #  :action_name: 
+      #  :cmp_print_form
+      def self.create(input_hash, opts = {})
+        action_name = opts[:action_name]
+        cmp_print_form = opts[:cmp_print_form]
         unless input_hash.is_a?(Hash)
           err_msg = "The following action definition on component '?1' is ill-formed: ?2"
           fail ParsingError.new(err_msg, cmp_print_form, action_name => input_hash)
         end
-        provider_type = provider_type(input_hash, context)
-        unless provider_class = provider_type_to_class(provider_type)
+        provider_type = provider_type(input_hash, opts)
+        unless provider_class = provider_type_to_class?(provider_type)
           err_msg = "The action '?1' on component '?2' has illegal provider type: ?3"
           fail ParsingError.new(err_msg, action_name, cmp_print_form, provider_type)
         end
-        provider_class.new(provider_type, input_hash)
+        provider_class.new(input_hash, opts)
       end
 
       private
 
-      ProviderTypeToClass = {
-        dtk: Dtk,
-        puppet: Puppet
-      }
-
-      def self.provider_type_to_class(provider_type)
-        provider_type = provider_type.to_sym
-        ProviderTypeToClass[provider_type] || (provider_type == Dynamic.type && Dynamic)
+      def type
+        self.class.type
       end
 
-      # gets overwritten
-      def provider_specific_fields(_input_hash)
-        fail Error.new('should be overwritten')
+      PROVIDER_CLASSES = [Dtk, Puppet, Dynamic]
+      PROVIDER_TYPE_TO_CLASS = PROVIDER_CLASSES.inject({}) { |h, klass| h.merge(klass.send(:type) => klass) }
+
+      def self.provider_type_to_class?(provider_type)
+        PROVIDER_TYPE_TO_CLASS[provider_type.to_sym]
       end
 
-      def self.provider_type(input_hash, context = {})
-        Constant.matches?(input_hash, :Provider) || compute_provider_type(input_hash, context)
+      def self.provider_type(input_hash, opts = {})
+        Constant.matches?(input_hash, :Provider) || compute_provider_type(input_hash, opts)
       end
 
-      def self.compute_provider_type(input_hash, context = {})
+      def self.compute_provider_type(input_hash, opts = {})
         ret = 
-          if provider_class = ProviderTypeToClass.find { |_provider, klass| klass.matches_input_hash?(input_hash) }
+          if provider_class = PROVIDER_TYPE_TO_CLASS.find { |_provider, klass| klass.matches_input_hash?(input_hash) }
             provider_class[0]
           else
             Dynamic.matches_input_hash?(input_hash) && Dynamic.type
           end
 
         unless ret
-          action_name = context[:action_name]
-          cmp_print_form = context[:cmp_print_form]
+          action_name = opts[:action_name]
+          cmp_print_form = opts[:cmp_print_form]
           err_msg = "Cannot determine provider type associated with the action '?1' on component '?2'"
           fail ParsingError.new(err_msg, action_name, cmp_print_form)
         end

@@ -35,9 +35,38 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         DeleteNode = 'delete_node'
       end
 
+      def initialize(input_hash, _opts = {})
+        super(provider: type.to_s).merge!(provider_specific_fields(input_hash))
+      end
+
+      def self.type
+        :dtk
+      end
+
       def self.matches_input_hash?(input_hash)
         !!Constant.matches?(input_hash, :Commands) || !!Constant.matches?(input_hash, :Functions) || !!Constant.matches?(input_hash, :Docker) || !!Constant.matches?(input_hash, :DeleteNode)
       end
+
+      def external_ref_from_function
+        if functions = self[:functions]
+          type = functions.first.slice('type')
+        end
+      end
+
+      def external_ref_from_bash_command
+        { type: 'bash_command' }
+      end
+
+      def external_ref_from_docker
+        { type: 'docker' }
+      end
+
+      def external_ref_from_delete_node
+        { type: 'delete_node' }
+      end
+
+
+      private
 
       def provider_specific_fields(input_hash)
         ret =
@@ -62,23 +91,6 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         ret
       end
 
-      def external_ref_from_function
-        if functions = self[:functions]
-          type = functions.first.slice('type')
-        end
-      end
-
-      def external_ref_from_bash_command
-        { type: 'bash_command' }
-      end
-
-      def external_ref_from_docker
-        { type: 'docker' }
-      end
-
-      def external_ref_from_delete_node
-        { type: 'delete_node' }
-      end
     end
   end; end
 end; end; end; end

@@ -18,6 +18,13 @@
 module DTK; class ModuleDSL; class V4
   class ObjectModelForm
     class Component < OMFBase::Component
+      module Constant
+        module Variations
+        end
+        extend Aux::ParsingingHelper::ClassMixin
+        Providers = 'providers'
+      end
+
       private
 
       def body(input_hash, component_name, context = {})
@@ -38,8 +45,11 @@ module DTK; class ModuleDSL; class V4
         if opts[:constants]
           add_attributes!(ret, component_type, ret_input_hash_with_constants(opts[:constants]), constant_attribute: true)
         end
-        ActionDef.set_action_info!(ret, input_hash, component_name)
+
+        ActionDef.set_action_info!(ret, input_hash, component_name, providers_input_hash: Constant.matches?(input_hash, :Providers))
+
         ret.set_if_not_nil('only_one_per_node', only_one_per_node(input_hash, ret['external_ref']))
+
         ret
       end
 

@@ -1,52 +1,99 @@
-#!/usr/bin/env ruby
-# Test Case 8: Rename existing attribute mapping in dependencies section in dtk.model.yaml file and push-clone-changes to server
+# Test Case 8: Remove existing attribute mapping on component from dtk.module.yaml file, push to server, stage assembly and check changes
 
-require 'rubygems'
-require 'rest_client'
-require 'pp'
-require 'awesome_print'
+require './lib/dtk_cli_spec'
 require './lib/dtk_common'
-require './lib/component_modules_spec'
 
-component_module_name = 'temp'
-component_module_namespace = 'dtk17'
-local_component_module_name = 'dtk17:temp'
-component_module_filesystem_location = "~/dtk/component_modules/dtk17"
-file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_8_dtk.model.yaml"
-file_for_change = "dtk.model.yaml"
-dtk_common = Common.new('', '')
+initial_module_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_8"
+module_location = '/tmp/cmd_test_case_8'
+module_name = 'test/cmd_test_case_8'
+assembly_name = 'test_assembly'
+service_name = 'cmd_test_case_8'
+service_location = "~/dtk/"
+original_module_name = 'cmd_test_case_8_dtk.module.yaml'
+delta_module_content = 'delta_cmd_test_case_8_dtk.module.yaml'
 
-describe '(Component Module DSL) Test Case 8: Rename existing attribute mapping in dependencies section in dtk.model.yaml file and push-clone-changes to server' do
+attributes_to_check_after_first_converge = {
+  'node/cmd_test_case_8::first_component/first_attribute'  => 'first_value',
+  'node/cmd_test_case_8::first_component/second_attribute' => 'second_value'
+}
+attributes_to_check_after_second_converge = {
+  'node/cmd_test_case_8::first_component/first_attribute'  => 'first_value', 
+  'node/cmd_test_case_8::first_component/second_attribute' => ''
+}
+
+dtk_common = Common.new("", "")
+
+describe '(Component Module DSL) Test Case 8: Remove existing attribute mapping on component from dtk.module.yaml file, push to server, stage assembly and check changes' do
   before(:all) do
-    puts '*****************************************************************************************************************************************************', ''
+    puts '**************************************************************************************************************************************************************', ''
   end
 
-  context 'Import component module function' do
-    include_context 'Import remote component module', component_module_namespace + '/' + component_module_name
+  context "Add original content of dtk.module.yaml and module content" do
+    include_context "Add original content of dtk.module.yaml and module content", initial_module_location, module_location, original_module_name
   end
 
-  context 'Get component module components list' do
-    include_context 'Get component module components list', dtk_common, local_component_module_name
+  context "Install module" do
+    include_context "Install module", module_name, module_location
   end
 
-  context 'Check if component module imported on local filesystem' do
-    include_context 'Check component module imported on local filesystem', component_module_filesystem_location, component_module_name
+  context "List assemblies contained in this module" do
+    include_context "List assemblies", module_name, assembly_name, dtk_common
   end
 
-  context 'Rename existing attribute mapping in dependencies section in dtk.model.yaml file' do
-    include_context 'Replace dtk.model.yaml file with new one', component_module_name, file_for_change_location, file_for_change, component_module_filesystem_location, 'renames attribute mapping in dependencies section from members to members2 in source component in dtk.model.yaml'
+  context "Stage assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
-  context 'Push clone changes of component module from local copy to server' do
-    include_context 'Push clone changes to server', local_component_module_name, file_for_change
+  context "Converge service instance" do
+    include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context 'Delete component module' do
-    include_context 'Delete component module', dtk_common, local_component_module_name
+  context "Check attributes correct in service instance" do
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_after_first_converge
   end
 
-  context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
+  end
+
+  context "Replace original content of dtk.module.yaml with delta content" do
+    include_context "Replace original content of dtk.module.yaml with delta content", module_location, delta_module_content
+  end
+
+  context "Push module changes" do
+    include_context "Push module changes", module_name, module_location
+  end
+
+  context "Stage assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
+  end
+
+  context "Converge service instance" do
+    include_context "Converge service instance", service_location, dtk_common, service_name
+  end
+
+  context "Check attributes correct in service instance" do
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_after_second_converge
+  end
+
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
+  end
+
+  context "Uninstall module" do
+    include_context "Uninstall module", module_name, module_location
+  end
+
+  context "Delete initial module on filesystem" do
+    include_context "Delete initial module on filesystem", module_location
   end
 
   after(:all) do

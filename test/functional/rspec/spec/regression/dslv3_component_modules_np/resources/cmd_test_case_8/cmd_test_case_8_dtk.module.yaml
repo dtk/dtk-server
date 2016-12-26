@@ -1,0 +1,53 @@
+---
+dsl_version: 1.0.0
+module: test/cmd_test_case_8
+version: master
+keywords: test
+description: test module
+license: Apache 2.0
+
+assemblies:
+  test_assembly:
+    description: test assembly
+    nodes:
+      node:
+        attributes:
+          image: precise_hvm
+          size: micro
+        components:
+        - cmd_test_case_8::first_component
+        - cmd_test_case_8::second_component
+    workflows:
+      create:
+        subtasks:
+        - name: create nodes
+          node: node
+          components:
+          - cmd_test_case_8::first_component
+          - cmd_test_case_8::second_component
+component_defs:
+  first_component:
+    attributes:
+      first_attribute:
+        type: string
+      second_attribute:
+        type: string
+    actions:
+      create:
+        puppet_class: cmd_test_case_8::first_component
+  second_component:
+    attributes:
+      first_link:
+        type: string
+        default: first_value
+      second_link:
+        type: string
+        default: delta_value
+    actions:
+      create:
+        puppet_class: cmd_test_case_8::second_component
+    link_defs:
+    - cmd_test_case_8::first_component:
+        attribute_mappings:
+        - $node.host_address -> first_attribute
+        - $node.host_address -> second_attribute

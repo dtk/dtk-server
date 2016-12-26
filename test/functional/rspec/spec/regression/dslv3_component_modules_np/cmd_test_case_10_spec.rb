@@ -1,54 +1,93 @@
-#!/usr/bin/env ruby
-# Test Case 10: NEG - Have attribute with required field set to - falsee in dtk.model.yaml file and push-clone-changes to server
+# Test Case 10: NEG - Have attribute with required field set to - falsee in dtk.model.yaml file, push to server
 
-require 'rubygems'
-require 'rest_client'
-require 'pp'
-require 'awesome_print'
+require './lib/dtk_cli_spec'
 require './lib/dtk_common'
-require './lib/component_modules_spec'
 
-component_module_name = 'temp'
-component_module_namespace = 'dtk17'
-local_component_module_name = 'dtk17:temp'
-component_module_filesystem_location = "~/dtk/component_modules/dtk17"
-file_for_change_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_10_dtk.model.yaml"
-file_for_change = "dtk.model.yaml"
-fail_message = "incorrect value for required field - falsee"
-expected_error_message = "ERROR"
-dtk_common = Common.new('', '')
+initial_module_location = "./spec/regression/dslv3_component_modules_np/resources/cmd_test_case_10"
+module_location = '/tmp/cmd_test_case_10'
+module_name = 'test/cmd_test_case_10'
+assembly_name = 'test_assembly'
+original_module_name = 'cmd_test_case_10_dtk.module.yaml'
+delta_module_content = 'delta_cmd_test_case_10_dtk.module.yaml'
+delta_2_module_content = 'delta_2_cmd_test_case_10_dtk.module.yaml'
+delta_3_module_content = 'delta_3_cmd_test_case_10_dtk.module.yaml'
+delta_4_module_content = 'delta_4_cmd_test_case_10_dtk.module.yaml'
+delta_5_module_content = 'delta_5_cmd_test_case_10_dtk.module.yaml'
+delta_6_module_content = 'delta_6_cmd_test_case_10_dtk.module.yaml'
 
-describe '(Component Module DSL) Test Case 10: NEG - Have attribute with required field set to - falsee in dtk.model.yaml file and push-clone-changes to server' do
+dtk_common = Common.new("", "")
+
+describe '(Component Module DSL) Test Case 10: NEG - Have attribute with required field set to - falsee in dtk.model.yaml file, push to server' do
   before(:all) do
-    puts '*****************************************************************************************************************************************************', ''
+    puts '************************************************************************************************************************************', ''
   end
 
-  context 'Import component module function' do
-    include_context 'Import remote component module', component_module_namespace + '/' + component_module_name
+  context "Add original content of dtk.module.yaml and module content" do
+    include_context "Add original content of dtk.module.yaml and module content", initial_module_location, module_location, original_module_name
   end
 
-  context 'Get component module components list' do
-    include_context 'Get component module components list', dtk_common, local_component_module_name
+  context "Install module" do
+    include_context "Install module", module_name, module_location
   end
 
-  context 'Check if component module imported on local filesystem' do
-    include_context 'Check component module imported on local filesystem', component_module_filesystem_location, component_module_name
+  context "List assemblies contained in this module" do
+    include_context "List assemblies", module_name, assembly_name, dtk_common
   end
 
-  context 'Set required field to falsee in attribute section in dtk.model.yaml file' do
-    include_context 'Replace dtk.model.yaml file with new one', component_module_name, file_for_change_location, file_for_change, component_module_filesystem_location, 'sets required field to incorrect value falsee in attribute members section in dtk.model.yaml'
+  context "Replace original content of dtk.module.yaml with delta content" do
+    include_context "Replace original content of dtk.module.yaml with delta content", module_location, delta_module_content
   end
 
-  context 'Push clone changes of component module from local copy to server' do
-    include_context 'NEG - Push clone changes to server', local_component_module_name, fail_message, expected_error_message
+  context "NEG - Push module changes" do
+    include_context "NEG - Push module changes", module_name, module_location
   end
 
-  context 'Delete component module' do
-    include_context 'Delete component module', dtk_common, local_component_module_name
+  context "Replace original content of dtk.module.yaml with delta content" do
+    include_context "Replace original content of dtk.module.yaml with delta content", module_location, delta_2_module_content
   end
 
-  context 'Delete component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', component_module_filesystem_location, component_module_name
+  context "NEG - Push module changes" do
+    include_context "NEG - Push module changes", module_name, module_location
+  end
+
+  context "Replace original content of dtk.module.yaml with delta content" do
+    include_context "Replace original content of dtk.module.yaml with delta content", module_location, delta_3_module_content
+  end
+
+  context "NEG - Push module changes" do
+    include_context "NEG - Push module changes", module_name, module_location
+  end
+
+  context "Replace original content of dtk.module.yaml with delta content" do
+    include_context "Replace original content of dtk.module.yaml with delta content", module_location, delta_4_module_content
+  end
+
+  context "NEG - Push module changes" do
+    include_context "NEG - Push module changes", module_name, module_location
+  end
+
+  context "Replace original content of dtk.module.yaml with delta content" do
+    include_context "Replace original content of dtk.module.yaml with delta content", module_location, delta_5_module_content
+  end
+
+  context "NEG - Push module changes" do
+    include_context "NEG - Push module changes", module_name, module_location
+  end
+
+  context "Replace original content of dtk.module.yaml with delta content" do
+    include_context "Replace original content of dtk.module.yaml with delta content", module_location, delta_6_module_content
+  end
+
+  context "NEG - Push module changes" do
+    include_context "NEG - Push module changes", module_name, module_location
+  end
+
+  context "Uninstall module" do
+    include_context "Uninstall module", module_name, module_location
+  end
+
+  context "Delete initial module on filesystem" do
+    include_context "Delete initial module on filesystem", module_location
   end
 
   after(:all) do

@@ -442,6 +442,20 @@ shared_context "Push module changes" do |module_name, module_location|
   end
 end
 
+shared_context "NEG - Push module changes" do |module_name, module_location|
+  it "does not push changes for module #{module_name}" do
+    puts 'NEG - Push module changes', '-----------------------------'
+    pass = true
+    value = `dtk module push -d #{module_location}`
+    puts value
+    pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
+    puts "Push of module #{module_name} was completed successfully which was not expected!" if pass == true
+    puts "Push of module #{module_name} did not complete successfully which is expected!" if pass == false
+    puts ''
+    expect(pass).to eq(false)
+  end
+end
+
 shared_context "Push service instance changes" do |service_name, service_location|
   it "pushes changes for service instance #{service_name}" do
     puts 'Push service instance changes', '--------------------------------'

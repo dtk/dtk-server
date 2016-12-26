@@ -1,0 +1,34 @@
+---
+dsl_version: 1.0.0
+module: test/cmd_test_case_10
+version: master
+keywords: test
+description: test module
+license: Apache 2.0
+
+assemblies:
+  test_assembly:
+    description: test assembly
+    nodes:
+      node:
+        attributes:
+          image: precise_hvm
+          size: micro
+        components:
+        - cmd_test_case_10::component
+    workflows:
+      create:
+        subtasks:
+        - name: create nodes
+          node: node
+          components:
+          - cmd_test_case_10::component
+component_defs:
+  component:
+    attributes:
+      file_path:
+        type: string
+        required: falsee
+    actions:
+      create:
+        puppet_class: cmd_test_case_10::component

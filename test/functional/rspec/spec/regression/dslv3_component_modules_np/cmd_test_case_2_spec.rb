@@ -66,7 +66,7 @@ describe '(Component Module DSL) Test Case 2: Rename existing component from dtk
   end
 
   context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_name, delta_component_to_check
+    include_context "Check component exist in service instance", dtk_common, service_name, renamed_component_to_check
   end
 
   context "Delete service instance" do

@@ -9,7 +9,7 @@ module_name = 'test/cmd_test_case_4'
 assembly_name = 'test_assembly'
 service_name = 'cmd_test_case_4'
 service_location = "~/dtk/"
-attributes_to_check = {'node/component::delta_attribute' => 'delta_value'}
+attributes_to_check = {'node/cmd_test_case_4::component/delta_attribute' => 'delta_value'}
 original_module_name = 'cmd_test_case_4_dtk.module.yaml'
 delta_module_content = 'delta_cmd_test_case_4_dtk.module.yaml'
 

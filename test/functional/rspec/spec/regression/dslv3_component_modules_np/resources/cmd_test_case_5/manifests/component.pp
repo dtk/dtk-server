@@ -1,4 +1,4 @@
-class cmd_test_case_4::component(
+class cmd_test_case_5::component(
   $file_path,
 ) {
   file { $file_path:
@@ -6,4 +6,4 @@ class cmd_test_case_4::component(
     content => "Hello from file!",
     mode    => '0644',
   }
-}
+} 

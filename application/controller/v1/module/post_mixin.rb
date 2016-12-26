@@ -95,6 +95,15 @@ module DTK
         rest_ok_response CommonModule::ComponentInfo::Remote.install(get_default_project, local_params, remote_params, rsa_pub_key)
       end
 
+      def publish_to_remote
+        namespace, module_name, version, rsa_pub_key = required_request_params(:namespace, :module_name, :version, :rsa_pub_key)
+
+        local_params  = local_params(:common_module, module_name, namespace: namespace, version: version)
+        remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
+        
+        rest_ok_response CommonModule::Remote.publish(get_default_project, local_params, remote_params, rsa_pub_key) 
+      end
+
       def pull_component_module_from_remote
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)

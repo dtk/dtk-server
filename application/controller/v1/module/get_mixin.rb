@@ -61,7 +61,7 @@ module DTK
         opts = Opts.new(remote_repo_base: ret_remote_repo_base)
         opts[:rsa_pub_key] = required_request_params(:rsa_pub_key)
         datatype  = :remote_module
-        module_list = CommonModule.list_remotes(get_default_project, opts)
+        module_list = CommonModule::Remote.list(get_default_project, opts)
         rest_ok_response filter_by_namespace(module_list), datatype: datatype
       end
 
@@ -69,7 +69,7 @@ module DTK
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)
         remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
-        rest_ok_response CommonModule.get_remote_module_info(get_default_project, rsa_pub_key, remote_params)
+        rest_ok_response CommonModule::Remote.get_module_info(get_default_project, remote_params, rsa_pub_key)
       end
     end
   end

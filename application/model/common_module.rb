@@ -20,7 +20,8 @@ module DTK
     # Mixins must go first
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
-    require_relative('common_module/import')
+    require_relative('common_module/remote')
+    require_relative('common_module/import') #TODO: should this be removed or have name changed after fully port to new client
     require_relative('common_module/module_repo_info')
     require_relative('common_module/update')
     require_relative('common_module/service_info')
@@ -63,27 +64,8 @@ module DTK
       ServiceInfo.list_assembly_templates(project)
     end
 
-    def self.list_remotes(project, opts = {})
-      rsa_pub_key = opts[:rsa_pub_key]
-      Repo::Remote.new.list_module_info(:service_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
-    end
-
     def self.get_module_dependencies(project, rsa_pub_key, remote_params)
       ComponentInfo.get_module_dependencies(project, rsa_pub_key, remote_params)
-    end
-
-    def self.get_remote_module_info(project, rsa_pub_key, remote_params)
-      ret = {}
-      if raw_service_info = ServiceInfo.get_remote_module_info?(project, rsa_pub_key, remote_params)
-        ret.merge!(service_info: transform_from_raw_remote_module_info(raw_service_info))
-      end
-      if raw_component_info = ComponentInfo.get_remote_module_info?(project, rsa_pub_key, remote_params)
-        ret.merge!(component_info: transform_from_raw_remote_module_info(raw_component_info))
-      end
-      if ret.empty?
-        fail ErrorUsage, "Module '#{remote_params.pp_module_ref}' not found in the DTKN Catalog"
-      end
-      ret.merge(version: remote_params.version || intersect_versions(raw_service_info, raw_component_info))
     end
 
     def self.exists(project, module_type, namespace, module_name, version)
@@ -119,10 +101,6 @@ module DTK
       end
     end
 
-    def self.transform_from_raw_remote_module_info(raw_info)
-      { remote_repo_url: raw_info[:remote_repo_url] }
-    end
-
     def self.create_local_params(module_type, module_name, opts = {})
       version   = opts[:version]
       namespace = opts[:namespace] || default_local_namespace_name()
@@ -132,29 +110,6 @@ module DTK
         version:     version,
         namespace:   namespace
       )
-    end
-
-    # TODO: DTK-2766: consider handling condition where service module at some version x requires component module
-    #       at another version; in this case want to use the different versions of these modules.
-    #       Need to figure out best version to use for combined; default is the service module version
-    #       Alternative is to fix up modules that have different versions
-    def self.intersect_versions(raw_service_info, raw_component_info)
-      if raw_service_info
-        if raw_component_info
-          if raw_service_info[:latest_version] == raw_component_info[:latest_version]
-            raw_service_info[:latest_version]
-          else
-            Aux.latest_version?(raw_service_info[:versions] && raw_component_info[:versions]) || 
-              fail(ErrorUsage, "Mismatch between component info and service info versions")
-          end
-        else
-          raw_service_info[:latest_version]
-        end
-      elsif raw_component_info
-        raw_component_info[:latest_version]
-      else
-        fail ErrorUsage, "Unexpected that both raw_component_info and raw_component_info are nil"
-      end
     end
 
   end

@@ -33,7 +33,7 @@ module DTK
           if parsed_dependent_modules = parsed_common_module.val(:DependentModules)
             update_component_module_refs(service_module_branch, parsed_dependent_modules, omit_base_reference: @component_info_exists)
           end
-          CommonModule::ServiceInfo.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, local_params)
+          CommonModule::Info::Service.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, local_params)
           true
         end
       end

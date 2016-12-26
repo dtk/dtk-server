@@ -92,7 +92,7 @@ module DTK
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
 
-        rest_ok_response CommonModule::ComponentInfo::Remote.install(get_default_project, local_params, remote_params, rsa_pub_key)
+        rest_ok_response CommonModule::Info::Component::Remote.install(get_default_project, local_params, remote_params, rsa_pub_key)
       end
 
       def publish_to_remote
@@ -111,7 +111,7 @@ module DTK
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
 
-        response = CommonModule::ComponentInfo::Remote.pull(get_default_project, local_params, remote_params, rsa_pub_key)
+        response = CommonModule::Info::Component::Remote.pull(get_default_project, local_params, remote_params, rsa_pub_key)
         # TODO: stub so compltes to next step
         diffs_summary = ret_diffs_summary
         component_module = create_obj(:full_module_name, ComponentModule)

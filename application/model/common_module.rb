@@ -24,8 +24,7 @@ module DTK
     require_relative('common_module/import') #TODO: should this be removed or have name changed after fully port to new client
     require_relative('common_module/module_repo_info')
     require_relative('common_module/update')
-    require_relative('common_module/service_info')
-    require_relative('common_module/component_info')
+    require_relative('common_module/info')
     require_relative('common_module/service_instance')
 
     extend  CommonModule::ClassMixin
@@ -57,15 +56,15 @@ module DTK
     #  :remote_repo_base
     #  :detail_to_include
     def self.list(project, opts = Opts.new)
-      ServiceInfo.list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true, include_common_modules: true))
+      Info::Service.list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true, include_common_modules: true))
     end
 
     def self.list_assembly_templates(project)
-      ServiceInfo.list_assembly_templates(project)
+      Info::Service.list_assembly_templates(project)
     end
 
     def self.get_module_dependencies(project, rsa_pub_key, remote_params)
-      ComponentInfo.get_module_dependencies(project, rsa_pub_key, remote_params)
+      Info::Component.get_module_dependencies(project, rsa_pub_key, remote_params)
     end
 
     def self.exists(project, module_type, namespace, module_name, version)
@@ -95,8 +94,8 @@ module DTK
     def self.get_class_from_module_type(module_type)
       case module_type.to_sym
       when :common_module then CommonModule
-      when :service_module then ServiceInfo
-      when :component_module then ComponentInfo
+      when :service_module then Info::Service
+      when :component_module then Info::Component
       else fail ErrorUsage.new("Unknown module type '#{module_type}'.")
       end
     end

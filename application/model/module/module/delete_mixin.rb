@@ -133,7 +133,7 @@ module DTK; class BaseModule
     
     def delete_associated_params
       # Import that service_module is first; so it is deleted before component module
-      @delete_associated_params ||= { service_module: CommonModule::ServiceInfo, component_module: CommonModule::ComponentInfo }
+      @delete_associated_params ||= { service_module: CommonModule::Info::Service, component_module: CommonModule::Info::Component }
     end
 
 

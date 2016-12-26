@@ -49,11 +49,11 @@ module Ramaze::Helper
     end
 
     def service_info
-      ::DTK::CommonModule::ServiceInfo
+      ::DTK::CommonModule::Info::Service
     end
 
     def component_info
-      ::DTK::CommonModule::ComponentInfo
+      ::DTK::CommonModule::Info::Component
     end
 
   end

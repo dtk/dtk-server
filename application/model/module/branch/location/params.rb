@@ -95,10 +95,10 @@ module DTK; class ModuleBranch
         @combined_module_type ||= CommonModule.combined_module_type
       end
       def self.service_info_type
-        @service_info_type ||= CommonModule::ServiceInfo.info_type
+        @service_info_type ||= CommonModule::Info::Service.info_type
       end
       def self.component_info_type
-        @component_info_type ||= CommonModule::ComponentInfo.info_type
+        @component_info_type ||= CommonModule::Info::Component.info_type
       end
 
       def all_keys

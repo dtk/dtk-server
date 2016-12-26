@@ -55,14 +55,19 @@ module DTK; module CommonDSL
         def self.update_semantic_diff(diff_result, service_instance, module_branch, impacted_files, service_instance_parse)
           if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
             service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
-            new_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen, impacted_files: impacted_files)
-            update_collated = new_diffs.collate
-
-            diffs = update_collated.instance_variable_get(:@diffs)
-            SerializedHash.create(dsl_version: service_instance_gen.req(:DSLVersion)) do |serialized_hash|
-              CommonDSL::Diff::Collated::Sort::ForSerialize.sort_keys(diffs.keys).each do |collate_key|
-                diffs_of_same_type = diffs[collate_key]
-                diff_result.semantic_diffs.add_collate_level_elements?(collate_key, diffs_of_same_type)
+            if new_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen, impacted_files: impacted_files)
+              update_collated = new_diffs.collate
+              diffs = update_collated.instance_variable_get(:@diffs)
+              SerializedHash.create(dsl_version: service_instance_gen.req(:DSLVersion)) do |serialized_hash|
+                CommonDSL::Diff::Collated::Sort::ForSerialize.sort_keys(diffs.keys).each do |collate_key|
+                  diffs_of_same_type = diffs[collate_key]
+                  diff_result.semantic_diffs.add_collate_level_elements?(collate_key, diffs_of_same_type)
+                end
+              end
+              diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].each do |v|
+                v.each do |k|
+                  k[1]["CURRENT_VAL"], k[1]["NEW_VAL"] = k[1]["NEW_VAL"], k[1]["CURRENT_VAL"]
+                end
               end
             end
           end
@@ -71,17 +76,14 @@ module DTK; module CommonDSL
         def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, opts = {})
           DiffErrors.process_diffs_error_handling(diff_result, service_instance_gen) do
             Model.Transaction do
-
               collated_diffs.process(diff_result, opts) 
 
-              #check if colleted_diffs[:worflow] to add to the semantic diffs !! 
               DiffErrors.raise_if_any_errors(diff_result)
               Aux.stop_for_testing?(:push_diff) # for debug
               
               # items_to_update are things that need to be updated in repo from what at this point are in object model
               items_to_update = diff_result.items_to_update
-
-              if diff_result.items_to_update.include?(:workflow)
+              if diff_result.items_to_update.include?(:workflow)  #filter out when doing changes to workflow and components
                 service_instance       = opts[:service_instance]
                 impacted_files         = opts[:impacted_files]
                 service_instance_parse = opts[:service_instance_parse]

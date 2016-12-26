@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Test Case 1: Remove existing component from dtk.module.yaml file, push to server, stage assembly and check changes
 
 require './lib/dtk_cli_spec'

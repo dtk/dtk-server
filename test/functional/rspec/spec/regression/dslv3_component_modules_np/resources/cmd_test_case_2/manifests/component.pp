@@ -1,0 +1,1 @@
+class cmd_test_case_2::component() {}

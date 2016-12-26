@@ -83,7 +83,7 @@ module DTK; module CommonDSL
               
               # items_to_update are things that need to be updated in repo from what at this point are in object model
               items_to_update = diff_result.items_to_update
-              if diff_result.items_to_update.include?(:workflow)  #filter out when doing changes to workflow and components
+              if diff_result.items_to_update.include?(:workflow)
                 service_instance       = opts[:service_instance]
                 impacted_files         = opts[:impacted_files]
                 service_instance_parse = opts[:service_instance_parse]

@@ -1,4 +1,4 @@
-# Test Case 8: Remove existing attribute mapping on component from dtk.module.yaml file, push to server, stage assembly and check changes
+# Test Case 8: Remove existing attribute mapping on component from dtk.module.yaml file, push to server, converge assembly and check changes then add new mapping
 
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
@@ -11,21 +11,33 @@ service_name = 'cmd_test_case_8'
 service_location = "~/dtk/"
 original_module_name = 'cmd_test_case_8_dtk.module.yaml'
 delta_module_content = 'delta_cmd_test_case_8_dtk.module.yaml'
+delta_2_module_content = 'delta_2_cmd_test_case_8_dtk.module.yaml'
 
+# initial check
 attributes_to_check_after_first_converge = {
   'node/cmd_test_case_8::first_component/first_attribute'  => 'first_value',
   'node/cmd_test_case_8::first_component/second_attribute' => 'second_value'
 }
+
+# delta check
 attributes_to_check_after_second_converge = {
-  'node/cmd_test_case_8::first_component/first_attribute'  => 'first_value', 
-  'node/cmd_test_case_8::first_component/second_attribute' => ''
+  'node/cmd_test_case_8::first_component/first_attribute' => 'first_value'
+}
+attributes_dont_exist_after_second_converge = {
+  'node/cmd_test_case_8::first_component/second_attribute' => 'second_value'
+}
+
+# delta 2 check
+attributes_to_check_after_third_converge = {
+  'node/cmd_test_case_8::first_component/first_attribute' => 'first_value',
+  'node/cmd_test_case_8::first_component/third_attribute' => 'second_value'
 }
 
 dtk_common = Common.new("", "")
 
-describe '(Component Module DSL) Test Case 8: Remove existing attribute mapping on component from dtk.module.yaml file, push to server, stage assembly and check changes' do
+describe '(Component Module DSL) Test Case 8: Remove existing attribute mapping on component from dtk.module.yaml file, push to server, stage assembly and check changes then add new mapping' do
   before(:all) do
-    puts '**************************************************************************************************************************************************************', ''
+    puts '***********************************************************************************************************************************************************************************', ''
   end
 
   context "Add original content of dtk.module.yaml and module content" do
@@ -78,6 +90,38 @@ describe '(Component Module DSL) Test Case 8: Remove existing attribute mapping 
 
   context "Check attributes correct in service instance" do
     include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_after_second_converge
+  end
+
+  context "NEG - Check attributes correct in service instance" do
+    include_context "NEG - Check attributes correct in service instance", dtk_common, service_name, attributes_dont_exist_after_second_converge
+  end
+
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
+  end
+
+  context "Replace original content of dtk.module.yaml with delta content" do
+    include_context "Replace original content of dtk.module.yaml with delta content", module_location, delta_2_module_content
+  end
+
+  context "Push module changes" do
+    include_context "Push module changes", module_name, module_location
+  end
+
+  context "Stage assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
+  end
+
+  context "Converge service instance" do
+    include_context "Converge service instance", service_location, dtk_common, service_name
+  end
+
+  context "Check attributes correct in service instance" do
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_after_third_converge
   end
 
   context "Delete service instance" do

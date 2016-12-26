@@ -1,4 +1,4 @@
- ---
+---
 dsl_version: 1.0.0
 module: test/cmd_test_case_10
 version: master

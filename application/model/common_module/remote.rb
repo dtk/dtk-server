@@ -19,21 +19,20 @@ module DTK
   class CommonModule
     module Remote
       def self.list(project, opts = {})
-        rsa_pub_key = opts[:rsa_pub_key]
-        Repo::Remote.new.list_module_info(:service_module, rsa_pub_key, opts.merge!(ret_versions_array: true))
+        Repo::Remote.new.list_module_info(:service_module, opts[:rsa_pub_key], opts.merge!(ret_versions_array: true))
       end
 
       # opts can have keys:
       #   :donot_raise_error
-      def self.get_module_info(project, remote_params, rsa_pub_key, opts = {})
+      def self.get_module_info(project, remote_params, client_rsa_pub_key, opts = {})
         ret = {}
-        if raw_service_info = Info::Service.get_remote_module_info?(project, rsa_pub_key, remote_params)
+        if raw_service_info = Info::Service::Remote.get_module_info?(project, client_rsa_pub_key, remote_params)
           ret.merge!(service_info: transform_from_raw_remote_module_info(raw_service_info))
         end
-        if raw_component_info = Info::Component.get_remote_module_info?(project, rsa_pub_key, remote_params)
+        if raw_component_info = Info::Component::Remote.get_module_info?(project, client_rsa_pub_key, remote_params)
           ret.merge!(component_info: transform_from_raw_remote_module_info(raw_component_info))
         end
-
+        
         unless ret.empty?
           ret.merge(version: remote_params.version || intersect_versions(raw_service_info, raw_component_info))
         else
@@ -45,11 +44,18 @@ module DTK
         end     
       end
 
-      def self.publish(project, local_params, remote_params, rsa_pub_key)
-        module_info = get_module_info(project, remote_params, rsa_pub_key, donot_raise_error: true)
-        fail ErrorUsage, "The publish command failed because the module '#{remote_params.pp_module_ref}' is already on the #{Term.remote_ref}" unless module_info.empty?
-        
-        # TODO: stub for DTK-2806
+      def self.publish(project, local_params, remote_params, client_rsa_pub_key)
+        remote_module_info = get_module_info(project, remote_params, client_rsa_pub_key, donot_raise_error: true)
+        something_published = false
+        unless remote_module_info[:component_info]
+          something_published = Info::Component::Remote.publish?(project, local_params, remote_params, client_rsa_pub_key)
+        end
+        unless remote_module_info[:service_info] 
+          if Info::Service::Remote.publish?(project, local_params, remote_params, client_rsa_pub_key)
+            something_published = true
+          end
+        end
+        fail ErrorUsage, "The publish command failed because the module '#{remote_params.pp_module_ref}' is already on the #{Term.remote_ref}"  unless something_published
         nil
       end
 
@@ -74,7 +80,7 @@ module DTK
           if raw_component_info
             if raw_service_info[:latest_version] == raw_component_info[:latest_version]
               raw_service_info[:latest_version]
-          else
+            else
               Aux.latest_version?(raw_service_info[:versions] && raw_component_info[:versions]) || 
                 fail(ErrorUsage, "Mismatch between component info and service info versions")
             end
@@ -87,7 +93,6 @@ module DTK
           fail ErrorUsage, "Unexpected that both raw_component_info and raw_component_info are nil"
         end
       end
-      
 
     end
   end

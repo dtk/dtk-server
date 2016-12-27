@@ -22,7 +22,7 @@ module DTK; module ModuleCommonMixin
     # install from a dtkn repo; directly in this method handles the module/branch and repo level items
     # and then calls process_dsl_and_ret_parsing_errors to handle model and implementaion/files parts depending on what type of module it is
 
-    # TODO: DTK-2766: updated coe so new client does not use this method
+    # TODO: DTK-2766: updated so new client does not use this method
     def install(project, local_params, remote_params, client_rsa_pub_key, opts = {})
       version = remote_params.version
 
@@ -229,6 +229,32 @@ module DTK; module ModuleCommonMixin
       ret.merge!(remote_exist: remote_exist, frozen: frozen)
     end
 
+    
+    # TODO: DTK-2806: stub: 'publish_info' was cut and patse from 'publish' in module/module_common_mixin/remote.rb
+    def publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
+      # TODO: DTK-2806:  see if this is needed 
+      # publish_preprocess_raise_error?(module_branch_obj)
+
+      # we need to send Repoman information about modules and we do it here
+      file_content = repo_file_content(module_branch, ModuleRefs.meta_filename_path())
+
+      # create module on remote repo manager
+      # this wil raise error if it exists already or dont have accsss
+      repoman_response = Repo::Remote.new(remote).publish_to_remote(client_rsa_pub_key, file_content)
+      remote_repo_name = repoman_response[:git_repo_name]
+      remote.set_repo_name!(remote_repo_name)
+      
+      # link and push to remote repo
+      # create remote repo object
+      repo.link_to_remote(local, remote)
+      repo.push_to_remote(local, remote)
+      
+      self.class.create_repo_remote_object(repo, remote, remote_repo_name)
+      repoman_response.merge(remote_repo_name: remote[:module_name])
+    end
+
+    # TODO: DTK-2806: 'publish' below was legacy; once remove dtk-shell this can be depreacted ffor above
+    #
     # publish to a remote repo
     # request_params: hash map containing remote_component_name, remote_component_namespace
     def publish(local_params, remote_params, client_rsa_pub_key, version = nil)

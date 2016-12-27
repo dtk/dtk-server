@@ -18,37 +18,16 @@
 module DTK
   class CommonModule
     module ClassMixin
-      def find_from_name_with_version?(project, namespace, module_name, version)
+      def matching_module_with_module_branch?(project, namespace, module_name, version)
         ret = nil
-        unless namespace_obj = Namespace.find_by_name?(project.model_handle(:namespace), namespace)
-          return ret
-        end
-
+        return ret unless namespace_obj = Namespace.find_by_name?(project.model_handle(:namespace), namespace)
         sp_hash = {
-          cols: [
-            :id,
-            :group_id,
-            :display_name,
-            :namespace_id,
-            :namespace,
-            :version_info
-          ],
-          filter: [
-            :and,
-            [:eq, :project_project_id, project.id],
-            [:eq, :namespace_id, namespace_obj.id],
-            [:eq, :display_name, module_name]
-          ]
+          cols: [:id, :group_id, :display_name, :namespace_id, :namespace, :version_info],
+          filter: [:and, [:eq, :project_project_id, project.id], [:eq, :namespace_id, namespace_obj.id], [:eq, :display_name, module_name]]
         }
-        
         get_objs(project.model_handle(model_type), sp_hash).find{ |mod| (mod[:module_branch]||{})[:version] == version }
       end
       
-      def get_remote_module_info?(project, rsa_pub_key, remote_params)
-        remote = remote_params.create_remote(project, info_type: info_type)
-        Repo::Remote.new(remote).get_remote_module_info?(rsa_pub_key)
-      end
-
       NS_MOD_DELIM_IN_REF = ':'
       def find_from_name?(model_handle, namespace, module_name)
         ref = "#{namespace}#{NS_MOD_DELIM_IN_REF}#{module_name}"

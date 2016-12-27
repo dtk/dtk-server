@@ -19,6 +19,7 @@ module DTK
   class CommonModule
     module Info
       class Service < ServiceModule
+        require_relative('service/remote')
         extend  CommonModule::ClassMixin
         include CommonModule::Mixin
         

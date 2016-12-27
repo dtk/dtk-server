@@ -24,11 +24,25 @@ module DTK
         # install from a dtkn repo; directly in this method handles the module/branch and repo level items
         # and then calls process_dsl_and_ret_parsing_errors to handle model and implementaion/files parts 
         def self.install(project, local_params, remote_params, client_rsa_pub_key)
-          new(project, local_params, remote_params, client_rsa_pub_key).install
+          new(project, local_params, remote_params, client_rsa_pub_key, remote_exists: true).install
         end
 
         def self.pull(project, local_params, remote_params, client_rsa_pub_key)
-          new(project, local_params, remote_params, client_rsa_pub_key).pull
+          new(project, local_params, remote_params, client_rsa_pub_key, remote_exists: true).pull
+        end
+
+        # returns true if component info is published
+        def publish?
+          unless module_branch = get_module_branch?
+            return nil # no component info
+          end
+          repo = get_repo_with_branch
+
+          # DTK-2806: need to test whether call to publish_info is doing right thing
+          response = module_obj.publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
+          #  DTK-2806: need to check response for errors otr see if code throws errors
+          pp [:publish_info_response, response]
+          true
         end
 
         def install
@@ -70,6 +84,10 @@ module DTK
         end
 
         private
+
+        def self.info_type
+          Info::Component.info_type
+        end
 
         def module_class
           ComponentModule

@@ -27,8 +27,8 @@ module DTK
           :component_info
         end
         
-        def self.get_module_dependencies(project, rsa_pub_key, remote_params)
-          missing_modules, required_modules, dependency_warnings = get_required_and_missing_modules(project, remote_params, rsa_pub_key)
+        def self.get_module_dependencies(project, client_rsa_pub_key, remote_params)
+          missing_modules, required_modules, dependency_warnings = get_required_and_missing_modules(project, remote_params, client_rsa_pub_key)
           {
             missing_module_components: missing_modules,
             dependency_warnings: dependency_warnings,
@@ -36,8 +36,8 @@ module DTK
           }
         end
         
-        def self.list_remotes(_model_handle, rsa_pub_key = nil, opts = {})
-          Repo::Remote.new.list_module_info(module_type, rsa_pub_key, opts.merge!(ret_versions_array: true))
+        def self.list_remotes(_model_handle, client_rsa_pub_key = nil, opts = {})
+          Repo::Remote.new.list_module_info(module_type, client_rsa_pub_key, opts.merge!(ret_versions_array: true))
         end
         
         private

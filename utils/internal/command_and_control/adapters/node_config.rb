@@ -24,6 +24,7 @@ module DTK
       end
       
       ConfigAgentTypeToMCInfo = {
+        dynamic: { agent: 'generic_worker', action: 'run' },
         puppet: { agent: 'puppet_apply', action: 'run' },
         bash_commands: { agent: 'action_agent', action: 'run_command' },
         chef: { agent: 'chef_solo', action: 'run' },

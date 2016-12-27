@@ -12,17 +12,8 @@ service_location = "~/dtk/"
 original_module_name = 'cmd_test_case_9_dtk.module.yaml'
 delta_module_content = 'delta_cmd_test_case_9_dtk.module.yaml'
 
-attributes_to_check_1 = {
-  'node/cmd_test_case_9::first_component/hash_attr'    => "",
-  'node/cmd_test_case_9::first_component/hash_attr_2'  => "",
-  'node/cmd_test_case_9::first_component/hash_attr_3'  => "",
-  'node/cmd_test_case_9::first_component/hash_attr_4'  => "",
-  'node/cmd_test_case_9::first_component/hash_attr_5'  => "",
-}
-
-attributes_to_check_2 = {
+attributes_to_check = {
   'node/cmd_test_case_9::first_component/hash_attr'    => "{key1=>value1}",
-  'node/cmd_test_case_9::first_component/hash_attr_2'  => "",
   'node/cmd_test_case_9::first_component/hash_attr_3'  => "{key1=>nil}",
   'node/cmd_test_case_9::first_component/hash_attr_4'  => "{key1=>[element1, element2]}",
   'node/cmd_test_case_9::first_component/hash_attr_5'  => "{key1=>value1, key2=>value2}",
@@ -47,22 +38,6 @@ describe '(Component Module DSL) Test Case 9: Test adding verious default values
     include_context "List assemblies", module_name, assembly_name, dtk_common
   end
 
-  context "Stage assembly from module" do
-    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
-  end
-
-  context "Check attributes correct in service instance" do
-    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_1
-  end
-
-  context "Delete service instance" do
-    include_context "Delete service instance", service_location, service_name, dtk_common
-  end
-
-  context "Uninstall service instance" do
-    include_context "Uninstall service instance", service_location, service_name
-  end
-
   context "Replace original content of dtk.module.yaml with delta content" do
     include_context "Replace original content of dtk.module.yaml with delta content", module_location, delta_module_content
   end
@@ -76,7 +51,7 @@ describe '(Component Module DSL) Test Case 9: Test adding verious default values
   end
 
   context "Check attributes correct in service instance" do
-    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_2
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check
   end
 
   context "Delete service instance" do

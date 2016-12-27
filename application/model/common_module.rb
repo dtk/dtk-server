@@ -27,7 +27,7 @@ module DTK
     require_relative('common_module/info')
     require_relative('common_module/service_instance')
 
-    extend  CommonModule::ClassMixin
+    extend CommonModule::ClassMixin
     include CommonModule::Mixin
 
     extend ModuleClassMixin
@@ -63,18 +63,24 @@ module DTK
       Info::Service.list_assembly_templates(project)
     end
 
-    def self.get_module_dependencies(project, rsa_pub_key, remote_params)
-      Info::Component.get_module_dependencies(project, rsa_pub_key, remote_params)
+    def self.get_module_dependencies(project, client_rsa_pub_key, remote_params)
+      Info::Component.get_module_dependencies(project, client_rsa_pub_key, remote_params)
     end
 
     def self.exists(project, module_type, namespace, module_name, version)
-      if matching_module = get_class_from_module_type(module_type).find_from_name_with_version?(project, namespace, module_name, version)
+      if matching_module = get_class_from_module_type(module_type).matching_module_with_module_branch?(project, namespace, module_name, version)
         ModuleRepoInfo.new(matching_module[:module_branch])
       end
     end
 
+    def self.matching_module_branch?(project, namespace, module_name, version)
+      if matching_module = matching_module_with_module_branch?(project, namespace, module_name, version)
+        matching_module[:module_branch]
+      end
+    end
+
     def self.get_common_module?(project, namespace, module_name, version)
-      find_from_name_with_version?(project, namespace, module_name, version)
+      matching_module_with_module_branch?(project, namespace, module_name, version)
     end
 
     def self.delete(project, namespace, module_name, version, opts = {})
@@ -89,6 +95,7 @@ module DTK
       :common_module
     end
 
+
     private
 
     def self.get_class_from_module_type(module_type)
@@ -99,7 +106,7 @@ module DTK
       else fail ErrorUsage.new("Unknown module type '#{module_type}'.")
       end
     end
-
+    
     def self.create_local_params(module_type, module_name, opts = {})
       version   = opts[:version]
       namespace = opts[:namespace] || default_local_namespace_name()

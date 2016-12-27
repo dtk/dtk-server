@@ -18,27 +18,51 @@
 module DTK
   class CommonModule
     module Info
+      # Base class for getting remote info for component and serviceinfo
       class Remote
-        def initialize(project, local_params, remote_params, client_rsa_pub_key)
+        # opts can have keys
+        #   :remote_exists - set to true by operations where remote exists
+        def initialize(project, local_params, remote_params, client_rsa_pub_key, opts = {})
           @project             = project
           @local               = local_params.create_local(project)
-          @remote              = remote_params.create_remote(project)
+          @remote              = ret_remote(project, remote_params)
           @client_rsa_pub_key  = client_rsa_pub_key
           @remote_repo_handler = Repo::Remote.new(@remote)
-          @remote_repo_info    = @remote_repo_handler.get_remote_module_info(client_rsa_pub_key)
-          @git_repo_name       = @remote_repo_info[:git_repo_name]
-
-          @remote.set_repo_name!(@git_repo_name)
+          
+          if opts[:remote_exists]
+            @remote_repo_info    = @remote_repo_handler.get_remote_module_info(client_rsa_pub_key)
+            @git_repo_name       = @remote_repo_info[:git_repo_name]
+            @remote.set_repo_name!(@git_repo_name)
+          end
         end
         private :initialize
 
+        def self.get_module_info?(project, client_rsa_pub_key, remote_params)
+          remote = ret_remote(project, remote_params)
+          Repo::Remote.new(remote).get_remote_module_info?(client_rsa_pub_key)
+        end
+
+        def self.publish?(project, local_params, remote_params, client_rsa_pub_key)
+          new(project, local_params, remote_params, client_rsa_pub_key).publish?
+        end
 
         private
 
         attr_reader :project, :local, :remote, :client_rsa_pub_key, :remote_repo_handler, :remote_repo_info, :git_repo_name
 
+        def self.ret_remote(project, remote_params)
+          remote_params.create_remote(project, info_type: info_type)
+        end
+        def ret_remote(project, remote_params)
+          self.class.ret_remote(project, remote_params)
+        end
+
         def get_module_branch?
           module_obj? && module_obj?.get_module_branch(local_branch)
+        end
+
+        def get_repo_with_branch
+          get_repo_with_branch? || fail(Error, "Unexpected that get_repo_with_branch? is nil")
         end
 
         def get_repo_with_branch?
@@ -60,7 +84,11 @@ module DTK
           repo_user_acls = RepoUser.authorized_users_acls(project.id_handle)
           Repo::WithBranch.create_workspace_repo(project.id_handle, local, repo_user_acls, create_opts)
         end
-        
+
+        def module_obj
+          module_obj? || fail(Error, "unexpected that  module_obj? is nil")
+        end
+
         def module_obj? 
           if @module_obj_computed
             @module_obj

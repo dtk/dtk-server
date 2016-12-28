@@ -317,6 +317,20 @@ shared_context 'Uninstall module' do |module_name, module_location|
   end
 end
 
+shared_context 'NEG - Uninstall module' do |module_name, module_location, error_message|
+  it "does not uninstall #{module_name} module from server" do
+    puts 'NEG - Uninstall module:', '-------------------------'
+    pass = true
+    value = `dtk module uninstall -d #{module_location} -y`
+    puts value
+    pass = false if value.include? error_message
+    puts "Uninstall of module #{module_name} was completed successfully which is not expected!" if pass == true
+    puts "Uninstall of module #{module_name} did not complete successfully which is expected!" if pass == false
+    puts ''
+    expect(pass).to eq(false)
+  end
+end
+
 shared_context 'Add original content of dtk.module.yaml and module content' do |initial_module_location, module_location, original_dtk_module_name|
   it "copies initial module on location #{module_location}" do
     puts 'Add original content of dtk.module.yaml and module content', '----------------------------------------------------'

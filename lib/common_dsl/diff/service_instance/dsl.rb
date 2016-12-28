@@ -64,9 +64,11 @@ module DTK; module CommonDSL
                   diff_result.semantic_diffs.add_collate_level_elements?(collate_key, diffs_of_same_type)
                 end
               end
-              diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].each do |v|
-                v.each do |k|
-                  k[1]["CURRENT_VAL"], k[1]["NEW_VAL"] = k[1]["NEW_VAL"], k[1]["CURRENT_VAL"]
+              unless diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].nil?
+                diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].each do |v|
+                  v.each do |k|
+                    k[1]["CURRENT_VAL"], k[1]["NEW_VAL"] = k[1]["NEW_VAL"], k[1]["CURRENT_VAL"]
+                  end
                 end
               end
             end

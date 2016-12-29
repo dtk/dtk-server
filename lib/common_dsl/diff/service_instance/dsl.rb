@@ -37,7 +37,12 @@ module DTK; module CommonDSL
                 # TODO: DTK-2665: look at moving setting semantic_diffs because process_diffs can remove items
                 #  alternatively have items removed (e.g., create workflow rejected) in compute_base_diffs
                 diff_result.semantic_diffs = collated_diffs.serialize(dsl_version)
-                process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules], service_instance: service_instance, impacted_files: impacted_files, service_instance_parse: service_instance_parse)
+                require 'debugger'
+                Debugger.wait_connection = true
+                Debugger.start_remote
+                debugger
+                process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules], service_instance: service_instance, impacted_files: impacted_files)
+                postprocess_diffs_summary(diff_result, service_instance_parse, service_instance, module_branch, impacted_files) if diff_result.repo_updated
               end
             end
           end
@@ -51,28 +56,28 @@ module DTK; module CommonDSL
           assembly_gen.diff?(assembly_parse, QualifiedKey.new, service_instance: service_instance, impacted_files: opts[:impacted_files])
         end
         
-        #TODO: Further refactoring required
-        def self.update_semantic_diff(diff_result, service_instance, module_branch, impacted_files, service_instance_parse)
-          if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
-            service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
-            if new_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen, impacted_files: impacted_files)
-              update_collated = new_diffs.collate
-              diffs = update_collated.instance_variable_get(:@diffs)
-              SerializedHash.create(dsl_version: service_instance_gen.req(:DSLVersion)) do |serialized_hash|
-                CommonDSL::Diff::Collated::Sort::ForSerialize.sort_keys(diffs.keys).each do |collate_key|
-                  diffs_of_same_type = diffs[collate_key]
-                  diff_result.semantic_diffs.add_collate_level_elements?(collate_key, diffs_of_same_type)
-                end
-              end
-              unless diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].nil?
-                diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].each do |v|
-                  v.each do |k|
-                    k[1]["CURRENT_VAL"], k[1]["NEW_VAL"] = k[1]["NEW_VAL"], k[1]["CURRENT_VAL"]
-                  end
-                end
-              end
+        def self.postprocess_diffs_summary(diff_result, service_instance_parse, service_instance, module_branch, impacted_files)
+          unless diff_result.semantic_diffs['WORKFLOWS_MODIFIED']
+            new_service_instance_gen = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
+            new_base_diffs = compute_base_diffs?(service_instance, service_instance_parse, new_service_instance_gen, impacted_files: impacted_files)
+            new_collated_diffs = new_base_diffs.collate
+
+            dsl_version = new_service_instance_gen.req(:DSLVersion)
+            new_serialized_diffs = new_collated_diffs.serialize(dsl_version)
+            if workflows = new_serialized_diffs['WORKFLOWS_MODIFIED']
+              diff_result.semantic_diffs['WORKFLOWS_MODIFIED'] = revert_workflow_values(workflows)
             end
           end
+        end
+
+        def self.revert_workflow_values(workflows)
+          reversed_workflows = []
+
+          workflows.each do |workflow|
+            reversed_workflows << workflow.inject({}) { |h, (workflow_name, w)| h.merge!(workflow_name => {'CURRENT_VAL' => w['NEW_VAL'], 'NEW_VAL' => w['CURRENT_VAL']}) }
+          end
+
+          reversed_workflows
         end
 
         def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, opts = {})
@@ -85,12 +90,6 @@ module DTK; module CommonDSL
               
               # items_to_update are things that need to be updated in repo from what at this point are in object model
               items_to_update = diff_result.items_to_update
-              if diff_result.items_to_update.include?(:workflow)
-                service_instance       = opts[:service_instance]
-                impacted_files         = opts[:impacted_files]
-                service_instance_parse = opts[:service_instance_parse]
-                semantic_update =  update_semantic_diff(diff_result, service_instance, module_branch, impacted_files, service_instance_parse)
-              end
 
               unless items_to_update.empty?
                 # Treat updates to repo from object model as transaction that rolls back git repo to what client set it as

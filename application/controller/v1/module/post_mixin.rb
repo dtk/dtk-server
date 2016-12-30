@@ -100,7 +100,7 @@ module DTK
 
         local_params  = local_params(:common_module, module_name, namespace: namespace, version: version)
         remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
-        
+
         rest_ok_response CommonModule::Remote.publish(get_default_project, local_params, remote_params, rsa_pub_key) 
       end
 

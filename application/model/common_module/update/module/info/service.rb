@@ -18,6 +18,7 @@
 module DTK
   class CommonModule::Update::Module::Info
     class Service < self
+      require_relative('service/transform')
       
       def initialize(*args)
         service_instance_opts = args.pop
@@ -36,6 +37,11 @@ module DTK
           CommonModule::Info::Service.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, local_params)
           true
         end
+      end
+
+      def transform_from_common_module?
+        transform = Transform.new(parsed_common_module, self).compute_service_module_outputs!
+        file_path__content_array = transform.file_path__content_array
       end
 
       private

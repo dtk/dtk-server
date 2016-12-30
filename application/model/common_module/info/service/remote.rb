@@ -33,6 +33,14 @@ module DTK
 
           # The source info is on the repo handing off the common module branch
           pp [:commom_module_branch, commom_module_branch]
+          dsl_file_obj = CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(commom_module_branch)
+          parsed_common_module = dsl_file_obj.parse_content(:common_module)
+          CommonDSL::Parse.set_dsl_version!(commom_module_branch, parsed_common_module)
+
+          args = [project, local, nil, commom_module_branch, parsed_common_module, {}]
+          file_path__content_array = CommonModule::Update::Module::Info::Service.new(*args).transform_from_common_module?
+          # transform.input_paths.each { |path| RepoManager.delete_file?(path, {no_commit: true}, @aug_component_module_branch) }
+          RepoManager.add_files(module_branch, file_path__content_array)
           
           # Need to check below doing right thing; right now just pushing empty content since service module barnch is empty
 

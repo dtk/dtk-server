@@ -34,11 +34,10 @@ module DTK
         # returns true if component info is published
         def publish?
           unless module_branch = get_module_branch?
-            return nil # no component info
+            return nil
           end
-          repo = get_repo_with_branch
 
-          # DTK-2806: need to test whether call to publish_info is doing right thing
+          repo     = get_repo_with_branch
           response = module_obj.publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
           #  DTK-2806: need to check response for errors otr see if code throws errors
           pp [:publish_info_response, response]

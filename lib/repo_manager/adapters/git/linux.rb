@@ -153,9 +153,16 @@ module DTK
       
       # opts can have keys:
       #   :squash
+      #   :strategy - can be :theirs
       def git_command__merge(branch_to_merge_from, opts = {})
         command_array = [branch_to_merge_from]
         command_array << '--squash' if opts[:squash]
+        if strategy = opts[:strategy]
+          case strategy
+          when :theirs then command_array += ['-X', 'theirs']
+          else fail Error, "Not supported: opts[:strategy]=#{strategy}"
+          end
+        end
         git_command.merge(cmd_opts, *command_array)
       end
       

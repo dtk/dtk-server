@@ -440,6 +440,7 @@ module DTK; class RepoManager
 
     # opts can have keys:
     #   :squash
+    #   :strategy
     def merge_from_branch(branch_to_merge_from, opts = {})
       checkout(@branch) do
         git_command__merge(branch_to_merge_from, opts)

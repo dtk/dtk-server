@@ -22,7 +22,7 @@ module DTK; module CommonDSL
         def process(result, opts = {})
           assembly_instance    = service_instance.assembly_instance
           augmented_components = assembly_instance.get_augmented_components
-          base_component_name  = qualified_key.parent_component_name?(include_node: true)
+          base_component_name  = CommonDSL::Diff::QualifiedKey.parent_component_name?(qualified_key, include_node: true)
           dep_component_name   = parse_object
           dependency_name      = relative_distinguished_name
 

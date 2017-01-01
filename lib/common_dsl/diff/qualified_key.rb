@@ -21,47 +21,18 @@ module DTK
 
       # If this refers to element under a node than node object wil be returned; otherwise nil will be returned
       # if component is asembly level
-      def parent_node?(assembly_instance)
-        return @parent_node if @parent_node
+      def self.parent_node?(qualified_key, assembly_instance)
+        key_elements = qualified_key.key_elements
         if key_elements.size == 2 and key_elements[0].type.to_sym == :node
           node_name = key_elements[0].key
-          unless @parent_node = assembly_instance.get_node?([:eq, :display_name, node_name])
-            fail Error, "Unexpected that assembly '#{assembly_instance.display_name}' does not have a node with name '#{node_name}'"
-          end
-          @parent_node
-        end
-      end
-
-      def parent_node(assembly_instance)
-        parent_node?(assembly_instance) || fail(Error, "Unexepected that parent_node?(assembly_instance) is nil")
-      end
-
-      def parent_component_name?(opts = {})
-        node_name      = nil
-        component_name = nil
-
-        key_elements.each do |element|
-          if element[:type] == :component
-            component_name = element[:key]
-          elsif element[:type] == :node
-            node_name = element[:key]
-          end
-        end
-
-        opts[:include_node] ? "#{node_name}/#{component_name}" : component_name
-      end
-
-      # temp workaround for node = parent_node?
-      def self.parent_node?(key, assembly_instance)
-        if key.respond_to?(:parent_node?)
-          key.parent_node?(assembly_instance)
-        else
-          new(key.key_elements).parent_node?(assembly_instance)
+          assembly_instance.get_node?([:eq, :display_name, node_name]) || 
+            fail(Error, "Unexpected that assembly '#{assembly_instance.display_name}' does not have a node with name '#{node_name}'")
         end
       end
 
       # if node attribute returns [node_name, attribute_name]; otherwise returns nil
-      def is_node_attribute?
+      def self.is_node_attribute?(qualified_key)
+        key_elements = qualified_key.key_elements
         if key_elements.size == 2 and key_elements[0].type.to_sym == :node and key_elements[1].type.to_sym == :attribute
           node_name      = key_elements[0].key
           attribute_name = key_elements[1].key
@@ -69,8 +40,18 @@ module DTK
         end
       end
 
-      private
-      attr_reader :key_elements
+      def self.parent_component_name?(qualified_key, opts = {})
+        node_name      = nil
+        component_name = nil
+        qualified_key.key_elements.each do |element|
+          if element[:type] == :component
+            component_name = element[:key]
+          elsif element[:type] == :node
+            node_name = element[:key]
+          end
+        end
+        opts[:include_node] ? "#{node_name}/#{component_name}" : component_name
+      end
 
     end
   end

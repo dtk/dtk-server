@@ -219,7 +219,7 @@ module DTK; class Task; class Template
             end
           end
           node_actions = parse_and_reify_node_actions?(serialized_node_actions, node_name, node_id, action_list, opts)
-          node_actions ? h.merge(node_actions) : {}
+          node_actions ? h.merge(node_actions) : h
         end
         ret
       end

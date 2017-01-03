@@ -20,8 +20,8 @@ module DTK; module ModuleCommonMixin
   end
   module Create::Class
     # opts can have keys
-    #  :no_error_if_exists - Booelean (default: false)
-    #  :no_initial_commit - Booelean (default: false)
+    #  :no_error_if_exists - Boolean (default: false)
+    #  :no_initial_commit - Boolean (default: false)
     #  :return_module_branch - Boolean (default: false)
     #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     #  :create_implementation - Boolean (default: false)

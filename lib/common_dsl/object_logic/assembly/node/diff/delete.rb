@@ -16,16 +16,21 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::Node
+  class ObjectLogic::Assembly; class Node
     class Diff
       class Delete < CommonDSL::Diff::Element::Delete
-        def process(result, opts = {})
-          node = assembly_instance.get_node_by_name?(node_name)
+        # opts can have keys
+        #  :gen_object
+        def initialize(qualified_key, opts = {})
+          super
+          @node = ret_node
+        end
 
-          if node.is_node_group?
+        def process(result, opts = {})
+          if @node.is_node_group?
             fail Error "TODO: need to write delete for node groups"
           else
-            delete_node(node, result)
+            delete_node(result)
           end
 
           result.add_item_to_update(:workflow)
@@ -34,69 +39,75 @@ module DTK; module CommonDSL
 
         private
 
+        def node_has_been_created?
+          Node.node_has_been_created?(@node)
+        end
+
+        def ret_node
+          assembly_instance.get_node_by_name?(node_name)
+        end
+
         def node_name
           relative_distinguished_name
         end
 
-        def delete_node(node, result)
-          if node.get_admin_op_status == 'pending'
-            delete_node_and_nested_components(node, result, force_delete: true)
+        def delete_node(result)
+          if node_has_been_created?
+            # if node is created then splice into workflow explicit delete steps and remove refernces to actions on the deleted node
+            # and marke the node and netsed components as 'to be deleted'
+            delete_when_node_has_been_created(result)
           else
-            generate_delete_node_workflow(node, result)
+            # If node is not yet created then delete the node and its components from the assembly and the workflow
+            delete_node_and_nested_components(result, force_delete: true)
           end
         end
 
-        def delete_node_and_nested_components(node, result, opts = {})
-          delete_nested_components(node, result, opts)
+        def delete_node_and_nested_components(result, opts = {})
+          delete_nested_components(result, opts)
           delete_node_opts = result.semantic_diffs['WORKFLOWS_MODIFIED'] ? { do_not_update_task_template: true, destroy_nodes: true } : {destroy_nodes: true}
-          assembly_instance.delete_node(node.id_handle, delete_node_opts)
+          assembly_instance.delete_node(@node.id_handle, delete_node_opts)
         end
 
-        def delete_nested_components(node, result, opts = {})
-          node_components = node.get_components.reject{ |cmp| IgnoreComponents.include?(cmp[:component_type]) }
-          node_components.each do |component|
+        def delete_nested_components(result, opts = {})
+          non_node_components.each do |component|
             cmp_qualified_key = qualified_key.create_with_new_element?(:component, component[:display_name])
-            component_delete_diff = ObjectLogic::Assembly::Component::Diff::Delete.new(cmp_qualified_key, gen_object: component, service_instance: @service_instance)
+            component_delete_diff = Component::Diff::Delete.new(cmp_qualified_key, gen_object: component, service_instance: @service_instance)
             component_delete_diff.process(result, opts)
           end
         end
-        IgnoreComponents = ['ec2__properties', 'ec2__node']
 
-        def generate_delete_node_workflow(node, result, opts = {})
-          if has_cmps_with_delete_action?(node)
-            delete_nested_components(node, result, opts)
-            add_delete_node_subtask(node, result, opts)
+        def non_node_components
+          @non_node_components ||= @node.get_components.reject { |component|  Node.is_a_node_component?(component) }
+        end
+
+        def delete_when_node_has_been_created(result, opts = {})
+          if has_component_with_delete_action?
+            delete_nested_components(result, opts)
+            add_delete_node_subtask(result, opts)
           else
-            add_delete_node_subtask(node, result, opts)
-            delete_nested_components(node, result, opts)
+            add_delete_node_subtask(result, opts)
+            delete_nested_components(result, opts)
           end
+          @node.update_from_hash_assignments(to_be_deleted: true)
         end
 
-        private
-
-        def has_cmps_with_delete_action?(node)
-          has_delete_action = false
-          node_components   = node.get_components.reject{ |cmp| IgnoreComponents.include?(cmp[:component_type]) }
-
-          node_components.each do |component|
-            cmp_instance = DTK::Component::Instance.create_from_component(component)
-            if cmp_instance.get_action_def?('delete')
-              has_delete_action = true
-              break
-            end
-          end
-
-          has_delete_action
+        def has_component_with_delete_action?
+          !!non_node_components.find { |component| Component.component_delete_action_def?(component) }
         end
 
-        def add_delete_node_subtask(node, result, opts = {})
-          component             = node.get_components.find{ |nc| nc[:component_type].eql?('ec2__node') }
-          cmp_qualified_key     = qualified_key.create_with_new_element?(:component, component[:display_name])
-          component_delete_diff = ObjectLogic::Assembly::Component::Diff::Delete.new(cmp_qualified_key, gen_object: component, service_instance: @service_instance)
+        def add_delete_node_subtask(result, opts = {})
+          cmp_qualified_key     = qualified_key.create_with_new_element?(:component, canonical_node_component.display_name)
+          component_delete_diff = Component::Diff::Delete.new(cmp_qualified_key, gen_object: canonical_node_component, service_instance: @service_instance)
 
           component_delete_diff.process(result, opts)
         end
+
+        def canonical_node_component
+          @canonical_node_component ||= @node.get_components.find{ |component| Node.is_canonical_node_component?(component) } || 
+            fail(Error, "Unexpected no node component for node '#{node_name}'")
+        end
+
       end
     end
-  end
+  end; end
 end; end

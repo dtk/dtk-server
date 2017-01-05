@@ -48,7 +48,7 @@ module DTK; class Task
 
       def self.update_when_deleted_component?(assembly, node, component, opts = {})
         # TODO: currently only updating the create action task template and only if it is persisted
-        # makes sense to also automtically delete component in other actions
+        # makes sense to also automtically delete component in other actions aside from once in spliced in delete subtask
         assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
         task_action = DefaultTaskActionForUpdates
         if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, task_action)

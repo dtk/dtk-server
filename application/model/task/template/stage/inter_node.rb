@@ -18,10 +18,12 @@
 module DTK; class Task; class Template
   class Stage
     class InterNode < ::Hash
+      include Serialization
+      # 'include Serialization' must be done first
       require_relative('inter_node/factory')
       require_relative('inter_node/multi_node')
       require_relative('inter_node/nested_subtask')
-      include Serialization
+
 
       def initialize(name = nil)
         super()
@@ -54,7 +56,7 @@ module DTK; class Task; class Template
               ret << action
               # TODO: DTK-2680: Aldin
               #  Not high priority, but better to take this special purpose logic out of here and
-              #  instead when creating the dlete workflow explicitly put in the cleanup task
+              #  instead when creating the delete workflow explicitly put in the cleanup task
               #   so this would go in lib/common_dsl/object_logic/assembly/component/diff/delete/task_template/splice_in_delete_action.rb
               if is_component_delete_action?(action)
                 add_component_cleanup_task?(parent_task, node_actions, ret, action)
@@ -119,12 +121,11 @@ module DTK; class Task; class Template
       # can be over-written
       def delete_action!(action_match)
         node_id = action_match.action.node_id
-        unless node_action = self[node_id]
-          fail Error.new('Unexepected that no node action can be found')
-        end
-        if :empty == node_action.delete_action!(action_match)
-          delete(node_id)
-          :empty if empty?()
+        if node_action = self[node_id]
+          if :empty == node_action.delete_action!(action_match)
+            delete(node_id)
+            :empty if empty?()
+          end
         end
       end
 

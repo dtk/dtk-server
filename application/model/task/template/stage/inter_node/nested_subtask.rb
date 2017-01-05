@@ -21,14 +21,12 @@ module DTK;
       class NestedSubtask < self
         def initialize(serialized_content)
           super(serialized_content[:name])
-          @serialization_form = ret_serialization_form(serialized_content)
-          @import             = serialized_content[Field::Import]
-          @flatten            = serialized_content[Field::Flatten]
-
-          # subtasks get dynamically set
+          set_optional_fields!(serialized_content)
+          # subtasks get dynamically set by parse_and_reify!
           @subtasks = []
         end
-        
+        private :initialize
+
         # opts can have keys:
         #  :just_parse (Boolean)
         def self.parse_and_reify(serialized_content, action_list, opts = {})
@@ -40,28 +38,26 @@ module DTK;
             fail Error, "Unexpected that serialized_content[Field::Subtasks] is nil"
           end
           subtasks.each do |subtask|
-            @subtasks << self.class.parse_and_ret_normalized_content([subtask], serialized_content, action_list, opts)
+            reified_subtask = 
+              if subtask[Field::Subtasks]
+                NestedSubtask.parse_and_reify(subtask, action_list, opts)
+              else
+                InterNode.parse_and_ret_normalized_content([subtask], serialized_content, action_list, opts)
+              end
+            @subtasks << reified_subtask
           end
           self
         end
         
         def serialization_form(opts = {})
-          @serialization_form
-        end
-
-        def import?
-          @import
-        end
-
-        def flatten?
-          @flatten
+          optional_fields_for_serialization_form.merge(Field::Subtasks => @subtasks.map { |subtask| subtask.serialization_form(opts) })
         end
 
         # TODO: DTK-2680: Aldin
         # Put this in to flatten subtasks when nested subtaskl but this is creating error
          def add_subtasks!(parent_task, internode_stage_index, assembly_idh = nil)
            ret = []
-           if @flatten
+           if flatten?
             @subtasks.each do |subtask|
                ret += subtask.add_subtasks!(parent_task, internode_stage_index, assembly_idh)
              end
@@ -105,8 +101,20 @@ module DTK;
 
         private
 
-        def ret_serialization_form(serialized_content)
-          serialized_content
+        OPTIONAL_FIELDS = [Field::SubtaskOrder, Field::Import, Field::Flatten]
+        def set_optional_fields!(serialized_content)
+          @optional_fields = OPTIONAL_FIELDS.inject({}) do |h, k| 
+            v = serialized_content[k]
+            v.nil? ? h : h.merge(k => v)
+          end
+        end
+
+        def optional_fields_for_serialization_form
+          @optional_fields
+        end
+
+        def flatten?
+          @optional_fields[Field::Flatten]
         end
 
       end

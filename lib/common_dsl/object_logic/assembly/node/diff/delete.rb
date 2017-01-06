@@ -77,7 +77,7 @@ module DTK; module CommonDSL
         end
 
         def non_node_components
-          @non_node_components ||= @node.get_components.reject { |component|  Node.is_a_node_component?(component) }
+          @non_node_components ||= @node.get_components.reject { |component| ::DTK::Component::Domain::Node.is_type_of?(component) }
         end
 
         def delete_when_node_has_been_created(result, opts = {})
@@ -103,7 +103,7 @@ module DTK; module CommonDSL
         end
 
         def canonical_node_component
-          @canonical_node_component ||= @node.get_components.find{ |component| Node.is_canonical_node_component?(component) } || 
+          @canonical_node_component ||= @node.get_components.find{ |component| ::DTK::Component::Domain::Node::Canonical.is_type_of?(component) } ||
             fail(Error, "Unexpected no node component for node '#{node_name}'")
         end
 

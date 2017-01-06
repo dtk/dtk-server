@@ -144,20 +144,22 @@ module DTK; class Task
         each_with_index { |internode_stage, i| block.call(internode_stage, i + 1) }
       end
 
-      def add_ndx_action_index!(hash, action)
-        self.class.add_ndx_action_index!(hash, action)
+      def add_ndx_action_index!(hash, indexed_action)
+        self.class.add_ndx_action_index!(hash, indexed_action)
       end
-      def self.add_ndx_action_index!(hash, action)
-        (hash[action.node_id] ||= []) << action.index
+      def self.add_ndx_action_index!(hash, indexed_action)
+        fail Error, "Unexpected that the following action does not have an index: #{indexed_action.inspect}" unless indexed_action.index
+        (hash[indexed_action.node_id] ||= []) << indexed_action.index
         hash
       end
 
-      def includes_action?(action)
-        ndx_action_indexes = add_ndx_action_index!({}, action)
+      # if template content includes action, ActionMatch is found
+      def includes_action?(indexed_action)
+        # ndx_action_indexes has node id as index and action_index array as values 
+        ndx_action_indexes = add_ndx_action_index!({}, indexed_action)
         return nil if ndx_action_indexes.empty?
         each_internode_stage do |internode_stage, stage_index|
-          action_match = ActionMatch.new(action)
-          if internode_stage.find_earliest_match?(action_match, ndx_action_indexes)
+          if action_match = internode_stage.includes_action?(indexed_action, ndx_action_indexes: ndx_action_indexes) 
             action_match.internode_stage_index = stage_index
             return action_match
           end
@@ -173,10 +175,6 @@ module DTK; class Task
         else
           self[internode_stage_index - 1]
         end
-      end
-
-      def delete_internode_stage!(internode_stage_index)
-        delete_at(internode_stage_index - 1)
       end
 
       def create_stages!(object, actions, opts = {})

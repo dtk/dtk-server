@@ -63,15 +63,6 @@ module DTK; module CommonDSL
           node.get_admin_op_status != 'pending'
         end
 
-        CANONICAL_NODE_COMPONENT_TYPE = 'ec2__node'
-        NODE_COMPONENT_TYPES = [CANONICAL_NODE_COMPONENT_TYPE, 'ec2__properties']
-        def self.is_canonical_node_component?(component)
-          component.get_field?(:component_type).eql?(CANONICAL_NODE_COMPONENT_TYPE)
-        end
-        def self.is_a_node_component?(component)
-          NODE_COMPONENT_TYPES.include?(component.get_field?(:component_type))
-        end
-
         private
 
         def self.get_augmented_nodes(assembly_instance, opts = {})

@@ -21,39 +21,56 @@ module DTK
       module DeleteMixin
         # if action is explicitly included in task template then delete the action from this object and return updated object
         # else return nil
+        # opts can have keys:
+        #   :remove_delete_action  
+        #  TODO: ...
         def delete_explicit_action?(action, action_list, opts = {})
-          opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod)
-          if indexed_action = action_list.find { |a| a.match_action?(action, opts) }
-            # TODO: DTK-2732: validate: think this will be executed on cleanup task, we need to delete .delete action from workflow
-            # I put in this opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod) above and also
-            # this part below because in action_list above it will not match component .delete action but only action for creating component
-            # on config node
-            # So I put this part below which will match component .delete action and delete it, instead of deleting component create action
-            #
-            if action.is_a?(Action::WithMethod)
-              indexed_action = action if indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]") || opts[:remove_delete_action]
-            end
+          # TODO: cleanup so dont use merge; firs make sure not used outside this context
+          opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod) 
+          if indexed_action = indexed_action?(action, action_list, Aux.hash_subset(opts, [:remove_delete_action]))
             if action_match = includes_action?(indexed_action)
-              # TODO: DTK-2732: look at whether when it is not in_multinode_stage whether we should still delete if this component is only instance
-              # that matches this step. 
-              # note: in_multinode_stage is somehwta in misnomer in that it can be true when step only refers to assembly wide
-              if action_match.is_assembly_wide? or !action_match.in_multinode_stage
-                delete_action!(action_match)
-                self
-              end
+              delete_action?(action_match, indexed_action, opts)
             end
           end
         end
-        
+
         private
+          
+        def indexed_action?(action, action_list, opts = {})
+          if indexed_action = action_list.find { |a| a.match_action?(action, opts) }
+            # TODO: DTK-2732: validate: this will be executed on cleanup task, we need to delete .delete action from workflow
+            # and cleanup
+            # also cleanup up refernce "ec2::node ...
+            if action.is_a?(Action::WithMethod) and 
+                (indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]") || opts[:remove_delete_action]) 
+              indexed_action = action 
+            end
+            indexed_action
+          end
+        end
         
+        def delete_action?(action_match, indexed_action, opts = {})
+          # TODO: DTK-2732: look at whether when it is not in_multinode_stage whether we should still delete if this component is only instance
+          # that matches this step. 
+          # note: 'in_multinode_stage' is somewhat in misnomer in that it can be true when step only refers to assembly wide
+          if action_match.is_assembly_wide? or !action_match.in_multinode_stage
+            delete_action!(action_match, indexed_action, opts)
+            self
+          end
+        end
         
-        def delete_action!(action_match)
+        def delete_action!(action_match, indexed_action, opts = {})
           internode_stage_index = action_match.internode_stage_index
-          if :empty == internode_stage(internode_stage_index).delete_action!(action_match)
+          internode_stage       = internode_stage(internode_stage_index)
+          
+          if :empty == internode_stage.delete_action!(action_match)
             delete_internode_stage!(internode_stage_index)
             :empty if empty?
-          end
+          end          
+        end
+
+        def delete_internode_stage!(internode_stage_index)
+          delete_at(internode_stage_index - 1)
         end
         
       end

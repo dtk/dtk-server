@@ -15,10 +15,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class Component
-  # For special objects               
-  class Domain
-    r8_nested_require('domain', 'nic')
+module DTK
+  class Component
+    # For components with special semantics
+    class Domain
+      require_relative('domain/node')
+
+      def self.is_type_of?(component)
+        self::TYPES.include?(component.get_field?(:component_type))
+      end
+    end
+  end
+end
+
+=begin
+# TODO: may put back in
+    require_relative('domain/nic')
 
     def initialize(component)
       # component with attributes
@@ -66,3 +78,4 @@ module DTK; class Component
     end
   end
 end; end
+=end

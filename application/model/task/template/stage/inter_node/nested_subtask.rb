@@ -70,12 +70,14 @@ module DTK;
            ret
          end
 
-         # TODO: DTK-2680: Aldin; we need to check if this is written right
-         def delete_action!(action_match)
+         def delete_action!(parent_action_match)
            delete_elements = []
            @subtasks.each_with_index do |subtask, i| 
-             if :empty == subtask.delete_action!(action_match) 
-               delete_elements << i
+             # action_match is only applicable to top level and needs to be recalculated
+             if action_match = subtask_action_match?(subtask, parent_action_match)
+               if :empty == subtask.delete_action!(action_match) 
+                 delete_elements << i
+               end
              end
            end
            # Need to rerverse order since when delete it shifts order if from beginning
@@ -117,6 +119,9 @@ module DTK;
           @optional_fields[Field::Flatten]
         end
 
+        def subtask_action_match?(subtask, parent_action_match)
+          subtask.includes_action?(parent_action_match.insert_action)
+        end
       end
     end
   end

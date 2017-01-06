@@ -52,8 +52,7 @@ module DTK; module CommonDSL
                 assembly_instance.delete_component(component.id_handle, node.id, delete_cmp_opts)
               else
                 task_template_processor.insert_explict_delete_action?(force_delete: opts[:force_delete])
-                task_template_processor.remove_component_actions? unless Node.is_canonical_node_component?(component)
-
+                task_template_processor.remove_component_actions? unless ::DTK::Component::Domain::Node::Canonical.is_type_of?(component)
                 component.update_from_hash_assignments(to_be_deleted: true)
               end
 

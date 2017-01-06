@@ -25,7 +25,6 @@ module DTK; class Task
       # opts can have keys:
       #    :delete_action
       #    :delete_params
-      #    :remove_delete_action
       #    TODO: any more options
       def self.create_hash(assembly, component, node, opts = {})
         hash = {

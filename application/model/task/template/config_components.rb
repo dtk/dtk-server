@@ -54,7 +54,7 @@ module DTK; class Task
         if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, task_action)
           update_opts = {}
           # special case for canonical node component used for generating delete-node workflow
-          if Component::Domain::Node::Canonical.is_type_of?(component) || opts[:remove_delete_action] 
+          if Component::Domain::Node::Canonical.is_type_of?(component)
             update_opts.merge!(:action_def => CommonDSL::ObjectLogic::Assembly::Component.component_delete_action_def?(component))
           end
           action_to_delete = Action.create(component.add_title_field?().merge(node: node), update_opts)

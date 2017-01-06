@@ -22,11 +22,9 @@ module DTK
         # if action is explicitly included in task template then delete the action from this object and return updated object
         # else return nil
         # opts can have keys:
-        #   :remove_delete_action  
         #  TODO: ...
-        # TODO: DTK-2732: check if get opts[:remove_delete_action]
         def delete_explicit_action?(action, action_list, opts = {})
-          match_opts = Aux.hash_subset(opts, [:remove_delete_action]).merge(class: action.is_a?(Action::WithMethod) && Action::WithMethod)
+          match_opts = (action.is_a?(Action::WithMethod) ? { class: Action::WithMethod } : {})
           if indexed_action = action_list.find { |a| a.match_action?(action, match_opts) }
             if action_match = includes_action?(indexed_action)
               delete_action?(action_match, indexed_action, opts)

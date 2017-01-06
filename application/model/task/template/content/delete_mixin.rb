@@ -25,9 +25,8 @@ module DTK
         #   :remove_delete_action  
         #  TODO: ...
         def delete_explicit_action?(action, action_list, opts = {})
-          # TODO: cleanup so dont use merge; firs make sure not used outside this context
-          opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod) 
-          if indexed_action = indexed_action?(action, action_list, Aux.hash_subset(opts, [:remove_delete_action]))
+          indexed_action_opts = Aux.hash_subset(opts, [:remove_delete_action]).merge(class: action.is_a?(Action::WithMethod) && Action::WithMethod)
+          if indexed_action = indexed_action?(action, action_list, indexed_action_opts)
             if action_match = includes_action?(indexed_action)
               delete_action?(action_match, indexed_action, opts)
             end

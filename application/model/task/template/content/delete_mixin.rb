@@ -24,9 +24,10 @@ module DTK
         # opts can have keys:
         #   :remove_delete_action  
         #  TODO: ...
+        # TODO: DTK-2732: check if get opts[:remove_delete_action]
         def delete_explicit_action?(action, action_list, opts = {})
-          indexed_action_opts = Aux.hash_subset(opts, [:remove_delete_action]).merge(class: action.is_a?(Action::WithMethod) && Action::WithMethod)
-          if indexed_action = indexed_action?(action, action_list, indexed_action_opts)
+          match_opts = Aux.hash_subset(opts, [:remove_delete_action]).merge(class: action.is_a?(Action::WithMethod) && Action::WithMethod)
+          if indexed_action = action_list.find { |a| a.match_action?(action, match_opts) }
             if action_match = includes_action?(indexed_action)
               delete_action?(action_match, indexed_action, opts)
             end
@@ -35,19 +36,6 @@ module DTK
 
         private
           
-        def indexed_action?(action, action_list, opts = {})
-          if indexed_action = action_list.find { |a| a.match_action?(action, opts) }
-            # TODO: DTK-2732: validate: this will be executed on cleanup task, we need to delete .delete action from workflow
-            # and cleanup
-            # also cleanup up refernce "ec2::node ...
-            if action.is_a?(Action::WithMethod) and 
-                (indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]") || opts[:remove_delete_action]) 
-              indexed_action = action 
-            end
-            indexed_action
-          end
-        end
-        
         def delete_action?(action_match, indexed_action, opts = {})
           # TODO: DTK-2732: look at whether when it is not in_multinode_stage whether we should still delete if this component is only instance
           # that matches this step. 

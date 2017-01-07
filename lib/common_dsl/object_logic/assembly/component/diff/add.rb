@@ -22,24 +22,10 @@ module DTK; module CommonDSL
         include Mixin
 
         def process(result, opts = {})
-          matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component_name) 
-          aug_cmp_template = nil
+          service_instance_branch = opts[:service_instance_branch] || fail(Error, "Unexpected that opts[:service_instance_branch] is nil")
+          dependent_module_refs   = ModuleRefs.get_component_module_refs(service_instance_branch)
 
-          if matching_aug_cmp_templates.empty?
-            result.add_error_msg("Component '#{qualified_key.print_form}' does not match any installed component templates")
-          elsif matching_aug_cmp_templates.size > 1
-            aug_cmp_template = find_matching_dependency(matching_aug_cmp_templates, opts[:dependent_modules])
-
-            unless aug_cmp_template
-              error_msg = "Component '#{qualified_key.print_form}' matches multiple installed component templates. Please select one of the following templates by adding under dependencies key inside 'dtk.service.yaml' file:"
-              error_msg += "\n#{pretty_print_templates(matching_aug_cmp_templates).join(",\n")}"
-              result.add_error_msg(error_msg)
-            end
-          else
-            aug_cmp_template = matching_aug_cmp_templates.first
-          end
-
-          if aug_cmp_template
+          if aug_cmp_template = matching_aug_component_template?(dependent_module_refs)
             node = parent_node? || assembly_instance.create_assembly_wide_node?
             new_component_idh = add_component_to_node(node, aug_cmp_template, component_title: component_title?)
 
@@ -48,10 +34,34 @@ module DTK; module CommonDSL
 
             # any attributes that all in diff are overrides that subsume the component's default attributes
             set_attribute_overrides(result, new_component_idh)
-          end 
+          else
+            result.add_error_msg(error_msg_when_missing_module_ref(dependent_module_refs))
+          end                   
         end
         
         private
+        def matching_aug_component_template?(dependent_module_refs)
+          # TODO: for DTK-2822
+          # use dependent_module_refs to see if component_name's module is in mdoule refs
+          #  if not return nil otehr wise use the matching namespace and version to find template
+          # probably circumvent below or use versions that returns all matches for module name
+          #matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component_name) 
+          fail Error, "Need to write matching_aug_component_template?"
+        end
+
+        def error_msg_when_missing_module_ref(dependent_module_refs)
+          # TODO: for DTK-2822: below is code that is legacy; use dependent_module_refs instead of find_matching_dependency(matching_aug_cmp_templates, opts[:dependent_modules])
+
+          # "Component '#{qualified_key.print_form}' does not match any installed component templates")
+          # elsif matching_aug_cmp_templates.size > 1
+          # aug_cmp_template = find_matching_dependency(matching_aug_cmp_templates, opts[:dependent_modules])
+
+          #  unless aug_cmp_template
+          #    error_msg = "Component '#{qualified_key.print_form}' matches multiple installed component templates. Please select one of the following templates by adding under dependencies key inside 'dtk.service.yaml' file:"
+          #    error_msg += "\n#{pretty_print_templates(matching_aug_cmp_templates).join(",\n")}"
+          fail Error, "Need to write error_msg_when_missing_module_ref"
+        end
+        
 
         # opts can have keys:
         #   :component_title
@@ -97,7 +107,8 @@ module DTK; module CommonDSL
         def attributes_semantic_parse_hash
           @attributes_semantic_parse_hash ||= @parse_object.val(:Attributes) || {}
         end
-        
+=begin
+TODO: deprecate        
         def find_matching_dependency(matching_aug_cmp_templates, dependencies = {})
           return if dependencies.nil? || dependencies.empty?
           
@@ -113,7 +124,7 @@ module DTK; module CommonDSL
         def match_templates_against_dependency(templates, dep_name, dep_version = 'master')
           templates.find{ |template| "#{template[:namespace][:display_name]}/#{template[:display_name]}".eql?(dep_name) && template[:version].eql?(dep_version) }
         end
-        
+=end        
         def pretty_print_templates(templates)
           temp_array = []
           
@@ -123,7 +134,7 @@ module DTK; module CommonDSL
           
           temp_array
         end
-        
+
       end
     end
   end

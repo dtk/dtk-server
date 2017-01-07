@@ -71,12 +71,11 @@ end
             node_group_member.bump_down_associated_node_group_cardinality() unless node_group_member[:ng_member_deleted]
           end
         end
-
-        if opts[:update_task_template]
-          unless assembly = opts[:assembly]
-            fail Error.new('If update_task_template is set, :assembly must be given as an option')
-          end
-          update_task_templates_when_deleted_node?(assembly)
+        
+        if opts[:update_task_template] # TODO: think we can cleanup upstream to call option :cleanup, a better description
+          assembly = opts[:assembly] || fail(Error, "If update_task_template is set, :assembly must be given as an option")
+          # updates task template to remove all references to node, which includes removing subtask temporaly spliced that does actual delete  
+          Task::Template::ConfigComponents.cleanup_after_node_has_been_deleted?(assembly, self)
         end
         Model.delete_instance(id_handle())
         true
@@ -132,16 +131,6 @@ end
         delete_object(opts)
       end
 
-      def update_task_templates_when_deleted_node?(assembly)
-        # TODO: can be more efficient if have Task::Template method that takes node and deletes all teh nodes component in bulk
-        sp_hash = {
-          #:only_one_per_node,:ref are put in for info needed when getting title
-          cols: [:id, :display_name, :node_node_id, :only_one_per_node, :ref],
-          filter: [:eq, :node_node_id, id()]
-        }
-        components = Component::Instance.get_objs(model_handle(:component), sp_hash)
-        components.map { |cmp| Task::Template::ConfigComponents.update_when_deleted_component?(assembly, self, cmp) }
-      end
     end
   end
 end; end

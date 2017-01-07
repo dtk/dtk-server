@@ -58,13 +58,13 @@ module DTK; module CommonDSL
             delete_when_node_has_been_created(result)
           else
             # If node is not yet created then delete the node and its components from the assembly and the workflow
-            delete_node_and_nested_components(result, force_delete: true)
+            delete_when_node_not_yet_created(result)
           end
         end
 
-        def delete_node_and_nested_components(result, opts = {})
-          delete_nested_components(result, opts)
-          delete_node_opts = result.semantic_diffs['WORKFLOWS_MODIFIED'] ? { do_not_update_task_template: true, destroy_nodes: true } : {destroy_nodes: true}
+        def delete_when_node_not_yet_created(result)
+          delete_nested_components(result, force_delete: true)
+          delete_node_opts = result.semantic_diffs['WORKFLOWS_MODIFIED'] ? { do_not_update_task_template: true} : {}
           assembly_instance.delete_node(@node.id_handle, delete_node_opts)
         end
 

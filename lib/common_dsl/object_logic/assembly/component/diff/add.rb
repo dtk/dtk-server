@@ -41,6 +41,9 @@ module DTK; module CommonDSL
         
         private
         def matching_aug_component_template?(dependent_module_refs)
+          pp [:component_name, component_name]
+          matching_aug_cmp_templates = ::DTK::Component::Template.find_matching_component_templates(assembly_instance, component_name)
+          pp [:matching_aug_cmp_templates, matching_aug_cmp_templates]
           # TODO: for DTK-2822
           # use dependent_module_refs to see if component_name's module is in mdoule refs
           #  if not return nil otehr wise use the matching namespace and version to find template

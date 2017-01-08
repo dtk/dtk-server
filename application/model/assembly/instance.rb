@@ -169,25 +169,24 @@ module DTK; class  Assembly
       new_obj
     end
 
-    # TODO: encapsulate where this comes from
-    EC2_PROPERTIES_DISPLAY_NAME = 'ec2::properties'
-    EC2_PROPERTIES_NAMESPACE    = 'aws'
+    def add_ec2_node_component(project, node)
+      domain_component = Component::Domain::Node::Canonical
+      cmp_name         = "#{domain_component.ec2_component_display_name_form}[#{node.name}]"
+      namespace        = domain_component.ec2_namespace
+      add_ec2_component(node, cmp_name, namespace, donot_update_workflow: true)
+    end
+
     def add_ec2_properties_and_set_attributes(project, node, image, instance_size)
-      cmp_name  = EC2_PROPERTIES_DISPLAY_NAME
-      namespace = EC2_PROPERTIES_NAMESPACE
+      domain_component = Component::Domain::Node::Properties
+      cmp_name         = domain_component.ec2_component_display_name_form
+      namespace        = domain_component.ec2_namespace
 
-      unless aug_component_template = Component::Template.get_augmented_component_template?(self, cmp_name, namespace: namespace, use_base_template: true)
-        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
-      end
-
-      opts = Opts.new( auto_complete_links: true, project: project)
-      component_title = ComponentTitle.parse_title?(cmp_name)
-      new_component_idh = add_component(node.id_handle(), aug_component_template, component_title, opts)
+      new_node_component = add_ec2_component(node, cmp_name, namespace, auto_complete_links: true)
 
       node.update_object!(:display_name)
-      node_name = node[:display_name]
+      node_name = node.display_name
 
-      service = Service.new(self, components: [new_component_idh.create_object()])
+      service = Service.new(self, components: [new_node_component])
       node = (CommandAndControl.create_nodes_from_service(service)||[]).first
 
       av_pairs = []
@@ -199,26 +198,29 @@ module DTK; class  Assembly
       node.validate_and_fill_in_values!
     end
 
-    def add_ec2_node_component(project, node)
-      cmp_name  = "ec2::node[#{node.name}]"
-      namespace = 'aws'
-
-      unless aug_component_template = Component::Template.get_augmented_component_template?(self, cmp_name, namespace: namespace, use_base_template: true)
-        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
+    # opts can have keys 
+    #   :auto_complete_links
+    #   :donot_update_workflow
+    def add_ec2_component(node, cmp_name, namespace, opts = {})
+      Log.error("need to fix 'add_ec2_component so version is taken care of by making call to a method othaer than Component::Template.get_augmented_base_component_template?")
+      unless aug_component_template =  Component::Template.get_augmented_base_component_template?(self, cmp_name, namespace) ||
+        fail(ErrorUsage, "Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
       end
-
-      opts = Opts.new(project: project, donot_update_workflow: true)
-      component_title = ComponentTitle.parse_title?(cmp_name)
-      add_component(node.id_handle, aug_component_template, component_title, opts)
+      new_component_idh = add_component(node.id_handle, aug_component_template, ComponentTitle.parse_title?(cmp_name), Opts.new(opts.merge(project: project)))
+      new_component_idh.create_object
     end
+    private :add_ec2_component
 
     # aug_cmp_template is a component template augmented with keys having objects
     # :module_branch
     # :component_module
     # :namespace
     # opts can have
+    #  :project 
     #  :idempotent
     #  :donot_update_workflow
+    #  :splice_in_delete_action
+    #  TODO: ...
     def add_component(node_idh, aug_cmp_template, component_title, opts = {})
       # if node_idh it means we call add component from node context
       # else we call from service instance/workspace and use assembly_wide node

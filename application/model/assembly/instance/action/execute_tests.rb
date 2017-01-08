@@ -246,47 +246,6 @@ module DTK
           end
         end
 
-        #TODO: deprecate
-        #TODO: rather than passing in strings, have controller/helper methods convert to ids and objects, rather than passing
-        def get_augmented_component_templates(nodes, components)
-          ret = []
-          if nodes.empty?
-            return ret
-          end
-
-          sp_hash = {
-            cols: [:id, :group_id, :instance_component_template_parent, :node_node_id],
-            filter: [:oneof, :node_node_id, nodes.map(&:id)]
-          }
-          ret = Model.get_objs(nodes.first.model_handle(:component), sp_hash).map do |r|
-            r[:component_template].merge(node_node_id: r[:node_node_id], component_instance_id: r[:id])
-          end
-          if components.nil? || components.empty? or !components.include? '/'
-            return ret
-          end
-
-          cmp_node_names = components.map do |name_pairs|
-            if name_pairs.include? '/'
-              split = name_pairs.split('/')
-                if split.size == 2
-                  { node_name: split[0], component_name: Component.display_name_from_user_friendly_name(split[1]) }
-                else
-                  Log.error("unexpected component form: #{name_pairs}; skipping")
-                  nil
-                end
-            else
-                { component_name: Component.display_name_from_user_friendly_name(name_pairs) }
-            end
-          end.compact
-          ndx_node_names = nodes.inject({}) { |h, n| h.merge(n[:id] => n[:display_name]) }
-
-          #only keep matching ones
-          ret.select do |cmp_template|
-            cmp_node_names.find do |r|
-              r[:node_name] == ndx_node_names[cmp_template[:node_node_id]] && r[:component_name] == cmp_template[:display_name]
-            end
-          end
-        end
       end
     end
   end

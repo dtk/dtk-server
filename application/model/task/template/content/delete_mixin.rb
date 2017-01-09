@@ -32,6 +32,16 @@ module DTK
           end
         end
 
+        def delete_actions_on_node?(node, action_list)
+          # delete if it exists canonical node delete action, which servres to update the spliced in delete subtask 
+          if delete_action = canonical_node_component_delete_action?(node)
+            delete_explicit_action?(delete_action, action_list)
+          else
+            Log.error("Unexpected that node '#{node.display_name}' does not have a canonical_node_component")
+          end
+          delete_components_on_node!(node)
+        end
+
         private
           
         def delete_action?(action_match, indexed_action, opts = {})
@@ -54,10 +64,37 @@ module DTK
           end          
         end
 
+        def delete_components_on_node!(node)
+          each_internode_stage do |internode_stage, internode_stage_index|
+            if :empty == internode_stage.delete_components_on_node!(node)
+              delete_internode_stage!(internode_stage_index)
+              :empty if empty?
+            end
+          end
+        end
+
         def delete_internode_stage!(internode_stage_index)
           delete_at(internode_stage_index - 1)
         end
-        
+
+        def canonical_node_component_delete_action?(node)
+          if canonical_node_component = canonical_node_component?(node)
+            delete_action_def = CommonDSL::ObjectLogic::Assembly::Component.component_delete_action_def?(canonical_node_component)
+            Action.create(canonical_node_component.add_title_field?().merge(node: node), action_def: delete_action_def)
+          end
+        end
+
+        def canonical_node_component?(node)
+         sp_hash = {
+           #:only_one_per_node,:ref are put in for info needed when getting title
+           cols: [:id, :display_name, :node_node_id, :only_one_per_node, :ref],
+            filter: [:eq, :node_node_id, node.id]
+          }
+          Component::Instance.get_objs(node.model_handle(:component), sp_hash).find do |component|
+            Component::Domain::Node::Canonical.is_type_of?(component)
+          end
+        end
+
       end
     end
   end

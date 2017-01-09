@@ -120,6 +120,15 @@ module DTK; class Task; class Template
         end
       end
 
+      # can be over-written
+      def delete_components_on_node!(node)
+        node_id = node.id
+        if node_action = self[node_id]
+          delete(node_id)
+          :empty if empty?()
+        end
+      end
+
       # TODO: DTK-2759: thnk this need to be overwritten for nested task
       def splice_in_action!(action_match, insert_point)
         unless node_id = action_match.insert_action.node_id

@@ -80,9 +80,19 @@ module DTK;
                end
              end
            end
-           # Need to rerverse order since when delete it shifts order if from beginning
-           delete_elements.reverse.each { |i| @subtasks.delete_at(i) }
+           delete_empty_subtasks!(delete_elements)
            :empty if @subtasks.empty?
+         end
+
+         def delete_node!(node)
+          delete_elements = []
+           @subtasks.each_with_index do |subtask, i| 
+             if :empty == subtask.delete_node!(node)
+               delete_elements << i
+             end
+           end
+           delete_empty_subtasks!(delete_elements)
+          :empty if @subtasks.empty?
          end
         
         def find_earliest_match?(action_match, ndx_action_indexes)
@@ -122,6 +132,12 @@ module DTK;
         def subtask_action_match?(subtask, parent_action_match)
           subtask.includes_action?(parent_action_match.insert_action)
         end
+
+        def delete_empty_subtasks!(delete_elements)
+          # Need to rerverse order since when delete it shifts order if from beginning
+          delete_elements.reverse.each { |i| @subtasks.delete_at(i) }
+        end
+
       end
     end
   end

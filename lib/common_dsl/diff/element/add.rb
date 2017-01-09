@@ -34,7 +34,21 @@ module DTK
         def serialize(serialized_hash)
           serialized_hash.serialize_add_element(self)
         end
-        
+
+        private
+        # opts can have keys:
+        #   :service_instance_branch (required)
+        #   :component_module_refs
+        def component_module_refs(opts = {})
+          unless @component_module_refs ||= opts[:component_module_refs]
+            service_instance_branch = opts[:service_instance_branch] || fail(Error, "Unexpected that opts[:service_instance_branch] is nil")
+            @component_module_refs ||= ModuleRefs.get_component_module_refs(service_instance_branch)
+          end
+        end        
+
+        def find_matching_aug_component_template?(component_type, module_ref)
+          assembly_instance.find_matching_aug_component_template?(component_type, module_ref.namespace, module_ref.version_string)
+        end
       end
     end
   end

@@ -17,12 +17,12 @@
 #
 module DTK
   class ModuleRefs
-    r8_nested_require('module_refs', 'mixin')
-    r8_nested_require('module_refs', 'parse')
-    r8_nested_require('module_refs', 'component_dsl_form')
-    r8_nested_require('module_refs', 'matching_templates')
-    r8_nested_require('module_refs', 'tree')
-    r8_nested_require('module_refs', 'lock')
+    require_relative('module_refs/mixin')
+    require_relative('module_refs/parse')
+    require_relative('module_refs/component_dsl_form')
+    require_relative('module_refs/matching_templates')
+    require_relative('module_refs/tree')
+    require_relative('module_refs/lock')
     include MatchingTemplatesMixin
 
     attr_reader :parent, :component_modules
@@ -97,16 +97,19 @@ module DTK
 
     # serializes and saves object to repo
     def serialize_and_save_to_repo?(opts = {})
-      dsl_hash_form = dsl_hash_form()
+      dsl_hash_form = dsl_hash_form
       if !dsl_hash_form.empty? || opts[:ambiguous] || opts[:possibly_missing] || opts[:create_empty_module_refs]
-        meta_filename_path = meta_filename_path()
         @parent.serialize_and_save_to_repo?(meta_filename_path, dsl_hash_form, nil, opts)
       end
     end
 
+    def component_module_ref?(cmp_module_name)
+      @component_modules[key(cmp_module_name)]
+    end
+
     def matching_component_module_namespace?(cmp_module_name)
       if module_ref = component_module_ref?(key(cmp_module_name))
-        module_ref.namespace()
+        module_ref.namespace
       end
     end
 
@@ -122,7 +125,7 @@ module DTK
 
     def update_component_template_ids(component_module)
       # first get filter so can call get_augmented_component_refs
-      assembly_templates = component_module.get_associated_assembly_templates()
+      assembly_templates = component_module.get_associated_assembly_templates
       return if assembly_templates.empty?
       filter = [:oneof, :id, assembly_templates.map { |r| r[:id] }]
       opts = {
@@ -138,7 +141,7 @@ module DTK
 
     def has_module_version?(cmp_module_name, version_string)
       if cmp_module_ref = component_module_ref?(cmp_module_name)
-        cmp_module_ref.version_string() == version_string
+        cmp_module_ref.version_string == version_string
       end
     end
 
@@ -192,12 +195,8 @@ module DTK
       ModuleRef.create_or_update(parent, cmp_modules.values)
     end
 
-    def component_module_ref?(cmp_module_name)
-      @component_modules[key(cmp_module_name)]
-    end
-
     def add_or_set_component_module_ref(cmp_module_name, mod_ref_hash)
-      @component_modules[key(cmp_module_name)] = ModuleRef.reify(@parent.model_handle(), mod_ref_hash)
+      @component_modules[key(cmp_module_name)] = ModuleRef.reify(@parent.model_handle, mod_ref_hash)
     end
 
     def self.key(el)
@@ -208,10 +207,10 @@ module DTK
     end
 
     def self.isa_dsl_filename?(path)
-      path == meta_filename_path()
+      path == meta_filename_path
     end
     def meta_filename_path
-      self.class.meta_filename_path()
+      self.class.meta_filename_path
     end
     def self.meta_filename_path
       ServiceModule::DSLParser.default_rel_path?(:component_module_refs) ||
@@ -219,10 +218,10 @@ module DTK
     end
 
     def dsl_hash_form
-      ret = SimpleOrderedHash.new()
+      ret = SimpleOrderedHash.new
       dsl_hash_form = {}
       component_modules.each_pair do |cmp_module_name, cmr|
-        hf = cmr.dsl_hash_form()
+        hf = cmr.dsl_hash_form
         dsl_hash_form[cmp_module_name.to_s] = hf unless hf.empty?
       end
 
@@ -230,7 +229,7 @@ module DTK
         return ret
       end
 
-      sorted_dsl_hash_form = dsl_hash_form.keys.map(&:to_s).sort().inject(SimpleOrderedHash.new()) do |h, k|
+      sorted_dsl_hash_form = dsl_hash_form.keys.map(&:to_s).sort.inject(SimpleOrderedHash.new) do |h, k|
         h.merge(k => dsl_hash_form[k])
       end
       ret.merge(component_modules: sorted_dsl_hash_form)
@@ -247,7 +246,7 @@ module DTK
       unless service_id = @parent.get_field?(:service_id)
         fail Error.new('Cannot find project from parent object')
       end
-      service_module = @parent.model_handle(:service_module).createIDH(id: service_id).create_object()
+      service_module = @parent.model_handle(:service_module).createIDH(id: service_id).create_object
       unless project_id = service_module.get_field?(:project_project_id)
         fail Error.new('Cannot find project from parent object')
       end

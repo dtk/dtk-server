@@ -248,6 +248,14 @@ module DTK
       "#{ref}__#{version}"
     end
 
+    # user friendly name will be cmp or mod::cmp
+    def self.module_name_from_user_friendly_name(user_friendly_component_name)
+      user_friendly_component_name.split('::').first
+    end
+    def self.component_type_from_user_friendly_name(user_friendly_component_name)
+      user_friendly_component_name.sub(/::/, '__')
+    end
+
     def self.module_name(component_type)
       component_type.gsub(/__.+$/, '')
     end

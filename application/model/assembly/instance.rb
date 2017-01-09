@@ -202,10 +202,23 @@ module DTK; class  Assembly
     #   :auto_complete_links
     #   :donot_update_workflow
     def add_ec2_component(node, cmp_name, namespace, opts = {})
-      Log.error("need to fix 'add_ec2_component so version is taken care of by making call to a method othaer than Component::Template.get_augmented_base_component_template?")
-      unless aug_component_template =  Component::Template.get_augmented_base_component_template?(self, cmp_name, namespace) ||
-        fail(ErrorUsage, "Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
-      end
+
+      unless matching_module_ref = ModuleRefs.get_component_module_refs(service_instance_branch).component_module_ref?(module_name)
+            result.add_error_msg("Cannot find dependency for component #{component_name}'s module '#{module_name}' in the dependency section")
+            return
+          end
+
+          namespace = matching_module_ref.namespace
+          version   =  matching_module_ref.version_string
+          unless aug_cmp_template = assembly_instance.find_matching_aug_component_template?(component_type, namespace, version)
+            result.add_error_msg("Component '#{component_name}' is not in dependent module '#{matching_module_ref.print_form}'")
+            return
+          end
+
+      
+
+
+      aug_component_template =  Component::Template.get_augmented_base_component_template(self, cmp_name, namespace, version: version) ||
       new_component_idh = add_component(node.id_handle, aug_component_template, ComponentTitle.parse_title?(cmp_name), Opts.new(opts.merge(project: project)))
       new_component_idh.create_object
     end
@@ -707,6 +720,11 @@ module DTK; class  Assembly
     end
 
     private
+
+    # version associated with assembly
+    def assembly_version
+      @assembly_version ||= ModuleVersion.ret(self)
+    end
 
     # returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
     #[col,empty_assem_nodes]

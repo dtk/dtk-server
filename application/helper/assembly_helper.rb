@@ -227,6 +227,15 @@ module Ramaze::Helper
       ret
     end
 
+    
+    # returns [cmp_name, version] where version can be nil
+    def ret_component_name_and_version(input_cmp_name)
+      if match = input_cmp_name.match(/(\w+)\((\d{1,2}.\d{1,2}.\d{1,2})\)/)
+        [match[1], match[2]]
+      end
+      [component_type, nil]
+    end
+
     # returns [assembly_template_name,service_module_name]; if cannot find one or both or these nil is returned in the associated element
     def get_template_and_service_names_params(assembly, opts = {})
       assembly_template_name, service_module_name = ret_request_params(:assembly_template_name, :service_module_name)

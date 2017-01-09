@@ -30,15 +30,24 @@ module DTK; class Component
     #   :component_module
     #   :namespace
     # if no match is found then nil is returned otherwise error raised indicating multiple matches found
-    def self.get_augmented_base_component_template?(assembly, cmp_name, namespace)
+    # opts can have keys:
+    #   :version
+    def self.get_augmented_base_component_template(assembly, user_friendly_cmp_name, namespace, opts = {})
       ret_cmp = nil
-      matching_cmp_templates = find_matching_component_templates(assembly, cmp_name, namespace: namespace, use_base_template: use_base_template)
+      component_type, title = ComponentTitle.parse_component_display_name(display_name_from_user_friendly_name(user_friendly_cmp_name))
+      version = opts[:version]
 
-      if matching_cmp_templates.empty?
-        return ret_cmp
-      elsif matching_cmp_templates.size > 1
-        possible_names = matching_cmp_templates.map { |r| r.display_name_print_form(namespace_prefix: true) }.join(',')
-        fail ErrorUsage.new("Multiple components with different namespaces or/and versions match. You have to specify namespace or version.")
+      matching_cmp_templates = assembly.find_matching_aug_component_templates(component_type, namespace, version: version, use_just_base_template: true)
+
+      if matching_cmp_templates.size != 1
+        component_ref = "#{namespace}:#{user_friendly_cmp_name}"
+        component_ref << "(#{version})" if version
+        if matching_cmp_templates.empty?
+          fail ErrorUsage, "No component template matching '#{component_ref} exists"
+        else
+          possible_names = matching_cmp_templates.map { |r| r.display_name_print_form(namespace_prefix: true) }.join(', ')
+          fail ErrorUsage, "Multiple components templates matching '#{component_ref} exists: #{possible_names}"
+        end
       end
       ret_cmp = matching_cmp_templates.first
 
@@ -60,45 +69,6 @@ module DTK; class Component
         fail ErrorUsage.new("Unable to add component from (#{full_ret_cmp_name}) because you are already using components version: #{full_cmp_mod_name}") if ret_cmp_version != cmp_mod_version
       end
       ret_cmp
-    end
-
-    # This method returns an array with zero or more matching augmented component templates
-    # opts can have keys
-    #   :namespace
-    #   :use_base_template
-    def self.find_matching_component_templates(assembly, cmp_name, opts = {})
-      ret = []
-      display_name = display_name_from_user_friendly_name(cmp_name)
-      component_type, title, version =  ComponentTitle.parse_component_display_name(display_name, return_version: true)
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info, :version],
-        filter: [:and,
-                 [:eq, :type, 'template'],
-                 [:eq, :component_type, component_type],
-                 [:neq, :project_project_id, nil],
-                 [:oneof, :version, filter_on_versions(assembly: assembly, version: version)],
-                 [:eq, :node_node_id, nil]]
-      }
-      ret = get_objs(assembly.model_handle(:component_template), sp_hash, keep_ref_cols: true)
-      if namespace = opts[:namespace]
-        # filter component templates by namepace
-        ret.select! { |cmp| cmp[:namespace][:display_name] == namespace }
-      end
-      ret
-      return ret if ret.empty?
-
-      # there could be two matches one from base template and one from service insatnce specific template; in
-      # this case use service specfic one
-      assembly_version = assembly_version(assembly)
-      if ret.find { |cmp| cmp[:version] == assembly_version }
-        if opts[:use_base_template]
-          ret.reject! { |cmp| cmp[:version] == assembly_version }
-        else
-          ret.select! { |cmp| cmp[:version] == assembly_version }
-        end
-      end
-
-      ret
     end
 
     def self.create_from_component(cmp)
@@ -268,8 +238,6 @@ module DTK; class Component
       filter   = [
         :and,
         [:eq, :type, 'template'],
-        # had to remove this to display other versions beside master
-        # [:oneof, :version, filter_on_versions(assembly: assembly)],
         [:eq, :project_project_id, project.id]
       ]
 
@@ -344,24 +312,6 @@ module DTK; class Component
     end
 
     private
-
-    def self.assembly_version(assembly)
-      ModuleVersion.ret(assembly)
-    end
-    def self.filter_on_versions(opts)
-      ret      = []
-      version  = opts[:version]
-      assembly = opts[:assembly]
-
-      if version
-        ret << version.gsub!(/\(|\)/,'')
-      elsif assembly
-        ret << 'master'
-        ret << assembly_version(assembly)
-      end
-
-      ret.compact
-    end
 
     # if title is in the name, this strips it off
     def self.name_to_id_aux(model_handle, name, version, opts = {})

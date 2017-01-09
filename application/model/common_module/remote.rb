@@ -26,10 +26,10 @@ module DTK
       #   :donot_raise_error
       def self.get_module_info(project, remote_params, client_rsa_pub_key, opts = {})
         ret = {}
-        if raw_service_info = Info::Service::Remote.get_module_info?(project, client_rsa_pub_key, remote_params)
+        if raw_service_info = Info::Service::Remote.get_module_info?(project, client_rsa_pub_key, remote_params, opts)
           ret.merge!(service_info: transform_from_raw_remote_module_info(raw_service_info))
         end
-        if raw_component_info = Info::Component::Remote.get_module_info?(project, client_rsa_pub_key, remote_params)
+        if raw_component_info = Info::Component::Remote.get_module_info?(project, client_rsa_pub_key, remote_params, opts)
           ret.merge!(component_info: transform_from_raw_remote_module_info(raw_component_info))
         end
         

@@ -145,6 +145,11 @@ module DTK
 
         client_params.merge!(version: remote.version) if remote.version
         client_params.merge!(module_refs_content: opts[:module_refs_content]) unless is_empty?(opts[:module_refs_content])
+
+        if ignore_missing_base = opts[:ignore_missing_base_version]
+          client_params.merge!(ignore_missing_base_version: ignore_missing_base)
+        end
+
         get_opts = opts[:raise_error] ? { raise_error: true } : { raise_error_with_exceptions: [:no_resource] }
         response_data = client.get_module_info?(client_params, get_opts)
         return nil if response_data.nil?

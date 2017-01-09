@@ -1,48 +1,63 @@
-#!/usr/bin/env ruby
-# Test Case 15: Converge service instance with component that has delete action and delete/destroy service
+# Test Case 15: Converge service instance with component that has delete action and delete/uninstall service
 
-require 'rubygems'
-require 'rest_client'
-require 'pp'
-require 'json'
-require 'awesome_print'
 require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
+require './lib/dtk_cli_spec'
 
-STDOUT.sync = true
+component_to_delete = "node/test_delete::component"
+node_to_delete = "node"
 
-namespace = 'dtk17'
-service_module_name = 'test_delete'
-component_module_name = 'test_delete'
+module_name = 'dtk17/test_delete'
+module_location = '/tmp/test_delete'
+assembly_name = 'delete_workflow'
 service_name = 'stda_test_case_15_instance'
-assembly_name = 'test_delete::delete_workflow'
-components_to_delete = "test_delete::component"
-check_component_in_task_status = true
-dtk_common = Common.new(service_name, assembly_name)
+service_location = "~/dtk/"
 
-describe '(Staging And Deploying Assemblies) Test Case 15: Converge service instance with component that has delete action and delete/destroy service' do
+dtk_common = Common.new('', '')
+
+describe '(Staging And Deploying Assemblies) Test Case 15: Converge service instance with component that has delete action and delete/uninstall service' do
   before(:all) do
-    puts '*******************************************************************************************************************************************', ''
+    puts '*********************************************************************************************************************************************', ''
   end
 
-  context "Stage service function on #{assembly_name} assembly" do
-    include_context 'Stage', dtk_common
+  context "Install module from dtkn" do
+    include_context "Install module from dtkn", module_name, module_location, 'master'
   end
 
-  context 'List services after stage' do
-    include_context 'List services after stage', dtk_common
+  context "List assemblies contained in this module" do
+    include_context "List assemblies", module_name, assembly_name, dtk_common
   end
 
-  context 'Converge function' do
-    include_context 'Converge', dtk_common
+  context "Stage assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
-  context 'Delete and destroy service with workflow' do
-    include_context 'Delete service with workflow', dtk_common, components_to_delete, check_component_in_task_status
+  context "Converge service instance" do
+    include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context 'List services after delete' do
-    include_context 'List services after delete', dtk_common
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
+  end
+
+  context "NEG - Check component exist in service instance" do
+    include_context "NEG - Check component exist in service instance", dtk_common, service_name, component_to_delete
+  end
+
+  context "NEG - Check node exist in service instance" do
+    include_context "NEG - Check node exist in service instance", dtk_common, service_name, node_to_delete
+  end
+
+  context "Uninstall module" do
+    include_context "Uninstall module", module_name, module_location
+  end
+
+  context "Delete initial module on filesystem" do
+    include_context "Delete initial module on filesystem", module_location
   end
 
   after(:all) do

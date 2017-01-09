@@ -25,8 +25,9 @@ module DTK; class Task; class Template
       # opts can have keys
       #  :params
       def initialize(action, action_def, opts = {})
-        # @action = action
-        @action = change_puppet_class_or_definition_for_delete(action, action_def)
+        action = change_puppet_class_or_definition_for_delete(action, action_def)
+        super(parent_action: action)
+        @action  = action
         @method = ActionMethod.new(action_def)
         @params = opts[:params]
       end

@@ -36,7 +36,7 @@ module DTK; module CommonDSL
             if matching_cmps.size > 1
               result.add_error_msg("Unexpected that component name '#{qualified_key.print_form}' match multiple components")
             else
-              component = DTK::Component::Instance.create_from_component(matching_cmps.first)
+              component = ::DTK::Component::Instance.create_from_component(matching_cmps.first)
 
               # no op if to_be_deleted is set since this is peristent setting we use to detect whether the task update has been done already
               return if component.get_field?(:to_be_deleted)
@@ -46,14 +46,13 @@ module DTK; module CommonDSL
               # - if delete action defined for component then puts an explicit delete action in workflow
               task_template_processor = TaskTemplate.new(assembly_instance, component, node)
 
-              if opts[:force_delete] || node.get_admin_op_status.eql?('pending') || !task_template_processor.component_delete_action_def?
+              if opts[:force_delete] || !Node.node_has_been_created?(node) || !task_template_processor.component_delete_action_def?
                 # if workflow is modified by user, we do not want to change it when deleting component
                 delete_cmp_opts = result.semantic_diffs['WORKFLOWS_MODIFIED'] ? { do_not_update_task_template: true } : {}
-                assembly_instance.delete_component(component.id_handle, node[:id], delete_cmp_opts)
+                assembly_instance.delete_component(component.id_handle, node.id, delete_cmp_opts)
               else
                 task_template_processor.insert_explict_delete_action?(force_delete: opts[:force_delete])
-                task_template_processor.remove_component_actions? unless component[:component_type].eql?('ec2__node')
-
+                task_template_processor.remove_component_actions? unless ::DTK::Component::Domain::Node::Canonical.is_type_of?(component)
                 component.update_from_hash_assignments(to_be_deleted: true)
               end
 

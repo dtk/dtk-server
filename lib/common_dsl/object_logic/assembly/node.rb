@@ -59,6 +59,10 @@ module DTK; module CommonDSL
           diff_set_from_hashes(nodes_gen, nodes_parse, qualified_key, opts)
         end
 
+        def self.node_has_been_created?(node)
+          node.get_admin_op_status != 'pending'
+        end
+
         private
 
         def self.get_augmented_nodes(assembly_instance, opts = {})
@@ -77,7 +81,7 @@ module DTK; module CommonDSL
         def self.add_node_level_attributes!(ndx_nodes)
           node_idhs = ndx_nodes.values.reject { |node| node.is_assembly_wide_node? }.map(&:id_handle)
           unless node_idhs.empty?
-            DTK::Node.get_node_level_assembly_template_attributes(node_idhs).each do |r|
+            ::DTK::Node.get_node_level_assembly_template_attributes(node_idhs).each do |r|
               node_id = r[:node_node_id]
               (ndx_nodes[node_id][:attributes] ||= []) << r
             end
@@ -104,11 +108,11 @@ module DTK; module CommonDSL
             value_asserted: value,
             value_derived: nil
           }
-          DTK::Attribute.create_stub(node.model_handle(:attribute), hash)
+          ::DTK::Attribute.create_stub(node.model_handle(:attribute), hash)
         end
         
         def self.add_augmented_components!(ndx_nodes)
-          DTK::Node::Instance.add_augmented_components!(ndx_nodes)
+          ::DTK::Node::Instance.add_augmented_components!(ndx_nodes)
         end
         
       end

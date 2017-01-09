@@ -1,0 +1,23 @@
+---
+dsl_version: 1.0.0
+name: stda_test_case_16_instance
+dependencies:
+  aws/ec2: master
+  dtk17/test_delete: 0.0.1
+nodes:
+  node:
+    attributes:
+      image: trusty_hvm
+      size: micro
+    components:
+    - test_delete::component:
+        attributes:
+          file_path: /tmp/test.txt
+workflows:
+  create:
+    node: node
+    ordered_components:
+    - test_delete::component
+    node: second_node
+    ordered_components:
+    - test_delete::component

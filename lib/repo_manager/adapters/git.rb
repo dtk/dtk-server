@@ -440,6 +440,7 @@ module DTK; class RepoManager
 
     # opts can have keys:
     #   :squash
+    #   :strategy
     def merge_from_branch(branch_to_merge_from, opts = {})
       checkout(@branch) do
         git_command__merge(branch_to_merge_from, opts)
@@ -522,13 +523,10 @@ module DTK; class RepoManager
       ret = nil
       mutex.synchronize do
         Dir.chdir(@path) do
-          current_head = current_branch
+          current_head = current_branch()
           git_command__checkout(branch_name) unless current_head == branch_name
           return ret unless block
           ret = yield
-          unless current_head == branch_name
-            git_command__checkout(branch_name)
-          end
         end
       end
       ret

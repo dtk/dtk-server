@@ -37,6 +37,11 @@ module DTK; class Repo
         end
       end
 
+      def copy
+        # doing explicit vil.nil? test because nil.respond_to?(:dup) is true by nil.dup is an error
+        inject(self.class.new){ |h, (k, v)| h.merge(k => (!v.nil? and v.respond_to?(:dup)) ? v.dup : v) }
+      end
+
       def no_diffs?
         keys.empty?
       end

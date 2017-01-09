@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK
-  module CommonDSL 
-    class ObjectLogic::Assembly::Component::Diff::Delete
+module DTK; module CommonDSL 
+  class ObjectLogic::Assembly
+    class Component::Diff::Delete
       # methods for updating the task template
       class TaskTemplate
         require_relative('task_template/splice_in_delete_action')
@@ -36,7 +36,7 @@ module DTK
           if component_delete_action_def?
             # TODO: DTK-2732: Only run delete action on assembly level node if it has been converged
             # Best way to treat this is by keeping component info on what has been converged
-            if @node.is_assembly_wide_node? or @node.get_admin_op_status != 'pending'
+            if @node.is_assembly_wide_node? or Node.node_has_been_created?(@node)
               insert_explict_delete_action
             end
           end
@@ -61,28 +61,12 @@ module DTK
           pp ["DEBUG: task template after splice_in_delete_action", serialized_content]
           Task::Template.update_from_serialized_content?(@assembly_instance.id_handle, serialized_content)
         end
-=begin
-        ## TODO: DTK-2680: Aldin
-        #   Keeping around old so we can see whether after removibgf it we can remove thiongs in functions it callss that were just needed by it
-        def insert_explict_delete_action_aux
-          add_delete_action_opts = { 
-            action_def: component_delete_action_def?,
-            skip_if_not_found: true, 
-            insert_strategy: :insert_at_start_in_subtask,
-            add_delete_action: true
-          }
-          if component_title = @component.title?
-            add_delete_action_opts[:component_title] = component_title
-          end
-          Task::Template::ConfigComponents.update_when_added_component_or_action?(@assembly_instance, @node, @component, add_delete_action_opts)
-=end
 
         def component_delete_action_def?
-          DTK::Component::Instance.create_from_component(@component).get_action_def?('delete')
+          Component.component_delete_action_def?(@component)
         end
-
       end
     end
   end
-end
+end; end
 

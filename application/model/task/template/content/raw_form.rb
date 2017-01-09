@@ -16,26 +16,15 @@
 # limitations under the License.
 #
 module DTK
-  class CommonDSL::ObjectLogic::Assembly::Component::Diff
-    module Mixin
-      private
-      
-      def component_name
-        relative_distinguished_name
+  class Task::Template::Content
+    class RawForm
+      def serialization_form(_opts = {})
+        @serialized_content
       end
       
-      def component_title?
-        component_type, title = ComponentTitle.parse_component_display_name(component_name)
-        title
+      def initialize(serialized_content)
+        @serialized_content = serialized_content
       end
-      
-      # This method will either return a node object if component is under node or node group or nil
-      # if component is asembly level
-      def parent_node?
-        CommonDSL::Diff::QualifiedKey.parent_node?(qualified_key, assembly_instance)
-      end
-      
     end
   end
 end
-

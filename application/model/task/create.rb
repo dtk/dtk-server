@@ -152,6 +152,13 @@ module DTK; class Task
       ret
     end
 
+    #  opts can have keys:
+    #   :component_type
+    #   :commit_msg, 
+    #   :task_action
+    #   :start_nodes
+    #   :ret_nodes_to_start
+    #   TODO: ....
     def self.create_from_assembly_instance?(assembly, opts = {})
       component_type = opts[:component_type] || :service
       target_idh     = target_idh_from_assembly(assembly)
@@ -159,32 +166,7 @@ module DTK; class Task
 
       ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action]))
 
-      nodes_to_create = []
-      nodes_wait_for_start = []
-
-      node_cols = [:id, :display_name, :type, :external_ref, :admin_op_status]
-      assembly_nodes = assembly.get_leaf_nodes(remove_assembly_wide_node: true, cols: node_cols)
-
-      ng_members_to_delete = assembly_nodes.select{ |node| node[:ng_member_deleted] }
-      ng_members_to_delete.each{ |node| node.destroy_and_delete(dont_change_cardinality: true) }
-      assembly_nodes.reject!{ |node| ng_members_to_delete.include?(node) }
-
-      assembly_nodes.each do |node|
-        external_ref = node.external_ref
-        if !external_ref.created?
-          nodes_to_create << node
-        else
-          if opts[:start_nodes]
-            nodes_wait_for_start << node
-            opts[:ret_nodes_to_start] << node
-          elsif external_ref.dns_name?.nil?
-            # this is handling case where task got stuck where there it is started but does not have a dns address yet
-            # by putting under nodes_wait_for_start there will be a wait intil get its address
-            nodes_wait_for_start << node
-          end
-        end
-      end
-
+      nodes_to_create, nodes_wait_for_start = nodes_to_process_in_task(assembly, Aux.hash_subset(opts, [:start_nodes, :ret_nodes_to_start]))
       case component_type
        when :service
         # start stopped nodes
@@ -217,6 +199,41 @@ module DTK; class Task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret
     end
+
+    # returns [nodes_to_create, nodes_wait_for_start]
+    #  opts can have keys:
+    #   :start_nodes
+    #   :ret_nodes_to_start
+    def self.nodes_to_process_in_task(assembly, opts = {})
+      nodes_to_create = []
+      nodes_wait_for_start = []
+
+      node_cols = [:id, :display_name, :type, :external_ref, :admin_op_status, :to_be_deleted]
+      assembly_nodes = assembly.get_leaf_nodes(remove_assembly_wide_node: true, cols: node_cols)
+
+      ng_members_to_delete = assembly_nodes.select{ |node| node[:ng_member_deleted] }
+      ng_members_to_delete.each{ |node| node.destroy_and_delete(dont_change_cardinality: true) }
+      assembly_nodes.reject!{ |node| ng_members_to_delete.include?(node) or  node[:to_be_deleted]}
+
+      assembly_nodes.each do |node|
+        external_ref = node.external_ref
+        if !external_ref.created?
+          nodes_to_create << node
+        else
+          if opts[:start_nodes]
+            nodes_wait_for_start << node
+            opts[:ret_nodes_to_start] << node
+          elsif external_ref.dns_name?.nil?
+            # this is handling case where task got stuck where there it is started but does not have a dns address yet
+            # by putting under nodes_wait_for_start there will be a wait intil get its address
+            nodes_wait_for_start << node
+          end
+        end
+      end
+      [nodes_to_create, nodes_wait_for_start]
+    end
+    private_class_method :nodes_to_process_in_task
+      
 
     #TODO: below will be private when finish refactoring this file
     def self.target_idh_from_assembly(assembly)

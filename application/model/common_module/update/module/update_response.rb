@@ -24,7 +24,7 @@ module DTK
       end
 
       def add_diffs_summary!(diffs_summary)
-        merge!(diffs: diffs_summary)
+        merge!(diffs: diffs_summary.copy) # copy needed because upstream can modify diffs_summary
         self
       end
     end

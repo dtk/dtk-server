@@ -66,9 +66,10 @@ module DTK
         file_path__content_array = transform.file_path__content_array
         transform.input_paths.each { |path| RepoManager.delete_file?(path, {no_commit: true}, @aug_component_module_branch) }
         RepoManager.add_files(@aug_component_module_branch, file_path__content_array)
+        RepoManager.push_changes(@aug_component_module_branch)
       end
 
-      # TODO: DTK-2766: this uses the legacy parsing routines in the dtk-server gem. Port over ti dtk-dsl parsing
+      # TODO: DTK-2766: this uses the legacy parsing routines in the dtk-server gem. Port over to dtk-dsl parsing
       def update_component_info_in_model_from_dsl(parsed_dependent_modules)
         aug_mb = @aug_component_module_branch # alias
         # TODO: for migration purposes needed the  Implementation.create? method. This shoudl be done during initial create

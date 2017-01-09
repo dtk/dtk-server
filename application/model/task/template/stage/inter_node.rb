@@ -18,10 +18,11 @@
 module DTK; class Task; class Template
   class Stage
     class InterNode < ::Hash
+      include Serialization
+      # 'include Serialization' must be done first
       require_relative('inter_node/factory')
       require_relative('inter_node/multi_node')
       require_relative('inter_node/nested_subtask')
-      include Serialization
 
       def initialize(name = nil)
         super()
@@ -47,14 +48,14 @@ module DTK; class Task; class Template
       def add_subtasks!(parent_task, internode_stage_index, assembly_idh = nil)
         ret = []
         each_node_actions do |node_actions|
-          if node_actions.is_ec2_node_component_task?
-            add_ec2_node_subtasks(parent_task, node_actions, ret)
+          if node_actions.is_node_component_task?
+            add_delete_node_subtasks(parent_task, node_actions, ret)
           else
             if action = node_actions.add_subtask!(parent_task, internode_stage_index, assembly_idh)
               ret << action
               # TODO: DTK-2680: Aldin
               #  Not high priority, but better to take this special purpose logic out of here and
-              #  instead when creating the dlete workflow explicitly put in the cleanup task
+              #  instead when creating the delete workflow explicitly put in the cleanup task
               #   so this would go in lib/common_dsl/object_logic/assembly/component/diff/delete/task_template/splice_in_delete_action.rb
               if is_component_delete_action?(action)
                 add_component_cleanup_task?(parent_task, node_actions, ret, action)
@@ -81,25 +82,17 @@ module DTK; class Task; class Template
         end
       end
 
-      def add_ec2_node_subtasks(parent_task, node_actions, ret)
-        n_node            = node_actions.node
-        assembly_instance = n_node.get_assembly?
-        opts              = Opts.new(delete_action: 'delete_node', delete_params: [n_node.id_handle])
-
-        parent_task[:display_name] = "delete node #{n_node.get_field?(:display_name)}"
-        parent_task[:temporal_order] = 'sequential'
-
-        command_and_control_action = Task.create_for_command_and_control_action(assembly_instance, 'destroy_node?', n_node[:id], n_node, opts.merge(return_executable_action: true))
-        sub_task = Task.create_stub(parent_task.model_handle(), executable_action: command_and_control_action, display_name: 'destroy node')
-        parent_task.add_subtask(sub_task)
-        ret << command_and_control_action
-
-        cleanup  = Task::Action::Cleanup.create_hash(assembly_instance, nil, n_node, opts)
-        sub_task = Task.create_stub(parent_task.model_handle(), executable_action: cleanup, display_name: 'cleanup')
-        parent_task.add_subtask(sub_task)
-        ret << cleanup
+      # opts can have keys:
+      #   :ndx_action_indexes
+      def includes_action?(indexed_action, opts = {})
+        ndx_action_indexes = opts[:ndx_action_indexes] || Content.add_ndx_action_index!({}, indexed_action)
+        action_match = Content::ActionMatch.new(indexed_action)
+        if find_earliest_match?(action_match, ndx_action_indexes)
+          action_match
+        end
       end
 
+      # can be over-written
       def find_earliest_match?(action_match, ndx_action_indexes)
         ndx_action_indexes.each_pair do |node_id, action_indexes|
           if node_actions = self[node_id]
@@ -119,18 +112,18 @@ module DTK; class Task; class Template
       # can be over-written
       def delete_action!(action_match)
         node_id = action_match.action.node_id
-        unless node_action = self[node_id]
-          fail Error.new('Unexepected that no node action can be found')
-        end
-        if :empty == node_action.delete_action!(action_match)
-          delete(node_id)
-          :empty if empty?()
+        if node_action = self[node_id]
+          if :empty == node_action.delete_action!(action_match)
+            delete(node_id)
+            :empty if empty?()
+          end
         end
       end
 
+      # TODO: DTK-2759: thnk this need to be overwritten for nested task
       def splice_in_action!(action_match, insert_point)
         unless node_id = action_match.insert_action.node_id
-          fail Error.new('Unexepected that node_id is nil')
+          fail Error.new('Unexpected that node_id is nil')
         end
         case insert_point
           when :end_last_execution_block
@@ -219,7 +212,7 @@ module DTK; class Task; class Template
             end
           end
           node_actions = parse_and_reify_node_actions?(serialized_node_actions, node_name, node_id, action_list, opts)
-          node_actions ? h.merge(node_actions) : {}
+          node_actions ? h.merge(node_actions) : h
         end
         ret
       end
@@ -241,6 +234,27 @@ module DTK; class Task; class Template
       end
 
       private
+
+      def add_delete_node_subtasks(parent_task, node_actions, ret)
+        n_node            = node_actions.node
+        assembly_instance = n_node.get_assembly?
+        opts              = Opts.new(delete_action: 'delete_node', delete_params: [n_node.id_handle])
+
+        parent_task[:display_name] = "delete node #{n_node.get_field?(:display_name)}"
+        # TODO: :temporal_order should probably be concurrent
+        parent_task[:temporal_order] = 'sequential'
+
+        command_and_control_action = Task.create_for_command_and_control_action(assembly_instance, 'destroy_node?', n_node[:id], n_node, opts.merge(return_executable_action: true))
+        sub_task = Task.create_stub(parent_task.model_handle(), executable_action: command_and_control_action, display_name: 'destroy node')
+        parent_task.add_subtask(sub_task)
+        ret << command_and_control_action
+
+        cleanup  = Task::Action::Cleanup.create_hash(assembly_instance, nil, n_node, opts)
+        sub_task = Task.create_stub(parent_task.model_handle(), executable_action: cleanup, display_name: 'cleanup')
+        parent_task.add_subtask(sub_task)
+        ret << cleanup
+      end
+
 
       def is_component_delete_action?(action)
         if action_method = action.action_method?

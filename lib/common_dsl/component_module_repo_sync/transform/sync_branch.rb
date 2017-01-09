@@ -45,7 +45,8 @@ module DTK; module CommonDSL
         private
 
         def merge_service_instance_into_sync_branch
-          RepoManager.merge_from_branch(service_instance_branch_name, sync_branch_repo_context)
+          # merge strategy 'theirs' is needed to resolve any conflicts
+          RepoManager.merge_from_branch(service_instance_branch_name, { strategy: :theirs }, sync_branch_repo_context)
         end
 
         def commit_all_changes_on_sync_branch

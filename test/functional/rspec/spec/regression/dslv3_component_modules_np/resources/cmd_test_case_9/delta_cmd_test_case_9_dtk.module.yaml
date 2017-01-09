@@ -1,0 +1,66 @@
+---
+dsl_version: 1.0.0
+module: test/cmd_test_case_9
+version: master
+keywords: test
+description: test module
+license: Apache 2.0
+
+assemblies:
+  test_assembly:
+    description: test assembly
+    nodes:
+      node:
+        attributes:
+          image: precise_hvm
+          size: micro
+        components:
+        - cmd_test_case_9::first_component
+    workflows:
+      create:
+        subtasks:
+        - name: create nodes
+          node: node
+          components:
+          - cmd_test_case_9::first_component
+component_defs:
+  first_component:
+    attributes:
+      array_attr:
+        type: array
+        default:
+        - element1
+      hash_attr:
+        type: hash
+        default:
+          key1: value1
+      hash_attr_2:
+        type: hash
+        default:
+      hash_attr_3:
+        type: hash
+        default:
+          key1:
+      hash_attr_4:
+        type: hash
+        default:
+          key1:
+          - element1
+          - element2
+      hash_attr_5:
+        type: hash
+        default:
+          key1: value1
+          key2: value2
+      boolean_attr:
+        type: boolean
+        default: false
+      port_attr:
+        type: port
+        default: 8080
+      integer_attr:
+        type: integer
+        default: 878
+    actions:
+      create:
+        puppet_class: cmd_test_case_9::first_component

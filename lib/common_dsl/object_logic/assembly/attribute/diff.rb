@@ -33,7 +33,7 @@ module DTK; module CommonDSL
         end
 
         def update_and_propagate_attribute_when_node_property?
-          node_name, attribute_name = @qualified_key.is_node_attribute?
+          node_name, attribute_name = CommonDSL::Diff::QualifiedKey.is_node_attribute?(@qualified_key)
           if attribute_name
             if node_component_attribute = ::DTK::Attribute::Pattern.node_component_attribute?(parent_node_when_node_attribute, attribute_name)
               self.class.update_and_propagate_attribute(node_component_attribute, new_val)

@@ -71,6 +71,11 @@ module DTK; module CommonDSL
           diff_set_from_hashes(nodes_gen, nodes_parse, qualified_key, opts)
         end
 
+
+        def self.component_delete_action_def?(component)
+          ::DTK::Component::Instance.create_from_component(component).get_action_def?('delete')
+        end
+
         private
 
         def self.component_name(aug_component)

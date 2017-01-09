@@ -18,22 +18,40 @@
 module DTK; class Task
   class Template
     class Content < ::Array
+      require_relative('content/delete_mixin')
       require_relative('content/insert_action_helper')
       require_relative('content/action_match')
+      require_relative('content/raw_form')
+      require_relative('content/serialized_content_array')
 
+      include DeleteMixin
       include Serialization
       include Stage::InterNode::Factory::StageName
 
       def initialize(object = nil, actions = [], opts = {})
         super()
-        if object
-          create_stages!(object, actions, opts)
+        @subtask_order = opts[:subtask_order]
+        create_stages!(object, actions, opts) if object
+      end
+
+      def serialization_form(opts = {})
+        ret = nil
+        subtasks = map { |internode_stage| internode_stage.serialization_form(opts) }.compact
+        return ret if subtasks.empty?
+
+        # Dont put in sequential block if just single stage and Constant::Sequential
+        normalized_subtasks = 
+          if subtasks.size == 1
+            subtasks.first.inject({}) { |h, (k, v)| k == :name ? h : h.merge(k => v) }
+          else
+            { Field::Subtasks => subtasks }
         end
+        (@subtask_order ? { Field::SubtaskOrder => @subtask_order } : {}).merge(normalized_subtasks)
       end
 
       def create_subtask_instances(task_mh, assembly_idh)
         ret = []
-        return ret if empty?()
+        return ret if empty?
         all_actions = []
         each_internode_stage do |internode_stage, stage_index|
           task_hash = {
@@ -51,7 +69,7 @@ module DTK; class Task
 
       def self.create_from_component_action(new_cmp_action, assembly)
         action_list = ActionList::ConfigComponents.get(assembly)
-        ret = new()
+        ret = new
         ret.insert_action?(new_cmp_action, action_list)
         ret
       end
@@ -64,33 +82,6 @@ module DTK; class Task
       def insert_action?(new_action, action_list, opts = {})
         insert_action_helper = InsertActionHelper.create(new_action, action_list, opts)
         insert_action_helper.insert_action?(self)
-      end
-
-      # if action is explicitly included in task template then delete the action from this object and return updated object
-      # else return nil
-      def delete_explicit_action?(action, action_list, opts = {})
-        opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod)
-        if indexed_action = action_list.find { |a| a.match_action?(action, opts) }
-          # TODO: DTK-2680: Aldin: put in a few sentences explaing this logic
-          # TODO: DTK-2680: Rich: I think this will be executed on cleanup task, we need to delete .delete action from workflow
-          # I put in this opts.merge!(class: Action::WithMethod) if action.is_a?(Action::WithMethod) above and also
-          # this part below because in action_list above it will not match component .delete action but only action for creating component
-          # on config node
-          # So I put this part below which will match component .delete action and delete it, instead of deleting component create action
-          #
-          if action.is_a?(Action::WithMethod)
-            indexed_action = action if indexed_action.component_type.eql?("ec2::node[#{indexed_action.node_name}]") || opts[:remove_delete_action]
-          end
-          if action_match = includes_action?(indexed_action)
-            # TODO: DTK-2732: look at whether when it is not in_multinode_stage whether we should still delete if this component is only instance
-            # that matches this step. 
-            # note: in_multinode_stage is somehwta in misnomer in that it can be true when step only refers to assembly wide
-            if action_match.is_assembly_wide? or !action_match.in_multinode_stage
-              delete_action!(action_match)
-              self
-            end
-          end
-        end
       end
 
       def splice_in_action!(action_match, insert_point, opts = {})
@@ -112,7 +103,7 @@ module DTK; class Task
             # - multi node, or
             # - has explicit actions
             if last_internode_stage.is_a?(Stage::InterNode::MultiNode) ||
-                last_internode_stage.has_action_with_method?()
+                last_internode_stage.has_action_with_method?
               new_internode_stage = Stage::InterNode.create_from_single_action(action_match.insert_action, opts)
               self << new_internode_stage
             else
@@ -137,37 +128,8 @@ module DTK; class Task
         self
       end
 
-      def serialization_form(opts = {})
-        ret = nil
-        subtasks = map { |internode_stage| internode_stage.serialization_form(opts) }.compact
-        if subtasks.empty?()
-          return ret
-        end
-
-        # Dont put in sequential block if just single stage
-        if subtasks.size == 1
-          subtasks.first.delete(:name)
-          subtasks.first
-        else
-          {
-            Field::SubtaskOrder => Constant::Sequential,
-            Field::Subtasks => subtasks
-          }
-        end
-      end
-
       def self.reify(serialized_content)
         RawForm.new(serialized_content)
-      end
-
-      class RawForm
-        def serialization_form(_opts = {})
-          @serialized_content
-        end
-
-        def initialize(serialized_content)
-          @serialized_content = serialized_content
-        end
       end
 
       # opts can have keys:
@@ -175,61 +137,29 @@ module DTK; class Task
       #  ...
       def self.parse_and_reify(serialized_content, actions, opts = {})
         # normalize to handle case where single stage, but not folded under subtasks
-
-        unless subtasks = Constant.matches?(serialized_content, :Subtasks) 
-          subtasks = [] if parse_and_reify__empty_subtasks?(serialized_content)
-        end
-
-        normalized_subtasks =
-          if subtasks
-            has_multi_stages = (parse_and_reify__temporal_order(serialized_content) == Constant::Sequential)
-            has_multi_stages ? subtasks : [{ Field::Subtasks => subtasks }]
-          else
-            [serialized_content]
-          end
-
-        new(SerializedContentArray.new(normalized_subtasks), actions, opts)
-      end
-
-      def self.parse_and_reify__temporal_order(serialized_content)
-        if temporal_order = Constant.matches?(serialized_content, :SubtaskOrder)
-          temporal_order.to_sym 
-        else
-          # Default is Sequential
-          Constant::Sequential
-        end
-      end
-
-      def self.parse_and_reify__empty_subtasks?(serialized_content)
-        # check if empty workflow by making sure it is not a stage directly not wrapped in subtask
-        !Constant.matches?(serialized_content, :Subtasks) and !Constant.matches?(serialized_content, :ComponentsOrActions)
-      end
-
-      class SerializedContentArray < Array
-        def initialize(array)
-          super()
-          array.each { |a| self << a }
-        end
+        SerializedContentArray.normalize(serialized_content, actions, opts)
       end
 
       def each_internode_stage(&block)
         each_with_index { |internode_stage, i| block.call(internode_stage, i + 1) }
       end
 
-      def add_ndx_action_index!(hash, action)
-        self.class.add_ndx_action_index!(hash, action)
+      def add_ndx_action_index!(hash, indexed_action)
+        self.class.add_ndx_action_index!(hash, indexed_action)
       end
-      def self.add_ndx_action_index!(hash, action)
-        (hash[action.node_id] ||= []) << action.index
+      def self.add_ndx_action_index!(hash, indexed_action)
+        fail Error, "Unexpected that the following action does not have an index: #{indexed_action.inspect}" unless indexed_action.index
+        (hash[indexed_action.node_id] ||= []) << indexed_action.index
         hash
       end
 
-      def includes_action?(action)
-        ndx_action_indexes = add_ndx_action_index!({}, action)
-        return nil if ndx_action_indexes.empty?()
+      # if template content includes action, ActionMatch is found
+      def includes_action?(indexed_action)
+        # ndx_action_indexes has node id as index and action_index array as values 
+        ndx_action_indexes = add_ndx_action_index!({}, indexed_action)
+        return nil if ndx_action_indexes.empty?
         each_internode_stage do |internode_stage, stage_index|
-          action_match = ActionMatch.new(action)
-          if internode_stage.find_earliest_match?(action_match, ndx_action_indexes)
+          if action_match = internode_stage.includes_action?(indexed_action, ndx_action_indexes: ndx_action_indexes) 
             action_match.internode_stage_index = stage_index
             return action_match
           end
@@ -239,24 +169,12 @@ module DTK; class Task
 
       private
 
-      def delete_action!(action_match)
-        internode_stage_index = action_match.internode_stage_index
-        if :empty == internode_stage(internode_stage_index).delete_action!(action_match)
-          delete_internode_stage!(internode_stage_index)
-          :empty if empty?()
-        end
-      end
-
       def internode_stage(internode_stage_index)
         if internode_stage_index == :last
-          last()
+          last
         else
           self[internode_stage_index - 1]
         end
-      end
-
-      def delete_internode_stage!(internode_stage_index)
-        delete_at(internode_stage_index - 1)
       end
 
       def create_stages!(object, actions, opts = {})
@@ -271,6 +189,7 @@ module DTK; class Task
 
       # opts can have keys:
       #  :just_parse (Boolean)
+      #  :subtask_order
       #  ...
       def create_stages_from_serialized_content!(serialized_content_array, actions, opts = {})
         serialized_content_array.each do |serialized_content|
@@ -283,12 +202,12 @@ module DTK; class Task
       def create_stages_from_temporal_constraints!(temporal_constraints, actions, opts = {})
         default_stage_name_proc = { internode_stage_name_proc: DefaultNameProc }
         if opts[:node_centric_first_stage]
-          node_centric_actions = actions.select { |a| a.source_type() == :node_group }
+          node_centric_actions = actions.select { |a| a.source_type == :node_group }
           # TODO:  get :internode_stage_name_proc from node group field  :task_template_stage_name
           opts_x = { internode_stage_name_proc: DefaultNodeGroupNameProc }.merge(opts)
           create_stages_from_temporal_constraints_aux!(temporal_constraints, node_centric_actions, opts_x)
 
-          assembly_actions = actions.select { |a| a.source_type() == :assembly }
+          assembly_actions = actions.select { |a| a.source_type == :assembly }
           create_stages_from_temporal_constraints_aux!(temporal_constraints, assembly_actions, default_stage_name_proc.merge(opts))
         else
           create_stages_from_temporal_constraints_aux!(temporal_constraints, actions, default_stage_name_proc.merge(opts))
@@ -302,15 +221,15 @@ module DTK; class Task
         stage_factory = Stage::InterNode::Factory.new(actions, temporal_constraints)
         before_index_hash = inter_node_constraints.create_before_index_hash(actions)
         done = false
-        existing_num_stages = size()
+        existing_num_stages = size
         new_stages = []
         # before_index_hash gets destroyed in while loop
         until done
           if before_index_hash.empty?
             done = true
           else
-            stage_action_indexes = before_index_hash.ret_and_remove_actions_not_after_any!()
-            if stage_action_indexes.empty?()
+            stage_action_indexes = before_index_hash.ret_and_remove_actions_not_after_any!
+            if stage_action_indexes.empty?
               # TODO: see if any other way there can be loops
               fail ErrorUsage.new('Loop detected in temporal orders')
             end
@@ -325,7 +244,7 @@ module DTK; class Task
 
       def set_internode_stage_names!(new_stages, internode_stage_name_proc)
         return unless internode_stage_name_proc
-        is_single_stage = (new_stages.size() == 1)
+        is_single_stage = (new_stages.size == 1)
         new_stages.each_with_index do |internode_stage, i|
           unless internode_stage.name
             stage_index = i + 1

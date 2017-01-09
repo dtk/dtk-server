@@ -27,9 +27,9 @@ module DTK; class Task; class Template
         executable_action
       end
 
-      def is_ec2_node_component_task?
+      def is_node_component_task?
         if component = has_action_with_method? && (components.size == 1) && components.first
-          component[:component_type].eql?('ec2__node')
+          Component::Domain::Node::Canonical.is_type_of?(component) 
         end
       end
 

@@ -1,9 +1,0 @@
-source 'https://rubygems.org'
-
-gem 'awesome_print', '1.1.0'
-gem 'rspec'
-gem 'rest-client'
-gem 'rspec2db', :github => 'ATLANTBH/rspec'
-gem 'dtk-shell', :git => 'https://github.com/dtk/dtk-shell.git'
-gem 'dtk-dsl', :git => 'https://github.com/dtk/dtk-dsl.git'
-gem 'dtk-client', :git => 'https://github.com/dtk/dtk-client.git'

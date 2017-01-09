@@ -37,9 +37,9 @@ module DTK
         end
         private :initialize
 
-        def self.get_module_info?(project, client_rsa_pub_key, remote_params)
+        def self.get_module_info?(project, client_rsa_pub_key, remote_params, opts = {})
           remote = ret_remote(project, remote_params)
-          Repo::Remote.new(remote).get_remote_module_info?(client_rsa_pub_key)
+          Repo::Remote.new(remote).get_remote_module_info?(client_rsa_pub_key, opts)
         end
 
         def self.publish?(project, local_params, remote_params, client_rsa_pub_key)

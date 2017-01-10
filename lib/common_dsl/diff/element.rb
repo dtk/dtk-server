@@ -60,7 +60,7 @@ module DTK
       end
 
       def assembly_instance
-        (@service_instance && @service_instance.assembly_instance) || fail(Error, "Unexpected that @service_instance is nil") 
+        @assembly_instance ||= (@service_instance && @service_instance.assembly_instance) || fail(Error, "Unexpected that @service_instance is nil") 
       end
 
       def project

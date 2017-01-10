@@ -18,20 +18,21 @@
 module DTK; class  Assembly
   class Instance < self
     r8_require('../service_associations')
-    r8_nested_require('instance', 'service_link_mixin')
-    r8_nested_require('instance', 'service_link')
-    r8_nested_require('instance', 'action')
-    r8_nested_require('instance', 'violation')
-    r8_nested_require('instance', 'violations')
-    r8_nested_require('instance', 'update')
-    r8_nested_require('instance', 'list')
-    r8_nested_require('instance', 'get')
-    r8_nested_require('instance', 'delete')
-    r8_nested_require('instance', 'exec_delete')
-    r8_nested_require('instance', 'service_setting')
-    r8_nested_require('instance', 'node_status')
-    r8_nested_require('instance', 'lock')
-    r8_nested_require('instance', 'dsl_location')
+    require_relative('instance/service_link_mixin')
+    require_relative('instance/service_link')
+    require_relative('instance/action')
+    require_relative('instance/violation')
+    require_relative('instance/violations')
+    require_relative('instance/update')
+    require_relative('instance/list')
+    require_relative('instance/get')
+    require_relative('instance/delete')
+    require_relative('instance/exec_delete')
+    require_relative('instance/node_component')
+    require_relative('instance/service_setting')
+    require_relative('instance/node_status')
+    require_relative('instance/lock')
+    require_relative('instance/dsl_location')
 
     include ServiceLinkMixin
     include ViolationsMixin
@@ -40,6 +41,7 @@ module DTK; class  Assembly
     include DeleteMixin
     extend DeleteClassMixin
     include ExecDeleteMixin
+    include NodeComponentMixin
     include GetMixin
     extend GetClassMixin
     include NodeStatusMixin
@@ -168,61 +170,6 @@ module DTK; class  Assembly
 
       new_obj
     end
-
-    def add_ec2_node_component(project, node)
-      domain_component = Component::Domain::Node::Canonical
-      cmp_name         = "#{domain_component.ec2_component_display_name_form}[#{node.name}]"
-      namespace        = domain_component.ec2_namespace
-      add_ec2_component(node, cmp_name, namespace, donot_update_workflow: true)
-    end
-
-    def add_ec2_properties_and_set_attributes(project, node, image, instance_size)
-      domain_component = Component::Domain::Node::Properties
-      cmp_name         = domain_component.ec2_component_display_name_form
-      namespace        = domain_component.ec2_namespace
-
-      new_node_component = add_ec2_component(node, cmp_name, namespace, auto_complete_links: true)
-
-      node.update_object!(:display_name)
-      node_name = node.display_name
-
-      service = Service.new(self, components: [new_node_component])
-      node = (CommandAndControl.create_nodes_from_service(service)||[]).first
-
-      av_pairs = []
-      if vpc_images = node.vpc_images
-        av_pairs = validate_image_and_size(vpc_images, node_name, image, instance_size)
-      end
-      set_attributes(av_pairs) unless av_pairs.empty?
-
-      node.validate_and_fill_in_values!
-    end
-
-    # opts can have keys 
-    #   :auto_complete_links
-    #   :donot_update_workflow
-    def add_ec2_component(node, cmp_name, namespace, opts = {})
-
-      unless matching_module_ref = ModuleRefs.get_component_module_refs(service_instance_branch).component_module_ref?(module_name)
-            result.add_error_msg("Cannot find dependency for component #{component_name}'s module '#{module_name}' in the dependency section")
-            return
-          end
-
-          namespace = matching_module_ref.namespace
-          version   =  matching_module_ref.version_string
-          unless aug_cmp_template = assembly_instance.find_matching_aug_component_template?(component_type, namespace, version)
-            result.add_error_msg("Component '#{component_name}' is not in dependent module '#{matching_module_ref.print_form}'")
-            return
-          end
-
-      
-
-
-      aug_component_template =  Component::Template.get_augmented_base_component_template(self, cmp_name, namespace, version: version) ||
-      new_component_idh = add_component(node.id_handle, aug_component_template, ComponentTitle.parse_title?(cmp_name), Opts.new(opts.merge(project: project)))
-      new_component_idh.create_object
-    end
-    private :add_ec2_component
 
     # aug_cmp_template is a component template augmented with keys having objects
     # :module_branch

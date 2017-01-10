@@ -253,7 +253,8 @@ module DTK
       user_friendly_component_name.split('::').first
     end
     def self.component_type_from_user_friendly_name(user_friendly_component_name)
-      user_friendly_component_name.sub(/::/, '__')
+      # the part .split('[').first strips off title if it is there
+      user_friendly_component_name.sub(/::/, '__').split('[').first 
     end
 
     def self.module_name(component_type)

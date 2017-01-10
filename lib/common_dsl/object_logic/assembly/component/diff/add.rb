@@ -51,6 +51,10 @@ module DTK; module CommonDSL
           @component_type ||= ::DTK::Component.component_type_from_user_friendly_name(component_name)
         end
 
+        def find_matching_aug_component_template?(component_type, module_ref)
+          assembly_instance.find_matching_aug_component_template?(component_type, module_ref.namespace, module_ref.version_string)
+        end
+        
         # opts can have keys:
         #   :component_title
         def add_component_to_node(node, aug_cmp_template, opts = {})

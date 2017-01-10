@@ -30,66 +30,46 @@ module DTK; module CommonDSL
             else
               fail DTK::Error, "Unexpected type '#{node_type}'"
             end
+          
+          add_nested_and_node_components(result, new_node, opts)
 
-          add_nested_components(new_node, result, opts)
-          # dont process anything more if any errors in add_nested_components
-          return if result.any_errors?
-
-          add_node_properties_component(new_node)
-          add_ec2_node_component(new_node)
-
-          result.add_item_to_update(:workflow) # workflow updated to add a node
-          result.add_item_to_update(:assembly)
+          unless result.any_errors?
+            result.add_item_to_update(:workflow) # workflow updated to add a node
+            result.add_item_to_update(:assembly)
+          end
+        end
+        
+        private 
+        def add_nested_and_node_components(result, node, opts = {})
+          component_module_refs = component_module_refs(opts)
+          add_diff_opts = opts.merge(component_module_refs: component_module_refs)
+          components_semantic_parse_array.each do |component|
+            component_add_diff = Component::Diff::Add.new(component.qualified_key, parse_object: component, service_instance: @service_instance)
+            # TODO: for efficiency allow a bulked up call that handles all components at same time
+            component_add_diff.process(result, add_diff_opts)
+          end 
+          add_node_components(node, component_module_refs)
         end
 
-        private 
+        def add_node_components(node, component_module_refs)
+          image         = node_attribute(:image)
+          instance_size = node_attribute(:size)
+          
+          # TODO: hard coded to ec2_properties and ec2_node
+          assembly_instance.add_ec2_node_components(project, node, image, instance_size, component_module_refs)
+          # TODO: workaround if image and size are added after stage; remove when we implement attributes add and delete (now have only modify)
+          attribute_set_opts = { create: true, skip_node_property_check: true, skip_image_and_size_validation: true, do_not_raise: true }
+          assembly_instance.set_attributes([{ pattern: "#{node_name}/image", value: image }, { pattern: "#{node_name}/size", value: instance_size }], attribute_set_opts)
+        end
 
         def node_type
           @node_type ||= @parse_object.type
         end
-
+        
         def node_name
           relative_distinguished_name
         end
         
-        def add_node_properties_component(node)
-          image         = node_attribute(:image)
-          instance_size = node_attribute(:size)
-          begin
-            # TODO: hard coded to ec2_properties
-            assembly_instance.add_ec2_properties_and_set_attributes(project, node, image, instance_size)
-            # workaround if image and size are added after stage; remove when we implement attributes add and delete (now have only modify)
-            attribute_set_opts = { create: true, skip_node_property_check: true, skip_image_and_size_validation: true, do_not_raise: true }
-            assembly_instance.set_attributes([{ pattern: "#{node_name}/image", value: image }, { pattern: "#{node_name}/size", value: instance_size }], attribute_set_opts)
-          rescue => e
-            if e.respond_to?(:message)
-              Diff::DiffErrors.raise_error(error_msg: e.message)
-            else
-              fail e
-            end
-          end
-        end
-
-        def add_ec2_node_component(node)
-          begin
-            assembly_instance.add_ec2_node_component(project, node)
-          rescue => e
-            if e.respond_to?(:message)
-              Diff::DiffErrors.raise_error(error_msg: e.message)
-            else
-              fail e
-            end
-          end
-        end
-
-        def add_nested_components(node, result, opts = {})
-           components_semantic_parse_array.each do |component|
-            # TODO: need to put new node in method called below
-            component_add_diff = Component::Diff::Add.new(component.qualified_key, parse_object: component, service_instance: @service_instance)
-            component_add_diff.process(result, opts)
-          end 
-        end
-
         def node_attribute(attr_name)
           @parse_object.attribute_value(attr_name)
         end
@@ -106,3 +86,21 @@ module DTK; module CommonDSL
     end
   end
 end; end
+
+
+
+        def add_ec2_node_component(node)
+          begin
+            assembly_instance.add_ec2_node_component(project, node)
+          rescue => e
+            if e.respond_to?(:message)
+              Diff::DiffErrors.raise_error(error_msg: e.message)
+            else
+              fail e
+            end
+          end
+        end
+
+
+
+

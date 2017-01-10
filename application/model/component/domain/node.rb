@@ -29,13 +29,8 @@ module DTK; class Component
       end
 
       TYPES = Canonical::TYPES + Properties::TYPES
-      EC2_NAMESPACE = 'aws'
       def self.ec2_component_display_name_form
         Domain.convert_to_component_display_name_form(self::EC2_TYPE)
-      end
-
-      def self.ec2_namespace
-        EC2_NAMESPACE
       end
     end
   end

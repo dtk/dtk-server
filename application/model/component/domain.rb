@@ -24,6 +24,11 @@ module DTK
       def self.is_type_of?(component)
         self::TYPES.include?(component.get_field?(:component_type))
       end
+
+      private
+      def self.convert_to_component_display_name_form(internal_type_form)
+        internal_type_form.gsub(/__/, '::')
+      end
     end
   end
 end

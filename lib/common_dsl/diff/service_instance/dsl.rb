@@ -25,7 +25,6 @@ module DTK; module CommonDSL
           #  statement from service_instance_top_dsl_file or any nested dsl file that is recursively broght in throgh imports
           #  This will be used in Parse.matching_service_instance_top_dsl_file_obj?; it will return non nil if top or any nested
           #  dsl files are impacted
-          pp [:dsl_locations, service_instance.get_dsl_locations]
           if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
             service_instance_parse = dsl_file_obj.parse_content(:service_instance)
             service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
@@ -55,7 +54,7 @@ module DTK; module CommonDSL
         def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, opts = {})
           DiffErrors.process_diffs_error_handling(diff_result, service_instance_gen) do
             Model.Transaction do
-              collated_diffs.process(diff_result, opts)
+              collated_diffs.process(diff_result, { service_instance_branch: module_branch }.merge(opts))
               DiffErrors.raise_if_any_errors(diff_result)
               Aux.stop_for_testing?(:push_diff) # for debug
               

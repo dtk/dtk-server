@@ -642,11 +642,10 @@ module DTK
     def rest__add_component
       assembly = ret_assembly_instance_object()
       cmp_name, namespace = ret_request_params(:component_template_id, :namespace)
+      cmp_name, version = ret_component_name_and_version(cmp_name)
       assembly_idh = assembly.id_handle()
 
-      unless aug_component_template = Component::Template.get_augmented_component_template?(assembly, cmp_name, namespace: namespace, use_base_template: true)
-        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
-      end
+      aug_component_template = Component::Template.get_augmented_base_component_template(assembly, cmp_name, namespace, version: version)
 
       component_title = ret_component_title?(cmp_name)
       node_id         = ret_request_params(:node_id)

@@ -28,7 +28,7 @@ credentials_status=target.send_request('/rest/account/set_catalog_credentials', 
 ssh_key_status=target.send_request('/rest/account/add_user_direct_access', rsa_pub_key: target.ssh_key, username: repo_user, first_registration: false)
 
 # Install aws:network service module with required component modules
-system("dtk module install -d #{target_location} #{target_service_module}")
+system("dtk module install -d #{target_location} -y #{target_service_module}")
 
 # Stage target service, set attributes and converge
 target_staged = target.stage_service_instance(target_service_module_name, target_instance)

@@ -18,20 +18,21 @@
 module DTK; class  Assembly
   class Instance < self
     r8_require('../service_associations')
-    r8_nested_require('instance', 'service_link_mixin')
-    r8_nested_require('instance', 'service_link')
-    r8_nested_require('instance', 'action')
-    r8_nested_require('instance', 'violation')
-    r8_nested_require('instance', 'violations')
-    r8_nested_require('instance', 'update')
-    r8_nested_require('instance', 'list')
-    r8_nested_require('instance', 'get')
-    r8_nested_require('instance', 'delete')
-    r8_nested_require('instance', 'exec_delete')
-    r8_nested_require('instance', 'service_setting')
-    r8_nested_require('instance', 'node_status')
-    r8_nested_require('instance', 'lock')
-    r8_nested_require('instance', 'dsl_location')
+    require_relative('instance/service_link_mixin')
+    require_relative('instance/service_link')
+    require_relative('instance/action')
+    require_relative('instance/violation')
+    require_relative('instance/violations')
+    require_relative('instance/update')
+    require_relative('instance/list')
+    require_relative('instance/get')
+    require_relative('instance/delete')
+    require_relative('instance/exec_delete')
+    require_relative('instance/node_component')
+    require_relative('instance/service_setting')
+    require_relative('instance/node_status')
+    require_relative('instance/lock')
+    require_relative('instance/dsl_location')
 
     include ServiceLinkMixin
     include ViolationsMixin
@@ -40,6 +41,7 @@ module DTK; class  Assembly
     include DeleteMixin
     extend DeleteClassMixin
     include ExecDeleteMixin
+    include NodeComponentMixin
     include GetMixin
     extend GetClassMixin
     include NodeStatusMixin
@@ -169,56 +171,16 @@ module DTK; class  Assembly
       new_obj
     end
 
-    # TODO: encapsulate where this comes from
-    EC2_PROPERTIES_DISPLAY_NAME = 'ec2::properties'
-    EC2_PROPERTIES_NAMESPACE    = 'aws'
-    def add_ec2_properties_and_set_attributes(project, node, image, instance_size)
-      cmp_name  = EC2_PROPERTIES_DISPLAY_NAME
-      namespace = EC2_PROPERTIES_NAMESPACE
-
-      unless aug_component_template = Component::Template.get_augmented_component_template?(self, cmp_name, namespace: namespace, use_base_template: true)
-        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
-      end
-
-      opts = Opts.new( auto_complete_links: true, project: project)
-      component_title = ComponentTitle.parse_title?(cmp_name)
-      new_component_idh = add_component(node.id_handle(), aug_component_template, component_title, opts)
-
-      node.update_object!(:display_name)
-      node_name = node[:display_name]
-
-      service = Service.new(self, components: [new_component_idh.create_object()])
-      node = (CommandAndControl.create_nodes_from_service(service)||[]).first
-
-      av_pairs = []
-      if vpc_images = node.vpc_images
-        av_pairs = validate_image_and_size(vpc_images, node_name, image, instance_size)
-      end
-      set_attributes(av_pairs) unless av_pairs.empty?
-
-      node.validate_and_fill_in_values!
-    end
-
-    def add_ec2_node_component(project, node)
-      cmp_name  = "ec2::node[#{node.name}]"
-      namespace = 'aws'
-
-      unless aug_component_template = Component::Template.get_augmented_component_template?(self, cmp_name, namespace: namespace, use_base_template: true)
-        fail ErrorUsage.new("Component with identifier #{namespace.nil? ? '\'' : ('\'' + namespace + ':')}#{cmp_name}' does not exist!")
-      end
-
-      opts = Opts.new(project: project, donot_update_workflow: true)
-      component_title = ComponentTitle.parse_title?(cmp_name)
-      add_component(node.id_handle, aug_component_template, component_title, opts)
-    end
-
     # aug_cmp_template is a component template augmented with keys having objects
     # :module_branch
     # :component_module
     # :namespace
     # opts can have
+    #  :project 
     #  :idempotent
     #  :donot_update_workflow
+    #  :splice_in_delete_action
+    #  TODO: ...
     def add_component(node_idh, aug_cmp_template, component_title, opts = {})
       # if node_idh it means we call add component from node context
       # else we call from service instance/workspace and use assembly_wide node
@@ -705,6 +667,11 @@ module DTK; class  Assembly
     end
 
     private
+
+    # version associated with assembly
+    def assembly_version
+      @assembly_version ||= ModuleVersion.ret(self)
+    end
 
     # returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
     #[col,empty_assem_nodes]

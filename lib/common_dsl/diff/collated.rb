@@ -87,6 +87,8 @@ module DTK
           end
         end
 
+        # TODO: for DTK-2823: depeneencies must be added and must be before :component so when component add is processed
+        # the object module module refs reflects what is in updated dsl
         class ForProcess < self
           private
           # :workflow must be before ops that add and delete nodes and components

@@ -69,6 +69,9 @@ module DTK; module CommonDSL
         end
 
         def delete_nested_components(result, opts = {})
+          # TODO: DTK-2824: modify so either just call a method that processes nodes or one that calls
+          # component_delete_diff.process but with options that say dont proces workflow folowed by code here that
+          # calls delete_components_on_node for task template
           non_node_components.each do |component|
             cmp_qualified_key = qualified_key.create_with_new_element?(:component, component[:display_name])
             component_delete_diff = Component::Diff::Delete.new(cmp_qualified_key, gen_object: component, service_instance: @service_instance)

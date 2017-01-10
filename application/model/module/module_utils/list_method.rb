@@ -19,6 +19,7 @@ module DTK
   module ModuleUtils
     class ListMethod
       DEFAULT_VERSION = 'CURRENT'
+      MASTER_VERSION = 'master'
 
       def self.aggregate_detail(branch_module_rows, project_idh, model_type, opts)
         project = project_idh.create_object()
@@ -66,7 +67,7 @@ module DTK
           end
 
           if opts[:include_versions]
-            version = module_branch.version_print_form(Opts.new(default_version_string: DEFAULT_VERSION))
+            version = module_branch.version_print_form(Opts.new(default_version_string: MASTER_VERSION))
             (mdl[:version_array] ||= []) << version unless version.eql?('CURRENT')
           end
           if external_ref_source = module_branch.external_ref_source()
@@ -81,8 +82,12 @@ module DTK
         # put in display name form
         ndx_ret.each_value do |mdl|
           if raw_va = mdl.delete(:version_array)
-            unless raw_va.size == 1 && raw_va.first == DEFAULT_VERSION
-              version_array = (raw_va.include?(DEFAULT_VERSION) ? [DEFAULT_VERSION] : []) + raw_va.reject { |v| v == DEFAULT_VERSION }.sort
+            if raw_va.size == 1
+              mdl.merge!(versions: raw_va[0])
+            end
+
+            unless raw_va.size == 1 && raw_va.first == MASTER_VERSION
+              version_array = (raw_va.include?(MASTER_VERSION) ? [MASTER_VERSION] : []) + raw_va.reject { |v| v == MASTER_VERSION }.sort
               mdl.merge!(versions: version_array.join(', '))
             end
           end

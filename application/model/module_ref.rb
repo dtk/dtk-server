@@ -136,6 +136,14 @@ module DTK
       ret
     end
 
+    def print_form
+      ret = "#{namespace}:#{module_name}"
+      if version = version_string
+        ret << "(#{version})"
+      end
+      ret
+    end
+
     private
 
     def self.ret_create_rows(parent, module_ref_hash_array)

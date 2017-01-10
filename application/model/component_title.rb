@@ -71,12 +71,7 @@ module DTK
         else
           component_type = cmp_node_part
         end
-        if opts[:return_version]
-          component_type, version = validate_version(component_type)
-          ret = [node_name, component_type, title, version]
-        else
-          ret = [node_name, component_type, title]
-        end
+        ret = [node_name, component_type, title]
       end
 
       if component_type =~ LegalComponentType
@@ -106,11 +101,5 @@ module DTK
       title
     end
 
-    def self.validate_version(component_type)
-      if match = component_type.match(/(\w+)(\(\d{1,2}.\d{1,2}.\d{1,2}\))/)
-        return [match[1], match[2]]
-      end
-      return [component_type, nil]
-    end
   end
 end

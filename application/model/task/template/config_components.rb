@@ -49,19 +49,15 @@ module DTK; class Task
 
       def self.update_when_deleted_component?(assembly, node, component, opts = {})
         # TODO: currently only updating the create action task template and only if it is persisted
-        # makes sense to also automtically delete component in other actions aside from once in spliced in delete subtask
+        # makes sense to also automtically delete component in other workflow actions aside from once in spliced in delete subtask
         action_to_delete = Action.create(component.add_title_field?.merge(node: node))
         delete_action?(assembly, action_to_delete, DefaultTaskActionForUpdates, opts)
       end
 
       def self.cleanup_after_node_has_been_deleted?(assembly, node)
         # TODO: currently only updating the create action task template and only if it is persisted
-        # makes sense to also automtically delete component in other actions aside from once in spliced in delete subtask
-        unless action_to_delete = canonical_node_component_delete_action(assembly, node)
-          Log.error("Unexpected that node '#{node.display_name}' does not have a canonical_node_component")
-          return
-        end
-        delete_action?(assembly, action_to_delete, DefaultTaskActionForUpdates)
+        # makes sense to also automtically delete node components in other workflow actions aside from once in spliced in delete subtask
+        delete_actions_on_node?(assembly, node, DefaultTaskActionForUpdates)
       end
 
       # opts can have
@@ -199,24 +195,15 @@ module DTK; class Task
         end
       end
 
-      def self.canonical_node_component_delete_action(assembly, node)
-        if canonical_node_component = canonical_node_component?(assembly, node)
-          delete_action_def = CommonDSL::ObjectLogic::Assembly::Component.component_delete_action_def?(canonical_node_component)
-          Action.create(canonical_node_component.add_title_field?().merge(node: node), action_def: delete_action_def)
+      def self.delete_actions_on_node?(assembly, node, task_action)
+        assembly_cmp_actions = ActionList::ConfigComponents.get(assembly)
+        if task_template_content = get_template_content_aux?([:assembly], assembly, assembly_cmp_actions, task_action)
+          if updated_template_content = task_template_content.delete_actions_on_node?(node, assembly_cmp_actions)
+            Persistence::AssemblyActions.persist(assembly, updated_template_content)
+          end
         end
       end
-
-      def self.canonical_node_component?(assembly, node)
-        sp_hash = {
-          #:only_one_per_node,:ref are put in for info needed when getting title
-          cols: [:id, :display_name, :node_node_id, :only_one_per_node, :ref],
-          filter: [:eq, :node_node_id, node.id()]
-        }
-        Component::Instance.get_objs(assembly.model_handle(:component), sp_hash).find do |component|
-          Component::Domain::Node::Canonical.is_type_of?(component)
-        end
-      end
-
+      
     end
   end
 end; end

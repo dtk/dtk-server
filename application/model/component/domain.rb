@@ -20,15 +20,44 @@ module DTK
     # For components with special semantics
     class Domain
       require_relative('domain/node')
+      require_relative('domain/provider')
+
+      def initialize(component)
+        @component = component
+      end
 
       def self.is_type_of?(component)
-        self::TYPES.include?(component.get_field?(:component_type))
+        legal_types.include?(component.get_field?(:component_type))
       end
 
       private
+
+      attr_reader :component
+
+      def self.legal_types
+        if const_defined?(:TYPES)
+          self::TYPES
+        else
+          fail "Method should not be called on class '#{self}' because static type constant 'TYPES' not defined"
+        end
+      end
+
       def self.convert_to_component_display_name_form(internal_type_form)
         internal_type_form.gsub(/__/, '::')
       end
+
+      def attribute_value?(attr_name)
+        attr_name = attr_name.to_s
+        if attr = attributes.find { |attr| attr_name == attr[:display_name] }
+          attr[:attribute_value]
+        end 
+      end
+
+      def attributes
+        # @component[:attributes] is in case augmented component with attributes
+        @attributes ||= @component[:attributes] || @component.get_attributes
+      end
+
     end
   end
 end
@@ -71,16 +100,6 @@ end
       [:oneof, :component_type, component_types]
     end
 
-    def match_attribute_value?(attr_name)
-      attr_name = attr_name.to_s
-      if attr = attributes.find { |attr| attr_name == attr[:display_name] }
-        attr[:attribute_value]
-      end 
-    end
-
-    def attributes
-      @component[:attributes] || []
-    end
   end
 end; end
 =end

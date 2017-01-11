@@ -26,6 +26,7 @@ module DTK; class  Assembly
     require_relative('instance/update')
     require_relative('instance/list')
     require_relative('instance/get')
+    require_relative('instance/component_template')
     require_relative('instance/add')
     require_relative('instance/delete')
     require_relative('instance/exec_delete')
@@ -45,6 +46,7 @@ module DTK; class  Assembly
     include NodeComponentMixin
     include GetMixin
     extend GetClassMixin
+    include ComponentTemplateMixin
     include AddMixin
     include NodeStatusMixin
     extend NodeStatusClassMixin

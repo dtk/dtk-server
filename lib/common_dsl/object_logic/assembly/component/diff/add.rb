@@ -22,14 +22,14 @@ module DTK; module CommonDSL
         include Mixin
 
         def process(result, opts = {})
-          unless matching_module_ref = component_module_refs(opts).component_module_ref?(module_name)
-            result.add_error_msg("Cannot find dependency for component #{component_name}'s module '#{module_name}' in the dependency section")
-            return
+          aug_cmp_template = nil
+          begin 
+            aug_cmp_template = assembly_instance.find_matching_aug_component_template(module_name, component_type, component_module_refs(opts))
+          rescue ErrorUsage => e
+            aug_cmp_template = nil
+            result.add_error_msg(e.message)
           end
-          unless aug_cmp_template = find_matching_aug_component_template?(component_type, matching_module_ref)
-            result.add_error_msg("Component '#{component_name}' is not in dependent module '#{matching_module_ref.print_form}'")
-            return
-          end
+          return unless  aug_cmp_template
 
           node = parent_node? || assembly_instance.create_assembly_wide_node?
           new_component_idh = add_component_to_node(node, aug_cmp_template, component_title: component_title?)
@@ -51,10 +51,6 @@ module DTK; module CommonDSL
           @component_type ||= ::DTK::Component.component_type_from_user_friendly_name(component_name)
         end
 
-        def find_matching_aug_component_template?(component_type, module_ref)
-          assembly_instance.find_matching_aug_component_template?(component_type, module_ref.namespace, module_ref.version_string)
-        end
-        
         # opts can have keys:
         #   :component_title
         def add_component_to_node(node, aug_cmp_template, opts = {})

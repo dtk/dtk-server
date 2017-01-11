@@ -64,17 +64,9 @@ module DTK
       #   :auto_complete_links
       #   :donot_update_workflow
       def add_ec2_component(project, node, component_name, component_module_refs, opts = {})
-        module_name = Component.module_name_from_user_friendly_name(component_name)
-        unless matching_module_ref = component_module_refs.component_module_ref?(module_name)
-          fail ErrorUsage, "Cannot find dependency for component #{component_name}'s module '#{module_name}' in the dependency section"
-        end
-        
-        namespace      = matching_module_ref.namespace
-        version        =  matching_module_ref.version_string
+        module_name    = Component.module_name_from_user_friendly_name(component_name)
         component_type = Component.component_type_from_user_friendly_name(component_name)
-        unless aug_component_template = find_matching_aug_component_template?(component_type, namespace, version)
-          fail ErrorUsage, "Component '#{component_name}' is not in dependent module '#{matching_module_ref.print_form}'"
-        end
+        aug_component_template = find_matching_aug_component_template(module_name, component_type, component_module_refs)
         
         component_title = ComponentTitle.parse_title?(component_name)
         new_component_idh = add_component(node.id_handle, aug_component_template, component_title, Opts.new(opts.merge(project: project)))

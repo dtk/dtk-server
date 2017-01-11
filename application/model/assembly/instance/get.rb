@@ -122,44 +122,6 @@ module DTK; class Assembly; class Instance
       components
     end
 
-    def find_matching_aug_component_template?(component_type, namespace, version)
-      matches = find_matching_aug_component_templates(component_type, namespace, version: version)
-      fail Error, "Unexpected that multiple matches: #{matches.inspect}" if matches.size > 1
-      matches.first
-    end
-
-    # This method returns an array with zero or more matching augmented component templates
-    # opts can have keys
-    #   :version
-    #   :use_just_base_template
-    def find_matching_aug_component_templates(component_type, namespace, opts = {})
-      ret = []
-      versions_to_match = [opts[:version] ? opts[:version].gsub(/\(|\)/,'') : 'master']
-      versions_to_match << assembly_version unless opts[:use_just_base_template]
-
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :module_branch_id, :type, :ref, :augmented_with_module_info, :version],
-        filter: [:and,
-                 [:eq, :type, 'template'],
-                 [:eq, :component_type, component_type],
-                 [:neq, :project_project_id, nil],
-                 [:oneof, :version, versions_to_match],
-                 [:eq, :node_node_id, nil]]
-      }
-      ret = Component::Template.get_objs(model_handle(:component_template), sp_hash, keep_ref_cols: true).select do |cmp| 
-        cmp[:namespace][:display_name] == namespace 
-      end
-      return ret if ret.empty?
-
-      # there could be two matches one from base template and one from service insatnce specific template; in
-      # this case use service specfic one
-      if !opts[:use_just_base_template] and ret.find { |cmp| cmp[:version] == assembly_version }
-        ret.select! { |cmp| cmp[:version] == assembly_version }
-      end
-      
-      ret
-    end
-
     #### end: get methods around components
 
     #### get methods around component modules

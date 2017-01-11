@@ -17,7 +17,6 @@
 module DTK
   class V1::ModuleController
     module PostMixin
-
       def stage
         service_module    = ret_service_module
         is_target_service = boolean_request_params(:is_target)
@@ -102,6 +101,12 @@ module DTK
         remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
 
         rest_ok_response CommonModule::Remote.publish(get_default_project, local_params, remote_params, rsa_pub_key) 
+      end
+
+      def delete_from_remote
+        namespace, module_name, version, rsa_pub_key = required_request_params(:namespace, :module_name, :version, :rsa_pub_key)
+        remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
+        rest_ok_response CommonModule::Remote.delete(get_default_project, remote_params, rsa_pub_key, false)
       end
 
       def pull_component_module_from_remote

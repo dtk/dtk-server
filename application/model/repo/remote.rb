@@ -97,8 +97,8 @@ module DTK
         { remote_repo_namespace: namespace }.merge(Aux.convert_keys_to_symbols(response_data))
       end
 
-      def delete_remote_module(client_rsa_pub_key, force_delete = false)
-        raise_error_if_module_is_not_accessible(client_rsa_pub_key)
+      def delete_remote_module(client_rsa_pub_key, force_delete = false, opts = {})
+        raise_error_if_module_is_not_accessible(client_rsa_pub_key) unless opts[:skip_accessibility_check]
         params = {
           username: current_tenant_username,
           name: remote.module_name,
@@ -107,7 +107,7 @@ module DTK
           force_delete: force_delete
         }
         params.merge!(version: remote.version) if remote.version
-        client.delete_module(params, client_rsa_pub_key)
+        client.delete_module(params, client_rsa_pub_key, opts)
       end
 
       def raise_error_if_module_is_not_accessible(client_rsa_pub_key)

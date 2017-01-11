@@ -180,10 +180,11 @@ module DTK
       post_rest_request_data(route, body, raise_error: true, timeout: 30)
     end
 
-    def delete_module(params_hash, client_rsa_pub_key = nil)
+    def delete_module(params_hash, client_rsa_pub_key = nil, opts = {})
       route = collection_route_from_type(params_hash) + '/delete_by_name'
       body = user_params_delegated_client(client_rsa_pub_key, params_hash)
-      delete_rest_request_data(route, body, raise_error: true)
+      opts[:raise_error] = true unless opts.key?(:raise_error)
+      delete_rest_request_data(route, body, opts)
     end
 
     def grant_user_access_to_module(params_hash, client_rsa_pub_key = nil)

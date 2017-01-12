@@ -37,10 +37,15 @@ module DTK
             return nil
           end
 
-          repo     = get_repo_with_branch
+          repo                 = get_repo_with_branch
+          dsl_file_obj         = CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(commom_module_branch)
+          parsed_common_module = dsl_file_obj.parse_content(:common_module)
+
+          # this means component_defs part is deleted from module
+          return unless parsed_common_module[:component_defs]
+
           response = module_obj.publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
-          #  DTK-2806: need to check response for errors otr see if code throws errors
-          pp [:publish_info_response, response]
+
           true
         end
 
@@ -90,6 +95,10 @@ module DTK
 
         def module_class
           ComponentModule
+        end
+
+        def commom_module_branch
+          CommonModule.matching_module_branch?(project, namespace, module_name, version) || fail(Error, "Unexpecetd that CommonModule.matching_module_branch? is nil") 
         end
       end
     end

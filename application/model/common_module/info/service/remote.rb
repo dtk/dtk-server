@@ -24,29 +24,22 @@ module DTK
           unless module_branch = get_module_branch?
             return nil # no service info
           end
-          repo = get_repo_with_branch
 
-          # DTK-2806: put in code that uses transform to from contenet in common module to repo/branch captured by
-          # module_branch, repo; this service module will initially have no info in it, it can be place where we put
-          # Need to check if this can be called after the content is updated. Probably only for master version
-          pp [:service_publish_info, module_branch, repo]
-
-          # The source info is on the repo handing off the common module branch
-          pp [:commom_module_branch, commom_module_branch]
-          dsl_file_obj = CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(commom_module_branch)
+          repo                 = get_repo_with_branch
+          dsl_file_obj         = CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(commom_module_branch)
           parsed_common_module = dsl_file_obj.parse_content(:common_module)
+
+          # this means assemblies part is deleted from module
+          return unless parsed_common_module[:assemblies]
+
           CommonDSL::Parse.set_dsl_version!(commom_module_branch, parsed_common_module)
 
           args = [project, local, nil, commom_module_branch, parsed_common_module, {}]
           file_path__content_array = CommonModule::Update::Module::Info::Service.new(*args).transform_from_common_module?
-          # transform.input_paths.each { |path| RepoManager.delete_file?(path, {no_commit: true}, @aug_component_module_branch) }
-          RepoManager.add_files(module_branch, file_path__content_array)
-          
-          # Need to check below doing right thing; right now just pushing empty content since service module barnch is empty
 
-          response = module_obj.publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
-          #  DTK-2806: need to check response for errors otr see if code throws errors
-          pp [:publish_info_response, response]
+          RepoManager.add_files(module_branch, file_path__content_array)
+          module_obj.publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
+
           true
         end
 

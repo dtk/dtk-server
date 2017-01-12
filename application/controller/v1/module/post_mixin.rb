@@ -105,8 +105,16 @@ module DTK
 
       def delete_from_remote
         namespace, module_name, version, rsa_pub_key = required_request_params(:namespace, :module_name, :version, :rsa_pub_key)
+
+        opts          = {}
         remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
-        rest_ok_response CommonModule::Remote.delete(get_default_project, remote_params, rsa_pub_key, false)
+
+        if version.eql?('all')
+          versions = required_request_params(:versions)
+          opts.merge!(versions: versions)
+        end
+
+        rest_ok_response CommonModule::Remote.delete(get_default_project, remote_params, rsa_pub_key, false, opts)
       end
 
       def pull_component_module_from_remote

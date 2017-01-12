@@ -59,21 +59,33 @@ module DTK
         nil
       end
 
-      def self.delete(project, remote_params, client_rsa_pub_key, force_delete)
+      def self.delete(project, remote_params, client_rsa_pub_key, force_delete, opts = {})
         # for now we delete service and component modules from remote if exist
         # later will change to unpublish for common module
-        opts = { raise_error: false, skip_accessibility_check: true }
-        remote_params[:module_type] = :component_module
-        component_info = ComponentModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete, opts)
+        if versions = opts[:versions]
+          versions.each do |version|
+            remote_params[:version] = version
+            delete_remote_version?(project, remote_params, client_rsa_pub_key, force_delete)
+          end
+        else
+          delete_remote_version?(project, remote_params, client_rsa_pub_key, force_delete)
+        end
 
-        remote_params[:module_type] = :service_module
-        service_info = ServiceModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete, opts)
-
-        fail(ErrorUsage, "Module '#{remote_params.pp_module_ref}' not found in the DTKN Catalog") if component_info.empty? && service_info.empty?
         nil
       end
 
       private
+
+      def self.delete_remote_version?(project, remote_params, client_rsa_pub_key, force_delete)
+        remote_opts = { raise_error: false, skip_accessibility_check: true }
+        remote_params[:module_type] = :component_module
+        component_info = ComponentModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete, remote_opts)
+
+        remote_params[:module_type] = :service_module
+        service_info = ServiceModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete, remote_opts)
+
+        fail(ErrorUsage, "Module '#{remote_params.pp_module_ref}' not found in the DTKN Catalog") if component_info.empty? && service_info.empty?
+      end
 
       module Term
         def self.remote_ref

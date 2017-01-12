@@ -47,14 +47,17 @@ module DTK
       def self.publish(project, local_params, remote_params, client_rsa_pub_key)
         remote_module_info = get_module_info(project, remote_params, client_rsa_pub_key, donot_raise_error: true)
         something_published = false
+
         unless remote_module_info[:component_info]
           something_published = Info::Component::Remote.publish?(project, local_params, remote_params, client_rsa_pub_key)
         end
+
         unless remote_module_info[:service_info] 
           if Info::Service::Remote.publish?(project, local_params, remote_params, client_rsa_pub_key)
             something_published = true
           end
         end
+
         fail ErrorUsage, "The publish command failed because the module '#{remote_params.pp_module_ref}' is already on the #{Term.remote_ref}"  unless something_published
         nil
       end

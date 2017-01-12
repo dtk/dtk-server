@@ -17,7 +17,7 @@
 #
 module DTK; class Task
   class Action
-    class CreateNode < NodeLevel
+    class CreateNode < Base
       def initialize(type, object, task_idh = nil, _assembly_idh = nil)
         hash =
           case type
@@ -28,14 +28,14 @@ module DTK; class Task
               attributes: [],
               node: node_create_obj_optional_subclass(object[:node]),
               datacenter: object[:datacenter],
-              user_object: CurrentSession.new.get_user_object()
+              user_object: CurrentSession.new.get_user_object
             }
            when :hash
             object
            else
-            fail Error.new('Unexpected CreateNode.initialize type')
+            fail Error, "Unexpected CreateNode.initialize type"
           end
-        super(type, hash, task_idh)
+        super(hash, task_idh)
       end
       private :initialize
 
@@ -82,7 +82,7 @@ module DTK; class Task
 
       def get_dynamic_attributes(_result)
         ret = []
-        attrs_to_set = attributes_to_set()
+        attrs_to_set = attributes_to_set
         attr_names = attrs_to_set.map { |a| a[:display_name].to_sym }
         av_pairs__node_components = get_dynamic_attributes__node_components!(attr_names)
         rest_av_pairs = (attr_names.empty? ? {} : CommandAndControl.get_and_update_node_state!(self[:node], attr_names))
@@ -181,18 +181,5 @@ module DTK; class Task
       end
     end
 
-    ##
-    # Class we are using to execute code which is responsible for handling Node
-    # when she moves from pending state to running state.
-    ##
-    # TODO: move common fns to NodeLevel and then have this inherit to NodeLevel
-    class PowerOnNode < CreateNode
-      def self.stage_display_name
-        'power_on_nodes_stage'
-      end
-      def self.task_display_name
-        'power_on_node'
-      end
-    end
   end
 end; end

@@ -156,7 +156,7 @@ module DTK
     end
 
     def reify!
-      self[:executable_action] &&= Action::OnNode.create_from_hash(self[:executable_action_type], self[:executable_action], id_handle)
+      self[:executable_action] &&= Action.create_from_hash(self[:executable_action_type], self[:executable_action], id_handle)
     end
 
     def ret_command_and_control_adapter_info

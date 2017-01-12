@@ -24,6 +24,66 @@ module DTK; class Task
       #   :action_method
       #   :params - attribute value hash
 
+      def self.create_from_hash(hash, task_idh = nil)
+        if component = hash[:component]
+          unless component.is_a?(Component)
+            unless task_idh
+              fail Error.new('If hash[:component] is not of type Component then task_idh must be supplied')
+            end
+            hash[:component] = Component.create_from_model_handle(component, task_idh.createMH(:component))
+          end
+        end
+        if attrs = hash[:attributes]
+          unless attrs.empty?
+            attr_mh = task_idh.createMH(:attribute)
+            attrs.each_with_index { |attr, i| attrs[i] = Attribute.create_from_model_handle(attr, attr_mh) }
+          end
+        end
+        new(hash)
+      end
+
+      # returns [actions, config_agent_type]
+      def self.create_actions_from_execution_blocks(exec_blocks)
+        actions = []
+        cmps_info = exec_blocks.components_hash_with(action_methods: true)
+        config_agent_type = config_agent_type(cmps_info)
+        cmps_info.each do |cmp_hash|
+          cmp = cmp_hash[:component]
+          action_method = cmp_hash[:action_method] # can be nil
+          hash = {
+            attributes: [],
+            component: cmp
+          }
+          if action_method
+            hash.merge!(action_method: action_method)
+          end
+          if params =  cmp_hash[:params]
+            hash.merge!(params: params)
+          end
+          actions << new(hash)
+        end
+        [actions, config_agent_type]
+      end
+
+      def self.create_from_state_change(scs_same_cmp, deps)
+        state_change = scs_same_cmp.first
+        # TODO: may deprecate need for ||[sc[:id]
+        pointer_ids = scs_same_cmp.map { |sc| sc[:linked_ids] || [sc[:id]] }.flatten.compact
+        hash = {
+          state_change_pointer_ids: pointer_ids, #this field used to update teh coorepdonsing state change after thsi action is run
+          attributes: [],
+          component: state_change[:component]
+        }
+        hash.merge!(component_dependencies: deps) if deps
+
+        # TODO: can get more sophisticated and handle case where some components installed and other are incremental
+        incremental_change = !scs_same_cmp.find { |sc| not sc[:type] == 'setting' }
+        if incremental_change
+          hash.merge!(changed_attribute_ids: scs_same_cmp.map { |sc| sc[:attribute_id] })
+        end
+        new(hash)
+      end
+
       def component
         assert_exists(:component)
         self[:component]
@@ -74,24 +134,6 @@ module DTK; class Task
         end
         action_def_id_handle = component.model_handle(:action_def).createIDH(id: action_def_ref[:action_def_id])
         ActionDef.get_action_def(action_def_id_handle, opts)
-      end
-
-      def self.create_from_hash(hash, task_idh = nil)
-        if component = hash[:component]
-          unless component.is_a?(Component)
-            unless task_idh
-              fail Error.new('If hash[:component] is not of type Component then task_idh must be supplied')
-            end
-            hash[:component] = Component.create_from_model_handle(component, task_idh.createMH(:component))
-          end
-        end
-        if attrs = hash[:attributes]
-          unless attrs.empty?
-            attr_mh = task_idh.createMH(:attribute)
-            attrs.each_with_index { |attr, i| attrs[i] = Attribute.create_from_model_handle(attr, attr_mh) }
-          end
-        end
-        new(hash)
       end
 
       def add_attribute!(attr)
@@ -255,48 +297,6 @@ module DTK; class Task
           ret_attr[:value] = attr[:value_asserted] || attr[:value_derived]
           ret_attr
         end
-      end
-
-      # returns [actions,config_agent_type]
-      def self.create_actions_from_execution_blocks(exec_blocks)
-        actions = []
-        cmps_info = exec_blocks.components_hash_with(action_methods: true)
-        config_agent_type = config_agent_type(cmps_info)
-        cmps_info.each do |cmp_hash|
-          cmp = cmp_hash[:component]
-          action_method = cmp_hash[:action_method] # can be nil
-          hash = {
-            attributes: [],
-            component: cmp
-          }
-          if action_method
-            hash.merge!(action_method: action_method)
-          end
-          if params =  cmp_hash[:params]
-            hash.merge!(params: params)
-          end
-          actions << new(hash)
-        end
-        [actions, config_agent_type]
-      end
-
-      def self.create_from_state_change(scs_same_cmp, deps)
-        state_change = scs_same_cmp.first
-        # TODO: may deprecate need for ||[sc[:id]
-        pointer_ids = scs_same_cmp.map { |sc| sc[:linked_ids] || [sc[:id]] }.flatten.compact
-        hash = {
-          state_change_pointer_ids: pointer_ids, #this field used to update teh coorepdonsing state change after thsi action is run
-          attributes: [],
-          component: state_change[:component]
-        }
-        hash.merge!(component_dependencies: deps) if deps
-
-        # TODO: can get more sophsiticated and handle case where some components installed and other are incremental
-        incremental_change = !scs_same_cmp.find { |sc| not sc[:type] == 'setting' }
-        if incremental_change
-          hash.merge!(changed_attribute_ids: scs_same_cmp.map { |sc| sc[:attribute_id] })
-        end
-        new(hash)
       end
 
       private

@@ -528,7 +528,6 @@ module DTK; class Task
       ret
     end
 
-    # Amar
     # moved call to ConfigNode.create_from_state_change into this method for error handling with clear message to user
     # if TSort throws TSort::Cyclic error, it means intra-node cycle case
     def get_executable_action_from_state_change(state_change, assembly_idh, stage_index)

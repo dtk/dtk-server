@@ -17,7 +17,51 @@
 #
 module DTK; class Task
   class Action
-    class ConfigNode < OnNode
+    # Actions that configure a node
+    # TODO: see if misnomer since these can be set of assembly level actions that 
+    class ConfigNode < Base
+      def initialize(type, object, task_idh = nil, assembly_idh = nil)
+        # TODO: clean up so dont have to look for assembly_idh in two places
+        assembly_idh ||= object[:assembly_idh]
+        intra_node_stages = hash = nil
+        case type
+          when :state_change
+            sc = object
+            sample_state_change = sc.first
+            node = sample_state_change[:node]
+            component_actions, intra_node_stages = OnComponent.order_and_group_by_component(sc)
+            hash = {
+              node: node,
+              state_change_types: sc.map { |sc| sc[:type] }.uniq,
+              config_agent_type: sc.first.on_node_config_agent_type,
+              component_actions: component_actions
+            }
+            hash.merge!(assembly_idh: assembly_idh) if assembly_idh
+          when :hash
+            if component_actions = object[:component_actions]
+              component_actions.each_with_index { |ca, i| component_actions[i] = OnComponent.create_from_hash(ca, task_idh) }
+            end
+            hash = object
+          when :execution_blocks
+            exec_blocks = object
+            actions, config_agent_type = OnComponent.create_actions_from_execution_blocks(exec_blocks)
+            hash = {
+              node: exec_blocks.node(),
+              state_change_types: ['converge_component'],
+              config_agent_type: config_agent_type,
+              component_actions: actions
+            }
+            hash.merge!(assembly_idh: assembly_idh) if assembly_idh
+            intra_node_stages = exec_blocks.intra_node_stages()
+          else
+            fail Error.new('Unexpected ConfigNode.initialize type')
+          end
+        super(hash, task_idh)
+        # set_intra_node_stages must be done after super
+        set_intra_node_stages!(intra_node_stages) if intra_node_stages
+      end
+      private :initialize
+
       def self.create_from_execution_blocks(exec_blocks, assembly_idh = nil)
         task_idh = nil #not needed in new
         new(:execution_blocks, exec_blocks, task_idh, assembly_idh)
@@ -254,48 +298,7 @@ module DTK; class Task
         end
       end
 
-      private
 
-      def initialize(type, object, task_idh = nil, assembly_idh = nil)
-        # TODO: clean up so dont have to look for assembly_idh in two places
-        assembly_idh ||= object[:assembly_idh]
-        intra_node_stages = hash = nil
-        case type
-          when :state_change
-            sc = object
-            sample_state_change = sc.first
-            node = sample_state_change[:node]
-            component_actions, intra_node_stages = OnComponent.order_and_group_by_component(sc)
-            hash = {
-              node: node,
-              state_change_types: sc.map { |sc| sc[:type] }.uniq,
-              config_agent_type: sc.first.on_node_config_agent_type,
-              component_actions: component_actions
-            }
-            hash.merge!(assembly_idh: assembly_idh) if assembly_idh
-          when :hash
-            if component_actions = object[:component_actions]
-              component_actions.each_with_index { |ca, i| component_actions[i] = OnComponent.create_from_hash(ca, task_idh) }
-            end
-            hash = object
-          when :execution_blocks
-            exec_blocks = object
-            actions, config_agent_type = OnComponent.create_actions_from_execution_blocks(exec_blocks)
-            hash = {
-              node: exec_blocks.node(),
-              state_change_types: ['converge_component'],
-              config_agent_type: config_agent_type,
-              component_actions: actions
-            }
-            hash.merge!(assembly_idh: assembly_idh) if assembly_idh
-            intra_node_stages = exec_blocks.intra_node_stages()
-          else
-            fail Error.new('Unexpected ConfigNode.initialize type')
-          end
-        super(type, hash, task_idh)
-        # set_intra_node_stages must be done after super
-        set_intra_node_stages!(intra_node_stages) if intra_node_stages
-      end
     end
   end
 end; end

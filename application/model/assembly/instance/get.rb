@@ -124,7 +124,12 @@ module DTK; class Assembly; class Instance
 
     #### end: get methods around components
 
-    #### get methods around component modules
+    #### get methods around component modules and component module refs
+    def get_component_module_refs
+      ModuleRefs.get_component_module_refs(get_service_instance_branch)
+    end
+
+    # TODO: unify above and below. Th emethod get_component_module_ref is newer
 
     # opts can have keys
     #   :get_branch_relationship_info - Boolean
@@ -266,6 +271,10 @@ module DTK; class Assembly; class Instance
     end
 
     #### end: get methods around tasks
+
+    def get_service_instance_branch
+      AssemblyModule::Service.get_service_instance_branch(self)
+    end
 
     def get_sub_assemblies
       self.class.get_sub_assemblies([id_handle()])

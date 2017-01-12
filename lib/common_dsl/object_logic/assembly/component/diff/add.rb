@@ -24,7 +24,7 @@ module DTK; module CommonDSL
         def process(result, opts = {})
           aug_cmp_template = nil
           begin 
-            aug_cmp_template = assembly_instance.find_matching_aug_component_template(module_name, component_type, component_module_refs(opts))
+            aug_cmp_template = assembly_instance.find_matching_aug_component_template(component_type, component_module_refs(opts))
           rescue ErrorUsage => e
             aug_cmp_template = nil
             result.add_error_msg(e.message)
@@ -43,10 +43,6 @@ module DTK; module CommonDSL
         
         private
 
-        def module_name 
-          @module_name ||= ::DTK::Component.module_name_from_user_friendly_name(component_name)
-        end
-        
         def component_type 
           @component_type ||= ::DTK::Component.component_type_from_user_friendly_name(component_name)
         end

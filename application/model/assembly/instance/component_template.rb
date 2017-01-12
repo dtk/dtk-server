@@ -18,9 +18,16 @@
 module DTK 
   class Assembly::Instance
     module ComponentTemplateMixin
-      
-      def find_matching_aug_component_template(module_name, component_type, component_module_refs)
+      def find_matching_aug_component_template?(component_type, component_module_refs)
+        find_matching_aug_component_template(component_type, component_module_refs, donot_raise_error: true)
+      end
+
+      # opts can have keys:
+      #   :donot_raise_error
+      def find_matching_aug_component_template(component_type, component_module_refs, opts = {})
+        module_name = Component.module_name(component_type)
         unless matching_module_ref = component_module_refs.component_module_ref?(module_name)
+          return nil if opts[:donot_raise_error]
           fail ErrorUsage, "Cannot find dependency for component #{Component.display_name_print_form(component_type)}'s module '#{module_name}' in the dependency section"
         end
         
@@ -31,8 +38,10 @@ module DTK
         if matches.size == 1
           matches.first
         elsif matches.size > 1
+          return nil if opts[:donot_raise_error]
           fail Error, "Unexpected that multiple matches: #{matches.inspect}" 
         else
+          return nil if opts[:donot_raise_error]
           fail ErrorUsage, "Component '#{Component.display_name_print_form(component_type)}' is not in dependent module '#{matching_module_ref.print_form}'"
         end
       end

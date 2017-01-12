@@ -18,29 +18,37 @@
 module DTK
   class ActionDef
     class DynamicProvider
-      def initialize(params_hash)
-        @provider_module     = :ruby_provider # TODO: stub 
-        @provider_parameters = ret_provider_parameters(params_hash)
+      def initialize(action_def_params, assembly_instance)
+        @action_def_params      = action_def_params
+        @provider_module_name   = 'ruby-provider' # TODO: stub 
+        @container_component       = ret_container_component?(@provider_module_name, assembly_instance) 
       end
       private :initialize
       
-      def self.matching_dynamic_provider?(component_template, method_name)
-        # TODO: 2805 this gives facade that hides external refs
-        return create_when_create_method(component_template) if method_name == 'create'
-        if action_def = ActionDef.get_matching_action_def?(component_template, method_name)
-          new(action_def.content) 
+      def self.matching_dynamic_provider?(component_template, method_name, assembly_instance)
+        if action_def_params = ActionDef.get_matching_action_def_params?(component_template, method_name)
+          new(action_def_params, assembly_instance)
         end
       end
       
       private
       
-      def self.create_when_create_method(component_template)
-        new(component_template.get_field?(:external_ref))
+
+      def ret_container_component?(provider_module_name, assembly_instance)
+        component_module_refs  = assembly_instance.component_module_refs
+        container_component_type  = container_component_type(provider_module_name)
+
+        # container_dtk_component is acomponent template with default attribute values
+        if container_dtk_component = assembly_instance.find_matching_aug_component_template?(container_component_type, component_module_refs) 
+          Component::Domain::Provider::Container.new(container_dtk_component)
+        end
       end
-      
-      def ret_provider_parameters(params_hash)
-        params_hash.inject({}) { |h, (k, v)| k == :provider ? h : h.merge(k => v) }
+
+      CONTAINER_COMPONENT_NAME = 'container'
+      def container_component_type(provider_module_name)
+        Component.component_type_from_module_and_component(provider_module_name, CONTAINER_COMPONENT_NAME)
       end
+
     end
   end
 end

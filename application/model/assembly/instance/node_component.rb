@@ -26,10 +26,7 @@ module DTK
       # opts can have keys:
       #   :component_module_refs
       def add_ec2_properties_and_set_attributes(project, node, image, instance_size, opts = {})
-        unless component_module_refs = opts[:component_module_refs]
-          service_instance_branch = AssemblyModule::Service.get_service_instance_branch(self)
-          component_module_refs = ModuleRefs.get_component_module_refs(service_instance_branch)
-        end
+        component_module_refs = opts[:component_module_refs] || get_component_module_refs
 
         domain_component = Component::Domain::Node::Properties
         cmp_name         = domain_component.ec2_component_display_name_form
@@ -64,9 +61,8 @@ module DTK
       #   :auto_complete_links
       #   :donot_update_workflow
       def add_ec2_component(project, node, component_name, component_module_refs, opts = {})
-        module_name    = Component.module_name_from_user_friendly_name(component_name)
         component_type = Component.component_type_from_user_friendly_name(component_name)
-        aug_component_template = find_matching_aug_component_template(module_name, component_type, component_module_refs)
+        aug_component_template = find_matching_aug_component_template(component_type, component_module_refs)
         
         component_title = ComponentTitle.parse_title?(component_name)
         new_component_idh = add_component(node.id_handle, aug_component_template, component_title, Opts.new(opts.merge(project: project)))

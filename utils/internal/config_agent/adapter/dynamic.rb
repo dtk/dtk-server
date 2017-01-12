@@ -19,13 +19,12 @@ module DTK; class ConfigAgent
   module Adapter
     class Dynamic < ConfigAgent
       def ret_msg_content(config_node, opts = {})
-        assembly_instance  = opts[:assembly]
-        component_action   = config_node[:component_actions].first
-        method_name        = component_action.method_name? || 'create'
-        component          = component_action[:component]
-        component_template = component_template(component)
-        
-        unless dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider?(component_template, method_name)
+        assembly_instance     = opts[:assembly]
+        component_action      = config_node[:component_actions].first
+        method_name           = component_action.method_name? || 'create'
+        component             = component_action[:component]
+        component_template    = component_template(component)
+        unless dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider?(component_template, method_name, assembly_instance)
           fail ErrorUsage, "Method '#{method_name}' not defined on component '#{component.display_name_print_form}'"
         end
         # this is info that wil be used when remove stub

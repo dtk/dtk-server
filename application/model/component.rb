@@ -26,6 +26,7 @@ module DTK
     require_relative('component/test')
     require_relative('component/resource_matching')
     require_relative('component/include_module')
+    require_relative('component/name')
     require_relative('component/domain')
     include GetMethod::Mixin
     extend GetMethod::ClassMixin
@@ -39,6 +40,8 @@ module DTK
     extend ComponentMetaClassMixin
     extend BranchNames::ClassMixin
     include BranchNames::Mixin
+    extend Name::ClassMixin
+    include Name::Mixin
 
     set_relation_name(:component, :component)
     def self.common_columns
@@ -193,116 +196,6 @@ module DTK
     end
 
     ### display name functions
-    def self.display_name_from_user_friendly_name(user_friendly_name)
-      # user_friendly_name.gsub(/::/,"__")
-      # using sub instead of gsub because we need only first :: to change to __
-      # e.g. we have cmp "mysql::bindings::java" we want "mysql__bindings::java"
-      user_friendly_name.sub(/::/, '__')
-    end
-
-    # TODO: these methods in this section need to be cleaned up and also possibly partitioned into Component::Instance and Component::Template
-    def display_name_print_form(opts = {})
-      cols_to_get = [:component_type, :display_name]
-      unless opts[:without_version]
-        cols_to_get += [:version]
-      end
-      update_object!(*cols_to_get)
-      component_type = component_type_print_form()
-
-      # handle version
-      ret =
-        if opts[:without_version] || has_default_version?()
-          component_type
-        else
-          self.class.name_with_version(component_type, self[:version])
-        end
-
-      # handle component title
-      if title = ComponentTitle.title?(self)
-        ret = ComponentTitle.print_form_with_title(ret, title)
-      end
-
-      if opts[:namespace_prefix]
-        if cmp_namespace = self[:namespace]
-          ret = "#{cmp_namespace}:#{ret}"
-        end
-      end
-
-      if opts[:node_prefix]
-        if node = get_node()
-          ret = "#{node[:display_name]}/#{ret}"
-        end
-      end
-      ret
-    end
-
-    def self.name_with_version(name, version)
-      if version.is_a?(ModuleVersion::Semantic)
-        "#{name}(#{version})"
-      else
-        name
-      end
-    end
-
-    def self.ref_with_version(ref, version)
-      "#{ref}__#{version}"
-    end
-
-    # user friendly name will be cmp or mod::cmp
-    def self.module_name_from_user_friendly_name(user_friendly_component_name)
-      user_friendly_component_name.split('::').first
-    end
-    def self.component_type_from_user_friendly_name(user_friendly_component_name)
-      # the part .split('[').first strips off title if it is there
-      user_friendly_component_name.sub(/::/, '__').split('[').first 
-    end
-
-    def self.module_name(component_type)
-      component_type.gsub(/__.+$/, '')
-    end
-
-    NamespaceDelim = ':'
-    def self.display_name_print_form(display_name, opts = Opts.new)
-      ret =
-        if opts[:no_module_name]
-          display_name.gsub(/^.+__/, '')
-        else
-          display_name.gsub(/__/, '::')
-        end
-
-      if namespace = opts[:namespace]
-        ret = "#{namespace}#{NamespaceDelim}#{ret}"
-      end
-
-      if version = opts[:version]
-        ret = "#{ret}(#{version})" unless version.eql?('master')
-      end
-
-      ret
-    end
-
-    def self.component_type_print_form(component_type, opts = Opts.new)
-      if opts[:no_module_name]
-        component_type.gsub(/^.+__/, '')
-      else
-        component_type.gsub(/__/, '::')
-      end
-    end
-    def component_type_print_form
-      self.class.component_type_print_form(get_field?(:component_type))
-    end
-
-    def convert_to_print_form!
-      update_object!(:display_name, :version)
-      component_type = component_type_print_form()
-
-      opts = { namespace: self[:namespace] }
-      opts.merge!( version: self[:version] ) unless has_default_version?()
-      self[:display_name] = self.class.display_name_print_form(self[:display_name], opts)
-
-      self[:version] = nil if has_default_version?()
-      self
-    end
 
     ### end: display name functions
 

@@ -44,11 +44,14 @@ module DTK
       end
     end
 
-    def self.get_matching_action_def?(component_template, method_name)
-      if match = get_ndx_action_defs([component_template.id_handle], filter: [:eq, :method_name, method_name])[component_template.id]
-        # will only be one element
-        match.first
-      end
+    def self.get_matching_action_def_params?(component_template, method_name)
+      ret = 
+        if match = get_ndx_action_defs([component_template.id_handle], filter: [:eq, :method_name, method_name])[component_template.id]
+          # will only be one element
+          match.first && match.first.content
+        end
+      # TODO: 2805 this gives facade that hides external refs
+      ret || (component_template.get_field?(:external_ref) if method_name == 'create')
     end
 
     def self.get_ndx_action_defs(cmp_template_idhs, opts = {})

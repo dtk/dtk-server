@@ -97,6 +97,10 @@ module DTK; class  Assembly
       task_idhs
     end
 
+    def component_module_refs
+      @component_module_refs ||= get_component_module_refs
+    end
+
     def get_info__flat_list(opts = {})
       filter = [:eq, :id, id()]
       self.class.get_info__flat_list(model_handle(), { filter: filter }.merge(opts))

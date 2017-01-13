@@ -14,6 +14,7 @@ require File.expand_path('../mixins/component_modules_version_mixin.rb', __FILE_
 require File.expand_path('../mixins/service_modules_mixin.rb', __FILE__)
 require File.expand_path('../mixins/service_modules_version_mixin.rb', __FILE__)
 require File.expand_path('../mixins/test_modules_mixin.rb', __FILE__)
+require File.expand_path('../mixins/modules_mixin.rb', __FILE__)
 
 STDOUT.sync = true
 
@@ -27,6 +28,7 @@ class Common
 	include TestModulesMixin
 	include ComponentModulesVersionMixin
 	include ServiceModulesVersionMixin
+	include ModulesMixin
 
 	attr_accessor :server, :port, :endpoint, :username, :password
 	attr_accessor :service_name, :service_id, :workspace_id, :is_target, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace, :node_group

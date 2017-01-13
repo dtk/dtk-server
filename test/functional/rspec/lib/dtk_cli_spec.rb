@@ -463,8 +463,94 @@ shared_context "NEG - Push module changes" do |module_name, module_location|
     value = `dtk module push -d #{module_location}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
-    puts "Push of module #{module_name} was completed successfully which was not expected!" if pass == true
+    puts "Push of module #{module_name} was completed successfully which is not expected!" if pass == true
     puts "Push of module #{module_name} did not complete successfully which is expected!" if pass == false
+    puts ''
+    expect(pass).to eq(false)
+  end
+end
+
+shared_context "Push-dtkn module changes" do |module_name, module_location|
+  it "pushes changes for module #{module_name} to dtkn" do
+    puts 'Push-dtkn module changes', '----------------------------'
+    pass = true
+    value = `dtk module push-dtkn -d #{module_location}`
+    puts value
+    pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
+    puts "Push-dtkn of module #{module_name} was completed successfully!" if pass == true
+    puts "Push-dtkn of module #{module_name} did not complete successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context "NEG - Push-dtkn module changes" do |module_name, module_location|
+  it "does not push changes for module #{module_name} to dtkn" do
+    puts 'NEG - Push-dtkn module changes', '-------------------------------'
+    pass = true
+    value = `dtk module push-dtkn -d #{module_location}`
+    puts value
+    pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
+    puts "Push-dtkn of module #{module_name} was completed successfully which is not expected!" if pass == true
+    puts "Push-dtkn of module #{module_name} did not complete successfully which is expected!" if pass == false
+    puts ''
+    expect(pass).to eq(false)
+  end
+end
+
+shared_context "Publish module" do |module_name, module_location|
+  it "publish module #{module_name} to dtkn" do
+    puts 'Publish module changes', '--------------------------'
+    pass = true
+    value = `dtk module publish -d #{module_location}`
+    puts value
+    pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
+    puts "Publish of module #{module_name} was completed successfully!" if pass == true
+    puts "Publish of module #{module_name} did not complete successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context "NEG - Publish module" do |module_name, module_location|
+  it "does not publish module #{module_name} to dtkn" do
+    puts 'NEG - Publish module changes', '-----------------------------'
+    pass = true
+    value = `dtk module publish -d #{module_location}`
+    puts value
+    pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
+    puts "Publish of module #{module_name} was completed successfully which is not expected!" if pass == true
+    puts "Publish of module #{module_name} did not complete successfully which is expected!" if pass == false
+    puts ''
+    expect(pass).to eq(false)
+  end
+end
+
+shared_context "Delete module from remote" do |dtk_common, module_name, module_version|
+  it "deletes module #{module_name} with version #{module_version} from dtkn" do
+    puts 'Delete module from remote', '-------------------------'
+    pass = true
+    value = `dtk module delete-from-remote -y -v #{module_version} #{module_name}`
+    puts value
+    pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
+    module_exists_on_repoman = dtk_common.module_exists_on_remote?(module_name, module_version)
+    pass = false if module_exists_on_repoman == true
+    puts "Delete of module #{module_name} from remote was completed successfully!" if pass == true
+    puts "Delete of module #{module_name} from remote did not complete successfully!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context "NEG - Delete module from remote" do |dtk_common, module_name, module_version|
+  it "does not delete module #{module_name} with version #{module_version} from dtkn" do
+    puts 'NEG - Delete module from remote', '------------------------------'
+    pass = true
+    value = `dtk module delete-from-remote -y -v #{module_version} #{module_name}`
+    puts value
+    pass = false if ((value.include? "Module '#{module_name}' does not exist on repo manager!") || (value.include? "Module '#{module_name}(#{module_version})' not found in the DTKN Catalog"))
+    puts "Delete of module #{module_name} from remote was completed successfully which is not expected!" if pass == true
+    puts "Delete of module #{module_name} from remote did not complete successfully which is expected!" if pass == false
     puts ''
     expect(pass).to eq(false)
   end

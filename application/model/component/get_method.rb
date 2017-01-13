@@ -26,7 +26,7 @@ module DTK; class Component
           pntr = ndx_ret[link_def[:id]] ||= link_def.merge(link_def_links: [])
           pntr[:link_def_links] << r[:link_def_link]
         end
-        ret =  ndx_ret.values()
+        ret =  ndx_ret.values
         ret.each { |r| r[:link_def_links].sort! { |a, b| a[:position] <=> b[:position] } }
         ret
       end
@@ -66,17 +66,20 @@ module DTK; class Component
       def get_implementations(component_idhs)
         ret = []
         return ret if component_idhs.empty?
-        mh = component_idhs.first.createMH()
+        mh = component_idhs.first.createMH
         get_objs(mh, sp_hash([:implementation], :id, component_idhs)).map { |r| r[:implementation] }
       end
 
       private
 
+      # opts can have keys:
+      #   :cols - default is common_columns
+      #   :cols_plus - addition to cols
       def get_component_children(component_idhs, child_class, child_model_name, opts = {})
         ret = []
         return ret if component_idhs.empty?
         mh = component_idhs.first.create_childMH(child_model_name)
-        cols = opts[:cols] || child_class.common_columns()
+        cols = opts[:cols] || child_class.common_columns
         if cols_plus = opts[:cols_plus]
           cols = (cols + opts[:cols_plus]).uniq
         end

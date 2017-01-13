@@ -18,8 +18,18 @@
 module DTK
   class Component::Domain
     module Provider
-      require_relative('provider/container')
-      require_relative('provider/parameters')
+      class Parameters < Component::Domain
+        def initialize(component)
+          super(component)
+        end
+        
+        ParameterInfo = Struct.new(:name, :required, :default)
+        def parameter_info
+          @parameter_info ||= attributes.map { |attr| ParameterInfo.new(attr.display_name.to_sym, attr[:required], attr[:attribute_value]) }
+        end
+
+      end
     end
   end
 end
+

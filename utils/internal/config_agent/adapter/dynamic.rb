@@ -26,6 +26,8 @@ module DTK; class ConfigAgent
         component_template    = component_template(component)
 
         dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
+        dynamic_provider.raise_error_if_not_valid
+
         docker_file = dynamic_provider.docker_file?
 
         msg = get_stubbed_message

@@ -48,7 +48,7 @@ module DTK; class Task; class Template
 
       begin
         MustacheTemplate.render(string, @task_params)
-       rescue MustacheTemplateError::MissingVar => e
+       rescue MustacheTemplate::Error::MissingVar => e
         ident = 4
         err_msg = "The variable '#{e.missing_var}' in the following workflow term is not set:\n#{' ' * ident}#{string}"
         fail ErrorUsage.new(err_msg)

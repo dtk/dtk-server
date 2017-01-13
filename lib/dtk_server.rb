@@ -17,6 +17,7 @@
 #
 module DTK
   require_relative('common_dsl')
+  require_relative('mustache_template')
   require_relative('doc_generator')
   require_relative('model')
   require_relative('parsed_dsl')

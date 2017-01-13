@@ -116,7 +116,7 @@ module DTK; class ConfigAgent; module Adapter
       if MustacheTemplate.needs_template_substitution?(docker_file_template)
         begin
           docker_file_template = MustacheTemplate.render(docker_file_template, attributes)
-        rescue MustacheTemplateError::MissingVar => e
+        rescue MustacheTemplate::Error::MissingVar => e
           ident = 4
           err_msg = "The variable '#{e.missing_var}' in the following workflow term is not set:\n#{' ' * ident}#{string}"
           fail ErrorUsage.new(err_msg)

@@ -24,21 +24,29 @@ module DTK; class ConfigAgent
         method_name           = component_action.method_name? || 'create'
         component             = component_action[:component]
         component_template    = component_template(component)
-        unless dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider?(component_template, method_name, assembly_instance)
-          fail ErrorUsage, "Method '#{method_name}' not defined on component '#{component.display_name_print_form}'"
-        end
-        # this is info that wil be used when remove stub
-        pp [:dynamic_provider, dynamic_provider]
+
+        dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
+        docker_file = dynamic_provider.docker_file?
 
         msg = get_stubbed_message
         msg.merge!(
           modules: get_base_and_dependent_modules(component, assembly_instance),
           component_name: component_action.component_module_name
         )
+        if docker_file
+          pp :docker_file
+          STDOUT << docker_file
+          pp 'using docker file from provider'
+          msg[:execution_environment] = { type: EPHEMERAL_CONTAINER_TYPE, docker_file: docker_file }
+        end
+
         pp [:msg, msg]
+
         msg
 
       end
+
+      EPHEMERAL_CONTAINER_TYPE = 'ephemeral_container'
 
       def type
         :dynamic

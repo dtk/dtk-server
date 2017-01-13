@@ -21,18 +21,33 @@ module DTK
       def initialize(action_def_params, assembly_instance)
         @action_def_params      = action_def_params
         @provider_module_name   = 'ruby-provider' # TODO: stub 
-        @container_component       = ret_container_component?(@provider_module_name, assembly_instance) 
+        @container_component    = ret_container_component?(@provider_module_name, assembly_instance) 
       end
       private :initialize
-      
+
+      def self.matching_dynamic_provider(component_template, method_name, assembly_instance)
+        matching_dynamic_provider?(component_template, method_name, assembly_instance) ||
+          fail(ErrorUsage, "Method '#{method_name}' not defined on component '#{component_template.display_name_print_form}'")
+      end
+
       def self.matching_dynamic_provider?(component_template, method_name, assembly_instance)
         if action_def_params = ActionDef.get_matching_action_def_params?(component_template, method_name)
           new(action_def_params, assembly_instance)
         end
       end
-      
+
+      def docker_file?
+        if @docker_file_set
+          @docker_file
+        else
+          @docker_file_set = true
+          if dockerfile_template = (@container_component && @container_component.dockerfile_template?) 
+            @docker_file = MustacheTemplate.render(dockerfile_template, @action_def_params)
+          end
+        end
+      end
+
       private
-      
 
       def ret_container_component?(provider_module_name, assembly_instance)
         component_module_refs  = assembly_instance.component_module_refs

@@ -24,9 +24,10 @@ module DTK
           @dockerfile_template = attribute_value?(:dockerfile)
         end
 
-        def debug
-          STDOUT << @dockerfile_template
+        def dockerfile_template?
+          @dockerfile_template
         end
+
       end
     end
   end

@@ -47,19 +47,48 @@ module DTK
       def self.publish(project, local_params, remote_params, client_rsa_pub_key)
         remote_module_info = get_module_info(project, remote_params, client_rsa_pub_key, donot_raise_error: true)
         something_published = false
+
         unless remote_module_info[:component_info]
           something_published = Info::Component::Remote.publish?(project, local_params, remote_params, client_rsa_pub_key)
         end
+
         unless remote_module_info[:service_info] 
           if Info::Service::Remote.publish?(project, local_params, remote_params, client_rsa_pub_key)
             something_published = true
           end
         end
+
         fail ErrorUsage, "The publish command failed because the module '#{remote_params.pp_module_ref}' is already on the #{Term.remote_ref}"  unless something_published
         nil
       end
 
+      def self.delete(project, remote_params, client_rsa_pub_key, force_delete, opts = {})
+        # for now we delete service and component modules from remote if exist
+        # later will change to unpublish for common module
+        if versions = opts[:versions]
+          versions.each do |version|
+            remote_params[:version] = version
+            delete_remote_version?(project, remote_params, client_rsa_pub_key, force_delete)
+          end
+        else
+          delete_remote_version?(project, remote_params, client_rsa_pub_key, force_delete)
+        end
+
+        nil
+      end
+
       private
+
+      def self.delete_remote_version?(project, remote_params, client_rsa_pub_key, force_delete)
+        remote_opts = { raise_error: false, skip_accessibility_check: true }
+        remote_params[:module_type] = :component_module
+        component_info = ComponentModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete, remote_opts)
+
+        remote_params[:module_type] = :service_module
+        service_info = ServiceModule.delete_remote(project, remote_params, client_rsa_pub_key, force_delete, remote_opts)
+
+        fail(ErrorUsage, "Module '#{remote_params.pp_module_ref}' not found in the DTKN Catalog") if component_info.empty? && service_info.empty?
+      end
 
       module Term
         def self.remote_ref

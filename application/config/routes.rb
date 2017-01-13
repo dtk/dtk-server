@@ -89,6 +89,7 @@ DTK::ReactorRoute.draw do
   post 'api/v1/modules/list_remote'                         => 'v1::module/list_remote'
   post 'api/v1/modules/generate_service_name'               => 'v1::module/generate_service_name'
   post 'api/v1/modules/stage'                               => 'v1::module/stage'
+  post 'api/v1/modules/delete_from_remote'                  => 'v1::module/delete_from_remote'
 
   ########## end: Modules
 

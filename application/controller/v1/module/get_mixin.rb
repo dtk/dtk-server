@@ -35,8 +35,20 @@ module DTK
 
       def exists
         namespace, module_name, module_type = required_request_params(:namespace, :module_name, :module_type)
-        version = request_params(:version) || 'master'
-        rest_ok_response CommonModule.exists(get_default_project, module_type, namespace, module_name, version)
+
+        version     = request_params(:version) || 'master'
+        remote_info = request_params(:remote_info)
+        response    = CommonModule.exists(get_default_project, module_type, namespace, module_name, version, { ret_remote_info: remote_info })
+
+        if remote_info && response[:has_remote]
+          rsa_pub_key   = required_request_params(:rsa_pub_key)
+          remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
+          opts          = version ? {} : { ignore_missing_base_version: true }
+          remote_info   = CommonModule::Remote.get_module_info(get_default_project, remote_params, rsa_pub_key, opts)
+          response.merge!(remote_info) unless remote_info.empty?
+        end
+
+        rest_ok_response response
       end
 
       def list

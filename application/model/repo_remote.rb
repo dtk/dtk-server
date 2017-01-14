@@ -247,6 +247,10 @@ module DTK
       repo_remote
     end
 
+    def self.default_remote(repo_remote_mh, repo_id)
+      get_obj(repo_remote_mh, filter: [:and, [:eq, :is_default, true], [:eq, :repo_id, repo_id]])
+    end
+
     def is_builtin_provider?
       ALL_PROVIDERS.last.eql?(remote_provider_name())
     end

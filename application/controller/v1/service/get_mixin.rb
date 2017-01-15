@@ -92,7 +92,7 @@ module DTK
       end
 
       def dependent_modules
-        rest_ok_response assembly_instance.info_about(:modules, Opts.new(detail_to_include: [:version_info])), datatype: :assembly_component_module
+        rest_ok_response assembly_instance.info_about(:modules, Opts.new(detail_to_include: [:version_info], project: get_default_project)), datatype: :assembly_component_module
       end
 
       def nodes

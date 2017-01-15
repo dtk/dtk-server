@@ -205,14 +205,12 @@
       "id",
       "name",
       "remote(s)",
-      "dsl_parsed",
       "version(s)"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
       "remote(s)": "linked_remotes",
-      "dsl_parsed": "dsl_parsed",
       "version(s)": "versions"
     }
   },
@@ -220,19 +218,13 @@
     "order": [
       "id",
       "name",
-      "namespace",
-      "updated",
-      "update saved",
-      "dsl_parsed",
+      "remote(s)",
       "version"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
-      "namespace": "namespace_name",
-      "updated": "local_copy",
-      "update saved": "update_saved",
-      "dsl_parsed": "dsl_parsed",
+      "remote(s)": "linked_remotes",
       "version": "display_version"
     }
   },

@@ -122,6 +122,7 @@ module DTK; class  Assembly
             end
           end
 
+          r[:display_name] = r[:namespace_name] + ":" + r[:display_name]
           if get_branch_relationship_info
             if r[:local_copy]
               if module_branch[:frozen]
@@ -134,6 +135,13 @@ module DTK; class  Assembly
             end
           end
         end
+
+        # opts_aggr = Opts.new(
+        #   include_remotes: include_remotes,
+        #   include_versions: include_versions,
+        #   remote_repo_base: :dtkn
+        # )
+        # unsorted_ret = ModuleUtils::ListMethod.aggregate_detail(unsorted_ret, project_idh, model_type(), opts_aggr)
 
         unsorted_ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
       end

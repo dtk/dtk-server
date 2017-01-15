@@ -20,17 +20,20 @@ module DTK; module CommonDSL
     class Node::Diff
       class Add < CommonDSL::Diff::Element::Add
         def process(result, opts = {})
-          new_node = 
+          new_node =
             case node_type
             when :node
               assembly_instance.add_node_from_diff(node_name)
             when :node_group
-              # fail DTK::Error, "TODO: write 'assembly_instance.add_node_group_from_diff(node_name)'"
-              fail ErrorUsage, "Adding of node groups through dsl is not supported yet."
+              if cardinality = node_attribute(:cardinality)
+                assembly_instance.add_node_group_diff(node_name, cardinality)
+              else
+                fail DTK::Error, "Cardinality attribute not provided for node group '#{node_name}'!"
+              end
             else
               fail DTK::Error, "Unexpected type '#{node_type}'"
             end
-          
+
           add_nested_and_node_components(result, new_node, opts)
 
           unless result.any_errors?

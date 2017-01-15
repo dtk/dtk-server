@@ -113,6 +113,29 @@ module DTK
           }
           target.clone_into(node_template, override_attrs, node_template.source_clone_info_opts)
         end
+
+        def add_node_group_diff(node_group_name, cardinality)
+          target = get_target
+          node_template = Node::Template.find_matching_node_template(target)
+
+          self.update_object!(:display_name)
+          ref = SQL::ColRef.concat('assembly--', "#{self[:display_name]}--#{node_group_name}")
+
+          override_attrs = {
+            display_name: node_group_name,
+            assembly_id: id,
+            type: 'node_group_staged',
+            ref: ref
+          }
+
+          new_obj = target.clone_into(node_template, override_attrs, node_template.source_clone_info_opts)
+          Node::NodeAttribute.create_or_set_attributes?([new_obj], :cardinality, cardinality)
+
+          node_group_obj = new_obj.create_obj_optional_subclass
+          node_group_obj.add_group_members(cardinality.to_i)
+
+          new_obj
+        end
         
         def add_node(node_name, node_binding_rs = nil, opts = {})
           # if assembly_wide node (used to add component directly on service_instance/assembly_template/workspace)

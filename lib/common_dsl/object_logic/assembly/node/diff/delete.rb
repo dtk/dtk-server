@@ -27,12 +27,7 @@ module DTK; module CommonDSL
         end
 
         def process(result, opts = {})
-          if @node.is_node_group?
-            fail Error "TODO: need to write delete for node groups"
-          else
-            delete_node(result)
-          end
-
+          delete_node(result)
           result.add_item_to_update(:workflow)
           result.add_item_to_update(:assembly)
         end
@@ -65,7 +60,12 @@ module DTK; module CommonDSL
         def delete_when_node_not_yet_created(result)
           delete_nested_components(result, force_delete: true)
           delete_node_opts = result.semantic_diffs['WORKFLOWS_MODIFIED'] ? { do_not_update_task_template: true} : {}
-          assembly_instance.delete_node(@node.id_handle, delete_node_opts)
+
+          if @node.is_node_group?
+            assembly_instance.delete_node_group(@node.id_handle, delete_node_opts)
+          else
+            assembly_instance.delete_node(@node.id_handle, delete_node_opts)
+          end
         end
 
         def delete_nested_components(result, opts = {})
@@ -107,7 +107,7 @@ module DTK; module CommonDSL
 
         def canonical_node_component
           @canonical_node_component ||= @node.get_components.find{ |component| ::DTK::Component::Domain::Node::Canonical.is_type_of?(component) } ||
-            fail(Error, "Unexpected no node component for node '#{node_name}'")
+            fail(DTK::Error, "Unexpected no node component for node '#{node_name}'")
         end
 
       end

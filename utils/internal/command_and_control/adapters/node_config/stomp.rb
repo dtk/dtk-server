@@ -179,7 +179,7 @@ module DTK
       end
 
       def self.action_results(result, action)
-        if config_agent = config_agent_for_action?(action)
+        if config_agent = config_agent_object?(action)
           if config_agent.respond_to?(:action_results)
             config_agent.action_results(result, action)
           else
@@ -189,10 +189,7 @@ module DTK
         end
       end
 
-      # NOT USED SO FAR beloow
-
       def self.errors_in_node_action_result?(result, action = nil)
-        # result[:statuscode] is for mcollective agent errors and data is for errors for agent
         if result[:statuscode] != 0
           action_results = result[:data] ? result[:data][:data] : []
 
@@ -211,16 +208,20 @@ module DTK
 
       private
 
-      def self.config_agent_for_action?(action)
-        if config_agent_type = action && action.config_agent_type
-          ConfigAgent.load(config_agent_type)
-        end
+      def self.config_agent_object?(action)
+        if action
+          if action.respond_to?(:config_agent_object)
+            action.config_agent_object
+          else
+             ConfigAgent.load(action.config_agent_type)
+          end
+        end                   
       end
 
       def self.errors_in_node_action_payload?(payload, action = nil)
         ret = nil
         answer_computed = false
-        if config_agent = config_agent_for_action?(action)
+        if config_agent = config_agent_object?(action)
           if config_agent.respond_to?(:errors_in_result?)
             answer_computed = true
             ret = config_agent.errors_in_result?(payload, action)

@@ -130,37 +130,21 @@ module DTK; class Task
         # this means there is no dynamic attributes
         return ret if result.is_a?(Array)
 
-        # TODO: DTK-2701; temp until have protocol field
-        if dyn_attrs = result[:data][:data]['dynamic_attributes'] rescue nil
-          return ProtocolVersion::V1.parse_dynamic_attributes(dyn_attrs, self)
+        if config_agent_object.respond_to?(:get_dynamic_attributes)
+          if payload = result[:data]
+            return config_agent_object.get_dynamic_attributes(payload, self)
+          end
         end
 
-        dyn_attrs = (result[:data] || {})[:dynamic_attributes]
+        # TODO: replace generic methods below by delegating all to config_agent_object
 
+        dyn_attrs = (result[:data] || {})[:dynamic_attributes]
         if !dyn_attrs && result[:data]
           dyn_attrs = result[:data][:data][:dynamic_attributes] rescue nil
         end
 
         return ret if (dyn_attrs || []).empty?
-        dyn_attrs.map { |attr| self.class.dynamic_attribute_return_form(attr[:attribute_id], attr[:attribute_val]) }
-      end
-
-      # TODO: move to directory subsection under message processing to arbiter
-      module ProtocolVersion
-        module V1
-          def self.parse_dynamic_attributes(dyn_attrs, task_action)
-            ret = []
-            dyn_attrs.each_pair do |attr_name, raw_attr_val|
-              attribute = task_action.find_matching_attribute?(attr_name)
-              if attribute && attribute.get_field?(:dynamic)
-                val = attribute.use_attribute_datatype_to_convert(raw_attr_val)
-                ret << ConfigNode.dynamic_attribute_return_form(attribute.id, val)
-              end
-            end
-            ret
-          end
-
-        end
+        dyn_attrs.map { |attr| dynamic_attribute_return_form(attr[:attribute_id], attr[:attribute_val]) }
       end
 
       def find_matching_attribute?(attr_name)
@@ -173,18 +157,18 @@ module DTK; class Task
         ret
       end
 
-      def self.dynamic_attribute_return_form(id, val)
+      def dynamic_attribute_return_form(id, val)
         { id: id, attribute_value: sanitize_attribute_val(val) }
       end
 
-      def self.sanitize_attribute_val(val)
+      def sanitize_attribute_val(val)
         if val.is_a?(Symbol)
           val.to_s
         else
           val
         end
       end
-      private_class_method :sanitize_attribute_val
+      private :sanitize_attribute_val
 
       def self.add_attributes!(attr_mh, action_list)
         # ndx_actions values is an array of actions to handel case wheer component on node group and multiple nodes refernce it
@@ -313,6 +297,10 @@ module DTK; class Task
 
       def update_state_change_status(task_mh, status)
         update_state_change_status_aux(task_mh, status, component_actions().map { |a| a[:state_change_pointer_ids] }.compact.flatten)
+      end
+
+      def config_agent_object
+        @config_agent_object ||= ConfigAgent.load(config_agent_type)
       end
 
       def config_agent_type

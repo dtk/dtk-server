@@ -18,6 +18,12 @@
 module DTK; class ConfigAgent
   module Adapter
     class Dynamic < ConfigAgent
+      require_relative('dynamic/dynamic_attributes')
+      require_relative('dynamic/error_results')
+
+      include DynamicAttributes::Mixin
+      include ErrorResults::Mixin
+
       def ret_msg_content(config_node, opts = {})
         assembly_instance     = opts[:assembly]
         component_action      = config_node[:component_actions].first
@@ -49,13 +55,13 @@ module DTK; class ConfigAgent
       end
 
       EPHEMERAL_CONTAINER_TYPE = 'ephemeral_container'
-
+      
       def type
         :dynamic
       end
       
       private
-
+      
       def get_base_and_dependent_modules(component, assembly_instance)
         ComponentModule::VersionContextInfo.get_in_hash_form([component], assembly_instance).inject({}) do |h, r|
           h.merge(r[:implementation] => Aux.hash_subset(r, [:repo, :branch, :sha]))

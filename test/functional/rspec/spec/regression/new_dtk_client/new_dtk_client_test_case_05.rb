@@ -28,8 +28,7 @@ node_to_check = 'new_node'
 node_group_to_check = 'new_node_group'
 cardinality = 2
 component_to_check = 'new_node/stdlib'
-component_to_check_on_node_group_1 = 'new_node_group:1/stdlib'
-component_to_check_on_node_group_2 = 'new_node_group:2/stdlib'
+component_to_check_on_node_group = 'new_node_group/stdlib'
 
 dtk_common = Common.new('', '')
 
@@ -87,11 +86,7 @@ describe "(New DTK client) Test Case 5: Test various options for service push" d
   end
 
   context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_on_node_group_1
-  end
-
-  context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_on_node_group_2
+    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_on_node_group
   end
 
   context "Check node exist in service instance" do

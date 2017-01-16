@@ -130,23 +130,61 @@ module DTK; class Task
         # this means there is no dynamic attributes
         return ret if result.is_a?(Array)
 
+        # TODO: DTK-2701; temp until have protocol field
+        if dyn_attrs = result[:data][:data]['dynamic_attributes'] rescue nil
+          return ProtocolVersion::V1.parse_dynamic_attributes(dyn_attrs, self)
+        end
+
         dyn_attrs = (result[:data] || {})[:dynamic_attributes]
 
         if !dyn_attrs && result[:data]
           dyn_attrs = result[:data][:data][:dynamic_attributes] rescue nil
         end
 
-        return ret if dyn_attrs.nil? || dyn_attrs.empty?
-        dyn_attrs.map { |a| { id: a[:attribute_id], attribute_value: sanitize_attribute_val(a[:attribute_val]) } }
+        return ret if (dyn_attrs || []).empty?
+        dyn_attrs.map { |attr| self.class.dynamic_attribute_return_form(attr[:attribute_id], attr[:attribute_val]) }
       end
 
-      def sanitize_attribute_val(val)
+      # TODO: move to directory subsection under message processing to arbiter
+      module ProtocolVersion
+        module V1
+          def self.parse_dynamic_attributes(dyn_attrs, task_action)
+            ret = []
+            dyn_attrs.each_pair do |attr_name, raw_attr_val|
+              attribute = task_action.find_matching_attribute?(attr_name)
+              if attribute && attribute.get_field?(:dynamic)
+                val = attribute.use_attribute_datatype_to_convert(raw_attr_val)
+                ret << ConfigNode.dynamic_attribute_return_form(attribute.id, val)
+              end
+            end
+            ret
+          end
+
+        end
+      end
+
+      def find_matching_attribute?(attr_name)
+        ret = nil
+        (self[:component_actions] || []).each do |component_action|
+          if ret = (component_action[:attributes] || []).find { |attribute| attribute.display_name == attr_name }
+            return ret
+          end
+        end
+        ret
+      end
+
+      def self.dynamic_attribute_return_form(id, val)
+        { id: id, attribute_value: sanitize_attribute_val(val) }
+      end
+
+      def self.sanitize_attribute_val(val)
         if val.is_a?(Symbol)
           val.to_s
         else
           val
         end
       end
+      private_class_method :sanitize_attribute_val
 
       def self.add_attributes!(attr_mh, action_list)
         # ndx_actions values is an array of actions to handel case wheer component on node group and multiple nodes refernce it

@@ -21,14 +21,14 @@ module DTK; class Attribute
       unless st_summary = self[:semantic_type_summary]
         self[:data_type]
       else
-        is_array?() ? "array(#{st_summary})" : st_summary
+        is_array? ? "array(#{st_summary})" : st_summary
       end
     end
 
     def ret_default_info
       default = self[:value_asserted]
       return nil unless default
-      if is_array?()
+      if is_array?
         ret = {}
         hash_semantic_type = semantic_type[:array]
         default.each_with_index do |d, i|
@@ -49,6 +49,10 @@ module DTK; class Attribute
       Datatype.convert_value_to_ruby_object(self, opts)
     end
 
+    def use_attribute_datatype_to_convert(raw_val)
+      Datatype.use_attribute_datatype_to_convert(self, raw_val)
+    end
+
     private
 
     def semantic_type
@@ -56,14 +60,14 @@ module DTK; class Attribute
     end
 
     def is_array?
-      semantic_type().is_array?()
+      semantic_type.is_array?
     end
   end
 
   module Datatype
     def self.ret_datatypes
-      scalar_types = SemanticTypeSchema.ret_scalar_defined_datatypes()
-      scalar_types += ret_builtin_scalar_types()
+      scalar_types = SemanticTypeSchema.ret_scalar_defined_datatypes
+      scalar_types += ret_builtin_scalar_types
       ret = []
       scalar_types.each do |t|
         ret << t
@@ -84,6 +88,39 @@ module DTK; class Attribute
       end
     end
 
+    def self.use_attribute_datatype_to_convert(attr, raw_val)
+      return nil if raw_val.nil?
+      case (attr[:data_type] || :string).to_sym
+      when :string
+        ret = raw_val.to_s rescue nil
+        raise_error_msg?(:string, raw_val, attr) if ret.nil?
+        ret
+      when :boolean
+        case raw_val.to_s
+        when 'true' then true
+        when 'false' then false
+        else raise_error_msg?(:boolean, raw_val, attr)
+        end
+      when :integer
+        if raw_val =~ /^[0-9]+$/
+          raw_val.to_i
+        else
+          raise_error_msg?(:integer, raw_val, attr)
+        end
+      when :json
+        if raw_val.kind_of?(::Hash) or  raw_val.kind_of?(::Array)
+          raw_val
+        else
+          ret = raw_val.to_s rescue nil
+          raise_error_msg?(:json, raw_val, attr) if ret.nil?
+          ret
+        end
+      else
+        fail Error, "Unexpected Datatype '#{attr[:data_type]}' for attribute '#{attr.print_form}'"
+      end
+    end
+
+    # TODO: unify above and below
     # opts can have keys:
     #  :value_field
     #  :donot_raise_error
@@ -125,7 +162,7 @@ module DTK; class Attribute
         datatype = Regexp.last_match(1)
         is_array = true
       end
-      if ret_builtin_scalar_types().include?(datatype)
+      if ret_builtin_scalar_types.include?(datatype)
         ret[:data_type] = datatype
       else
         ret[:data_type] = 'json'

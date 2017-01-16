@@ -77,7 +77,7 @@ module DTK; class  Assembly
         end
       end
 
-      def delete_node_group(node_group_idh)
+      def delete_node_group(node_group_idh, opts = {})
         unless node_group_idh.is_a?(IDHandle)
           node_group_idh = id_handle().createIDH(model_name: :node, id: node_group_idh[:guid])
         end
@@ -91,7 +91,7 @@ module DTK; class  Assembly
 
         node_group = node_group.create_obj_optional_subclass()
         node_group.delete_group_members(0)
-        node_group.delete_object(update_task_template: true, assembly: self)
+        node_group.delete_object(update_task_template: !opts[:do_not_update_task_template], assembly: self)
       end
 
       def delete_component(component_idh, node_id = nil, opts = {})

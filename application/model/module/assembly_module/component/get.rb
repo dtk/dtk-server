@@ -100,7 +100,7 @@ module DTK; class AssemblyModule
         return ret if els_ndx_by_cmp_mod_ids.empty?
 
         sp_hash = {
-          cols: [:id, :display_name, :group_id, :namespace_id],
+          cols: [:id, :display_name, :group_id, :namespace_id, :remote_repos],
           filter: [:oneof, :id, els_ndx_by_cmp_mod_ids.keys]
         }
         ret = Model.get_objs(@assembly.model_handle(:component_module), sp_hash)
@@ -112,6 +112,10 @@ module DTK; class AssemblyModule
               dsl_parsed: (module_branch || {})[:dsl_parsed],
               module_branch: module_branch
             }
+            if repo_remote = r[:repo_remote]
+              linked_remote = ModuleUtils::ListMethod.linked_remotes_print_form(({repo_remote[:id] => repo_remote}).values, nil, not_published: nil)
+              to_add.merge!(linked_remotes: linked_remote)
+            end
             r.merge!(to_add)
           end
         end

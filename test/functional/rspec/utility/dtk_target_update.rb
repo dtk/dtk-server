@@ -57,6 +57,10 @@ describe "Target setup and update" do
     include_context "Converge service instance", service_location, dtk_common, target_service_name
   end
 
+  context "Set default target" do
+    include_context "Set default target", target_service_name
+  end
+
   after(:all) do
     puts '', ''
   end

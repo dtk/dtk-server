@@ -20,7 +20,7 @@ nodes:
 workflows:
   create:
     subtasks:
-    - name: create node
+    - name: create nodes
       node: node
       components:
       - stdlib

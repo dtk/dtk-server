@@ -25,7 +25,7 @@ dtk_common = Common.new('', '')
 describe "Target setup and update" do
   before(:all) do
     puts '**********************************************', ''
-    system("dtk service uninstall -y --delete -d #{service_location}/#{service_name}")
+    system("dtk service uninstall -y -r --delete -d #{service_location}/#{service_name}")
     system("rm -rf #{service_location}/#{service_name}")
     system("dtk module uninstall -v #{target_version} -y -d #{target_location} #{target_module}")
     system("rm -rf #{target_location}")

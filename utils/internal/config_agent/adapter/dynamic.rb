@@ -33,34 +33,48 @@ module DTK; class ConfigAgent
 
         dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
-
+        
         docker_file = dynamic_provider.docker_file?
-
-        msg = get_stubbed_message
-        msg.merge!(
+        
+        execution_environment =
+          if docker_file
+            { type: ExecutionEnvironment::EPHEMERAL_CONTAINER, docker_file: docker_file }
+          else
+            { type: ExecutionEnvironment::NATIVE }
+          end
+        
+        msg = {
+          provider_type: dynamic_provider.type,
+          attributes: { 
+            provider: { 'entrypoint' =>  dynamic_provider.entrypoint },
+            instance: component_attribute_values(component_action)
+          },
           modules: get_base_and_dependent_modules(component, assembly_instance),
-          component_name: component_action.component_module_name
-        )
-        if docker_file
-          pp :docker_file
-          STDOUT << docker_file
-          pp 'using docker file from provider'
-          msg[:execution_environment] = { type: EPHEMERAL_CONTAINER_TYPE, docker_file: docker_file }
-        end
-
-        pp [:msg, msg]
-
+          component_name: component_action.component_module_name,
+          execution_environment: execution_environment 
+        }          
+        Log.info_pp [:message_sent_to_dynamic_provider, msg]
+        
         msg
-
       end
 
-      EPHEMERAL_CONTAINER_TYPE = 'ephemeral_container'
+      module ExecutionEnvironment
+        EPHEMERAL_CONTAINER = 'ephemeral_container'
+        NATIVE = 'native'
+      end
       
       def type
         :dynamic
       end
       
       private
+
+      def component_attribute_values(component_action)
+        component_action.attributes.inject({}) do |h, attr|
+          # prune dynamic attributes that are not also inputs
+          (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(attr.display_name => attr[:attribute_value])
+        end
+      end
       
       def get_base_and_dependent_modules(component, assembly_instance)
         ComponentModule::VersionContextInfo.get_in_hash_form([component], assembly_instance).inject({}) do |h, r|
@@ -71,13 +85,14 @@ module DTK; class ConfigAgent
       def component_template(component)
         component.id_handle(id: component[:ancestor_id]).create_object
       end
-
-      MSG_LOCATION = '/host_volume/ruby_provider_test.yaml'
-      def get_stubbed_message
-        file_content = File.open(MSG_LOCATION).read
-        YAML.load(file_content)
-      end
-
+      
+      # TODO: deprerate; used for testing
+      # MSG_LOCATION = '/host_volume/ruby_provider_test.yaml'
+      # def get_stubbed_message
+      #  file_content = File.open(MSG_LOCATION).read
+      #  YAML.load(file_content)
+      # end
+      
     end
   end
 end; end

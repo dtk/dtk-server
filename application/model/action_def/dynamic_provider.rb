@@ -18,11 +18,16 @@
 module DTK
   class ActionDef
     class DynamicProvider
+      attr_reader :type
+
       def initialize(component_template, method_name, action_def_params, assembly_instance)
         @component_template      = component_template
         @method_name             = method_name
+        # @component_template and @method_name need to be set first
+        
         @action_def_params       = action_def_params
-        @provider_module_name    = 'ruby-provider' # TODO: stub 
+        @type                    = ret_type(action_def_params)
+        @provider_module_name    = ret_provider_module_name(@type)
         @provider_parameter_info = ret_provider_parameter_info(@provider_module_name, assembly_instance) 
         @container_component     = ret_container_domain_component?(@provider_module_name, assembly_instance)
       end
@@ -32,7 +37,7 @@ module DTK
         validate_required_params
         self
       end
-
+      
       def self.matching_dynamic_provider(component_template, method_name, assembly_instance)
         matching_dynamic_provider?(component_template, method_name, assembly_instance) ||
           fail(ErrorUsage, "Method '#{method_name}' not defined on component '#{component_template.display_name_print_form}'")
@@ -42,6 +47,10 @@ module DTK
         if action_def_params = ActionDef.get_matching_action_def_params?(component_template, method_name)
           new(component_template, method_name, action_def_params, assembly_instance)
         end
+      end
+      
+      def entrypoint
+        @action_def_params[:entrypoint] || raise_error_missing_action_def_param(:entrypoint)
       end
       
       def docker_file?
@@ -56,6 +65,20 @@ module DTK
       end
       
       private
+      
+      def ret_type(action_def_params)
+        action_def_params[:type] || raise_error_missing_action_def_param(:type)
+      end
+      
+      def raise_error_missing_action_def_param(param_name)
+        fail ErrorUsage, "#{action_ref_print_form} does not have the parameter '#{param_name}' defined"
+      end
+
+      PROVIDER_MODULE_DELIM = '-'
+      
+      def ret_provider_module_name(type)
+        "#{type}#{PROVIDER_MODULE_DELIM}provider"
+      end
 
       def validate_required_params
         missing_required_params = @provider_parameter_info.select { |info| info.required and ! @action_def_params.has_key?(info.name) }.map(&:name)

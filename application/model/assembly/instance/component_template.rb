@@ -19,13 +19,23 @@ module DTK
   class Assembly::Instance
     module ComponentTemplateMixin
       
-      def find_matching_aug_component_template(module_name, component_type, component_module_refs)
+      def find_matching_aug_component_template(module_name, component_type, component_module_refs, dependent_modules = {})
+        namespace = nil
+        version   = nil
+
         unless matching_module_ref = component_module_refs.component_module_ref?(module_name)
-          fail ErrorUsage, "Cannot find dependency for component #{Component.display_name_print_form(component_type)}'s module '#{module_name}' in the dependency section"
+          # this is temporary solution until we resolve ticket https://reactor8.atlassian.net/browse/DTK-2835
+          matching_module = find_in_dependent_modules(dependent_modules, module_name) unless dependent_modules.empty?
+          if matching_module
+            namespace = matching_module[:namespace]
+            version   = matching_module[:version]
+          else
+            fail ErrorUsage, "Cannot find dependency for component #{Component.display_name_print_form(component_type)}'s module '#{module_name}' in the dependency section"
+          end
         end
         
-        namespace = matching_module_ref.namespace
-        version   =  matching_module_ref.version_string
+        namespace ||= matching_module_ref.namespace
+        version   ||=  matching_module_ref.version_string
         
         matches = find_matching_aug_component_templates(component_type, namespace, version: version)
         if matches.size == 1
@@ -33,7 +43,10 @@ module DTK
         elsif matches.size > 1
           fail Error, "Unexpected that multiple matches: #{matches.inspect}" 
         else
-          fail ErrorUsage, "Component '#{Component.display_name_print_form(component_type)}' is not in dependent module '#{matching_module_ref.print_form}'"
+          # this is temporary solution until we resolve ticket https://reactor8.atlassian.net/browse/DTK-2835
+          ref_print_form = matching_module_ref ? matching_module_ref.print_form : "#{namespace}:#{module_name}(#{version})"
+          # fail ErrorUsage, "Component '#{Component.display_name_print_form(component_type)}' is not in dependent module '#{matching_module_ref.print_form}'"
+          fail ErrorUsage, "Dependent module '#{ref_print_form}' not found! Please check if provided namespace and/or version are correct and try again"
         end
       end
 
@@ -67,6 +80,26 @@ module DTK
         end
         
         ret
+      end
+
+      private
+
+      def find_in_dependent_modules(dependent_modules, module_name)
+        matching_modules = dependent_modules.select{ |name, _version| ((name.split('/')[1])||'') == module_name }
+        if matching_modules.empty?
+          fail ErrorUsage, "Dependency module '#{module_name}' not found in 'dependencies' list!"
+        elsif matching_modules.size > 1
+          fail ErrorUsage, "Unexpected that multiple matches found for module '#{module_name}' in 'dependencies' list!"
+        else
+          namespace_name  = matching_modules.keys.first
+          version         = matching_modules[namespace_name]
+          namespace, name = namespace_name.split('/')
+          {
+            namespace: namespace,
+            name: name,
+            version: version
+          }
+        end
       end
 
     end

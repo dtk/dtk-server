@@ -99,15 +99,12 @@ module DTK; class AssemblyModule
         end
         return ret if els_ndx_by_cmp_mod_ids.empty?
 
-        module_mh = @assembly.model_handle(:component_module)
-
         sp_hash = {
-          cols: [:id, :display_name, :group_id, :namespace_id, :module_branches_with_repos],
+          cols: [:id, :display_name, :group_id, :namespace_id],
           filter: [:oneof, :id, els_ndx_by_cmp_mod_ids.keys]
         }
-        ret = Model.get_objs(module_mh, sp_hash)
+        ret = Model.get_objs(@assembly.model_handle(:component_module), sp_hash)
 
-        ModuleUtils::ListMethod.augment_with_remotes_info!(ret, module_mh)
         ret.each do |r|
           if el = els_ndx_by_cmp_mod_ids[r[:id]]
             module_branch = el.module_branch
@@ -116,8 +113,8 @@ module DTK; class AssemblyModule
               dsl_parsed: (module_branch || {})[:dsl_parsed],
               module_branch: module_branch
             }
-            if ndx_repo_remotes = r.delete(:ndx_repo_remotes)
-              if linked_remote = ModuleUtils::ListMethod.linked_remotes_print_form((ndx_repo_remotes || {}).values, nil, not_published: nil)
+            if remote_repo = (module_branch.get_obj(cols: [:remote_repo])||{})[:repo_remote]
+              if linked_remote = ModuleUtils::ListMethod.linked_remotes_print_form(([remote_repo]), nil, not_published: nil)
                 to_add.merge!(linked_remotes: linked_remote)
               end
             end

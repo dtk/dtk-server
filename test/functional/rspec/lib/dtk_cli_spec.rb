@@ -337,7 +337,7 @@ shared_context 'NEG - Uninstall module' do |module_name, module_location, error_
     pass = true
     value = `dtk module uninstall -d #{module_location} -y`
     puts value
-    pass = false if value.include? error_message
+    pass = false if ((value.include? error_message) || (value.include? "[ERROR]"))
     puts "Uninstall of module #{module_name} was completed successfully which is not expected!" if pass == true
     puts "Uninstall of module #{module_name} did not complete successfully which is expected!" if pass == false
     puts ''

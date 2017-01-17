@@ -100,7 +100,7 @@ module DTK
 
       # opts can have keys:
       #   :dependent_modules
-        def find_in_dependent_modules(dependent_modules, module_name, opts = {})
+      def find_in_dependent_modules(dependent_modules, module_name)
         matching_modules = dependent_modules.select{ |name, _version| ((name.split('/')[1])||'') == module_name }
         if matching_modules.empty?
           fail ErrorUsage, "Dependency module '#{module_name}' not found in 'dependencies' list!"

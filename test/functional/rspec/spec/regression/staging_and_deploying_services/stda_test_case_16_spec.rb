@@ -17,26 +17,23 @@ component_to_check = "second_node/test_delete::component"
 node_to_check = "second_node"
 error_message = "Service instance cannot be deleted because it is not empty"
 
-module_name = 'dtk17/test_delete'
+module_name = 'r8/test_delete'
 module_location = '/tmp/test_delete'
 assembly_name = 'delete_workflow'
 service_name = 'stda_test_case_16_instance'
 service_location = "~/dtk/"
 full_service_location = service_location + service_name
+version = 'master'
 
 dtk_common = Common.new('', '')
 
 describe '(Staging And Deploying Assemblies) Test Case 16: Converge service instance with component that has delete action add new node then delete node with delete action' do
   before(:all) do
     puts '*****************************************************************************************************************************************************************', ''
-  end
-
-  context "Install module from dtkn" do
-    include_context "Install module from dtkn", module_name, module_location, 'master'
-  end
-
-  context "List assemblies contained in this module" do
-    include_context "List assemblies", module_name, assembly_name, dtk_common
+    # Install/clone r8:test_delete module with required dependency modules
+    system("mkdir #{module_location}")
+    system("dtk module clone -v #{version} #{module_name} #{module_location}")
+    system("dtk module install -y -d #{module_location} #{module_name}")
   end
 
   context "Stage assembly from module" do
@@ -97,14 +94,6 @@ describe '(Staging And Deploying Assemblies) Test Case 16: Converge service inst
 
   context "Uninstall service instance" do
     include_context "Uninstall service instance", service_location, service_name
-  end
-
-  context "Uninstall module" do
-    include_context "Uninstall module", module_name, module_location
-  end
-
-  context "Delete initial module on filesystem" do
-    include_context "Delete initial module on filesystem", module_location
   end
 
   after(:all) do

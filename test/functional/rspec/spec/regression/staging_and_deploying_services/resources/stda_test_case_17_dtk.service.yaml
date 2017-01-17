@@ -3,7 +3,7 @@ dsl_version: 1.0.0
 name: stda_test_case_17_instance
 dependencies:
   aws/ec2: master
-  dtk17/test_delete: 0.0.1
+  r8/test_delete: master
 nodes:
   node:
     attributes:

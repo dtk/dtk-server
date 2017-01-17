@@ -24,7 +24,7 @@ module DTK
         version   = nil
 
         unless matching_module_ref = component_module_refs.component_module_ref?(module_name)
-          # this is temporary solution until we resolve ticket https://reactor8.atlassian.net/browse/DTK-2835
+          # this is temporary solution until we implement dependency diffss functionality
           matching_module = find_in_dependent_modules(dependent_modules, module_name) unless dependent_modules.empty?
           if matching_module
             namespace = matching_module[:namespace]
@@ -43,7 +43,7 @@ module DTK
         elsif matches.size > 1
           fail Error, "Unexpected that multiple matches: #{matches.inspect}" 
         else
-          # this is temporary solution until we resolve ticket https://reactor8.atlassian.net/browse/DTK-2835
+          # this is temporary solution until we implement dependency diffss functionality
           ref_print_form = matching_module_ref ? matching_module_ref.print_form : "#{namespace}:#{module_name}(#{version})"
           # fail ErrorUsage, "Component '#{Component.display_name_print_form(component_type)}' is not in dependent module '#{matching_module_ref.print_form}'"
           fail ErrorUsage, "Dependent module '#{ref_print_form}' not found! Please check if provided namespace and/or version are correct and try again"

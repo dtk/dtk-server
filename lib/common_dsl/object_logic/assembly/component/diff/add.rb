@@ -24,7 +24,7 @@ module DTK; module CommonDSL
         def process(result, opts = {})
           aug_cmp_template = nil
           begin 
-            aug_cmp_template = assembly_instance.find_matching_aug_component_template(component_type, component_module_refs(opts))
+            aug_cmp_template = assembly_instance.find_matching_aug_component_template(component_type, component_module_refs(opts), dependent_modules: opts[:dependent_modules])
           rescue ErrorUsage => e
             aug_cmp_template = nil
             result.add_error_msg(e.message)

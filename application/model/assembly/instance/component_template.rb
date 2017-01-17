@@ -24,16 +24,17 @@ module DTK
 
       # opts can have keys:
       #   :donot_raise_error
+      #   :dependent_modules
       def find_matching_aug_component_template(component_type, component_module_refs, opts = {})
         module_name = Component.module_name(component_type)
-        unless matching_module_ref = component_module_refs.component_module_ref?(module_name)
+
+        namespace, version = find_namespace_and_version?(module_name, component_module_refs, dependent_modules: opts[:dependent_modules])
+
+        if namespace.nil?
           return nil if opts[:donot_raise_error]
-          fail ErrorUsage, "Cannot find dependency for component #{Component.display_name_print_form(component_type)}'s module '#{module_name}' in the dependency section"
+          fail ErrorUsage, "Cannot find dependency for component #{Component.display_name_print_form(component_type)}'s module '#{module_name}' in the dependency section" 
         end
-        
-        namespace = matching_module_ref.namespace
-        version   =  matching_module_ref.version_string
-        
+
         matches = find_matching_aug_component_templates(component_type, namespace, version: version)
         if matches.size == 1
           matches.first
@@ -42,7 +43,10 @@ module DTK
           fail Error, "Unexpected that multiple matches: #{matches.inspect}" 
         else
           return nil if opts[:donot_raise_error]
-          fail ErrorUsage, "Component '#{Component.display_name_print_form(component_type)}' is not in dependent module '#{matching_module_ref.print_form}'"
+          # this is temporary solution until we implement dependency diffs functionality
+          ref_print_form = matching_module_ref ? matching_module_ref.print_form : "#{namespace}:#{module_name}(#{version})"
+          # fail ErrorUsage, "Component '#{Component.display_name_print_form(component_type)}' is not in dependent module '#{matching_module_ref.print_form}'"
+          fail ErrorUsage, "Dependent module '#{ref_print_form}' not found! Please check if provided namespace and/or version are correct and try again"
         end
       end
 
@@ -76,6 +80,42 @@ module DTK
         end
         
         ret
+      end
+
+      private
+
+      # returns [namespace, version] can be nil
+      def find_namespace_and_version?(module_name, component_module_refs)
+        if matching_module_ref = component_module_refs.component_module_ref?(module_name)
+          [matching_module_ref.namespace, matching_module_ref.version_string]
+        else
+          # TODO: this is temporary solution until we implement dependency diffs functionality
+          if dependent_modules = opts[:dependent_modules]
+            if matching_module = find_in_dependent_modules(dependent_modules, module_name)
+              [matching_module[:namespace], matching_module[:version]]
+            end
+          end
+        end
+      end
+
+      # opts can have keys:
+      #   :dependent_modules
+        def find_in_dependent_modules(dependent_modules, module_name, opts = {})
+        matching_modules = dependent_modules.select{ |name, _version| ((name.split('/')[1])||'') == module_name }
+        if matching_modules.empty?
+          fail ErrorUsage, "Dependency module '#{module_name}' not found in 'dependencies' list!"
+        elsif matching_modules.size > 1
+          fail ErrorUsage, "Unexpected that multiple matches found for module '#{module_name}' in 'dependencies' list!"
+        else
+          namespace_name  = matching_modules.keys.first
+          version         = matching_modules[namespace_name]
+          namespace, name = namespace_name.split('/')
+          {
+            namespace: namespace,
+            name: name,
+            version: version
+          }
+        end
       end
 
     end

@@ -25,7 +25,7 @@ dtk_common = Common.new('', '')
 describe "Target setup and update" do
   before(:all) do
     puts '**********************************************', ''
-    system("dtk service uninstall -y --delete -d #{service_location}/#{service_name}")
+    system("dtk service uninstall -y -r --delete -d #{service_location}/#{service_name}")
     system("rm -rf #{service_location}/#{service_name}")
     system("dtk module uninstall -v #{target_version} -y -d #{target_location} #{target_module}")
     system("rm -rf #{target_location}")
@@ -55,6 +55,10 @@ describe "Target setup and update" do
 
   context "Converge service instance" do
     include_context "Converge service instance", service_location, dtk_common, target_service_name
+  end
+
+  context "Set default target" do
+    include_context "Set default target", target_service_name
   end
 
   after(:all) do

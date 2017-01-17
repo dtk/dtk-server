@@ -100,6 +100,20 @@ shared_context 'Stage target from module' do |target_name, target_location, asse
   end
 end
 
+shared_context 'Set default target' do |target_service_name|
+  it "sets target #{target_service_name} as default one" do
+    puts 'Set default target', '------------------'
+    pass = true
+    value = `dtk service set-default-target #{target_service_name}`
+    puts value
+    pass = false if value.include? 'ERROR'
+    puts "Target #{target_service_name} is set as default one!" if pass == true
+    puts "Target #{target_service_name} is not set as default one!" if pass == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context 'Set attribute' do |service_location, service_name, attribute_name, attribute_value|
   it "sets attribute for #{attribute_name}" do
     puts 'Set attribute', '---------------'
@@ -323,7 +337,7 @@ shared_context 'NEG - Uninstall module' do |module_name, module_location, error_
     pass = true
     value = `dtk module uninstall -d #{module_location} -y`
     puts value
-    pass = false if value.include? error_message
+    pass = false if ((value.include? error_message) || (value.include? "[ERROR]"))
     puts "Uninstall of module #{module_name} was completed successfully which is not expected!" if pass == true
     puts "Uninstall of module #{module_name} did not complete successfully which is expected!" if pass == false
     puts ''

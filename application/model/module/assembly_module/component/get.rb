@@ -104,6 +104,7 @@ module DTK; class AssemblyModule
           filter: [:oneof, :id, els_ndx_by_cmp_mod_ids.keys]
         }
         ret = Model.get_objs(@assembly.model_handle(:component_module), sp_hash)
+
         ret.each do |r|
           if el = els_ndx_by_cmp_mod_ids[r[:id]]
             module_branch = el.module_branch
@@ -112,9 +113,15 @@ module DTK; class AssemblyModule
               dsl_parsed: (module_branch || {})[:dsl_parsed],
               module_branch: module_branch
             }
+            if remote_repo = (module_branch.get_obj(cols: [:remote_repo])||{})[:repo_remote]
+              if linked_remote = ModuleUtils::ListMethod.linked_remotes_print_form(([remote_repo]), nil, not_published: nil)
+                to_add.merge!(linked_remotes: linked_remote)
+              end
+            end
             r.merge!(to_add)
           end
         end
+
         ret
       end
 

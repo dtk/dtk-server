@@ -223,6 +223,26 @@ end
         join_cond: { module_branch_id: :module_branch__id },
         cols: [:id, :ref, :group_id, :ancestor_id, :display_name, :task_action, :content, :component_component_id, :module_service_id]
       }]
+    },
+    remote_repo:{
+      type: :json,
+      hidden: true,
+      remote_dependencies: [
+        {
+          model_name: :repo,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :module_branch__repo_id },
+          cols: [:id, :repo_name, :local_dir, :remote_repo_namespace]
+        },
+        {
+          model_name: :repo_remote,
+          convert: true,
+          join_type: :inner,
+          join_cond: { repo_id: :repo__id },
+          cols: [:id, :display_name, :group_id, :ref, :repo_name, :repo_namespace, :repo_id, :created_at, :is_default]
+        }
+      ]
     }
   },
   many_to_one: [:component_module, :service_module, :test_module, :node_module, :common_module],

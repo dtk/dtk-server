@@ -7,25 +7,22 @@ require './lib/dtk_cli_spec'
 component_to_delete = "node/test_delete::component"
 node_to_delete = "node"
 
-module_name = 'dtk17/test_delete'
+module_name = 'r8/test_delete'
 module_location = '/tmp/test_delete'
 assembly_name = 'delete_workflow'
 service_name = 'stda_test_case_15_instance'
 service_location = "~/dtk/"
+version = 'master'
 
 dtk_common = Common.new('', '')
 
 describe '(Staging And Deploying Assemblies) Test Case 15: Converge service instance with component that has delete action and delete/uninstall service' do
   before(:all) do
     puts '*********************************************************************************************************************************************', ''
-  end
-
-  context "Install module from dtkn" do
-    include_context "Install module from dtkn", module_name, module_location, 'master'
-  end
-
-  context "List assemblies contained in this module" do
-    include_context "List assemblies", module_name, assembly_name, dtk_common
+    # Install/clone r8:test_delete module with required dependency modules
+    system("mkdir #{module_location}")
+    system("dtk module clone -v #{version} #{module_name} #{module_location}")
+    system("dtk module install -y -d #{module_location} #{module_name}")
   end
 
   context "Stage assembly from module" do
@@ -50,14 +47,6 @@ describe '(Staging And Deploying Assemblies) Test Case 15: Converge service inst
 
   context "NEG - Check node exist in service instance" do
     include_context "NEG - Check node exist in service instance", dtk_common, service_name, node_to_delete
-  end
-
-  context "Uninstall module" do
-    include_context "Uninstall module", module_name, module_location
-  end
-
-  context "Delete initial module on filesystem" do
-    include_context "Delete initial module on filesystem", module_location
   end
 
   after(:all) do

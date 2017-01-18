@@ -87,10 +87,11 @@ module DTK
             end
 
             unless raw_va.size == 1 && raw_va.first == MASTER_VERSION
-              version_array = (raw_va.include?(MASTER_VERSION) ? [MASTER_VERSION] : []) + raw_va.reject { |v| v == MASTER_VERSION }.sort
+              version_array = raw_va.reject { |v| v == MASTER_VERSION }.sort{ |a,b| a <=> b }.reverse + (raw_va.include?(MASTER_VERSION) ? [MASTER_VERSION] : [])
               mdl.merge!(versions: version_array.join(', '))
             end
           end
+
           external_ref_source = mdl.delete(:external_ref_source)
           ndx_repo_remotes = mdl.delete(:ndx_repo_remotes)
 
@@ -119,8 +120,6 @@ module DTK
           end
         end
       end
-
-      private
 
       def self.linked_remotes_print_form(repo_remotes, external_ref_source, opts = {})
         opts_pp = Opts.new(provider_prefix: true)

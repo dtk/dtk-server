@@ -112,7 +112,8 @@ module DTK; class  Assembly
         unsorted_ret = get_component_modules(:recursive, opts_get)
         unsorted_ret.each do |r|
           module_branch = r[:module_branch]
-          version = module_branch[:version] if module_branch
+          version       = module_branch[:version] if module_branch
+          r[:full_name] = "#{r[:namespace_name]}:#{r[:display_name]}"
 
           if version.eql?('master') || version.match(/\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
             r[:display_version] = version

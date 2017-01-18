@@ -84,8 +84,10 @@ module DTK
 
       private
 
+      # opts can have keys:
+      #   :dependent_modules
       # returns [namespace, version] can be nil
-      def find_namespace_and_version?(module_name, component_module_refs)
+      def find_namespace_and_version?(module_name, component_module_refs, opts = {})
         if matching_module_ref = component_module_refs.component_module_ref?(module_name)
           [matching_module_ref.namespace, matching_module_ref.version_string]
         else

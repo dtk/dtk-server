@@ -40,7 +40,7 @@ module DTK
         remote_info = request_params(:remote_info)
         response    = CommonModule.exists(get_default_project, module_type, namespace, module_name, version, { ret_remote_info: remote_info })
 
-        if remote_info && response[:has_remote]
+        if remote_info && (response || {})[:has_remote]
           rsa_pub_key   = required_request_params(:rsa_pub_key)
           remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
           opts          = version ? {} : { ignore_missing_base_version: true }

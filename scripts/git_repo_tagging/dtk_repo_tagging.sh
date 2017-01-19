@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+set -e
+
 usage_config() {
   echo -e "Usage:\n$0 dtk_major_tag output_dir\n"
 } 

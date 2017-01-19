@@ -1,119 +1,98 @@
 #!/usr/bin/env ruby
-# Test Case 10: Publish component module using full name #{component_module_name} to users default namespace and then delete it
+# Test Case 10: Install module from one namespace, create with another namespace, publish and delete from remote
 
-require 'rubygems'
-require 'rest_client'
-require 'pp'
-require 'json'
-require 'awesome_print'
 require './lib/dtk_common'
 require './lib/assembly_and_service_operations_spec'
-require './lib/parameters_setting_spec'
-require './lib/component_modules_spec'
-require './lib/component_module_versions_spec'
+require './lib/dtk_cli_spec'
 
-existing_component_module_name = 'jmeter'
-component_module_namespace = 'r8'
-existing_component_module = 'r8:jmeter'
-namespace = 'dtk17'
-component_module_name = 'bakir_test1'
-local_component_module = 'local:bakir_test1'
-new_local_component_module = 'dtk17:bakir_test1'
-default_filesystem_location = '~/dtk/component_modules'
-r8_component_module_filesystem_location = '~/dtk/component_modules/r8'
-dtk17_component_module_filesystem_location = '~/dtk/component_modules/dtk17'
-local_component_module_filesystem_location = '~/dtk/component_modules/local'
-version = "0.0.1"
+module_1 = 'r8/jmeter'
+module_1_version = 'master'
+module_1_location = '/tmp/r8/jmeter'
+
+module_2 = 'dtk17/jmeter'
+module_2_version = 'master'
+module_2_location = '/tmp/dtk17/jmeter'
 
 dtk_common = Common.new('', '')
 
-describe "(Modules, Services and Versioning) Test Case 10: Publish component module using full name #{component_module_name} to users default namespace and then delete it" do
+describe "(Modules, Services and Versioning) Test Case 10: Install module from one namespace, create with another namespace, publish and delete from remote" do
   before(:all) do
-    puts '***************************************************************************************************************************************************************', ''
+    puts '*************************************************************************************************************************************************', ''
+    system("mkdir -p /tmp/r8/jmeter")
   end
 
-  context 'Import component module function' do
-    include_context 'Import remote component module', component_module_namespace + '/' + existing_component_module_name
+  context "Install module from dtkn" do
+    include_context "Install module from dtkn", module_1, module_1_location, module_1_version
   end
 
-  context 'Get component module components list' do
-    include_context 'Get component module components list', dtk_common, existing_component_module
-  end
-
-  context 'Check if component module imported on local filesystem' do
-    include_context 'Check component module imported on local filesystem', r8_component_module_filesystem_location, existing_component_module_name
-  end
-
-  context "Create new directory called #{component_module_name} and copy the content of #{existing_component_module} in it" do
+  context "Create new directory called #{module_2_location} and copy the content of #{module_1_location} in it" do
     it 'creates new directory with existing component module content in it' do
       puts 'Create new directory and copy the content of existing component module', '----------------------------------------------------------------------'
       pass = false
-      `mkdir -p #{default_filesystem_location}/#{component_module_name}`
-      `cp -r #{r8_component_module_filesystem_location}/#{existing_component_module_name}/* #{default_filesystem_location}/#{component_module_name}/`
-      value = `ls #{default_filesystem_location}/#{component_module_name}/manifests`
+      `mkdir -p #{module_2_location}`
+      `cp -r #{module_1_location}/* #{module_2_location}/`
+      value = `ls #{module_2_location}/manifests`
       pass = !value.include?('No such file or directory')
       puts ''
       pass.should eq(true)
     end
   end
 
-  context 'Import new component module function' do
-    include_context 'Import component module', component_module_name
+  context "Install new module" do
+    include_context "Install module", module_2, module_2_location
   end
 
-  context "Create new component module version" do
-    include_context "Create component module version", dtk_common, local_component_module, version
+  context "Publish module" do
+    include_context "Publish module", module_2, module_2_location
   end
 
-  context "Publish new component module version to remote repo" do
-    include_context "Publish versioned component module", dtk_common, local_component_module, "#{namespace}/#{component_module_name}", version
+  context "Uninstall module" do
+    include_context "Uninstall module", module_1, module_1_location
   end
 
-  context "Delete all component module versions from server" do
-    include_context "Delete all component module versions", dtk_common, local_component_module
+  context "Delete initial module on filesystem" do
+    include_context "Delete initial module on filesystem", module_1_location
   end
 
-  context "Delete all component module versions from local filesystem" do
-    include_context 'Delete all local component module versions', local_component_module_filesystem_location, component_module_name
+  context "Uninstall module" do
+    include_context "Uninstall module", module_2, module_2_location
   end
 
-  context 'Delete old component module' do
-    include_context 'Delete component module', dtk_common, existing_component_module
+  context "Delete initial module on filesystem" do
+    include_context "Delete initial module on filesystem", module_2_location
   end
 
-  context 'Delete old component module from local filesystem' do
-    include_context 'Delete component module from local filesystem', r8_component_module_filesystem_location, existing_component_module_name
+  context "Create new directory called #{module_2_location}" do
+    it 'creates new directory' do
+      puts 'Create new directory', '---------------------------'
+      pass = false
+      `mkdir -p #{module_2_location}`
+      value = `ls #{module_2}`
+      pass = !value.include?('No such file or directory')
+      puts ''
+      pass.should eq(true)
+    end
   end
 
-  context 'Import component module function' do
-    include_context 'Import remote component module', "#{namespace}/#{component_module_name}"
+  context "Install module from dtkn" do
+    include_context "Install module from dtkn", module_2, module_2_location, module_2_version
   end
 
-  context 'Check if component module imported on local filesystem' do
-    include_context 'Check component module imported on local filesystem', dtk17_component_module_filesystem_location, component_module_name
+  context "Uninstall module" do
+    include_context "Uninstall module", module_1, module_1_location
   end
 
-  context 'Check if component module version imported on local filesystem' do
-    include_context 'Check component module imported on local filesystem', dtk17_component_module_filesystem_location, component_module_name + "-" + version
+  context "Delete initial module on filesystem" do
+    include_context "Delete initial module on filesystem", module_1_location
   end
 
-  context "Delete all component module versions from server" do
-    include_context "Delete all component module versions", dtk_common, new_local_component_module
+  context "Delete module from remote" do
+    include_context "Delete module from remote", dtk_common, module_2, module_2_location
   end
 
-  context "Delete all component module versions from local filesystem" do
-    include_context 'Delete all local component module versions', dtk17_component_module_filesystem_location, component_module_name
-  end
-
-  context "Delete new component module from remote repo" do
-    include_context "Delete remote component module version", dtk_common, component_module_name, namespace, version
-  end
-
-  context 'Delete remote module' do
-    include_context 'Delete component module from remote', dtk_common, component_module_name, namespace
-  end
-  
   after(:all) do
+    system("rm -r /tmp/r8/jmeter")
+    system("rm -r /tmp/dtk17/jmeter")
     puts '', ''
   end
 end

@@ -53,7 +53,9 @@ module DTK; class ConfigAgent
           component_name: component_action.component_module_name,
           execution_environment: execution_environment 
         }          
-        Log.info_pp [:message_sent_to_dynamic_provider, msg]
+        # TODO: DTK-2847: once sending attributes with meta data can display attributes below after running santize method on them
+        # hack to take out attributes until
+        Log.info_pp [:message_sent_to_dynamic_provider, msg.merge(attributes: '[ATTRIBUTES]')]
         
         msg
       end
@@ -75,10 +77,16 @@ module DTK; class ConfigAgent
           (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(attr.display_name => attr[:attribute_value])
         end
       end
-      
+
+      # TODO: DTK-2848: use component to prune list
       def get_base_and_dependent_modules(component, assembly_instance)
-        ComponentModule::VersionContextInfo.get_in_hash_form([component], assembly_instance).inject({}) do |h, r|
-          h.merge(r[:implementation] => Aux.hash_subset(r, [:repo, :branch, :sha]))
+        ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance).inject({}) do |h, aug_module_branch|
+          module_info = {
+            repo: aug_module_branch.repo.display_name,
+            branch: aug_module_branch.branch_name,
+          }
+          module_info.merge!(sha: aug_module_branch.current_sha) if aug_module_branch.frozen
+          h.merge(aug_module_branch.module_name => module_info)
         end
       end
       

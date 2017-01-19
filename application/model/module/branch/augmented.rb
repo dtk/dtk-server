@@ -47,18 +47,30 @@ module DTK
         component_module? || raise_unexpected_nil('component_module?')
       end
 
+      def module_name 
+        self[:module_name] || raise_unexpected_nil('self[:module_name]')
+      end
+
       def repo
         self[:repo] || raise_unexpected_nil('self[:repo]')
       end
 
+      def current_sha
+        self[:current_sha] || raise_unexpected_nil('self[:current_sha]')
+      end
+      
       def branch_name
         self[:branch]  || raise_unexpected_nil('self[:branch]')
       end
-
+      
       def namespace
         self[:namespace]  || raise_unexpected_nil('self[:namespace]')
       end
 
+      def frozen
+        has_key?(:frozen) ? self[:frozen] : raise_unexpected_nil('self[:frozen]')
+      end
+      
       def implementation
         @implementation ||= get_implementation
       end

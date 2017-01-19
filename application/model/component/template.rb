@@ -17,6 +17,11 @@
 #
 module DTK; class Component
   class Template < self
+    require_relative('template/augmented')
+    require_relative('template/match_element')
+
+    extend MatchElement::ClassMixin
+
     def self.get_objs(mh, sp_hash, opts = {})
       if mh[:model_name] == :component_template
         super(mh.merge(model_name: :component), sp_hash, opts).map { |cmp| create_from_component(cmp) }
@@ -25,6 +30,12 @@ module DTK; class Component
       end
     end
 
+    def self.create_from_component(cmp)
+      cmp && cmp.id_handle.create_object(model_name: :component_template).merge(cmp)
+    end
+
+
+    # TODO: looks like only used by old controller
     # This method returns an augmented_component_template if a unique match is found; this is a component template augmented with keys:
     #   :module_branch
     #   :component_module
@@ -37,7 +48,7 @@ module DTK; class Component
       component_type, title = ComponentTitle.parse_component_display_name(display_name_from_user_friendly_name(user_friendly_cmp_name))
       version = opts[:version]
 
-      matching_cmp_templates = assembly.find_matching_aug_component_templates(component_type, namespace, version: version, use_just_base_template: true)
+      matching_cmp_templates = Augmented.find_matching_component_templates(assembly, component_type, namespace, version: version, use_just_base_template: true)
 
       if matching_cmp_templates.size != 1
         component_ref = "#{namespace}:#{user_friendly_cmp_name}"
@@ -69,10 +80,6 @@ module DTK; class Component
         fail ErrorUsage.new("Unable to add component from (#{full_ret_cmp_name}) because you are already using components version: #{full_cmp_mod_name}") if ret_cmp_version != cmp_mod_version
       end
       ret_cmp
-    end
-
-    def self.create_from_component(cmp)
-      cmp && cmp.id_handle.create_object(model_name: :component_template).merge(cmp)
     end
 
     def self.get_info_for_clone(cmp_template_idhs)
@@ -138,100 +145,6 @@ module DTK; class Component
       end
       ret
     end
-
-    class MatchElement < Hash
-      def initialize(hash)
-        super()
-        replace(hash)
-      end
-
-      def component_type
-        self[:component_type]
-      end
-
-      def version_field
-        self[:version_field]
-      end
-
-      def version
-        self[:version]
-      end
-
-      def namespace
-        self[:namespace]
-      end
-    end
-    def self.get_matching_elements(project_idh, match_element_array, opts = {})
-      ret = []
-      base_module_local_params = opts[:module_local_params]
-      cmp_types = match_element_array.map(&:component_type).uniq
-      versions = match_element_array.map(&:version_field)
-      sp_hash = {
-        cols: [:id, :group_id, :component_type, :version, :implementation_id, :external_ref],
-        filter: [:and,
-                 [:eq, :project_project_id, project_idh.get_id],
-                 [:oneof, :version, versions],
-                 [:eq, :assembly_id, nil],
-                 [:eq, :node_node_id, nil],
-                 [:oneof, :component_type, cmp_types]]
-      }
-      component_rows = get_objs(project_idh.createMH(:component), sp_hash)
-      augment_with_namespace!(component_rows)
-      ret = []
-      unmatched = []
-      match_element_array.each do |el|
-        matches = component_rows.select do |r|
-          el.version_field == r[:version] &&
-            el.component_type == r[:component_type] &&
-            (el.namespace.nil? || el.namespace == r[:namespace])
-        end
-        if matches.empty?
-          unmatched << el
-        elsif matches.size == 1
-          ret << matches.first
-        else
-          if base_match = base_module_local_params && match_base_module?(matches, base_module_local_params)
-            ret << base_match
-          else
-            # TODO: may put in logic that sees if one is service modules ns and uses that one when multiple matches
-            module_name = Component.module_name(el.component_type)
-            error_params = {
-              module_type: 'component',
-            module_name: Component.module_name(el.component_type),
-              namespaces: matches.map { |m| m[:namespace] }.compact # compact just to be safe
-            }
-            fail ServiceModule::ParsingError::AmbiguousModuleRef, error_params
-          end
-        end
-      end
-      unless unmatched.empty?
-        # TODO: indicate whether there is a nailed namespace that does not exist or no matches at all
-        cmp_refs = unmatched.map do |match_el|
-          cmp_type = match_el.component_type
-          if ns = match_el.namespace
-            cmp_type = "#{ns}:#{cmp_type}"
-          end
-          {
-            component_type: cmp_type,
-            version: match_el.version
-          }
-        end
-        if opts[:service_instance_module]
-          fail ServiceModule::ParsingError::RemovedServiceInstanceCmpRef.new(cmp_refs, opts)
-        else
-          fail ServiceModule::ParsingError::DanglingComponentRefs.new(cmp_refs, opts)
-        end
-      end
-      ret
-    end
-
-    def self.match_base_module?(matches, base_module_local_params)
-      namespace = base_module_local_params.namespace
-      version   = base_module_local_params.version
-      matches.find { |match| match[:namespace] == namespace and match[:version] = version }
-    end
-    private_class_method :match_base_module? 
-
 
     def self.list(project, opts = {})
       assembly = opts[:assembly_instance]
@@ -347,36 +260,35 @@ module DTK; class Component
       end
       component_templates
     end
-  end
 
-  # TODO: may move to be instance method on Template
-  module TemplateMixin
-    def update_default(attribute_name, val, field_to_match = :display_name)
-      tmpl_attr_obj =  get_virtual_attribute(attribute_name, [:id, :value_asserted], field_to_match)
-      fail Error.new("cannot find attribute #{attribute_name} on component template") unless tmpl_attr_obj
-      update(updated: true)
-      tmpl_attr_obj.update(value_asserted: val)
-      # update any instance that points to this template, which does not have an instance value asserted
-      # TODO: can be more efficient by doing selct and update at same time
-      base_sp_hash = {
-        model_name: :component,
-        filter: [:eq, :ancestor_id, id],
-        cols: [:id]
-      }
-      join_array =
-        [{
-           model_name: :attribute,
-           convert: true,
-           join_type: :inner,
-           filter: [:and, [:eq, field_to_match, attribute_name], [:eq, :is_instance_value, false]],
-           join_cond: { component_component_id: :component__id },
-           cols: [:id, :component_component_id]
-         }]
-      attr_ids_to_update = Model.get_objects_from_join_array(model_handle, base_sp_hash, join_array).map { |r| r[:attribute][:id] }
-      unless attr_ids_to_update.empty?
-        attr_mh = createMH(:attribute)
-        attribute_rows = attr_ids_to_update.map { |attr_id| { id: attr_id, value_asserted: val } }
-        Attribute.update_and_propagate_attributes(attr_mh, attribute_rows)
+    module Mixin
+      def update_default(attribute_name, val, field_to_match = :display_name)
+        tmpl_attr_obj =  get_virtual_attribute(attribute_name, [:id, :value_asserted], field_to_match)
+        fail Error.new("cannot find attribute #{attribute_name} on component template") unless tmpl_attr_obj
+        update(updated: true)
+        tmpl_attr_obj.update(value_asserted: val)
+        # update any instance that points to this template, which does not have an instance value asserted
+        # TODO: can be more efficient by doing selct and update at same time
+        base_sp_hash = {
+          model_name: :component,
+          filter: [:eq, :ancestor_id, id],
+          cols: [:id]
+        }
+        join_array =
+          [{
+             model_name: :attribute,
+             convert: true,
+             join_type: :inner,
+             filter: [:and, [:eq, field_to_match, attribute_name], [:eq, :is_instance_value, false]],
+             join_cond: { component_component_id: :component__id },
+             cols: [:id, :component_component_id]
+           }]
+        attr_ids_to_update = Model.get_objects_from_join_array(model_handle, base_sp_hash, join_array).map { |r| r[:attribute][:id] }
+        unless attr_ids_to_update.empty?
+          attr_mh = createMH(:attribute)
+          attribute_rows = attr_ids_to_update.map { |attr_id| { id: attr_id, value_asserted: val } }
+          Attribute.update_and_propagate_attributes(attr_mh, attribute_rows)
+        end
       end
     end
   end

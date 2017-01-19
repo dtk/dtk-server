@@ -32,7 +32,7 @@ module DTK
     extend GetMethod::ClassMixin
     include Dependency::Mixin
     extend Dependency::ClassMixin
-    include TemplateMixin
+    include Template::Mixin
     include ComponentModelDefProcessor
     include ComponentViewMetaProcessor
     include ComponentClone

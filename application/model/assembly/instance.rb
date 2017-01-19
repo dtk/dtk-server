@@ -516,12 +516,12 @@ module DTK; class  Assembly
       super(mn || :component)
     end
 
-    private
-
     # version associated with assembly
     def assembly_version
       @assembly_version ||= ModuleVersion.ret(self)
     end
+
+    private
 
     # returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
     #[col,empty_assem_nodes]

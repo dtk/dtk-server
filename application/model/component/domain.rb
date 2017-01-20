@@ -34,6 +34,12 @@ module DTK
 
       attr_reader :component
 
+      def attributes
+        # @component[:attributes] is in case augmented component with attributes
+        @attributes ||= @component[:attributes] || @component.get_attributes
+      end
+
+
       def self.legal_types
         if const_defined?(:TYPES)
           self::TYPES
@@ -51,11 +57,6 @@ module DTK
         if attr = attributes.find { |attr| attr_name == attr[:display_name] }
           attr[:attribute_value]
         end 
-      end
-
-      def attributes
-        # @component[:attributes] is in case augmented component with attributes
-        @attributes ||= @component[:attributes] || @component.get_attributes
       end
 
     end

@@ -104,11 +104,16 @@ module DTK; class ConfigAgent
             repo: aug_module_branch.repo.display_name,
             branch: aug_module_branch.branch_name,
           }
-          module_info.merge!(sha: aug_module_branch.current_sha) if aug_module_branch.frozen
+          # need sha if points to base module otherwise it is an assembly_module_version
+          module_info.merge!(sha: aug_module_branch.current_sha) unless is_assembly_module_version?(aug_module_branch)
           h.merge(aug_module_branch.module_name => module_info)
         end
       end
-      
+
+      def is_assembly_module_version?(aug_module_branch)
+        ModuleVersion.assembly_module_version?(aug_module_branch.version)
+      end
+
       def component_template(component)
         component.id_handle(id: component[:ancestor_id]).create_object
       end

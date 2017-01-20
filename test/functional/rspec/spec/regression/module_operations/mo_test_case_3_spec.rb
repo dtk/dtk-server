@@ -68,7 +68,7 @@ describe "(Module operations) Test Case 3: Install module version (component par
       puts 'Create new directory', '---------------------------'
       pass = false
       `mkdir -p #{module_2_location}`
-      value = `ls #{module_2}`
+      value = `ls #{module_2_location}`
       pass = !value.include?('No such file or directory')
       puts ''
       pass.should eq(true)

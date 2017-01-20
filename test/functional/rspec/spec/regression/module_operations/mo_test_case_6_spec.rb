@@ -32,7 +32,7 @@ describe "(Module operations) Test Case 6: Install module (service and component
       `cp -r #{module_1_location}/* #{module_2_location}/`
       `sed -i "s#module: #{module_1}#module: #{module_2}#g" #{module_2_location}/dtk.module.yaml`
       value = `cat #{module_2_location}/dtk.module.yaml | grep #{module_2}`
-      pass = !value.include?('')
+      pass = value.include?('module: #{module_2}')
       puts ''
       pass.should eq(true)
     end
@@ -67,7 +67,7 @@ describe "(Module operations) Test Case 6: Install module (service and component
       puts 'Create new directory', '---------------------------'
       pass = false
       `mkdir -p #{module_2_location}`
-      value = `ls #{module_2}`
+      value = `ls #{module_2_location}`
       pass = !value.include?('No such file or directory')
       puts ''
       pass.should eq(true)
@@ -84,7 +84,7 @@ describe "(Module operations) Test Case 6: Install module (service and component
       pass = false
       value_1 = `cat #{module_2_location}/dtk.module.yaml | grep component_defs`
       value_2 = `cat #{module_2_location}/dtk.module.yaml | grep assemblies`
-      pass = (!value_1.include?('')) && (!value_2.include?(''))
+      pass = (value_1.include?('component_defs')) && (value_2.include?('assemblies'))
       puts ''
       pass.should eq(true)
     end

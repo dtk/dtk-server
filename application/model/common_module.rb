@@ -55,8 +55,8 @@ module DTK
     # opts can have keys
     #  :remote_repo_base
     #  :detail_to_include
-    def self.list(project, opts = Opts.new)
-      Info::Service.list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true, include_common_modules: true))
+    def self.list_modules(project, opts = Opts.new)
+      list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true, include_common_modules: true))
     end
 
     def self.list_assembly_templates(project)

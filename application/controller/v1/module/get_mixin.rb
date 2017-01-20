@@ -58,7 +58,7 @@ module DTK
           opts.merge!(detail_to_include: detail_to_include)
           datatype  = :module_with_versions if detail_to_include.include?(:versions)
         end
-        rest_ok_response CommonModule.list(get_default_project, opts), datatype: datatype
+        rest_ok_response CommonModule.list_modules(get_default_project, opts), datatype: datatype
       end
 
       def module_dependencies

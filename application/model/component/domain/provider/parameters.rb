@@ -22,12 +22,19 @@ module DTK
         def initialize(component)
           super(component)
         end
-        
-        ParameterInfo = Struct.new(:name, :required, :default)
-        def parameter_info
-          @parameter_info ||= attributes.map { |attr| ParameterInfo.new(attr.display_name.to_sym, attr[:required], attr[:attribute_value]) }
-        end
 
+        def attributes_with_overrides(overrides)
+          # normalize in case keys are symbols
+          overrides = overrides.inject({}) { |h, (a, v)| h.merge(a.to_s => v) }
+          attributes.map do |attribute|
+            el = attribute
+            if attribute[:attribute_value].nil?
+              override_val = overrides[attribute.display_name]
+              el = el.merge(attribute_value: override_val) unless override_val.nil?
+            end
+            el
+          end
+        end
       end
     end
   end

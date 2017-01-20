@@ -42,23 +42,29 @@ module DTK; class ConfigAgent
           else
             { type: ExecutionEnvironment::NATIVE }
           end
-        
+
+        provider_attributes = attribute_form_for_request(dynamic_provider.entrypoint_attribute)
+        instance_attributes = component_attribute_values_for_request(component_action)
+
         msg = {
+          protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
           provider_type: dynamic_provider.type,
           attributes: { 
-            provider: { 'entrypoint' =>  dynamic_provider.entrypoint },
-            instance: component_attribute_values(component_action)
+            provider: provider_attributes,
+            instance: instance_attributes,
           },
           modules: get_base_and_dependent_modules(component, assembly_instance),
           component_name: component_action.component_module_name,
           execution_environment: execution_environment 
         }          
-        # TODO: DTK-2847: once sending attributes with meta data can display attributes below after running santize method on them
-        # hack to take out attributes until
-        Log.info_pp [:message_sent_to_dynamic_provider, msg.merge(attributes: '[ATTRIBUTES]')]
-        
+        Log.info_pp [:message_sent_to_dynamic_provider, Sanitize.sanitize_message(msg)]
+
+        # TODO: DTK-2847: when switch over on arbiter side remove this line and remove the module HackForDTK2847
+        msg = HackForDTK2847.convert_message(msg)
+
         msg
       end
+      ARBITER_REQUEST_PROTOCOL_VERSION = 1
 
       module ExecutionEnvironment
         EPHEMERAL_CONTAINER = 'ephemeral_container'
@@ -71,11 +77,24 @@ module DTK; class ConfigAgent
       
       private
 
-      def component_attribute_values(component_action)
+      def attribute_form_for_request(attribute)
+        attribute_info = {
+          value: attribute[:attribute_value],
+          datatype: attribute[:data_type],
+          hidden: attribute[:hidden]
+        }
+        { attribute.display_name => attribute_info }
+      end
+
+      def component_attribute_values_for_request(component_action)
         component_action.attributes.inject({}) do |h, attr|
           # prune dynamic attributes that are not also inputs
-          (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(attr.display_name => attr[:attribute_value])
+          (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(attribute_form_for_request(attr))
         end
+      end
+
+      def sanitized_attribute_values(attribute)
+        
       end
 
       # TODO: DTK-2848: use component to prune list
@@ -93,13 +112,31 @@ module DTK; class ConfigAgent
       def component_template(component)
         component.id_handle(id: component[:ancestor_id]).create_object
       end
-      
-      # TODO: deprerate; used for testing
-      # MSG_LOCATION = '/host_volume/ruby_provider_test.yaml'
-      # def get_stubbed_message
-      #  file_content = File.open(MSG_LOCATION).read
-      #  YAML.load(file_content)
-      # end
+
+      module Sanitize
+        def self.sanitize_message(msg)
+          sanitized_attributes = msg[:attributes].inject({}) do |h, (type, attributes_hash)| 
+            h.merge(type => attributes_hash.inject({}) { |h, (name, info)| h.merge(name => sanitize_attribute(info)) })
+          end
+          msg.merge(attributes: sanitized_attributes)
+        end
+
+        private
+        
+        HIDDEN_VALUE = '***'
+        def self.sanitize_attribute(attr_info)
+          attr_info[:hidden] ? attr_info.merge(value: HIDDEN_VALUE) : attr_info 
+        end
+      end
+
+      module HackForDTK2847
+        def self.convert_message(msg)
+          converted_attributes = msg[:attributes].inject({}) do |h, (type, attributes_hash)|
+            h.merge(type => attributes_hash.inject({}) { |h, (name, info)| h.merge(name => info[:value]) })
+          end
+          msg.merge(attributes: converted_attributes)
+        end
+      end
       
     end
   end

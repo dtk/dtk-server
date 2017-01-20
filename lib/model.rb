@@ -262,8 +262,12 @@ module DTK
     extend ModelDataClassMixins
     include ModelDataInstanceMixins
 
-    # created before has id
-    # use param name hash_values rather than hash_scalar_values because can have nested objects
+
+
+    def duplicate
+      id_handle.create_object.merge(self)
+    end
+
     def self.create_stub(model_handle, hash_values = {})
       self.new(hash_values, model_handle[:c], model_name(), model_handle.create_stubIDH())
     end

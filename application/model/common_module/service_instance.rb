@@ -25,8 +25,9 @@ module DTK
       end
       def create_service_instance_and_nested_modules(opts = {})
         service_module_branch = get_or_create_module_for_service_instance(opts.merge(delete_existing_branch: true))
-        generate_dsl_opts = opts[:add_nested_modules] ? { aug_component_module_branches: aug_component_module_branches() } : {}
-        CommonDSL::Generate::ServiceInstance.generate_dsl(self, service_module_branch, generate_dsl_opts)
+        CommonDSL::Generate::ServiceInstance.generate_dsl(self, service_module_branch) do 
+          create_nested_modules_dsl_and_objects(service_module_branch) if opts[:add_nested_modules]
+        end
         ModuleRepoInfo.new(service_module_branch)
       end
 
@@ -65,9 +66,14 @@ module DTK
         }.merge(module_repo_info)
       end
 
+      private
+
+      def create_nested_modules_dsl_and_objects(service_module_branch)
+        CommonDSL::ComponentModuleRepoSync.pull_from_component_modules(service_module_branch, aug_component_module_branches)
+      end
+
       def aug_component_module_branches
-        aug_dependent_module_branches = ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance, augment_with_component_modules: true)
-        # TODO: DTK-2707: add in entry for base module being staged if it has component module
+        @aug_dependent_module_branches ||= ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance, augment_with_component_modules: true)
       end
       
     end

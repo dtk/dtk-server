@@ -44,7 +44,7 @@ module DTK
           # this means component_defs part is deleted from module
           return unless parsed_common_module[:component_defs]
 
-          response = module_obj.publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
+          module_obj.publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
 
           true
         end
@@ -71,7 +71,8 @@ module DTK
             # This last call creates common module and branch 
             # TODO: DTK-2852: need to change create_empty_module_with_branch to also update content from component module repo
             # or instead to not create any repos here and instaed do it on demand when there is a clone module operation
-            CommonModule.create_empty_module_with_branch(project, local_params.merge(module_type: :common_module))
+            # CommonModule.create_empty_module_with_branch(project, local_params.merge(module_type: :common_module))
+            CommonModule.create_module_and_branch_obj?(project, nil, local.merge(module_type: :common_module))
             nil
           end
         end

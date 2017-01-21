@@ -209,16 +209,17 @@ module DTK
       end
     end
 
-    # TODO: ModuleBranch::Location : need to paramterize this on branch
-    # raises exception if more repos found
     def get_repo
-      repos = get_repos()
+      get_repo? || fail(Error, "Unexpected that no repos tied to module '#{display_name}'")
+    end
 
-      unless repos.size == 1
-        fail Error.new('unexpected that number of matching repos is not equal to 1')
+    def get_repo?
+      repos = get_repos
+      if repos.size > 1
+        repo_names = repos.map(&:display_name)
+        fail Error, "Unexpected that multiple repos (#{repo_names.join(', ')} matches module '#{display_name}'"
       end
-
-      repos.first()
+      repos.first
     end
 
     def get_repos

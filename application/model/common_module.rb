@@ -67,17 +67,11 @@ module DTK
       Info::Component.get_module_dependencies(project, client_rsa_pub_key, remote_params)
     end
 
+    # opts can have keys:
+    #  :ret_remote_info
     def self.exists(project, module_type, namespace, module_name, version, opts = {})
       if matching_module = get_class_from_module_type(module_type).matching_module_with_module_branch?(project, namespace, module_name, version)
-        module_repo_info = ModuleRepoInfo.new(matching_module[:module_branch])
-
-        if opts[:ret_remote_info]
-          if remote = matching_module.get_repo.default_remote
-            module_repo_info.merge!(has_remote: true)
-          end
-        end
-
-        module_repo_info
+        ModuleRepoInfo.new(matching_module[:module_branch], ret_remote_info: opts[:ret_remote_info])
       end
     end
 

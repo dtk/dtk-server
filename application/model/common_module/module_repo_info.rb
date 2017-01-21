@@ -19,32 +19,38 @@ module DTK
   class CommonModule
     # TODO: DTK-2587: ModuleRepoInfo will replace Dtk::ModuleRepoInfo 
     class ModuleRepoInfo < ::Hash
-      def initialize(module_branch)
-        dtk_module_branch_info =  module_branch.get_module_repo_info
-        replace(convert_from_dtk_module_branch_info(dtk_module_branch_info))
-      end
-
-      private
-
-      def convert_from_dtk_module_branch_info(dtk_module_branch_info)
-        dtk_info = dtk_module_branch_info
-        {
-          repo: {
-            id: dtk_info[:repo_id],
-            name: dtk_info[:repo_name],
-            url: dtk_info[:repo_url]
-          },
+      # opts can have keys:
+      #  :ret_remote_info
+      def initialize(module_branch, opts = {})
+        module_obj = module_branch.get_module
+        hash = {
           module: {
-            id: dtk_info[:module_id],
-            name: dtk_info[:module_name],
-            namespace: dtk_info[:module_namespace],
-            version: dtk_info[:version]
-          },
-          branch: {
-            name: dtk_info[:workspace_branch],
-            head_sha: dtk_info[:branch_head_sha]
+            id: module_obj.id,
+            name: module_obj.module_name,
+            namespace: module_obj.module_namespace,
+            version: module_branch.get_field?(:version)
           }
         }
+        
+        if repo = module_branch.get_repo(:repo_name)
+          repo_name = repo.get_field?(:repo_name)
+          repo_info = {
+            id: repo.id,
+            name: repo_name,
+            url: RepoManager.repo_url(repo_name)
+          }
+
+          branch_info = {
+            name: module_branch.get_field?(:branch),
+            head_sha: RepoManager.branch_head_sha(module_branch)
+          }
+
+          hash.merge!(repo: repo_info, branch: branch_info)
+          hash.merge!(has_remote: true) if repo.default_remote
+        end
+        
+
+        replace(hash)
       end
     end
   end

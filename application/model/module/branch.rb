@@ -29,6 +29,10 @@ module DTK
       [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :dsl_version, :frozen]
     end
 
+    def pretty_print_form
+      "module_branch[id=#{id}, name=#{display_name}]"
+    end
+
     # TODO: should change type of self[:external_ref] to json
     # but before check any side effect of change
     def external_ref
@@ -65,10 +69,10 @@ module DTK
 
     def get_module_repo_info
       repo = get_repo(:repo_name)
-      module_obj = get_module()
+      module_obj = get_module
       version = get_field?(:version)
-      opts = { version: version, module_namespace: module_obj.module_namespace() }
-      ModuleRepoInfo.new(repo, module_obj.module_name(), module_obj.id_handle(), self, opts)
+      opts = { version: version, module_namespace: module_obj.module_namespace }
+      ModuleRepoInfo.new(repo, module_obj.module_name, module_obj.id_handle, self, opts)
     end
 
     def get_service_module_task_templates(opts = {})
@@ -602,20 +606,19 @@ module DTK
       # TODO: temp until for source of bug where component rather than component_module put in for type
       if type == 'component'
         type = 'component_module'
-        Log.error_pp(['Bug :component from :component_module on', local, caller()[0..7]])
+        Log.error_pp(['Bug :component from :component_module on', local, caller[0..7]])
       end
 
       assigns = {
         display_name: branch,
         branch: branch,
-        repo_id: repo_idh.get_id(),
         is_workspace: true,
         type: local.module_type.to_s,
         version: version_field(local.version),
         dsl_parsed: false
       }
-
-      assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
+      assigns.merge!(repo_id: repo_idh.get_id) if repo_idh
+      assigns.merge!(ancestor_id: ancestor_branch_idh.get_id) if ancestor_branch_idh
       assigns.merge!(current_sha: opts[:current_sha]) if opts[:current_sha]
 
       # if installing specific component/service module version mark branch as frozen
@@ -633,12 +636,12 @@ module DTK
       assigns = {
         display_name: branch,
         branch: branch,
-        repo_id: repo_idh.get_id(),
+        repo_id: repo_idh.get_id,
         is_workspace: true,
         type: type,
         version: version_field(version)
       }
-      assigns.merge!(ancestor_id: ancestor_branch_idh.get_id()) if ancestor_branch_idh
+      assigns.merge!(ancestor_id: ancestor_branch_idh.get_id) if ancestor_branch_idh
       assigns.merge!(frozen: opts[:frozen]) if opts[:frozen]
       assigns.merge!(dsl_version: opts[:dsl_version]) if opts[:dsl_version]
       ref = branch

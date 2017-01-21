@@ -84,14 +84,15 @@ module DTK
         rest_ok_response CommonModule.delete(get_default_project, namespace, module_name, version, opts)
       end
 
-      def install_component_module
+      def install_component_info
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)
 
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
 
-        rest_ok_response CommonModule::Info::Component::Remote.install(get_default_project, local_params, remote_params, rsa_pub_key)
+        CommonModule::Info::Component::Remote.install(get_default_project, local_params, remote_params, rsa_pub_key)
+        rest_ok_response 
       end
 
       def publish_to_remote

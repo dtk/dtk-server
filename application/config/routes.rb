@@ -82,7 +82,7 @@ DTK::ReactorRoute.draw do
 
   post 'api/v1/modules/create_empty_module'                 => 'v1::module/create_empty_module'
   post 'api/v1/modules/delete'                              => 'v1::module/delete'
-  post 'api/v1/modules/install_component_module'            => 'v1::module/install_component_module'
+  post 'api/v1/modules/install_component_info'              => 'v1::module/install_component_info'
   post 'api/v1/modules/publish_to_remote'                   => 'v1::module/publish_to_remote'
   post 'api/v1/modules/pull_component_module_from_remote'   => 'v1::module/pull_component_module_from_remote'
   post 'api/v1/modules/update_from_repo'                    => 'v1::module/update_from_repo'

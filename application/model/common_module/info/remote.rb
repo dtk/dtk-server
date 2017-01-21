@@ -24,6 +24,7 @@ module DTK
         #   :remote_exists - set to true by operations where remote exists
         def initialize(project, local_params, remote_params, client_rsa_pub_key, opts = {})
           @project             = project
+          @local_params        = local_params
           @local               = local_params.create_local(project)
           @remote              = ret_remote(project, remote_params)
           @client_rsa_pub_key  = client_rsa_pub_key
@@ -48,7 +49,7 @@ module DTK
 
         private
 
-        attr_reader :project, :local, :remote, :client_rsa_pub_key, :remote_repo_handler, :remote_repo_info, :git_repo_name
+        attr_reader :project, :local_params, :local, :remote, :client_rsa_pub_key, :remote_repo_handler, :remote_repo_info, :git_repo_name
 
         def self.ret_remote(project, remote_params)
           remote_params.create_remote(project, info_type: info_type)

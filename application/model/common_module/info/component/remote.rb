@@ -51,6 +51,7 @@ module DTK
 
         def install
           Model.Transaction do
+            # These calls use/create a component module and branch
             repo_with_branch = get_repo_with_branch? || create_repo_with_branch
 
             commit_sha = repo_with_branch.initial_sync_with_remote(remote, remote_repo_info)
@@ -66,7 +67,12 @@ module DTK
             # process_dsl_and_ret_parsing_errors will raise error if parsing error
             module_obj.process_dsl_and_ret_parsing_errors(repo_with_branch, module_branch, local, opts_process_dsl)
             module_branch.set_sha(commit_sha)
-            module_class.module_repo_info(repo_with_branch, module_and_branch_info, version: version, module_namespace: namespace)
+
+            # This last call creates common module and branch 
+            # TODO: DTK-2852: need to change create_empty_module_with_branch to also update content from component module repo
+            # or instead to not create any repos here and instaed do it on demand when there is a clone module operation
+            CommonModule.create_empty_module_with_branch(project, local_params.merge(module_type: :common_module))
+            nil
           end
         end
 

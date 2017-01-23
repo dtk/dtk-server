@@ -1,0 +1,84 @@
+---
+module: test_ns/unit_test_9
+version: master
+dependencies:
+  aws/ec2: master
+  r8/stdlib: master
+  r8/unit_test: master
+assemblies:
+  simple_link:
+    nodes:
+      source:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::attribute_test
+        - unit_test::source:
+            component_links:
+              unit_test::sink:
+              - sink/unit_test::sink
+      sink:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::sink
+  fan_in:
+    nodes:
+      source1:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::source:
+            component_links:
+              unit_test::sink:
+              - sink/unit_test::sink
+      source2:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::source:
+            component_links:
+              unit_test::sink:
+              - sink/unit_test::sink
+      sink:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::sink
+  fan_out:
+    nodes:
+      source:
+        attributes:
+          image: precise_hvm
+          size: small
+        components:
+        - stdlib
+        - unit_test::source:
+            component_links:
+              unit_test::sink:
+              - sink1/unit_test::sink
+              - sink2/unit_test::sink
+      sink1:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::sink
+      sink2:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::sink

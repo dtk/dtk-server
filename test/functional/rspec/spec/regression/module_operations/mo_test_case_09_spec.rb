@@ -11,6 +11,7 @@ module_1_location = '/tmp/test_ns/new_unit_test_9'
 module_2 = 'test_ns/unit_test_9'
 module_2_version = 'master'
 module_2_location = '/tmp/test_ns/unit_test_9'
+initial_module_location = "./spec/regression/module_operations/resources/mo_test_case_09_1_dtk.module.yaml"
 updated_module_location = "./spec/regression/module_operations/resources/mo_test_case_09_dtk.module.yaml"
 
 dtk_common = Common.new('', '')
@@ -19,25 +20,15 @@ describe "(Module operations) Test Case 9: Install module (service part) from on
   before(:all) do
     puts '****************************************************************************************************************************************************************************************', ''
     system("mkdir -p #{module_1_location}")
+    system("mkdir -p #{module_2_location}")
   end
 
   context "Install module from dtkn" do
     include_context "Install module from dtkn", module_1, module_1_location, module_1_version
   end
 
-  context "Create new directory called #{module_2_location} and copy the content of #{module_1_location} in it" do
-    it 'creates new directory with existing component module content in it' do
-      puts 'Create new directory and copy the content of existing component module', '----------------------------------------------------------------------'
-      pass = false
-      `mkdir -p #{module_2_location}`
-      `cp -r #{module_1_location}/* #{module_2_location}/`
-      `sed -i "s#module: #{module_1}#module: #{module_2}#g" #{module_2_location}/dtk.module.yaml`
-      `sed -i "s#new_unit_test_9#unit_test_9#g" #{module_2_location}/dtk.module.yaml`
-      value = `cat #{module_2_location}/dtk.module.yaml | grep #{module_2}`
-      pass = value.include?("module: #{module_2}")
-      puts ''
-      pass.should eq(true)
-    end
+  context "Change content of module on local filesystem" do
+    include_context "Change content of module on local filesystem", module_2_location, initial_module_location
   end
 
   context "Install new module" do

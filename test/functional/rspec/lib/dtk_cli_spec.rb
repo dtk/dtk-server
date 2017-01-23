@@ -456,6 +456,16 @@ shared_context "Change content of dependency module in service instance on local
   end
 end
 
+shared_context "Check dependency module exists on service instance" do |dtk_common, service_name, service_location, module_name|
+  it "checks that module #{module_name} exists as dependency on service instance #{service_name}" do
+    puts "Check dependency module exists on service instance", "----------------------------------------------------"
+    pass = false
+    # todo: add content here
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context "Push module changes" do |module_name, module_location|
   it "pushes changes for module #{module_name}" do
     puts 'Push module changes', '-------------------------'
@@ -527,6 +537,20 @@ shared_context "Publish module" do |module_name, module_location|
 end
 
 shared_context "NEG - Publish module" do |module_name, module_location|
+  it "does not publish module #{module_name} to dtkn" do
+    puts 'NEG - Publish module changes', '-----------------------------'
+    pass = true
+    value = `dtk module publish -d #{module_location}`
+    puts value
+    pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
+    puts "Publish of module #{module_name} was completed successfully which is not expected!" if pass == true
+    puts "Publish of module #{module_name} did not complete successfully which is expected!" if pass == false
+    puts ''
+    expect(pass).to eq(false)
+  end
+end
+
+shared_context "NEG - Publish module with incorrect name" do |module_name, module_location|
   it "does not publish module #{module_name} to dtkn" do
     puts 'NEG - Publish module changes', '-----------------------------'
     pass = true

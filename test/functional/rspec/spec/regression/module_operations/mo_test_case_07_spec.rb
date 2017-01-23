@@ -50,10 +50,6 @@ describe "(Module operations) Test Case 7: Negative test cases for publishing an
     include_context "NEG - Publish module", module_2, incorrect_module_2_location
   end
 
-  context "NEG - Publish module when incorrect module name" do
-    include_context "NEG - Publish module", incorrect_module_2, module_2_location
-  end 
-
   context "Publish module" do
     include_context "Publish module", module_2, module_2_location
   end

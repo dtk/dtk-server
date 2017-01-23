@@ -77,6 +77,14 @@ module DTK
         rest_ok_response CommonModule.create_empty_module_with_branch(get_default_project, local_params, has_remote_repo: has_remote_repo)
       end
 
+      def create_repo_from_component_info
+        namespace, module_name = required_request_params(:namespace, :module_name)
+        version = request_params(:version) || 'master'
+
+        local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
+        rest_ok_response CommonModule.create_repo_from_component_info(get_default_project, local_params)
+      end
+
       def delete
         namespace, module_name, = required_request_params(:namespace, :module_name)
         version = request_params(:version) || 'master'

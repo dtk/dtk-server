@@ -81,6 +81,7 @@ DTK::ReactorRoute.draw do
   get 'api/v1/modules/remote_module_info'        => 'v1::module/remote_module_info'
 
   post 'api/v1/modules/create_empty_module'                 => 'v1::module/create_empty_module'
+  post 'api/v1/modules/create_repo_from_component_info'     => 'v1::module/create_repo_from_component_info'
   post 'api/v1/modules/delete'                              => 'v1::module/delete'
   post 'api/v1/modules/install_component_info'              => 'v1::module/install_component_info'
   post 'api/v1/modules/publish_to_remote'                   => 'v1::module/publish_to_remote'

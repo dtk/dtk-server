@@ -26,9 +26,10 @@ module DTK; module ModuleCommonMixin
     #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     #  :create_implementation - Boolean (default: false)
     #  :has_remote_repo - Boolean (default: false)
+    #  :common_module - TODO: see if this is needed and instead use module_type from local_params
     def create_module(project, local_params, opts = {})
-      local = local_params.create_local(project)
-      namespace = local_params.namespace
+      local       = local_params.create_local(project)
+      namespace   = local_params.namespace
       module_name = local_params.module_name
       project_idh = project.id_handle
 
@@ -40,31 +41,20 @@ module DTK; module ModuleCommonMixin
         end
       end
 
-      if module_obj && opts[:common_module]
-        # base_branch just needs to be a random branch on module_obj
-        base_branch = module_obj.get_module_branches.first
-        repo = module_obj.get_repo
-        repo.merge!(branch_name: local.branch_name)
-        RepoManager.add_branch_and_push?(local.branch_name, {}, base_branch)
-        local_repo_obj = repo.create_subclass_obj(:repo_with_branch)
-      else
-        create_opts = {
-          create_branch: local.branch_name,
-          donot_create_master_branch: true,
-          delete_if_exists: true,
-          # TODO: dont think key 'namespace_name' is used
-          namespace_name: namespace
-        }
-        create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
-
-        if add_remote_files_info = opts[:add_remote_files_info]
-          create_opts.merge!(add_remote_files_info: add_remote_files_info)
+      local_repo_obj = 
+        if module_obj && opts[:common_module]
+          # base_branch just needs to be a random branch on module_obj
+          base_branch = module_obj.get_module_branches.first
+          repo = module_obj.get_repo
+          repo.merge!(branch_name: local.branch_name)
+          RepoManager.add_branch_and_push?(local.branch_name, {}, base_branch)
+          repo.create_subclass_obj(:repo_with_branch)
+        else
+          create_repo_opts = Aux.hash_subset(opts, [:no_initial_commit, :add_remote_files_info]).merge(delete_if_exists: true)
+          create_repo(local, create_repo_opts)
         end
-        repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-        local_repo_obj = Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
-      end
 
-      repo_idh = local_repo_obj.id_handle()
+      repo_idh = local_repo_obj.id_handle
       module_and_branch_info = create_module_and_branch_obj?(project, repo_idh, local, opts)
 
       Implementation.create?(project, local, local_repo_obj) if opts[:create_implementation]
@@ -79,12 +69,35 @@ module DTK; module ModuleCommonMixin
       module_and_branch_info.merge(module_repo_info: module_repo_info(local_repo_obj, module_and_branch_info, opts_info))
     end
 
+    # opts can have keys:
+    #   :no_initial_commit
+    #   :add_remote_files_info
+    #   :delete_if_exists
+    def create_repo(local, opts = {})
+      project_idh = local.project.id_handle
+
+      create_opts = {
+        create_branch: local.branch_name,
+        donot_create_master_branch: true,
+        delete_if_exists: opts[:delete_if_exists],
+        # TODO: dont think key 'namespace_name' is used
+        namespace_name: local.namespace
+      }
+      create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
+
+      if add_remote_files_info = opts[:add_remote_files_info]
+        create_opts.merge!(add_remote_files_info: add_remote_files_info)
+      end
+      repo_user_acls = RepoUser.authorized_users_acls(project_idh)
+      Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
+    end
+
     # opts can have keys
     #  :ancestor_branch_idh
     #  :current_sha
     # TODO: 2575: look at setting new branch dsl_version from branch clone from
     def create_module_and_branch_obj?(project, repo_idh, local, opts = {})
-      project_idh = project.id_handle()
+      project_idh = project.id_handle
       module_name = local.module_name
       namespace = Namespace.find_or_create(project.model_handle(:namespace), local.module_namespace_name)
       ref = local.module_name(with_namespace: true)
@@ -95,11 +108,11 @@ module DTK; module ModuleCommonMixin
       fields = {
         display_name: module_name,
         module_branch: mb_create_hash,
-        namespace_id: namespace.id()
+        namespace_id: namespace.id
       }
 
       create_hash = {
-        model_type.to_s() => {
+        model_type.to_s => {
           ref => fields
         }
       }
@@ -109,10 +122,10 @@ module DTK; module ModuleCommonMixin
 
       return module_branch if opts[:return_module_branch]
 
-      module_idh =  project_idh.createIDH(model_name: model_name(), id: module_branch[:module_id])
+      module_idh =  project_idh.createIDH(model_name: model_name, id: module_branch[:module_id])
       # TODO: ModuleBranch::Location: see if after refactor version field needed
       # TODO: ModuleBranch::Location: ones that come from local can be omitted
-      { version: version_field, module_name: module_name, module_idh: module_idh, module_branch_idh: module_branch.id_handle() }
+      { version: version_field, module_name: module_name, module_idh: module_idh, module_branch_idh: module_branch.id_handle }
     end
 
     # TODO: ModuleBranch::Location: deprecate below for above

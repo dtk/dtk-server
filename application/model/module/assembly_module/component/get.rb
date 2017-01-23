@@ -113,6 +113,9 @@ module DTK; class AssemblyModule
               dsl_parsed: (module_branch || {})[:dsl_parsed],
               module_branch: module_branch
             }
+            # TODO: change so module_branch.get_objs and then if multiple remotes pick default remore or both
+            # right now if teher is multiple remotes getting log message: 
+            # call to get_obj for module_branch (sp_hash={:cols=>[:remote_repo]} returned more than one row
             if remote_repo = (module_branch.get_obj(cols: [:remote_repo])||{})[:repo_remote]
               if linked_remote = ModuleUtils::ListMethod.linked_remotes_print_form(([remote_repo]), nil, not_published: nil)
                 to_add.merge!(linked_remotes: linked_remote)

@@ -52,6 +52,17 @@ module DTK
       ModuleRepoInfo.new(module_branch)
     end
 
+    def self.create_repo_from_component_info(project, local_params)
+      local = local_params.create_local(project)
+
+      Model.Transaction do
+        local_repo_obj  = create_repo(local, no_initial_commit: true, delete_if_exists: true)
+        # TODO: tarnsform content from component info into new repo and push its contents
+        module_branch = create_module_and_branch_obj?(project, local_repo_obj.id_handle, local, return_module_branch: true)
+        ModuleRepoInfo.new(module_branch)
+      end
+    end
+
     # opts can have keys
     #  :remote_repo_base
     #  :detail_to_include

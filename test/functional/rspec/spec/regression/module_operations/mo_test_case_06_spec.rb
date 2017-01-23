@@ -1,16 +1,16 @@
 # Test Case 6: Install module (service and component part) from one namespace, create with another namespace, publish module version and delete from remote
-# Pre-requisite: r8/unit_test(master) exists on repo manager
+# Pre-requisite: test_ns/new_unit_test_6(master) exists on repo manager
 
 require './lib/dtk_common'
 require './lib/dtk_cli_spec'
 
-module_1 = 'r8/unit_test'
+module_1 = 'test_ns/new_unit_test_6'
 module_1_version = 'master'
-module_1_location = '/tmp/r8/unit_test'
+module_1_location = '/tmp/test_ns/new_unit_test_6'
 
-module_2 = 'test_ns/unit_test'
+module_2 = 'test_ns/unit_test_6'
 module_2_version = '0.0.1'
-module_2_location = '/tmp/test_ns/unit_test'
+module_2_location = '/tmp/test_ns/unit_test_6'
 
 dtk_common = Common.new('', '')
 

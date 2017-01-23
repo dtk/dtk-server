@@ -1,4 +1,4 @@
-# Test Case 6: Import module from remote repo and check its corresponding assemblies
+# Test Case 9: Import module from remote repo and check its corresponding assemblies
 # Pre-requisite: r8/bakir_test_apache(master) exists on repo manager
 
 require './lib/dtk_common'
@@ -11,7 +11,7 @@ assembly_name = 'test_apache'
 
 dtk_common = Common.new('', '')
 
-describe '(Module operations) Test Case 6: Import module from remote repo and check its corresponding assemblies' do
+describe '(Module operations) Test Case 9: Import module from remote repo and check its corresponding assemblies' do
   before(:all) do
     puts '******************************************************************************************************', ''
     system("mkdir -p #{module_location}")

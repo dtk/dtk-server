@@ -1,22 +1,23 @@
-# Test Case 5: Install module (service and component part) from one namespace, create with another namespace, publish and delete from remote
-# Pre-requisite: r8/unit_test(master) exists on repo manager
+# Test Case 9: Install module (service part) from one namespace, create with another namespace and publish, updated local module with component info and publish again 
+# Pre-requisite: test_ns/new_unit_test_9(master) exists on repo manager
 
 require './lib/dtk_common'
 require './lib/dtk_cli_spec'
 
-module_1 = 'r8/unit_test'
+module_1 = 'test_ns/new_unit_test_9'
 module_1_version = 'master'
-module_1_location = '/tmp/r8/unit_test'
+module_1_location = '/tmp/test_ns/new_unit_test_9'
 
-module_2 = 'test_ns/unit_test'
+module_2 = 'test_ns/unit_test_9'
 module_2_version = 'master'
-module_2_location = '/tmp/test_ns/unit_test'
+module_2_location = '/tmp/test_ns/unit_test_9'
+updated_module_location = "./spec/regression/module_operations/resources/mo_test_case_09_dtk.module.yaml"
 
 dtk_common = Common.new('', '')
 
-describe "(Module operations) Test Case 5: Install module (service and component part) from one namespace, create with another namespace, publish and delete from remote" do
+describe "(Module operations) Test Case 9: Install module (service part) from one namespace, create with another namespace and publish, updated local module with component info and publish again" do
   before(:all) do
-    puts '**************************************************************************************************************************************************************', ''
+    puts '****************************************************************************************************************************************************************************************', ''
     system("mkdir -p #{module_1_location}")
   end
 
@@ -52,6 +53,19 @@ describe "(Module operations) Test Case 5: Install module (service and component
 
   context "Delete initial module on filesystem" do
     include_context "Delete initial module on filesystem", module_1_location
+  end
+
+  # add component part also
+  context "Change content of module on local filesystem" do
+    include_context "Change content of module on local filesystem", module_2_location, updated_module_location
+  end
+
+  context "Push module changes" do
+    include_context "Push module changes", module_2, module_2_location
+  end
+
+  context "Push-dtkn module changes" do
+    include_context "Push-dtkn module changes", module_2, module_2_location
   end
 
   context "Uninstall module" do

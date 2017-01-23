@@ -1,0 +1,128 @@
+---
+module: test_ns/unit_test_9
+version: master
+dependencies:
+  aws/ec2: master
+  r8/stdlib: master
+assemblies:
+  simple_link:
+    nodes:
+      source:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::attribute_test
+        - unit_test::source:
+            component_links:
+              unit_test::sink:
+              - sink/unit_test::sink
+      sink:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::sink
+  fan_in:
+    nodes:
+      source1:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::source:
+            component_links:
+              unit_test::sink:
+              - sink/unit_test::sink
+      source2:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::source:
+            component_links:
+              unit_test::sink:
+              - sink/unit_test::sink
+      sink:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::sink
+  fan_out:
+    nodes:
+      source:
+        attributes:
+          image: precise_hvm
+          size: small
+        components:
+        - stdlib
+        - unit_test::source:
+            component_links:
+              unit_test::sink:
+              - sink1/unit_test::sink
+              - sink2/unit_test::sink
+      sink1:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::sink
+      sink2:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test::sink
+component_defs:
+  sink:
+    external_ref:
+      puppet_class: unit_test::sink
+  source:
+    external_ref:
+      puppet_class: unit_test::source
+    attributes:
+      upstream:
+        type: array
+        required: true
+    dependencies:
+      unit_test::sink:
+        location: remote
+    link_defs:
+      unit_test::sink:
+      - location: remote
+        attribute_mappings:
+        - "$node.host_address -> upstream"
+  attribute_test:
+    external_ref:
+      puppet_class: unit_test::attribute_test
+    attributes:
+      array_attr:
+        type: array
+        default:
+      hash_attr:
+        type: hash
+        default:
+          key1:
+          - element1
+          - element2
+      boolean_attr:
+        type: boolean
+        default: false
+      port_attr:
+        type: port
+        default: 7000
+      integer_attr:
+        type: integer
+        default: 878
+      required_attr:
+        required: true
+      new_port:
+        type: port

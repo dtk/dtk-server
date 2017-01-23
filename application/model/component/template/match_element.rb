@@ -103,14 +103,12 @@ module DTK
           end
           ret
         end
-      end
 
-      private
-
-      def match_base_module?(matches, base_module_local_params)
-        namespace = base_module_local_params.namespace
-        version   = base_module_local_params.version
-        matches.find { |match| match[:namespace] == namespace and match[:version] = version }
+        def match_base_module?(matches, base_module_local_params)
+          namespace = base_module_local_params.namespace
+          version   = base_module_local_params.version
+          matches.find { |match| match[:namespace] == namespace and match[:version] = version }
+        end
       end
     end
   end

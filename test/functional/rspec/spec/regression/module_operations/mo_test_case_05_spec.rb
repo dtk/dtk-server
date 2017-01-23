@@ -31,6 +31,7 @@ describe "(Module operations) Test Case 5: Install module (service and component
       `mkdir -p #{module_2_location}`
       `cp -r #{module_1_location}/* #{module_2_location}/`
       `sed -i "s#module: #{module_1}#module: #{module_2}#g" #{module_2_location}/dtk.module.yaml`
+      `sed -i "s#new_unit_test_5#unit_test_5#g" #{module_2_location}/dtk.module.yaml`
       value = `cat #{module_2_location}/dtk.module.yaml | grep #{module_2}`
       pass = value.include?("module: #{module_2}")
       puts ''

@@ -200,9 +200,13 @@ module DTK
       end
       private :remote
 
-      def list_module_info(type = nil, rsa_pub_key = nil, opts = {})
+      # opts can have keys:
+      #  :ret_versions_array
+      #  :namespace
+      def list_module_info(type, rsa_pub_key, opts = {})
         new_repo = R8::Config[:repo][:remote][:new_client]
-        filter = type && { type: type_for_remote_module(type) }
+        filter = { type: type_for_remote_module(type) }
+        filter.merge!(namespace: opts[:namespace]) if opts[:namespace]
         remote_modules = client.list_modules(filter, rsa_pub_key)
 
         unsorted = remote_modules.map do |r|
@@ -216,7 +220,7 @@ module DTK
             # substitute base with master
             parsed_versions = []
             versions.each{ |version| parsed_versions << (version.eql?('master') ? 'base' : version) }
-            el.merge!(versions: parsed_versions)
+            el.merge!(versions: Aux.sort_versions(parsed_versions))
           end
 
           el

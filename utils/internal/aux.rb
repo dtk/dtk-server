@@ -51,9 +51,16 @@ module DTK
         end
       end
 
+      def sort_versions(versions)
+        versions = versions.dup
+        master = versions.delete('master') || versions.delete('base')
+        ret = versions.sort { |a, b| version_triplet?(a) <=> version_triplet?(b) }
+        master ? [master] + ret  : ret
+      end
+
       def latest_version?(versions)
         versions = versions.dup
-        master = versions.delete('master')
+        master = versions.delete('master') || versions.delete('base')
         if versions.empty?
           master
         else

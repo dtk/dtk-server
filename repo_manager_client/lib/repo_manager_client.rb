@@ -25,18 +25,43 @@ module DTK
       BranchInstance.new(@rest_base_url, repo, branch, opts)
     end
 
+
     ###
     ##  V1 namespace methods
     #
 
-    def list_component_modules(username, client_rsa_pub_key)
-      response = get_rest_request_data('/v1/component_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
+    def list_modules(filter, client_rsa_pub_key)
+      repo_user = get_approved_repouser(client_rsa_pub_key)
+
+      response = 
+        case filter[:type]
+        when 'component'
+          list_component_modules(CurrentSession.catalog_username, client_rsa_pub_key)
+        when 'service'
+          list_service_modules(CurrentSession.catalog_username, client_rsa_pub_key)
+
+          # TODO: test and node deprecated
+        when 'test'
+          list_test_modules(CurrentSession.catalog_username, client_rsa_pub_key)
+        when 'node'
+          list_node_modules(CurrentSession.catalog_username, client_rsa_pub_key)
+        else
+          fail ErrorUsage.new("Provided module type '#{filter[:type]}' is not valid")
+        end
+
+      if namespace_filter = filter[:namespace]
+        response.reject! { |module_info| module_info['namespace_name'] != namespace_filter }
+      end
+
       response
     end
 
+    def list_component_modules(username, client_rsa_pub_key)
+      get_rest_request_data('/v1/component_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
+    end
+
     def list_service_modules(username, client_rsa_pub_key)
-      response = get_rest_request_data('/v1/service_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
-      response
+      get_rest_request_data('/v1/service_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
     end
 
     def list_service_module_assemblies(username, client_rsa_pub_key)
@@ -44,33 +69,13 @@ module DTK
     end
 
     def list_test_modules(username, client_rsa_pub_key)
-      response = get_rest_request_data('/v1/test_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
-      response
+      get_rest_request_data('/v1/test_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
     end
 
     def list_node_modules(username, client_rsa_pub_key)
-      response = get_rest_request_data('/v1/node_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
-      response
+      get_rest_request_data('/v1/node_modules/list_remote', user_params_with_fingerprint(username, client_rsa_pub_key), raise_error: true)
     end
 
-    def list_modules(filter = nil, client_rsa_pub_key = nil)
-      repo_user = get_approved_repouser(client_rsa_pub_key)
-
-      case filter[:type]
-        when 'component'
-          response = list_component_modules(CurrentSession.catalog_username, client_rsa_pub_key)
-        when 'service'
-          response = list_service_modules(CurrentSession.catalog_username, client_rsa_pub_key)
-        when 'test'
-          response = list_test_modules(CurrentSession.catalog_username, client_rsa_pub_key)
-        when 'node'
-          response = list_node_modules(CurrentSession.catalog_username, client_rsa_pub_key)
-        else
-          fail ErrorUsage.new("Provided module type '#{filter[:type]}' is not valid")
-        end
-
-      response
-    end
 
     def list_module_assemblies(filter = nil, client_rsa_pub_key = nil)
       repo_user = get_approved_repouser(client_rsa_pub_key)

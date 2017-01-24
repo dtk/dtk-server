@@ -18,8 +18,15 @@
 module DTK
   class CommonModule
     module Remote
-      def self.list(project, opts = {})
-        Repo::Remote.new.list_module_info(:service_module, opts[:rsa_pub_key], opts.merge!(ret_versions_array: true))
+      # opts can have keys:
+      #  :remote_repo_base 
+      #  :namespace
+      def self.list(rsa_pub_key, opts = {})
+        remote_repo = Repo::Remote.new(opts[:remote_repo_base])
+        list_opts = { ret_versions_array: true, namespace: opts[:namespace] }
+        remote_service_modules = remote_repo.list_module_info(:service_module, rsa_pub_key, list_opts)
+        remote_component_modules = remote_repo.list_module_info(:component_module, rsa_pub_key, list_opts)
+        Intersect.intersect_remote_lists(remote_service_modules, remote_component_modules)
       end
 
       # opts can have keys:
@@ -34,7 +41,7 @@ module DTK
         end
         
         unless ret.empty?
-          ret.merge(version: remote_params.version || intersect_versions(raw_service_info, raw_component_info))
+          ret.merge(version: remote_params.version || Intersect.intersect_versions(raw_service_info, raw_component_info))
         else
           if opts[:donot_raise_error]
             ret
@@ -100,29 +107,92 @@ module DTK
         { remote_repo_url: raw_info[:remote_repo_url] }
       end
 
-      # TODO: DTK-2766: consider handling condition where service module at some version x requires component module
-      #       at another version; in this case want to use the different versions of these modules.
-      #       Need to figure out best version to use for combined; default is the service module version
-      #       Alternative is to fix up modules that have different versions
-      def self.intersect_versions(raw_service_info, raw_component_info)
-        if raw_service_info
-          if raw_component_info
-            if raw_service_info[:latest_version] == raw_component_info[:latest_version]
-              raw_service_info[:latest_version]
+      module Intersect
+        # TODO: DTK-2766: consider handling condition where service module at some version x requires component module
+        #       at another version; in this case want to use the different versions of these modules.
+        #       Need to figure out best version to use for combined; default is the service module version
+        #       Alternative is to fix up modules that have different versions
+        def self.intersect_versions(raw_service_info, raw_component_info)
+          if raw_service_info
+            if raw_component_info
+              if raw_service_info[:latest_version] == raw_component_info[:latest_version]
+                raw_service_info[:latest_version]
+              else
+                Aux.latest_version?(raw_service_info[:versions] && raw_component_info[:versions]) || 
+                  fail(ErrorUsage, "Mismatch between component info and service info versions")
+              end
             else
-              Aux.latest_version?(raw_service_info[:versions] && raw_component_info[:versions]) || 
-                fail(ErrorUsage, "Mismatch between component info and service info versions")
+              raw_service_info[:latest_version]
+            end
+          elsif raw_component_info
+            raw_component_info[:latest_version]
+          else
+            fail ErrorUsage, "Unexpected that both raw_component_info and raw_component_info are nil"
+          end
+        end
+        
+        def self.intersect_remote_lists(remote_service_modules, remote_component_modules)
+          ndx_service_modules = remote_service_modules.inject({}) { |h, m| h.merge(m[:display_name] => m) }
+          ndx_component_modules = remote_component_modules.inject({}) { |h, m| h.merge(m[:display_name] => m) }
+          all_module_names = (ndx_service_modules.keys + ndx_component_modules.keys).uniq.sort
+          all_module_names.map do |module_name|
+            service_module = ndx_service_modules[module_name]
+            component_module = ndx_component_modules[module_name]
+            if service_module and component_module
+              intersect_matching_list_elements(service_module, component_module)
+            else
+              service_module || component_module
+            end
+          end
+        end
+          
+        private        
+        
+        def self.intersect_matching_list_elements(service_module, component_module)
+          {
+            display_name: service_module[:display_name],
+            owner: owner(service_module, component_module),
+            group_owners: group_owners(service_module, component_module),
+            permissions: permissions(service_module, component_module),
+            last_updated: last_updated(service_module, component_module),
+            versions: versions(service_module, component_module)
+          }
+        end
+        
+        def self.last_updated(service_module, component_module)
+          service_last_updated   = service_module[:last_updated]
+          component_last_updated = component_module[:last_updated]
+          if service_last_updated and component_last_updated
+            if DateTime.parse(service_last_updated) < DateTime.parse(component_last_updated)
+              component_last_updated
+            else
+              service_last_updated
             end
           else
-            raw_service_info[:latest_version]
+            service_last_updated || component_last_updated
           end
-        elsif raw_component_info
-          raw_component_info[:latest_version]
-        else
-          fail ErrorUsage, "Unexpected that both raw_component_info and raw_component_info are nil"
         end
-      end
+        
+        def self.versions(service_module, component_module)
+          Aux.sort_versions((service_module[:versions] || [])  & (component_module[:versions] || []))
+        end
+        
+        # TODO: just hacls now if service modules and component_modules conflict on owner, :group_owners, or permisions
+        def self.owner(service_module, component_module)
+          service_module[:owner]
+        end
+        
+        def self.group_owners(service_module, component_module)
+          service_module[:group_owners]
+        end
+        
+        def self.permissions(service_module, component_module)
+          # TODO: intersect 
+          service_module[:permissions]
+        end
 
+      end
     end
   end
 end
+

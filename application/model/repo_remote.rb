@@ -20,7 +20,7 @@ module DTK
     def print_form(opts = Opts.new)
       ret = self[:display_name] || '' #'' just to be safe
       ret = "#{remote_provider_name}://#{ret}" if opts[:provider_prefix]
-      ret = "#{DefaultMarker}#{ret}" if opts[:is_default_namespace]
+      ret = "#{DEFAULT_MARKER}#{ret}" if opts[:is_default_namespace]
       ret
     end
 
@@ -36,8 +36,9 @@ module DTK
     #
     REMOTE_LOCATION_REGEX = /(.*\.git)(\/.*)$/
 
-    RemoteRepoBase = :dtknet
-    DefaultMarker = '*'
+    DTKN = :dtknet
+    REMOTE_REPO_BASE = DTKN
+    DEFAULT_MARKER = '*'
 
     def self.get_git_remotes(module_obj)
       module_obj.get_linked_remote_repos.collect do |a|
@@ -53,8 +54,11 @@ module DTK
       end.compact
     end
 
+    def self.repo_dtkn
+      DTKN
+    end
     def self.repo_base
-      RemoteRepoBase
+      REMOTE_REPO_BASE
     end
 
     def self.remote_provider_name(url_of_provider)
@@ -99,7 +103,7 @@ module DTK
 
     def remote_ref
       if is_builtin_provider?
-        Repo.remote_ref(RemoteRepoBase, get_field?(:repo_namespace))
+        Repo.remote_ref(REMOTE_REPO_BASE, get_field?(:repo_namespace))
       else
         remote_url = git_remote_url()
 

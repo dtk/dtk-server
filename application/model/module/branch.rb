@@ -443,6 +443,21 @@ module DTK
       aug_component_module_branch.update_current_sha_from_repo!
     end
 
+    def push_to_component_module(aug_component_module_branch)
+      external_repo   = aug_component_module_branch.repo
+      external_branch = aug_component_module_branch.branch_name
+      RepoManager.push_to_external_repo(external_repo, external_branch, self)
+      RepoManager.fast_foward_pull(external_branch, { force: true }, aug_component_module_branch)
+      aug_component_module_branch.update_current_sha_from_repo!
+    end
+
+    def pull_from_component_module!(aug_component_module_branch)
+      external_repo   = aug_component_module_branch.repo
+      external_branch = aug_component_module_branch.branch_name
+      RepoManager.pull_from_external_repo(external_repo, external_branch, self)
+      update_current_sha_from_repo!
+    end
+
     def process_ambiguous_dependencies(ambiguous, hash_content)
       content = ''
       content << "---\ncomponent_modules:\n" if hash_content.empty?
@@ -474,8 +489,6 @@ module DTK
 
       content
     end
-
-    private :push_changes_to_repo
 
     def default_dsl_format_type
       index = (get_type() == :service_module ? :service : :component)

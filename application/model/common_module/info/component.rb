@@ -39,6 +39,14 @@ module DTK
         def self.list_remotes(_model_handle, client_rsa_pub_key = nil, opts = {})
           Repo::Remote.new.list_module_info(module_type, client_rsa_pub_key, opts.merge!(ret_versions_array: true))
         end
+
+        def self.populate_common_module_repo_from_component_info(component_module_local, common_module_branch, common_module_repo)
+          aug_component_module_branch = get_augmented_module_branch_from_local(component_module_local)
+          pp [:aug_component_module_branch, aug_component_module_branch]
+          common_module_branch.pull_from_component_module!(aug_component_module_branch)
+          common_module_branch.push_changes_to_repo
+          Log.error('now do transform')
+        end
         
         private
         
@@ -49,6 +57,10 @@ module DTK
           else
             super
           end
+        end
+
+        def remote_from_local(local)
+          remote_params
         end
 
       end

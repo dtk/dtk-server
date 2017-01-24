@@ -94,6 +94,10 @@ module DTK
     end
 
     module GetBranchClassMixin
+      def get_augmented_module_branch_from_local(local)
+        ModuleBranch::Augmented.augmented_module_branch(get_module_branch_from_local(local))
+      end
+
       def get_module_branch_from_local(local)
         project = local.project()
         project_idh = project.id_handle()
@@ -115,6 +119,7 @@ module DTK
           fail Error.new("Matched rows has unexpected size (#{matches.size}) since its is >1")
         end
       end
+
       # TODO: ModuleBranch::Location: deprecate below for above
       def get_workspace_module_branch(project, module_name, version = nil, namespace = nil, opts = {})
         project_idh = project.id_handle()

@@ -465,6 +465,12 @@ module DTK; class RepoManager
       end
     end
 
+    def pull_from_external_repo(external_repo, external_branch)
+      checkout(@branch) do
+        git_command__pull_from_external_repo(external_repo, external_branch)
+      end
+    end
+
     def get_branches
       @grit_repo.branches.map(&:name)
     end

@@ -52,14 +52,14 @@ module DTK
       ModuleRepoInfo.new(module_branch)
     end
 
-    def self.create_repo_from_component_info(project, local_params)
-      local = local_params.create_local(project)
-
+    def self.create_repo_from_component_info(project, common_module_local_params)
+      common_module_local    = common_module_local_params.create_local(project)
+      component_module_local = common_module_local.merge(module_type: :component_module)
       Model.Transaction do
-        local_repo_obj  = create_repo(local, no_initial_commit: true, delete_if_exists: true)
-        # TODO: tarnsform content from component info into new repo and push its contents
-        module_branch = create_module_and_branch_obj?(project, local_repo_obj.id_handle, local, return_module_branch: true)
-        ModuleRepoInfo.new(module_branch)
+        common_module_repo  = create_repo(common_module_local, no_initial_commit: true, delete_if_exists: true)
+        common_module_branch = create_module_and_branch_obj?(project, common_module_repo.id_handle, common_module_local, return_module_branch: true)
+        Info::Component.populate_common_module_repo_from_component_info(component_module_local, common_module_branch, common_module_repo)
+        ModuleRepoInfo.new(common_module_branch)
       end
     end
 
@@ -82,6 +82,9 @@ module DTK
     #  :ret_remote_info
     def self.exists(project, module_type, namespace, module_name, version, opts = {})
       if matching_module = get_class_from_module_type(module_type).matching_module_with_module_branch?(project, namespace, module_name, version)
+# TODO: DTK-2852: for testing
+# allows ecists to go throw without repo so then the create repo from module called
+#matching_module[:module_branch][:repo_id] = nil
         ModuleRepoInfo.new(matching_module[:module_branch], ret_remote_info: opts[:ret_remote_info])
       end
     end

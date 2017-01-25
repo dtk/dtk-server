@@ -18,18 +18,19 @@
 module DTK
   module CommonDSL
     module ObjectLogic
-      class NestedModule < ContentInputHash
-        require_relative('nested_module/component')
-
-        def initialize(service_module_branch, aug_component_module_branch)
+      # ComponentInfo covers both a nested module and a common module
+      class ComponentInfoModule < ContentInputHash
+        require_relative('component_info_module/component')
+ 
+        def initialize(module_branch, aug_component_module_branch)
           super()
-          @service_module_branch       = service_module_branch
+          @module_branch               = module_branch
           @aug_component_module_branch = aug_component_module_branch
         end
         private :initialize
 
-        def self.generate_content_input(service_module_branch, aug_component_module_branch)
-          new(service_module_branch, aug_component_module_branch).generate_content_input!
+        def self.generate_content_input(module_branch, aug_component_module_branch)
+          new(module_branch, aug_component_module_branch).generate_content_input!
         end
 
         def generate_content_input!
@@ -56,7 +57,7 @@ module DTK
         end
 
         def dsl_version
-          @service_module_branch.dsl_version
+          @module_branch.dsl_version
         end
 
         def module_namespace

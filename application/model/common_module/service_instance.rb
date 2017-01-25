@@ -66,14 +66,14 @@ module DTK
         }.merge(module_repo_info)
       end
 
+      def aug_component_module_branches
+        @aug_dependent_module_branches ||= ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance, augment_with_component_modules: true)
+      end
+
       private
 
       def create_nested_modules_dsl_and_objects(service_module_branch)
         CommonDSL::ComponentModuleRepoSync.pull_from_component_modules(service_module_branch, aug_component_module_branches)
-      end
-
-      def aug_component_module_branches
-        @aug_dependent_module_branches ||= ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance, augment_with_component_modules: true)
       end
       
     end

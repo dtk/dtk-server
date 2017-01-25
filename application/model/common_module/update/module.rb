@@ -51,8 +51,13 @@ module DTK
           # TODO: make more efficient by just computing parsed_common_module if parsing
           parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
           CommonDSL::Parse.set_dsl_version!(@module_branch, parsed_common_module)
-
           parse_needed = (opts[:force_parse] == true or top_dsl_file_changed)
+
+          unless opts[:skip_missing_check]
+            missing_dependencies = check_for_missing_dependencies(parsed_common_module, repo)
+            return missing_dependencies if missing_dependencies[:missing_dependencies]
+          end
+
           create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)
           @module_branch.set_dsl_parsed!(true)
         end
@@ -89,6 +94,11 @@ module DTK
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
         component_info_exists = Info::Component.new(*args).create_or_update_from_parsed_common_module?
         Info::Service.new(*(args + [{ component_info_exists: component_info_exists }])).create_or_update_from_parsed_common_module?
+      end
+
+      def check_for_missing_dependencies(parsed_common_module, repo, opts = {})
+        args = [@project, @local_params, repo, @module_branch, parsed_common_module, opts]
+        Info::Service.new(*(args)).check_for_missing_dependencies
       end
 
     end

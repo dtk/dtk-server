@@ -80,18 +80,20 @@ module DTK
     # TODO: DTK-2046
     # make change here so argument has external_ref info; so might pass in as argument module_ref objects
     # This might require the persistent module refs to be there
-    def update_object_if_needed!(cmp_modules_with_namespaces)
-      ret = false
-      cmp_modules_with_namespaces.each do |cmp_mod|
-        [:display_name, :namespace_name].each do |key|
-          fail Error.new("Unexpected that cmp_modules_with_namespaces element does not have key: #{key}") unless cmp_mod[key]
-        end
-        cmp_mod_name = cmp_mod[:display_name]
-        unless component_module_ref?(cmp_mod_name)
-          add_or_set_component_module_ref(cmp_mod_name, {namespace_info: cmp_mod[:namespace_name], version_info: cmp_mod[:version_info]})
-          ret = true
-        end
+    def update_object_if_needed!(cmp_modules_with_namespaces, opts = {})
+      ret              = false
+      module_ref_diffs = get_module_ref_diffs(cmp_modules_with_namespaces)
+
+      if to_add = module_ref_diffs[:add]
+        to_add.each { |cmp_mod| add_or_set_component_module_ref(cmp_mod[:display_name], {namespace_info: cmp_mod[:namespace_name], version_info: cmp_mod[:version_info]}) }
+        ret = true
       end
+
+      if to_delete = module_ref_diffs[:delete]
+        to_delete.each { |cmp_mod| delete_component_module_ref(cmp_mod[:display_name]) }
+        ret = true
+      end
+
       ret
     end
 
@@ -189,6 +191,31 @@ module DTK
       ModuleRef.create_or_update(new_branch, cmrs.component_modules.values)
     end
 
+    def get_module_ref_diffs(cmp_modules_with_namespaces, opts = {})
+      diffs             = {}
+      refs_w_namespaces = module_refs_to_modules_with_namespaces
+
+      cmp_modules_with_namespaces.each do |cmp_mod|
+        [:display_name, :namespace_name].each do |key|
+          fail Error.new("Unexpected that cmp_modules_with_namespaces element does not have key: #{key}") unless cmp_mod[key]
+        end
+
+        unless component_module_ref?(cmp_mod[:display_name])
+          (diffs[:add] ||= []) << cmp_mod
+        end
+        # if !refs_w_namespaces.include?(cmp_mod)
+        #   (diffs[:add] ||= []) << cmp_mod
+        # end
+      end
+
+      to_delete = refs_w_namespaces - cmp_modules_with_namespaces
+      unless to_delete.empty?
+        diffs[:delete] = to_delete
+      end
+
+      diffs
+    end
+
     private
 
    def self.update(parent, cmp_modules)
@@ -197,6 +224,10 @@ module DTK
 
     def add_or_set_component_module_ref(cmp_module_name, mod_ref_hash)
       @component_modules[key(cmp_module_name)] = ModuleRef.reify(@parent.model_handle, mod_ref_hash)
+    end
+
+    def delete_component_module_ref(cmp_module_name)
+      @component_modules.delete(key(cmp_module_name))
     end
 
     def self.key(el)
@@ -251,6 +282,10 @@ module DTK
         fail Error.new('Cannot find project from parent object')
       end
       @parent.model_handle(:project).createIDH(id: project_id)
+    end
+
+    def module_refs_to_modules_with_namespaces
+      component_modules.map { |_name, ref| { display_name: ref[:display_name], namespace_name: ref[:namespace_info], version_info: (ref[:version_info] || 'master').to_s } }
     end
   end
 end

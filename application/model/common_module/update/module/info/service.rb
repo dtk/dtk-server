@@ -31,10 +31,11 @@ module DTK
         if parsed_assemblies = parsed_common_module.val(:Assemblies)
           service_module_branch = create_module_branch_and_repo?
           CommonDSL::Parse.set_dsl_version!(service_module_branch, parsed_common_module)
-          if parsed_dependent_modules = parsed_common_module.val(:DependentModules)
-            update_component_module_refs(service_module_branch, parsed_dependent_modules, omit_base_reference: @component_info_exists)
-          end
+
+          # update assemblies before updating module refs because we need to check for references in assemblies when updating module refs
           CommonModule::Info::Service.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, local_params)
+
+          update_component_module_refs(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
           true
         end
       end
@@ -42,6 +43,14 @@ module DTK
       def transform_from_common_module?
         transform = Transform.new(parsed_common_module, self).compute_service_module_outputs!
         file_path__content_array = transform.file_path__content_array
+      end
+
+      def check_for_missing_dependencies
+        if parsed_assemblies = parsed_common_module.val(:Assemblies)
+          service_module_branch = create_module_branch_and_repo?
+          CommonDSL::Parse.set_dsl_version!(service_module_branch, parsed_common_module)
+          check_and_ret_missing_modules(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
+        end
       end
 
       private

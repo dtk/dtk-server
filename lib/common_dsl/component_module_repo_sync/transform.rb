@@ -22,7 +22,7 @@ module DTK
         require_relative('transform/sync_branch')
         require_relative('transform/service_instance')
 
-        def self.transform_from_component_info(module_branch, aug_component_module_branch, base_dir, dsl_file_path )
+        def self.transform_from_component_info(module_branch, aug_component_module_branch, dsl_file_path )
           dsl_hash = ObjectLogic::ComponentInfoModule.generate_content_input(module_branch, aug_component_module_branch)
           dsl_hash = convert_top_level_symbol_keys_to_strings(dsl_hash) # Needed because skipping Generate
           yaml_text = DSL::YamlHelper.generate(dsl_hash)
@@ -30,6 +30,7 @@ module DTK
           Generate::DirectoryGenerator.add_files(module_branch, file_path__content_array, donot_push_changes: true, no_commit: true)
 
           # delete files in component module form
+          base_dir = File.dirname(dsl_file_path)
           ([component_module_dsl_filename, module_refs_filename]).each do |file_path|
             RepoManager.delete_file?("#{base_dir}/#{file_path}", { no_commit: true }, module_branch)
           end            

@@ -36,7 +36,7 @@ module DTK; module CommonDSL
         
         def transform_nested_module
           dsl_file_path = Common.nested_module_top_dsl_path(nested_module_name)
-          self.class.transform_from_component_info(@service_module_branch, @aug_component_module_branch, nested_module_dir, dsl_file_path)
+          self.class.transform_from_component_info(@service_module_branch, @aug_component_module_branch, dsl_file_path)
         end
 
         private

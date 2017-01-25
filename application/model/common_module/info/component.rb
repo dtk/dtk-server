@@ -42,14 +42,32 @@ module DTK
 
         def self.populate_common_module_repo_from_component_info(component_module_local, common_module_branch, common_module_repo)
           aug_component_module_branch = get_augmented_module_branch_from_local(component_module_local)
-          pp [:aug_component_module_branch, aug_component_module_branch]
           common_module_branch.pull_from_component_module!(aug_component_module_branch)
+          transform_from_component_info(common_module_branch, aug_component_module_branch)
           common_module_branch.push_changes_to_repo
-          Log.error('now do transform')
         end
         
         private
-        
+
+        def self.transform_from_component_info(common_module_branch, aug_component_module_branch)
+          transform_class.transform_from_component_info(common_module_branch, aug_component_module_branch, common_module_base_dir, common_module_dsl_file_path)
+          transform_class.commit_all_changes(common_module_branch, commit_msg: 'Loaded component info')
+        end
+
+        def self.transform_class
+          @transform_class ||= CommonDSL::ComponentModuleRepoSync::Transform
+        end
+
+        def self.common_module_base_dir
+          common_module_file_type.base_dir
+        end
+        def self.common_module_dsl_file_path
+          common_module_file_type.canonical_path
+        end
+        def self.common_module_file_type
+          @common_module_file_type ||= ::DTK::CommonDSL::FileType::CommonModule::DSLFile::Top
+        end
+
         # This causes all get_obj(s) class an instance methods to return Info::Component objects, rather than ComponentModule ones
         def self.get_objs(model_handle, sp_hash, opts = {})
           if model_handle[:model_name] == :component_module

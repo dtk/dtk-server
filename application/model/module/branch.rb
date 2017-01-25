@@ -84,7 +84,7 @@ module DTK
     end
 
     def augmented_module_branch
-      Augmented.augmented_module_branch(self)
+      Augmented.create_from_module_branch(self)
     end
 
     def get_module

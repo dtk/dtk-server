@@ -23,6 +23,66 @@ module DTK
     class Augmented < self
       subclass_model :module_branch_augmented, :module_branch, print_form: 'module_branch'
 
+      REQUIRED_PARAMS = [:module_name, :namespace] 
+      def self.create(module_branch, params = {})
+        missing_params =  REQUIRED_PARAMS - params.keys
+        fail Error, "Missing the following keys: #{missing_params.join(', ')}" unless missing_params.empty?
+        module_branch.merge(params).create_as_subclass_object(self)
+      end
+
+      def self.create_from_module_branch(module_branch)
+        sp_hash = {
+          cols: [:display_name, :augmented_branch_info, :namespace]
+        }
+        module_branch_id = module_branch.id
+        aug_module_obj = module_branch.get_module.get_objs(sp_hash).find { |r| r[:module_branch][:id] == module_branch_id }
+        aug_module_params = {
+          module_name: aug_module_obj.display_name, 
+          repo: aug_module_obj[:repo], 
+          namespace: aug_module_obj[:namespace].display_name
+        }
+        create(aug_module_obj[:module_branch], aug_module_params)
+      end
+
+      # opts can have keys:
+      #   :filter
+      #   :donot_raise_error
+      #   :include_repo_remotes
+      def self.get_augmented_module_branch(parent_module, opts = {})
+        ret = nil
+        version       = (opts[:filter] || {})[:version] #version can be nil
+        version_field = ModuleBranch.version_field(version) 
+        sp_hash = {
+          cols: [:display_name, :augmented_branch_info, :namespace]
+        }
+        module_rows = parent_module.get_objs(sp_hash).select do |r|
+          r[:module_branch][:version] == version_field
+        end
+
+        if module_rows.size == 0
+          fail ErrorUsage.new("Module #{parent_module.pp_module_ref(version)} does not exist") unless opts[:donot_raise_error]
+          return ret
+        end
+
+        # aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
+        unless aug_module_obj = aggregate_by_remote_namespace(module_rows, opts)
+          fail ErrorUsage.new("The module (#{parent_module.pp_module_ref(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
+        end
+
+        aug_module_params = {
+          module_name: aug_module_obj.display_name, 
+          repo: aug_module_obj[:repo], 
+          namespace: aug_module_obj[:namespace].display_name
+        }
+        aug_module_params.merge!(repo_remotes: aug_module_obj[:repo_remotes]) if opts[:include_repo_remotes]
+
+        create(aug_module_obj[:module_branch], aug_module_params)
+      end
+
+      def augment_with_component_module!
+        self.class.augment_with_component_modules!([self])
+      end
+
       def version
         self[:version]
       end
@@ -63,9 +123,8 @@ module DTK
         self[:branch]  || raise_unexpected_nil('self[:branch]')
       end
       
-      # namespace object
-      def module_namespace
-        self[:module_namespace]  || raise_unexpected_nil('self[:module_namespace]')
+      def namespace
+        self[:namespace] || raise_unexpected_nil('self[:namespace]')
       end
 
       def frozen
@@ -74,51 +133,6 @@ module DTK
       
       def implementation
         @implementation ||= get_implementation
-      end
-
-      def self.augmented_module_branch(module_branch)
-        sp_hash = {
-          cols: [:display_name, :augmented_branch_info, :namespace]
-        }
-        module_branch_id = module_branch.id
-        module_obj = module_branch.get_module.get_objs(sp_hash).find { |r| r[:module_branch][:id] == module_branch_id }
-        aug_module_branch = module_obj[:module_branch].merge(repo: module_obj[:repo], module_name: module_obj[:display_name], module_namespace: module_obj[:namespace])
-        aug_module_branch.create_as_subclass_object(self)
-      end
-
-      # opts can have keys:
-      #   :filter
-      #   :donot_raise_error
-      #   :include_repo_remotes
-      def self.get_augmented_module_branch(parent_module, opts = {})
-        ret = nil
-        version       = (opts[:filter] || {})[:version] #version can be nil
-        version_field = ModuleBranch.version_field(version) 
-        sp_hash = {
-          cols: [:display_name, :augmented_branch_info, :namespace]
-        }
-        module_rows = parent_module.get_objs(sp_hash).select do |r|
-          r[:module_branch][:version] == version_field
-        end
-
-        if module_rows.size == 0
-          unless opts[:donot_raise_error]
-            fail ErrorUsage.new("Module #{parent_module.pp_module_ref(version)} does not exist")
-          end
-          return ret
-        end
-
-        # aggregate by remote_namespace, filtering by remote_namespace if remote_namespace is given
-        unless module_obj = aggregate_by_remote_namespace(module_rows, opts)
-          fail ErrorUsage.new("The module (#{parent_module.pp_module_ref(version)}) is not tied to namespace '#{opts[:filter][:remote_namespace]}' on the repo manager")
-        end
-
-        aug_module_branch = module_obj[:module_branch].merge(repo: module_obj[:repo], module_name: module_obj[:display_name], module_namespace: module_obj[:namespace][:display_name])
-
-        if opts[:include_repo_remotes]
-          aug_module_branch.merge!(repo_remotes: module_obj[:repo_remotes])
-        end
-        aug_module_branch.create_as_subclass_object(self)
       end
 
       def self.augment_with_repos!(module_branches)
@@ -185,7 +199,7 @@ module DTK
       end
 
       def raise_unexpected_nil(what)
-        fail(Error, "Unexpected that #{what} is nil")
+        fail Error, "Unexpected that #{what} is nil"
       end
 
     end

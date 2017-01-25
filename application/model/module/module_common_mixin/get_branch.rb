@@ -95,7 +95,10 @@ module DTK
 
     module GetBranchClassMixin
       def get_augmented_module_branch_from_local(local)
-        ModuleBranch::Augmented.augmented_module_branch(get_module_branch_from_local(local))
+        aug_module_branch = ModuleBranch::Augmented.create_from_module_branch(get_module_branch_from_local(local))
+        aug_module_branch.augment_with_component_module! if local.module_type == :component_module
+
+        aug_module_branch
       end
 
       def get_module_branch_from_local(local)

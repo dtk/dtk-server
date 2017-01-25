@@ -57,8 +57,8 @@ module DTK
             Log.error_pp(['Unexpected that locked_module_ref[:info] is missing :module_branch for', locked_module_ref[:info]])
             nil
           else
-            aug_mb_hash = info[:module_branch].merge(namespace: info[:namespace], module_name: info[:module_name])
-            ModuleBranch.create_stub(module_branch_mh, aug_mb_hash).create_as_subclass_object(ModuleBranch::Augmented)
+            module_branch = ModuleBranch.create_stub(module_branch_mh, info[:module_branch])
+            ModuleBranch::Augmented.create(module_branch, Aux.hash_subset(info, [:module_name, :namespace]))
           end
         end.compact
         ModuleBranch::Augmented.augment_with_repos!(aug_module_branches)

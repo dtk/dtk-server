@@ -99,9 +99,9 @@ module DTK; class ConfigAgent
           module_info = {
             repo: aug_module_branch.repo.display_name,
             branch: aug_module_branch.branch_name,
+            sha: aug_module_branch.current_sha,
+            frozen: !is_assembly_module_version?(aug_module_branch)
           }
-          # need sha if points to base module otherwise it is an assembly_module_version
-          module_info.merge!(sha: aug_module_branch.current_sha) unless is_assembly_module_version?(aug_module_branch)
           h.merge(aug_module_branch.module_name => module_info)
         end
       end

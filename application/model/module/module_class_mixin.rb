@@ -163,15 +163,15 @@ module DTK
       module_list += common_module_array
     end
 
-    def module_exists(project, namespace, name, version = 'master')
+    def module_exists(project, namespace, name, version = 'master', opts = {})
       namespace_obj = Namespace.find_or_create(project.model_handle.createMH(:namespace), namespace)
 
-      opts = Opts.new(filter: [:and, [:eq, :namespace_id, namespace_obj.id()], [:eq, :display_name, name]], project_idh: project.id_handle(), detail_to_include: [:remotes, :versions])
+      get_opts = Opts.new(filter: [:and, [:eq, :namespace_id, namespace_obj.id()], [:eq, :display_name, name]], project_idh: project.id_handle(), detail_to_include: [:remotes, :versions])
       cols = [:id, :display_name, :namespace_id, :namespace, :module_branches_with_repos]
-      unsorted_ret = get_all(project.id_handle(), cols: cols, filter: opts[:filter])
+      unsorted_ret = get_all(project.id_handle(), cols: cols, filter: get_opts[:filter])
 
-      if selected_module = unsorted_ret.find{ |mod| mod[:module_branch][:verion] == version }
-        return selected_module[:id]
+      if selected_module = unsorted_ret.find{ |mod| mod[:module_branch][:version] == version }
+        return opts[:return_module] ? selected_module : selected_module[:id]
       end
 
       return nil

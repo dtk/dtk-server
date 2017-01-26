@@ -84,6 +84,24 @@ module DTK
         component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
       end
 
+      def delete_component_module_refs?(module_branch, parsed_dependent_modules, opts = {})
+        component_module_refs       = ModuleRefs.get_component_module_refs(module_branch)
+        cmp_modules_with_namespaces = ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts)
+
+        diffs = component_module_refs.get_module_ref_diffs(cmp_modules_with_namespaces)
+        if to_delete = diffs[:delete]
+          to_delete.each do |cmp_mod|
+            next if @module_name == cmp_mod[:display_name]
+
+            cmp_module         = ComponentModule.module_exists(project, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info], return_module: true)
+            assembly_templates = cmp_module.get_associated_assembly_templates
+            matching           = assembly_templates.select{ |at| at[:module_branch_id] == module_branch[:id]}
+
+            fail ErrorUsage, "Unable to delete dependency '#{cmp_mod[:namespace_name]}/#{cmp_mod[:display_name]}' because it is referenced by assemblies: '#{matching.map{|mt|mt[:display_name]}.join(', ')}'!" unless matching.empty?
+          end
+        end
+      end
+
       def cmp_modules_with_namespaces_hash(module_name_input, namespace_name_input, version_input)
         { 
           display_name: module_name_input,
@@ -111,13 +129,6 @@ module DTK
             unless CommonModule.exists(project, :component_module, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info])
               (ret[:missing_dependencies] ||= []) << cmp_mod
             end
-          end
-        end
-
-        if to_delete = diffs[:delete]
-          # cmp_modules = component_module_refs.component_modules
-          to_delete.each do |cmp_mode|
-            # matching_cmp_mod = cmp_modules.find{ |_name, mod| (mod[:display_name] == cmp_mode[:display_name]) && (mod[:namespace_info] == cmp_mode[:namespace_name]) && ((mod[:version_info]||'master') == cmp_mode[:version_info]) }
           end
         end
 

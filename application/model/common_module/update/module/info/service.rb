@@ -31,11 +31,12 @@ module DTK
         if parsed_assemblies = parsed_common_module.val(:Assemblies)
           service_module_branch = create_module_branch_and_repo?
           CommonDSL::Parse.set_dsl_version!(service_module_branch, parsed_common_module)
+          update_component_module_refs(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
 
           # update assemblies before updating module refs because we need to check for references in assemblies when updating module refs
           CommonModule::Info::Service.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, local_params)
 
-          update_component_module_refs(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
+          delete_component_module_refs?(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
           true
         end
       end

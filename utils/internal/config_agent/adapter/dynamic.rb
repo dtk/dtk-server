@@ -58,10 +58,6 @@ module DTK; class ConfigAgent
           execution_environment: execution_environment 
         }          
         Log.info_pp [:message_sent_to_dynamic_provider, Sanitize.sanitize_message(msg)]
-
-        # TODO: DTK-2847: when switch over on arbiter side remove this line and remove the module HackForDTK2847
-        #msg = HackForDTK2847.convert_message(msg)
-
         msg
       end
       ARBITER_REQUEST_PROTOCOL_VERSION = 1
@@ -134,16 +130,6 @@ module DTK; class ConfigAgent
         end
       end
 
-      module HackForDTK2847
-        def self.convert_message(msg)
-          converted_attributes = msg[:attributes].inject({}) do |h, (type, attributes_hash)|
-            h.merge(type => attributes_hash.inject({}) { |h, (name, info)| h.merge(name => info[:value]) })
-          end
-          msg.delete(:protocol_version)
-          msg.merge(attributes: converted_attributes)
-        end
-      end
-      
     end
   end
 end; end

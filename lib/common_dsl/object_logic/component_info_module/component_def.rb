@@ -18,9 +18,9 @@
 module DTK; module CommonDSL
   module ObjectLogic
     class ComponentInfoModule
-      class Component < ContentInputHash
+      class ComponentDef < ContentInputHash
         def self.generate_content_input_from_hash(dsl_input_hash)
-          new.merge(dsl_input_hash['components'] || {})
+          new.merge(dsl_input_hash['components'] || dsl_input_hash['component_defs'] || {})
         end
       end
     end

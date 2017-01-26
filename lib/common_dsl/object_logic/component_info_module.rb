@@ -20,17 +20,18 @@ module DTK
     module ObjectLogic
       # ComponentInfo covers both a nested module and a common module
       class ComponentInfoModule < ContentInputHash
-        require_relative('component_info_module/component')
+        require_relative('component_info_module/component_def')
  
-        def initialize(module_branch, aug_component_module_branch)
+        def initialize(type, module_branch, aug_component_module_branch)
           super()
+          @type                        = type # type can be :common_module or :nested_module 
           @module_branch               = module_branch
           @aug_component_module_branch = aug_component_module_branch
         end
         private :initialize
 
-        def self.generate_content_input(module_branch, aug_component_module_branch)
-          new(module_branch, aug_component_module_branch).generate_content_input!
+        def self.generate_content_input(type, module_branch, aug_component_module_branch)
+          new(type, module_branch, aug_component_module_branch).generate_content_input!
         end
 
         def generate_content_input!
@@ -38,11 +39,19 @@ module DTK
           set(:Module, "#{module_namespace}/#{module_name}")
           set(:Version, module_version)
           set?(:DependentModules, dependent_modules?)
-          set?(:Components, components?)
+          set?(component_defs_key, component_defs?)
           self
         end
 
         private
+
+        def component_defs_key
+          case @type
+          when :common_module then :ComponentDefs
+          when :nested_module then :Components
+          else fail Error "Unexpected type '#{@type}'"
+          end
+        end
 
         def dependent_modules?
           module_refs = ModuleRefs.get_component_module_refs(@aug_component_module_branch)
@@ -50,9 +59,9 @@ module DTK
           ret.empty? ? nil : ret
         end
         
-        def components?
+        def component_defs?
           dsl_input_hash = ModuleDSL.get_dsl_file_input_hash(@aug_component_module_branch.implementation)
-          ret = Component.generate_content_input_from_hash(dsl_input_hash)
+          ret = ComponentDef.generate_content_input_from_hash(dsl_input_hash)
           ret.empty? ? nil : ret
         end
 

@@ -22,8 +22,8 @@ module DTK
         require_relative('transform/sync_branch')
         require_relative('transform/service_instance')
 
-        def self.transform_from_component_info(module_branch, aug_component_module_branch, dsl_file_path )
-          dsl_hash = ObjectLogic::ComponentInfoModule.generate_content_input(module_branch, aug_component_module_branch)
+        def self.transform_from_component_info(type, module_branch, aug_component_module_branch, dsl_file_path )
+          dsl_hash = ObjectLogic::ComponentInfoModule.generate_content_input(type, module_branch, aug_component_module_branch)
           dsl_hash = convert_top_level_symbol_keys_to_strings(dsl_hash) # Needed because skipping Generate
           yaml_text = DSL::YamlHelper.generate(dsl_hash)
           file_path__content_array = [{ path: dsl_file_path, content: yaml_text }]

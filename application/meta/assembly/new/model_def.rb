@@ -147,64 +147,85 @@ end
     augmented_ports: {
       type: :json,
       hidden: true,
-      remote_dependencies:       lambda__segments_nodes_and_components.call([:id, :group_id, :display_name], [:id, :group_id, :display_name, :component_type]) +
-      [{
+      remote_dependencies: lambda__segments_nodes_and_components.call([:id, :group_id, :display_name], [:id, :group_id, :display_name, :component_type]) +
+      [
+        {
          model_name: :port,
          convert: true,
          join_type: :inner,
          join_cond: { node_node_id: :node__id, component_type: :nested_component__component_type },
          cols: Port.common_columns()
-       },
-       {
-         model_name: :link_def,
-         convert: true,
-         join_type: :left_outer,
-         join_cond: { component_component_id: :nested_component__id },
-         cols: ([:component_component_id] + LinkDef.common_columns()).uniq
-       }]
+        },
+        {
+          model_name: :link_def,
+          convert: true,
+          join_type: :left_outer,
+          join_cond: { component_component_id: :nested_component__id },
+          cols: ([:component_component_id] + LinkDef.common_columns()).uniq
+        }
+      ]
     },
     augmented_port_links: {
       type: :json,
       hidden: true,
-      remote_dependencies:       [{
-         model_name: :port_link,
-         convert: true,
-         join_type: :inner,
-         join_cond: { assembly_id: :component__id },
-         cols: [:id, :display_name, :group_id, :input_id, :output_id]
-       },
-                                  {
-                                    model_name: :port,
-                                    alias: :input_port,
-                                    convert: true,
-                                    join_type: :inner,
-                                    join_cond: { id: :port_link__input_id },
-                                    cols: Port.common_columns()
-                                  },
-                                  {
-                                    model_name: :node,
-                                    alias: :input_node,
-                                    convert: true,
-                                    join_type: :inner,
-                                    join_cond: { id: :input_port__node_node_id },
-                                    cols: [:id, :display_name, :group_id]
-                                  },
-                                  {
-                                    model_name: :port,
-                                    alias: :output_port,
-                                    convert: true,
-                                    join_type: :inner,
-                                    join_cond: { id: :port_link__output_id },
-                                    cols: Port.common_columns()
-                                  },
-                                  {
-                                    model_name: :node,
-                                    alias: :output_node,
-                                    convert: true,
-                                    join_type: :inner,
-                                    join_cond: { id: :output_port__node_node_id },
-                                    cols: [:id, :display_name, :group_id]
-                                  }]
+      remote_dependencies:
+      [
+        {
+          model_name: :port_link,
+          convert: true,
+          join_type: :inner,
+          join_cond: { assembly_id: :component__id },
+          cols: [:id, :display_name, :group_id, :input_id, :output_id]
+        },
+        {
+          model_name: :port,
+          alias: :input_port,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :port_link__input_id },
+          cols: Port.common_columns()
+        },
+        {
+          model_name: :component,
+          alias: :input_component,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :input_port__component_id },
+          cols: [:id, :display_name, :group_id]
+        },
+        {
+          model_name: :node,
+          alias: :input_node,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :input_port__node_node_id },
+          cols: [:id, :display_name, :group_id]
+        },
+        {
+          model_name: :port,
+          alias: :output_port,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :port_link__output_id },
+          cols: Port.common_columns()
+        },
+        {
+          model_name: :component,
+          alias: :output_component,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :output_port__component_id },
+          cols: [:id, :display_name, :group_id]
+        },
+        {
+          model_name: :node,
+          alias: :output_node,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :output_port__node_node_id },
+          cols: [:id, :display_name, :group_id]
+        }
+      ]
     },
     node_attributes: {
       type: :json,

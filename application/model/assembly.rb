@@ -104,7 +104,7 @@ module DTK
         rows.reject! { |r| !post_filter.call(r) }
       end
       rows.map do |r|
-        r[:port_link].merge(r.slice(:input_port, :output_port, :input_node, :output_node))
+        r[:port_link].merge(r.slice(:input_port, :output_port, :input_component, :output_component, :input_node, :output_node))
       end
     end
 

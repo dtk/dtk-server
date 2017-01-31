@@ -17,15 +17,15 @@
 #
 module DTK
   class BaseModule < Model
-    r8_nested_require('base_module', 'update_module')
-    r8_nested_require('base_module', 'version_context_info')
+    require_relative('base_module/update_module')
+    require_relative('base_module/version_context_info')
 
     # TODO: look through r8_nested_require('module'..,) and see which ones should be under instead base_module
-    r8_nested_require('module', 'dsl')
-    r8_nested_require('module', 'node_module_dsl')
-    r8_nested_require('module', 'auto_import')
+    require_relative('module/dsl')
+    require_relative('module/node_module_dsl')
+    require_relative('module/auto_import')
 
-    r8_nested_require('module', 'delete_mixin')
+    require_relative('module/delete_mixin')
 
     include DeleteMixin
     extend ModuleClassMixin
@@ -81,9 +81,9 @@ module DTK
         get_objs(cols: [:components]).map do |r|
           cmp = r[:component]
           branch = r[:module_branch]
-          unless branch.assembly_module_version?()
+          unless branch.assembly_module_version?
             display_name = Component::Template.component_type_print_form(cmp[:display_name], Opts.new(no_module_name: true))
-            { id: cmp[:id], display_name: display_name, version: branch.version_print_form() }
+            { id: cmp[:id], display_name: display_name, version: branch.version_print_form }
           end
         end.compact.sort { |a, b| "#{a[:version]}-#{a[:display_name]}" <=> "#{b[:version]}-#{b[:display_name]}" }
       when :attributes
@@ -97,14 +97,14 @@ module DTK
           attr   = r[:attribute]
           branch = r[:module_branch]
           # skip if assembly branch attributes or hidden
-          if attr[:hidden] or branch.assembly_module_version?()
+          if attr[:hidden] or branch.assembly_module_version?
             next
           end
           el = { 
             id:           attr[:id], 
             display_name: attr.print_path(r[:component]), 
             value:        attr[:value_asserted], 
-            version:      branch.version_print_form() 
+            version:      branch.version_print_form 
           }
           ret << el
         end
@@ -164,16 +164,16 @@ module DTK
 
     # raises exception if more repos found
     def get_repo
-      repos = get_repos().uniq
+      repos = get_repos
       unless repos.size == 1
         fail Error.new('unexpected that number of matching repos is not equal to 1')
       end
 
-      repos.first()
+      repos.first
     end
 
     def get_repos
-      get_objs_helper(:repos, :repo)
+      get_objs_helper(:repos, :repo, remove_dups: true)
     end
 
     def get_associated_target_instances
@@ -181,14 +181,14 @@ module DTK
     end
 
     def config_agent_type_default
-      ConfigAgent::Type.default_symbol()
+      ConfigAgent::Type.default_symbol
     end
 
     private
 
     def publish_preprocess_raise_error?(module_branch_obj)
       # unless get_field?(:dsl_parsed)
-      unless module_branch_obj.dsl_parsed?()
+      unless module_branch_obj.dsl_parsed?
         fail ErrorUsage.new('Unable to publish module that has parsing errors. Please fix errors and try to publish again.')
       end
     end

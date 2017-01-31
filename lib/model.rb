@@ -101,7 +101,11 @@ module DTK
 
     #======end: hash index methods
 
-    # TODO: looking to use this as step to transform to simpler object model calls
+    # opts can haev keys:
+    #   :sql_filter
+    #   :filter_proc
+    #   :augmented
+    #   :remove_dups
     def get_objs_helper(virtual_attr, result_col = nil, opts = {})
       result_col ||= Aux.singular?(virtual_attr).to_sym
       sp_hash = {
@@ -111,20 +115,34 @@ module DTK
         sp_hash.merge!(filter: opts[:sql_filter])
       end
       rows = get_objs(cols: [virtual_attr])
-      if filter_proc = opts[:filter_proc]
-        rows.map do |r|
-          # el = r[result_col]
-          el = r
-          if filter_proc.call(el)
-            opts[:augmented] ? augmented_form(r, result_col) : el
-          end
-        end.compact
-      elsif opts[:augmented]
-        augmented_form(rows, result_col)
-      else
-        rows.map { |r| r[result_col] }
-      end
+      ret = 
+        if filter_proc = opts[:filter_proc]
+          rows.map do |r|
+            el = r
+            if filter_proc.call(el)
+              opts[:augmented] ? augmented_form(r, result_col) : el
+            end
+          end.compact
+        elsif opts[:augmented]
+          augmented_form(rows, result_col)
+        else
+          rows.map { |r| r[result_col] }
+        end
+      
+      opts[:remove_dups] ? get_objs_helper_ret_with_remove_dups(ret) : ret
     end
+    
+    def get_objs_helper_ret_with_remove_dups(ret)
+      unless ret.empty?
+        if ret.first.respond_to?(:id)
+          ret = ret.inject({}) { |h, r| h.merge(r.id => r) }.values 
+        else
+          Log.error("Unexpected that opts[:remove_dups] givin but rows dont have an id method")
+        end
+      end
+      ret
+    end
+    private :get_objs_helper_ret_with_remove_dups
 
     #
     # Debug SQL methods (START)

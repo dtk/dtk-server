@@ -65,11 +65,18 @@ module DTK
         def get_repo_with_branch
           get_repo_with_branch? || fail(Error, "Unexpected that get_repo_with_branch? is nil")
         end
-
         def get_repo_with_branch?
-          if get_module_branch?
-            repo = module_obj?.get_repo.merge(branch_name: local_branch)
-            repo.create_subclass_obj(:repo_with_branch)
+          self.class.get_repo_with_branch(repo_obj, local_branch) if get_module_branch?
+        end
+        def self.get_repo_with_branch(repo_obj, local_branch)
+          repo_obj.merge(branch_name: local_branch).create_subclass_obj(:repo_with_branch)
+        end 
+
+        def create_repo_with_branch_if_needed
+          if repo_obj = repo_obj?
+            self.class.get_repo_with_branch(repo_obj, local_branch)
+          else
+            create_repo_with_branch
           end
         end
 
@@ -80,25 +87,26 @@ module DTK
           # need to make sure that tests above indicate whether module exists already since using :delete_if_exists
           create_opts = {
             donot_create_master_branch: true,
-            delete_if_exists: module_obj?.nil?
+            delete_if_exists: false
           }
           repo_user_acls = RepoUser.authorized_users_acls(project.id_handle)
           Repo::WithBranch.create_workspace_repo(project.id_handle, local, repo_user_acls, create_opts)
         end
 
         def module_obj
-          module_obj? || fail(Error, "unexpected that  module_obj? is nil")
+          module_obj? || fail(Error, "unexpected that module_obj? is nil")
         end
-
         def module_obj? 
-          if @module_obj_computed
-            @module_obj
-          else
-            @module_obj_computed = true
-            @module_obj = module_class.module_exists?(project.id_handle, module_name, namespace)
-          end
+          @module_obj ||= module_class.module_exists?(project.id_handle, module_name, namespace)
         end
 
+        def repo_obj
+          repo_obj? || fail(Error, "Unexpected that repo_obj? is nil")
+        end
+        def repo_obj?
+          @repo_obj ||= module_obj? && module_obj?.get_repo?
+        end
+        
         MASTER_BRANCH_NAME = 'master'
         def is_master_branch?
           version.nil? or version == MASTER_BRANCH_NAME 

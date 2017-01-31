@@ -52,7 +52,7 @@ module DTK
         def install
           Model.Transaction do
             # These calls use/create a component module and branch
-            repo_with_branch = get_repo_with_branch? || create_repo_with_branch
+            repo_with_branch = get_repo_with_branch? || create_repo_with_branch_if_needed
 
             commit_sha = repo_with_branch.initial_sync_with_remote(remote, remote_repo_info)
 

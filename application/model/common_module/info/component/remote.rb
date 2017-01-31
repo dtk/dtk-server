@@ -27,8 +27,10 @@ module DTK
           new(project, local_params, remote_params, client_rsa_pub_key, remote_exists: true).install
         end
 
-        def self.pull(project, local_params, remote_params, client_rsa_pub_key)
-          new(project, local_params, remote_params, client_rsa_pub_key, remote_exists: true).pull
+        # opts can have keys:
+        #   :force
+        def self.pull(project, local_params, remote_params, client_rsa_pub_key, opts = {})
+          new(project, local_params, remote_params, client_rsa_pub_key, remote_exists: true).pull(opts)
         end
 
         # returns true if component info is published
@@ -63,13 +65,12 @@ module DTK
             module_obj ||= module_and_branch_info[:module_idh].create_object
             module_branch = module_and_branch_info[:module_branch_idh].create_object
             
-            opts_process_dsl = { set_external_refs: true } # only relevant for a component module
             # process_dsl_and_ret_parsing_errors will raise error if parsing error
-            module_obj.process_dsl_and_ret_parsing_errors(repo_with_branch, module_branch, local, opts_process_dsl)
+            module_obj.process_dsl_and_ret_parsing_errors(repo_with_branch, module_branch, local, set_external_refs: true)
             module_branch.set_sha(commit_sha)
 
             # This last call creates common module and branch 
-            # TODO: DTK-2852: need to change create_empty_module_with_branch to also update content from component module repo
+            # TODO:  DTK-2866: need to change create_empty_module_with_branch to also update content from component module repo
             # or instead to not create any repos here and instaed do it on demand when there is a clone module operation
             # CommonModule.create_empty_module_with_branch(project, local_params.merge(module_type: :common_module))
             CommonModule.create_module_and_branch_obj?(project, nil, local.merge(module_type: :common_module))

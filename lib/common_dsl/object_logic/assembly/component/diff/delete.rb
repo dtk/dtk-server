@@ -51,8 +51,8 @@ module DTK; module CommonDSL
                 delete_cmp_opts = result.semantic_diffs['WORKFLOWS_MODIFIED'] ? { do_not_update_task_template: true } : {}
                 assembly_instance.delete_component(component.id_handle, node.id, delete_cmp_opts)
               else
-                task_template_processor.insert_explict_delete_action?(force_delete: opts[:force_delete])
                 task_template_processor.remove_component_actions? unless ::DTK::Component::Domain::Node::Canonical.is_type_of?(component)
+                task_template_processor.insert_explict_delete_action?(force_delete: opts[:force_delete])
                 component.update_from_hash_assignments(to_be_deleted: true)
               end
 

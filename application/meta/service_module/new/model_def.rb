@@ -43,7 +43,7 @@ lambda__segment_repos =
   {
     model_name: :repo,
     convert: true,
-    join_type: :inner,
+    join_type: :left_outer,
     join_cond: { id: :module_branch__repo_id },
     cols: args[:cols]
   }

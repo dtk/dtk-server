@@ -27,7 +27,7 @@ module DTK
 
     def component_type
       Log.info_pp(['#TODO: ModuleBranch::Location: deprecate for this being in ModuleBranch::Location local params', caller[0..4]])
-      case module_type()
+      case module_type
        when :service_module
         :service_module
        when :component_module
@@ -40,7 +40,7 @@ module DTK
     end
 
     def module_type
-      model_name()
+      model_name
     end
 
     def check_valid_id(model_handle, id)
@@ -70,7 +70,7 @@ module DTK
         cols: [:id, :group_id, :display_name, :namespace],
         filter: [:oneof, :id, idhs.map(&:get_id)]
       }
-      mh = idhs.first.createMH()
+      mh = idhs.first.createMH
       get_objs(mh, sp_hash).inject({}) do |h, row|
         namespace   = row[:namespace]
         module_name = row[:display_name]
@@ -92,14 +92,13 @@ module DTK
       remote_repo_base   = opts[:remote_repo_base]
       include_remotes    = opts.array(:detail_to_include).include?(:remotes)
       include_versions   = opts.array(:detail_to_include).include?(:versions)
-      include_cm         = opts[:include_common_modules]
       include_any_detail = ((include_remotes || include_versions) ? true : nil)
 
       cols = [:id, :display_name, :namespace_id, :namespace, include_any_detail && :module_branches_with_repos].compact
-      unsorted_ret = get_all(project_idh, cols: cols, filter: filter, include_common_modules: include_cm)
+      unsorted_ret = get_all(project_idh, cols: cols, filter: filter)
       unless include_versions
         # prune all but the base module branch
-        unsorted_ret.reject! { |r| r[:module_branch] && r[:module_branch][:version] != ModuleBranch.version_field_default() }
+        unsorted_ret.reject! { |r| r[:module_branch] && r[:module_branch][:version] != ModuleBranch.version_field_default }
       end
 
       if opts[:remove_assembly_branches]
@@ -111,7 +110,7 @@ module DTK
 
       filter_list!(unsorted_ret) if respond_to?(:filter_list!)
       unsorted_ret.each do |r|
-        r.merge!(type: r.component_type()) if r.respond_to?(:component_type)
+        r.merge!(type: r.component_type) if r.respond_to?(:component_type)
 
         if r[:namespace]
           r[:display_name] = Namespace.join_namespace(r[:namespace][:display_name], r[:display_name])
@@ -127,7 +126,7 @@ module DTK
           remote_repo_base: remote_repo_base,
           diff: diff
         )
-        unsorted_ret = ModuleUtils::ListMethod.aggregate_detail(unsorted_ret, project_idh, model_type(), opts_aggr)
+        unsorted_ret = ModuleUtils::ListMethod.aggregate_detail(unsorted_ret, project_idh, model_type, opts_aggr)
       end
 
       unsorted_ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
@@ -137,7 +136,7 @@ module DTK
     #  :cols
     #  :filter
     def get_all(project_idh, opts = {})
-      filter = [:eq, :project_project_id, project_idh.get_id()]
+      filter = [:eq, :project_project_id, project_idh.get_id]
       if opts[:filter]
         filter = [:and, filter, opts[:filter]]
       end
@@ -145,30 +144,16 @@ module DTK
         cols: add_default_cols?(opts[:cols]),
         filter: filter
       }
-      mh = project_idh.createMH(model_type())
-      module_list = get_objs(mh, sp_hash)
-
-      if opts[:include_common_modules]
-        return merge_array(module_list, sp_hash, project_idh) 
-      end
-      module_list 
+      mh = project_idh.createMH(model_type)
+      get_objs(mh, sp_hash)
     end
     
-    def merge_array(module_list, sp_hash, project_idh)
-      common_module_mh = project_idh.createMH(:common_module)
-      common_module_array = get_objs(common_module_mh, sp_hash)
-      common_module_array.each do |k|
-          module_list.delete_if { |h| h[:display_name] == k[:display_name] }
-      end 
-      module_list += common_module_array
-    end
-
     def module_exists(project, namespace, name, version = 'master')
       namespace_obj = Namespace.find_or_create(project.model_handle.createMH(:namespace), namespace)
 
-      opts = Opts.new(filter: [:and, [:eq, :namespace_id, namespace_obj.id()], [:eq, :display_name, name]], project_idh: project.id_handle(), detail_to_include: [:remotes, :versions])
+      opts = Opts.new(filter: [:and, [:eq, :namespace_id, namespace_obj.id], [:eq, :display_name, name]], project_idh: project.id_handle, detail_to_include: [:remotes, :versions])
       cols = [:id, :display_name, :namespace_id, :namespace, :module_branches_with_repos]
-      unsorted_ret = get_all(project.id_handle(), cols: cols, filter: opts[:filter])
+      unsorted_ret = get_all(project.id_handle, cols: cols, filter: opts[:filter])
 
       if selected_module = unsorted_ret.find{ |mod| mod[:module_branch][:verion] == version }
         return selected_module[:id]
@@ -228,13 +213,13 @@ module DTK
       if repo_user.any_direct_access_except?(model_name)
         repo_user.update_direct_access(model_name, false)
       else
-        delete_instance(repo_user.id_handle())
+        delete_instance(repo_user.id_handle)
       end
     end
 
     def module_repo_info(repo, module_and_branch_info, opts = {})
       info = module_and_branch_info #for succinctness
-      branch_obj = info[:module_branch_idh].create_object()
+      branch_obj = info[:module_branch_idh].create_object
       ModuleRepoInfo.new(repo, info[:module_name], info[:module_idh], branch_obj, opts)
     end
 
@@ -248,13 +233,13 @@ module DTK
       sp_hash = {
         cols: [:id, :group_id, :display_name],
         filter: [:and,
-                 [:eq, :project_project_id, project_idh.get_id()],
+                 [:eq, :project_project_id, project_idh.get_id],
                  [:eq, :display_name, module_name],
-                 [:eq, :namespace_id, namespace_obj.id()]
+                 [:eq, :namespace_id, namespace_obj.id]
                    ]
       }
 
-      get_obj(project_idh.createMH(model_type()), sp_hash)
+      get_obj(project_idh.createMH(model_type), sp_hash)
     end
 
     private
@@ -262,7 +247,7 @@ module DTK
     # can be overwritten
     # TODO: ModuleBranch::Location: deprecate
     def module_specific_type(_config_agent_type)
-      module_type()
+      module_type 
     end
 
     def get_all_repos(mh)

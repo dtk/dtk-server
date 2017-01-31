@@ -105,7 +105,7 @@ module DTK
       # each branch_module_row has a nested :repo column
       def self.augment_with_remotes_info!(branch_module_rows, module_mh)
         # index by repo_id
-        ndx_branch_module_rows = branch_module_rows.inject({}) { |h, r| h.merge(r[:repo][:id] => r) if r[:repo] }
+        ndx_branch_module_rows = branch_module_rows.inject({}) { |h, r| r[:repo] ? h.merge(r[:repo][:id] => r) : h }
         unless ndx_branch_module_rows.empty?
           sp_hash = {
             cols: [:id, :group_id, :display_name, :repo_id, :repo_name, :repo_namespace, :created_at, :is_default],

@@ -100,6 +100,16 @@ module DTK
     end
 
     def self.delete(project, namespace, module_name, version, opts = {})
+      if versions = opts[:versions]
+        versions.each do |version|
+          delete_version(project, namespace, module_name, version, opts)
+        end
+      else
+        delete_version(project, namespace, module_name, version, opts)
+      end
+    end
+
+    def self.delete_version(project, namespace, module_name, version, opts = {})
       unless common_module = get_common_module?(project, namespace, module_name, version)
         print_opts = {:namespace => namespace, :version => version}
         fail ErrorUsage.new("DTK module '#{DTK::Common::PrettyPrintForm.module_ref(module_name, opts)}' does not exist!")

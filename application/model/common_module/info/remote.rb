@@ -62,6 +62,10 @@ module DTK
           module_obj? && module_obj?.get_module_branch(local_branch)
         end
 
+        def get_base_branch?
+          module_obj? && module_obj?.get_workspace_module_branch
+        end
+
         def get_repo_with_branch
           get_repo_with_branch? || fail(Error, "Unexpected that get_repo_with_branch? is nil")
         end

@@ -151,9 +151,12 @@ module DTK
 
       def update_from_repo
         namespace, module_name, commit_sha = required_request_params(:namespace, :module_name, :commit_sha)
-        version = request_params(:version)
-        local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
-        rest_ok_response CommonModule::Update::Module.update_from_repo(get_default_project, commit_sha, local_params)
+
+        version            = request_params(:version)
+        skip_missing_check = request_params(:skip_missing_check)
+        local_params       = local_params(:common_module, module_name, namespace: namespace, version: version)
+
+        rest_ok_response CommonModule::Update::Module.update_from_repo(get_default_project, commit_sha, local_params, skip_missing_check: skip_missing_check)
       end
 
     end

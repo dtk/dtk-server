@@ -196,10 +196,9 @@ module DTK; class RepoManager
       @grit_repo.diff(ref1, ref2)
     end
 
-    # TODO: DTK-2795: put in pull_return_merge_relationship(remote_branch, conflict_merge_relationships, opts = {}) and have fast_foward_pull be
+    # TODO: DTK-2795: put in pull_return_merge_relationship(remote_branch, conflict_merge_relationships, opts = {}) and have pull_from_remote be
     # pull_return_merge_relationship((remote_branch, [:branchpoint, :local_ahead]
     #
-
 
     # returns :no_change, :changed, :merge_needed
     # opts can have keys:
@@ -207,7 +206,7 @@ module DTK; class RepoManager
     #   :remote_name
     #   :remote_url- if set then add_remote?(remote_name, remote_url) done
     #   :ret_diffs - if present then this method will update it with a Repo::Diffs object
-    def fast_foward_pull(remote_branch, opts = {})
+    def pull_from_remote(remote_branch, opts = {})
       remote_name = opts[:remote_name] || default_remote_name
       remote_ref  = "#{remote_name}/#{remote_branch}"
 
@@ -227,7 +226,9 @@ module DTK; class RepoManager
       # computed after a fetch and before a merge
       opts[:ret_diffs] = diff(remote_ref) if opts.has_key?(:ret_diffs)
 
-      if opts[:force]
+      if ret == :equal
+        # no op
+      elsif opts[:force]
         checkout(@branch) do
           git_command__hard_reset(remote_ref)
         end

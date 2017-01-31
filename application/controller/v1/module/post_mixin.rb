@@ -139,8 +139,9 @@ module DTK
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
 
-        response = CommonModule::Info::Component::Remote.pull(get_default_project, local_params, remote_params, rsa_pub_key)
-        # TODO: stub so compltes to next step
+        force = true # TODO: DTK-2856: might make this an input from cliennt
+        CommonModule::Info::Component::Remote.pull(get_default_project, local_params, remote_params, rsa_pub_key, force: force)
+
         diffs_summary = ret_diffs_summary
         component_module = create_obj(:full_module_name, ComponentModule)
         module_dsl_info = component_module.update_model_from_clone_changes?(nil, diffs_summary, version)

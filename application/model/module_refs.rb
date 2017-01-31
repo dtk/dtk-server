@@ -209,12 +209,15 @@ module DTK
       end
 
       to_delete = refs_w_namespaces - cmp_modules_with_namespaces
+      to_delete.reject!{ |cmp_mod| IgnoreReservedModules.include?("#{cmp_mod[:namespace_name]}:#{cmp_mod[:display_name]}") }
+
       unless to_delete.empty?
         diffs[:delete] = to_delete
       end
 
       diffs
     end
+    IgnoreReservedModules = ['aws:ec2']
 
     private
 

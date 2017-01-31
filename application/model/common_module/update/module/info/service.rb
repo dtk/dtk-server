@@ -47,11 +47,9 @@ module DTK
       end
 
       def check_for_missing_dependencies
-        if parsed_assemblies = parsed_common_module.val(:Assemblies)
-          service_module_branch = create_module_branch_and_repo?
-          CommonDSL::Parse.set_dsl_version!(service_module_branch, parsed_common_module)
-          check_and_ret_missing_modules(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
-        end
+        service_module_branch = create_module_branch_and_repo?
+        CommonDSL::Parse.set_dsl_version!(service_module_branch, parsed_common_module)
+        check_and_ret_missing_modules(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
       end
 
       private

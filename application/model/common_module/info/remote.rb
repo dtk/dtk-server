@@ -61,12 +61,18 @@ module DTK
           module_obj? && module_obj?.get_module_branch(local_branch)
         end
 
+        def get_base_branch?
+          module_obj? && module_obj?.get_workspace_module_branch
+        end
+
         def get_repo_with_branch
           get_repo_with_branch? || fail(Error, "Unexpected that get_repo_with_branch? is nil")
         end
 
         def get_repo_with_branch?
-          if get_module_branch?
+          #TODO: using base branch if specified version branch does not exist because we allow install of different versions into same repo
+          branch = get_module_branch? || get_base_branch?
+          if branch
             repo = module_obj?.get_repo.merge(branch_name: local_branch)
             repo.create_subclass_obj(:repo_with_branch)
           end

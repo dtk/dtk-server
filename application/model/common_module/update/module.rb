@@ -55,7 +55,7 @@ module DTK
 
           unless opts[:skip_missing_check]
             missing_dependencies = check_for_missing_dependencies(parsed_common_module, repo)
-            return missing_dependencies if missing_dependencies[:missing_dependencies]
+            return missing_dependencies if missing_dependencies && missing_dependencies[:missing_dependencies]
           end
 
           create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)

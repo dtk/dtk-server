@@ -53,11 +53,21 @@ module DTK
           end
           # TODO: confusing that input/output on port link does not reflect what is logical input/output
           if port_link[:input_port][:direction] == 'input'
-            base_ref = input_port
-            dep_ref = output_port
+            # base_ref = input_port
+            base_port = port_link[:input_port].merge!(node: port_link[:input_node], nested_component: port_link[:input_component])
+            base_ref  = base_port.display_name_print_form(hide_assembly_wide_node: true)
+
+            # dep_ref = output_port
+            dep_port = port_link[:output_port].merge!(node: port_link[:output_node], nested_component: port_link[:output_component])
+            dep_ref  = dep_port.display_name_print_form(hide_assembly_wide_node: true)
           else
-            base_ref = output_port
-            dep_ref = input_port
+            # base_ref = output_port
+            base_port = port_link[:output_port].merge!(node: port_link[:output_node], nested_component: port_link[:output_component])
+            base_ref  = base_port.display_name_print_form(hide_assembly_wide_node: true)
+
+            # dep_ref = input_port
+            dep_port = port_link[:input_port].merge!(node: port_link[:input_node], nested_component: port_link[:input_component])
+            dep_ref  = dep_port.display_name_print_form(hide_assembly_wide_node: true)
           end
         elsif object.is_a?(Port)
           port = object

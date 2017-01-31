@@ -138,7 +138,7 @@ module DTK
       private
 
       def ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts = {})
-        cmp_modules_with_namespaces = parsed_dependent_modules.map do |parsed_module_ref|
+        cmp_modules_with_namespaces = (parsed_dependent_modules || {}).map do |parsed_module_ref|
           parsed_module_name = parsed_module_ref.req(:ModuleName)
           # For legacy where dependencies can refer to themselves
           unless @module_name == parsed_module_name

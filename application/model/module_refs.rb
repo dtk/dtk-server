@@ -200,12 +200,9 @@ module DTK
           fail Error.new("Unexpected that cmp_modules_with_namespaces element does not have key: #{key}") unless cmp_mod[key]
         end
 
-        unless component_module_ref?(cmp_mod[:display_name])
+        if !refs_w_namespaces.include?(cmp_mod)
           (diffs[:add] ||= []) << cmp_mod
         end
-        # if !refs_w_namespaces.include?(cmp_mod)
-        #   (diffs[:add] ||= []) << cmp_mod
-        # end
       end
 
       to_delete = refs_w_namespaces - cmp_modules_with_namespaces

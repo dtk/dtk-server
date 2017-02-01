@@ -52,7 +52,8 @@ module DTK
         else
           return nil if opts[:donot_raise_error]
           # this is temporary solution until we implement dependency diffs functionality
-          ref_print_form = matching_module_ref ? matching_module_ref.print_form : "#{namespace}:#{module_name}(#{version})"
+          # ref_print_form = matching_module_ref ? matching_module_ref.print_form : "#{namespace}:#{module_name}(#{version})"
+          ref_print_form = "#{namespace}:#{module_name}(#{version})"
           # fail ErrorUsage, "Component '#{Component.display_name_print_form(component_type)}' is not in dependent module '#{matching_module_ref.print_form}'"
           fail ErrorUsage, "Dependent module '#{ref_print_form}' not found! Please check if provided namespace and/or version are correct and try again"
         end

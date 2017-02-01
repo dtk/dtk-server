@@ -22,7 +22,7 @@ module DTK; class BaseModule
         assembly_templates = get_associated_assembly_templates
         unless assembly_templates.empty?
           assembly_names = assembly_templates.map { |a| a.display_name_print_form(include_namespace: true) }
-          fail ErrorUsage, "Cannot delete the component module because the assembly template(s) (#{assembly_names.join(',')}) reference it"
+          fail ErrorUsage, "Cannot delete the module because the assembly template(s) (#{assembly_names.join(', ')}) reference it."
         end
 
         components = get_associated_component_instances

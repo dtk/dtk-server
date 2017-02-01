@@ -37,7 +37,7 @@ module DTK; module CommonDSL
                 # TODO: DTK-2665: look at moving setting semantic_diffs because process_diffs can remove items
                 #  alternatively have items removed (e.g., create workflow rejected) in compute_base_diffs
                 diff_result.semantic_diffs = collated_diffs.serialize(dsl_version)
-                process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules], service_instance: service_instance)
+                process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, dependent_modules: service_instance_parse[:dependent_modules], service_instance: service_instance, impacted_files: impacted_files, service_instance_parse: service_instance_parse)
               end
             end
           end
@@ -51,6 +51,35 @@ module DTK; module CommonDSL
           assembly_gen.diff?(assembly_parse, QualifiedKey.new, service_instance: service_instance, impacted_files: opts[:impacted_files])
         end
         
+        def self.update_semantic_diff(diff_result, service_instance, module_branch, impacted_files, service_instance_parse)
+          if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
+            service_instance_gen = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
+            if new_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen, impacted_files: impacted_files)
+              update_collated = new_diffs.collate
+              diffs = update_collated.instance_variable_get(:@diffs)
+              SerializedHash.create(dsl_version: service_instance_gen.req(:DSLVersion)) do |serialized_hash|
+                CommonDSL::Diff::Collated::Sort::ForSerialize.sort_keys(diffs.keys).each do |collate_key|
+                  diffs_of_same_type = diffs[collate_key]
+                  diff_result.semantic_diffs.add_collate_level_elements?(collate_key, diffs_of_same_type)
+                end
+              end
+
+              #TODO: Find better solution to update semantic_diffs
+              unless diff_result.semantic_diffs["COMPONENTLINKS_ADDED"].nil? && diff_result.semantic_diffs["COMPONENTS_DELETED"].nil?
+                diff_result.semantic_diffs["COMPONENTLINKS_DELETED"] = diff_result.semantic_diffs["COMPONENTLINKS_ADDED"]
+                diff_result.semantic_diffs.delete("COMPONENTLINKS_ADDED")
+              end
+
+              return if diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].nil? 
+              diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].each do |v|
+                v.each do |k|
+                  k[1]["CURRENT_VAL"], k[1]["NEW_VAL"] = k[1]["NEW_VAL"], k[1]["CURRENT_VAL"]
+                end
+              end
+            end
+          end
+        end
+
         def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, opts = {})
           DiffErrors.process_diffs_error_handling(diff_result, service_instance_gen) do
             Model.Transaction do
@@ -60,6 +89,13 @@ module DTK; module CommonDSL
               
               # items_to_update are things that need to be updated in repo from what at this point are in object model
               items_to_update = diff_result.items_to_update
+              if diff_result.items_to_update.include?(:workflow)
+                service_instance       = opts[:service_instance]
+                impacted_files         = opts[:impacted_files]
+                service_instance_parse = opts[:service_instance_parse]
+                semantic_update =  update_semantic_diff(diff_result, service_instance, module_branch, impacted_files, service_instance_parse)
+              end
+              # items_to_update are things that need to be updated in repo from what at this point are in object model
               unless items_to_update.empty?
                 # Treat updates to repo from object model as transaction that rolls back git repo to what client set it as
                 # If error,  RepoManager::Transaction.reset_on_error

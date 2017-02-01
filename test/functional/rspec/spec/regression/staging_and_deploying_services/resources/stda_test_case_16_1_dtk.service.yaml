@@ -23,9 +23,12 @@ nodes:
           file_path: /tmp/test.txt
 workflows:
   create:
-    node: node
-    ordered_components:
-    - test_delete::component
-    node: second_node
-    ordered_components:
-    - test_delete::component
+    subtasks:
+    - name: configure node
+      node: node
+      ordered_components:
+      - test_delete::component
+    - name: configure second node
+      node: second_node
+      ordered_components:
+      - test_delete::component

@@ -744,9 +744,7 @@ module DTK
       col_in_result ||= obj_col.to_s.gsub(/s$/, '').to_sym
       get_objs(cols: [obj_col]).inject({}) do |h, r|
         obj = r[col_in_result]
-        id = obj[:id]
-        h[obj[:id]] ||= obj
-        h
+        obj.nil? ? h : h.merge(obj[:id] =>  obj)
       end.values
     end
 

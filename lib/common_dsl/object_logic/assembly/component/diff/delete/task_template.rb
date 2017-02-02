@@ -55,7 +55,7 @@ module DTK; module CommonDSL
 
           # TODO: DTK-2689: Rich: I've added this to avoid raise of exception in
           # dtk-server/lib/common_dsl/object_logic/assembly/component/diff/delete/task_template/splice_in_delete_action.rb:44
-          serialized_content = { subtasks: [serialized_content] } unless serialized_content[:subtasks]
+          serialized_content = { subtasks: [serialized_content] } if !serialized_content && !serialized_content[:subtasks]
 
           splice_in_delete_action!(serialized_content)
           pp ["DEBUG: task template after splice_in_delete_action", serialized_content]

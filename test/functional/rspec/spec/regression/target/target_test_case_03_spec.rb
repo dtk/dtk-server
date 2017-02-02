@@ -9,7 +9,7 @@ target_module = 'aws/network'
 target_assembly_template = 'target'
 target_service_name = 'target_test_case_03'
 target_name = 'target'
-target_version = '1.0.2'
+target_version = '1.0.3'
 
 # Target attributes
 aws_access_key = ENV['AWS_ACCESS_KEY']

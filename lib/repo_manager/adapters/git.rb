@@ -220,13 +220,13 @@ module DTK; class RepoManager
          when :equal then :no_change
          when :branchpoint, :local_ahead then :merge_needed
          when :local_behind then :changed
-         else fail Error.new("Unexpected merge relation (#{merge_rel})")
+        else fail Error, "Unexpected merge relation '#{merge_rel}'"
         end
 
       # computed after a fetch and before a merge
       opts[:ret_diffs] = diff(remote_ref) if opts.has_key?(:ret_diffs)
 
-      if ret == :equal
+      if ret == :no_change
         # no op
       elsif opts[:force]
         checkout(@branch) do

@@ -132,22 +132,14 @@ module DTK
         rest_ok_response CommonModule::Remote.delete(get_default_project, remote_params, rsa_pub_key, false, opts)
       end
 
-      def pull_component_module_from_remote
+      def pull_component_info_from_remote
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
-        version = request_params(:version)
-
+        version       = request_params(:version)
+        force         = boolean_request_params(:force)
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
 
-        force = true # TODO: DTK-2856: might make this an input from cliennt
-        CommonModule::Info::Component::Remote.pull(get_default_project, local_params, remote_params, rsa_pub_key, force: force)
-
-        diffs_summary = ret_diffs_summary
-        component_module = create_obj(:full_module_name, ComponentModule)
-        module_dsl_info = component_module.update_model_from_clone_changes?(nil, diffs_summary, version)
-        response = module_dsl_info.hash_subset(:dsl_parse_error, :dsl_updated_info, :dsl_created_info, :external_dependencies, :component_module_refs)
-
-        rest_ok_response response
+        rest_ok_response CommonModule::Info::Component::Remote.pull(get_default_project, local_params, remote_params, rsa_pub_key, force: force)
       end
 
       def update_from_repo

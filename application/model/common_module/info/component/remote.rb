@@ -40,7 +40,7 @@ module DTK
           end
 
           repo                 = get_repo_with_branch
-          dsl_file_obj         = CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(commom_module_branch)
+          dsl_file_obj         = CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(common_module_branch)
           parsed_common_module = dsl_file_obj.parse_content(:common_module)
 
           # this means component_defs part is deleted from module
@@ -70,9 +70,6 @@ module DTK
             module_branch.set_sha(commit_sha)
 
             # This last call creates common module and branch 
-            # TODO:  DTK-2866: need to change create_empty_module_with_branch to also update content from component module repo
-            # or instead to not create any repos here and instaed do it on demand when there is a clone module operation
-            # CommonModule.create_empty_module_with_branch(project, local_params.merge(module_type: :common_module))
             CommonModule.create_module_and_branch_obj?(project, nil, local.merge(module_type: :common_module))
             nil
           end
@@ -87,11 +84,21 @@ module DTK
           end
 
           Model.Transaction do
-            unless repo_diffs_summary = module_branch.pull_remote_repo_changes_and_return_diffs_summary(remote, force: opts[:force])
-              pp [:repo_diffs_summary, repo_diffs_summary]
-              Log.error("Call code to parse if repo_diffs_summary includes the dsl file")
+            RepoManager::Transaction.reset_on_error(module_branch) do
+              diffs_summary = module_branch.pull_remote_repo_changes_and_return_diffs_summary!(remote, force: opts[:force])
+              unless diffs_summary.empty?
+                parse_info = module_obj.update_model_from_clone_changes(module_branch[:current_sha], diffs_summary, module_branch, local.version)
+                if dsl_parse_error = parse_info.dsl_parse_error?
+                  fail parse_error
+                end
+                # This updates the common module
+                augmented_module_branch = module_branch.augmented_module_branch.augment_with_component_module!
+                Info::Component.transform_from_component_info(common_module_branch, augmented_module_branch)
+                common_module_branch.push_changes_to_repo
+              end
+              # TODO: this is diffs wrt to component module; might want to change it in terms of common module files
+              { diffs: diffs_summary }
             end
-            nil
           end
         end
 
@@ -105,9 +112,6 @@ module DTK
           ComponentModule
         end
 
-        def commom_module_branch
-          CommonModule.matching_module_branch?(project, namespace, module_name, version) || fail(Error, "Unexpecetd that CommonModule.matching_module_branch? is nil") 
-        end
       end
     end
   end

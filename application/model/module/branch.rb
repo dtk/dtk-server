@@ -208,20 +208,16 @@ module DTK
     end
 
     # returns nil if no changes, otherwise returns Repo::Difs::Summary object
+    # if change updates sha on object
     # opts can have keys:
     #   :force
-    def pull_remote_repo_changes_and_return_diffs_summary(remote, opts = {}) 
-      ret = nil
-      # TODO: DTK-2795: see if instead should compute diffs_summary using mechanism in pull_repo_changes_and_return_diffs_summary
+    def pull_remote_repo_changes_and_return_diffs_summary!(remote, opts = {}) 
       opts_fast_foward = {
         force: opts[:force],
         remote_name: remote.remote_ref,
         remote_url: remote.repo_url,
-        ret_diffs: nil
+        ret_diffs: nil #by having key :ret_diffs exist in options it will be set
       }
-      # TODO: DTK-2795: rather than pull_from_remote look at only giving error if ret_merge_relationship
-      #  returns pull_return_merge_relationship((remote_branch, :conflicts => [:branchpoint] ..)
-      # or change pull_from_remote to be no change if local_ahead and include extra ket :ret_merge_relationship
       merge_result = RepoManager.pull_from_remote(remote.branch_name, opts_fast_foward, self)
       case merge_result
       when :merge_needed
@@ -229,19 +225,15 @@ module DTK
         fail ErrorUsage, "Merge problem pulling changes from remote into module '#{get_module.pp_module_ref}'" if merge_result == :merge_needed
       when :changed
         # this takes changes that are on clone in local server repo and pushes it to the repo
+        update_current_sha_from_repo!
         push_changes_to_repo(force: true)
-      when :equal
+      when :no_change
         #no op
       else fail Error, "Unexpected merge_result '#{merge_result}'"
       end
 
-
-      # RepoManager.pull_from_remote wil have updated opts_fast_foward[:ret_diffs]
-      if repo_diffs = opts_fast_foward[:ret_diffs]
-        repo_diffs_summary = repo_diffs.ret_summary
-        ret = repo_diffs_summary unless repo_diffs_summary.empty?
-      end
-      ret
+      # RepoManager.pull_from_remote will have updated opts_fast_foward[:ret_diffs]
+      opts_fast_foward[:ret_diffs].ret_summary
     end
 
     # opts can have keys:

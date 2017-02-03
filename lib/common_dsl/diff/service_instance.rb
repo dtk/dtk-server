@@ -32,7 +32,6 @@ module DTK; module CommonDSL
         Model.Transaction do
           # Parses and processes any service instance dsl changes; can update diff_result
           DSL.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
-          pp [:diff_result, diff_result]
           unless diff_result.any_errors?
             # Processes the changes to the nested module content and dsl 
             NestedModule.process_nested_module_changes(diff_result, service_instance, module_branch, impacted_files)

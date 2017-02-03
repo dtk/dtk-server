@@ -26,15 +26,15 @@ module DTK
           end
 
           repo                 = get_repo_with_branch
-          dsl_file_obj         = CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(commom_module_branch)
+          dsl_file_obj         = CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(common_module_branch)
           parsed_common_module = dsl_file_obj.parse_content(:common_module)
 
           # this means assemblies part is deleted from module
           return unless parsed_common_module[:assemblies]
 
-          CommonDSL::Parse.set_dsl_version!(commom_module_branch, parsed_common_module)
+          CommonDSL::Parse.set_dsl_version!(common_module_branch, parsed_common_module)
 
-          args = [project, local, nil, commom_module_branch, parsed_common_module, {}]
+          args = [project, local, nil, common_module_branch, parsed_common_module, {}]
           file_path__content_array = CommonModule::Update::Module::Info::Service.new(*args).transform_from_common_module?
 
           RepoManager.add_files(module_branch, file_path__content_array)
@@ -51,10 +51,6 @@ module DTK
 
         def module_class
           ServiceModule
-        end
-
-        def commom_module_branch
-          CommonModule.matching_module_branch?(project, namespace, module_name, version) || fail(Error, "Unexpecetd that CommonModule.matching_module_branch? is nil") 
         end
 
       end

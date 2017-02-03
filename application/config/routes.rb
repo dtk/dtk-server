@@ -85,7 +85,7 @@ DTK::ReactorRoute.draw do
   post 'api/v1/modules/delete'                              => 'v1::module/delete'
   post 'api/v1/modules/install_component_info'              => 'v1::module/install_component_info'
   post 'api/v1/modules/publish_to_remote'                   => 'v1::module/publish_to_remote'
-  post 'api/v1/modules/pull_component_module_from_remote'   => 'v1::module/pull_component_module_from_remote'
+  post 'api/v1/modules/pull_component_info_from_remote'     => 'v1::module/pull_component_info_from_remote'
   post 'api/v1/modules/update_from_repo'                    => 'v1::module/update_from_repo'
   post 'api/v1/modules/list_remote'                         => 'v1::module/list_remote'
   post 'api/v1/modules/generate_service_name'               => 'v1::module/generate_service_name'

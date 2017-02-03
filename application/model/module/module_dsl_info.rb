@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  class ModuleDSLInfo < Hash
+  class ModuleDSLInfo < ::Hash
     def initialize(hash = {})
       super()
       replace(hash)
@@ -29,6 +29,9 @@ module DTK
 
     def dsl_parse_error=(dsl_parse_error)
       self[:dsl_parse_error] = dsl_parse_error
+    end
+    def dsl_parse_error?
+      self[:dsl_parse_error]
     end
 
     def dsl_created_info=(dsl_created_info)

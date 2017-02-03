@@ -11,6 +11,7 @@ cd ~/server/current
 
 install debugger and dev dependencies:
 ```
+rvmsudo gem install debugger
 rvmsudo bundle install --with development
 ```
 

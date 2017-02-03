@@ -17,15 +17,17 @@
 #
 module DTK
   class RepoManager
-    # For backing ut of changes to repos on error
+    # For backing out of changes to repos on error
     module Transaction 
       def self.reset_on_error(module_branch, &body)
+        module_branch.update_current_sha_from_repo!
         sha_before_change = module_branch.current_sha
         begin
           yield
         rescue => e
           # within yield module_branch sha can be changed
-          if sha_before_change != module_branch.current_sha
+          module_branch.update_current_sha_from_repo!
+          if sha_before_change and (sha_before_change != module_branch.current_sha)
             repo = module_branch.get_repo
             repo.hard_reset_branch_to_sha(module_branch, sha_before_change) 
           end

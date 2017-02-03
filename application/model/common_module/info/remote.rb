@@ -62,6 +62,10 @@ module DTK
           module_obj? && module_obj?.get_module_branch(local_branch)
         end
 
+        def common_module_branch
+          @common_module_branch ||= CommonModule.matching_module_branch?(project, namespace, module_name, version) || fail(Error, "Unexpected that CommonModule.matching_module_branch? is nil") 
+        end
+
         def get_base_branch?
           module_obj? && module_obj?.get_workspace_module_branch
         end

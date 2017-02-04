@@ -20,6 +20,7 @@ module DTK; class ConfigAgent
     class Dynamic < ConfigAgent
       require_relative('dynamic/dynamic_attributes')
       require_relative('dynamic/error_results')
+      require_relative('dynamic/attribute_request_form')
 
       include DynamicAttributes::Mixin
       include ErrorResults::Mixin
@@ -42,10 +43,10 @@ module DTK; class ConfigAgent
           else
             { type: ExecutionEnvironment::NATIVE }
           end
-
-        provider_attributes = attribute_form_for_request(dynamic_provider.entrypoint_attribute)
-        instance_attributes = component_attribute_values_for_request(component_action)
-
+        
+        provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
+        instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
+        
         msg = {
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
           provider_type: dynamic_provider.type,
@@ -61,7 +62,7 @@ module DTK; class ConfigAgent
         msg
       end
       ARBITER_REQUEST_PROTOCOL_VERSION = 1
-
+      
       module ExecutionEnvironment
         EPHEMERAL_CONTAINER = 'ephemeral_container'
         NATIVE = 'native'
@@ -72,27 +73,7 @@ module DTK; class ConfigAgent
       end
       
       private
-
-      def attribute_form_for_request(attribute)
-        attribute_info = {
-          value: attribute[:attribute_value],
-          datatype: attribute[:data_type],
-          hidden: attribute[:hidden]
-        }
-        { attribute.display_name => attribute_info }
-      end
-
-      def component_attribute_values_for_request(component_action)
-        component_action.attributes.inject({}) do |h, attr|
-          # prune dynamic attributes that are not also inputs
-          (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(attribute_form_for_request(attr))
-        end
-      end
-
-      def sanitized_attribute_values(attribute)
-        
-      end
-
+      
       # TODO: DTK-2848: use component to prune list
       def get_base_and_dependent_modules(component, assembly_instance)
         ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance).inject({}) do |h, aug_module_branch|
@@ -105,15 +86,15 @@ module DTK; class ConfigAgent
           h.merge(aug_module_branch.module_name => module_info)
         end
       end
-
+      
       def is_assembly_module_version?(aug_module_branch)
         ModuleVersion.assembly_module_version?(aug_module_branch.version)
       end
-
+      
       def component_template(component)
         component.id_handle(id: component[:ancestor_id]).create_object
       end
-
+      
       module Sanitize
         def self.sanitize_message(msg)
           sanitized_attributes = msg[:attributes].inject({}) do |h, (type, attributes_hash)| 

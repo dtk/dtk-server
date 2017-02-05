@@ -31,7 +31,7 @@ module DTK; class ConfigAgent
         method_name           = component_action.method_name? || 'create'
         component             = component_action[:component]
         component_template    = component_template(component)
-
+        service_instance_name =  assembly_instance.display_name
         dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
         
@@ -45,7 +45,7 @@ module DTK; class ConfigAgent
           end
         
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
-        instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
+        instance_attributes = AttributeRequestForm.component_attribute_values(component_action, service_instance_name)
         
         msg = {
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
@@ -54,6 +54,7 @@ module DTK; class ConfigAgent
             provider: provider_attributes,
             instance: instance_attributes,
           },
+          service_instance: service_instance_name,
           modules: get_base_and_dependent_modules(component, assembly_instance),
           component_name: component_action.component_module_name,
           execution_environment: execution_environment 

@@ -29,8 +29,8 @@ module DTK
         { attribute.display_name => attribute_info(attribute) }
       end
       
-      def self.component_attribute_values(component_action, assembly_instance)
-        component_action.attributes.inject(service_wide_attribute_values(assembly_instance)) do |h, attr|
+      def self.component_attribute_values(component_action, service_instance_name)
+        component_action.attributes.inject(service_wide_attribute_values(service_instance_name)) do |h, attr|
           # prune dynamic attributes that are not also inputs
           (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(transform_attribute(attr))
         end
@@ -45,15 +45,15 @@ module DTK
 
       SERVICE_WIDE_ATTRIBUTES = {
         dtk_service_instance: {
-          value_lambda: lambda { |assembly_instance| assembly_instance.display_name }, 
+          value_lambda: lambda { |service_instance_name| service_instance_name }, 
           dattype: 'string', 
           hidden: false
         }
       }
       
-      def self.service_wide_attribute_values(assembly_instance)
+      def self.service_wide_attribute_values(service_instance_name)
         SERVICE_WIDE_ATTRIBUTES.inject({}) do | h, (attr_name, input)|
-          h.merge(attr_name.to_s => Info.new(input[:value_lambda].call(assembly_instance), input[:datatype], input[:hidden]))
+          h.merge(attr_name.to_s => Info.new(input[:value_lambda].call(service_instance_name), input[:datatype], input[:hidden]))
         end
       end
       

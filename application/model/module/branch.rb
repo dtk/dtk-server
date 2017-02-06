@@ -21,10 +21,11 @@ module DTK
   class ModuleBranch < Model
     require_relative('branch/location')
     require_relative('branch/augmented')
+    require_relative('branch/repo_updates') # TODO: as cleanup methods in this file that update git repo branch, move to here
 
     include BranchNames::Mixin
     extend BranchNames::ClassMixin
-
+    include RepoUpdates::Mixin
     def self.common_columns
       [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :dsl_version, :frozen]
     end
@@ -207,34 +208,6 @@ module DTK
       diffs_summary 
     end
 
-    # returns nil if no changes, otherwise returns Repo::Difs::Summary object
-    # if change updates sha on object
-    # opts can have keys:
-    #   :force
-    def pull_remote_repo_changes_and_return_diffs_summary!(remote, opts = {}) 
-      opts_fast_foward = {
-        force: opts[:force],
-        remote_name: remote.remote_ref,
-        remote_url: remote.repo_url,
-        ret_diffs: nil #by having key :ret_diffs exist in options it will be set
-      }
-      merge_result = RepoManager.pull_from_remote(remote.branch_name, opts_fast_foward, self)
-      case merge_result
-      when :merge_needed
-        # TODO: DTK-2795: below is wrong want full module ref no just module name
-        fail ErrorUsage, "Merge problem pulling changes from remote into module '#{get_module.pp_module_ref}'" if merge_result == :merge_needed
-      when :changed
-        # this takes changes that are on clone in local server repo and pushes it to the repo
-        update_current_sha_from_repo!
-        push_changes_to_repo(force: true)
-      when :no_change
-        #no op
-      else fail Error, "Unexpected merge_result '#{merge_result}'"
-      end
-
-      # RepoManager.pull_from_remote will have updated opts_fast_foward[:ret_diffs]
-      opts_fast_foward[:ret_diffs].ret_summary
-    end
 
     # opts can have keys:
     #   :force
@@ -456,12 +429,6 @@ module DTK
       aug_component_module_branch.update_current_sha_from_repo!
     end
 
-    def pull_from_component_module!(aug_component_module_branch)
-      external_repo   = aug_component_module_branch.repo
-      external_branch = aug_component_module_branch.branch_name
-      RepoManager.pull_from_external_repo(external_repo, external_branch, self)
-      update_current_sha_from_repo!
-    end
 
     def process_ambiguous_dependencies(ambiguous, hash_content)
       content = ''

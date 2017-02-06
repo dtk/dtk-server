@@ -22,5 +22,6 @@ module DTK
   require_relative('model')
   require_relative('parsed_dsl')
   require_relative('repo_manager')
+  require_relative('config_agent')
   require_relative('response_info')
 end

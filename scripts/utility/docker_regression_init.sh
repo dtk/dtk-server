@@ -22,8 +22,8 @@ if [[ -z $1 ]]; then
     exit 1
 fi
 
-DTK_IMAGE=getdtk/dtk-server
-ARBITER_IMAGE=getdtk/dtk-arbiter
+DTK_IMAGE=${DTK_IMAGE-getdtk/dtk-server}
+ARBITER_IMAGE=${ARBITER_IMAGE-getdtk/dtk-arbiter}
 REPO_HOST=repoman1.internal.r8network.com
 REPO_PORT=443
 MCO_PORT=6163

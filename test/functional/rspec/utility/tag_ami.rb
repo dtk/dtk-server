@@ -12,15 +12,18 @@ raise ArgumentError, 'You must provide list of aws:image_aws versions that have 
 component_module_namespace = 'aws'
 component_module_name = 'image_aws'
 component_module_versions = ARGV[0].split(',')
-component_module_file = 'dtk.model.yaml'
+component_module_file = 'dtk.module.yaml'
 
-dtk_client_dir = "#{ENV['HOME']}/dtk/component_modules/#{component_module_namespace}/#{component_module_name}"
+dtk_client_dir = "#{ENV['HOME']}/dtk/modules/#{component_module_name}"
+system("mkdir -p #{dtk_client_dir}")
+system("dtk module clone -d #{dtk_client_dir} #{component_module_namespace}/#{component_module_name}")
 dtk_server_version = ARGV[1] || 'master'
 dtk_arbiter_version = ARGV[2] || 'master'
 
+
 puts "Starting AMI Tag process...", "---------------------------"
 component_module_versions.each do |version|
-  dtk_model = YAML.load_file("#{dtk_client_dir}-#{version}/#{component_module_file}")
+  dtk_model = YAML.load_file("#{dtk_client_dir}/#{component_module_file}")
   dtk_model_images = dtk_model['components']['image_aws']['attributes']['images']['default']
 
   puts "Component-module #{component_module_namespace}:#{component_module_name} version #{version} selected: "
@@ -39,3 +42,5 @@ component_module_versions.each do |version|
   end
   puts ''
 end
+#cleanup of modules direcotry
+system("rm -rf #{ENV['HOME']}/dtk/modules/#{component_module_name}")

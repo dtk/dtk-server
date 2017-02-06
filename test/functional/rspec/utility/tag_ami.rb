@@ -14,13 +14,10 @@ component_module_name = 'image_aws'
 component_module_versions = ARGV[0].split(',')
 component_module_file = 'dtk.module.yaml'
 
-component_module_version = component_module_versions[2]
-puts "component_module_version: #{component_module_version}"
-puts "component_module_versions: #{component_module_versions}"
 
 dtk_client_dir = "#{ENV['HOME']}/dtk/modules/#{component_module_name}"
 system("mkdir -p #{dtk_client_dir}")
-system("dtk module clone -v #{component_module_version} #{component_module_namespace}/#{component_module_name} #{dtk_client_dir}")
+system("dtk module clone -v #{component_module_versions} #{component_module_namespace}/#{component_module_name} #{dtk_client_dir}")
 dtk_server_version = ARGV[1] || 'master'
 dtk_arbiter_version = ARGV[2] || 'master'
 

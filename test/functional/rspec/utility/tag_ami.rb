@@ -17,7 +17,7 @@ component_module_file = 'dtk.module.yaml'
 
 dtk_client_dir = "#{ENV['HOME']}/dtk/modules/#{component_module_name}"
 system("mkdir -p #{dtk_client_dir}")
-system("dtk module clone -v #{component_module_versions} #{component_module_namespace}/#{component_module_name} #{dtk_client_dir}")
+system("dtk module clone -v #{component_module_versions[0]} #{component_module_namespace}/#{component_module_name} #{dtk_client_dir}")
 dtk_server_version = ARGV[1] || 'master'
 dtk_arbiter_version = ARGV[2] || 'master'
 

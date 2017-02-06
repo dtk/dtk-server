@@ -84,18 +84,27 @@ module DTK
           end
 
           Model.Transaction do
-            RepoManager::Transaction.reset_on_error(module_branch) do
-              diffs_summary = module_branch.pull_remote_repo_changes_and_return_diffs_summary!(remote, force: opts[:force])
-              unless diffs_summary.empty?
-                parse_info = module_obj.update_model_from_clone_changes(module_branch[:current_sha], diffs_summary, module_branch, local.version)
-                if dsl_parse_error = parse_info.dsl_parse_error?
-                  fail parse_error
-                end
-                # This updates the common module
-                augmented_module_branch = module_branch.augmented_module_branch.augment_with_component_module!
-                Info::Component.transform_from_component_info(common_module_branch, augmented_module_branch)
-                common_module_branch.push_changes_to_repo
+            diffs_summary = module_branch.pull_remote_repo_changes!(remote, force: opts[:force])
+            if diffs_summary.empty?
+              { diffs: diffs_summary }
+            else
+              parse_info = module_obj.update_model_from_clone_changes(module_branch[:current_sha], diffs_summary, module_branch, local.version)
+              if dsl_parse_error = parse_info.dsl_parse_error?
+                fail parse_error
               end
+
+              # This updates the common module
+              aug_component_module_branch = module_branch.augmented_module_branch.augment_with_component_module!
+
+              # pull_from_component_module updates everything but dsl files
+              common_module_diffs_summary = common_module_branch.pull_from_component_module!(aug_component_module_branch)
+
+              # transform_from_component_info trets dsl file changes
+              # TODO: more efficient is only doing Info::Component.transform_from_component_info if dsl changes in pull 
+              Info::Component.transform_from_component_info(common_module_branch, aug_component_module_branch)
+
+              common_module_branch.push_changes_to_repo(force: true)
+
               # TODO: this is diffs wrt to component module; might want to change it in terms of common module files
               { diffs: diffs_summary }
             end

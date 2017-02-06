@@ -200,6 +200,18 @@ module DTK; class RepoManager
     # pull_return_merge_relationship((remote_branch, [:branchpoint, :local_ahead]
     #
 
+    def pull_from_external_repo(external_repo, external_branch, remote_name)
+      pull_opts = {
+        force: true,
+        remote_name: remote_name,
+        remote_url: self.class.repo_url(external_repo.display_name),
+        ret_diffs: nil #by having key :ret_diffs exist in options it will be set
+      }
+      pull_from_remote(external_branch, pull_opts)
+      # pull_from_remote will have updated pull_opts[:ret_diffs]
+      pull_opts[:ret_diffs]
+    end
+
     # returns :no_change, :changed, :merge_needed
     # opts can have keys:
     #   :force
@@ -463,12 +475,6 @@ module DTK; class RepoManager
     def push_to_external_repo(external_repo, external_branch)
       checkout(@branch) do
         git_command__push_to_external_repo(external_repo, external_branch)
-      end
-    end
-
-    def pull_from_external_repo(external_repo, external_branch)
-      checkout(@branch) do
-        git_command__pull_from_external_repo(external_repo, external_branch)
       end
     end
 

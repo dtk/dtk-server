@@ -41,11 +41,6 @@ module DTK
         git_command.push(cmd_opts, external_repo_url, '-f')
       end
 
-      def git_command__pull_from_external_repo(external_repo, external_branch)
-        external_repo_url = self.class.repo_url(external_repo.display_name)
-        git_command.pull(cmd_opts, external_repo_url, external_branch, '--allow-unrelated-histories')
-      end
-
       def git_command__clone(remote_repo, local_dir)
         git_command.clone(cmd_opts, remote_repo, local_dir)
       end

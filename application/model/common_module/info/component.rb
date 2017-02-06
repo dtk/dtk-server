@@ -48,8 +48,10 @@ module DTK
         end
         
         def self.transform_from_component_info(common_module_branch, aug_component_module_branch)
-          transform_class.transform_from_component_info(:common_module, common_module_branch, aug_component_module_branch, common_module_dsl_file_path)
-          transform_class.commit_all_changes(common_module_branch, commit_msg: 'Loaded component info')
+          RepoManager::Transaction.reset_on_error(common_module_branch) do
+            transform_class.transform_from_component_info(:common_module, common_module_branch, aug_component_module_branch, common_module_dsl_file_path)
+            transform_class.commit_all_changes(common_module_branch, commit_msg: 'Loaded component info')
+          end
         end
 
         private

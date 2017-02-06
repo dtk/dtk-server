@@ -25,7 +25,7 @@ dtk_arbiter_version = ARGV[2] || 'master'
 puts "Starting AMI Tag process...", "---------------------------"
 component_module_versions.each do |version|
   dtk_model = YAML.load_file("#{dtk_client_dir}/#{component_module_file}")
-  dtk_model_images = dtk_model['components']['image_aws']['attributes']['images']['default']
+  dtk_model_images = dtk_model['component_defs']['image_aws']['attributes']['images']['default']
 
   puts "Component-module #{component_module_namespace}:#{component_module_name} version #{version} selected: "
   aws_regions.each do |region|

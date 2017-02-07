@@ -47,12 +47,4 @@ class dtk_stage6 {
 }
 class {"dtk_stage6": stage => 6}
  
-# class dtk_stage7 {
-#   dtk_server::add_user {"dtk1": tenant_user_password => "r8server", tenant_user => "dtk1", tenant_db_user => "dtk1"}
-# }
-# class {"dtk_stage7": stage => 7}
- 
-# class dtk_stage8 {
-#   dtk_server::cron_idle_instances {"dtk1": tenant_password => "r8server"}
-# }
-# class {"dtk_stage8": stage => 8}
+

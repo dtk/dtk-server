@@ -55,6 +55,10 @@ module DTK
           new(component_template, method_name, provider_attribute_values, assembly_instance)
         end
       end
+
+      def action_ref_print_form
+        "Action method '#{@method_name}' on component '#{@component_template.display_name_print_form}'"
+      end
       
       private
 
@@ -69,10 +73,6 @@ module DTK
 
       def raise_error_missing_action_def_param(param_name)
         fail ErrorUsage, "#{action_ref_print_form} does not have the parameter '#{param_name}' defined"
-      end
-
-      def action_ref_print_form
-        "Action method '#{@method_name}' on component '#{@component_template.display_name_print_form}'"
       end
 
     end

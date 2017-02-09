@@ -37,7 +37,7 @@ module DTK
         private
         
         def validate_provider_attributes
-          ProviderAttributes.validate_provider_attributes(provider_attributes)
+          ProviderAttributes.validate_provider_attributes(provider_attributes, self)
         end
 
       end
@@ -47,7 +47,7 @@ module DTK
         domain_component.attributes_with_overrides(provider_attribute_values).inject({}) { |h, attr| h.merge(attr.display_name => attr) }
       end
 
-      def self.validate_provider_attributes(provider_attributes)
+      def self.validate_provider_attributes(provider_attributes, provider)
         missing_required_params = []
         provider_attributes.each do |attribute| 
           if attribute[:required] and attribute[:attribute_value].nil?
@@ -56,7 +56,7 @@ module DTK
         end
         
         unless missing_required_params.empty?
-          err_msg  = "#{action_ref_print_form} is missing required provider "
+          err_msg  = "#{provider.action_ref_print_form} is missing required provider "
           if missing_required_params.size == 1 
             err_msg << "parameter '#{missing_required_params.first}'"
           else

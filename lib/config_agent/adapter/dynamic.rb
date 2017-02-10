@@ -51,13 +51,12 @@ module DTK; class ConfigAgent
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
           provider_type: dynamic_provider.type,
           service_instance: service_instance_name,
-          component: Aux.hash_subset(component.print_form_hash, [:type, :version, :title]),
+          component: component_request_form(component_action),
           attributes: { 
             provider: provider_attributes,
             instance: instance_attributes,
           },
           modules: get_base_and_dependent_modules(component, assembly_instance),
-          component_name: component_action.component_module_name,
           execution_environment: execution_environment 
         }          
         Log.info_pp [:message_sent_to_dynamic_provider, Sanitize.sanitize_message(msg)]
@@ -96,7 +95,15 @@ module DTK; class ConfigAgent
       def component_template(component)
         component.id_handle(id: component[:ancestor_id]).create_object
       end
-      
+
+      FULL_MODULE_NAME_DELIM = ':'
+      # returns hash with keys :namespace, :module_name, Ltype, :version, :title (optional)
+      def component_request_form(component_action)
+        module_name_with_ns = component_action.component_module_name
+        namespace, module_name = module_name_with_ns.split(FULL_MODULE_NAME_DELIM)
+        Aux.hash_subset(component_action[:component].print_form_hash, [:type, :version, :title]).merge(namespace: namespace, module_name: module_name)
+      end
+
       module Sanitize
         def self.sanitize_message(msg)
           sanitized_attributes = msg[:attributes].inject({}) do |h, (type, attributes_hash)| 

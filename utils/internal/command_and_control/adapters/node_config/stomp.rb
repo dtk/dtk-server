@@ -175,7 +175,7 @@ module DTK
         filter = filter_single_fact('pbuilderid', pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
-        async_agent_call('puppet_cancel', 'run', msg_content, filter, callbacks, context)
+        async_agent_call('cancel_action', 'run', msg_content, filter, callbacks, context)
       end
 
       def self.action_results(result, action)

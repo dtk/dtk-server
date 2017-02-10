@@ -120,6 +120,22 @@ module DTK
           end
           ret
         end
+
+        # returns hash with
+        #  :type 
+        #  :version 
+        #  :title (optional)
+        def print_form_hash
+          update_object!(:component_type, :display_name, :version)
+          ret = { 
+            type: component_type_print_form,
+            version: self[:version] || 'master'
+          }
+          if title = ComponentTitle.title?(self)
+            ret.merge!(title: title)
+          end         
+          ret
+        end
         
         def component_type_print_form
           Component.component_type_print_form(get_field?(:component_type))

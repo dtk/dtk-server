@@ -25,9 +25,9 @@ module DTK; class ConfigAgent
       include DynamicAttributes::Mixin
       include ErrorResults::Mixin
 
-      def ret_msg_content(config_node, opts = {})
+      def ret_msg_content(task_info, opts = {})
         assembly_instance     = opts[:assembly]
-        component_action      = config_node[:component_actions].first
+        component_action      = task_info[:component_actions].first
         method_name           = component_action.method_name? || 'create'
         component             = component_action[:component]
         component_template    = component_template(component)
@@ -50,11 +50,12 @@ module DTK; class ConfigAgent
         msg = {
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
           provider_type: dynamic_provider.type,
+          service_instance: service_instance_name,
+          component: Aux.hash_subset(component.print_form_hash, [:type, :version, :title]),
           attributes: { 
             provider: provider_attributes,
             instance: instance_attributes,
           },
-          service_instance: service_instance_name,
           modules: get_base_and_dependent_modules(component, assembly_instance),
           component_name: component_action.component_module_name,
           execution_environment: execution_environment 

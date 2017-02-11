@@ -194,18 +194,13 @@ module DTK
     # opts can have keys:
     #   :force
     def pull_repo_changes_and_return_diffs_summary(commit_sha, opts = {})
-      diffs_summary = nil
       update_object!(:branch, :current_sha)
       current_sha = current_sha()
       fail Error, "Unexpected that commit_sha == current_sha" if commit_sha == current_sha
 
-      pull_from_remote_raise_error_if_merge_needed(force: opts[:force])
-
-      if rev_diffs_summary = RepoManager.diff(current_sha, self).ret_summary
-        diffs_summary = rev_diffs_summary.reverse
-      end
-
-      diffs_summary 
+      pull_opts = { force: opts[:force], ret_diffs: nil } #by having key :ret_diffs exist in options it will be set
+      pull_from_remote_raise_error_if_merge_needed(pull_opts)
+      pull_opts[:ret_diffs].ret_summary # pull_from_remote_raise_error_if_merge_needed will have set pull_opts[:ret_diffs]
     end
 
 

@@ -45,6 +45,7 @@ module DTK; module CommonDSL
           
           dependent_node   = 'assembly_wide_node'
           matching_dep_cmp = nil
+          dependent_cmp    = dependent_cmp[:value] if dependent_cmp.is_a?(Hash) && dependent_cmp.has_key?(:value)
 
           base_node, base_cmp = base_cmp.split('/') if base_cmp.include?('/')
           dependent_node, dependent_cmp = dependent_cmp.split('/') if dependent_cmp.include?('/')

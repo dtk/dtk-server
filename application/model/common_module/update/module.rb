@@ -44,7 +44,8 @@ module DTK
 
         return ret if @module_branch.is_set_to_sha?(@commit_sha)
 
-        if repo_diffs_summary = @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) 
+        repo_diffs_summary = @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) 
+        unless repo_diffs_summary.empty?
           ret.add_diffs_summary!(repo_diffs_summary)
           top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
           

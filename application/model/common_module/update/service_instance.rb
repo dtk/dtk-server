@@ -28,7 +28,7 @@ module DTK
 
           unless module_branch.is_set_to_sha?(commit_sha)
             repo_diffs_summary = module_branch.pull_repo_changes_and_return_diffs_summary(commit_sha, force: opts[:force_pull])
-            if repo_diffs_summary
+            unless repo_diffs_summary.empty?
               diff_result = CommonDSL::Diff::ServiceInstance.process(service_instance, module_branch, repo_diffs_summary)
             end
             # This sets sha on branch only after all processing goes through

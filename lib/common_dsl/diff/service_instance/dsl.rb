@@ -64,13 +64,14 @@ module DTK; module CommonDSL
                 end
               end
 
+              #if WORKFLOWS_MODIFIED and items_to_udpate :workflow
               #TODO: Find better solution to update semantic_diffs
               unless diff_result.semantic_diffs["COMPONENTLINKS_ADDED"].nil? && diff_result.semantic_diffs["COMPONENTS_DELETED"].nil?
                 diff_result.semantic_diffs["COMPONENTLINKS_DELETED"] = diff_result.semantic_diffs["COMPONENTLINKS_ADDED"]
                 diff_result.semantic_diffs.delete("COMPONENTLINKS_ADDED")
               end
-
-              return if diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].nil? 
+              
+              return diff_result if diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].nil? 
               diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].each do |v|
                 v.each do |k|
                   k[1]["CURRENT_VAL"], k[1]["NEW_VAL"] = k[1]["NEW_VAL"], k[1]["CURRENT_VAL"]
@@ -78,6 +79,7 @@ module DTK; module CommonDSL
               end
             end
           end
+          diff_result
         end
 
         def self.process_diffs(diff_result, collated_diffs, module_branch, service_instance_gen, opts = {})
@@ -86,7 +88,6 @@ module DTK; module CommonDSL
               collated_diffs.process(diff_result, { service_instance_branch: module_branch }.merge(opts))
               DiffErrors.raise_if_any_errors(diff_result)
               Aux.stop_for_testing?(:push_diff) # for debug
-              
               # items_to_update are things that need to be updated in repo from what at this point are in object model
               items_to_update = diff_result.items_to_update
               if diff_result.items_to_update.include?(:workflow)

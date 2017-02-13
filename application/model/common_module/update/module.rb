@@ -47,7 +47,10 @@ module DTK
         if repo_diffs_summary = @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) 
           ret.add_diffs_summary!(repo_diffs_summary)
           top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
-          
+          require 'debugger'
+          Debugger.wait_connection = true
+          Debugger.start_remote
+          debugger
           # TODO: make more efficient by just computing parsed_common_module if parsing
           parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
           CommonDSL::Parse.set_dsl_version!(@module_branch, parsed_common_module)

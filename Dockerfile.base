@@ -20,7 +20,6 @@ COPY docker/manifests /tmp/manifests
 RUN puppet apply --debug /tmp/manifests/stage1.pp
 RUN puppet apply --debug /tmp/manifests/stage2.pp
 RUN puppet apply --debug /tmp/manifests/stage4.pp
-RUN puppet apply --debug /tmp/manifests/stage5.pp
 
 RUN apt-get install -y libpq-dev redis-server libicu-dev
 COPY Gemfile* /tmp/

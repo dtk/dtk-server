@@ -20,32 +20,27 @@ module DTK
     class Component < self
       require_relative('component/transform')
 
-      # returns true if there is component info
-      def create_or_update_from_parsed_common_module?
-        if parsed_component_defs = parsed_common_module.val(:ComponentDefs)
-          #TODO: DTK-2766: see if need to add file objects to the implementation object; check if needed in service instance
-          component_module_branch = create_module_branch_and_repo?(create_implementation: true)
-          CommonDSL::Parse.set_dsl_version!(component_module_branch, parsed_common_module)
+      def create_or_update_from_parsed_common_module(parsed_component_defs)
+        component_module_branch = create_module_branch_and_repo?(create_implementation: true)
+        CommonDSL::Parse.set_dsl_version!(component_module_branch, parsed_common_module)
+        
+        if parsed_dependent_modules = parsed_common_module.val(:DependentModules)
+          update_component_module_refs(component_module_branch, parsed_dependent_modules)
+        end
 
-          if parsed_dependent_modules = parsed_common_module.val(:DependentModules)
-            update_component_module_refs(component_module_branch, parsed_dependent_modules)
-          end
+        @aug_component_module_branch = component_module_branch.augmented_module_branch.augment_with_component_module!
 
-          @aug_component_module_branch = component_module_branch.augmented_module_branch.augment_with_component_module!
-
-          # TODO: DTK-2766: update_component_info_in_model_from_dsl is very slow do to the underlying legacy
-          # method to parse; First way to tackle this is to only call update_component_info_in_model_from_dsl if the component info
-          # part is updated. We wil leveref the diff reasoning analogous that fro service insatnces lib/common_dsl/diff/service_instance/dsl.rb
-          # add do coarse parsing. Later we will do away with legacy methods and do fine grain diff prasing for component updates
-          # TODO: Might have to get that to work we wil also need to replace sync_component_module_from_common_module mechanism from pushing to bare repo
-          # to copying files that are in @diffs_summary
-          sync_component_module_from_common_module
-          if parse_needed?
-            PerformanceService.start('update_component_info_in_model_from_dsl')
-            update_component_info_in_model_from_dsl(parsed_dependent_modules)
-            PerformanceService.end_measurement('update_component_info_in_model_from_dsl')
-          end
-          true
+        # TODO: DTK-2766: update_component_info_in_model_from_dsl is very slow do to the underlying legacy
+        # method to parse; First way to tackle this is to only call update_component_info_in_model_from_dsl if the component info
+        # part is updated. We wil leveref the diff reasoning analogous that fro service insatnces lib/common_dsl/diff/service_instance/dsl.rb
+        # add do coarse parsing. Later we will do away with legacy methods and do fine grain diff prasing for component updates
+        # TODO: Might have to get that to work we wil also need to replace sync_component_module_from_common_module mechanism from pushing to bare repo
+        # to copying files that are in @diffs_summary
+        sync_component_module_from_common_module
+        if parse_needed?
+          PerformanceService.start('update_component_info_in_model_from_dsl')
+          update_component_info_in_model_from_dsl(parsed_dependent_modules)
+          PerformanceService.end_measurement('update_component_info_in_model_from_dsl')
         end
       end
 

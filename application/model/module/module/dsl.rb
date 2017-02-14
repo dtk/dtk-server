@@ -307,7 +307,7 @@ module DTK
       end
       integer_version
     end
-    VersionIntegerWhenVersionMissing = 1
+    VersionIntegerWhenVersionMissing = 4
     VersionToVersionInteger = {
       '0.9'   => 2,
       '0.9.1' => 3,

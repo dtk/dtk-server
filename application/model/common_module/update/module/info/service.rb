@@ -23,21 +23,19 @@ module DTK
       def initialize(*args)
         service_instance_opts = args.pop
         super(*args)
-        @component_info_exists = service_instance_opts[:component_info_exists]
+        @component_defs_exist = service_instance_opts[:component_defs_exist]
       end
 
-      # returns true if there is service info
       def create_or_update_from_parsed_common_module?
         if parsed_assemblies = parsed_common_module.val(:Assemblies)
           service_module_branch = create_module_branch_and_repo?
           CommonDSL::Parse.set_dsl_version!(service_module_branch, parsed_common_module)
-          update_component_module_refs(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
+          update_component_module_refs(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_defs_exist)
 
           # update assemblies before updating module refs because we need to check for references in assemblies when updating module refs
           CommonModule::Info::Service.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, local_params)
 
-          delete_component_module_refs?(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
-          true
+          delete_component_module_refs?(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_defs_exist)
         end
       end
 
@@ -49,7 +47,7 @@ module DTK
       def check_for_missing_dependencies
         service_module_branch = create_module_branch_and_repo?
         CommonDSL::Parse.set_dsl_version!(service_module_branch, parsed_common_module)
-        check_and_ret_missing_modules(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_info_exists)
+        check_and_ret_missing_modules(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_defs_exist)
       end
 
       private

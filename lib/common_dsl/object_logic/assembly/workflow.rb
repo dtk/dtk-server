@@ -34,6 +34,9 @@ module DTK; module CommonDSL
           unsorted = workflows.inject({}) do |h, workflow| 
             h.merge(workflow.display_name => new(workflow).generate_content_input!)
           end
+          unsorted.each do |k, v|
+           v[:subtasks].each {|i| i[:node] == "assembly_wide"; i.delete(:node) }
+          end
           sorted_workflow_names(unsorted.keys).inject(ContentInputHash.new) { |h, workflow_name| h.merge(workflow_name => unsorted[workflow_name]) }
         end
 

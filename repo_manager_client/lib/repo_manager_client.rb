@@ -390,24 +390,36 @@ module DTK
           Log.error(response.inspect)
           {}
         end
-      elsif raise_error and not response.ok?
-        msg = error_msg(response)
+      elsif !response.ok?
+        msg  = error_msg(response)
         code = error_code(response)
-        if is_internal_error?(response)
-          fail Error.new(msg)
-        elsif code == NAME_NOT_ALLOWED_CODE
-          error = ErrorUsage.new(msg)
-          error.add_tag!(:raise_error)
-          fail error
-        elsif code == NO_RESOURCE
-          if exceptions = opts[:raise_error_with_exceptions]
-            return  nil if exceptions.include?(:no_resource)
+
+        if raise_error
+          if is_internal_error?(response)
+            fail Error.new(msg)
+          elsif code == NAME_NOT_ALLOWED_CODE
+            error = ErrorUsage.new(msg)
+            error.add_tag!(:raise_error)
+            fail error
+          elsif code == NO_RESOURCE
+            if exceptions = opts[:raise_error_with_exceptions]
+              return  nil if exceptions.include?(:no_resource)
+            end
+            error = ErrorUsage.new("Repo Manager error: #{msg}")
+            error.add_tag!(:no_resource)
+            fail error
+          else
+            fail ErrorUsage.new("Repo Manager error: #{msg}")
           end
-          error = ErrorUsage.new("Repo Manager error: #{msg}")
-          error.add_tag!(:no_resource)
-          fail error
         else
-          fail ErrorUsage.new("Repo Manager error: #{msg}")
+          dtk_code = dtk_code(response)
+
+          # special case for new client where component_defs part of module can be dependency in another module
+          if code == NO_RESOURCE && dtk_code == 'warning'
+            fail ErrorUsage.new("Repo Manager error: #{msg}")
+          else
+            response.data
+          end
         end
       else
         return response.data
@@ -455,6 +467,11 @@ module DTK
     def error_code(response)
       errors = response['errors']
       (errors.is_a?(Array) && errors.first) ? errors.first['code'] : 0
+    end
+
+    def dtk_code(response)
+      errors = response['errors']
+      (errors.is_a?(Array) && errors.first) ? errors.first['dtk_code'] : 0
     end
 
     def include_error_code?(errors, code)

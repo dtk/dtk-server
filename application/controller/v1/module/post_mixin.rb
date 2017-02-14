@@ -129,7 +129,7 @@ module DTK
           opts.merge!(versions: versions)
         end
 
-        rest_ok_response CommonModule::Remote.delete(get_default_project, remote_params, rsa_pub_key, false, opts)
+        rest_ok_response CommonModule::Remote.delete(get_default_project, remote_params, rsa_pub_key, request_params(:force), opts)
       end
 
       def pull_component_info_from_remote

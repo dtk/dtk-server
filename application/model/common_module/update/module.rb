@@ -91,18 +91,11 @@ module DTK
       
       # args has project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module, opts = {})
       def create_or_update_from_parsed_common_module(parsed_common_module, repo, opts = {})
-        args                  = [@project, @local_params, repo, @module_branch, parsed_common_module, opts]
-        parsed_component_defs = parsed_common_module.val(:ComponentDefs)
-        parsed_assemblies     = parsed_common_module.val(:Assemblies)
-
+        args  = [@project, @local_params, repo, @module_branch, parsed_common_module, opts]
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
-        # if both parsed_component_defs and parsed_assemblies are empty still want to call Info::Component create_or_update_from_parsed_common_module
-        if parsed_component_defs or parsed_assemblies.nil?
-          Info::Component.new(*args).create_or_update_from_parsed_common_module(parsed_component_defs)
-        end
-        if parsed_assemblies
-          Info::Service.new(*(args + [{ component_info_exists: !parsed_component_defs.nil? }])).create_or_update_from_parsed_common_module(parsed_assemblies)
-        end
+        Info::Component.new(*args).create_or_update_from_parsed_common_module?
+        component_defs_exist = Info::Component.component_defs_exist?(parsed_common_module)
+        Info::Service.new(*(args + [{ component_defs_exist: component_defs_exist}])).create_or_update_from_parsed_common_module?
       end
 
       def check_for_missing_dependencies(parsed_common_module, repo, opts = {})

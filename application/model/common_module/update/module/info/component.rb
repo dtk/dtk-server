@@ -20,7 +20,8 @@ module DTK
     class Component < self
       require_relative('component/transform')
 
-      def create_or_update_from_parsed_common_module(parsed_component_defs)
+      def create_or_update_from_parsed_common_module?
+        return unless module_info_exists?
         component_module_branch = create_module_branch_and_repo?(create_implementation: true)
         CommonDSL::Parse.set_dsl_version!(component_module_branch, parsed_common_module)
         
@@ -44,7 +45,20 @@ module DTK
         end
       end
 
+      def self.component_defs_exist?(parsed_common_module)
+        !parsed_common_module.val(:ComponentDefs).nil?
+      end
+
+      def self.module_info_exists?(parsed_common_module)
+        # second clause is to handle modules without any components
+        component_defs_exist?(parsed_common_module) or parsed_common_module.val(:Assemblies).nil?
+      end
+
       private
+
+      def module_info_exists?
+        self.class.module_info_exists?(parsed_common_module)
+      end
 
       def module_type
         :component_module
@@ -79,6 +93,7 @@ module DTK
         fail response if ModuleDSL::ParsingError.is_error?(response)
       end
 
+      #TODO: is this needed?
       def dependent_modules
 
       end

@@ -44,11 +44,10 @@ module DTK
           parsed_common_module = dsl_file_obj.parse_content(:common_module)
 
           # this means component_defs part is deleted from module
-          return unless parsed_common_module[:component_defs]
-
-          module_obj.publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
-
-          true
+          if Update::Module::Info::Component.module_info_exists?(parsed_common_module)
+            module_obj.publish_info(module_branch, repo, remote, local, client_rsa_pub_key)
+            true
+          end
         end
 
         def install

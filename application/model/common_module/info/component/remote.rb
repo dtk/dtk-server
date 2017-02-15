@@ -89,7 +89,7 @@ module DTK
             else
               parse_info = module_obj.update_model_from_clone_changes(module_branch[:current_sha], diffs_summary, module_branch, local.version)
               if dsl_parse_error = parse_info.dsl_parse_error?
-                fail parse_error
+                fail dsl_parse_error
               end
 
               # This updates the common module

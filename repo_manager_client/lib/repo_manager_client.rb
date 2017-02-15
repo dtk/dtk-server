@@ -415,7 +415,7 @@ module DTK
           dtk_code = dtk_code(response)
 
           # special case for new client where component_defs part of module can be dependency in another module
-          if code == NO_RESOURCE && dtk_code == 'warning'
+          if code == NO_RESOURCE && (dtk_code == 'warning' || dtk_code == 'not_allowed')
             fail ErrorUsage.new("Repo Manager error: #{msg}")
           else
             response.data

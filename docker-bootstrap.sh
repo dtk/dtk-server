@@ -33,17 +33,17 @@ docker pull $server_image
 docker pull $arbiter_image
 
 # check if upgrades are necessary
-server_image_latest=`docker inspect --format="{{ .Id }}" ${server_image}:latest`
-arbiter_image_latest=`docker inspect --format="{{ .Id }}" ${arbiter_image}:latest`
-server_image_running=`docker inspect --format="{{ .Image }}" ${server_container_name}`
-arbiter_image_running=`docker inspect --format="{{ .Image }}" ${arbiter_container_name}`
+server_image_latest=`docker inspect --format="{{ .Id }}" ${server_image}:latest 2>/dev/null`
+arbiter_image_latest=`docker inspect --format="{{ .Id }}" ${arbiter_image}:latest 2>/dev/null`
+server_image_running=`docker inspect --format="{{ .Image }}" ${server_container_name} 2>/dev/null`
+arbiter_image_running=`docker inspect --format="{{ .Image }}" ${arbiter_container_name} 2>/dev/null`
 
 # if newer images are available, stop and remove existing containers
-if [[ "$server_image_running" != "$server_image_latest" ]]; then
+if [[ "$server_image_running" != "$server_image_latest" ]] && [[ -n "$server_image_running" ]]; then
   docker stop $server_container_name
   docker rm $server_container_name
 fi
-if [[ "$arbiter_image_running" != "$arbiter_image_latest" ]]; then
+if [[ "$arbiter_image_running" != "$arbiter_image_latest" ]] && [[ -n "$arbiter_image_running" ]]; then
   docker stop $arbiter_container_name
   docker rm $arbiter_container_name
 fi

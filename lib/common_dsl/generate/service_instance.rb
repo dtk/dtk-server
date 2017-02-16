@@ -45,15 +45,20 @@ module DTK
         end
         
         def self.check_for_assembly_wide(content_input)
-          content_input[:asssembly][:workflows].each_pair do |k, v|
-            if subtasks = v[:subtasks]
-              subtasks.each do |subtask|
-                subtask.delete(:node) if subtask.has_key?(:node) && subtask[:node].eql?('assembly_wide')
+          require 'debugger'
+          Debugger.wait_connection = true
+          Debugger.start_remote
+          debugger
+          if assembly = content_input[:asssembly]
+            (assembly[:workflows]||{}).each_pair do |k, v|
+              if subtasks = v[:subtasks]
+                subtasks.each do |subtask|
+                  subtask.delete(:node) if subtask.has_key?(:node) && subtask[:node].eql?('assembly_wide')
+                end
               end
             end
           end
         end
-
       end
     end
   end

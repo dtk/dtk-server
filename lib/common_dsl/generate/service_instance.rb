@@ -39,10 +39,20 @@ module DTK
 
           dsl_version   = service_module_branch.dsl_version
           top_file_path = FileType::ServiceInstance::DSLFile::Top.canonical_path
+          check_for_assembly_wide(content_input)
           file_path__content_array = FileGenerator.generate_yaml_file_path__content_array(:service_instance, top_file_path, content_input, dsl_version)
           DirectoryGenerator.add_files(service_module_branch, file_path__content_array, donot_push_changes: true)
         end
         
+        def self.check_for_assembly_wide(content_input)
+          if assembly = content_input[:asssembly]
+            (assembly[:workflows]||{}).each_pair do |k, v|
+              (v[:subtasks]||{}).each do |subtask|
+                subtask.delete(:node) if subtask.has_key?(:node) && subtask[:node].eql?('assembly_wide')
+              end
+            end
+          end
+        end
       end
     end
   end

@@ -22,6 +22,8 @@ module DTK
       require_relative('remote/auth')
       include AuthMixin
 
+      DISPLAY_NAME_FOR_MASTER_BRANCH = 'master'
+
       def initialize(remote_or_repo_base = nil)
         arg = remote_or_repo_base #for succinctness
         if ModuleBranch::Location::Remote.includes?(arg)
@@ -219,7 +221,7 @@ module DTK
           if versions && !versions.empty?
             # substitute base with master
             parsed_versions = []
-            versions.each{ |version| parsed_versions << (version.eql?('master') ? 'base' : version) }
+            versions.each{ |version| parsed_versions << (version.eql?('master') ? DISPLAY_NAME_FOR_MASTER_BRANCH : version) }
             el.merge!(versions: Aux.sort_versions(parsed_versions))
           end
 
@@ -233,25 +235,6 @@ module DTK
         new_repo = R8::Config[:repo][:remote][:new_client]
         filter = type && { type: type_for_remote_module(type) }
         remote_modules = client.list_module_assemblies(filter, rsa_pub_key)
-
-        # unsorted = remote_modules.map do |r|
-        #   el = {}
-        #   last_updated = r['updated_at'] && Time.parse(r['updated_at']).strftime('%Y/%m/%d %H:%M:%S')
-        #   permission_string = "#{r['permission_hash']['user']}/#{r['permission_hash']['user_group']}/#{r['permission_hash']['other']}"
-        #   el.merge!(display_name: r['full_name'], owner: r['owner_name'], group_owners: r['user_group_names'], permissions: permission_string, last_updated: last_updated)
-        #   versions = opts[:ret_versions_array] ? r['versions'] : branch_names_to_versions(r['branches'])
-
-        #   if versions && !versions.empty?
-        #     # substitute base with master
-        #     parsed_versions = []
-        #     versions.each{ |version| parsed_versions << (version.eql?('master') ? 'base' : version) }
-        #     el.merge!(versions: parsed_versions)
-        #   end
-
-        #   el
-        # end
-
-        # unsorted.sort { |a, b| a[:display_name] <=> b[:display_name] }
       end
 
       def branch_names_to_versions(branch_names)

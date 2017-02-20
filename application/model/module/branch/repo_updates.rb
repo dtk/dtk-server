@@ -20,6 +20,19 @@ module DTK
     module RepoUpdates
       module Mixin
         # returns nil if no changes, otherwise returns Repo::Difs::Summary object
+        # opts can have keys:
+        #   :force
+        def pull_repo_changes_and_return_diffs_summary(commit_sha, opts = {}, &body)
+          RepoManager::Transaction.reset_on_error(self) do 
+            pull_opts = { force: opts[:force], ret_diffs: nil } #by having key :ret_diffs exist in options it will be set
+            pull_from_remote_raise_error_if_merge_needed(pull_opts)
+            repo_diffs_summary = pull_opts[:ret_diffs].ret_summary # pull_from_remote_raise_error_if_merge_needed will have set pull_opts[:ret_diffs]
+            body.call(repo_diffs_summary)
+          end
+        end
+
+
+        # returns nil if no changes, otherwise returns Repo::Difs::Summary object
         # if change updates sha on object
         # it returns diffs_summary
         # opts can have keys:

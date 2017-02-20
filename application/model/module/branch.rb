@@ -190,19 +190,6 @@ module DTK
         true
       end
     end
-    # returns nil if no changes, otherwise returns Repo::Difs::Summary object
-    # opts can have keys:
-    #   :force
-    def pull_repo_changes_and_return_diffs_summary(commit_sha, opts = {})
-      update_object!(:branch, :current_sha)
-      current_sha = current_sha()
-      fail Error, "Unexpected that commit_sha == current_sha" if commit_sha == current_sha
-
-      pull_opts = { force: opts[:force], ret_diffs: nil } #by having key :ret_diffs exist in options it will be set
-      pull_from_remote_raise_error_if_merge_needed(pull_opts)
-      pull_opts[:ret_diffs].ret_summary # pull_from_remote_raise_error_if_merge_needed will have set pull_opts[:ret_diffs]
-    end
-
 
     # opts can have keys:
     #   :force
@@ -415,15 +402,6 @@ module DTK
       RepoManager.pull_from_remote(external_branch, { force: true }, aug_component_module_branch)
       aug_component_module_branch.update_current_sha_from_repo!
     end
-
-    def push_to_component_module(aug_component_module_branch)
-      external_repo   = aug_component_module_branch.repo
-      external_branch = aug_component_module_branch.branch_name
-      RepoManager.push_to_external_repo(external_repo, external_branch, self)
-      RepoManager.pull_from_remote(external_branch, { force: true }, aug_component_module_branch)
-      aug_component_module_branch.update_current_sha_from_repo!
-    end
-
 
     def process_ambiguous_dependencies(ambiguous, hash_content)
       content = ''

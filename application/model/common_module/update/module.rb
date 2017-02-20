@@ -44,26 +44,27 @@ module DTK
 
         return ret if @module_branch.is_set_to_sha?(@commit_sha)
 
-        repo_diffs_summary = @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) 
-        unless repo_diffs_summary.empty?
-          ret.add_diffs_summary!(repo_diffs_summary)
-          top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
-          
-          # TODO: make more efficient by just computing parsed_common_module if parsing
-          parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
-          CommonDSL::Parse.set_dsl_version!(@module_branch, parsed_common_module)
-          parse_needed = (opts[:force_parse] == true or top_dsl_file_changed)
-
-          unless opts[:skip_missing_check]
-            missing_dependencies = check_for_missing_dependencies(parsed_common_module, repo)
-            return missing_dependencies if missing_dependencies && missing_dependencies[:missing_dependencies]
+        @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) do |repo_diffs_summary| 
+          unless repo_diffs_summary.empty?
+            ret.add_diffs_summary!(repo_diffs_summary)
+            top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
+            
+            # TODO: make more efficient by just computing parsed_common_module if parsing
+            parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
+            CommonDSL::Parse.set_dsl_version!(@module_branch, parsed_common_module)
+            parse_needed = (opts[:force_parse] == true or top_dsl_file_changed)
+            
+            unless opts[:skip_missing_check]
+              missing_dependencies = check_for_missing_dependencies(parsed_common_module, repo)
+              return missing_dependencies if missing_dependencies && missing_dependencies[:missing_dependencies]
+            end
+            
+            create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)
+            @module_branch.set_dsl_parsed!(true)
           end
-
-          create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)
-          @module_branch.set_dsl_parsed!(true)
+          # This sets sha on branch only after all processing goes through
+          @module_branch.update_current_sha_from_repo!
         end
-        # This sets sha on branch only after all processing goes through
-        @module_branch.update_current_sha_from_repo!
         ret
       end
 

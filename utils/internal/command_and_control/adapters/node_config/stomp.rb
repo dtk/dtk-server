@@ -168,15 +168,27 @@ module DTK
       end
       private_class_method :assembly_instance
 
-      # TODO: change signature to def self.async_execution(task_idh,top_task_idh,config_node,callbacks,context)
       def self.initiate_cancelation(task_idh, top_task_idh, config_node, opts)
-        msg_content = { task_id: task_idh.get_id(), top_task_id: top_task_idh.get_id() }
+        msg_content = { 
+          task_id: task_idh.get_id, 
+          worker: worker_for_cancelation_msg(config_node),
+          top_task_id: top_task_idh.get_id, 
+        }
         pbuilderid = Node.pbuilderid(config_node[:node])
         filter = filter_single_fact('pbuilderid', pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         async_agent_call('cancel_action', 'run', msg_content, filter, callbacks, context)
       end
+
+      # TODO: hack for DTK-2886
+      def self.worker_for_cancelation_msg(config_node)
+        case config_agent_type = config_node[:config_agent_type]
+        when 'dynamic' then 'generic'
+        else config_agent_type
+        end
+      end
+      private_class_method :worker_for_cancelation_msg
 
       def self.action_results(result, action)
         if config_agent = config_agent_object?(action)

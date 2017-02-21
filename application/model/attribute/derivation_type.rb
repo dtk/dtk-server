@@ -22,9 +22,13 @@ module DTK
       module Mixin
         # returns one of [:asserted, :derived__default, :derived__propagated] 
         def derivation_type
-          update_object!(:is_instance_value, :value_asserted, :value_derived)
+          update_object!(:is_instance_value, :value_asserted, :value_derived, :dynamic)
           if self[:is_instance_value]
             :asserted
+          elsif self[:value_asserted].nil? and self[:value_derived].nil?
+            # TODO: DTK-2906: put in special case for nil value; need to check if we can distinguish this from 
+            # :derived__propagated or if not whether it makes a difference
+            :derived__default
           elsif !self[:value_asserted].nil?
             :derived__default
           else

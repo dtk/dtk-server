@@ -30,7 +30,7 @@ module DTK; module CommonDSL::ObjectLogic
         private
 
         def prune? 
-          attribute_value.nil? or is_title_attribute?
+          is_title_attribute?
         end
 
         def tags?

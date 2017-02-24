@@ -139,8 +139,9 @@ module DTK
         recursive = boolean_request_params(:recursive)
         delete    = boolean_request_params(:delete)
 
+        nodes = assembly_instance.info_about(:nodes, datatype: :node)
         assembly_instance.uninstall(recursive: recursive, delete: delete)
-        rest_ok_response
+        rest_ok_response nodes 
       end
 
       def exec

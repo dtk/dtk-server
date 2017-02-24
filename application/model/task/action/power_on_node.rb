@@ -29,11 +29,11 @@ module DTK
     #       that looks at this; alternative can have two different tasks PowerOnNode and CheckNodeState
     class PowerOnNode < CreateNode
       def self.stage_display_name
-        'check_node_states_stage'
+        'ensure_nodes_are_running'
       end
 
       def self.task_display_name
-        'check_node_state'
+        'ensure_node_is_running'
       end
     end
   end

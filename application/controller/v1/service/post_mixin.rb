@@ -107,6 +107,7 @@ module DTK
 
         task.save!
 
+        # TODO: DTK-2915; not sure if we need any more; test this when converge from stopped state
         # still have to use start_instances until we implement this to start from workflow task
         unless (opts[:ret_nodes_to_start]||[]).empty?
           Node.start_instances(opts[:ret_nodes_to_start])

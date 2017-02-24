@@ -105,18 +105,19 @@ module DTK; class StateChange
       end
       # TODO: should we have in call below the option: remove_assembly_wide_node: true
       nodes = opts[:nodes] || assembly.get_leaf_nodes(cols: [:id, :display_name, :type, :external_ref, :admin_op_status])
-      # TODO: need to figure out if any advantage to filtering nodes
-      # nodes_to_start = nodes.select do |n| 
-      #  op_status = n.get_and_update_operational_status!
-      #  case op_status
-      #    when 'stopped' then true
-      #    when 'running' then false
-      #    else
-      #      Log.info("TODO: need to figure best way to treat power on when op status is '#{op_status}'")
-      #      true
-      #    end
-      #end
-      nodes_to_start = nodes
+
+      nodes_to_start = nodes.select do |n| 
+        op_status = n.get_and_update_operational_status!
+        case op_status
+        when 'stopped', 'stopping' then true
+        when 'running' then false
+        else
+          Log.info("nodes_to_start calculation when op status is '#{op_status}'")
+          true
+        end
+      end
+      # TODO: DTK-2915: took out below for above which was comment here for a while
+      #nodes_to_start = nodes
 
       return ret if nodes_to_start.empty?
 

@@ -58,7 +58,7 @@ module DTK
               missing_dependencies = check_for_missing_dependencies(parsed_common_module, repo)
               return missing_dependencies if missing_dependencies && missing_dependencies[:missing_dependencies]
             end
-            
+
             create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)
             @module_branch.set_dsl_parsed!(true)
           end
@@ -92,9 +92,27 @@ module DTK
       
       # args has project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module, opts = {})
       def create_or_update_from_parsed_common_module(parsed_common_module, repo, opts = {})
-        args  = [@project, @local_params, repo, @module_branch, parsed_common_module, opts]
+        args    = [@project, @local_params, repo, @module_branch, parsed_common_module, opts]
+        retried = false
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
+        begin
+          create_or_update_component_info(args)
+          create_or_update_service_info(args, parsed_common_module) unless retried
+        rescue XYZ::ModuleDSL::ParsingError::RefComponentTemplates => exception
+          # if trying to delete components from component info that are deleted from assemblies but not processed
+          # it will raise RefComponentTemplates; then we want to first process assemblies and retry component_defs processing
+          raise exception if retried
+          create_or_update_service_info(args, parsed_common_module)
+          retried = true
+          retry
+        end
+      end
+
+      def create_or_update_component_info(args)
         Info::Component.new(*args).create_or_update_from_parsed_common_module?
+      end
+
+      def create_or_update_service_info(args, parsed_common_module)
         component_defs_exist = Info::Component.component_defs_exist?(parsed_common_module)
         Info::Service.new(*(args + [{ component_defs_exist: component_defs_exist}])).create_or_update_from_parsed_common_module?
       end

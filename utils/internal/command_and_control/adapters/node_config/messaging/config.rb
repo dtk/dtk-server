@@ -228,6 +228,22 @@ pbuilderid = <%= pbuilderid %>
 private_key = /etc/dtk/ssh/arbiter
 EOF
 
+mkdir -p /usr/share/dtk/scripts
+cat << EOF > /usr/share/dtk/scripts/stop-apt-daily.sh
+#!/usr/bin/env bash
+# For problem on xenial
+# From http://unix.stackexchange.com/questions/315502/how-to-disable-apt-daily-service-on-ubuntu-cloud-vm-image
+systemctl stop apt-daily.service
+systemctl kill --kill-who=all apt-daily.service
+
+# wait until `apt-get updated` has been killed
+while ! (systemctl list-units --all apt-daily.service | fgrep -q dead)
+do
+  sleep 1;
+done
+EOF
+chmod 755 /usr/share/dtk/scripts/stop-apt-daily.sh
+
 <% if arbiter_update %>
 [ -x /usr/share/dtk/dtk-arbiter/update.sh ] && /usr/share/dtk/dtk-arbiter/update.sh <%=arbiter_branch %>
   <% if arbiter_restart %>

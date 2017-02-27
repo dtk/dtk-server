@@ -108,7 +108,7 @@ module DTK
 
         # !!! set root disk to GP2 to override fog default; important performance change
         if options[:block_device_mapping].size > 1
-          Log.error_pp(["TODO: check if correctly handling case with multiple block devices", options[:block_device_mapping]])
+          # Log.error_pp(["TODO: check if correctly handling case with multiple block devices", options[:block_device_mapping]])
         end
         options[:block_device_mapping].first["Ebs.VolumeType"] = 'gp2'
 

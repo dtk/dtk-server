@@ -723,7 +723,7 @@ module DTK
     def get_obj(sp_hash, opts = {})
       rows = get_objs(sp_hash, opts)
       if rows.size > 1
-        Log.error_pp(["call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash.inspect} returned more than one row:", rows, caller[0..5]])
+        Log.error_pp(["call to get_obj for #{model_handle[:model_name]} (returned more than one row:", rows, caller[0..5]])
       end
       rows.first
     end
@@ -786,7 +786,7 @@ module DTK
     def self.get_obj(model_handle, sp_hash, opts = {})
       rows = get_objs(model_handle, sp_hash, opts)
       if rows.size > 1
-        Log.error_pp(["call to get_obj for #{model_handle[:model_name]} (sp_hash=#{sp_hash.inspect} returned more than one row:", rows, caller[0..5]])
+        Log.error_pp(["call to get_obj for #{model_handle[:model_name]} (returned more than one row:", rows, caller[0..5]])
       end
       rows.first
     end

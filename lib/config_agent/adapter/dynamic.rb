@@ -52,7 +52,6 @@ module DTK; class ConfigAgent
           modules: get_base_and_dependent_modules(component, assembly_instance),
           execution_environment: execution_environment
         }          
-        Log.info_pp [:message_sent_to_dynamic_provider, Sanitize.sanitize_message(msg)]
         msg
       end
       ARBITER_REQUEST_PROTOCOL_VERSION = 1

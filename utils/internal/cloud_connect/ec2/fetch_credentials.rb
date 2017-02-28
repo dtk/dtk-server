@@ -44,9 +44,11 @@ module DTK
       CONTAINER_CREDENTIALS_HOST = "http://169.254.170.2"
       # From https://github.com/fog/fog-aws/blob/ecfc0a2905ce2ce7eb0946a44d55f7e49e35311d/lib/fog/aws/credential_fetcher.rb
       # Written here to make more robust
+      CACHE = {} # TODO: DTK-2926
       def self.fetch_credentials_without_retry(region)
         LOCK.synchronize do
           begin
+            return CACHE[:cred] if CACHE[:cred]
             role_data = nil
             az_data = nil
             if ENV["AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"]
@@ -63,7 +65,7 @@ module DTK
             end
 
             session = Fog::JSON.decode(role_data)
-            {
+             CACHE[:cred] = {
               region: region,
               aws_access_key_id: session['AccessKeyId'],
               aws_secret_access_key: session['SecretAccessKey'],

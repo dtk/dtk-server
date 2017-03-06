@@ -32,7 +32,13 @@ module DTK
             h.merge(component_info[:ref] => component_info)
           end
 
-          component_module_refs.set_matching_component_template_info?(ret.values, module_local_params: module_local_params, donot_set_component_templates: true, set_namespace: true)
+          cmp_template_info_opts = {
+            module_local_params: module_local_params,
+            donot_set_component_templates: true,
+            set_namespace: true
+          }
+          cmp_template_info_opts.merge!(raise_if_missing_dependencies: opts[:raise_if_missing_dependencies]) if opts[:raise_if_missing_dependencies]
+          component_module_refs.set_matching_component_template_info?(ret.values, cmp_template_info_opts)
           CommonModule::Import::ServiceModule.set_attribute_template_ids!(ret, container_idh)
           CommonModule::Import::ServiceModule.add_title_attribute_overrides!(cmps_with_titles, container_idh)
           ret

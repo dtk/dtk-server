@@ -33,7 +33,7 @@ module DTK
           update_component_module_refs(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_defs_exist)
 
           # update assemblies before updating module refs because we need to check for references in assemblies when updating module refs
-          CommonModule::Info::Service.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, local_params)
+          CommonModule::Info::Service.update_assemblies_from_parsed_common_module(project, service_module_branch, parsed_assemblies, local_params, raise_if_missing_dependencies: true)
 
           delete_component_module_refs?(service_module_branch, parsed_common_module.val(:DependentModules), omit_base_reference: @component_defs_exist)
         end

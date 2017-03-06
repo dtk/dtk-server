@@ -189,7 +189,9 @@ module DTK
         unless cmp_module_refs_to_add.empty?
           if opts[:raise_if_missing_dependencies]
             mapping_refs = cmp_module_refs_to_add.map{ |mr| "#{mr[:namespace_info]}:#{mr[:module_name]}" }
-            fail ErrorUsage, "You are using component(s) from following modules which are not added as dependencies: #{mapping_refs.join(', ')}!"
+            # need to skip adding of aws:ec2 because we add it after module is installed
+            mapping_refs.delete('aws:ec2')
+            fail ErrorUsage, "You are using component(s) from following modules which are not added as dependencies: #{mapping_refs.join(', ')}!" unless mapping_refs.empty?
           end
           ModuleRef.update(:add, @parent, cmp_module_refs_to_add)
         end

@@ -205,13 +205,15 @@
       "id",
       "name",
       "remote(s)",
-      "version(s)"
+      "version(s)",
+      "dsl_parsed"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
       "remote(s)": "linked_remotes",
-      "version(s)": "versions"
+      "version(s)": "versions",
+      "dsl_parsed": "dsl_parsed"
     }
   },
   "assembly_component_module": {

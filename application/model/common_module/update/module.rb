@@ -33,6 +33,8 @@ module DTK
 
       # opts can have keys
       #   :force_parse - Boolean (default false) 
+      #   :skip_missing_check - Boolean (default false) 
+      #   :initial_update - Boolean (default false) 
       def self.update_from_repo(project, commit_sha, local_params, opts = {})
         new(project, commit_sha, local_params).update_from_repo(opts)
       end
@@ -55,11 +57,16 @@ module DTK
             parse_needed = (opts[:force_parse] == true or top_dsl_file_changed)
             
             unless opts[:skip_missing_check]
-              missing_dependencies = check_for_missing_dependencies(parsed_common_module, repo)
+              missing_dependencies = check_for_missing_dependencies(parsed_common_module, repo, initial_update: opts[:initial_update])
               return missing_dependencies if missing_dependencies && missing_dependencies[:missing_dependencies]
             end
 
-            create_or_update_from_parsed_common_module(parsed_common_module, repo, parse_needed: parse_needed, diffs_summary: repo_diffs_summary)
+            create_or_update_opts = {
+              parse_needed: parse_needed, 
+              diffs_summary: repo_diffs_summary,
+              initial_update: opts[:initial_update]
+            }
+            create_or_update_from_parsed_common_module(parsed_common_module, repo, create_or_update_opts)
             @module_branch.set_dsl_parsed!(true)
           end
           # This sets sha on branch only after all processing goes through
@@ -89,39 +96,61 @@ module DTK
       def dsl_file_obj_from_repo
         CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(@module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
       end
-      
-      # args has project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module, opts = {})
+
+      # opts can have keys:
+      #   :parse_needed
+      #   :diffs_summary
+      #   :initial_update
       def create_or_update_from_parsed_common_module(parsed_common_module, repo, opts = {})
-        args    = [@project, @local_params, repo, @module_branch, parsed_common_module, opts]
+        args    = args_for_create_or_update(parsed_common_module, repo, opts)
         retried = false
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
         begin
           create_or_update_component_info(args)
-          create_or_update_service_info(args, parsed_common_module) unless retried
-        rescue XYZ::ModuleDSL::ParsingError::RefComponentTemplates => exception
+          create_or_update_service_info(args) unless retried
+        rescue ModuleDSL::ParsingError::RefComponentTemplates => exception
           # if trying to delete components from component info that are deleted from assemblies but not processed
           # it will raise RefComponentTemplates; then we want to first process assemblies and retry component_defs processing
           raise exception if retried
-          create_or_update_service_info(args, parsed_common_module)
+          create_or_update_service_info(args)
           retried = true
           retry
         end
+      end
+
+      # opts can have keys: 
+      #   :initial_update
+      def check_for_missing_dependencies(parsed_common_module, repo, opts = {})
+        info_service_object(args_for_create_or_update(parsed_common_module, repo, opts)).check_for_missing_dependencies
       end
 
       def create_or_update_component_info(args)
         Info::Component.new(*args).create_or_update_from_parsed_common_module?
       end
 
-      def create_or_update_service_info(args, parsed_common_module)
-        component_defs_exist = Info::Component.component_defs_exist?(parsed_common_module)
-        Info::Service.new(*(args + [{ component_defs_exist: component_defs_exist}])).create_or_update_from_parsed_common_module?
+      def create_or_update_service_info(args)
+        info_service_object(args, component_defs_exist: Info::Component.component_defs_exist?(args.parsed_common_module)).create_or_update_from_parsed_common_module?
       end
 
-      def check_for_missing_dependencies(parsed_common_module, repo, opts = {})
-        args = [@project, @local_params, repo, @module_branch, parsed_common_module, opts]
-        Info::Service.new(*(args)).check_for_missing_dependencies
+      # opts can have keys
+      #   :component_defs_exist
+      def info_service_object(args, opts = {})
+        Info::Service.new(*(args + [{ component_defs_exist: opts[:component_defs_exist]}]))
       end
 
+      # opts can have keys:
+      #   :parse_needed
+      #   :diffs_summary
+      #   :initial_update
+      def args_for_create_or_update(parsed_common_module, repo, opts = {})  
+        ArgsForCreateOrUpdate.new([@project, @local_params, repo, @module_branch, parsed_common_module, opts])
+      end
+      class ArgsForCreateOrUpdate < ::Array
+        def parsed_common_module
+          self[4]
+        end
+      end
+      
     end
   end
 end

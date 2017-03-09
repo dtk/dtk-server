@@ -28,6 +28,7 @@ module DTK
       # opts can have keys:
       #   :parse_needed
       #   :diffs_summary
+      #   :initial_update  
       def initialize(project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module, opts = {})
         @project                      = project
         @module_name                  = common_module__local_params.module_name
@@ -40,6 +41,7 @@ module DTK
         @module_class                 = self.class.get_class_from_module_type(module_type)
         @parse_needed                 = opts[:parse_needed]
         @diffs_summary                = opts[:diffs_summary]
+        @initial_update               = opts[:initial_update]
       end
 
       attr_reader :project, :local_params, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
@@ -65,7 +67,11 @@ module DTK
             repo = module_obj.get_repo
             module_branch = module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace_obj, return_module_branch: true)
             repo.merge!(branch_name: module_branch[:branch])
-            RepoManager.add_branch_and_push?(module_branch[:branch], { empty: true }, module_branch)
+            add_branch_opts = {
+              empty: true,
+              delete_existing_branch: @initial_update
+            }
+            RepoManager.add_branch_and_push?(module_branch[:branch], add_branch_opts, module_branch)
             module_branch
           end
         else

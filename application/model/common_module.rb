@@ -45,6 +45,7 @@ module DTK
         return_module_branch: true,
         no_initial_commit: true,
         common_module: true,
+        delete_existing_branch: true,  
         has_remote_repo: opts[:has_remote_repo]
       }
       # create_module also creates branch

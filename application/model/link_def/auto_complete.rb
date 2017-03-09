@@ -190,7 +190,7 @@ module DTK; class LinkDef
       relevant_link_def_ids = []
       cmp_link_def_ids = [] # subset of above on this component
       ndx_relevant_link_defs = {} #for splicing in possible_links TODO: see if more efficient to get possible_links
-      # in intial call to get node_link_defs_info
+      # in initial call to get node_link_defs_info
       # these are the ones for which the possible links shoudl be found
       node_link_defs_info.each do |r|
         port = r[:port]

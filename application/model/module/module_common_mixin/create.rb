@@ -21,6 +21,7 @@ module DTK; module ModuleCommonMixin
   module Create::Class
     # opts can have keys
     #  :no_error_if_exists - Boolean (default: false)
+    #  :delete_existing_branch - Boolean (default: false)
     #  :no_initial_commit - Boolean (default: false)
     #  :return_module_branch - Boolean (default: false)
     #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
@@ -47,7 +48,8 @@ module DTK; module ModuleCommonMixin
           base_branch = module_obj.get_module_branches.first
           repo = module_obj.get_repo
           repo.merge!(branch_name: local.branch_name)
-          RepoManager.add_branch_and_push?(local.branch_name, {}, base_branch)
+          add_branch_opts = { delete_existing_branch: opts[:delete_existing_branch] }
+          RepoManager.add_branch_and_push?(local.branch_name, add_branch_opts, base_branch)
           repo.create_subclass_obj(:repo_with_branch)
         else
           create_repo_opts = Aux.hash_subset(opts, [:no_initial_commit, :add_remote_files_info]).merge(delete_if_exists: true)

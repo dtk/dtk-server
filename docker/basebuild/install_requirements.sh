@@ -47,5 +47,3 @@ RUBY_VERSION=1.9.3-p484
 curl -sSL https://get.rvm.io | bash -s master --ruby=ruby-$RUBY_VERSION
 /usr/local/rvm/wrappers/default/gem install bundler --no-rdoc --no-ri
 
-# cleanup
-apt-get clean && apt-get -y autoremove && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

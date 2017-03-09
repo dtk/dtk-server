@@ -8,29 +8,11 @@ ENV LC_ALL en_US.UTF-8
 
 ENV DEBIAN_FRONTEND noninteractive
 
-ADD docker/install_requirements.sh /
-RUN /install_requirements.sh
-
-RUN env --unset=DEBIAN_FRONTEND
-
-RUN mkdir -p /etc/puppet/modules
+# RUN mkdir -p /etc/puppet/modules
 COPY dtk-provisioning/modules /etc/puppet/modules
-COPY docker/manifests /tmp/manifests
+COPY docker /tmp/docker
 
-RUN puppet apply --debug /tmp/manifests/stage1.pp
-RUN puppet apply --debug /tmp/manifests/stage2.pp
-RUN puppet apply --debug /tmp/manifests/stage4.pp
-
-RUN apt-get install -y libpq-dev redis-server libicu-dev
 COPY Gemfile* /tmp/
-WORKDIR '/tmp'
-RUN /usr/local/rvm/wrappers/default/bundle --without development --deployment --path=/var/lib/dtk-bundler-vendor
 
-# Prevent intermittent Gitolite issues
-# http://stackoverflow.com/a/2510548/15677
-RUN sed -i 's/^AcceptEnv LANG LC_\*$//g' /etc/ssh/sshd_config
-# http://stackoverflow.com/questions/22547939/docker-gitlab-container-ssh-git-login-error
-RUN sed -i '/session    required     pam_loginuid.so/d' /etc/pam.d/sshd
-
-RUN rm -rf /etc/puppet/modules /tmp/*
+RUN bash /tmp/docker/basebuild/install.sh
 

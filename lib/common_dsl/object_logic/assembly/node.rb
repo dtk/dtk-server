@@ -23,12 +23,12 @@ module DTK; module CommonDSL
         require_relative('node/attribute')
 
         def self.generate_content_input(assembly_instance)
-          get_augmented_nodes(assembly_instance, without_soft_deleted_nodes: true).inject(ContentInputHash.new) do |h, aug_node|
-            h.merge(aug_node.display_name => new.generate_content_input!(aug_node, without_soft_deleted_components: true))
+          get_augmented_nodes(assembly_instance).inject(ContentInputHash.new) do |h, aug_node|
+            h.merge(aug_node.display_name => new.generate_content_input!(aug_node))
           end
         end
         
-        def generate_content_input!(aug_node, opts = {})
+        def generate_content_input!(aug_node)
           set_id_handle(aug_node)
           aug_components = aug_node[:components] || []
           attributes = aug_node[:attributes] || []
@@ -36,7 +36,7 @@ module DTK; module CommonDSL
           self[:is_assembly_wide_node] = true if aug_node.is_assembly_wide_node?
 
           set?(:Attributes, Attribute.generate_content_input?(:node, attributes)) unless attributes.empty?
-          set(:Components, Component.generate_content_input(aug_components, opts)) unless aug_components.empty?
+          set(:Components, Component.generate_content_input(aug_components)) unless aug_components.empty?
           self
         end
 

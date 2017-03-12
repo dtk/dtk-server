@@ -30,7 +30,8 @@ module DTK; module CommonDSL::ObjectLogic
         private
 
         def prune? 
-          attribute_value.nil? or is_title_attribute?
+          # puttng in nil values so that when attribute diff compares keys and new key wil be compared with a new value
+          is_title_attribute?
         end
 
         def tags?

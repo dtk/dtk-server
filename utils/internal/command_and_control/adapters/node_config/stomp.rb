@@ -26,6 +26,7 @@ module DTK
       extend Messaging::AssemblyActionClassMixin
 
       DEFAULT_TIMEOUT_AUTH_NODE = 60
+      DEFAULT_TIMEOUT_CHECKALIVE = 5
 
       Lock = Mutex.new
 
@@ -112,7 +113,21 @@ module DTK
 
         filter = BlankFilter.merge(filter_x).merge('agent' => [agent])
         context = context_x.merge(callbacks: callbacks)
+
         handler.sendreq_with_callback(msg, agent, context, filter)
+      end
+
+      def self.check_alive(filter, callbacks, context)
+        # send a ping message, to make sure dtk-arbiter is up and listening
+        # this request will have a much shorter timeout
+        callbacks_checkalive = {
+          on_msg_received: proc do |msg|
+            Log.info("Check-alive succeeded") 
+          end
+        }
+        callbacks_checkalive[:on_timeout] = callbacks[:on_timeout]
+        context_checkalive = context.merge(:timeout => DEFAULT_TIMEOUT_CHECKALIVE)
+        async_agent_call('discovery', 'ping', {}, filter, callbacks_checkalive, context_checkalive)
       end
 
       def self.initiate_execution(task_idh, top_task_idh, config_node, opts)
@@ -139,7 +154,10 @@ module DTK
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         mc_info = mc_info_for_config_agent(config_agent)
-
+ 
+        # do a check-alive of arbiter
+        # unless discovery or git_access agents are called since they're executed on node initialization
+        check_alive(filter, callbacks, context) unless ['git_access', 'discovery'].include? mc_info[:agent]
         async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
       end
 

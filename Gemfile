@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # dtk gems
 gem 'dtk-common', :github => 'dtk/dtk-common'
 gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
-gem 'dtk-dsl', :github => 'dtk/dtk-dsl'
+gem 'dtk-dsl', :github => 'dtk/dtk-dsl', :branch => 'DTK-2843-handle-install-and-stage'
 
 # required to start a server
 gem 'fog'

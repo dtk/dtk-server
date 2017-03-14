@@ -87,10 +87,14 @@ module DTK
           if raw_va = mdl.delete(:version_array)
             if raw_va.size == 1
               mdl.merge!(versions: raw_va[0])
-            end
+            else
+              version_array = []
+              master_print  = raw_va.find { |v| v.delete('*') == MASTER_VERSION }
+              raw_va.delete(master_print)
 
-            unless raw_va.size == 1 && raw_va.first == MASTER_VERSION
-              version_array = raw_va.reject { |v| v == MASTER_VERSION }.sort{ |a,b| a <=> b }.reverse + (raw_va.include?(MASTER_VERSION) ? [MASTER_VERSION] : [])
+              version_array << master_print if master_print
+              version_array << raw_va.sort{ |a, b| a.delete('*') <=> b.delete('*') }.reverse
+
               mdl.merge!(versions: version_array.join(', '))
             end
           end

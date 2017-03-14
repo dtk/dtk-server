@@ -27,6 +27,7 @@ module DTK
 
       DEFAULT_TIMEOUT_AUTH_NODE = 60
       DEFAULT_TIMEOUT_CHECKALIVE = 5
+      DOCKER_EXECUTOR_PBUILDERID = 'docker-executor'
 
       Lock = Mutex.new
 
@@ -98,7 +99,11 @@ module DTK
           agent_ssh_key_private: node_repo_user[:ssh_rsa_private_key],
           server_ssh_rsa_fingerprint: RepoManager.repo_server_ssh_rsa_fingerprint()
         }
-        context = { timeout: DEFAULT_TIMEOUT_AUTH_NODE }.merge(context_x)
+        # use a short timeout for certain agents when running on docker-executor
+        # it's expected that dtk-arbiter container is always up and ready
+        timeout = pbuilderid.eql?(DOCKER_EXECUTOR_PBUILDERID) ? DEFAULT_TIMEOUT_CHECKALIVE : DEFAULT_TIMEOUT_AUTH_NODE
+        context = { timeout: timeout }.merge(context_x)
+
         async_agent_call('git_access', 'add_rsa_info', params, filter, callbacks, context)
       end
 
@@ -154,7 +159,7 @@ module DTK
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         mc_info = mc_info_for_config_agent(config_agent)
- 
+     
         # do a check-alive of arbiter
         # unless discovery or git_access agents are called since they're executed on node initialization
         check_alive(filter, callbacks, context) unless ['git_access', 'discovery'].include? mc_info[:agent]

@@ -49,7 +49,8 @@ module DTK; class Task
           assembly_instance = assembly.copy_as_assembly_instance
 
           if self[:node] || self[:component]
-            assembly_instance.send(self[:delete_action], *self[:delete_params])
+            send_opts = deleting_last_node?(assembly_instance) ? { do_not_update_task_template: true } : {}
+            assembly_instance.send(self[:delete_action], *self[:delete_params], send_opts)
           else
             component_idh = assembly.id_handle.createIDH(id: assembly.id(), model_name: :component)
             assembly_instance.class.send(self[:delete_action], component_idh, self[:opts])
@@ -133,6 +134,13 @@ module DTK; class Task
         ret = PrettyPrintHash.new
         ret[:node] = node_status(object, opts)
         ret
+      end
+
+      def deleting_last_node?(assembly_instance)
+        delete_action = self[:delete_action]
+        if delete_action && delete_action.to_s.eql?('delete_node')
+          !(assembly_instance.get_nodes__expand_node_groups.size > 1)
+        end
       end
     end
   end

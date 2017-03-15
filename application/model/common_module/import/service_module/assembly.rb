@@ -26,7 +26,7 @@ module DTK
         require_relative('assembly/node_property_component')
 
         module Mixin
-          def process_assembly!(parsed_assembly, module_local_params)
+          def process_assembly!(parsed_assembly, module_local_params, opts = {})
             if parsed_nodes = parsed_assembly.val(:Nodes)
               NodePropertyComponent.create_node_property_components?(parsed_nodes)
             end
@@ -56,7 +56,9 @@ module DTK
             tags = get_assembly_tags(parsed_assembly)
             assembly_ref_pointer.merge!('tags' => tags)
 
-            nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_assembly, @component_module_refs, module_local_params, default_assembly_name: assembly_name)
+            node_hash_opts = { default_assembly_name: assembly_name }
+            node_hash_opts.merge!(raise_if_missing_dependencies: opts[:raise_if_missing_dependencies]) if opts[:raise_if_missing_dependencies]
+            nodes_db_update_hash = Assembly::Nodes.db_update_hash(@container_idh, assembly_ref, parsed_assembly, @component_module_refs, module_local_params, node_hash_opts)
             @db_updates_assemblies['node'].merge!(nodes_db_update_hash.mark_as_complete)
 
             @ndx_assembly_hashes[assembly_ref] ||= parsed_assembly

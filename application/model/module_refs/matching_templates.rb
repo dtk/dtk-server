@@ -128,7 +128,7 @@ module DTK
         unless reference_errors.empty?
           fail ServiceModule::ParsingError::DanglingComponentRefs.new(reference_errors)
         end
-        update_module_refs_dsl?(mappings)
+        update_module_refs_dsl?(mappings, opts)
         ret
       end
 
@@ -160,7 +160,7 @@ module DTK
         ret
       end
 
-      def update_module_refs_dsl?(cmp_type_to_template_mappings)
+      def update_module_refs_dsl?(cmp_type_to_template_mappings, opts = {})
         module_name_to_ns = {}
         cmp_type_to_template_mappings.each do |cmp_type, cmp_info|
           module_name = module_name(cmp_type)
@@ -185,7 +185,14 @@ module DTK
             cmp_module_refs_to_add << new_cmp_moule_ref
           end
         end
+
         unless cmp_module_refs_to_add.empty?
+          if opts[:raise_if_missing_dependencies]
+            mapping_refs = cmp_module_refs_to_add.map{ |mr| "#{mr[:namespace_info]}:#{mr[:module_name]}" }
+            # need to skip adding of aws:ec2 because we add it after module is installed
+            mapping_refs.delete('aws:ec2')
+            fail ErrorUsage, "You are using component(s) from following modules which are not added as dependencies: #{mapping_refs.join(', ')}!" unless mapping_refs.empty?
+          end
           ModuleRef.update(:add, @parent, cmp_module_refs_to_add)
         end
       end

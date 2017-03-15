@@ -63,13 +63,17 @@ module DTK
             module_and_branch_info = module_class.create_module_and_branch_obj?(project, repo_with_branch.id_handle, local)
             module_obj ||= module_and_branch_info[:module_idh].create_object
             module_branch = module_and_branch_info[:module_branch_idh].create_object
+            module_branch.set_dsl_parsed!(false)
             
             # process_dsl_and_ret_parsing_errors will raise error if parsing error
             module_obj.process_dsl_and_ret_parsing_errors(repo_with_branch, module_branch, local, set_external_refs: true)
             module_branch.set_sha(commit_sha)
 
             # This last call creates common module and branch 
-            CommonModule.create_module_and_branch_obj?(project, nil, local.merge(module_type: :common_module))
+            common_module_branch = CommonModule.create_module_and_branch_obj?(project, nil, local.merge(module_type: :common_module), return_module_branch: true)
+
+            module_branch.set_dsl_parsed!(true)
+            common_module_branch.set_dsl_parsed!(true)
             nil
           end
         end
@@ -87,6 +91,8 @@ module DTK
             if diffs_summary.empty?
               { diffs: diffs_summary }
             else
+              module_branch.set_dsl_parsed!(false)
+              common_module_branch.set_dsl_parsed!(false)
               parse_info = module_obj.update_model_from_clone_changes(module_branch[:current_sha], diffs_summary, module_branch, local.version)
               if dsl_parse_error = parse_info.dsl_parse_error?
                 fail dsl_parse_error
@@ -103,6 +109,8 @@ module DTK
               Info::Component.transform_from_component_info(common_module_branch, aug_component_module_branch)
 
               common_module_branch.push_changes_to_repo(force: true)
+              module_branch.set_dsl_parsed!(true)
+              common_module_branch.set_dsl_parsed!(true)
 
               # TODO: this is diffs wrt to component module; might want to change it in terms of common module files
               { diffs: diffs_summary }

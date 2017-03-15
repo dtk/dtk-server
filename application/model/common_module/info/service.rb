@@ -43,11 +43,11 @@ module DTK
           get_field?(:ref)
         end
         
-        def self.update_assemblies_from_parsed_common_module(project, module_branch, parsed_assemblies, module_local_params)
+        def self.update_assemblies_from_parsed_common_module(project, module_branch, parsed_assemblies, module_local_params, opts = {})
           module_branch.set_dsl_parsed!(false)
           base_service_module = get_base_service_module(module_branch)
           import_helper = Import::ServiceModule.new(project, base_service_module, module_branch)
-          import_helper.put_needed_info_into_import_helper!(parsed_assemblies, module_local_params)
+          import_helper.put_needed_info_into_import_helper!(parsed_assemblies, module_local_params, opts)
           import_helper.import_into_model
           module_branch.set_dsl_parsed!(true)
         end

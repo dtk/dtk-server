@@ -140,12 +140,6 @@ module DTK
         git_command.pull(*args)
       end
       
-      # MOD_RESTRUCT-NEW deprecate below
-      def git_command__pull__checkout_form(branch_name, remote_name = nil)
-        remote_name ||= default_remote_name
-        git_command.pull(cmd_opts, remote_name, branch_name)
-      end
-      
       def git_command__rebase(branch_name, remote_name = nil)
         remote_name ||= default_remote_name
         git_command.rebase(cmd_opts, "#{remote_name}/#{branch_name}")

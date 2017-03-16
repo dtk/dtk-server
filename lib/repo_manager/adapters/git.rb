@@ -431,8 +431,7 @@ module DTK; class RepoManager
     end
 
     def pull_changes(remote_name = nil, remote_branch = nil, force = false)
-      # note: even though generated git comamdn hash --git-dir set, need to chdir
-      Dir.chdir(@path) do
+      checkout(@branch) do
         git_command__pull(@branch, remote_branch || @branch, remote_name, force)
       end
     end

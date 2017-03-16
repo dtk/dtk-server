@@ -572,12 +572,12 @@ module DTK
         branch: branch,
         is_workspace: true,
         type: local.module_type.to_s,
-        version: version_field(local.version),
-        dsl_parsed: false
+        version: version_field(local.version)
       }
       assigns.merge!(repo_id: repo_idh.get_id) if repo_idh
       assigns.merge!(ancestor_id: ancestor_branch_idh.get_id) if ancestor_branch_idh
       assigns.merge!(current_sha: opts[:current_sha]) if opts[:current_sha]
+      assigns.merge!(dsl_parsed: false) unless opts[:dont_set_dsl_parsed]
 
       # if installing specific component/service module version mark branch as frozen
       is_frozen = opts[:frozen].nil? ? (local.version && !local.version.eql?('master')) : opts[:frozen]

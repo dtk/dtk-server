@@ -143,7 +143,7 @@ module DTK
         if common_module = CommonModule.exists(get_default_project, :common_module, namespace, module_name, version)
           unless common_module[:repo]
             common_local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
-            CommonModule.create_repo_from_component_info(get_default_project, common_local_params)
+            CommonModule.create_repo_from_component_info(get_default_project, common_local_params, dont_set_dsl_parsed: true)
           end
         end
 

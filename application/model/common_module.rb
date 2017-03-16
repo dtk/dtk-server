@@ -53,12 +53,12 @@ module DTK
       ModuleRepoInfo.new(module_branch)
     end
 
-    def self.create_repo_from_component_info(project, common_module_local_params)
+    def self.create_repo_from_component_info(project, common_module_local_params, opts = {})
       common_module_local    = common_module_local_params.create_local(project)
       component_module_local = common_module_local.merge(module_type: :component_module)
       Model.Transaction do
         common_module_repo  = create_repo(common_module_local, no_initial_commit: true, delete_if_exists: true)
-        common_module_branch = create_module_and_branch_obj?(project, common_module_repo.id_handle, common_module_local, return_module_branch: true)
+        common_module_branch = create_module_and_branch_obj?(project, common_module_repo.id_handle, common_module_local, opts.merge(return_module_branch: true))
         Info::Component.populate_common_module_repo_from_component_info(component_module_local, common_module_branch, common_module_repo)
         ModuleRepoInfo.new(common_module_branch)
       end

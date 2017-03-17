@@ -226,15 +226,7 @@ module DTK
 
       def self.errors_in_node_action_result?(result, action = nil)
         if result[:statuscode] != 0
-          action_results = result[:data] ? result[:data][:data] : []
-
-          errors = (action_results||[]).select { |r| r[:status] != 0 }.uniq
-
-          error_message = errors.collect do |r|
-            r[:error] ? r[:error] : "Command '#{r[:description]}' failed with status code #{r[:status]}, output: #{r[:stderr]}"
-          end.join(', ')
-
-          [{ message: error_message || "Node Error ocurred, cannot provide additional data" }]
+          status_code_errors(result)
         else
           payload = result[:data] || {}
           errors_in_node_action_payload?(payload, action)
@@ -242,6 +234,25 @@ module DTK
       end
 
       private
+
+      def self.status_code_errors(result)
+        error_message = 
+          if message = result[:statusmsg] || result[:error_type]
+            "Action failed with status code #{result[:statuscode]}: #{message}"
+          else
+            # TODO: legacy that needs to be cleaned up
+            action_results = (result[:data] || {})[:data] || []
+            errors = action_results.select { |r| r[:status] != 0 }.uniq
+            if errors.empty?
+              nil
+            else
+              errors.map do |r|
+                r[:error] ? r[:error] : "Action '#{r[:description]}' failed with status code #{r[:status]}, output: #{r[:stderr]}"
+              end.join(', ')
+            end
+          end
+        [{ message: error_message || "Unknown error" }]
+      end
 
       def self.config_agent_object?(action)
         if action

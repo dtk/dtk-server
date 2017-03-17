@@ -41,6 +41,8 @@ module DTK; class ActionDef; class Content
             end
             attr_val = calculate_dyn_attr_value(evaluated_fn, attrs)
             dyn_attrs << { attribute_id: attr_id, attribute_val: attr_val }
+          rescue SyntaxError => syntax_error
+            fail SyntaxErrorParsing.error(d_attr, syntax_error)
           rescue SecurityError => e
             pp [e, e.backtrace[0..5]]
             return { error: e }
@@ -89,6 +91,28 @@ module DTK; class ActionDef; class Content
 
       def type
         'ruby_function'
+      end
+
+      module SyntaxErrorParsing
+        def self.error(dynamic_attribute, syntax_error)
+          error_msg = "Syntax error in inline ruby function to compute attribute '#{dynamic_attribute}'"
+          if error_info = parse?(syntax_error.message)
+            error_msg << " on line #{error_info.line_number}: #{error_info.message}"
+          else
+            error_msg << ": #{syntax_error.message}"
+          end
+          SyntaxError.new(error_msg)
+        end
+
+        private
+
+        ParsedInfo = Struct.new(:line_number, :message)
+        def self.parse?(err_msg)
+          if err_msg =~ /^\(eval\):([0-9]+): syntax error, (.+$)/
+            ParsedInfo.new($1, $2)
+          end
+        end
+
       end
     end
   end

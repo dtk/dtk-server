@@ -101,8 +101,8 @@ module DTK
     end
 
     def self.delete(project, namespace, module_name, version, opts = {})
-      if versions = opts[:versions]
-        versions.each do |version|
+      if version.is_a?(Array)
+        version.each do |version|
           delete_version(project, namespace, module_name, version, opts)
         end
       else

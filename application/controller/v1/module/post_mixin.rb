@@ -90,11 +90,6 @@ module DTK
         version = request_params(:version) || 'master'
         opts = { from_common_module: true }
 
-        if version.eql?('all')
-          versions = required_request_params(:versions)
-          opts.merge!(versions: versions)
-        end
-
         rest_ok_response CommonModule.delete(get_default_project, namespace, module_name, version, opts)
       end
 

@@ -22,7 +22,11 @@ module DTK
     class Linux < self
       def git_command__add_squashed_subtree(prefix, external_repo, external_branch)
         external_repo_url = self.class.repo_url(external_repo.display_name)
-        git_command__rm_r(prefix) #just to be safe
+        # subtree add only works if prefix does not exist
+        if Dir.exists?("#{@path}/#{prefix}")
+          git_command__rm_r(prefix) 
+          commit("Removing '#{prefix}' to allow subtree add")
+        end
         git_command.subtree(cmd_opts, 'add', '--prefix', prefix, external_repo_url, external_branch, '--squash')
       end
       private

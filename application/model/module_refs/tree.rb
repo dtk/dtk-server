@@ -264,7 +264,9 @@ module DTK
         module_refs.each do |module_ref|
           unless module_branch = ndx_module_branches[module_ref[:id]]
             err_msg = "A module '#{module_ref.module_name}' with namespace '#{module_ref.namespace}'"
-            err_msg << " with version '#{version}'" if version = module_ref.version_string
+            if version = module_ref.version_string
+              err_msg << " with version '#{version}'" 
+            end
             err_msg << " is referenced in a dependency, but does not exist"
             fail ErrorUsage, err_msg
           end

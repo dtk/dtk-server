@@ -18,7 +18,7 @@ GIT
 
 GIT
   remote: git://github.com/dtk/dtk-dsl.git
-  revision: cc077e98439e5bccc98611203f8bdc516c24e67f
+  revision: 4b641caf0b95d0d1e477044aca4c0aa031e4b2d0
   branch: DTK-2843-handle-install-and-stage
   specs:
     dtk-dsl (1.0.3)

@@ -85,7 +85,12 @@ module DTK; class Attribute
 
     def update_and_propagate_dynamic_attributes(attr_mh, dyn_attr_val_info)
       attribute_rows = dyn_attr_val_info.map { |r| { :id => r[:id], dynamic_attribute_value_field() => r[:attribute_value] } }
-      update_and_propagate_attributes(attr_mh, attribute_rows, add_state_changes: false, partial_value: false)
+      # TODO: breakinginto individual rows to avoid bug DTK-2946, which manifests if attributes have differenttypes; more
+      #  efficient would be to group by datatype
+      # update_and_propagate_attributes(attr_mh, attribute_rows, add_state_changes: false, partial_value: false)
+      attribute_rows.each do |attribute_row|
+        update_and_propagate_attributes(attr_mh, [attribute_row], add_state_changes: false, partial_value: false)
+      end
     end
 
     def propagate_and_optionally_add_state_changes(attr_mh, changed_attrs_info, opts = {})

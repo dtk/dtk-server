@@ -69,7 +69,7 @@ module DTK
           if opts[:include_versions]
             version = module_branch.version_print_form(Opts.new(default_version_string: MASTER_VERSION))
             unless version.eql?('CURRENT')
-              version_print = r[:dsl_parsed] ? "*#{version}" : version
+              version_print = r[:dsl_parsed] ? version : "*#{version}"
               (mdl[:version_array] ||= []) << version_print
             end
           end

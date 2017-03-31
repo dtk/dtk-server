@@ -25,14 +25,16 @@ module DTK; module CommonDSL
           matching_port_links = port_links.select{ |port_link| port_link[:display_name].eql?(relative_distinguished_name) }
           matching_link       = nil
 
-          if matching_port_links.size > 1
-            result.add_error_msg("Unexpected that component link '#{relative_distinguished_name}' match multiple links")
-          else
+          case matching_port_links.size
+          when 1
             matching_link = matching_port_links.first
+            DTK::Assembly::Instance::ServiceLink.delete(matching_link.id_handle)
+            result.add_item_to_update(:assembly)
+          when 0
+            result.add_error_msg("Unexpected that component link '#{relative_distinguished_name}' matches no links")
+          else
+            result.add_error_msg("Unexpected that component link '#{relative_distinguished_name}' matches multiple links")
           end
-
-          DTK::Assembly::Instance::ServiceLink.delete(matching_link.id_handle)
-          result.add_item_to_update(:assembly)
         end
 
       end

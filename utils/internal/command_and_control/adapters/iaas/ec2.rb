@@ -47,7 +47,9 @@ module DTK
       end
 
       def self.node_property_component_names
-        Reified::Node::ComponentType.names
+        # Reified::Node::ComponentType.names
+        # # TODO: initial implementation of node components does not have abstract node
+        ec2_node_component_names
       end
 
       def self.ec2_node_component_names

@@ -23,13 +23,11 @@ module DTK
         require_relative('assembly/attributes')
         require_relative('assembly/nodes')
         require_relative('assembly/components')
-        require_relative('assembly/node_property_component')
+        require_relative('assembly/node_component')
 
         module Mixin
           def process_assembly!(parsed_assembly, module_local_params, opts = {})
-            if parsed_nodes = parsed_assembly.val(:Nodes)
-              NodePropertyComponent.create_node_property_components?(parsed_nodes)
-            end
+            NodeComponent.add_node_components!(parsed_assembly)
 
             if module_version = module_local_params.version
               module_version = nil if module_version.eql?('master')

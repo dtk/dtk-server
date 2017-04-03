@@ -83,15 +83,9 @@ module DTK; module CommonDSL
         end
         
         def tags?
-          ret = []
-          # mark hidden any node_property component
-          ret << :hidden if node_property_component_types.include?(@aug_component[:component_type])
-          ret.empty? ? nil : ret
+          nil
         end
 
-        def node_property_component_types
-          @@node_property_component_types ||= CommandAndControl.node_property_component_types
-        end
 
       end
     end

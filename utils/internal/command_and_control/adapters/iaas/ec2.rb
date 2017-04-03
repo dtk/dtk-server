@@ -46,21 +46,10 @@ module DTK
         Reified::Node.create_nodes_from_service(service, params)
       end
 
-      def self.node_property_component_names
-        # Reified::Node::ComponentType.names
-        # # TODO: initial implementation of node components does not have abstract node
-        ec2_node_component_names
-      end
-
-      def self.ec2_node_component_names
-        # hardcoded for now
-        ["ec2::node"]
-      end
 
       def self.node_property_legal_attributes
         Reified::Node.legal_attributes
       end
-
 
       DefaultRegion = 'us-east-1'
 

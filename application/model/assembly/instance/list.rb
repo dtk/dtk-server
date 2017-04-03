@@ -205,9 +205,9 @@ module DTK; class  Assembly
         node_property_cmp =
           if node.node_group_member?
             parent_ng = find_parent_of_node_group_member?(node)
-            parent_ng.ret_node_property_component
+            parent_ng.node_property_component
           else
-            node.ret_node_property_component
+            node.node_property_component
           end
 
         if node_property_cmp
@@ -244,12 +244,9 @@ module DTK; class  Assembly
         aug_cmps      = get_augmented_components(opts)
         node_cmp_name = opts[:node_cmp_name]
 
-        # DTK-2535 1. In service instance, hide the 'node property components'
-        list_components__remove_node_property_components!(aug_cmps)
-
         cmps_print_form = aug_cmps.map do |r|
           namespace      = r[:namespace]
-          node_name      = "#{r[:node][:display_name]}/"
+          node_name      = "#{node_component_ref(r[:node])}/"
           version        = r[:version]
           hide_node_name = node_cmp_name || Node.is_assembly_wide_node?(r[:node])
           display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(r, namespace)}"
@@ -415,10 +412,15 @@ module DTK; class  Assembly
 
       private
 
+      def node_component_ref(node)
+        # TODO: hard coding this to ec2
+        NodeComponent.node_component_ref(:ec2, node.display_name)
+      end
+
       def convert_to_component_print_form(aug_cmp, opts = Opts.new)
         node_cmp_name  = opts[:node_cmp_name]
         namespace      = aug_cmp[:namespace]
-        node_name      = "#{aug_cmp[:node][:display_name]}/"
+        node_name      = "#{node_component_ref(aug_cmp[:node])}/"
         hide_node_name = node_cmp_name || Node.is_assembly_wide_node?(aug_cmp[:node])
         display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(aug_cmp, namespace)}"
         aug_cmp.hash_subset(:id).merge(display_name: display_name)

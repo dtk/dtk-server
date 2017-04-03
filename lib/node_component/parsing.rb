@@ -16,13 +16,9 @@
 # limitations under the License.
 #
 module DTK
-  require_relative('common_dsl')
-  require_relative('node_component')
-  require_relative('mustache_template')
-  require_relative('doc_generator')
-  require_relative('model')
-  require_relative('parsed_dsl')
-  require_relative('repo_manager')
-  require_relative('config_agent')
-  require_relative('response_info')
+  module NodeComponent
+    module Parsing
+      require_relative('parsing/common_module')
+    end
+  end
 end

@@ -121,49 +121,8 @@ module DTK
       end
     end
 
-    # returns name of all components that capture the node property
-    def self.node_property_component_names
-      TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_component_names }
-    end
-
-    def self.ec2_node_component_names
-      TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).ec2_node_component_names }
-    end
-
-    # returns type of all components that capture the node property
-    def self.node_property_component_types(type = nil)
-      property_component = node_property_component_names.map { |n| n.gsub(/::/,'__') }
-      node_component = ec2_node_component_names.map { |n| n.gsub(/::/,'__') }
-
-      case type
-      when :properties
-        return property_component
-      when :node
-        return node_component
-      else
-        return property_component.concat(node_component)
-      end
-    end
-
-    def self.node_property_component_type(type = nil)
-      types = node_property_component_types(type)
-      types.size == 1 ? types.first : fail(Error, "Unexepectd that node_property_component_types.size != 1")
-    end
-
     def self.node_property_legal_attributes
       TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_legal_attributes }
-    end
-
-    def self.node_property_component
-      if node_property_component_names.size == 1
-        node_property_component_names.first
-      else
-        fail Error.new("Currently not supported to have multiple node components!")
-      end
-    end
-
-    def self.ec2_node_component
-      ec2_node_component_names.first
     end
 
     def self.references_image?(target, node_external_ref)

@@ -16,13 +16,17 @@
 # limitations under the License.
 #
 module DTK
-  require_relative('common_dsl')
-  require_relative('node_component')
-  require_relative('mustache_template')
-  require_relative('doc_generator')
-  require_relative('model')
-  require_relative('parsed_dsl')
-  require_relative('repo_manager')
-  require_relative('config_agent')
-  require_relative('response_info')
+  module NodeComponent
+    require_relative('node_component/parsing')
+
+    NODE_COMPONENT_COMPONENT = 'node'
+    def self.node_component_type_display_name(iaas_type)
+      "#{iaas_type}::#{NODE_COMPONENT_COMPONENT}"
+    end
+
+    def self.node_component_ref(iaas_type, node_name)
+      "#{node_component_type_display_name(iaas_type)}[#{node_name}]"
+    end
+
+  end
 end

@@ -130,12 +130,22 @@ module DTK
       ndx_components.values
     end
 
-    def ret_node_property_component
-      if node_property_component_name = CommandAndControl.node_property_component
-        node_components = get_components(filter: [:eq, :display_name, node_property_component_name.gsub('::', '__')])
-        return nil if node_components.empty?
-        node_components.first
-      end
+    def node_component_ref
+      # TODO: hard-wired to ec2 
+      @node_component_ref ||= NodeComponent.node_component_ref(:ec2, display_name)
+    end
+
+    def node_property_component
+      @node_property_component ||= get_node_property_component
+    end
+    def get_node_property_component
+      internal_name = node_component_ref.gsub(/::/,'__')
+      sp_hash = {
+        filter: [:and, 
+                 [:eq, :assembly_id, get_field?(:assembly_id)], 
+                 [:eq, :display_name, internal_name]]
+      }
+      Component::Instance.get_obj(model_handle(:component), sp_hash)
     end
 
     def self.assembly_node_print_form?(obj)

@@ -16,9 +16,9 @@
 # limitations under the License.
 #
 module DTK
-  class CommonModule
-    module Import::ServiceModule::Assembly
-      module NodeComponent
+  module NodeComponent
+    module Parsing
+      module CommonModule
         # For each node, it creates a node_component if needed using the relevant node attributes in parsed node
         def self.add_node_components!(parsed_assembly)
           return unless parsed_nodes = parsed_assembly.val(:Nodes)
@@ -28,18 +28,19 @@ module DTK
         private
 
         def self.add_node_component!(parsed_assembly, parsed_node)
-          node_component = find_or_add_ec2_node_component!(parsed_assembly, parsed_node) # TODO: DTK-2967: hard-wired ec2 node
+          # TODO: DTK-2967: node component is hard wired to iaas-specfic and to ec2 as iaas choice
+          node_component = find_or_add_node_component!(parsed_assembly, :ec2, parsed_node) 
           move_attributes_to_node_component!(node_component, parsed_node)
         end
 
-        def self.find_or_add_ec2_node_component!(parsed_assembly, parsed_node)
+        def self.find_or_add_node_component!(parsed_assembly, iaas_type, parsed_node)
           ret = nil
           parsed_components  = parsed_assembly.val(:Components)
-          ec2_node_component = "#{CommandAndControl.ec2_node_component}[#{parsed_node.name}]"
-          if match = matching_component?(parsed_components, ec2_node_component)
+          node_component_ref = NodeComponent.node_component_ref(iaas_type, parsed_node.name)
+          if match = matching_component?(parsed_components, node_component_ref)
             ret = match
           else
-            ret = canonical_hash.merge(ec2_node_component => canonical_hash)
+            ret = canonical_hash.merge(node_component_ref => canonical_hash)
             unless parsed_components
               parsed_components = canonical_hash
               parsed_assembly.set(:Components, parsed_components)

@@ -131,9 +131,11 @@ module DTK
           recursive: recursive,
           donot_delete_assembly_from_database: true
         }
+
+        nodes = assembly_instance.info_about(:nodes, datatype: :node)
         assembly_instance.exec__delete(Opts.new(opts_hash))
 
-        rest_ok_response
+        rest_ok_response nodes
       end
 
       def uninstall

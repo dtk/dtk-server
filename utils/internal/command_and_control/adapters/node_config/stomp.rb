@@ -122,16 +122,26 @@ module DTK
         handler.sendreq_with_callback(msg, agent, context, filter)
       end
 
-      def self.check_alive(filter, callbacks, context)
+      def self.check_alive(filter, callbacks, context, task_idh)
         # send a ping message, to make sure dtk-arbiter is up and listening
         # this request will have a much shorter timeout
         callbacks_checkalive = {
           on_msg_received: proc do |msg|
-            Log.info("Check-alive succeeded") 
+            Log.info("Check-alive succeeded.") 
+            DTK::Task.checked_nodes.delete(msg[:pbuilderid])
+          end,
+          on_timeout: proc do |msg|
+            Log.error("Check-alive timeout detected.")
+            task_idh.create_object.add_event_and_errors(:complete_timeout, :server, ["Detected that dtk-arbiter is down"])
+            DTK::Workflow.cancel(task_idh.create_object)
+            DTK::Task.checked_nodes.clear
           end
         }
-        callbacks_checkalive[:on_timeout] = callbacks[:on_timeout]
         context_checkalive = context.merge(:timeout => DEFAULT_TIMEOUT_CHECKALIVE)
+        pbuilderid = filter["fact"].find{ |f| f[:value] if f[:fact].eql?('pbuilderid') }[:value]
+        DTK::Task.add_to_checked(pbuilderid)
+        Log.debug "Check-alive added to checked nodes: #{DTK::Task.checked_nodes}"
+
         async_agent_call('discovery', 'ping', {}, filter, callbacks_checkalive, context_checkalive)
       end
 
@@ -159,10 +169,14 @@ module DTK
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
         mc_info = mc_info_for_config_agent(config_agent)
-     
+
         # do a check-alive of arbiter
         # unless discovery or git_access agents are called since they're executed on node initialization
-        check_alive(filter, callbacks, context) unless ['git_access', 'discovery'].include? mc_info[:agent]
+        # or node already checked
+        unless DTK::Task.checked_nodes.include?(pbuilderid)
+          check_alive(filter, callbacks, context, task_idh) unless ['git_access', 'discovery'].include? mc_info[:agent]
+        end
+     
         async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
       end
 

@@ -82,6 +82,15 @@ module DTK
       Status::Type.task_has_status?(self, status)
     end
 
+    def self.checked_nodes
+      @checked_nodes ||= []
+    end
+
+    def self.add_to_checked(node_id)
+      @checked_nodes ||= []
+      @checked_nodes << node_id
+    end
+
     # TODO: see if we can deprecate guarded_by
     # returns list (possibly empty) of subtask idhs that guard this
     def guarded_by(external_guards)

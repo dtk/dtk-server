@@ -130,9 +130,10 @@ module DTK
       ndx_components.values
     end
 
+    ASSEMBLY_WIDE_NODE_NAME = 'assembly_wide'
     def node_component_ref
       # TODO: hard-wired to ec2 
-      @node_component_ref ||= NodeComponent.node_component_ref(:ec2, display_name)
+      @node_component_ref ||= (is_assembly_wide_node? ? ASSEMBLY_WIDE_NODE_NAME : NodeComponent.node_component_ref(:ec2, display_name))
     end
 
     def node_property_component

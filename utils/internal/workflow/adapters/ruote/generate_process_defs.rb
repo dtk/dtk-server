@@ -15,19 +15,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require 'json'
 module DTK
   module WorkflowAdapter
-    # TODO: reformat so this is not mixin but class
     module RuoteGenerateProcessDefs
-      r8_nested_require('generate_process_defs', 'context')
-      r8_nested_require('generate_process_defs', 'bulk_create')
+      require_relative('generate_process_defs/context')
+      require_relative('generate_process_defs/bulk_create')
       include ContextMixin
 
       @@count = 0
       def compute_process_def(task, guards)
         count = @@count += 1 #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
-        top_task_idh = task.id_handle()
+        top_task_idh = task.id_handle
         name = "process-#{count}"
         #TODO: this needs to be changed if we use guards again in the temporal ordering
         context = Context.create(guards, top_task_idh)
@@ -89,7 +87,7 @@ module DTK
         # TODO: below put in hack for DTK-2471 that needs to be cleaned up
         # Does not allow mixed bosh and non bosh
         # This intercepts a create node stages subtask and bulks it up so taht it is a set of queue node tasks with last being dispatch
-        case task.temporal_type()
+        case task.temporal_type
           when :leaf
             BulkCreate.create_node?(task, context, self) || compute_process_executable_action(task, context)
           when :sequential
@@ -127,11 +125,11 @@ module DTK
           'top_task_idh' => context.top_task_idh
         }
 
-        task_id = task.id()
-        Ruote::TaskInfo.set(task_id, context.top_task_idh.get_id(), task_info, task_type: opts[:task_type])
+        task_id = task.id
+        Ruote::TaskInfo.set(task_id, context.top_task_idh.get_id, task_info, task_type: opts[:task_type])
         participant_params = opts.merge(
           task_id: task_id,
-          top_task_id: context.top_task_idh.get_id()
+          top_task_id: context.top_task_idh.get_id
         )
         participant(name, participant_params)
       end

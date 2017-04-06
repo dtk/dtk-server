@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#TODO: clean this file up; much cut and paste. moving methods we want to keep towards the top
 module DTK; class Task
   module CreateClassMixin
     def create_from_assembly_instance?(assembly, opts = {})
@@ -175,11 +174,13 @@ module DTK; class Task
           # TODO: misnomer Action::PowerOnNode; they really just do 'wait until started' 
           start_nodes_task = NodesTask.create_subtask(Action::PowerOnNode, task_mh, node_scs)
         end
+        # TODO: DTK-2938; remove
         # create nodes
-        unless nodes_to_create.empty?
-          node_scs = StateChange::Assembly.node_state_changes(:create_node, assembly, target_idh, just_leaf_nodes: true, nodes: nodes_to_create)
-          create_nodes_task = NodesTask.create_subtask(Action::CreateNode, task_mh, node_scs)
-        end
+        # unless nodes_to_create.empty?
+        #  node_scs = StateChange::Assembly.node_state_changes(:create_node, assembly, target_idh, just_leaf_nodes: true, nodes: nodes_to_create)
+        #  create_nodes_task = NodesTask.create_subtask(Action::CreateNode, task_mh, node_scs)
+        # end
+        create_nodes_task = nil
        when :smoketest then nil # smoketest should not create a node
        else
         fail Error.new("Unexpected component_type (#{component_type})")

@@ -132,8 +132,13 @@ module DTK
           end,
           on_timeout: proc do |msg|
             Log.error("Check-alive timeout detected.")
-            task_idh.create_object.add_event_and_errors(:complete_timeout, :server, ["Detected that dtk-arbiter is down"])
-            DTK::Workflow.cancel(task_idh.create_object)
+            begin
+              DTK::Workflow.cancel(task_idh.create_object)
+              task_idh.create_object.add_event_and_errors(:complete_timeout, :server, ["Detected that dtk-arbiter is down"])
+            rescue Exception => e
+              Log.error("Error in cancel ExecuteOnNode #{e.class}")
+              fail e unless e.is_a?(ErrorUsage)
+            end
             DTK::Task.checked_nodes.clear
           end
         }

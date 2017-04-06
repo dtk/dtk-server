@@ -36,26 +36,23 @@ module DTK
 
       ####semantic processing
       def decomposition(task, context)
-        action = task[:executable_action]
-        # Task::Action::PowerOnNode must be tested before Task::Action::CreateNode
-        if action.is_a?(Task::Action::PowerOnNode)
+        action      = task[:executable_action]
+        action_type = action.type_for_workflow
+
+        case action_type
+        when :power_on_node
           detect_when_ready = participant_executable_action(:power_on_node, task, context, task_type: 'power_on_node', task_end: true, task_start: true)
           sequence([detect_when_ready])
-        elsif action.is_a?(Task::Action::InstallAgent)
-          main = participant_executable_action(:install_agent, task, context, task_type: 'install_agent', task_start: true, task_end: true)
-          sequence([main])
-        elsif action.is_a?(Task::Action::ExecuteSmoketest)
-          main = participant_executable_action(:execute_smoketest, task, context, task_type: 'execute_smoketest', task_start: true, task_end: true)
-          sequence([main])
-        elsif action.is_a?(Task::Action::CreateNode)
-          main = participant_executable_action(:create_node, task, context, task_start: true)
+        when :create_node
+          main = participant_executable_action(:execute_on_node, task, context, task_start: true)
           post_part = participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
           sequence(main, post_part)
-        elsif action.is_a?(Task::Action::ConfigNode)
-          guards = nil
-          if guard_tasks = context.get_guard_tasks(action)
-            guards = ret_guards(guard_tasks)
-          end
+        when :config
+          # TODO: double check that guards are deprecated and remove code if so
+          guards = 
+            if guard_tasks = context.get_guard_tasks(action)
+              ret_guards(guard_tasks)
+            end
 
           if action.execute_on_server?
             main = participant_executable_action(:execute_on_node, task, context, task_type: 'config_node', task_end: true, task_start: true)
@@ -70,15 +67,26 @@ module DTK
             sequence_tasks = [guards, sync_agent_code, authorize_action, main].compact
             sequence(*sequence_tasks)
           end
-        elsif action.is_a?(Task::Action::DeleteFromDatabase)
+        when :delete_from_database
           main = participant_executable_action(:delete_from_database, task, context, task_type: 'delete_from_database', task_start: true, task_end: true)
           sequence([main])
-        elsif action.is_a?(Task::Action::CommandAndControlAction)
+        when :command_and_control_action
           main = participant_executable_action(:command_and_control_action, task, context, task_type: 'delete_node', task_start: true, task_end: true)
           sequence([main])
-        elsif action.is_a?(Task::Action::Cleanup)
+        when :cleanup
           main = participant_executable_action(:cleanup, task, context, task_type: 'cleanup', task_start: true, task_end: true)
           sequence([main])
+
+        # TODO: These are deprecated
+        when :install_agent
+          main = participant_executable_action(:install_agent, task, context, task_type: 'install_agent', task_start: true, task_end: true)
+          sequence([main])
+        when :execute_smoketest
+          main = participant_executable_action(:execute_smoketest, task, context, task_type: 'execute_smoketest', task_start: true, task_end: true)
+          sequence([main])
+
+        else
+          fail Error, "Unexpected action type for workflow '#{action_type}'"
         end
       end
 

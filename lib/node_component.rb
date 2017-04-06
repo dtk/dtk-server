@@ -19,13 +19,22 @@ module DTK
   module NodeComponent
     require_relative('node_component/parsing')
 
+    SUPPORTED_IAAS_TYPES = [:ec2]
     NODE_COMPONENT_COMPONENT = 'node'
+    def self.node_component_type(iaas_type)
+      "#{iaas_type}__#{NODE_COMPONENT_COMPONENT}"
+    end
+
     def self.node_component_type_display_name(iaas_type)
       "#{iaas_type}::#{NODE_COMPONENT_COMPONENT}"
     end
 
     def self.node_component_ref(iaas_type, node_name)
       "#{node_component_type_display_name(iaas_type)}[#{node_name}]"
+    end
+
+    def self.component_types
+      @component_types ||= SUPPORTED_IAAS_TYPES.map { |iaas_type| node_component_type(iaas_type) }
     end
 
   end

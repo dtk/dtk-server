@@ -40,12 +40,23 @@ module DTK; class Task; class Template
 
       private
 
-      ACTION_PROVDER_TYPES = [:puppet, :dynamic]
+
+      ACTION_PROVDER_TYPES = [:puppet, :dynamic, :ruby_function]
       def config_agent_type_from_provider?
-        if provider_string = self[:provider]
+        if provider_string = canonical_provider_name(self[:provider])
           if matching_type = ACTION_PROVDER_TYPES.find { |type| provider_string == provider_string_name(type) }
             provider_symbol_name(matching_type)
           end
+        end
+      end
+
+      # TODO: woudl like to remove this mapping
+      CANONICAL_PROVIDER_MAPPING = {
+        'dtk' => 'ruby_function'
+      }
+      def canonical_provider_name(provider_string)
+        if provider_string
+          CANONICAL_PROVIDER_MAPPING[provider_string] || provider_string
         end
       end
 

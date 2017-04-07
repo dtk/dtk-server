@@ -489,7 +489,11 @@ module DTK
       self.class.Transaction(*args, &block)
     end
     def self.Transaction(*args, &block)
-      @db.transaction(*args, &block)
+      if R8::Config[:debug_no_transactions]
+        yield 
+      else
+        @db.transaction(*args, &block)
+      end
     end
 
     def self.RollbackTransaction

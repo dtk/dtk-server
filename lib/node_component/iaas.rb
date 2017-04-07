@@ -38,9 +38,9 @@ module DTK
 
       def update_attribute!(attribute_name, attribute_value)
         attribute = attribute(attribute_name)
-        attribute[:value_asserted] = nil
-        attribute[:value_derived]  = attribute_value
-        Attribute.update_and_propagate_dynamic_attributes(attribute_model_handle, [attribute]) 
+        attribute[:value_asserted] = attribute_value
+        attribute[:value_derived]  = nil
+        Attribute.update_and_propagate_attributes(attribute_model_handle, [attribute], add_state_changes: false, partial_value: false)
       end
       
       private

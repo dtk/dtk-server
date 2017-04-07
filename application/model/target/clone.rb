@@ -72,7 +72,7 @@ module DTK
         level = 1
         nodes = clone_copy_output.children_objects(level, :node, cols: [:display_name, :external_ref, :type])
         return if nodes.empty?
-        SpecialNodeAttributes.process!(nodes)
+        SpecialNodeAttributes.process(nodes, assembly)
 
         # The method create_target_refs_and_links?
         # - creates if needed target refs and links to them

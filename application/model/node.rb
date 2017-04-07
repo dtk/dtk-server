@@ -130,23 +130,8 @@ module DTK
       ndx_components.values
     end
 
-    ASSEMBLY_WIDE_NODE_NAME = 'assembly_wide'
     def node_component_ref
-      # TODO: hard-wired to ec2 
-      @node_component_ref ||= (is_assembly_wide_node? ? ASSEMBLY_WIDE_NODE_NAME : NodeComponent.node_component_ref(:ec2, display_name))
-    end
-
-    def node_property_component
-      @node_property_component ||= get_node_property_component
-    end
-    def get_node_property_component
-      internal_name = node_component_ref.gsub(/::/,'__')
-      sp_hash = {
-        filter: [:and, 
-                 [:eq, :assembly_id, get_field?(:assembly_id)], 
-                 [:eq, :display_name, internal_name]]
-      }
-      Component::Instance.get_obj(model_handle(:component), sp_hash)
+      @node_component_ref ||= NodeComponent.node_component_ref_from_node(self)
     end
 
     def self.assembly_node_print_form?(obj)
@@ -269,6 +254,10 @@ module DTK
 
     ######### Model apis
 
+    def assembly
+      @assembly ||= get_assembly? || fail("Unexpcted that node '#{display_name} not tied to an assembly")
+    end
+ 
     def get_assembly?(cols = nil)
       if assembly_id = get_field?(:assembly_id)
         sp_hash = {

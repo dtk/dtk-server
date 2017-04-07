@@ -62,7 +62,7 @@ module DTK; class Component
       def get_attributes(component_idhs, opts = {})
         get_component_children(component_idhs, ::DTK::Attribute, :attribute, opts)
       end
-
+      
       def get_implementations(component_idhs)
         ret = []
         return ret if component_idhs.empty?

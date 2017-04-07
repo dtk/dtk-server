@@ -163,8 +163,6 @@ module DTK; class  Assembly
                 target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
             end
           end
-          set_os_type_on_node_group_member!(node) if node[:os_type].nil? and is_node_group_member?(node.id_handle)
-          set_ec2_properties_attributes?(node)
 
           node.sanitize!
 
@@ -187,13 +185,6 @@ module DTK; class  Assembly
       end
       private :list_nodes
 
-      # TODO: change so that node group members have os_type set, rather than neding to fill it in
-      def set_os_type_on_node_group_member!(node_group_member)
-        if node_group_parent = find_parent_of_node_group_member?(node_group_member)
-          node_group_member[:os_type] = node_group_parent.get_field?(:os_type)
-        end
-      end
-      private :set_os_type_on_node_group_member!
       def find_parent_of_node_group_member?(node_group_member)
         ng_mh = node_group_member.model_handle(:node_group)
         if ndx_node_group = NodeGroup.get_node_groups_containing_nodes(ng_mh, Node::Filter::NodeList.new([node_group_member.id_handle]))
@@ -203,34 +194,6 @@ module DTK; class  Assembly
         end
       end
       private :find_parent_of_node_group_member?
-
-      def set_ec2_properties_attributes?(node)
-        node_property_cmp =
-          if node.node_group_member?
-            parent_ng = find_parent_of_node_group_member?(node)
-            parent_ng.node_property_component
-          else
-            node.node_property_component
-          end
-
-        if node_property_cmp
-          attribute_values  = node_property_cmp.get_direct_attribute_values(:value)
-          external_ref      = node[:external_ref]||{}
-
-          NodePropertyAttributes.each do |np_attribute|
-            if !node[np_attribute] && !external_ref[np_attribute]
-              if value = (attribute_values[np_attribute] || {})[:value]
-                if np_attribute == :os_type
-                  node[np_attribute] = value
-                else
-                  external_ref.merge!(np_attribute => value)
-                end
-              end
-            end
-          end
-        end
-      end
-      NodePropertyAttributes = [:os_type, :size, :image]
 
       def set_node_display_name!(node)
         node[:display_name] = node.assembly_node_print_form

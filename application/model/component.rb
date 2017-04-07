@@ -154,7 +154,6 @@ module DTK
       NodeComponent.component_types.include?(get_field?(:component_type))
     end
 
-
     def self.pending_changes_cols
       [:id, :node_for_state_change_info, :display_name, :basic_type, :external_ref, :node_node_id, :only_one_per_node, :extended_base_id, :implementation_id, :group_id]
     end

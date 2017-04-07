@@ -128,7 +128,7 @@ module DTK
         callbacks_checkalive = {
           on_msg_received: proc do |msg|
             Log.info("Check-alive succeeded.") 
-            DTK::Task.checked_nodes.delete(msg[:pbuilderid])
+            DTK::Task.checked_nodes.delete_if { |h| h[msg[:pbuilderid]] }
           end,
           on_timeout: proc do |msg|
             Log.error("Check-alive timeout detected.")
@@ -144,7 +144,8 @@ module DTK
         }
         context_checkalive = context.merge(:timeout => DEFAULT_TIMEOUT_CHECKALIVE)
         pbuilderid = filter["fact"].find{ |f| f[:value] if f[:fact].eql?('pbuilderid') }[:value]
-        DTK::Task.add_to_checked(pbuilderid)
+        checkalive_validity = Time.now + DEFAULT_TIMEOUT_CHECKALIVE
+        DTK::Task.add_to_checked({pbuilderid => checkalive_validity})
         Log.debug "Check-alive added to checked nodes: #{DTK::Task.checked_nodes}"
 
         async_agent_call('discovery', 'ping', {}, filter, callbacks_checkalive, context_checkalive)
@@ -178,11 +179,23 @@ module DTK
         # do a check-alive of arbiter
         # unless discovery or git_access agents are called since they're executed on node initialization
         # or node already checked
-        unless DTK::Task.checked_nodes.include?(pbuilderid)
+
+        checked_nodes_match = DTK::Task.checked_nodes.select { |h| h[pbuilderid]}
+
+        if node_checked?(DTK::Task.checked_nodes, pbuilderid)
+          DTK::Task.checked_nodes.delete_if { |h| h[pbuilderid] }
+        else
           check_alive(filter, callbacks, context, task_idh) unless ['git_access', 'discovery'].include? mc_info[:agent]
         end
      
         async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
+      end
+
+      def self.node_checked?(checked_nodes, pbuilderid)
+        checked_nodes_match = checked_nodes.select { |h| h[pbuilderid]}.first
+        checked = checked_nodes_match && checked_nodes_match[pbuilderid] > Time.now
+        Log.debug("Node #{pbuilderid} already checked: #{checked}")
+        checked
       end
 
       # TODO: below is hack and should find more reliable way to pass in assembly

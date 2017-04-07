@@ -18,19 +18,22 @@
 module DTK
   module NodeComponent
     class IAAS
+      require_relative('iaas/mixin')
+
       TYPES = [:ec2]
       TYPES.each { |iaas_type| require_relative("iaas/#{iaas_type}") }
 
-      attr_reader :component, :node_name
-      def initialize(node_name, component_with_attributes)
+      attr_reader :component, :node_name, :assembly_name
+      def initialize(assembly_name, node_name, component_with_attributes)
+        @assembly_name  = assembly_name
         @node_name      = node_name
         @component      = component_with_attributes.component
         # @ndx_attributes is indexed by symbolized attribute name
         @ndx_attributes = component_with_attributes.attributes.inject({}) { |h, attr| h.merge!(attr.display_name.to_sym => attr) } 
       end
 
-      def self.create(iaas_type, node_name, component_with_attributes)
-        klass(iaas_type).new(node_name, component_with_attributes)
+      def self.create(iaas_type, assembly_name, node_name, component_with_attributes)
+        klass(iaas_type).new(assembly_name, node_name, component_with_attributes)
       end
 
       def update_attribute!(attribute_name, attribute_value)
@@ -44,6 +47,10 @@ module DTK
       
       def attribute(attribute_name) 
         @ndx_attributes[attribute_name] || fail(Error, "Illegal attribute '#{attribute_name}' for component '#{component.display_name}'")
+      end
+
+      def attribute_value?(attribute_name) 
+        attribute(attribute_name)[:attribute_value]
       end
 
       def attribute_model_handle

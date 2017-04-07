@@ -17,10 +17,10 @@
 #
 module DTK; class Attribute
   class Pattern
-    r8_nested_require('pattern', 'type')
-    r8_nested_require('pattern', 'assembly')
-    r8_nested_require('pattern', 'node')
-    r8_nested_require('pattern', 'term')
+    require_relative('pattern/type')
+    require_relative('pattern/assembly')
+    require_relative('pattern/node')
+    require_relative('pattern/term')
 
     def self.node_name
       (pattern =~ NodeComponentRegexp ? Regexp.last_match(1) : raise_unexpected_pattern(pattern))
@@ -43,7 +43,7 @@ module DTK; class Attribute
     private_class_method :raise_unexpected_pattern
 
     def self.create_attr_pattern(base_object, attr_term, opts = {})
-      create(attr_term, base_object, opts).set_parent_and_attributes!(base_object.id_handle(), opts)
+      create(attr_term, base_object, opts).set_parent_and_attributes!(base_object.id_handle, opts)
     end
 
     # set_attributes can create or set attributes depending on options in opts
@@ -68,7 +68,7 @@ module DTK; class Attribute
 
         # if service instance has components check if there is a node with same name as component
         # if true then it is ambiguous whether using node or component attribute
-        check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?()
+        check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?
 
         init_av_pair = av_pair.clone
         check_if_node_property(av_pair) unless opts[:skip_node_property_check]
@@ -103,7 +103,7 @@ module DTK; class Attribute
           all_attr_idhs += ngm_attr_idhs
         end
         all_attr_idhs.each do |idh|
-          attribute_rows << { id: idh.get_id(), value_asserted: value }.merge(attr_properties)
+          attribute_rows << { id: idh.get_id, value_asserted: value }.merge(attr_properties)
         end
       end
 

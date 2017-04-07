@@ -19,7 +19,19 @@ module DTK
   class NodeComponent::IAAS
     class Ec2 < self
       def set_special_attributes
+        update_attribute!(:dtk_agent_info, dtk_agent_info)
         pp [:set_special_attributes, self]
+      end
+
+      private
+
+      def dtk_agent_info
+        {
+          node_config_server_host: CommandAndControl.node_config_server_host,
+          git_server_url: RepoManager.repo_url,
+          git_server_dns: RepoManager.repo_server_dns,
+          fingerprint: RepoManager.repo_server_ssh_rsa_fingerprint
+        }
       end
     end
   end

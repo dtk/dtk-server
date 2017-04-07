@@ -25,15 +25,30 @@ module DTK
       def initialize(node_name, component_with_attributes)
         @node_name      = node_name
         @component      = component_with_attributes.component
-        # @ndx_attributes is indexed by attribute name
-        @ndx_attributes = component_with_attributes.attributes.inject({}) { |h, attr| h.merge!(attr.display_name => attr) } 
+        # @ndx_attributes is indexed by symbolized attribute name
+        @ndx_attributes = component_with_attributes.attributes.inject({}) { |h, attr| h.merge!(attr.display_name.to_sym => attr) } 
       end
 
       def self.create(iaas_type, node_name, component_with_attributes)
         klass(iaas_type).new(node_name, component_with_attributes)
       end
 
+      def update_attribute!(attribute_name, attribute_value)
+        attribute = attribute(attribute_name)
+        attribute[:value_asserted] = nil
+        attribute[:value_derived]  = attribute_value
+        Attribute.update_and_propagate_dynamic_attributes(attribute_model_handle, [attribute]) 
+      end
+      
       private
+      
+      def attribute(attribute_name) 
+        @ndx_attributes[attribute_name] || fail(Error, "Illegal attribute '#{attribute_name}' for component '#{component.display_name}'")
+      end
+
+      def attribute_model_handle
+        @attribute_model_handle ||= component.model_handle(:attribute)
+      end
 
       def self.klass(iaas_type)
         fail Error, "Illegal iaas_type '#{iaas_type}'" unless TYPES.include?(iaas_type)

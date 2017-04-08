@@ -21,10 +21,12 @@ module DTK
     require_relative('node_component/iaas')
 
     def self.node_components(nodes, assembly)
-      assembly_name = assembly.display_name
+      # indexed by display_name
+      ndx_nodes = nodes.inject({}) { |h, node | h.merge(node.display_name => node) }
       get_components_with_attributes(nodes, assembly).map do |component_with_attr|
         component = component_with_attr.component
-        IAAS.create(iaas_type(component), assembly_name, node_name(component), component_with_attr) 
+        node      = ndx_nodes[node_name(component)]
+        IAAS.create(iaas_type(component), assembly, node, component_with_attr) 
       end
     end
 

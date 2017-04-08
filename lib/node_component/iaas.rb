@@ -23,17 +23,23 @@ module DTK
       TYPES = [:ec2]
       TYPES.each { |iaas_type| require_relative("iaas/#{iaas_type}") }
 
-      attr_reader :component, :node_name, :assembly_name
-      def initialize(assembly_name, node_name, component_with_attributes)
-        @assembly_name  = assembly_name
-        @node_name      = node_name
-        @component      = component_with_attributes.component
+      attr_reader :component, :node, :assembly
+      def initialize(assembly, node, component_with_attributes)
+        @assembly  = assembly
+        @node      = node
+        @component = component_with_attributes.component
         # @ndx_attributes is indexed by symbolized attribute name
         @ndx_attributes = component_with_attributes.attributes.inject({}) { |h, attr| h.merge!(attr.display_name.to_sym => attr) } 
       end
+      def assembly_name
+        assembly.display_name
+      end
+      def node_name
+        node.display_name
+      end
 
-      def self.create(iaas_type, assembly_name, node_name, component_with_attributes)
-        klass(iaas_type).new(assembly_name, node_name, component_with_attributes)
+      def self.create(iaas_type, assembly, node, component_with_attributes)
+        klass(iaas_type).new(assembly, node, component_with_attributes)
       end
 
       def update_attribute!(attribute_name, attribute_value)

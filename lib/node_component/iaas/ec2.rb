@@ -31,11 +31,15 @@ module DTK
       private
       
       def dtk_agent_info
-        {
+        template_bindings = {
           node_config_server_host: CommandAndControl.node_config_server_host,
           git_server_url: RepoManager.repo_url,
           git_server_dns: RepoManager.repo_server_dns,
           fingerprint: RepoManager.repo_server_ssh_rsa_fingerprint
+        }
+        {         
+          install_script: CommandAndControl.node_config_adapter_install_script(node, template_bindings),
+          cloud_config: CommandAndControl.node_config_adapter_cloud_config_options(node, template_bindings)
         }
       end
       

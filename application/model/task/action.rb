@@ -92,7 +92,7 @@ module DTK
           component_action = component_actions.first
 
           return nil unless component = component_action[:component]
-          return nil unless component.node_component?
+          return nil unless component.is_node_component?
 
           action_method_obj = component_action[:action_method]
           action_method = (action_method_obj && action_method_obj[:method_name]) || :create

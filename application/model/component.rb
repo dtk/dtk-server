@@ -149,11 +149,17 @@ module DTK
     def get_node
       get_obj_helper(:node)
     end
-    
-    def node_component?
-      NodeComponent.component_types.include?(get_field?(:component_type))
+
+    # returns true if component is a node component 
+    def is_node_component?
+      NodeComponent.is_node_component?(self)
     end
 
+    # returns a DTK::NodeComponent object if the component is a node component
+    def node_component?
+      NodeComponent.node_component?(component)
+    end
+    
     def self.pending_changes_cols
       [:id, :node_for_state_change_info, :display_name, :basic_type, :external_ref, :node_node_id, :only_one_per_node, :extended_base_id, :implementation_id, :group_id]
     end

@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module NodeComponent
+  class NodeComponent
     module Parsing
       module CommonModule
         # For each node, it creates a node_component if needed using the relevant node attributes in parsed node

@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  module NodeComponent
+  class NodeComponent
     module Parsing
       require_relative('parsing/common_module')
     end

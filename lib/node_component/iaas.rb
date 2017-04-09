@@ -16,27 +16,12 @@
 # limitations under the License.
 #
 module DTK
-  module NodeComponent
-    class IAAS
+  class NodeComponent
+    class IAAS < self
       require_relative('iaas/mixin')
 
       TYPES = [:ec2]
       TYPES.each { |iaas_type| require_relative("iaas/#{iaas_type}") }
-
-      attr_reader :component, :node, :assembly
-      def initialize(assembly, node, component_with_attributes)
-        @assembly  = assembly
-        @node      = node
-        @component = component_with_attributes.component
-        # @ndx_attributes is indexed by symbolized attribute name
-        @ndx_attributes = component_with_attributes.attributes.inject({}) { |h, attr| h.merge!(attr.display_name.to_sym => attr) } 
-      end
-      def assembly_name
-        assembly.display_name
-      end
-      def node_name
-        node.display_name
-      end
 
       def self.create(iaas_type, assembly, node, component_with_attributes)
         klass(iaas_type).new(assembly, node, component_with_attributes)
@@ -66,6 +51,18 @@ module DTK
       def self.klass(iaas_type)
         fail Error, "Illegal iaas_type '#{iaas_type}'" unless TYPES.include?(iaas_type)
         const_get iaas_type.to_s.capitalize 
+      end
+
+      
+      HOST_ATTRIBUTES = [:host_addresses_ipv4]
+      def link_host_attributes_to_node
+        ndx_node_attributes = node.get_node_attributes(filter: [:oneof, :display_name, HOST_ATTRIBUTES.map(&:to_s)]).inject({}) do  |h, attribute| 
+          h.merge(attribute.display_name.to_sym => attribute)
+        end
+
+        HOST_ATTRIBUTES.each do |attribute_name|
+          pp [:link_host_attributes_to_node, attribute_name, {component_attr: attribute(attribute_name), node_attr: ndx_node_attributes[attribute_name] }]
+        end
       end
 
     end

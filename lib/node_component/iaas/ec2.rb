@@ -25,7 +25,7 @@ module DTK
         update_attribute!(:dtk_agent_info, dtk_agent_info)
         update_attribute!(:tags, tags)
         update_attribute!(:client_token, ClientToken.generate)
-        pp [:set_special_attributes, self]
+        link_host_attributes_to_node
       end
       
       private

@@ -23,7 +23,8 @@ module DTK
       TYPES = [:ec2]
       TYPES.each { |iaas_type| require_relative("iaas/#{iaas_type}") }
 
-      def self.create(iaas_type, assembly, node, component_with_attributes)
+      def self.create(assembly, node, component_with_attributes)
+        iaas_type = iaas_type(component_with_attributes.component)
         klass(iaas_type).new(assembly, node, component_with_attributes)
       end
 
@@ -34,34 +35,28 @@ module DTK
         Attribute.update_and_propagate_attributes(attribute_model_handle, [attribute], add_state_changes: false, partial_value: false)
       end
       
-      private
-      
-      def attribute(attribute_name) 
-        @ndx_attributes[attribute_name] || fail(Error, "Illegal attribute '#{attribute_name}' for component '#{component.display_name}'")
-      end
-
-      def attribute_value?(attribute_name) 
-        attribute(attribute_name)[:attribute_value]
-      end
-
-      def attribute_model_handle
-        @attribute_model_handle ||= component.model_handle(:attribute)
-      end
-
       def self.klass(iaas_type)
         fail Error, "Illegal iaas_type '#{iaas_type}'" unless TYPES.include?(iaas_type)
         const_get iaas_type.to_s.capitalize 
       end
 
-      
-      HOST_ATTRIBUTES = [:host_addresses_ipv4]
-      def link_host_attributes_to_node
-        ndx_node_attributes = node.get_node_attributes(filter: [:oneof, :display_name, HOST_ATTRIBUTES.map(&:to_s)]).inject({}) do  |h, attribute| 
-          h.merge(attribute.display_name.to_sym => attribute)
+      module HostAttributes
+        ATTRIBUTES = [:host_addresses_ipv4]
+        def self.link_to_node(node_component)
+          node_attributes    = node_component.node.get_node_attributes(filter: [:oneof, :display_name, ATTRIBUTES.map(&:to_s)])
+          ndx_node_attributes = node_attributes.inject({}) {  |h, attribute| h.merge(attribute.display_name.to_sym => attribute) }
+
+          ATTRIBUTES.each do |attribute_name|
+            component_attribute = node_component.attribute(attribute_name)
+            node_attribute      = ndx_node_attributes[attribute_name]
+            add_attribute_link(node_component.assembly, component_attribute, node_attribute)
+          end
         end
 
-        HOST_ATTRIBUTES.each do |attribute_name|
-          pp [:link_host_attributes_to_node, attribute_name, {component_attr: attribute(attribute_name), node_attr: ndx_node_attributes[attribute_name] }]
+        private
+        
+        def self.add_attribute_link(assembly, component_attribute, node_attribute)
+          AttributeLink::AdHoc.create_simple(assembly, input_attribute: node_attribute, output_attribute: component_attribute)
         end
       end
 

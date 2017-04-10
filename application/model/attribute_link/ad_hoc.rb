@@ -38,6 +38,22 @@ module DTK
         end
       end
 
+      # params should have
+      #  :input_attribute
+      #  :output_attribute
+      def self.create_simple(assembly, params)
+        input_attribute  = params[:input_attribute]
+        output_attribute = params[:output_attribute]
+
+        link = { input_id: input_attribute.id, output_id: output_attribute.id }
+        opts_create = {
+          donot_update_port_info: true,
+          donot_create_pending_changes: true,
+          attr_rows: [input_attribute, output_attribute]
+        }
+        AttributeLink.create_attribute_links(assembly.id_handle, [link], opts_create)
+      end
+
       # type should be :source or :target
       def attribute_pattern(type)
         @attr_pattern[type]

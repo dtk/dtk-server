@@ -17,9 +17,12 @@
 #
 module DTK
   class NodeComponent
-    require_relative('node_component/parsing')
     require_relative('node_component/iaas')
+    require_relative('node_component/parsing')
+    require_relative('node_component/naming_class_mixin')
 
+    extend NamingClassMixin
+    
     attr_reader :component, :node, :assembly
     def initialize(assembly, node, component_with_attributes)
       @assembly  = assembly
@@ -35,6 +38,15 @@ module DTK
       node.display_name
     end
 
+    def attribute(attribute_name) 
+      fail(Error, "Illegal attribute '#{attribute_name}' for component '#{component.display_name}'") unless ndx_attributes.has_key?(attribute_name)  
+      ndx_attributes[attribute_name]
+    end
+
+    def attribute_value(attribute_name) 
+      attribute(attribute_name)[:attribute_value]
+    end
+
     # returns an array of DTK::NodeComponents
     def self.node_components(nodes, assembly)
       # indexed by display_name
@@ -42,13 +54,14 @@ module DTK
       get_components_with_attributes(nodes, assembly).map do |component_with_attr|
         component = component_with_attr.component
         node      = ndx_nodes[node_name(component)]
-        IAAS.create(iaas_type(component), assembly, node, component_with_attr) 
+        IAAS.create(assembly, node, component_with_attr) 
       end
     end
 
-    # returns true if component is a node component 
-    def self.is_node_component?(component)
-      NodeComponent.component_types.include?(component.get_field?(:component_type))
+    # returns a DTK::NodeComponent object
+    def self.node_component_from_node(node)
+      node_components([node], assembly_from_node(node)).first || 
+        fail(Error, "Unexpected that there is no node component associated with node object '#{node.display_name}'")
     end
 
     # returns a DTK::NodeComponent object if the component is a node component
@@ -57,36 +70,22 @@ module DTK
       if is_node_component?(component)
         assembly = assembly_from_component(component)
         node     = node_from_component(component, assembly)
-        IAAS.create(iaas_type(component), assembly, node, component_with_attributes(component))
+        IAAS.create(assembly, node, component_with_attributes(component))
       end
     end
 
-    def self.set_special_node_component_attributes(nodes, assembly)
-      node_components(nodes, assembly).each { |node_component| node_component.set_special_attributes }
-    end
-
-    NODE_COMPONENT_COMPONENT = 'node'
-    COMPONENT_TYPE_DELIM = '__'
-    COMPONENT_TYPE_DISPLAY_NAME_DEMILM = '::'
-    def self.node_component_type(iaas_type)
-      "#{iaas_type}#{COMPONENT_TYPE_DELIM}#{NODE_COMPONENT_COMPONENT}"
-    end
-
-    def self.node_component_type_display_name(iaas_type)
-      "#{iaas_type}#{COMPONENT_TYPE_DISPLAY_NAME_DEMILM}#{NODE_COMPONENT_COMPONENT}"
-    end
-
-    def self.node_component_ref(iaas_type, node_name)
-      "#{node_component_type_display_name(iaas_type)}[#{node_name}]"
-    end
-
-    ASSEMBLY_WIDE_NODE_NAME = 'assembly_wide'
-    def self.node_component_ref_from_node(node)
-      # TODO: DTK-2967: below hard-wired to ec2
-      node.is_assembly_wide_node? ? ASSEMBLY_WIDE_NODE_NAME : node_component_ref(:ec2, node.display_name)
+    # returns true if component is a node component 
+    def self.is_node_component?(component)
+      NodeComponent.component_types.include?(component.get_field?(:component_type))
     end
 
     private
+
+    def attribute_model_handle
+      @attribute_model_handle ||= component.model_handle(:attribute)
+    end
+
+    attr_reader :ndx_attributes
 
     def self.component_types
       @component_types ||= IAAS::TYPES.map { |iaas_type| node_component_type(iaas_type) }
@@ -122,10 +121,6 @@ module DTK
         fail(Error, "Unexpected that no matching node for componnet '#{component.display_name}'")
     end
     
-    def self.iaas_type(component)
-      component.get_field?(:component_type).split(COMPONENT_TYPE_DELIM).first.to_sym
-    end
-
     def self.node_name(component)
       if component.display_name =~ /\[(.+)\]$/
         $1
@@ -135,7 +130,11 @@ module DTK
     end
 
     def self.assembly_from_component(component)
-      component.model_handle.createIDH(model_name: :assembly_instance, id: component[:assembly_id]).create_object
+      component.model_handle.createIDH(model_name: :assembly_instance, id: component.get_field?(:assembly_id)).create_object
+    end
+
+    def self.assembly_from_node(node)
+      node.model_handle.createIDH(model_name: :assembly_instance, id: node.get_field?(:assembly_id)).create_object
     end
 
     def self.components_with_attributes(components)

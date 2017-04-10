@@ -133,6 +133,9 @@ module DTK
     def node_component_ref
       @node_component_ref ||= NodeComponent.node_component_ref_from_node(self)
     end
+    def node_component
+      @node_component ||= NodeComponent.node_component_from_node(self)
+    end
 
     def self.assembly_node_print_form?(obj)
       if obj.is_a?(Node)
@@ -544,12 +547,8 @@ module DTK
       self.class.pbuilderid(self)
     end
     def self.pbuilderid(node)
-      unless ret = CommandAndControl.pbuilderid(node)
-        fail Error.new("Node (#{node.get_field?(:display_name)}) with id (#{node.id}) does not have an #{PBuilderIDPrintName}")
-      end
-      ret
+      CommandAndControl.pbuilderid(node) || fail(Error, "Node '#{node.display_name}' with id #{node.id} does not have an internal communication ID")
     end
-    PBuilderIDPrintName = 'internal communication ID'
 
     def persistent_dns
       get_hostname_external_ref()[:persistent_dns]

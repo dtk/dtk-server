@@ -25,7 +25,7 @@ module DTK
         update_attribute!(:dtk_agent_info, dtk_agent_info)
         update_attribute!(:tags, tags)
         update_attribute!(:client_token, ClientToken.generate)
-        link_host_attributes_to_node
+        HostAttributes.link_to_node(self)
       end
       
       private
@@ -44,7 +44,7 @@ module DTK
       end
       
       def tags
-        (attribute_value?(:tags) || {}).merge('Name' => Tag.name(self))
+        (attribute_value(:tags) || {}).merge('Name' => Tag.name(self))
       end
     end
   end

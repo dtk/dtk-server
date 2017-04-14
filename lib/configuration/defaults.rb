@@ -249,6 +249,10 @@ R8::Config[:debug][:development_mode] = false
 R8::Config[:debug][:show_backtrace] = false
 R8::Config[:debug][:arbiter] = false
 
+# Performance logging
+R8::Config[:performance_log][:enable] = false
+R8::Config[:performance_log][:path] = '/tmp'
+
 # Grit config
 R8::Config[:grit][:debug] = false
 R8::Config[:grit][:git_timeout] = 120

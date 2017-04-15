@@ -85,7 +85,7 @@ module DTK
 
         # we map our heartbeat calls to requst IDs
         if is_heartbeat
-          msg_request_id = CommandAndControlAdapter::StompMultiplexer.heartbeat_registry_entry(pbuilder_id)
+          msg_request_id = multiplexer.heartbeat_registry_entry(pbuilder_id)
           if msg_request_id
             Log.debug("Heartbeat message received, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
           else
@@ -98,16 +98,14 @@ module DTK
           end
         end
 
-        # deregister_incoming(msg_request_id)
-
-        unless callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry(msg_request_id)
+        unless callbacks = multiplexer.callbacks_list[msg_request_id]
           # discard message if not the one requested
           Log.info("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
           return
         end
 
         # making sure that timeout threads do not run overtime
-        CommandAndControlAdapter::StompMultiplexer.process_response(original_msg, msg_request_id)
+        multiplexer.process_response(original_msg, msg_request_id)
       end
     end
 
@@ -154,6 +152,10 @@ module DTK
 
       decoded_message = SSHCipher.decrypt_sensitive(encrypted_message[:payload], encrypted_message[:ekey], encrypted_message[:esecret])
       decoded_message
+    end
+
+    def multiplexer
+      CommandAndControlAdapter::StompMultiplexer
     end
 
   end

@@ -27,8 +27,6 @@ module DTK
     class StompMultiplexer < ProtocolMultiplexer
       include Singleton
 
-      # this map is used to keep track of sent / received requirst_ids
-      @@callback_registry = {}
       @@callback_heartbeat_registry = {}
 
       HeartbeatLock = Mutex.new
@@ -57,19 +55,8 @@ module DTK
         end
       end
 
-      def register_with_listener(request_id, callbacks)
-        @@callback_registry[request_id] = callbacks
-        Log.info("Stomp message ID '#{request_id}' has been registered! Waiting for callback.")
-      end
-
       def self.process_response(msg, request_id)
         instance.process_response(msg, request_id)
-      end
-
-      def self.callback_registry(request_id)
-        DTKDebug.pp('callback_registry', { request_id: request_id, callback_registr: @@callback_registry[request_id], callbacks_list: callbacks_list })
-#        DTKDebug.pp('callback_registry', { request_id: request_id, callback_registry: @@callback_registry[request_id]})
-        @@callback_registry[request_id]
       end
 
       def self.heartbeat_registry_entry(pbuilder_id)
@@ -84,7 +71,6 @@ module DTK
       end
 
       def sendreq_with_callback(msg, agent, context_with_callbacks, filter = {})
-        DTKDebug.pp('sendreq_with_callback', { agent: agent, context: context_with_callbacks, caller: caller[0..7] })
         trigger = {
           generate_request_id: proc do |client|
             generate_request_id
@@ -97,8 +83,6 @@ module DTK
 
             # when heartbeat signal comes trough we need to map it to existing request id
             register_with_heartbeat_listener(pbuilderid, reqid) if 'discovery'.eql?(agent)
-
-            register_with_listener(reqid, Callbacks.create(context_with_callbacks[:callbacks]))
           end
         }
 

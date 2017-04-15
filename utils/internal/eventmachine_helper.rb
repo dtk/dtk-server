@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require 'rubygems'
 require 'eventmachine'
 module DTKDebug
   def self.pp(*args)
@@ -23,8 +22,8 @@ module DTKDebug
   end
 end
 
-module XYZ
-  module R8EM
+module DTK
+  module EventMachineHelper
     # include EM::Protocols::Stomp
     def self.add_timer(*args, &block)
       ::EM.add_timer(*args, &block)

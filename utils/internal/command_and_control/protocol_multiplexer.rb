@@ -85,7 +85,7 @@ module DTK
 
       def add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
         @lock.synchronize do
-          timer = R8EM.add_timer(timeout) { process_request_timeout(request_id) }
+          timer = EventMachineHelper.add_timer(timeout) { process_request_timeout(request_id) }
           @callbacks_list[request_id] = callbacks.merge(timer: timer)
 DTKDebug.pp('add_reqid_callbacks', { request_id: request_id, timeout: timeout, timer: timer, callbacks_list: @callbacks_list } )
           @count_info[request_id] = expected_count

@@ -51,6 +51,7 @@ module DTK
         end
         
         def cancel_timer
+          DTKDebug.pp('Callbacks#cancel_timer', self)
           if timer = self[:timer]
             R8EM.cancel_timer(timer)
           end

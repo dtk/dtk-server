@@ -16,13 +16,17 @@
 # limitations under the License.
 #
 module DTK
-  require_relative('common_dsl')
-  require_relative('mustache_template')
-  require_relative('doc_generator')
-  require_relative('model')
-  require_relative('parsed_dsl')
-  require_relative('repo_manager')
-  require_relative('config_agent')
-  require_relative('response_info')
-  require_relative('agent_info')
+  class AgentInfo
+    @agent_info = {}
+    AGENT_INFO_LOCK = Mutex.new
+
+    Info = Struct.new(:alive_timestamp)
+
+    def self.process_received_heartbeat_message(agent_id)
+      # TODO: write garbage collection for @agent_info
+      AGENT_INFO_LOCK.synchronize do
+        @agent_info[agent_id] = Info.new(Time.now)
+      end
+    end
+  end
 end

@@ -43,7 +43,6 @@ module DTK
         request_id = trigger[:generate_request_id].call(@protocol_handler)
         callbacks = Callbacks.create(context[:callbacks])
         timeout = context[:timeout] || DefaultTimeout
-DTKDebug.pp('process_request', { request_id: request_id, timeout: timeout, caller: caller[0..10] })
         expected_count = context[:expected_count] || ExpectedCountDefault
         add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
         trigger[:send_message].call(@protocol_handler, request_id)
@@ -88,7 +87,7 @@ DTKDebug.pp('process_request', { request_id: request_id, timeout: timeout, calle
         @lock.synchronize do
           timer = R8EM.add_timer(timeout) { process_request_timeout(request_id) }
           @callbacks_list[request_id] = callbacks.merge(timer: timer)
-DTKDebug.pp('add_reqid_callbacks', { caller: caller[0..7], request_id: request_id, timeout: timeout, timer: timer, callbacks_list: @callbacks_list } )
+DTKDebug.pp('add_reqid_callbacks', { request_id: request_id, timeout: timeout, timer: timer, callbacks_list: @callbacks_list } )
           @count_info[request_id] = expected_count
         end
       end
@@ -101,7 +100,7 @@ DTKDebug.pp('add_reqid_callbacks', { caller: caller[0..7], request_id: request_i
         ret = nil
 
         @lock.synchronize do
-DTKDebug.pp('get_and_remove_reqid_callbacks', { count_info: @count_info, request_id: request_id, caller: caller[0..10] }) 
+DTKDebug.pp('get_and_remove_reqid_callbacks', { count_info: @count_info, request_id: request_id })
           if opts[:force_delete]
             @count_info[request_id] = 0
           else

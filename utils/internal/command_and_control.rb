@@ -20,9 +20,10 @@ module DTK
   module CommandAndControlAdapter
   end
   class CommandAndControl
-    r8_nested_require('command_and_control', 'adapters/iaas')
-    r8_nested_require('command_and_control', 'adapters/node_config')
-    r8_nested_require('command_and_control', 'install_script')
+    require_relative('command_and_control/adapters/iaas')
+    require_relative('command_and_control/adapters/node_config')
+    require_relative('command_and_control/install_script')
+    require_relative('command_and_control/protocol_multiplexer')
 
     def self.create_without_task
       new()

@@ -122,6 +122,7 @@ module DTK
         handler.sendreq_with_callback(msg, agent, context, filter)
       end
 
+      # TODO: move DTK::Task.checked_nodes to DTK::AgentInfo to unify this and AgentInfo which keeps track of heartbeats received
       def self.check_alive(filter, callbacks, context, task_idh, &callback_on_success)
         # send a ping message, to make sure dtk-arbiter is up and listening
         # this request will have a much shorter timeout

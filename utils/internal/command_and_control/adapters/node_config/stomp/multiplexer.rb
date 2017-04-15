@@ -17,19 +17,11 @@
 #
 require 'singleton'
 
-
-require File.expand_path('../../../protocol_multiplexer', File.dirname(__FILE__))
-require File.expand_path('../../../../ssh_cipher', File.dirname(__FILE__))
-
 module DTK
   module CommandAndControlAdapter
 
     class StompMultiplexer < ProtocolMultiplexer
       include Singleton
-
-      @@callback_heartbeat_registry = {}
-
-      HeartbeatLock = Mutex.new
 
       def self.create(stomp_client)
         instance.set(stomp_client)
@@ -48,21 +40,8 @@ module DTK
         })
       end
 
-      def register_with_heartbeat_listener(pbuilderid, request_id)
-        HeartbeatLock.synchronize do
-          @@callback_heartbeat_registry[pbuilderid] = request_id
-          Log.info("Stomp heartbeat message with pbuilderid '#{pbuilderid}' has been registered to request id '#{request_id}'. Waiting for callback.")
-        end
-      end
-
       def self.process_response(msg, request_id)
         instance.process_response(msg, request_id)
-      end
-
-      def self.heartbeat_registry_entry(pbuilder_id)
-        HeartbeatLock.synchronize do
-          @@callback_heartbeat_registry.delete(pbuilder_id)
-        end
       end
 
       def send_ping_request
@@ -75,27 +54,22 @@ module DTK
           generate_request_id: proc do |client|
             generate_request_id
           end,
-          send_message: proc do |client, reqid|
+          send_message: proc do |client, request_id|
             pbuilderid = filter['fact'].first[:value]
 
-            message = create_message(reqid, msg, agent, pbuilderid)
+            message = create_message(request_id, msg, agent, pbuilderid)
             client.publish(message)
-
-            # when heartbeat signal comes trough we need to map it to existing request id
-            register_with_heartbeat_listener(pbuilderid, reqid) if 'discovery'.eql?(agent)
           end
         }
 
         process_request(trigger, context_with_callbacks)
       end
 
-    private
-
+      private
+      
       def generate_request_id
-        DTKDebug.pp('generate_request_id', { caller: caller[0..7] })
         ::MCollective::SSL.uuid.gsub("-", "")
       end
-
 
     end
   end

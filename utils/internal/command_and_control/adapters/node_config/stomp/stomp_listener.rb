@@ -50,62 +50,26 @@ module DTK
       super
     end
 
-    def receive_msg msg
-      if "CONNECTED".eql?(msg.command)
+    def receive_msg(msg)
+      case msg.command
+      when 'CONNECTED'
         # success connecting to stomp
         subscribe(R8::Config[:arbiter][:queue])
         @stomp_rdy = true
         Log.debug "Connected to STOMP and subscribed to queue '#{R8::Config[:arbiter][:queue]}'"
-      elsif "ERROR".eql?(msg.command)
+      when 'ERROR'
         Log.error("Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ...", nil)
-         @stomp_rdy = true
+        @stomp_rdy = true
         raise "Not able to connect to STOMP, reason: #{msg.header['message']}. Stopping listener now ..."
       else
-        begin
-          original_msg = decode(msg.body)
-        rescue Exception => ex
-          Log.fatal("Error decrypting STOMP message, will have to ignore this message. Error: #{ex.message}")
-          return
-        end
-
-        # note pong messages are also heartbeat messages
-        msg_request_id = original_msg[:requestid]
-        pbuilder_id    = original_msg[:pbuilderid]
-        is_heartbeat   = original_msg[:heartbeat]
-        is_pong        = original_msg[:pong]
-
-        DTKDebug.pp('recieve_msg', [:requestid, :pbuilderid, :heartbeat, :pong].inject({}) { |h, k| h.merge(k => original_msg[k]) })
-
-        # decode message
-        if msg_request_id
-          Log.debug "Received STOMP message, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
-        else
-          Log.debug "Received STOMP heartbeat message from pbuilderid '#{pbuilder_id}' ..."
-        end
-
-        # we map our heartbeat calls to requst IDs
-        if is_heartbeat
-          msg_request_id = multiplexer.heartbeat_registry_entry(pbuilder_id)
-          if msg_request_id
-            Log.debug("Heartbeat message received, and mapped from '#{pbuilder_id}' to request ID '#{msg_request_id}'")
-          else
-            if is_pong
-              Log.debug "Received pong response from node with pbuilderid '#{pbuilder_id}' ..."
-            else
-              Log.debug("Heartbeat message received from '#{pbuilder_id}', dropping message since it could not be resolved to this tenant")
-            end
-            return
+        decoded_message = 
+          begin
+            decode(msg.body)
+          rescue Exception => e
+            Log.fatal("Error decrypting STOMP message, will have to ignore this message. Error: #{e.message}")
+            nil
           end
-        end
-
-        unless callbacks = multiplexer.callbacks_list[msg_request_id]
-          # discard message if not the one requested
-          Log.info("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
-          return
-        end
-
-        # making sure that timeout threads do not run overtime
-        multiplexer.process_response(original_msg, msg_request_id)
+        process_decoded_message(decoded_message) if decoded_message
       end
     end
 
@@ -136,7 +100,27 @@ module DTK
       end
     end
 
-  private
+    private
+
+    def process_decoded_message(message)
+      request_id   = message[:requestid]
+      pbuilder_id  = message[:pbuilderid]
+      is_heartbeat = message[:heartbeat]
+      # note pong messages are also heartbeat messages
+      is_pong      = message[:pong] # TODO: do we still need is_pong
+      
+      Log.debug_pp ['Received STOMP message', [:requestid, :pbuilderid, :heartbeat, :pong].inject({}) { |h, k| h.merge(k => message[k]) }]
+
+      AgentInfo.process_received_heartbeat_message(pbuilder_id) if is_heartbeat
+
+      if request_id 
+        if multiplexer.callbacks_list[request_id]
+          multiplexer.process_response(message, request_id)
+        else
+          Log.info("Stomp message received with ID '#{request_id}' is not for this tenant, and it is being ignored!") unless is_heartbeat
+        end
+      end
+    end
 
     def safe_print_stomp_password
       (R8::Config[:stomp][:password] || '').gsub(/./,'*')

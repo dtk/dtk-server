@@ -17,6 +17,12 @@
 #
 require 'rubygems'
 require 'eventmachine'
+module DTKDebug
+  def self.pp(*args)
+    ::DTK::Log.debug_pp(['DTKDebug:', args]) 
+  end
+end
+
 module XYZ
   module R8EM
     # include EM::Protocols::Stomp

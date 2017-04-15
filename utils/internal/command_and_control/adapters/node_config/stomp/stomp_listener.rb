@@ -74,6 +74,8 @@ module DTK
         is_heartbeat   = original_msg[:heartbeat]
         is_pong        = original_msg[:pong]
 
+        DTKDebug.pp('recieve_msg', [:requestid, :pbuilderid, :heartbeat, :pong].inject({}) { |h, k| h.merge(k => original_msg[k]) })
+
         # decode message
         if msg_request_id
           Log.debug "Received STOMP message, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
@@ -98,9 +100,7 @@ module DTK
 
         # deregister_incoming(msg_request_id)
 
-        callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
-
-        unless callbacks
+        unless callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry(msg_request_id)
           # discard message if not the one requested
           Log.info("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
           return

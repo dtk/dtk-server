@@ -15,15 +15,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module XYZ
+module DTK
   module CommandAndControlAdapter
     class ProtocolMultiplexer
+      require_relative('protocol_multiplexer/callbacks')
+      attr_reader :callbacks_list
+
       def initialize(protocol_handler = nil)
         # TODO: might put operations on @protocol_handler in mutex
         @protocol_handler = protocol_handler
         @callbacks_list = {}
         @count_info = {}
         @lock = Mutex.new
+      end
+
+      def self.callbacks_list
+        instance.callbacks_list
       end
 
       def set(protocol_handler)
@@ -36,12 +43,14 @@ module XYZ
         request_id = trigger[:generate_request_id].call(@protocol_handler)
         callbacks = Callbacks.create(context[:callbacks])
         timeout = context[:timeout] || DefaultTimeout
+DTKDebug.pp('process_request', { request_id: request_id, timeout: timeout, caller: caller[0..10] })
         expected_count = context[:expected_count] || ExpectedCountDefault
         add_reqid_callbacks(request_id, callbacks, timeout, expected_count)
         trigger[:send_message].call(@protocol_handler, request_id)
       end
 
-      DefaultTimeout = 30 * 60
+#      DefaultTimeout = 30 * 60
+      DefaultTimeout = 30 * 4
       ExpectedCountDefault = 1
 
       def process_response(msg, request_id)
@@ -49,7 +58,7 @@ module XYZ
         begin
           callbacks = get_and_remove_reqid_callbacks?(request_id)
           if (is_cancel_response(msg))
-            callbacks.process_cancel()
+            callbacks.process_cancel
           elsif callbacks
             callbacks.process_msg(msg, request_id)
           else
@@ -79,6 +88,7 @@ module XYZ
         @lock.synchronize do
           timer = R8EM.add_timer(timeout) { process_request_timeout(request_id) }
           @callbacks_list[request_id] = callbacks.merge(timer: timer)
+DTKDebug.pp('add_reqid_callbacks', { caller: caller[0..7], request_id: request_id, timeout: timeout, timer: timer, callbacks_list: @callbacks_list } )
           @count_info[request_id] = expected_count
         end
       end
@@ -91,71 +101,28 @@ module XYZ
         ret = nil
 
         @lock.synchronize do
+DTKDebug.pp('get_and_remove_reqid_callbacks', { count_info: @count_info, request_id: request_id, caller: caller[0..10] }) 
           if opts[:force_delete]
-            count = @count_info[request_id] = 0
+            @count_info[request_id] = 0
           else
-            # TODO: protection from obscure error
             if @count_info[request_id]
-              count = @count_info[request_id] -= 1
+              @count_info[request_id] -= 1
             else
               Log.error('@count_info[request_id] is null')
               return nil
             end
           end
-          if count == 0
+
+          if @count_info[request_id] < 1
             ret = @callbacks_list.delete(request_id)
-            ret.cancel_timer()
-          elsif count > 0
+            ret.cancel_timer
+          else
             ret = @callbacks_list[request_id]
           end
         end
         ret
       end
 
-      class Callbacks < HashObject
-        def self.create(callbacks_info)
-          self.new(callbacks_info)
-        end
-
-        def self.process_error(callbacks, error_obj)
-          unless callbacks && callbacks.process_error(error_obj)
-            Log.error("Error in process_response: #{error_obj.inspect}")
-            Log.error_pp(error_obj.backtrace)
-          end
-        end
-
-        def process_msg(msg, request_id)
-          callback = self[:on_msg_received]
-          if callback
-            callback.call(msg)
-          else
-            Log.error("Could not find process msg callback for request_id #{request_id}")
-          end
-        end
-
-        def process_timeout(_request_id)
-          callback = self[:on_timeout]
-          callback.call() if callback
-        end
-
-        def process_cancel
-          callback = self[:on_cancel]
-          callback.call() if callback
-        end
-
-        def cancel_timer
-          timer = self[:timer]
-          R8EM.cancel_timer(timer) if timer
-        end
-
-        def process_error(error_object)
-          callback = self[:on_error]
-          if callback
-            callback.call(error_object)
-            true
-          end
-        end
-      end
     end
   end
 end

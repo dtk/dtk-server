@@ -73,12 +73,14 @@ DTK::ReactorRoute.draw do
   ########## end: Services
 
   ########## Modules
-  get 'api/v1/modules'                           => 'v1::module/exists'
-  get 'api/v1/modules/list'                      => 'v1::module/list'
-  get 'api/v1/modules/assemblies'                => 'v1::module/assemblies'
-  get 'api/v1/modules/remote_modules'            => 'v1::module/remote_modules'
-  get 'api/v1/modules/module_dependencies'       => 'v1::module/module_dependencies'
-  get 'api/v1/modules/remote_module_info'        => 'v1::module/remote_module_info'
+  get 'api/v1/modules'                                     => 'v1::module/exists'
+  get 'api/v1/modules/list'                                => 'v1::module/list'
+  get 'api/v1/modules/assemblies'                          => 'v1::module/assemblies'
+  get 'api/v1/modules/remote_modules'                      => 'v1::module/remote_modules'
+  get 'api/v1/modules/module_dependencies'                 => 'v1::module/module_dependencies'
+  get 'api/v1/modules/remote_module_info'                  => 'v1::module/remote_module_info'
+  get 'api/v1/modules/local_module_dependencies'           => 'v1::module/local_module_dependencies'
+  get 'api/v1/modules/module_info_with_local_dependencies' => 'v1::module/module_info_with_local_dependencies'
 
   post 'api/v1/modules/create_empty_module'                 => 'v1::module/create_empty_module'
   post 'api/v1/modules/create_repo_from_component_info'     => 'v1::module/create_repo_from_component_info'

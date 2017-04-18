@@ -92,7 +92,7 @@ module DTK
         class ForProcess < self
           private
           # :workflow must be before ops that add and delete nodes and components
-          TYPE_ORDER = [:node, :component, :attribute, :workflow]
+          TYPE_ORDER = [:node, :componentlink, :component, :attribute, :workflow]
           OP_ORDER   = [:deleted, :modified, :added]
 
           def self.type_order_mapping

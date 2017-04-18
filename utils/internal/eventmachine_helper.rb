@@ -16,12 +16,6 @@
 # limitations under the License.
 #
 require 'eventmachine'
-module DTKDebug
-  def self.pp(*args)
-    ::DTK::Log.debug_pp(['DTKDebug:', args]) 
-  end
-end
-
 module DTK
   module EventMachineHelper
     # include EM::Protocols::Stomp

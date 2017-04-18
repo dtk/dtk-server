@@ -51,7 +51,6 @@ module DTK
         end
         
         def cancel_timer
-          DTKDebug.pp('Callbacks#cancel_timer', self)
           if timer = self[:timer]
             EventMachineHelper.cancel_timer(timer)
           end

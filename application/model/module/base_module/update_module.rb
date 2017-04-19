@@ -105,7 +105,7 @@ module DTK; class BaseModule
 
       if version && !version.eql?('') && !version.eql?('master')
         unless version = ModuleVersion.ret(version)
-          fail ::DTK::ErrorUsage::BadVersionValue.new(remote_params.version)
+          fail ::DTK::ErrorUsage::BadVersionValue.new(version)
         end
       end
 

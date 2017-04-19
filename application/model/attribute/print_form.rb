@@ -128,16 +128,12 @@ module DTK
       # if this is node component it returns an aug component that is converted to node component
       def self.convert_if_node_component?(aug_attr)
         if component_type = (aug_attr[:nested_component] || {})[:component_type]
-          if node_property_component_types.include?(component_type)
+          if NodeComponent.component_types.include?(component_type)
             aug_attr.hash_subset(*(aug_attr.keys - [:nested_component]))
           end
         end
       end
 
-      def self.node_property_component_types
-        @node_property_component_types ||= CommandAndControl.node_property_component_types
-      end
-      
       def self.linked_to_display_form(linked_to_obj)
         linked_to_obj.map { |r| r[:display_name] }.join(', ')
       end

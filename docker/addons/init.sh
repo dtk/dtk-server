@@ -203,6 +203,11 @@ ln -sf ${HOST_VOLUME}/server.conf /etc/dtk/${TENANT_USER}/server.conf
 #   sed -i "s|^encryption.password_salt.*\"\"|encryption.password_salt = \"${salt}\"|g" /etc/dtk/${TENANT_USER}/server.conf
 # fi
 
+# optionally install development bundle
+if [[ ${DEVELOPMENT} == true ]]; then
+  su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/server/current/application; bundle install --with development"
+fi
+
 # set up the tenant database and use
 su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/server/current/application; bundle exec ./utility/dbrebuild.rb"
 su - ${TENANT_USER} -c "cd /home/${TENANT_USER}/server/current/application; bundle exec ./utility/initialize.rb"

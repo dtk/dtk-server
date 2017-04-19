@@ -68,6 +68,13 @@ module DTK
         rest_ok_response CommonModule.get_module_dependencies(get_default_project, rsa_pub_key, remote_params)
       end
 
+      def local_module_dependencies
+        namespace, module_name = required_request_params(:namespace, :module_name)
+        version = request_params(:version)
+        local_params = local_params(:component_module, module_name, namespace: namespace, version: version)
+        rest_ok_response CommonModule.get_local_module_dependencies(get_default_project, local_params)
+      end
+
       def remote_modules
         rsa_pub_key = required_request_params(:rsa_pub_key)
         namespace   = ret_request_params(:module_namespace)
@@ -85,6 +92,18 @@ module DTK
         remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
         opts = version ? {} : { ignore_missing_base_version: true }
         rest_ok_response CommonModule::Remote.get_module_info(get_default_project, remote_params, rsa_pub_key, opts)
+      end
+
+      def module_info_with_local_dependencies
+        namespace, module_name = required_request_params(:namespace, :module_name)
+        version = request_params(:version) || 'master'
+        response = {}
+        if module_info = CommonModule.exists(get_default_project, :component_module, namespace, module_name, version, { ret_remote_info: true })
+          local_params = local_params(:component_module, module_name, namespace: namespace, version: version)
+          dependencies = CommonModule.get_local_module_dependencies(get_default_project, local_params)
+          response = { :module_info => module_info, :dependencies => dependencies }
+        end
+        rest_ok_response response
       end
     end
   end

@@ -79,6 +79,24 @@ module DTK
       Info::Component.get_module_dependencies(project, client_rsa_pub_key, remote_params)
     end
 
+    def self.get_local_module_dependencies(project, local_params)
+      if matching_module = get_class_from_module_type(local_params.module_type).matching_module_with_module_branch?(project, local_params.namespace, local_params.module_name, local_params.version)
+        Info::Component.get_local_module_dependencies(project, matching_module, local_params)
+      else
+        missing = { 'name' => local_params[:module_name], 'type' => local_params[:module_type], 'version' => local_params[:version], 'namespace' => local_params[:namespace] }
+        {
+          missing_module_components:[missing],
+          dependency_warnings: [],
+          required_modules: []
+        }
+        # fail ErrorUsage.new("DTK module '#{DTK::Common::PrettyPrintForm.module_ref(module_name, opts)}' does not exist!")
+      end
+    end
+
+    def self.module_info_with_local_dependencies(project, module_list)
+      Info::Component.module_info_with_local_dependencies(project, module_list)
+    end
+
     # opts can have keys:
     #  :ret_remote_info
     def self.exists(project, module_type, namespace, module_name, version, opts = {})

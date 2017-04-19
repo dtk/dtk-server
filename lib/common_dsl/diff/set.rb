@@ -138,6 +138,8 @@ module DTK
         type       = diff_class.type
 
         parse_hash.each do |key, parse_object|
+          parse_object[:component_links] = parse_object.delete("links") unless parse_object["links"].nil?
+            
           qualified_key =  parent_qualified_key.create_with_new_element?(type, key)
           if gen_hash.has_key?(key)
             if diff = gen_hash[key].diff?(parse_object, qualified_key, opts)

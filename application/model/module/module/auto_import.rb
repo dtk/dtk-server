@@ -23,7 +23,15 @@ module DTK
       opts = Opts.new(project_idh: project.id_handle())
 
       # this method will return array with missing and required modules
-      module_info_array = self.cross_reference_modules(opts, response['component_info'], remote.namespace, response['dependency_warnings'])
+      self.cross_reference_modules(opts, response['component_info'], remote.namespace, response['dependency_warnings'])
+    end
+
+    def get_required_and_missing_local_modules(project, matching_module, local_params)
+      dependencies   = matching_module.get_module_branch_from_local_params(local_params).get_module_refs
+      pretified_deps = prettify_local_dependencies(dependencies)
+
+      opts = Opts.new(project_idh: project.id_handle)
+      self.cross_reference_modules(opts, pretified_deps)
     end
 
     # Method will check if given component modules are present on the system
@@ -137,6 +145,17 @@ module DTK
           return true if ModuleVersion.versions_same?(version, vr)
         end
         false
+      end
+    end
+
+    def prettify_local_dependencies(dependencies)
+      dependencies.map do |dep|
+        {
+          'module_name' => dep[:display_name],
+          'module_type' => 'component_module',
+          'remote_namespace' => dep[:namespace_info],
+          'version_info' => dep[:version_info] || 'master'
+        }
       end
     end
   end

@@ -35,6 +35,27 @@ module DTK
             required_modules: required_modules
           }
         end
+
+        def self.get_local_module_dependencies(project, matching_module_obj, local_params)
+          missing_modules, required_modules, dependency_warnings = get_required_and_missing_local_modules(project, matching_module_obj, local_params)
+          {
+            missing_module_components: missing_modules,
+            dependency_warnings: dependency_warnings,
+            required_modules: required_modules
+          }
+        end
+
+        def self.module_info_with_local_dependencies(project, module_list)
+          missing = required = []
+          module_list.each do |m|
+            if module_info = CommonModule.exists(get_default_project, module_type, namespace, module_name, version, { ret_remote_info: true })
+
+            else
+              missing << m
+            end
+          end
+
+        end
         
         def self.list_remotes(_model_handle, client_rsa_pub_key = nil, opts = {})
           Repo::Remote.new.list_module_info(module_type, client_rsa_pub_key, opts.merge!(ret_versions_array: true))

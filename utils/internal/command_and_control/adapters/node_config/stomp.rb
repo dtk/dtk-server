@@ -122,13 +122,14 @@ module DTK
         handler.sendreq_with_callback(msg, agent, context, filter)
       end
 
-      def self.check_alive(filter, callbacks, context, task_idh)
+      def self.check_alive(filter, callbacks, context, task_idh, &callback_on_success)
         # send a ping message, to make sure dtk-arbiter is up and listening
         # this request will have a much shorter timeout
         callbacks_checkalive = {
           on_msg_received: proc do |msg|
             Log.info("Check-alive succeeded.") 
             DTK::Task.checked_nodes.delete_if { |h| h[msg[:pbuilderid]] }
+            callback_on_success.call
           end,
           on_timeout: proc do |msg|
             Log.error("Check-alive timeout detected.")
@@ -182,13 +183,17 @@ module DTK
 
         checked_nodes_match = DTK::Task.checked_nodes.select { |h| h[pbuilderid]}
 
+        put_in_callback = false
         if node_checked?(DTK::Task.checked_nodes, pbuilderid)
           DTK::Task.checked_nodes.delete_if { |h| h[pbuilderid] }
-        else
-          check_alive(filter, callbacks, context, task_idh) unless ['git_access', 'discovery'].include? mc_info[:agent]
+        elsif !['git_access', 'discovery'].include?(mc_info[:agent])
+          check_alive(filter, callbacks, context, task_idh) do
+            async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
+          end
+          put_in_callback = true
         end
      
-        async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
+        async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context) unless put_in_callback
       end
 
       def self.node_checked?(checked_nodes, pbuilderid)
@@ -323,3 +328,4 @@ module DTK
     end
   end
 end
+

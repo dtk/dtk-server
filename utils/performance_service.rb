@@ -22,9 +22,8 @@ module DTK
   #
   class PerformanceService
     # Configuration
-    @@file_path = "/tmp/perf_#{Common::Aux.running_process_user()}.out"
-    @@perf_enabled = true
-
+    @@file_path = "#{R8::Config[:performance_log][:path]}/perf_#{Common::Aux.running_process_user()}.out" 
+    @@perf_enabled = R8::Config[:performance_log][:enable]
 
     @@timer_hash = {}
     @@measure_lock = Mutex.new

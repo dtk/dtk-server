@@ -53,7 +53,7 @@ module DTK; module CommonDSL
           aug_components.each do |aug_cmp|
             break if matching_base_cmp && matching_dep_cmp
 
-            cmp_type = aug_cmp[:component_type].gsub('__', '::')
+            cmp_type = aug_cmp[:display_name].gsub('__', '::')
             cmp_node = aug_cmp[:node][:display_name]
 
             if cmp_type.eql?(base_cmp) && base_node.eql?(cmp_node)

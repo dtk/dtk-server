@@ -181,19 +181,19 @@ module DTK
         # unless discovery or git_access agents are called since they're executed on node initialization
         # or node already checked
 
-        checked_nodes_match = DTK::Task.checked_nodes.select { |h| h[pbuilderid]}
-
-        put_in_callback = false
-        if node_checked?(DTK::Task.checked_nodes, pbuilderid)
-          DTK::Task.checked_nodes.delete_if { |h| h[pbuilderid] }
-        elsif !['git_access', 'discovery'].include?(mc_info[:agent])
-          check_alive(filter, callbacks, context, task_idh) do
-            async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
+        callback_mode = false
+        if R8::Config[:debug_check_alive]
+          if node_checked?(DTK::Task.checked_nodes, pbuilderid)
+            DTK::Task.checked_nodes.delete_if { |h| h[pbuilderid] }
+          elsif !['git_access', 'discovery'].include?(mc_info[:agent])
+            check_alive(filter, callbacks, context, task_idh) do
+              async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
+            end
+            callback_mode = true
           end
-          put_in_callback = true
         end
      
-        async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context) unless put_in_callback
+        async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context) unless callback_mode
       end
 
       def self.node_checked?(checked_nodes, pbuilderid)

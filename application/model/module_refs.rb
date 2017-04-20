@@ -89,10 +89,10 @@ module DTK
         ret = true
       end
 
-      # if to_delete = module_ref_diffs[:delete]
-      #   to_delete.each { |cmp_mod| delete_component_module_ref(cmp_mod[:display_name]) }
-      #   ret = true
-      # end
+      if to_delete = module_ref_diffs[:delete]
+        to_delete.each { |cmp_mod| delete_component_module_ref(cmp_mod[:display_name]) }
+        ret = true
+      end
 
       ret
     end

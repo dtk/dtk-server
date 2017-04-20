@@ -36,7 +36,7 @@ module DTK
         def self.find_or_add_node_component!(parsed_assembly, iaas_type, parsed_node)
           ret = nil
           parsed_components  = parsed_assembly.val(:Components)
-          node_component_ref = NodeComponent.node_component_ref(iaas_type, parsed_node.name)
+          node_component_ref = NodeComponent.node_component_ref(iaas_type, parsed_node.name,  node_type: node_type(parsed_node))
           if match = matching_component?(parsed_components, node_component_ref)
             ret = match
           else
@@ -46,6 +46,18 @@ module DTK
               parsed_assembly.set(:Components, parsed_components)
             end
             parsed_components.merge!(ret)
+          end
+          ret
+        end
+
+        NODE_TYPE_KEY   = 'type'
+        NODE_GROUP_TYPE = 'group'
+        def self.node_type(parsed_node)
+          ret = Type::SINGLE
+          if attributes = parsed_node.val(:Attributes)
+            if type_attribute = attributes[NODE_TYPE_KEY]
+              ret = Type::GROUP if type_attribute.val(:Value) == NODE_GROUP_TYPE 
+            end
           end
           ret
         end
@@ -73,11 +85,13 @@ module DTK
             attributes.merge!(attr_name => canonical_hash(:Value => attr_val)) unless attr_val.nil?
           end
 
-          remove_attributes_from_parsed_node!(parsed_node)
-        end
-
-        def self.remove_attributes_from_parsed_node!(parsed_node)
-          parsed_node.set(:Attributes, canonical_hash)
+          # remove from parsed_node any moved attributes, but in no caes remove type
+          remove_attributes = attr_val_pairs.keys - ['type']
+          update_hash = parsed_attributes.inject(canonical_hash) do |h, (name, v)|
+            remove_attributes.include?(name) ? h : h.merge(name => v)
+          end           
+          parsed_node.set(:Attributes, update_hash)
+          nil
         end
 
         def self.find_attribute_value?(parsed_attributes, target_attribute_name)

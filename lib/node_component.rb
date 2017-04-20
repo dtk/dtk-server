@@ -17,9 +17,12 @@
 #
 module DTK
   class NodeComponent
+    require_relative('node_component/type')
+    # type must be before naming_class_mixin
+    require_relative('node_component/naming_class_mixin')
     require_relative('node_component/iaas')
     require_relative('node_component/parsing')
-    require_relative('node_component/naming_class_mixin')
+
 
     extend NamingClassMixin
     
@@ -89,7 +92,7 @@ module DTK
     attr_reader :ndx_attributes
 
     def self.component_types
-      @component_types ||= IAAS::TYPES.map { |iaas_type| node_component_type(iaas_type) }
+      @component_types ||= IAAS::TYPES.inject([]) { |a, iaas_type| a + node_component_types(iaas_type) }
     end
 
     def self.get_components_with_attributes(nodes, assembly)

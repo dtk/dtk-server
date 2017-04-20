@@ -18,31 +18,53 @@
 module DTK
   class NodeComponent
     module NamingClassMixin
-      NODE_COMPONENT_COMPONENT = 'node'
-      COMPONENT_TYPE_DELIM = '__'
+      COMPONENT = {
+        Type::SINGLE => 'node',
+        Type::GROUP  => 'node_group'
+      }
+      DEFAULT_NODE_TYPE = Type::SINGLE
+
+      COMPONENT_TYPE_DELIM               = '__'
       COMPONENT_TYPE_DISPLAY_NAME_DEMILM = '::'
-      def node_component_type(iaas_type)
-        "#{iaas_type}#{COMPONENT_TYPE_DELIM}#{NODE_COMPONENT_COMPONENT}"
+
+      def node_component_types(iaas_type)
+        [Type::SINGLE, Type::GROUP].map { |node_type| "#{iaas_type}#{COMPONENT_TYPE_DELIM}#{COMPONENT[node_type]}" }
       end
 
-      def node_component_type_display_name(iaas_type)
-        "#{iaas_type}#{COMPONENT_TYPE_DISPLAY_NAME_DEMILM}#{NODE_COMPONENT_COMPONENT}"
+      # opts can have keys:
+      #   ::node_type
+      def node_component_type_display_name(iaas_type, opts = {})
+        "#{iaas_type}#{COMPONENT_TYPE_DISPLAY_NAME_DEMILM}#{COMPONENT[node_type(opts)]}"
       end
       
-      def node_component_ref(iaas_type, node_name)
-        "#{node_component_type_display_name(iaas_type)}[#{node_name}]"
+      # opts can have keys:
+      #   :node_type
+      def node_component_ref(iaas_type, node_name, opts = {})
+        "#{node_component_type_display_name(iaas_type, opts)}[#{node_name}]"
       end
 
       ASSEMBLY_WIDE_NODE_NAME = 'assembly_wide'
       def node_component_ref_from_node(node)
         # TODO: DTK-2967: below hard-wired to ec2
-        node.is_assembly_wide_node? ? ASSEMBLY_WIDE_NODE_NAME : node_component_ref(:ec2, node.display_name)
+        node.is_assembly_wide_node? ? 
+          ASSEMBLY_WIDE_NODE_NAME : 
+          node_component_ref(:ec2, node.display_name, node_type: node_type_from_node(node))
       end
 
       private
 
       def iaas_type(component)
         component.get_field?(:component_type).split(COMPONENT_TYPE_DELIM).first.to_sym
+      end
+
+      # opts can have keys:
+      #   :node_type
+      def node_type(opts = {})
+        opts[:node_type] || DEFAULT_NODE_TYPE
+      end
+
+      def node_type_from_node(node)
+        node.is_node_group? ? Type::GROUP : Type::SINGLE
       end
 
     end

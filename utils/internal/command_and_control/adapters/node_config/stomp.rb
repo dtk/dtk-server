@@ -182,15 +182,13 @@ module DTK
         # or node already checked
 
         callback_mode = false
-        if R8::Config[:debug_check_alive]
-          if node_checked?(DTK::Task.checked_nodes, pbuilderid)
-            DTK::Task.checked_nodes.delete_if { |h| h[pbuilderid] }
-          elsif !['git_access', 'discovery'].include?(mc_info[:agent])
-            check_alive(filter, callbacks, context, task_idh) do
-              async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
-            end
-            callback_mode = true
+        if node_checked?(DTK::Task.checked_nodes, pbuilderid)
+          DTK::Task.checked_nodes.delete_if { |h| h[pbuilderid] }
+        elsif !['git_access', 'discovery'].include?(mc_info[:agent])
+          check_alive(filter, callbacks, context, task_idh) do
+            async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
           end
+          callback_mode = true
         end
      
         async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context) unless callback_mode

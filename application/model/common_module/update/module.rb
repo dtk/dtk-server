@@ -20,6 +20,8 @@ module DTK
     class Module < self
       require_relative('module/info')
       require_relative('module/update_response')
+
+      attr_reader :project
       
       def initialize(project, commit_sha, local_params)
         @project      = project

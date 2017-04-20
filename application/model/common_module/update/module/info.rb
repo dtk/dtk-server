@@ -85,9 +85,31 @@ module DTK
       def update_component_module_refs(module_branch, parsed_dependent_modules, opts = {})
         component_module_refs       = ModuleRefs.get_component_module_refs(module_branch)
         cmp_modules_with_namespaces = ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts)
+
+        if opts[:add_recursive_dependencies]
+          deps_of_deps = add_dependencies_of_dependencies(cmp_modules_with_namespaces)
+          cmp_modules_with_namespaces.concat(deps_of_deps)
+          cmp_modules_with_namespaces.uniq!
+        end
+
         # The call 'component_module_refs.update_object_if_needed!' updates the object component_module_refs and returns true if changed
         # The call 'component_module_refs.update' updates the object model
         component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
+      end
+
+      def add_dependencies_of_dependencies(cmp_modules_with_namespaces)
+        dependencies_of_dependencies = []
+        cmp_modules_with_namespaces.each do |cmp_module|
+          if module_exists = ComponentModule.module_exists(project, cmp_module[:namespace_name], cmp_module[:display_name], cmp_module[:version_info], :return_module => true)
+            if module_branch = module_exists[:module_branch]
+              dep_module_refs = module_branch.get_module_refs
+              dep_module_refs.each do |dep_module_ref|
+                dependencies_of_dependencies << { :namespace_name => dep_module_ref[:namespace_info], :display_name => dep_module_ref[:display_name], :version_info => dep_module_ref[:version_info] }
+              end
+            end
+          end
+        end
+        dependencies_of_dependencies
       end
 
       def delete_component_module_refs?(module_branch, parsed_dependent_modules, opts = {})

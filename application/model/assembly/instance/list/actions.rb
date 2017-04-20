@@ -16,11 +16,11 @@
 # limitations under the License.
 #
 module DTK
-  class Assembly::Instance
-    class ListActions
+  module Assembly::Instance::List
+    class Actions
       module Mixin
         def list_actions(type = nil)
-          ListActions.new(self).list(type)
+          Actions.new(self).list(type)
         end
       end
 

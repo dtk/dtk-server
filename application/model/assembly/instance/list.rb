@@ -15,9 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class  Assembly
-  class Instance
-    module ListClassMixin
+module DTK; class Assembly::Instance
+  module List
+    require_relative('list/nodes')
+    require_relative('list/actions')
+
+    module ClassMixin
       def list_with_workspace(assembly_mh, opts = {})
         get(assembly_mh, opts)
       end
@@ -67,9 +70,9 @@ module DTK; class  Assembly
       end
     end
 
-    require_relative('list/list_actions')
-    module ListMixin
-      include ListActions::Mixin
+    module Mixin
+      include Actions::Mixin
+      include Nodes::Mixin
 
       def info_about(about, opts = Opts.new)
         case about
@@ -142,69 +145,6 @@ module DTK; class  Assembly
         unsorted_ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
       end
 
-      def list_nodes(opts = Opts.new)
-        opts.merge!(remove_node_groups: false)
-        nodes = get_nodes__expand_node_groups(opts)
-
-        # remove assembly wide nodes
-        nodes.reject!{ |node| node.is_assembly_wide_node? }
-        # remove soft-deleted node group members
-        nodes.reject!{ |node| node[:ng_member_deleted] }
-
-        nodes.each do |node|
-          set_node_display_name!(node)
-          set_node_admin_op_status!(node)
-          if external_ref = node[:external_ref]
-            external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
-          end
-          if target = node[:target]
-            if target[:iaas_properties]
-              target[:iaas_properties][:security_group] ||=
-                target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
-            end
-          end
-
-          node.sanitize!
-
-          is_assembly_wide_node = node.is_assembly_wide_node?
-        
-          # we set dtk-client-type since we need to distinguish between node / node-group
-          is_node_group_member     = is_node_group_member?(node.id_handle)
-
-          # if node is not part of node group we set nil
-          node[:dtk_client_type]   = node.is_node_group? ? :node_group : is_node_group_member ? :node_group_node : nil
-
-          # remove node group or assembly wide node from list commands
-          node[:dtk_client_hidden] = node.is_node_group? || is_assembly_wide_node
-
-          # remove assembly wide node from dtk context
-          node[:dtk_context_hidden] = is_assembly_wide_node
-        end
-
-        nodes.sort { |a, b| a[:display_name] <=> b[:display_name] }
-      end
-      private :list_nodes
-
-      def find_parent_of_node_group_member?(node_group_member)
-        ng_mh = node_group_member.model_handle(:node_group)
-        if ndx_node_group = NodeGroup.get_node_groups_containing_nodes(ng_mh, Node::Filter::NodeList.new([node_group_member.id_handle]))
-          if node_group_id__node_group = ndx_node_group[node_group_member.id]
-            node_group_id__node_group.values.first
-          end
-        end
-      end
-      private :find_parent_of_node_group_member?
-
-      def set_node_display_name!(node)
-        node[:display_name] = node.assembly_node_print_form
-      end
-
-      def set_node_admin_op_status!(node)
-        if node.is_node_group?
-          node[:admin_op_status] = nil
-        end
-      end
-      private :set_node_display_name!, :set_node_admin_op_status!
 
       def list_components(opts = Opts.new)
         aug_cmps      = get_augmented_components(opts)

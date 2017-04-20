@@ -38,8 +38,8 @@ module DTK; class  Assembly
 
     include ServiceLinkMixin
     include ViolationsMixin
-    include ListMixin
-    extend ListClassMixin
+    include List::Mixin
+    extend List::ClassMixin
     include DeleteMixin
     extend DeleteClassMixin
     include ExecDeleteMixin
@@ -521,6 +521,16 @@ module DTK; class  Assembly
       @assembly_version ||= ModuleVersion.ret(self)
     end
 
+    #returns a node group object if node_idh is a node group member of this assembly instance
+    def is_node_group_member?(node_idh)
+      sp_hash = {
+        cols: [:id, :display_name, :group_id, :node_members],
+        filter: [:eq, :assembly_id, id()]
+      }
+      node_id = node_idh.get_id()
+      Model.get_objs(model_handle(:node), sp_hash).find { |ng| ng[:node_member].id == node_id }
+    end
+
     private
 
     # returns column plus whether need to pull in empty assembly nodes (assembly nodes w/o any components)
@@ -553,16 +563,6 @@ module DTK; class  Assembly
       }
       
       get_obj(target.model_handle(:assembly_instance), sp_hash)
-    end
-
-    #returns a node group object if node_idh is a node group member of this assembly instance
-    def is_node_group_member?(node_idh)
-      sp_hash = {
-        cols: [:id, :display_name, :group_id, :node_members],
-        filter: [:eq, :assembly_id, id()]
-      }
-      node_id = node_idh.get_id()
-      Model.get_objs(model_handle(:node), sp_hash).find { |ng| ng[:node_member].id == node_id }
     end
 
     def order_components_by_workflow(components, workflow_delete_order)

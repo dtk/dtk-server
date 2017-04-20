@@ -348,6 +348,7 @@ module DTK
       if external_ref = node[:external_ref]
         external_ref.delete(:ssh_credentials)
       end
+      node
     end
     def sanitize!
       self.class.sanitize!(self)

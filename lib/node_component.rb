@@ -38,6 +38,7 @@ module DTK
       node.display_name
     end
 
+    # returns attribute object
     def attribute(attribute_name) 
       fail(Error, "Illegal attribute '#{attribute_name}' for component '#{component.display_name}'") unless ndx_attributes.has_key?(attribute_name)  
       ndx_attributes[attribute_name]

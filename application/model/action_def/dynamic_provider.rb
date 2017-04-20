@@ -19,9 +19,11 @@ module DTK
   class ActionDef
     class DynamicProvider
       require_relative('dynamic_provider/container')
+      require_relative('dynamic_provider/bash')
       require_relative('dynamic_provider/provider_attributes')
 
       include Container::Mixin
+      include Bash::Mixin
       include ProviderAttributes::Mixin
 
       attr_reader :type

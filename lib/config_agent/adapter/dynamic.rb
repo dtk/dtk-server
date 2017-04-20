@@ -99,7 +99,8 @@ module DTK; class ConfigAgent
             docker_file = dynamic_provider.docker_file? || fail(Error, "Unexpected that 'dynamic_provider.docker_file?' is nil")
             { type: EPHEMERAL_CONTAINER, docker_file: docker_file }
           else
-            { type: NATIVE }
+            bash = dynamic_provider.bash?  || fail(Error, "Unexpected that 'dynamic_provider.bash?' is nil")
+            { type: NATIVE, bash: bash }
           end
         end
       end

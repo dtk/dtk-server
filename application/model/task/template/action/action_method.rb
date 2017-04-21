@@ -43,7 +43,9 @@ module DTK; class Task; class Template
 
       ACTION_PROVDER_TYPES = [:puppet, :dynamic, :ruby_function]
       def config_agent_type_from_provider?
-        if provider_string = canonical_provider_name(self[:provider])
+        if provider_string = self[:provider]
+        # Commented out because bash provider actions cannot be executed on ec2 nodes because of line below
+        # if provider_string = canonical_provider_name(self[:provider])
           if matching_type = ACTION_PROVDER_TYPES.find { |type| provider_string == provider_string_name(type) }
             provider_symbol_name(matching_type)
           end

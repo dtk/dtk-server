@@ -22,11 +22,15 @@ module DTK
 
         private
         def list_nodes(opts = Opts.new)
-          nodes = get_nodes__expand_node_groups(opts.merge(remove_node_groups: false)).reject do |node|
-            # remove assembly wide nodes and soft-deleted node group members
-            node.is_assembly_wide_node? or node[:ng_member_deleted] 
+          # DTK-2938; temp took below out; need some variation to list node group members
+          # nodes = get_nodes__expand_node_groups(opts.merge(remove_node_groups: false)).reject do |node|
+          #  # remove assembly wide nodes and soft-deleted node group members
+          #  node.is_assembly_wide_node? or node[:ng_member_deleted] 
+          #end
+          nodes = get_nodes.reject do |node|
+            node.is_assembly_wide_node? or node.is_node_group?
           end
-          
+
           NodeComponent.node_components(nodes, self).map do |node_component| 
             Nodes.new(node_component, self).list_form
           end.sort { |a, b| a.display_name <=> b.display_name }

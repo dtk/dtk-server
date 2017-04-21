@@ -68,7 +68,7 @@ module DTK
 
           action_info = ActionInfo.new(node, component_type, component_title, CREATE_METHOD)
           if node.is_node_group?
-            action_info_array += expand_node_group_members(action_info)
+            action_info_array += expand_node_group_members(node, action_info)
           else
             action_info_array << action_info
           end
@@ -100,7 +100,7 @@ module DTK
       end
 
       # if there is node group in service instance, expand node group memebers and display them in list-actions
-      def expand_node_group_members(action_info)
+      def expand_node_group_members(node, action_info)
         info = action_info # alias
         action_info_array = []
 
@@ -111,7 +111,7 @@ module DTK
         members.sort_by! { |m| m[:index].to_i }
 
         if members.size <= 2
-          members.each { |member| action_info_array << ComponentActionInfo.new(member, info.component_type, info.component_title, info.method_name) }
+          members.each { |member| action_info_array << ActionInfo.new(member, info.component_type, info.component_title, info.method_name) }
         else
           first_index = members.first[:index]
           last_index = members.last[:index]

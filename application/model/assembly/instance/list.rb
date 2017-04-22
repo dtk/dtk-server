@@ -41,7 +41,7 @@ module DTK; class Assembly::Instance
 
           if opts[:include_namespaces]
             assembly_templates = assembly_rows.map { |a| a[:assembly_template] }.compact
-            Template.augment_with_namespaces!(assembly_templates)
+            Assembly::Template.augment_with_namespaces!(assembly_templates)
           end
           list_aux(assembly_rows, attr_rows, opts)
         end

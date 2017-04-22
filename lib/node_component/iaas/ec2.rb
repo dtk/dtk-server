@@ -20,16 +20,42 @@ module DTK
     class Ec2 < self
       require_relative('ec2/client_token')
       require_relative('ec2/tag')
+      require_relative('ec2/instance')
+      require_relative('ec2/group')
       
       def set_special_attributes
         update_attribute!(:dtk_agent_info, dtk_agent_info)
         update_attribute!(:tags, tags)
-        update_attribute!(:client_token, ClientToken.generate)
         HostAttributes.link_to_node(self)
+      end
+
+      DYNAMIC_SPECIAL_ATTRIBUTES = {
+        :client_token => {
+          :test => lambda { |ec2_node_component| ec2_node_component.generate_new_client_token? },
+          :value => lambda { |_ec2_node_component| ClientToken.generate }
+        }
+      }
+      # returns [is_special_value, special_value] where if first is false then second should be ignored
+      def update_if_dynamic_special_attribute!(attribute)
+        ret = [false, nil]
+        attribute_symbol = attribute.display_name.to_sym
+        unless special_value_info = DYNAMIC_SPECIAL_ATTRIBUTES[attribute_symbol]
+          return ret
+        end
+        unless special_value_info[:test].call(self)
+          return ret
+        end
+        value = special_value_info[:value].call(self)
+        update_attribute!(attribute_symbol, value)
+        [true, value]
+      end
+      
+      def generate_new_client_token?
+        fail Error::NoMethodForConcreteClass.new(self.class)
       end
       
       private
-      
+
       def dtk_agent_info
         template_bindings = {
           node_config_server_host: CommandAndControl.node_config_server_host,

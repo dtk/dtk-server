@@ -83,6 +83,12 @@ module DTK
       NodeComponent.component_types.include?(component.get_field?(:component_type))
     end
 
+    # returns [is_special_value, special_value] where if first is false then second should be ignored
+    # this can be overwritten
+    def update_if_dynamic_special_attribute!(_attribute)
+      [false, nil]
+    end
+
     private
 
     def attribute_model_handle

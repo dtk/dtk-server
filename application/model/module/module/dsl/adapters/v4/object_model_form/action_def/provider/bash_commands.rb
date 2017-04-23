@@ -15,22 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: Move from catch all provider dtk to individual ones
 module DTK; class ModuleDSL; class V4; class ObjectModelForm
   class ActionDef; class Provider
-    class Dtk < self
+    class BashCommands < self
       module Constant
         module Variations
         end
         extend Aux::ParsingingHelper::ClassMixin
 
-        Functions = 'functions'
-        Variations::Functions = ['functions', 'function']
-
-        Docker = 'docker'
-        Variations::Docker = ['docker_image', 'docker_run_params', 'docker_file_template']
-
-        DeleteNode = 'delete_node'
+        Commands = 'commands'
+        Variations::Commands = ['commands', 'command']
       end
 
       def initialize(input_hash, _opts = {})
@@ -38,11 +32,11 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       end
 
       def self.type
-        :dtk
+        :bash_commands
       end
 
       def self.matches_input_hash?(input_hash)
-        !!Constant.matches?(input_hash, :Functions) || !!Constant.matches?(input_hash, :Docker) || !!Constant.matches?(input_hash, :DeleteNode)
+        !!Constant.matches?(input_hash, :Commands)
       end
 
       def external_ref_from_function
@@ -51,28 +45,15 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         end
       end
 
-      def external_ref_from_docker
-        { type: 'docker' }
+      def external_ref_from_bash_commands
+        { type: 'bash_commands' }
       end
-
-      def external_ref_from_delete_node
-        { type: 'delete_node' }
-      end
-
 
       private
 
       def provider_specific_fields(input_hash)
-        ret =
-          if functions = Constant.matches?(input_hash, :Functions)
-            { functions: functions.is_a?(Array) ? functions : [functions] }
-          elsif docker = Constant.matches?(input_hash, :Docker)
-            # { docker: docker.is_a?(Array) ? docker : [docker] }
-            { docker: [input_hash]}
-          elsif delete_node = Constant.matches?(input_hash, :DeleteNode)
-            # { docker: docker.is_a?(Array) ? docker : [docker] }
-            { delete_node: [delete_node]}
-          end
+        commands = Constant.matches?(input_hash, :Commands)
+        ret = { commands: commands.is_a?(Array) ? commands : [commands] }
 
         stdout_err = input_hash['stdout_and_stderr']
         unless stdout_err.nil?

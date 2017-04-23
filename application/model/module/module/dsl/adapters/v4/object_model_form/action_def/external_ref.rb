@@ -37,9 +37,9 @@ module DTK; class ModuleDSL; class V4
               action_content
             elsif action_content.respond_to?(:external_ref_from_create_action)
               external_ref_aux(action_content.external_ref_from_create_action, component_name)
-            elsif action_content.respond_to?(:external_ref_from_bash_command)
+            elsif action_content.respond_to?(:external_ref_from_bash_commands)
               (ret['action_def'] ||= {}).merge!('create' => create_action)
-              action_content.external_ref_from_bash_command
+              action_content.external_ref_from_bash_commands
             end
           end
         end

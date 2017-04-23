@@ -32,27 +32,22 @@ module DTK; class Task; class Template
         self[:method_name]
       end
 
-      # default is bash_commands unless epxlicit provider method
       def config_agent_type
-        # TODO: DTK-2805: clean up think self[:provider] == :dtk is overloaded and falss through to using provider_symbol_name(:bash_commands)
-        config_agent_type_from_provider? || provider_symbol_name(:bash_commands)
+        config_agent_type_from_provider
       end
 
       private
 
-
-      ACTION_PROVDER_TYPES = [:puppet, :dynamic, :ruby_function]
-      def config_agent_type_from_provider?
-        if provider_string = self[:provider]
-        # Commented out because bash provider actions cannot be executed on ec2 nodes because of line below
-        # if provider_string = canonical_provider_name(self[:provider])
-          if matching_type = ACTION_PROVDER_TYPES.find { |type| provider_string == provider_string_name(type) }
+      ACTION_PROVIDER_TYPES = [:puppet, :dynamic, :ruby_function, :bash_commands]
+      def config_agent_type_from_provider
+        if provider_string = canonical_provider_name(self[:provider])
+          if matching_type = ACTION_PROVIDER_TYPES.find { |type| provider_string == provider_string_name(type) }
             provider_symbol_name(matching_type)
           end
         end
       end
 
-      # TODO: woudl like to remove this mapping
+      # TODO: would like to remove this mapping
       CANONICAL_PROVIDER_MAPPING = {
         'dtk' => 'ruby_function'
       }

@@ -54,7 +54,7 @@ module DTK; class Task; class Template
       method_name        = parsed.method_name
       params             = parsed.params
       
-      # if component has external_ref[:type] = 'bash_command' it means it has bash command instead of puppet in create action
+      # if component has external_ref[:type] = 'bash_commands' it means it has bash command instead of puppet in create action
       # here we set bash create action to be executed instead of puppet_apply
       method_name ||= set_bash_create_action(action_list, component_name_ref)
       
@@ -118,7 +118,7 @@ module DTK; class Task; class Template
     def self.set_bash_create_action(action_list, component_name_ref)
       cmp = action_list.find { |a_item| a_item.component_display_name.eql?(component_name_ref.gsub('::', '__')) }
       if cmp && (ext_ref = cmp.external_ref)
-        (ext_ref[:type] || '').eql?('bash_command') ? 'create' : nil
+        (ext_ref[:type] || '').eql?('bash_commands') ? 'create' : nil
       end
     end
 

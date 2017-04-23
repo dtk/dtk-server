@@ -19,9 +19,11 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
   class ActionDef
     class Provider < OutputHash
       require_relative('provider/dynamic')
-      # TODO:L DTK-2805:  cleanup provider/dtk since artifical catchall 
+      require_relative('provider/bash_commands')
+      # TODO: DTK-2805:  cleanup provider/dtk since artifical catchall 
       require_relative('provider/dtk')
       require_relative('provider/puppet')
+
 
       # opts can have:
       #  :providers_input_hash: 
@@ -48,7 +50,8 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         self.class.type
       end
 
-      PROVIDER_CLASSES = [Dtk, Puppet, Dynamic]
+      # Dynamic must be last because it is catchall
+      PROVIDER_CLASSES = [Dtk, Puppet, BashCommands] + [Dynamic]
       PROVIDER_TYPE_TO_CLASS = PROVIDER_CLASSES.inject({}) { |h, klass| h.merge(klass.send(:type) => klass) }
 
       def self.provider_type_to_class?(provider_type)

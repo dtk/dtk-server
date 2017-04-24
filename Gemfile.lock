@@ -18,9 +18,9 @@ GIT
 
 GIT
   remote: git://github.com/dtk/dtk-dsl.git
-  revision: 14c7b3604f4fc076f4a644ce359c7c93a0e824b0
+  revision: 7035b8ba954915bd61af99662a357c6569dc7e94
   specs:
-    dtk-dsl (1.0.5)
+    dtk-dsl (1.0.6)
 
 GEM
   remote: https://rubygems.org/
@@ -334,3 +334,6 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
+
+BUNDLED WITH
+   1.14.3

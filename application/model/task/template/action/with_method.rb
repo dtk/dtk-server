@@ -84,7 +84,7 @@ module DTK; class Task; class Template
       #  method_name and params can be nil
       def self.parse(serialized_item, opts = {})
         unless ret = has_explicit_method?(serialized_item, opts)
-          raise_action_ref_error(serialized_item) unless serialized_item.is_a?(String)
+          raise_action_ref_error(serialized_item) unless serialized_item.is_a?(String) || serialized_item.first[0].is_a?(Symbol)
           ret = ParseStruct.new(serialized_item, nil, nil)
         end
         ret

@@ -33,6 +33,20 @@ module DTK
           subtask_order_string = Constant.matches?(serialized_content, :SubtaskOrder)
           subtask_order        = subtask_order_string && subtask_order_string.to_sym
 
+          #TODO: Check all serialized content if it contains breakpoint, this is just a placeholder function
+          unless serialized_content[:subtasks][0][:breakpoint].nil?
+            name = serialized_content[:subtasks].first[:ordered_components].first
+            name.gsub!('::', '__')
+            breakpoint = serialized_content[:subtasks].first[:breakpoint]
+
+            actions.each do |action|
+              if action[:display_name] == name
+                action[:breakpoint] = breakpoint
+              end
+            end
+          end
+          #=============================================================================================
+
           normalized_subtasks =
             if subtasks
               has_multi_stages =  (add_subtask_order_default(subtask_order) == Constant::Sequential)

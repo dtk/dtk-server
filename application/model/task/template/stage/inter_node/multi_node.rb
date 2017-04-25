@@ -20,7 +20,7 @@ module DTK; class Task; class Template; class Stage
     class MultiNode < self
       def initialize(serialized_multinode_action)
         super(serialized_multinode_action[:name])
-        @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
+        @ordered_components, @components_or_actions_key, @breakpoint = components_or_actions(serialized_multinode_action)    
         unless @ordered_components 
           fail ParsingError::MissingComponentOrActionKey.new(serialized_multinode_action, stage: serialized_multinode_action[:name]) 
         end
@@ -48,7 +48,8 @@ module DTK; class Task; class Template; class Stage
           ordered_components = key_val.values.first
           components_or_actions_key = key_val.keys.first
           ordered_components = ordered_components.kind_of?(Array) ? ordered_components : [ordered_components]
-          [ordered_components, components_or_actions_key]
+          breakpoint = serialized_el[:breakpoint] unless serialized_el[:breakpoint].nil?
+          [ordered_components, components_or_actions_key, breakpoint]
         end
       end
 
@@ -76,7 +77,7 @@ module DTK; class Task; class Template; class Stage
             end
             return ret
           end
-            
+
           info_per_node = {} #indexed by node_id
           @ordered_components.each do |serialized_action|
             cmp_ref = Action::WithMethod.parse_component_name_ref(serialized_action)

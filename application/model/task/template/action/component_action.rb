@@ -72,7 +72,8 @@ module DTK; class Task; class Template
             else
               # strip off node_name prefix if it exists
               # need to handle cases like apt::ppa[ppa:chris/node.js]
-              component_name_ref_x = component_name_ref.gsub(/^[^\[]+\//, '')
+              component_name_ref_x = component_name_ref.gsub(/^[^\[]+\//, '') 
+              component_name_ref_x.gsub!("__", "::") # by default in workflow aws_efs__file_system[efs-test] has '__' instead of '::'
               component_name_ref_x == serialization_form(no_node_name_prefix: true)
             end
           end
@@ -80,8 +81,7 @@ module DTK; class Task; class Template
       end
 
       def match_component_ref?(component_type, title = nil)
-        component_type == component_type(without_title: true) &&
-          (title.nil? || title == component_title?())
+        component_type == component_type(without_title: true) && (title.nil? || title == component_title?()) || self[:breakpoint] == true
       end
 
       def serialization_form(opts = {})

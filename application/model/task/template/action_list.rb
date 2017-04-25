@@ -58,7 +58,7 @@ module DTK; class Task; class Template
     end
 
     def find_matching_action(node_name, opts = {})
-      find { |a| a.match?(node_name, opts[:component_name_ref]) }
+       find { |a| a.match?(node_name, opts[:component_name_ref]) }
     end
 
     def select(&block)

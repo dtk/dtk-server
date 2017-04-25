@@ -57,7 +57,7 @@ module DTK; class Task; class Template
       # if component has external_ref[:type] = 'bash_command' it means it has bash command instead of puppet in create action
       # here we set bash create action to be executed instead of puppet_apply
       method_name ||= set_bash_create_action(action_list, component_name_ref)
-
+      pp [:debug_2966_branch, caller[0], {node_name: node_name,component_name_ref: component_name_ref}]  
       unless action = action_list.find_matching_action(node_name, component_name_ref: component_name_ref)
         RaiseError.bad_component_name_ref(node_name, parsed) unless opts[:skip_if_not_found]
       else

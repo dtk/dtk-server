@@ -18,8 +18,7 @@
 module DTK
   class Assembly::Instance
     module Action
-      r8_nested_require('action', 'execute_tests')
-      r8_nested_require('action', 'ssh_access')
+      require_relative('action/ssh_access')
       class GetLog < ActionResultsQueue
         private
 

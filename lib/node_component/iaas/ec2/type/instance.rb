@@ -16,14 +16,13 @@
 # limitations under the License.
 #
 module DTK
-  class NodeComponent::IAAS
-    class Ec2 < self
-      require_relative('ec2/type')
-      require_relative('ec2/special_attribute')
-      require_relative('ec2/instance_attributes')
-
-      include SpecialAttribute::Mixin
+  class NodeComponent::IAAS::Ec2::Type
+    class Instance < self
+      def generate_new_client_token?
+        # generate only if does not exists
+        attribute_value?(:client_token).nil?
+      end
 
     end
   end
-end
+end      

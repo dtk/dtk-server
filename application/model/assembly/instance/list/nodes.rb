@@ -22,98 +22,60 @@ module DTK
 
         private
         def list_nodes(opts = Opts.new)
-          # DTK-2938; temp took below out; need some variation to list node group members
-          # nodes = get_nodes__expand_node_groups(opts.merge(remove_node_groups: false)).reject do |node|
-          #  # remove assembly wide nodes and soft-deleted node group members
-          #  node.is_assembly_wide_node? or node[:ng_member_deleted] 
-          #end
-          nodes = get_nodes.reject do |node|
-            node.is_assembly_wide_node? or node.is_node_group?
-          end
+          nodes = get_nodes.reject { |node| node.is_assembly_wide_node? }
 
-          NodeComponent.node_components(nodes, self).map do |node_component| 
-            Nodes.new(node_component, self).list_form
+          NodeComponent.node_components(nodes, self).inject([]) do |a, node_component| 
+            to_add = nil
+            if node_component.node.is_node_group?
+              to_add = node_component.instance_attributes_array.map do |instance_attributes|
+                # There will be an element for each node group member
+                Nodes.new(node_component, instance_attributes).node_in_list_form!
+              end
+            else
+              to_add = [Nodes.new(node_component, node_component.instance_attributes).node_in_list_form!]
+            end
+            a + to_add
           end.sort { |a, b| a.display_name <=> b.display_name }
         end
       end
 
-      def initialize(node_component, assembly_instance)
-        @node_component    = node_component
-        @node              = node_component.node
-        @assembly_instance = assembly_instance
+      def initialize(base_node_component, instance_attributes)
+        @base_node_component = base_node_component
+        @instance_attributes = instance_attributes
       end
 
-      def list_form
-        node[:display_name]      = node.assembly_node_print_form
-        node[:admin_op_status]   = admin_op_status
-        node[:dtk_client_type]   = dtk_client_type
-        node[:dtk_client_hidden] = dtk_context_hidden
-        node[:os_type]           = component_attribute_value(:os_type)
-
+      def node_in_list_form!
+        node = instance_attributes.node
+        
+        node[:display_name]      = instance_value?(:display_name)
+        node[:admin_op_status]   = instance_value?(:admin_op_status)
+        node[:os_type]           = base_value?(:os_type)
+        
         external_ref = node[:external_ref] ||= {}
         external_ref[:dns_name]    = dns_name
-        external_ref[:instance_id] = component_attribute_value(:instance_id)
-        external_ref[:size]        = component_attribute_value(:size)
+        external_ref[:instance_id] = instance_value?(:instance_id)
+        external_ref[:size]        = base_value?(:size)
 
-        set_target_iaas_properties!
-        
         node.sanitize!
       end
-
-      private
-
-      attr_reader :node, :node_component, :assembly_instance
       
-      def admin_op_status
-        if node.is_node_group?
-          nil
-        else
-          # TODO: DTK-2967: below hard-wired to ec2 attribute instance_state
-          component_attribute_value(:instance_state)
-        end
-      end
-
+      private
+      
+      attr_reader :base_node_component, :instance_attributes
+      
       def dns_name
-        host_addresses_ipv4 = component_attribute_value(:host_addresses_ipv4)
+        host_addresses_ipv4 = instance_value?(:host_addresses_ipv4)
         host_addresses_ipv4 && host_addresses_ipv4.first
       end
-
-      # TODO: this might not be needed any more
-      def set_target_iaas_properties!
-        if target = node[:target]
-          if target[:iaas_properties]
-            target[:iaas_properties][:security_group] ||=
-              target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
-          end
-        end
-      end
-
-      def dtk_client_type
-        # if node is not part of node group we set nil
-        is_node_group? ? :node_group : is_node_group_member? ? :node_group_node : nil
-      end
-
-      def dtk_context_hidden
-        # remove node group or assembly wide node from list commands
-        is_node_group? || is_assembly_wide_node?
-      end
-
-      def is_assembly_wide_node? 
-        node.is_assembly_wide_node?
-      end
-
-      def is_node_group?
-        node.is_node_group?
+      
+      def instance_value?(attribute_name)
+        instance_attributes.value?(attribute_name)
       end
       
-      def is_node_group_member?
-        assembly_instance.is_node_group_member?(node.id_handle)
+      def base_value?(attribute_name)
+        base_node_component.attribute_value?(attribute_name)
       end
       
-      def component_attribute_value(attribute_name)
-        node_component.attribute_value(attribute_name)
-      end
-
     end
   end
 end

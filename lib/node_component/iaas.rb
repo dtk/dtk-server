@@ -38,7 +38,7 @@ module DTK
 
       private      
       def self.klass(iaas_type, node)
-        klass_base(iaas_type).const_get(node.is_node_group?  ? 'Group' : 'Instance')
+        klass_base(iaas_type).const_get('Type').const_get(node.is_node_group?  ? 'Group' : 'Instance')
       end
 
       def self.klass_base(iaas_type)

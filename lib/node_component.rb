@@ -20,13 +20,19 @@ module DTK
     require_relative('node_component/type')
     # type must be before naming_class_mixin
     require_relative('node_component/naming_class_mixin')
+    require_relative('node_component/node_group')
+    # instance_attributes must be before iaas
+    require_relative('node_component/instance_attributes')
     require_relative('node_component/iaas')
     require_relative('node_component/parsing')
 
 
-    extend NamingClassMixin
+    extend Naming::ClassMixin
+    include NodeGroup::Mixin
     
-    attr_reader :component, :node, :assembly
+    attr_reader :component, :node, :assembly, :ndx_attributes
+
+
     def initialize(assembly, node, component_with_attributes)
       @assembly  = assembly
       @node      = node
@@ -47,8 +53,18 @@ module DTK
       ndx_attributes[attribute_name]
     end
 
-    def attribute_value(attribute_name) 
+    def attribute_name_value_hash
+      ndx_attributes.inject({}) { |h, (name, attribute)| h.merge(name => attribute[:attribute_value]) }
+     end
+    private :attribute_name_value_hash
+
+
+    def attribute_value?(attribute_name) 
       attribute(attribute_name)[:attribute_value]
+    end
+
+    def attribute_value(attribute_name)
+      attribute_value?(attribute_name) || fail(Error, "Unexpected that attribute '#{attribute_name}' is not set")
     end
 
     # returns an array of DTK::NodeComponents
@@ -89,13 +105,25 @@ module DTK
       [false, nil]
     end
 
+    def self.components_with_attributes(components)
+      Component::Instance::WithAttributes.components_with_attributes(components)
+    end
+    def self.component_with_attributes(component)
+      components_with_attributes([component]).first
+    end
+
+    # returns an InstanceAttributes object
+    def instance_attributes
+      fail Error, "The method instance_attributes should not be called on a node group" if node.is_node_group?
+      # TODO: restrict to only instance attributes
+      self.class::InstanceAttributes.new(node, attribute_name_value_hash)
+    end
+
     private
 
     def attribute_model_handle
       @attribute_model_handle ||= component.model_handle(:attribute)
     end
-
-    attr_reader :ndx_attributes
 
     def self.component_types
       @component_types ||= IAAS::TYPES.inject([]) { |a, iaas_type| a + node_component_types(iaas_type) }
@@ -145,13 +173,6 @@ module DTK
 
     def self.assembly_from_node(node)
       node.model_handle.createIDH(model_name: :assembly_instance, id: node.get_field?(:assembly_id)).create_object
-    end
-
-    def self.components_with_attributes(components)
-      Component::Instance::WithAttributes.components_with_attributes(components)
-    end
-    def self.component_with_attributes(component)
-      components_with_attributes([component]).first
     end
 
   end

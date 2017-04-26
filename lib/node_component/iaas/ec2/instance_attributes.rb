@@ -17,24 +17,25 @@
 #
 module DTK
   class NodeComponent::IAAS::Ec2
-    class Group < self
-      def generate_new_client_token?
-        # generate if does not exists or there are new group members to create
-        attribute_value(:client_token).nil? or new_group_members_to_create?
-      end
-
+    class InstanceAttributes < NodeComponent::InstanceAttributes 
       private
 
-      INSTANCE_ID_KEY = 'instance_id'
-      def new_group_members_to_create?
-        existing_instances = (attribute_value(:instances) || []).reject { |instance| instance[INSTANCE_ID_KEY].nil? }
-        existing_instances.size < cardinaility
+      ATTRIBUTES = [:instance_id, :instance_state, :private_ip_address, :public_ip_address, :private_dns_name, :public_dns_name, :host_addresses_ipv4, :block_device_mappings]
+
+      def iaas_normalize(attributes_name_value_hash)
+        symbol_hash = attributes_name_value_hash.inject({}) { |h, (n, v)| h.merge(n.to_sym => v) }
+        ATTRIBUTES.inject({}) do |h, name| 
+          (value = symbol_hash[name]) ? h.merge(normalize(name) => value) : h 
+        end
       end
 
-      def cardinaility
-        string_value = attribute_value(:cardinality) || fail(Error::Usage, "Unexpected that cardinality not set") 
-        string_value.to_i
-      end
+      NORMALIZE_MAPPING = {
+        instance_state: :admin_op_status
+      }
+      def normalize(name)
+        NORMALIZE_MAPPING[name] || name
+      end      
     end
   end
-end      
+end
+

@@ -16,14 +16,25 @@
 # limitations under the License.
 #
 module DTK
-  class NodeComponent::IAAS
-    class Ec2 < self
-      require_relative('ec2/type')
-      require_relative('ec2/special_attribute')
-      require_relative('ec2/instance_attributes')
+  class NodeComponent::IAAS::Ec2::Type
+    class Group < self
+      def generate_new_client_token?
+        # generate if does not exists or there are new group members to create
+        attribute_value?(:client_token).nil? or new_group_members_to_create?
+      end
 
-      include SpecialAttribute::Mixin
+      private
 
+      INSTANCE_ID_KEY = 'instance_id'
+      def new_group_members_to_create?
+        existing_instances = (attribute_value?(:instances) || []).reject { |instance| instance[INSTANCE_ID_KEY].nil? }
+        existing_instances.size < cardinaility
+      end
+
+      def cardinaility
+        string_value = attribute_value(:cardinality)
+        string_value.to_i
+      end
     end
   end
-end
+end      

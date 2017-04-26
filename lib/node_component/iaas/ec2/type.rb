@@ -17,11 +17,11 @@
 #
 module DTK
   class NodeComponent::IAAS::Ec2
-    class Instance < self
-      def generate_new_client_token?
-        # generate only if does not exists
-        attribute_value(:client_token).nil?
-      end
+    class Type < self
+      require_relative('type/instance')
+      require_relative('type/group')
+
+
 
     end
   end

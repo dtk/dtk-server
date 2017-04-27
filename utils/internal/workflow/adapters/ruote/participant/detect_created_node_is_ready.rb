@@ -41,7 +41,6 @@ module DTK
 
                   # these must be called before get_and_propagate_dynamic_attributes
                   node.associate_elastic_ip?()
-                  node.associate_persistent_dns?()
 
                   action.get_and_propagate_dynamic_attributes(result)
                   set_result_succeeded(workitem, result, task, action)

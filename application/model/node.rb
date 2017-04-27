@@ -637,10 +637,6 @@ module DTK
       end
     end
 
-    def associate_persistent_dns?
-      CommandAndControl.associate_persistent_dns?(self)
-    end
-
     # Method will remove DNS information for node, this happens when we do not persistent
     # DNS and by stopping node we do not need to keep DNS information
     def strip_dns_info!

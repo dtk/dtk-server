@@ -27,49 +27,6 @@ module DTK; module CommandAndControlAdapter
         conn().associate_elastic_ip(node.instance_id(), node.elastic_ip())
       end
 
-      #TODO: errors here should result in warning set to user that dns set wrong and will be ignored
-      def associate_persistent_dns?(node)
-        # check if it needs a persistent dns
-        unless persistent_dns = node.persistent_dns()
-          return
-        end
-
-        unless ec2_address = ec2_public_address!(node)
-          Log.error("cannot find ec2_address in associate_persistent_dns for node with ID '#{node[:id]}")
-          return
-        end
-        # we add record to DNS which links node's DNS to perssistent DNS
-        dns = nil
-        begin
-          dns = dns()
-        rescue  => e
-          err_msg = "cannot find ec2_address in associate_persistent_dns for node with ID '#{node[:id]}"
-          if e.is_a?(::DTK::Error)
-            err_msg << ": #{e}"
-          end
-          Log.error(err_msg)
-          return
-        end
-
-        record = dns.get_record?(node.persistent_dns())
-
-        if record.nil?
-          # there is no record we need to create it (first boot)
-          record = dns.create_record(node.persistent_dns(), ec2_address)
-        else
-          # we need to update it with new dns name
-          record = dns.update_record(record, ec2_address)
-        end
-
-        # in case there was no record created we raise error
-        fail Error, "Not able to set DNS hostname for node with ID '#{node[:id]}" if record.nil?
-
-        # if all sucess we update the database
-        node.update(hostname_external_ref: node[:hostname_external_ref])
-
-        Log.info "Persistent DNS '#{node.persistent_dns()}' has been assigned to node and set as default DNS."
-      end
-
       private
 
       def process_addresses__first_boot?(node)

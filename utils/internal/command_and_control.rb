@@ -166,11 +166,6 @@ module DTK
       klass.destroy_node?(node, opts)
     end
 
-    def self.associate_persistent_dns?(node)
-      klass = load_iaas_for(node: node)
-      klass.associate_persistent_dns?(node)
-    end
-
     def self.associate_elastic_ip(node)
       klass = load_iaas_for(node: node)
       klass.associate_elastic_ip(node)

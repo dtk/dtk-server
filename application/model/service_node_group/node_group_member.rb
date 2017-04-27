@@ -36,7 +36,7 @@ module DTK
           # check if is linked to a service_node_group to distingusih it from otehr target_refs
           node_group_member_obj = create_stub(node.model_handle(:node_group_member),node)
           if node_group_member_obj.has_service_node_group?
-            node
+            node_group_member_obj
           end
         end
       end

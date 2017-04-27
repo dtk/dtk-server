@@ -30,7 +30,7 @@ module DTK
       end
 
       NORMALIZE_MAPPING = {
-        instance_state: :admin_op_status
+        # no ec2 attributes to normalize since using ec2 names as canonical names
       }
       def normalize(name)
         NORMALIZE_MAPPING[name] || name

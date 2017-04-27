@@ -29,13 +29,13 @@ module DTK
             if node_component.node.is_node_group?
               to_add = node_component.instance_attributes_array.map do |instance_attributes|
                 # There will be an element for each node group member
-                Nodes.new(node_component, instance_attributes).node_in_list_form!
+                Nodes.new(node_component, instance_attributes).node_hash_list_form
               end
             else
-              to_add = [Nodes.new(node_component, node_component.instance_attributes).node_in_list_form!]
+              to_add = [Nodes.new(node_component, node_component.instance_attributes).node_hash_list_form]
             end
             a + to_add
-          end.sort { |a, b| a.display_name <=> b.display_name }
+          end.sort { |a, b| a[:display_name] <=> b[:display_name] }
         end
       end
 
@@ -44,32 +44,32 @@ module DTK
         @instance_attributes = instance_attributes
       end
 
-      def node_in_list_form!
-        node = instance_attributes.node
-        
-        node[:display_name]      = instance_value?(:display_name)
-        node[:admin_op_status]   = instance_value?(:admin_op_status)
-        node[:os_type]           = base_value?(:os_type)
-        
-        external_ref = node[:external_ref] ||= {}
-        external_ref[:dns_name]    = dns_name
-        external_ref[:instance_id] = instance_value?(:instance_id)
-        external_ref[:size]        = base_value?(:size)
-
-        node.sanitize!
+      def node_hash_list_form
+        { 
+          :id               => instance_attributes.node.id,
+          :display_name     => instance_value(:display_name),
+          :instance_id      => instance_value?(:instance_id),
+          :instance_state   => instance_value?(:instance_state), 
+          :os_type          => base_value?(:os_type),
+          :dns_address      => dns_address,
+          :size             => base_value?(:size)
+        }
       end
       
       private
       
       attr_reader :base_node_component, :instance_attributes
       
-      def dns_name
+      def dns_address
         host_addresses_ipv4 = instance_value?(:host_addresses_ipv4)
         host_addresses_ipv4 && host_addresses_ipv4.first
       end
       
       def instance_value?(attribute_name)
         instance_attributes.value?(attribute_name)
+      end
+      def instance_value(attribute_name)
+        instance_value?(attribute_name) || fail("Unexpected that node attribute '#{attribute_name}' is nil")
       end
       
       def base_value?(attribute_name)

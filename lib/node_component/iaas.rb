@@ -29,13 +29,6 @@ module DTK
         klass(iaas_type, node).new(assembly, node, component_with_attributes)
       end
 
-      def update_attribute!(attribute_name, attribute_value)
-        attribute = attribute(attribute_name)
-        attribute[:value_asserted] = attribute_value
-        attribute[:value_derived]  = nil
-        Attribute.update_and_propagate_attributes(attribute_model_handle, [attribute], add_state_changes: false, partial_value: false)
-      end
-
       private      
       def self.klass(iaas_type, node)
         klass_base(iaas_type).const_get('Type').const_get(node.is_node_group?  ? 'Group' : 'Instance')

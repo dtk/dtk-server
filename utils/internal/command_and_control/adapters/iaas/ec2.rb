@@ -64,15 +64,6 @@ module DTK
         node_external_ref[:type] == 'ec2_image' && node_external_ref[:image_id]
       end
 
-      DEFAULT_COMMUNICATION_ID = 'docker-executor'
-      def self.pbuilderid(node)
-        if node.is_assembly_wide_node?
-          DEFAULT_COMMUNICATION_ID
-        else
-          node.node_component.attribute_value(:instance_id)
-        end
-      end
-
       def self.start_instances(nodes)
         nodes.each do |node|
           aws_conn_from_node(node).server_start(node.instance_id())

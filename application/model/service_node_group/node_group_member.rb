@@ -29,30 +29,40 @@ module DTK
         # no op
       end
 
+      # returns NodeGroupMember object if node group member; otehrwise retuns nil
       def self.node_group_member?(node)
         if node.kind_of?(NodeGroupMember)
           node
         elsif node.is_target_ref?
           # check if is linked to a service_node_group to distingusih it from otehr target_refs
           node_group_member_obj = create_stub(node.model_handle(:node_group_member),node)
-          if node_group_member_obj.has_service_node_group?
+          if node_group_member_obj.node_group_parent?
             node_group_member_obj
           end
         end
       end
-      
+
+      def index
+        (self[:index] || fail(Error, "Unexpeced that self[:index] is nil")).to_i
+      end
       # This should only be called if node is a node_group_member although its class may not be NodeGroupMember
       def self.node_group_member_index(node)
         # using node[:index] is  shortcut
-        node[:index] || TargetRef.node_member_index(node)
+        (node[:index] || TargetRef.node_member_index(node)).to_i
       end
 
       def self.node_group_name(node)
         TargetRef.node_group_name(node)
       end
 
-      def has_service_node_group?
+      # return ServiceNodeGroup if self has a node group parent; otherwise nil
+      def node_group_parent?
         service_node_group(raise_errors: false)
+      end
+
+      # return ServiceNodeGroup
+      def node_group_parent
+        service_node_group(raise_errors: true)
       end
 
       def soft_delete()

@@ -20,18 +20,21 @@ module DTK
     require_relative('node_component/type')
     # type must be before naming_class_mixin
     require_relative('node_component/naming_class_mixin')
-    require_relative('node_component/node_group')
+    require_relative('node_component/attribute_mixin')
+    require_relative('node_component/get_class_mixin')
     # instance_attributes must be before iaas
     require_relative('node_component/instance_attributes')
     require_relative('node_component/iaas')
     require_relative('node_component/parsing')
 
 
-    extend Naming::ClassMixin
-    include NodeGroup::Mixin
-    
-    attr_reader :component, :node, :assembly, :ndx_attributes
+    extend NamingClassMixin
+    include AttributeMixin
+    extend GetClassMixin
+    include InstanceAttributes::Mixin
+    extend InstanceAttributes::ClassMixin
 
+    attr_reader :component, :node, :assembly
 
     def initialize(assembly, node, component_with_attributes)
       @assembly  = assembly
@@ -45,26 +48,6 @@ module DTK
     end
     def node_name
       node.display_name
-    end
-
-    # returns attribute object
-    def attribute(attribute_name) 
-      fail(Error, "Illegal attribute '#{attribute_name}' for component '#{component.display_name}'") unless ndx_attributes.has_key?(attribute_name)  
-      ndx_attributes[attribute_name]
-    end
-
-    def attribute_name_value_hash
-      ndx_attributes.inject({}) { |h, (name, attribute)| h.merge(name => attribute[:attribute_value]) }
-     end
-    private :attribute_name_value_hash
-
-
-    def attribute_value?(attribute_name) 
-      attribute(attribute_name)[:attribute_value]
-    end
-
-    def attribute_value(attribute_name)
-      attribute_value?(attribute_name) || fail(Error, "Unexpected that attribute '#{attribute_name}' is not set")
     end
 
     # returns an array of DTK::NodeComponents
@@ -99,66 +82,12 @@ module DTK
       NodeComponent.component_types.include?(component.get_field?(:component_type))
     end
 
-    # returns [is_special_value, special_value] where if first is false then second should be ignored
-    # this can be overwritten
-    def update_if_dynamic_special_attribute!(_attribute)
-      [false, nil]
-    end
-
-    def self.components_with_attributes(components)
-      Component::Instance::WithAttributes.components_with_attributes(components)
-    end
-    def self.component_with_attributes(component)
-      components_with_attributes([component]).first
-    end
-
-    # returns an InstanceAttributes object
-    def instance_attributes
-      fail Error, "The method instance_attributes should not be called on a node group" if node.is_node_group?
-      # TODO: restrict to only instance attributes
-      self.class::InstanceAttributes.new(node, attribute_name_value_hash)
-    end
-
     private
-
-    def attribute_model_handle
-      @attribute_model_handle ||= component.model_handle(:attribute)
-    end
 
     def self.component_types
       @component_types ||= IAAS::TYPES.inject([]) { |a, iaas_type| a + node_component_types(iaas_type) }
     end
 
-    def self.get_components_with_attributes(nodes, assembly)
-      components_with_attributes(get_components(nodes, assembly))
-    end
-
-    COMPONENT_COLS = [:id, :group_id, :display_name, :component_type]
-    def self.get_components(nodes, assembly)
-      ret = []
-      return ret if nodes.empty?
-      internal_names = nodes.map { |node| node_component_ref_from_node(node).gsub(/::/,'__') }
-      sp_hash = {
-        cols: COMPONENT_COLS,
-        filter: [:and, 
-                 [:eq, :assembly_id, assembly.id], 
-                 [:oneof, :display_name, internal_names]]
-      }
-      Component::Instance.get_objs(assembly.model_handle(:component), sp_hash)
-    end
-
-    NODE_COLS = [:id, :group_id, :display_name, :assembly_id]
-    def self.node_from_component(component, assembly)
-      sp_hash = {
-        cols: NODE_COLS,
-        filter: [:and, 
-                 [:eq, :assembly_id, assembly.id], 
-                 [:eq, :display_name, node_name(component)]]
-      }
-      Node.get_obj(assembly.model_handle(:node), sp_hash) || 
-        fail(Error, "Unexpected that no matching node for componnet '#{component.display_name}'")
-    end
-    
     def self.node_name(component)
       if component.display_name =~ /\[(.+)\]$/
         $1

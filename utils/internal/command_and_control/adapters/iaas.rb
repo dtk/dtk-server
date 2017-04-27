@@ -18,7 +18,16 @@
 module DTK
   class CommandAndControl
     class IAAS < self
+      DEFAULT_COMMUNICATION_ID = 'docker-executor'
+      def self.pbuilderid(node)
+        if node.is_assembly_wide_node?
+          DEFAULT_COMMUNICATION_ID
+        else
+          NodeComponent.instance_id(node)
+        end
+      end
 
+      # TODO: DTK-2938: check which of below should be removed
       # This should be overwritten
       def get_and_update_node_state!(_node, _attribute_names)
         fail Error.new("The method '#{self.class}#get_and_update_node_state' should be defined")

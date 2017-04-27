@@ -18,6 +18,33 @@
 module DTK
   class NodeComponent
     class InstanceAttributes < ::Hash
+      require_relative('instance_attributes/node_group_helper')
+
+      module ClassMixin
+        def instance_id(node)
+          InstanceAttributes.instance_id(node)
+        end
+      end
+
+      module Mixin
+        # returns an InstanceAttributes object
+        def instance_attributes
+          fail Error, "The method instance_attributes should not be called on a node group" if node.is_node_group?
+          self.class::InstanceAttributes.new(node, attribute_name_value_hash)
+        end
+
+        # Returns an array of InstanceAttributes objects
+        def instance_attributes_array
+          ret = []
+          fail Error, "The method instance_attributes_array should only be called on node group" unless node.is_node_group?
+          node_group_helper = NodeGroupHelper.new(self)
+          node.get_node_group_members.each_with_index do |node_group_member, index|
+            ret << self.class::InstanceAttributes.new(node_group_member, node_group_helper.attribute_name_value_hash(index))
+          end
+          ret
+        end
+      end
+      
       def initialize(node, attributes_name_value_hash)
         super()
         name_value_hash = iaas_normalize(attributes_name_value_hash)
@@ -25,17 +52,34 @@ module DTK
         @node = node
       end
       attr_reader :node
-
+      
       def value?(name)
         self[name.to_sym]
       end
-
+      
+      def value(name)
+        value?(name) || fail(Error, "Unexpected that attribute '#{name}' has a nil value")
+      end
+      
+      def self.instance_id(node_or_node_group_member)
+        instance_attributes(node_or_node_group_member).value(:instance_id)
+      end
+      
       private
 
+      def self.instance_attributes(node_or_node_group_member)
+        if node_group_member = node_or_node_group_member.node_group_member?
+          node_group = node_group_member.node_group_parent
+          node_group.node_component.instance_attributes_array[node_group_member.index - 1]
+        else
+          node_or_node_group_member.node_component.instance_attributes
+        end
+      end
+      
       def iaas_normalize(attributes_name_value_hash)
         fail Error::NoMethodForConcreteClass.new(self.class)
       end
-
+      
       def display_name_hash(node, opts = {})
         { display_name: node.assembly_node_print_form }
       end

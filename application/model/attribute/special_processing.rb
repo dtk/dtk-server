@@ -15,84 +15,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class Attribute
-  class SpecialProcessing
-    r8_nested_require('special_processing', 'value_check')
-    r8_nested_require('special_processing', 'update')
+module DTK
+  class Attribute
+    class SpecialProcessing
+      require_relative('special_processing/group_cardinality')
 
-    private
-
-    def self.needs_special_processing?(attr)
-      attr_info(attr)
-    end
-
-    def self.attr_info(attr)
-      if type = attribute_type(attr)
-        SpecialProcessingInfo[type][attr.get_field?(:display_name).to_sym]
+      def initialize(attribute, component, new_val)
+        @attribute = attribute
+        @component = component
+        @new_val   = new_val
       end
-    end
+      private :initialize
+      
+      def self.handle_special_processing_attributes(existing_attributes, ndx_new_vals)
+        existing_attributes.each do |attribute|
+          next unless SPECIAL_PROCESSING_ATTRIBUTES.include?(attribute.display_name)
+          # only special_processing on component attributes
+          next unless component = attribute.get_component?
 
-    def self.attribute_type(attr)
-      attr.update_object!(:node_node_id, :component_component_id)
-      if attr[:node_node_id] then :node
-      elsif attr[:component_component_id] then :component
-      else
-        Log.error('Unexepected that both :node_node_id and :component_component_id are nil')
-        nil
-      end
-    end
-
-    class LegalValues
-      attr_reader :print_form
-      def include?(val)
-        @charachteristic_fn.call(val)
-      end
-      def self.create?(attr, attr_info)
-        if attr_info
-          if attr_info[:legal_values] || (attr_info[:legal_value_fn] && attr_info[:legal_value_error_msg])
-            new(attr, attr_info)
+          if attribute_info = needs_special_processing?(attribute, component)
+            new_val = ndx_new_vals[attribute[:id]]
+            attribute_info[:proc].call(attribute, component, new_val)
           end
         end
       end
 
-      private
-
-      def initialize(attr, attr_info)
-        if attr_info[:legal_values]
-          legal_values = attr_info[:legal_values].call(attr)
-          @charachteristic_fn = lambda { |v| legal_values.include?(v) }
-          @print_form = legal_values
-        else #attr_info[:legal_value_fn] and attr_info[:legal_value_error_msg]
-          @charachteristic_fn = attr_info[:legal_value_fn]
-          @print_form = [attr_info[:legal_value_error_msg]]
-        end
+      def self.process(attribute, component, value)
+        new(attribute, component, value).process
       end
-    end
 
-    SpecialProcessingInfo = {
-      node: {
-        instance_size: {
-          legal_values: lambda { |a| Node::Template.legal_instance_sizes(a.model_handle(:node)) },
-          proc: lambda { |a, v| Update::MemorySize.new(a, v).process() }
-        },
-        # os_identifier: {
-        #   legal_values: lambda { |a| Node::Template.legal_os_identifiers(a.model_handle(:node)) },
-        #   proc: lambda { |a, v| Update::OsIdentifier.new(a, v).process() }
-        # },
+      private
+      
+      attr_reader :attribute, :component, :new_val
+
+      # returns attribute_info or nil
+      def self.needs_special_processing?(attribute, component)
+        attribute_info = SPECIAL_PROCESSING_INFO[attribute.display_name.to_sym]
+        attribute_info if attribute_info[:component_types].include?(component[:component_type])
+      end
+
+      SPECIAL_PROCESSING_INFO = {
         cardinality: {
-          legal_value_fn: lambda do |v|
-            val =
-              if v.is_a?(Fixnum) then v
-              elsif v.is_a?(String) && v =~ /^[0-9]+$/ then v.to_i
-              end
-            val && val > 0
-          end,
-          legal_value_error_msg: 'Value must be a positive integer',
-          proc: lambda { |a, v| Update::GroupCardinality.new(a, v).process() }
+          component_types: ['ec2__node_group'],
+          proc: lambda { |attribute, component, value| GroupCardinality.process(attribute, component, value) }
         }
-      },
-      component: {
       }
-    }
+      SPECIAL_PROCESSING_ATTRIBUTES = SPECIAL_PROCESSING_INFO.keys.map(&:to_s)
+        
+    end
   end
-end; end
+end

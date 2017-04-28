@@ -76,6 +76,9 @@ module DTK
         IAAS.create(assembly, node, component_with_attributes(component))
       end
     end
+    def self.node_component(component)
+      node_component?(component) || fail(Error, "Unexpected that component '#{component.display_name}' is not a node component")
+    end
 
     # returns true if component is a node component 
     def self.is_node_component?(component)

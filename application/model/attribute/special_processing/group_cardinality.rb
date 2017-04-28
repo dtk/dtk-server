@@ -24,13 +24,10 @@ module DTK
       
       def process
         existing_val = (attribute.get_field?(:value_asserted) || 0).to_i
-        if new_val == existing_val
-          fail ErrorUsage.new("Value set equals existing value (#{existing_val})")
-        end
-        node_component = NodeComponent.node_component(component)
-        pp [:node_component, node_component]
-        fail 'got here'
-        node_group = attribute.get_service_node_group(cols: [:id, :group_id, :display_name, :datacenter_datacenter_id, :assembly_id])
+        # no op if no change
+        return if new_val == existing_val
+
+        node_group = NodeComponent.node_component(component).node_group
         ng_members = node_group.get_node_group_members
         
         # existing_val is value of cardinality attributes, and in some cases can be different than node_group_members.size

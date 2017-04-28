@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: deprecate NodeGroup since this replaces it
 module DTK
   # This class represents objects that are specfied by node groups in assembly templates and service insatnces
   class ServiceNodeGroup < Node
@@ -33,6 +32,20 @@ module DTK
     def self.id_to_name(model_handle, id)
       IdNameHelper.id_to_name(model_handle, id)
     end
+    # TODO: DTK-2938: from deprcated application/model/node_group; make sure dont need
+    # below which is called at  https://github.com/dtk/dtk-server/blob/c51fd400e023ad297395674c75ed6362da20650b/application/model/task/status/list_form.rb#L56
+    # def NodeGroup.id_to_name(model_handle, id)
+    #  sp_hash =  {
+    #    cols: [:display_name],
+    #    filter: [:and,
+    #             [:eq, :id, id],
+    #             [:eq, :type, 'node_group_instance'],
+    #             [:neq, :datacenter_datacenter_id, nil]]
+    #  }
+    #  rows_raw = get_objs(model_handle, sp_hash)
+    #  rows_raw.first[:display_name]
+    # end
+
 
     # clone_components_to_members returns array with each element being a cloned component
     # on node_members with their attributes; it clones if necssary

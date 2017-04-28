@@ -43,12 +43,20 @@ module DTK
       # @ndx_attributes is indexed by symbolized attribute name
       @ndx_attributes = component_with_attributes.attributes.inject({}) { |h, attr| h.merge!(attr.display_name.to_sym => attr) } 
     end
+
+    def node_group
+      fail Error, "The method 'node_group' should not be called on a node component not associated with a node group" unless node.is_node_group?
+      node
+    end
+
     def assembly_name
       assembly.display_name
     end
+
     def node_name
       node.display_name
     end
+
 
     # returns an array of DTK::NodeComponents
     def self.node_components(nodes, assembly)

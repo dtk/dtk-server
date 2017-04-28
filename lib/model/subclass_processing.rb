@@ -52,9 +52,6 @@ module DTK
       def find_subtype_model_name(id_handle, opts = {})
         model_name = id_handle[:model_name]
         return model_name unless SubclassProcessing.subclass_targets.include?(model_name)
-        if shortcut = subclass_controllers(model_name, opts)
-          return shortcut
-        end
         case model_name
           when :component
            type = get_object_scalar_column(id_handle, :type)
@@ -73,15 +70,6 @@ module DTK
       end
 
       private
-
-      # so can use calling cobntroller to shortcut needing datbase lookup
-      def subclass_controllers(model_name, opts)
-        if model_name == :node && opts[:controller_class] == Node_groupController
-          :node_group
-        elsif model_name == :component && opts[:controller_class] == AssemblyController
-          :assembly
-        end
-      end
 
       def models_to_add(model_name)
         SubclassProcessing.models_to_add(model_name)
@@ -130,7 +118,6 @@ module DTK
           when :component_template then Component::Template
           when :component_instance then Component::Instance
           when :datacenter then Target
-          when :node_group then NodeGroup
           when :service_node_group then ServiceNodeGroup
           when :repo_with_branch then Repo::WithBranch
           when :component_module then ComponentModule
@@ -173,7 +160,6 @@ module DTK
         if model_class == Component::Template then :component_template
         elsif model_class == Assembly::Instance then :assembly_instance
         elsif model_class == Assembly::Template then :assembly_template
-        elsif model_class == NodeGroup then :node
         elsif model_class == ServiceNodeGroup then :node
         end
       end
@@ -183,8 +169,7 @@ module DTK
           return ret
         end
         # TODO: move over all models to use data-driven form
-        if model_class == NodeGroup then 'node group'
-        elsif model_class == Assembly::Instance then 'service'
+        if model_class == Assembly::Instance then 'service'
         elsif model_class == Assembly::Template then 'service module'
         elsif model_class == Component::Template then 'component template'
         end

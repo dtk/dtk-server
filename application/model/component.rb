@@ -571,7 +571,7 @@ module DTK
         attr = r[:attribute]
         attr.merge(component_attrs) if attr and not attribute_is_filtered?(attr, attr_filters)
       end.compact
-      attributes = AttributeComplexType.flatten_attribute_list(filtered_attrs)
+      attributes = Attribute::ComplexType.flatten_attribute_list(filtered_attrs)
       component.merge(attributes: attributes)
     end
 
@@ -717,7 +717,7 @@ module DTK
       # if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
       return component.merge(attributes: []) unless component_and_attrs.first[:attribute]
       opts = { flatten_nil_value: true }
-      component.merge(attributes: AttributeComplexType.flatten_attribute_list(component_and_attrs.map { |r| r[:attribute] }, opts))
+      component.merge(attributes: Attribute::ComplexType.flatten_attribute_list(component_and_attrs.map { |r| r[:attribute] }, opts))
     end
 
     def get_attributes_unraveled(to_set = {}, opts = {})
@@ -733,7 +733,7 @@ module DTK
         to_set[:component_id] = sample[:component_component_id]
       end
 
-      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes, opts)
+      flattened_attr_list = Attribute::ComplexType.flatten_attribute_list(raw_attributes, opts)
       i18n = get_i18n_mappings_for_models(:attribute)
       flattened_attr_list.map do |a|
         unless a[:hidden]

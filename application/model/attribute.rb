@@ -15,18 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: move files to inside DTK::Attribute
-files =
-  [
-   'dependency_analysis',
-   'group',
-   'complex_type'
-  ]
-r8_nested_require('attribute', files)
 module DTK
   class Attribute < Model
     set_relation_name(:attribute, :attribute)
 
+    require_relative('attribute/dependency_analysis')
+    require_relative('attribute/group')
+    require_relative('attribute/complex_type')
     require_relative('attribute/get_method')
     require_relative('attribute/meta')
     require_relative('attribute/datatype')
@@ -41,10 +36,10 @@ module DTK
 
     include GetMethod::Mixin
     extend GetMethod::ClassMixin
-    include AttributeGroupInstanceMixin
+    include GroupInstanceMixin
     include DatatypeMixin
-    extend AttrDepAnalaysisClassMixin
-    extend AttributeGroupClassMixin
+    extend DependencyAnalysisClassMixin
+    extend GroupClassMixin
     include ConstantMixin
     include PrintFormMixin
     extend PrintFormClassMixin
@@ -185,7 +180,7 @@ module DTK
       return true if attribute_value().nil?
       return false unless self[:data_type] == 'json'
       return nil unless self[:semantic_type]
-      has_req_fields = AttributeComplexType.has_required_fields_given_semantic_type?(attribute_value(), self[:semantic_type])
+      has_req_fields = ComplexType.has_required_fields_given_semantic_type?(attribute_value(), self[:semantic_type])
       return nil if has_req_fields.nil?
       has_req_fields ? false : true
     end
@@ -227,7 +222,7 @@ module DTK
       ret = []
       ndx_nodes = {}
       component_actions.each do |action|
-        AttributeComplexType.flatten_attribute_list(action[:attributes], flatten_nil_value: true).each do |attr|
+        ComplexType.flatten_attribute_list(action[:attributes], flatten_nil_value: true).each do |attr|
           ret << attr.merge(component: action[:component], node: action[:node], task_id: task[:id])
         end
         if opts[:include_node_attributes]
@@ -354,16 +349,16 @@ module DTK
       cmp_el = cmp_name ? cmp_name.gsub(/::.+$/, '') : nil
       attr_name = self[:display_name]
       token_array = ([node_or_group_name, cmp_el] + Aux.tokenize_bracket_name(attr_name)).compact
-      AttributeComplexType.serialze(token_array)
+      ComplexType.serialze(token_array)
     end
 
     def qualified_attribute_id_aux(node_or_group_id_formatted = nil)
       cmp_id = self.key?(:component) ? self[:component][:id] : nil
-      cmp_id_formatted = AttributeComplexType.container_id(:component, cmp_id)
-      attr_id_formatted = AttributeComplexType.container_id(:attribute, self[:id])
-      item_path = AttributeComplexType.item_path_token_array(self) || []
+      cmp_id_formatted = ComplexType.container_id(:component, cmp_id)
+      attr_id_formatted = ComplexType.container_id(:attribute, self[:id])
+      item_path = ComplexType.item_path_token_array(self) || []
       token_array = ([node_or_group_id_formatted, cmp_id_formatted, attr_id_formatted] + item_path).compact
-      AttributeComplexType.serialze(token_array)
+      ComplexType.serialze(token_array)
     end
 
     def self.unravelled_value(val, path)

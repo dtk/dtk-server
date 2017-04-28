@@ -46,7 +46,7 @@ module DTK
 
     def node_group
       fail Error, "The method 'node_group' should not be called on a node component not associated with a node group" unless node.is_node_group?
-      node
+      node.create_as_subclass_object(NodeGroup)
     end
 
     def assembly_name

@@ -118,7 +118,7 @@ module DTK
           when :component_template then Component::Template
           when :component_instance then Component::Instance
           when :datacenter then Target
-          when :service_node_group then ServiceNodeGroup
+          when :node_group then NodeGroup
           when :repo_with_branch then Repo::WithBranch
           when :component_module then ComponentModule
           when :test_module then TestModule
@@ -144,7 +144,7 @@ module DTK
         component_template: :component,
         component_instance: :component,
         node_group: :node,
-        service_node_group: :node
+        node_group: :node
       }
 
       def self.add_subclass_klass_mapping(subclass_klass, model_name, opts = {})
@@ -160,7 +160,7 @@ module DTK
         if model_class == Component::Template then :component_template
         elsif model_class == Assembly::Instance then :assembly_instance
         elsif model_class == Assembly::Template then :assembly_template
-        elsif model_class == ServiceNodeGroup then :node
+        elsif model_class == NodeGroup then :node
         end
       end
 

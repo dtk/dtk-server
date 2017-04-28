@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class ServiceNodeGroup
+module DTK; class NodeGroup
   class Cache < self
     def self.model_name
       :node

@@ -65,8 +65,8 @@ module DTK; class Attribute
         ret
       end
 
-      def get_service_node_group(opts = {})
-        get_node(opts.merge(subclass_model_name: :service_node_group))
+      def get_node_group(opts = {})
+        get_node(opts.merge(subclass_model_name: :node_group))
       end
 
       def get_component?(opts = {})

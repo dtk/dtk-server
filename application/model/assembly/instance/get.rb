@@ -160,7 +160,7 @@ module DTK; class Assembly; class Instance
         node_or_ngs.reject!{ |n| n.is_assembly_wide_node? }
       end
 
-      nodes = ServiceNodeGroup.expand_with_node_group_members?(node_or_ngs, opts)
+      nodes = NodeGroup.expand_with_node_group_members?(node_or_ngs, opts)
       nodes.each{ |node| node.update_object!(:ng_member_deleted) }
 
       nodes
@@ -169,7 +169,7 @@ module DTK; class Assembly; class Instance
     def get_node_groups(opts = {})
       cols = opts[:cols] || Node.common_columns()
       node_or_ngs = get_nodes(*cols)
-      ServiceNodeGroup.get_node_groups?(node_or_ngs)
+      NodeGroup.get_node_groups?(node_or_ngs)
     end
 
     def get_node?(filter)
@@ -362,7 +362,7 @@ module DTK; class Assembly; class Instance
         ret
       else
         ret.map do |r|
-          r.is_node_group? ? r.id_handle().create_object(model_name: :service_node_group).merge(r) : r
+          r.is_node_group? ? r.id_handle().create_object(model_name: :node_group).merge(r) : r
         end
       end
     end

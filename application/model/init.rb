@@ -17,7 +17,7 @@
 #
  module DTK
   class ModelInit
-    toplevel_model_files = %w(model user user_group user_group_relation repo repo_user repo_remote repo_user_acl attribute attribute_override port port_link monitoring_item attribute_link node service_node_group node_group_relation component component_ref component_type_hierarchy assembly library target task task_log task_event task_error state_change search_object dependency component_order constraints violation layout component_database link_def link_def component_relation file_asset implementation project node_binding_ruleset dns component_title module_ref module_refs module common_module workspace namespace node_bindings node_image node_image_attribute node_interface action_def service service_associations)
+    toplevel_model_files = %w(model user user_group user_group_relation repo repo_user repo_remote repo_user_acl attribute attribute_override port port_link monitoring_item attribute_link node node_group node_group_relation component component_ref component_type_hierarchy assembly library target task task_log task_event task_error state_change search_object dependency component_order constraints violation layout component_database link_def link_def component_relation file_asset implementation project node_binding_ruleset dns component_title module_ref module_refs module common_module workspace namespace node_bindings node_image node_image_attribute node_interface action_def service service_associations)
 
     toplevel_model_files.each { |model_file| require_relative(model_file) }
 

@@ -16,13 +16,13 @@
 # limitations under the License.
 #
 module DTK
-  class ServiceNodeGroup
+  class NodeGroup
     class NodeGroupMember < ::DTK::Node
       def self.model_name
         :node
       end
       def bump_down_associated_node_group_cardinality
-        service_node_group().bump_down_cardinality()
+        node_group().bump_down_cardinality()
       end
 
       def clone_post_copy_hook(_clone_copy_output, _opts = {})
@@ -34,7 +34,7 @@ module DTK
         if node.kind_of?(NodeGroupMember)
           node
         elsif node.is_target_ref?
-          # check if is linked to a service_node_group to distingusih it from otehr target_refs
+          # check if is linked to a node_group to distingusih it from otehr target_refs
           node_group_member_obj = create_stub(node.model_handle(:node_group_member),node)
           if node_group_member_obj.node_group_parent?
             node_group_member_obj
@@ -55,14 +55,14 @@ module DTK
         TargetRef.node_group_name(node)
       end
 
-      # return ServiceNodeGroup if self has a node group parent; otherwise nil
+      # return NodeGroup if self has a node group parent; otherwise nil
       def node_group_parent?
-        service_node_group(raise_errors: false)
+        node_group(raise_errors: false)
       end
 
-      # return ServiceNodeGroup
+      # return NodeGroup
       def node_group_parent
-        service_node_group(raise_errors: true)
+        node_group(raise_errors: true)
       end
 
       def soft_delete()
@@ -71,13 +71,13 @@ module DTK
 
       private
 
-      def service_node_group(opts = {})
-        return @service_node_group if @service_node_group
+      def node_group(opts = {})
+        return @node_group if @node_group
         sp_hash = {
-          cols: [:id, :service_node_group],
+          cols: [:id, :node_group],
           filter: [:eq, :node_id, id()]
         }
-        nodes = Model.get_objs(model_handle(:node_group_relation), sp_hash).map { |r| r[:service_node_group] }
+        nodes = Model.get_objs(model_handle(:node_group_relation), sp_hash).map { |r| r[:node_group] }
         unless nodes.size == 1
           if opts[:raise_errors].nil? or opts[:raise_errors]
             fail Error.new("Unexpected that rows.size (#{nodes.size}) does not equal 1")
@@ -87,7 +87,7 @@ module DTK
         unless ret.is_node_group?()
           fail Error.new("Unexpected that node (#{ret.inspect}) connected to node group member (#{get_field?(:display_name)}) is not a node group")
         end
-        @service_node_group = ServiceNodeGroup.create_as(ret)
+        @node_group = NodeGroup.create_as(ret)
       end
     end
   end

@@ -54,7 +54,7 @@ module DTK; class Task; class Status
               source = 'instance'
               unless l3[:component][:node_node_id] == l2[:executable_action][:node][:id]
                 # TODO: DTK-2938: see if change to use service id to name is right or even if this line is ever reached
-                node_group = ServiceNodeGroup.id_to_name(model_handle, l3[:component][:node_node_id])
+                node_group = NodeGroup.id_to_name(model_handle, l3[:component][:node_node_id])
                 source = 'node_group'
               end
               level_2_ret[:components] <<

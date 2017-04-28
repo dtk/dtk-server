@@ -81,7 +81,7 @@ module DTK; class Attribute
         pattern = create_attr_pattern(base_object, av_pair[:pattern], opts)
         ret << pattern
         # attribute_idhs are base level attribute id_handles; in contrast to
-        # node_group_member_attribute_idhs, which gives non null set if attribute is on a node and node is a service_node_group
+        # node_group_member_attribute_idhs, which gives non null set if attribute is on a node and node is a node_group
         # purpose of finding node_group_member_attribute_idhs is when explicitly setting node group attribute want to set
         # all its members to same value; only checking for component level and not node level because
         # node level attributes different for each node member

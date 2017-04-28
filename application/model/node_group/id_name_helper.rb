@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK
-  class ServiceNodeGroup
+  class NodeGroup
     module IdNameHelper
       def self.check_valid_id(model_handle, id)
         check_valid_id_helper(model_handle, id, filter(id: id))
@@ -43,7 +43,7 @@ module DTK
         FilterBase + [[:eq, added_condition_hash.keys.first, added_condition_hash.values.first]]
       end
 
-      NodeType = 'service_node_group'
+      NodeType = 'node_group'
       FilterBase =
         [:and,
          [:eq, :type, NodeType],

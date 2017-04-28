@@ -17,11 +17,11 @@
 #
 module DTK
   # This class represents objects that are specfied by node groups in assembly templates and service insatnces
-  class ServiceNodeGroup < Node
-    require_relative('service_node_group/id_name_helper')
-    require_relative('service_node_group/clone')
-    require_relative('service_node_group/node_group_member')
-    require_relative('service_node_group/cache')
+  class NodeGroup < Node
+    require_relative('node_group/id_name_helper')
+    require_relative('node_group/clone')
+    require_relative('node_group/node_group_member')
+    require_relative('node_group/cache')
 
     def self.check_valid_id(model_handle, id)
       IdNameHelper.check_valid_id(model_handle, id)

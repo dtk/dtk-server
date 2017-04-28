@@ -73,17 +73,17 @@ module DTK
     end
 
     def node_group_member?
-      ServiceNodeGroup::NodeGroupMember.node_group_member?(self)
+      NodeGroup::NodeGroupMember.node_group_member?(self)
     end
 
     # should only be called if self is a node_group_member (it can stil have class DTK::Node
     def node_group_name
-      ServiceNodeGroup::NodeGroupMember.node_group_name(self)
+      NodeGroup::NodeGroupMember.node_group_name(self)
     end
 
     # should only be called if self is a node_group_member (it can stil have class DTK::Node
     def node_group_member_index
-      ServiceNodeGroup::NodeGroupMember.node_group_member_index(self)
+      NodeGroup::NodeGroupMember.node_group_member_index(self)
     end
 
     def is_assembly_wide_node?

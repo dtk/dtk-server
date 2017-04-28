@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class ServiceNodeGroup
+module DTK; class NodeGroup
   module Clone
     # clone_components_to_members returns array with each element being a cloned component
     # on node_members with their attributes; it clones if necssary

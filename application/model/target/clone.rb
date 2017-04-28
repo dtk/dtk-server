@@ -163,7 +163,7 @@ module DTK
         ndx_sc_ids = sc_hashes.inject({}) { |h, sc| h.merge(sc[:node_id] => sc[:id]) }
         sc_mh = target_idh.createMH(:state_change)
         new_items_hash = []
-        ServiceNodeGroup.get_ndx_node_group_members(node_groups.map(&:id_handle)).each do |ng_id, node_members|
+        NodeGroup.get_ndx_node_group_members(node_groups.map(&:id_handle)).each do |ng_id, node_members|
           unless ng_state_change_id = ndx_sc_ids[ng_id]
             Log.eror('Unexpected that ndx_sc_ihs[ng_id] is null')
             next

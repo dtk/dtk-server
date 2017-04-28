@@ -38,7 +38,7 @@ module DTK; class LinkDef::Context
         node().is_node_group?()
       end
 
-      def service_node_group_cache
+      def node_group_cache
         ret = node()
         unless ret.is_node_group?()
           fail Error.new('Shoud not be called if not node group')

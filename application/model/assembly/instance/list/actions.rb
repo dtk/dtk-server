@@ -18,6 +18,7 @@
 module DTK
   module Assembly::Instance::List
     class Actions
+      require_relative('actions/info')
       module Mixin
         def list_actions(type = nil)
           Actions.new(self).list(type)
@@ -56,9 +57,6 @@ module DTK
         end
       end
 
-      ActionInfo = Struct.new(:node, :component_type, :component_title, :method_name)
-      CREATE_METHOD = 'create'
-
       def add_component_create_actions!(ret)
         action_info_array = []
         assembly_instance.get_augmented_components.each do |component|
@@ -66,7 +64,7 @@ module DTK
           component_type  = component[:component_type].gsub('__', '::')
           component_title = ((match = component[:display_name].match(/.*\[(.*)\]/)) && match[1])
 
-          action_info = ActionInfo.new(node, component_type, component_title, CREATE_METHOD)
+          action_info = Info.new(component_type, component_title, Info::CREATE_METHOD, node: node)
           if node.is_node_group?
             action_info_array += expand_node_group_members(node, action_info)
           else
@@ -74,21 +72,20 @@ module DTK
           end
         end
 
-        ret.concat(summarize(action_info_array))
+        ret.concat(Info.display_form(action_info_array))
       end
 
       def add_component_actions_with_methods!(ret)
         action_info_array = []
         Task::Template::Action::AdHoc.list(assembly_instance, :component_instance, {return_nodes: true}).each do |component_action|
           method_name = component_action[:method_name]
-          next if method_name == CREATE_METHOD
+          next if method_name == Info::CREATE_METHOD
 
           node            = component_action[:node]
           component_type  = component_action[:component_type]
           component_title = ((match = component_action[:display_name].match(/.*\[(.*)\]/)) && match[1])
 
-          
-          action_info = ActionInfo.new(node, component_type, component_title, method_name)
+          action_info = Info.new(component_type, component_title, method_name, node: node)
           if node.is_node_group?
             action_info_array += node_group_member_actions
           else
@@ -96,101 +93,32 @@ module DTK
           end
         end
         
-        ret.concat(summarize(action_info_array))
+        ret.concat(Info.display_form(action_info_array))
       end
 
       # if there is node group in service instance, expand node group memebers and display them in list-actions
       def expand_node_group_members(node, action_info)
-        info = action_info # alias
         action_info_array = []
 
         # add node group name to list action
-        action_info_array << info
+        action_info_array << action_info
+        
+        component_type  = action_info.component_type
+        component_title = action_info.component_title 
+        method_name     = action_info.method_name
 
-        members = node.get_node_group_members
-        members.sort_by! { |m| m[:index].to_i }
+        members = node.get_node_group_members.sort_by{ |m| m[:index].to_i }
 
-        if members.size <= 2
-          members.each { |member| action_info_array << ActionInfo.new(member, info.component_type, info.component_title, info.method_name) }
+        if members.size <=  Info::MAX_NODE_GROUP_MEMBERS_TO_DISPLAY
+          members.each { |ng_member| action_info_array << Info.new(component_type, component_title, method_name, node: ng_member) }
         else
-          first_index = members.first[:index]
-          last_index = members.last[:index]
-          raise "Need to treat"
-#          action_info_array << { node: "#{node[:display_name]}:[#{first_index}-#{last_index}]", component_ref: component_ref, component_title: component_title }
+          node_group_range = [members.first[:index], members.last[:index]]
+          action_info_array << Info.new(component_type, component_title, method_name, node_name: node.display_name, node_group_range: node_group_range)
         end
 
         action_info_array
       end
 
-      def summarize(action_info_array)
-        ret = []
-        index_iterate(action_info_array) do |node_name, component_type, method_name, action_info_array|
-          info_element = 
-            if action_info_array.size == 1
-              action_info_array.first
-            else
-              # everything wil be same in action_info_array elements except for title
-              sample_info = action_info_array.first
-              ActionInfo.new(sample_info.node, component_type, title_summary(action_info_array), method_name) 
-            end
-          ret << summarize_element(info_element)
-        end
-        ret
-      end
-
-      TITLE_SUMMARY = 'NAME'
-      COUNT_TO_USE_TITLE_SUMMARY = 4
-      TITLE_DELIM = ','
-      def title_summary(action_info_array)
-        if action_info_array.size > COUNT_TO_USE_TITLE_SUMMARY
-          TITLE_SUMMARY
-        else
-          action_info_array.map(&:component_title).join(TITLE_DELIM) 
-        end
-      end
-      
-      def index_iterate(action_info_array, &block)
-        index_action_info(action_info_array).each_pair do |node_name, ndx_by_component_type|
-          ndx_by_component_type.each_pair do |component_type, ndx_by_method_name|
-            ndx_by_method_name.each_pair do |method_name, action_info_array|
-              block.call(node_name, component_type, method_name, action_info_array)
-            end
-          end
-        end
-      end
-
-      # indexed by [node_name][component_type][method_name]
-      def index_action_info(action_info_array)
-        ret = {}
-        action_info_array.each do |action_info|
-          node_name      = node_name(action_info.node)
-          component_type = action_info.component_type
-          method_name    = action_info.method_name || CREATE_METHOD
-          (((ret[node_name] ||= {})[component_type] ||= {})[method_name] ||= []) << action_info
-        end
-        ret
-      end
-      
-      def summarize_element(action_info)
-        info             = action_info # alias
-        node             = info.node
-        method_name      = info.method_name
-        is_create_method = (method_name.nil? or method_name == CREATE_METHOD)
-        
-        display_name = ''
-        display_name << "#{node_name(node)}/" unless node.is_assembly_wide_node?
-        display_name << info.component_type
-        display_name << "[#{info.component_title}]" if info.component_title
-        display_name << ".#{method_name}" unless is_create_method
-        
-        action_type = (is_create_method ? 'component_create' : 'component_action')
-        { display_name: display_name, action_type: action_type }
-      end
-
-      def node_name(node)
-        node.node_component_ref
-      end
-      
     end
   end
 end

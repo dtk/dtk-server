@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::Attribute
+module DTK
+  class CommonDSL::ObjectLogic::Assembly::Attribute
     class Diff < CommonDSL::Diff::Base
       class Modify < CommonDSL::Diff::Element::Modify
         def process(_result, _opts = {})
@@ -47,4 +47,4 @@ module DTK; module CommonDSL
       end
     end
   end
-end; end
+end

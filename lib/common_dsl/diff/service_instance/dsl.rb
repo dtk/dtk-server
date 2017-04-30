@@ -19,7 +19,7 @@ module DTK; module CommonDSL
   class Diff
     module ServiceInstance
       module DSL
-        #Parses and processes any service instance dsl changes; if dsl updated then updates diff_result or raises error
+        # Parses and processes any service instance dsl changes; if dsl updated then updates diff_result or raises error
         def self.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
           # TODO: DTK-2738:  service_instance.get_dsl_locations will have path of any nested dsl file that is in an import
           #  statement from service_instance_top_dsl_file or any nested dsl file that is recursively broght in throgh imports
@@ -43,6 +43,8 @@ module DTK; module CommonDSL
           end
         end
 
+        private
+
         # opts can have keys:
         #   :impacted_files
         def self.compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen, opts = {})
@@ -65,9 +67,9 @@ module DTK; module CommonDSL
               end
 
               #TODO: Find better solution to update semantic_diffs
-              unless diff_result.semantic_diffs["COMPONENTLINKS_ADDED"].nil? && diff_result.semantic_diffs["COMPONENTS_DELETED"].nil?
-                diff_result.semantic_diffs["COMPONENTLINKS_DELETED"] = diff_result.semantic_diffs["COMPONENTLINKS_ADDED"]
-                diff_result.semantic_diffs.delete("COMPONENTLINKS_ADDED")
+              unless diff_result.semantic_diffs["COMPONENT_LINKS_ADDED"].nil? && diff_result.semantic_diffs["COMPONENTS_DELETED"].nil?
+                diff_result.semantic_diffs["COMPONENT_LINKS_DELETED"] = diff_result.semantic_diffs["COMPONENT_LINKS_ADDED"]
+                diff_result.semantic_diffs.delete("COMPONENT_LINKS_ADDED")
               end
 
               return if diff_result.semantic_diffs["WORKFLOWS_MODIFIED"].nil? 
@@ -97,13 +99,9 @@ module DTK; module CommonDSL
               end
               # items_to_update are things that need to be updated in repo from what at this point are in object model
               unless items_to_update.empty?
-                # Treat updates to repo from object model as transaction that rolls back git repo to what client set it as
-                # If error,  RepoManager::Transaction.reset_on_error
-                RepoManager::Transaction.reset_on_error(module_branch) do
-                  # update dtk.service.yaml with data from object model
-                  Generate::ServiceInstance.generate_dsl(opts[:service_instance], module_branch)
-                  diff_result.repo_updated = true # means repo updated by server
-                end
+                # update dtk.service.yaml with data from object model
+                Generate::ServiceInstance.generate_dsl(opts[:service_instance], module_branch)
+                diff_result.repo_updated = true # means repo updated by server
               end
             end
           end

@@ -118,10 +118,15 @@ module DTK
     end
 
     def update_current_sha_from_repo!
-      current_sha = RepoManager.branch_head_sha(self)
-      update(current_sha: current_sha)
-      self[:current_sha] = current_sha
-      current_sha
+      update_sha!(RepoManager.branch_head_sha(self))
+    end
+    def hard_reset_branch_to_sha!(sha)
+      get_repo.hard_reset_branch_to_sha(self, sha)
+      update_sha!(sha)
+    end
+    def update_sha!(sha)
+      update(current_sha: sha)
+      self[:current_sha] = sha
     end
 
     def update_external_ref(ext_ref)

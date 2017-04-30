@@ -28,8 +28,7 @@ module DTK
           # within yield module_branch sha can be changed
           module_branch.update_current_sha_from_repo!
           if sha_before_change and (sha_before_change != module_branch.current_sha)
-            repo = module_branch.get_repo
-            repo.hard_reset_branch_to_sha(module_branch, sha_before_change) 
+            module_branch.hard_reset_branch_to_sha!(sha_before_change)
           end
           raise e
         end

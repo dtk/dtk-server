@@ -17,7 +17,7 @@
 #
 module DTK
   class Assembly::Instance
-    class ServiceLink
+    class ComponentLink
       class Factory < self
         def initialize(assembly_instance, input_cmp_idh, output_cmp_idh, dependency_name)
           super(assembly_instance)

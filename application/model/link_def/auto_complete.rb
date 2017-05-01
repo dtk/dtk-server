@@ -96,9 +96,7 @@ module DTK; class LinkDef
             # Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
           else
             # Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
-            matching_cmp = matching_cmps.first
-            output_cmp_idh = matching_cmp.id_handle()
-            assembly.add_service_link?(input_cmp_idh, output_cmp_idh)
+            assembly.add_component_link(input_cmp_idh.create_object, matching_cmps.first)
           end
         end
       end

@@ -40,10 +40,12 @@ module DTK
         end
       end
 
-      def self.parent_component_name?(qualified_key, opts = {})
+      # opts can have keys:
+      #   :include_node
+      def parent_component_name?(opts = {})
         node_name      = nil
         component_name = nil
-        qualified_key.key_elements.each do |element|
+        key_elements.each do |element|
           if element[:type] == :component
             component_name = element[:key]
           elsif element[:type] == :node
@@ -51,6 +53,9 @@ module DTK
           end
         end
         opts[:include_node] ? "#{node_name}/#{component_name}" : component_name
+      end
+      def parent_component_name(opts = {})
+        parent_component_name?(opts = {}) || fail(Error, "Unexpected that parent_component_name?(..) is nil")
       end
 
     end

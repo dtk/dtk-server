@@ -16,30 +16,42 @@
 # limitations under the License.
 #
 module DTK
-  class Assembly::Instance
-    class ServiceLink
-      r8_nested_require('service_link', 'factory')
-
-      def initialize(assembly_instance)
-        @assembly_instance = assembly_instance
+  class Assembly::Instance::ComponentLink
+    module PrintForm
+      # opts can have keys:
+      #   :context
+      #   :filter
+      def self.list_component_links(assembly_instance, opts = {})
+        pp_opts = { context: opts[:context] }
+        get_augmented_port_links(filter: opts[:filter]).map { |r| print_form_hash(r, pp_opts) } +
+          assembly_instance.get_augmented_ports(mark_unconnected: true).select { |r| r[:unconnected] }.map { |r| print_form_hash(r, pp_opts) }
       end
 
-      def self.delete(port_link_idhs)
-        if port_link_idhs.is_a?(Array)
-          return if port_link_idhs.empty?
-        else
-          port_link_idhs = [port_link_idhs]
+      def self.list_possible_component_links(assembly_instance)
+        ret = []
+        output_ports = []
+        unc_ports = []
+        assembly_instance.get_augmented_ports(mark_unconnected: true).each do |r|
+          if r[:direction] == 'output'
+            output_ports << r
+          elsif r[:unconnected]
+            unc_ports << r
+          end
         end
-
-        aug_attr_links = get_augmented_attribute_links(port_link_idhs)
-        attr_mh = port_link_idhs.first.createMH(:attribute)
-        Model.Transaction do
-          AttributeLink.update_for_delete_links(attr_mh, aug_attr_links)
-          port_link_idhs.map { |port_link_idh| Model.delete_instance(port_link_idh) }
-        end
+        return ret if output_ports.nil? || unc_ports.nil?
+        poss_conns = LinkDef.find_possible_connections(unc_ports, output_ports)
+        poss_conns.map do |r|
+          poss_conn = "#{r[:output_port][:id]}:#{r[:output_port].display_name_print_form}"
+          print_form_hash(r[:input_port]).merge(possible_connection: poss_conn)
+        end.sort { |a, b| a[:service_ref] <=> b[:service_ref] }
       end
 
+      # opts can have keys
+      #   :context
+      # object is of type PortLink or Port
+      # TODO: can this any longer be passed a Port object
       def self.print_form_hash(object, opts = {})
+        opts = { hide_assembly_wide_node: true }.merge(opts)
         # set the following (some can have nil as legal value)
         service_type = base_ref = required = description = nil
         id = object[:id]
@@ -47,8 +59,8 @@ module DTK
           port_link = object
           input_port = print_form_hash__port(port_link[:input_port], port_link[:input_node], opts)
           output_port = print_form_hash__port(port_link[:output_port], port_link[:output_node], opts)
-          service_type = port_link[:input_port].link_def_name()
-          if service_type != port_link[:output_port].link_def_name()
+          service_type = port_link[:input_port].link_def_name
+          if service_type != port_link[:output_port].link_def_name
             Log.error('input and output link defs are not equal')
           end
           # TODO: confusing that input/output on port link does not reflect what is logical input/output
@@ -56,23 +68,23 @@ module DTK
             # base_ref = input_port
             base_port = port_link[:input_port].merge!(node: port_link[:input_node], nested_component: port_link[:input_component])
             base_ref  = base_port.display_name_print_form(hide_assembly_wide_node: true)
-
+            
             # dep_ref = output_port
             dep_port = port_link[:output_port].merge!(node: port_link[:output_node], nested_component: port_link[:output_component])
             dep_ref  = dep_port.display_name_print_form(hide_assembly_wide_node: true)
           else
             # base_ref = output_port
-            base_port = port_link[:output_port].merge!(node: port_link[:output_node], nested_component: port_link[:output_component])
+          base_port = port_link[:output_port].merge!(node: port_link[:output_node], nested_component: port_link[:output_component])
             base_ref  = base_port.display_name_print_form(hide_assembly_wide_node: true)
-
+            
             # dep_ref = input_port
             dep_port = port_link[:input_port].merge!(node: port_link[:input_node], nested_component: port_link[:input_component])
             dep_ref  = dep_port.display_name_print_form(hide_assembly_wide_node: true)
           end
         elsif object.is_a?(Port)
           port = object
-          base_ref = port.display_name_print_form()
-          service_type = port.link_def_name()
+          base_ref = port.display_name_print_form
+          service_type = port.link_def_name
           if link_def = port[:link_def]
             required = port[:required]
             description = port[:description]
@@ -80,7 +92,7 @@ module DTK
         else
           fail Error.new("Unexpected object type (#{object.class})")
         end
-
+        
         ret = {
           id: id,
           type: service_type,
@@ -92,22 +104,10 @@ module DTK
         ret
       end
 
-      private
-
-      def self.get_augmented_attribute_links(port_link_idhs)
-        ret = []
-        return ret if port_link_idhs.empty?
-        sp_hash = {
-          cols: [:id, :group_id, :port_link_id, :input_id, :output_id, :dangling_link_info],
-          filter: [:oneof, :port_link_id, port_link_idhs.map(&:get_id)]
-        }
-        attribute_link_mh = port_link_idhs.first.createMH(:attribute_link)
-        Model.get_objs(attribute_link_mh, sp_hash)
-      end
-
       def self.print_form_hash__port(port, node, opts = {})
         port.merge(node: node).display_name_print_form(opts)
       end
+
     end
   end
 end

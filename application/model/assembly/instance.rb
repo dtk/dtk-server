@@ -18,8 +18,7 @@
 module DTK; class  Assembly
   class Instance < self
     r8_require('../service_associations')
-    require_relative('instance/service_link_mixin')
-    require_relative('instance/service_link')
+    require_relative('instance/component_link')
     require_relative('instance/action')
     require_relative('instance/violation')
     require_relative('instance/violations')
@@ -36,7 +35,7 @@ module DTK; class  Assembly
     require_relative('instance/lock')
     require_relative('instance/dsl_location')
 
-    include ServiceLinkMixin
+    include ComponentLink::Mixin
     include ViolationsMixin
     include List::Mixin
     extend List::ClassMixin

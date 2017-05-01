@@ -88,7 +88,7 @@ module DTK
       end
 
       def component_links
-        rest_ok_response assembly_instance.list_service_links(hide_assembly_wide_node: true), datatype: :service_link
+        rest_ok_response assembly_instance.list_component_links, datatype: :service_link
       end
 
       def dependent_modules

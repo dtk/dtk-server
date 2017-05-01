@@ -450,7 +450,7 @@ module DTK
 
     def rest__delete_service_link
       port_link = ret_port_link()
-      Assembly::Instance::ServiceLink.delete(port_link.id_handle())
+      Assembly::Instance::ComponentLink.delete(port_link.id_handle())
       rest_ok_response
     end
 
@@ -458,8 +458,9 @@ module DTK
       assembly = ret_assembly_instance_object()
       input_cmp_idh = ret_component_id_handle(:input_component_id, assembly)
       output_cmp_idh = ret_component_id_handle(:output_component_id, assembly, allow_external_component: true)
-      opts = ret_params_hash(:dependency_name)
-      service_link_idh = assembly.add_service_link?(input_cmp_idh, output_cmp_idh, opts)
+      link_name = ret_request_params(:dependency_name)
+      opts =  (link_name ? { link_name: link_name } : {})
+      service_link_idh = assembly.add_component_link(input_cmp_idh.create_object, output_cmp_idh.create_object, opts)
       rest_ok_response service_link: service_link_idh.get_id()
     end
 
@@ -469,8 +470,7 @@ module DTK
       context = (ret_request_params(:context) || :assembly).to_sym
       opts = { context: context }
       opts.merge!(filter: { input_component_id: component_id }) if component_id
-      opts.merge!(hide_assembly_wide_node: true)
-      ret = assembly.list_service_links(opts)
+      ret = assembly.list_component_links(opts)
       rest_ok_response ret
     end
 
@@ -480,7 +480,7 @@ module DTK
       find_missing, find_possible = ret_request_params(:find_missing, :find_possible)
       ret =
         if find_possible
-          assembly.list_connections__possible()
+          assembly.list_possible_component_links
         elsif find_missing
           fail Error.new('Deprecated')
         else

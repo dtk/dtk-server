@@ -32,7 +32,7 @@ module DTK
         if link_def_info = result[:link_def_created]
           link_def_hash = link_def_info[:hash_form]
           antec_cmp = parsed_info.antec_component_instance
-          create_link_defs_and_service_links(assembly, parsed_info.links, dep_cmp, peer_cmps, antec_cmp, link_def_hash)
+          create_link_defs_and_component_links(assembly, parsed_info.links, dep_cmp, peer_cmps, antec_cmp, link_def_hash)
         else
           create_attribute_links?(assembly, parsed_info.links, dep_cmp, peer_cmps)
         end
@@ -102,18 +102,16 @@ module DTK
         }
       end
 
-      def self.create_link_defs_and_service_links(assembly, _parsed_adhoc_links, dep_cmp, peer_cmps, antec_cmp, link_def_hash)
+      def self.create_link_defs_and_component_links(assembly, _parsed_adhoc_links, dep_cmp, peer_cmps, antec_cmp, link_def_hash)
         # This method iterates over all the components in assembly that includes dep_cmp and its peers and for each
         # adds the link_def to it and then service link between this and antec_cmp
-        dependency_name = link_def_hash.values.first[:link_type]
-        antec_cmp_idh = antec_cmp.id_handle()
+        link_name = link_def_hash.values.first[:link_type]
         ([dep_cmp] + peer_cmps).each do |cmp|
-           # TODO: can be more efficient to combine these two operations and see if can bulk them
-           cmp_idh = cmp.id_handle()
-           Model.input_hash_content_into_model(cmp_idh, link_def: link_def_hash)
-           assembly.add_service_link?(cmp_idh, antec_cmp_idh, dependency_name: dependency_name)
-         end
-       end
+          # TODO: can be more efficient to combine these two operations and see if can bulk them
+          Model.input_hash_content_into_model(cmp.id_handle, link_def: link_def_hash)
+          assembly.add_component_link(cmp, antec_cmp, link_name: link_name)
+        end
+      end
 
       def self.create_attribute_links?(assembly, parsed_adhoc_links, dep_component, peer_components)
         attr_link_rows = parsed_adhoc_links.inject([]) do |a, adhoc_link|

@@ -38,7 +38,7 @@ module DTK; module CommonDSL
         
         def generate_content_input?
           set_id_handle(@component_link)
-          cmp_link = DTK::Assembly::Instance::ServiceLink.print_form_hash(@component_link, hide_assembly_wide_node: true)
+          cmp_link = DTK::Assembly::Instance::ComponentLink.print_form_hash(@component_link)
           set(:Value, cmp_link[:dependent_component])
           self
         end

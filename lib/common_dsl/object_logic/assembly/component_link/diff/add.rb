@@ -15,29 +15,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL 
-  class ObjectLogic::Assembly
+module DTK
+  class CommonDSL::ObjectLogic::Assembly
     class ComponentLink::Diff
       class Add < CommonDSL::Diff::Element::Add
         def process(result, opts = {})
           assembly_instance    = service_instance.assembly_instance
-          augmented_components = assembly_instance.get_augmented_components
-          base_component_name  = CommonDSL::Diff::QualifiedKey.parent_component_name?(qualified_key, include_node: true)
+          base_component_name  = qualified_key.parent_component_name(include_node: true)
           dep_component_name   = parse_object
-          dependency_name      = relative_distinguished_name
-
+          link_name            = relative_distinguished_name
+          
+          assembly_instance.add_component_link_from_name_params(base_component_name, dep_component_name, link_name: link_name)
+          result.add_item_to_update(:assembly)
+        end
+      end
+    end
+  end
+end
+=begin
           base_component, dependent_component = ret_matching_components(augmented_components, base_component_name, dep_component_name)
 
           if base_component && dependent_component
             input_cmp_idh    = base_component.id_handle
             output_cmp_idh   = dependent_component.id_handle
-            service_link_idh = assembly_instance.add_service_link?(input_cmp_idh, output_cmp_idh, dependency_name: dependency_name)
+            service_link_idh = assembly_instance.add_service_link?(input_cmp_idh, output_cmp_idh, dependency_name: link_name)
           end
 
-          result.add_item_to_update(:assembly)
         end
         
         private
+
+          augmented_components = assembly_instance.get_augmented_components
         
         def ret_matching_components(aug_components, base_cmp, dependent_cmp)
           base_node         = 'assembly_wide_node'
@@ -71,3 +79,4 @@ module DTK; module CommonDSL
     end
   end
 end; end
+=end

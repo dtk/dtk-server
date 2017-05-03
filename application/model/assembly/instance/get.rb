@@ -54,6 +54,7 @@ module DTK; class Assembly; class Instance
     #### end: get methods around attribute mappings
 
     #### get methods around components
+
     def get_component_info_for_action_list(opts = {})
       get_field?(:display_name)
       assembly_source = { type: 'assembly', object: hash_subset(:id, :display_name) }
@@ -83,17 +84,32 @@ module DTK; class Assembly; class Instance
       Component::Instance.get_objs(model_handle(:component_instance), sp_hash)
     end
 
+    def get_nodes_with_components_and_their_attributes
+      ndx_nodes = get_nodes.inject({}) { |h, node| h.merge(node.id => node) }
+
+      sp_hash = sp_cols(:components_and_their_attrs).filter(:oneof, :id, ndx_nodes.keys)
+      Node.get_objs(model_handle(:node), sp_hash).each do |row|
+        if component = row[:component]
+          node_id = row.id
+          components = ndx_nodes[node_id][:components] ||= []
+          unless matching_component = components.find { |cmp| cmp[:id] == component.id } 
+            matching_component = component.merge(attributes: [])
+            components << matching_component
+          end
+          if attr = row[:attribute]
+            matching_component[:attributes] << attr
+          end
+        end
+      end
+      ndx_nodes.values
+    end
+
     def get_augmented_components(opts = Opts.new)
       ret  = []
       rows = get_objs(cols: [:instance_nodes_and_cmps_summary_with_namespace])
 
       if opts[:filter_proc]
         rows.reject! { |r| !opts[:filter_proc].call(r) }
-
-      # TODO: this is just used by Component::Test.get_linked_tests, which might be deprecated        
-      elsif opts[:filter_component] and opts[:filter_component] != ''
-        filter_component = opts[:filter_component].sub(/::/, '__')
-        rows.reject! { |r| r[:nested_component][:display_name] != filter_component }
       end
 
       return ret if rows.empty?

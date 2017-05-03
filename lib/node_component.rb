@@ -57,7 +57,6 @@ module DTK
       node.display_name
     end
 
-
     # returns an array of DTK::NodeComponents
     def self.node_components(nodes, assembly)
       # indexed by display_name
@@ -91,6 +90,29 @@ module DTK
     # returns true if component is a node component 
     def self.is_node_component?(component)
       NodeComponent.component_types.include?(component.get_field?(:component_type))
+    end
+
+    # This gets the assembly level components and the node component ones with what is nested under them
+    def self.get_augmented_nested_components(assembly)
+      aug_nodes = assembly.get_nodes_with_components_and_their_attributes
+
+      # indexed by the user friendly component name
+      ndx_top_level_components = {} 
+      aug_nodes.each do |aug_node| 
+        if aug_node.is_assembly_wide_node?  
+          aug_node[:components].each { |component| ndx_top_level_components.merge!(component.display_name_print_form => component) }
+        end
+      end
+      
+      # process nested components
+      aug_nodes.each do |aug_node|
+        unless  aug_node.is_assembly_wide_node?
+          ndx = node_component_ref_from_node(aug_node)
+          ndx_top_level_components[ndx].merge!(:components => aug_node[:components])
+        end
+      end
+      # ndx_top_level_components now has top level components with ones nested under them
+      ndx_top_level_components.values
     end
 
     private

@@ -22,23 +22,6 @@ module DTK; module CommonDSL
         require_relative('node/diff')
         require_relative('node/attribute')
 
-        def self.generate_content_input(assembly_instance)
-          get_augmented_nodes(assembly_instance).inject(ContentInputHash.new) do |h, aug_node|
-            h.merge(aug_node.display_name => new.generate_content_input!(aug_node))
-          end
-        end
-        
-        def generate_content_input!(aug_node)
-          set_id_handle(aug_node)
-          aug_components = aug_node[:components] || []
-          attributes = aug_node[:attributes] || []
-          # :is_assembly_wide_node just used internally to server-side processing; so not using 'set' method
-          self[:is_assembly_wide_node] = true if aug_node.is_assembly_wide_node?
-
-          set?(:Attributes, Attribute.generate_content_input?(:node, attributes)) unless attributes.empty?
-          set(:Components, Component.generate_content_input(aug_components)) unless aug_components.empty?
-          self
-        end
 
         ### For diffs
         # opts can have keys:
@@ -63,58 +46,6 @@ module DTK; module CommonDSL
           node.get_admin_op_status != 'pending'
         end
 
-        private
-
-        def self.get_augmented_nodes(assembly_instance, opts = {})
-          assembly_instance_nodes = assembly_instance.get_nodes(:to_be_deleted)
-
-          if opts[:without_soft_deleted_nodes]
-            assembly_instance_nodes.reject!{ |node| node[:to_be_deleted] }
-          end
-
-          ndx_nodes = assembly_instance_nodes.inject({}) { |h, r| h.merge(r.id => r) }
-          add_node_level_attributes!(ndx_nodes)
-          add_augmented_components!(ndx_nodes)
-          ndx_nodes.values
-        end
-        
-        def self.add_node_level_attributes!(ndx_nodes)
-          node_idhs = ndx_nodes.values.reject { |node| node.is_assembly_wide_node? }.map(&:id_handle)
-          unless node_idhs.empty?
-            ::DTK::Node.get_node_level_assembly_template_attributes(node_idhs).each do |r|
-              node_id = r[:node_node_id]
-              (ndx_nodes[node_id][:attributes] ||= []) << r
-            end
-            add_type_node_level_attribute!(ndx_nodes)
-          end
-        end
-
-        def self.add_type_node_level_attribute!(ndx_nodes)
-          # add 'type: group' for node groups
-          node_groups = ndx_nodes.values.select { |node| node.is_node_group? }
-          node_groups.each do |node_group|
-            type_attribute = node_level_attribute(node_group, 'type', 'group')
-            (ndx_nodes[node_group.id][:attributes] ||= []) << type_attribute
-          end
-        end
-
-        def self.node_level_attribute(node, name, value)
-          hash = {
-            display_name: name,
-            node_node_id: node.id,
-            data_type: 'string',
-            hidden: false,
-            dynamic: false,
-            value_asserted: value,
-            value_derived: nil
-          }
-          ::DTK::Attribute.create_stub(node.model_handle(:attribute), hash)
-        end
-        
-        def self.add_augmented_components!(ndx_nodes)
-          ::DTK::Node::Instance.add_augmented_components!(ndx_nodes)
-        end
-        
       end
     end
   end

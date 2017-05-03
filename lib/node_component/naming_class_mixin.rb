@@ -52,7 +52,7 @@ module DTK
       end
       
       private
-      
+
       def iaas_type(component)
         component.get_field?(:component_type).split(COMPONENT_TYPE_DELIM).first.to_sym
       end

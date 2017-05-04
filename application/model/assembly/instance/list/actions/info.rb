@@ -23,6 +23,7 @@ module DTK
         #   :node
         #   :node_name
         #   :node_group_range
+        #   :node_ref
         def initialize(component_type, component_title, method_name, opts = {})
           @component_type        = component_type
           @component_title       = component_title
@@ -30,7 +31,8 @@ module DTK
           @action_type           = ret_action_type(method_name)
           @node_name, @node_ref  = ret_node_name_and_ref(opts) 
         end
-        attr_reader :component_type, :component_title, :method_name, :node_name
+        attr_reader :component_type, :component_title, :method_name, :node_name, :node_ref 
+
 
         def display_form
           display_name = ''
@@ -48,9 +50,12 @@ module DTK
               if action_info_array.size == 1
                 action_info_array.first
               else
-                # everything wil be same in action_info_array elements except for title
+
+                # everything will be same in action_info_array elements except for title
                 sample_info = action_info_array.first
-                new(component_type, title_summary(action_info_array), method_name, node: sample_info.node) 
+                node_name   = sample_info.node_name
+                node_ref    = sample_info.node_ref
+                new(component_type, title_summary(action_info_array), method_name, node_name: node_name, node_ref: node_ref)
               end
             ret << info_element.display_form
           end
@@ -59,7 +64,7 @@ module DTK
 
         private
         
-        attr_reader :action_type, :node_ref
+        attr_reader :action_type
         
         CREATE_METHOD = 'create'
         TITLE_SUMMARY = 'NAME'
@@ -103,8 +108,8 @@ module DTK
         #   :node_group_range
         # returns [node_name, node_ref]
         def ret_node_name_and_ref(opts = {}) 
-          unless opts[:node] or (opts[:node_name] and opts[:node_group_range])
-            fail Error, "opts[:node] or (opts[:node_name] and opts[:node_group_range] must be non nil"
+          unless opts.has_key?(:node) or (opts.has_key?(:node_name) and (opts.has_key?(:node_group_range) or opts.has_key?(:node_ref)))
+            fail Error, "opts.has_key?(:node) or (opts.has_key?(:node_name) and (opts.has_key?(:node_group_range) or opts.has_key?(:node_ref)))must be non nil"
           end
 
           node_name = node_ref = nil
@@ -112,10 +117,8 @@ module DTK
             node_name = node.node_component_ref
             node_ref  = node_name unless node.is_assembly_wide_node?
           else
-            range = opts[:node_group_range]
-
             node_name = opts[:node_name]
-            node_ref  = "#{node_name}:[#{range[0]}-#{range[1]}]"
+            node_ref  = (opts[:node_group_range] ? "#{node_name}:[#{opts[:node_group_range][0]}-#{opts[:node_group_range][1]}]" : opts[:node_ref] )
           end
           [node_name, node_ref]
         end

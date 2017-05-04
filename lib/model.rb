@@ -263,6 +263,9 @@ module DTK
     include ModelDataInstanceMixins
 
 
+    def self.object_from_id(model_handle, id)
+      model_handle.createIDH(id: id).create_object
+    end
 
     def duplicate
       id_handle.create_object.merge(self)

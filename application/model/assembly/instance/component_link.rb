@@ -56,10 +56,6 @@ module DTK
         @assembly_instance = assembly_instance
       end
       
-      def self.print_form_hash(component_link)
-        PrintForm.print_form_hash(component_link)
-      end
-
       def self.delete(port_link_idhs)
         if port_link_idhs.is_a?(Array)
           return if port_link_idhs.empty?

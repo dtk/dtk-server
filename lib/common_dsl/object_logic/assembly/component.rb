@@ -21,22 +21,25 @@ module DTK; module CommonDSL
       class Component < ContentInputHash
         require_relative('component/diff')
         require_relative('component/attribute')
-        require_relative('component/component_link')
 
-        def initialize(aug_component, assembly_component_links)
+        def initialize(aug_component, assembly_instance, assembly_component_links)
           super()
           @aug_component            = aug_component
+          @assembly_instance        = assembly_instance
           @assembly_component_links = assembly_component_links
-
         end
         private :initialize
 
         def self.generate_content_input(assembly_instance)
           assembly_component_links = assembly_instance.get_augmented_port_links
           # get_augmented_nested_components returns components with nested components
-          NodeComponent.get_augmented_nested_components(assembly_instance).inject(ContentInputHash.new) do |h, aug_component|
-            h.merge(component_name(aug_component) => new(aug_component, assembly_component_links).generate_content_input!)
+
+          ret = ContentInputHash.new
+          NodeComponent.get_augmented_nested_components(assembly_instance).each do |aug_component|
+            next if aug_component[:to_be_deleted] 
+            ret.merge!(component_name(aug_component) => new(aug_component, assembly_instance, assembly_component_links).generate_content_input!)
           end
+          ret
         end
         
         def generate_content_input!
@@ -47,9 +50,9 @@ module DTK; module CommonDSL
           component_links        = assembly_component_links.select { |link|  link[:input_component].id == aug_component.id }
 
           set?(:Attributes, Attribute.generate_content_input?(:component, attributes, component: aug_component)) unless attributes.empty?
-          set?(:ComponentLinks, ComponentLink.generate_content_input?(component_links)) unless component_links.empty?
+          set?(:ComponentLinks, ComponentLink.generate_content_input?(component_links, assembly_instance)) unless component_links.empty?
           # Below adds nesetd components
-          set(:Components, Component.generate_content_input__base_components(aug_nested_components, assembly_component_links)) unless aug_nested_components.empty?
+          set(:Components, Component.generate_content_input__base_components(aug_nested_components, assembly_instance, assembly_component_links)) unless aug_nested_components.empty?
 
           if tags = tags?
             add_tags!(tags)
@@ -58,13 +61,14 @@ module DTK; module CommonDSL
           self
         end
 
-        def self.generate_content_input__base_components(aug_components, assembly_component_links)
-          aug_components.reject!{ |aug_cmp| aug_cmp[:to_be_deleted] }
-          aug_components.inject(ContentInputHash.new) do |h, aug_component|
-            h.merge(component_name(aug_component) => new(aug_component, assembly_component_links).generate_content_input!)
+        def self.generate_content_input__base_components(aug_components, assembly_instance, assembly_component_links)
+          ret = ContentInputHash.new
+          aug_components.each do |aug_component|
+            next if  aug_component[:to_be_deleted] 
+            ret.merge!(component_name(aug_component) => new(aug_component, assembly_instance, assembly_component_links).generate_content_input!)
           end
+          ret
         end
-        
 
         # For diffs
         # opts can have keys:
@@ -91,7 +95,7 @@ module DTK; module CommonDSL
 
         private
 
-        attr_reader :aug_component, :assembly_component_links
+        attr_reader :aug_component, :assembly_instance, :assembly_component_links
 
         def self.component_name(aug_component)
           aug_component.display_name_print_form(without_version: true)

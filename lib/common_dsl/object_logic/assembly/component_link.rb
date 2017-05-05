@@ -52,11 +52,10 @@ module DTK; module CommonDSL
         end
 
         ### For diffs
-        def diff?(attribute_parse, qualified_key, opts = {})
+        def diff?(component_link_parse, qualified_key, opts = {})
           unless skip_for_generation?
-            cur_val = val(:Value)
-            new_val = attribute_parse.respond_to?(:val) ? attribute_parse.val(:Value) : attribute_parse
-            create_diff?(cur_val, new_val, qualified_key)
+            create_diff?(val(:Value), component_link_parse.value, qualified_key)
+            # TODO: DTK-2938; not checking external service name yet; need to check only to see if both non nil and differnet
           end
         end
 

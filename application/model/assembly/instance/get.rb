@@ -110,6 +110,9 @@ module DTK; class Assembly; class Instance
 
       if opts[:filter_proc]
         rows.reject! { |r| !opts[:filter_proc].call(r) }
+      elsif ! (opts[:filter_component] || '').empty?
+        filter_component = opts[:filter_component]
+        rows.reject! { |r| r[:nested_component].display_name_print_form != filter_component }
       end
 
       return ret if rows.empty?

@@ -246,23 +246,23 @@ module DTK; class  Assembly
 
       # check if action is called on component or on service instance action
       if task_action
-        component_id, method_name = nil, nil
+        component_name, method_name = nil, nil
 
         if match = task_action.match(/^(.*)\.(\w*)$/)
-          component_id, method_name = $1, $2
+          component_name, method_name = $1, $2
         else
-          component_id = task_action
+          component_name = task_action
         end
 
-        # component_id, method_name = task_action.split(ACTION_DELIMITER)
-        augmented_cmps = check_if_augmented_component(params, component_id, { include_assembly_cmps: true })
+        # component_name, method_name = task_action.split(ACTION_DELIMITER)
+        augmented_cmps = check_if_augmented_component(params, component_name, { include_assembly_cmps: true })
 
         # check if component and service level action with same name
-        check_if_ambiguous(component_id) unless augmented_cmps.empty?
+        check_if_ambiguous(component_name) unless augmented_cmps.empty?
 
         # if task_action.include?(ACTION_DELIMITER) || !augmented_cmps.empty?
         if (task_action.include?(ACTION_DELIMITER) && method_name) || !augmented_cmps.empty?
-          return execute_cmp_action(params, component_id, method_name, augmented_cmps)
+          return execute_cmp_action(params, component_name, method_name, augmented_cmps)
         end
       end
 

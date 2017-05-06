@@ -77,7 +77,7 @@ module DTK
         end
 
         # shortcut if no locked versions and no required elements
-        if component_modules().empty? and not cmp_types_to_check.values.find(&:mapping_required?)
+        if component_modules.empty? and not cmp_types_to_check.values.find(&:mapping_required?)
           # TODO: should we instead prune out all those that dont have mapping required
           return {}
         end
@@ -154,7 +154,7 @@ module DTK
         end
 
         # get matching component template info and insert matches into ret
-        Component::Template.get_matching_elements(project_idh(), ret.values, module_local_params: opts[:module_local_params]).each do |cmp_template|
+        Component::Template.get_matching_elements(project_idh, ret.values, module_local_params: opts[:module_local_params]).each do |cmp_template|
           ret[cmp_template[:component_type]].merge!(component_template: cmp_template)
         end
         ret
@@ -173,8 +173,8 @@ module DTK
         cmp_module_refs_to_add = []
         module_name_to_ns.each do |cmp_module_name, namespace|
           if component_module_ref = component_module_ref?(cmp_module_name)
-            unless component_module_ref.namespace() == namespace
-              fail Error.new("Unexpected that at this point component_module_ref.namespace() (#{component_module_ref.namespace()}) not equal to namespace (#{namespace})")
+            unless component_module_ref.namespace == namespace
+              fail Error.new("Unexpected that at this point component_module_ref.namespace (#{component_module_ref.namespace()}) not equal to namespace (#{namespace})")
             end
           else
             new_cmp_moule_ref = {

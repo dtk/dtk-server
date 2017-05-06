@@ -18,29 +18,41 @@
 module DTK
   class NodeComponent
     module Parsing
-      module CommonModule
+      class CommonModule
+        require_relative('common_module/abstract_node')
         # For each node, it creates a node_component if needed using the relevant node attributes in parsed node
+        # For each component that is of form asbtract node or abstract node group it also adds a node component
         def self.add_node_components!(parsed_assembly)
-          return unless parsed_nodes = parsed_assembly.val(:Nodes)
-          parsed_nodes.each_value { |parsed_node| add_node_component!(parsed_assembly, parsed_node) }
+          add_node_component_from_node_section!(parsed_assembly)
+          # The method AbstractNode.parsed_nodes! returns all abstract node and node groups found in parsed_assembly and removes them from 
+          # the parsed_assembly argumment
+          AbstractNode.add_node_components!(parsed_assembly)
         end
         
         private
 
-        def self.add_node_component!(parsed_assembly, parsed_node)
-          # TODO: DTK-2967: node component is hard wired to iaas-specfic and to ec2 as iaas choice
-          node_component = find_or_add_node_component!(parsed_assembly, :ec2, parsed_node) 
-          move_attributes_to_node_component!(node_component, parsed_node)
+        def self.add_node_component_from_node_section!(parsed_assembly)
+          (parsed_assembly.val(:Nodes) || {}).each_value do |parsed_node| 
+            node_component = find_or_add_node_component!(parsed_assembly, iaas_type, parsed_node.name, node_type(parsed_node))
+            move_attributes_to_node_component!(node_component, parsed_node)
+          end
         end
 
-        def self.find_or_add_node_component!(parsed_assembly, iaas_type, parsed_node)
+        def self.iaas_type
+          # TODO: DTK-2967: node component is hard wired to iaas-specfic and to ec2 as iaas choice
+          :ec2
+        end
+
+        # opts can have keys
+        #   :node_content
+        def self.find_or_add_node_component!(parsed_assembly, iaas_type, node_name, node_type, opts = {})
           ret = nil
           parsed_components  = parsed_assembly.val(:Components)
-          node_component_ref = NodeComponent.node_component_ref(iaas_type, parsed_node.name,  node_type: node_type(parsed_node))
+          node_component_ref = NodeComponent.node_component_ref(iaas_type, node_name,  node_type: node_type)
           if match = matching_component?(parsed_components, node_component_ref)
             ret = match
           else
-            ret = canonical_hash.merge(node_component_ref => canonical_hash)
+            ret = canonical_hash.merge(node_component_ref => opts[:node_content] || canonical_hash)
             unless parsed_components
               parsed_components = canonical_hash
               parsed_assembly.set(:Components, parsed_components)

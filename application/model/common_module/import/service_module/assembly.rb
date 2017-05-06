@@ -26,6 +26,8 @@ module DTK
  
         module Mixin
           def process_assembly!(parsed_assembly, module_local_params, opts = {})
+            # The method add_node_components! can shift around :componnst and : node fields in parsed_assembly aloig with adding components taht are node
+            # components
             NodeComponent::Parsing::CommonModule.add_node_components!(parsed_assembly)
 
             if module_version = module_local_params.version

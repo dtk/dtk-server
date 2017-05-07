@@ -17,26 +17,23 @@
 #
 module DTK
   class NodeComponent
+    # The code under Parsing::CommonModule is for parsing modules to look for references to nodes 
+    #  - under node section (node_section) or 
+    #  - under component section (abstract_node) 
     module Parsing
       class CommonModule
         require_relative('common_module/abstract_node')
-        # For each node, it creates a node_component if needed using the relevant node attributes in parsed node
-        # For each component that is of form asbtract node or abstract node group it also adds a node component
-        def self.add_node_components!(parsed_assembly)
-          add_node_component_from_node_section!(parsed_assembly)
-          # The method AbstractNode.parsed_nodes! returns all abstract node and node groups found in parsed_assembly and removes them from 
-          # the parsed_assembly argumment
-          AbstractNode.add_node_components!(parsed_assembly)
+        require_relative('common_module/node_section')
+        require_relative('common_module/node_attribute')
+        def self.process_node_components!(parsed_assembly)
+          # For both nodes under node section and abstract node componenst under component section the methods below move it into form where
+          # There is an explicit entry under :nodes with node name as key, no attributes, but all nested components
+          # There is an entry under :components that is teh component type associated wityh an asbtract node or node group that has the node related attributes
+          NodeSection.process_nodes_in_node_section!(parsed_assembly)
+          AbstractNode.process_abstract_node_components!(parsed_assembly)
         end
         
         private
-
-        def self.add_node_component_from_node_section!(parsed_assembly)
-          (parsed_assembly.val(:Nodes) || {}).each_value do |parsed_node| 
-            node_component = find_or_add_node_component!(parsed_assembly, iaas_type, parsed_node.name, node_type(parsed_node))
-            move_attributes_to_node_component!(node_component, parsed_node)
-          end
-        end
 
         def self.iaas_type
           # TODO: DTK-2967: node component is hard wired to iaas-specfic and to ec2 as iaas choice
@@ -62,53 +59,9 @@ module DTK
           ret
         end
 
-        NODE_TYPE_KEY   = 'type'
-        NODE_GROUP_TYPE = 'group'
-        def self.node_type(parsed_node)
-          ret = Type::SINGLE
-          if attributes = parsed_node.val(:Attributes)
-            if type_attribute = attributes[NODE_TYPE_KEY]
-              ret = Type::GROUP if type_attribute.val(:Value) == NODE_GROUP_TYPE 
-            end
-          end
-          ret
-        end
-
         def self.matching_component?(parsed_components, component_name)
           if match_in_array_form = (parsed_components && parsed_components.find { |name, parsed_component| name == component_name })
             canonical_hash.merge(component_name => match_in_array_form[1])
-          end
-        end
-
-        NODE_ATTRIBUTES = ['image', 'size']
-        def self.move_attributes_to_node_component!(node_component, parsed_node)
-          return unless parsed_attributes = parsed_node.val(:Attributes)
-
-          attr_val_pairs = NODE_ATTRIBUTES.inject({}) do |h, name|
-            (val = find_attribute_value?(parsed_attributes, name)) ? h.merge(name => val) : h
-          end
-          return if attr_val_pairs.empty?
-          
-          unless attributes = node_component.val(:Attributes)
-            attributes = canonical_hash
-            node_component.values.first.set(:Attributes, attributes)
-          end
-          attr_val_pairs.each_pair do |attr_name, attr_val|
-            attributes.merge!(attr_name => canonical_hash(:Value => attr_val)) unless attr_val.nil?
-          end
-
-          # remove from parsed_node any moved attributes, but in no caes remove type
-          remove_attributes = attr_val_pairs.keys - ['type']
-          update_hash = parsed_attributes.inject(canonical_hash) do |h, (name, v)|
-            remove_attributes.include?(name) ? h : h.merge(name => v)
-          end           
-          parsed_node.set(:Attributes, update_hash)
-          nil
-        end
-
-        def self.find_attribute_value?(parsed_attributes, target_attribute_name)
-          if match = parsed_attributes.find { |attribute_name, parsed_attribute| attribute_name == target_attribute_name }
-            match[1].val(:Value)
           end
         end
 
@@ -117,6 +70,24 @@ module DTK
           hash.each_pair { |k, v| ret.set(k, v) }
           ret
         end
+
+        def self.find_attribute_value?(parsed_attributes, target_attribute_name)
+          if match = parsed_attributes.find { |attribute_name, parsed_attribute| attribute_name == target_attribute_name }
+            match[1].val(:Value)
+          end
+        end
+
+        # this method looks under top_key in parsed_node_or_component for a hash and if so removes the keys nested_keys_to_remove in it
+        def self.remove_keys!(parsed_node_or_component, top_key, nested_keys_to_remove) 
+          return if nested_keys_to_remove.empty?
+          if parse_hash = parsed_node_or_component.val(top_key) 
+            update_hash = parse_hash.inject(canonical_hash) do |h, (name, v)|
+              nested_keys_to_remove.include?(name) ? h : h.merge(name => v)
+            end       
+          end
+          parsed_node_or_component.set(top_key, update_hash)
+        end
+
       end
     end
   end

@@ -26,9 +26,10 @@ module DTK
  
         module Mixin
           def process_assembly!(parsed_assembly, module_local_params, opts = {})
-            # The method add_node_components! can shift around :componnst and : node fields in parsed_assembly aloig with adding components taht are node
-            # components
-            NodeComponent::Parsing::CommonModule.add_node_components!(parsed_assembly)
+            # The method process_node_components! shifts around and can add to :components and : node fields in parsed_assembly
+            NodeComponent::Parsing::CommonModule.process_node_components!(parsed_assembly)
+            # TODO: DTK-2967: rather than having NodeComponent::Parsing::CommonModule do special processing looking :node section and asbtract nodes
+            # in parsed assemblies to get below to work; we should update below
 
             if module_version = module_local_params.version
               module_version = nil if module_version.eql?('master')

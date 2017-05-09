@@ -212,10 +212,6 @@ module DTK; class Task
       end
 
       ids = []
-      require 'debugger'
-      Debugger.wait_connection = true
-      Debugger.start_remote
-      debugger
       task_template_content.each do |config_node_action|
           config_node_action.each {|action| ids << action[1][0][0].id }
       end

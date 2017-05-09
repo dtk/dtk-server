@@ -194,10 +194,58 @@ module DTK; class Task
         return nil
       end
 
+      ids = []
+      require 'debugger'
+      Debugger.wait_connection = true
+      Debugger.start_remote
+      debugger
+      task_template_content.each do |config_node_action|
+          config_node_action.each {|action| ids << action[1][0][0].id }
+      end
+
+
+      parent_field_name = DB.parent_field(:component, :attribute)
+      sp_hash = {
+          relation: :attribute,
+          filter: [:oneof, parent_field_name, ids],
+          columns: [:id, :display_name, parent_field_name, :external_ref, :attribute_value, :required, :dynamic, :dynamic_input, :port_type, :port_is_external, :data_type, :semantic_type, :hidden]
+      }
+      serialized_content = DTK::Task::Template::ConfigComponents::Persistence::AssemblyActions.get_serialized_content_from_assembly(assembly, task_action = nil, task_params: opts[:task_params])
+      check_for_breakpoint(serialized_content, stages_config_nodes_task)
+
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtask(start_nodes_task) if start_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret
+    end
+
+    def self.check_for_breakpoint(serialized_content, stages_config_nodes_task)
+      stages_config_nodes_task.each do |a|
+        if executable_action = a[:subtasks].first[:executable_action]
+          executable_action[:component_actions].each do |ex|
+            ex[:attributes].each do |attributes|
+             path = attributes[:external_ref][:path]
+             external_ref_name = string_between_markers(path, "[", "]")
+             serialized_content[:subtasks].each do |subtask|
+                unless subtask[:ordered_components].nil?
+                  component = subtask[:ordered_components].first  
+                  unless component.index('[').nil?
+                    cmp = component.slice(0..(component.index('[') - 1))
+                    cmp.gsub!("::","__")
+                    if cmp.include?(external_ref_name) && attributes[:display_name].include?("dtk_debug")
+                      attributes[:value_asserted] = subtask[:breakpoint] unless subtask[:breakpoint].nil?
+                    end
+                  end
+                end
+             end
+            end
+          end
+        end
+      end
+    end
+
+    def self.string_between_markers(string, marker1, marker2) 
+        string[/#{Regexp.escape(marker1)}(.*?)#{Regexp.escape(marker2)}/m, 1]
     end
 
     # returns [nodes_to_create, nodes_wait_for_start]

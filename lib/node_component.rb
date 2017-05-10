@@ -89,7 +89,7 @@ module DTK
 
     # returns true if component is a node component 
     def self.is_node_component?(component)
-      NodeComponent.component_types.include?(component.get_field?(:component_type))
+      component_types.include?(component.get_field?(:component_type))
     end
 
     # This gets the assembly level components and the node component ones with what is nested under them
@@ -115,17 +115,28 @@ module DTK
       ndx_top_level_components.values
     end
 
-    private
-
+    def self.node_name_if_node_component?(component_instance_name)
+      component_type = Component.component_type_from_user_friendly_name(component_instance_name)
+      if component_types.include?(component_type)
+        node_name_from_component_name(component_instance_name)
+      end
+    end
+    
     def self.component_types
       @component_types ||= IAAS::TYPES.inject([]) { |a, iaas_type| a + node_component_types(iaas_type) }
     end
-
+    
+    private
+    
     def self.node_name(component)
-      if component.display_name =~ /\[(.+)\]$/
+      node_name_from_component_name(component.display_name)
+    end
+    
+    def self.node_name_from_component_name(component_instance_name)
+      if component_instance_name =~ /\[(.+)\]$/
         $1
       else
-        fail Error, "Unexpected that display_name '#{component.display_name}' is not of form IAAS_node[NAME]"
+        fail Error, "Unexpected that display_name '#{component_instance_name}' is not of form IAAS_node[NAME]"
       end
     end
 

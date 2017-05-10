@@ -16,26 +16,21 @@
 # limitations under the License.
 #
 module DTK
-  module CommonDSL
-    class ObjectLogic::Assembly::Component::Diff
+  class CommonDSL::ObjectLogic::Assembly
+    class ComponentLink::Diff
       module Mixin
         private
-        
-        def component_name
-          relative_distinguished_name
+
+        def ret_base_link_params(assembly_instance, qualified_key)
+          info = qualified_key.parent_component_info
+          link_params_class::Base.new(assembly_instance, component_name: info.component_name, node_name: info.node_name)
         end
-        
-        def component_title?
-          component_type, title = ComponentTitle.parse_component_display_name(component_name)
-          title
-        end
-        
-        def parent_node
-          Diff::QualifiedKey.parent_node?(qualified_key, assembly_instance) || assembly_instance.assembly_wide_node
+
+        def link_params_class
+          Assembly::Instance::ComponentLink::LinkParams
         end
 
       end
     end
   end
 end
-

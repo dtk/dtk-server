@@ -19,64 +19,26 @@ module DTK
   class CommonDSL::ObjectLogic::Assembly
     class ComponentLink::Diff
       class Add < CommonDSL::Diff::Element::Add
+        include Mixin
+
         def process(result, opts = {})
           assembly_instance    = service_instance.assembly_instance
-          base_component_name  = qualified_key.parent_component_name(include_node: true)
-          dep_component_name   = parse_object
+          # TODO: DTK-3005: this does not handle link other than explicit link name; need to pass this into parse
           link_name            = relative_distinguished_name
-          
-          assembly_instance.add_component_link_from_name_params(base_component_name, dep_component_name, link_name: link_name)
+          base_link_params     = ret_base_link_params(assembly_instance, qualified_key)
+          dep_link_params      = component_link_value.dependency_link_params(assembly_instance)
+
+          assembly_instance.add_component_link_from_link_params(base_link_params, dep_link_params, link_name: link_name)
           result.add_item_to_update(:assembly)
         end
+
+        private
+
+        def component_link_value 
+          @component_link_valu ||= ComponentLink::Value.new(parse_object.value, parse_object.external_service_name?)
+        end
+
       end
     end
   end
 end
-=begin
-          base_component, dependent_component = ret_matching_components(augmented_components, base_component_name, dep_component_name)
-
-          if base_component && dependent_component
-            input_cmp_idh    = base_component.id_handle
-            output_cmp_idh   = dependent_component.id_handle
-            service_link_idh = assembly_instance.add_service_link?(input_cmp_idh, output_cmp_idh, dependency_name: link_name)
-          end
-
-        end
-        
-        private
-
-          augmented_components = assembly_instance.get_augmented_components
-        
-        def ret_matching_components(aug_components, base_cmp, dependent_cmp)
-          base_node         = 'assembly_wide_node'
-          matching_base_cmp = nil
-          
-          dependent_node   = 'assembly_wide_node'
-          matching_dep_cmp = nil
-          dependent_cmp    = dependent_cmp[:value] if dependent_cmp.is_a?(Hash) && dependent_cmp.has_key?(:value)
-
-          base_node, base_cmp = base_cmp.split('/') if base_cmp.include?('/')
-          dependent_node, dependent_cmp = dependent_cmp.split('/') if dependent_cmp.include?('/')
-
-          aug_components.each do |aug_cmp|
-            break if matching_base_cmp && matching_dep_cmp
-
-            cmp_type = aug_cmp[:display_name].gsub('__', '::')
-            cmp_node = aug_cmp[:node][:display_name]
-
-            if cmp_type.eql?(base_cmp) && base_node.eql?(cmp_node)
-              matching_base_cmp = aug_cmp
-            end
-
-            if cmp_type.eql?(dependent_cmp) && dependent_node.eql?(cmp_node)
-              matching_dep_cmp = aug_cmp
-            end
-          end
-
-          return [matching_base_cmp, matching_dep_cmp]
-        end
-      end
-    end
-  end
-end; end
-=end

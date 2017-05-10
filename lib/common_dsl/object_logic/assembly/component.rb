@@ -78,7 +78,7 @@ module DTK; module CommonDSL
           aggregate_diffs?(qualified_key, opts) do |diff_set|
             diff_set.add_diff_set? Attribute, val(:Attributes), component_parse.val(:Attributes)
             diff_set.add_diff_set? ComponentLink, val(:ComponentLinks), component_parse.val(:ComponentLinks)
-            # TODO: need to add diffs on all subobjects
+            diff_set.add_diff_set? Component, val(:Components), component_parse.val(:Components)
           end
         end
 

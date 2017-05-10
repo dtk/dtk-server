@@ -488,6 +488,10 @@ module DTK; class  Assembly
     end
 
     def self.name_to_id(model_handle, name)
+      name_to_object(model_handle, name).id
+    end
+
+    def self.name_to_object(model_handle, name)
       parts = name.split('/')
       augmented_sp_hash =
         if parts.size == 1
@@ -507,7 +511,7 @@ module DTK; class  Assembly
         else
           fail ErrorNameInvalid.new(name, pp_object_type())
         end
-      name_to_id_helper(model_handle, name, augmented_sp_hash)
+      name_to_object_helper(model_handle, name, augmented_sp_hash)
     end
 
     # TODO: probably move to Assembly

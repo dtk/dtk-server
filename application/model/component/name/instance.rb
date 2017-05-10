@@ -53,7 +53,7 @@ module DTK
             
             display_name = Component.display_name_from_user_friendly_name(name)
             # setting node_prefix to true, but node_name can be nil, meaning an assembly-wide component instance
-          node_name, cmp_type, cmp_title = ComponentTitle.parse_component_display_name(display_name, node_prefix: true)
+            node_name, cmp_type, cmp_title = ComponentTitle.parse_component_display_name(display_name, node_prefix: true)
             
             sp_hash = {
               cols:   [:id, :node, :assembly_id],

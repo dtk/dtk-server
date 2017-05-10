@@ -30,7 +30,7 @@ module DTK; module CommonDSL
           if augmented_cmps.empty?
             result.add_error_msg("Component '#{qualified_key.print_form}' does not match any components")
           else
-            node          = parent_node? || assembly_instance.has_assembly_wide_node?
+            node          = parent_node
             matching_cmps = augmented_cmps.select{|cmp| cmp[:node][:display_name] == node[:display_name]}
 
             if matching_cmps.size > 1

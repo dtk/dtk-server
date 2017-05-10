@@ -34,11 +34,11 @@ module DTK
         dep_component_name = dep_component.component_type_print_form
         error_msg = 
           if link_name =  opts[:link_name]
-            "Specified link name (#{link_name}) does not match any of the dependencies defined between component type (#{base_component_name}) and component type (#{dep_component_name}): #{matching_link_types.join(',')}"
+            "Specified link name '#{link_name}' does not match any of the dependencies defined between component type '#{base_component_name}' and component type '#{dep_component_name}': #{matching_link_types.join(',')}"
           elsif matching_link_types.empty?
-            "There are no links defined between component type (#{base_component_name}) and component type (#{dep_component_name})"
+            "There are no links defined between component type '#{base_component_name}' and component type '#{dep_component_name}'"
           elsif matching_link_types.size > 1
-            "Ambiguous which link between component type (#{base_component_name}) and component type (#{dep_component_name}) selected; select one of #{matching_link_types.join(',')})"
+            "Ambiguous which link between component type '#{base_component_name}' and component type '#{dep_component_name}' selected; select one of #{matching_link_types.join(',')})"
           end
         fail ErrorUsage, error_msg if error_msg
       end

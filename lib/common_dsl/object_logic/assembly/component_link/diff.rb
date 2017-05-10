@@ -18,6 +18,8 @@
 module DTK
   class CommonDSL::ObjectLogic::Assembly::ComponentLink
     class Diff < CommonDSL::Diff::Base
+      require_relative('diff/mixin')
+      # mixin must be before add and modify
       require_relative('diff/add')
       require_relative('diff/delete')
       require_relative('diff/modify')

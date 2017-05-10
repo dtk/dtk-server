@@ -20,6 +20,7 @@ module DTK; module CommonDSL
     class Assembly
       class ComponentLink < ContentInputHash
         require_relative('component_link/diff')
+        require_relative('component_link/value')
 
         def initialize(component_link, base_assembly_instance)
           super()
@@ -52,10 +53,14 @@ module DTK; module CommonDSL
         end
 
         ### For diffs
+        
+        # opts can have keys:
+        #   :service_instance
         def diff?(component_link_parse, qualified_key, opts = {})
           unless skip_for_generation?
-            create_diff?(val(:Value), component_link_parse.value, qualified_key)
-            # TODO: DTK-2938; not checking external service name yet; need to check only to see if both non nil and differnet
+            gen_value = Value.new(val(:Value), val(:ExternalServiceName))
+            parse_value = Value.new(component_link_parse.value, component_link_parse.external_service_name?)
+            create_diff?(gen_value, parse_value, qualified_key, service_instance: opts[:service_instance])
           end
         end
 

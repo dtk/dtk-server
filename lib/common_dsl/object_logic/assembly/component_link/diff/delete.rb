@@ -20,13 +20,15 @@ module DTK
     class ComponentLink::Diff
       class Delete < CommonDSL::Diff::Element::Delete
         def process(result, opts = {})
-          assembly_instance   = service_instance.assembly_instance
-          port_links          = assembly_instance.get_augmented_port_links
-          base_component_name = qualified_key.parent_component_name
-          link_name           = relative_distinguished_name
-
+          assembly_instance     = service_instance.assembly_instance
+          port_links            = assembly_instance.get_augmented_port_links
+          parent_component_info = qualified_key.parent_component_info
+          base_component_name   = parent_component_info.component_name
+          link_name             = relative_distinguished_name
+          pp ['port_link input_components', port_links.map { |port_link| port_link[:input_component].display_name_print_form }]
           
           matching_port_links = port_links.select do |port_link| 
+            # TODO: DTK-2938: probably need also to get node name; check if port_link[:input_component].display_name_print_form has node name
             port_link.display_name == link_name and 
               port_link[:input_component].display_name_print_form == base_component_name
           end

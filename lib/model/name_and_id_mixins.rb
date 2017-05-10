@@ -56,6 +56,11 @@ module DTK
       end
 
       def name_to_id_helper(model_handle, name, augmented_sp_hash, opts = {})
+        obj = name_to_object_helper(model_handle, name, augmented_sp_hash, opts)
+        obj && obj.id
+      end
+
+      def name_to_object_helper(model_handle, name, augmented_sp_hash, opts = {})
         post_filter = augmented_sp_hash.delete(:post_filter)
         augmented_sp_hash[:cols] ||= [:id]
 
@@ -68,7 +73,7 @@ module DTK
         elsif rows.size > 2
           fail ErrorNameAmbiguous.new(name, rows.map { |r| r[:id] }, pp_object_type())
         else
-          rows.first[:id]
+          rows.first
         end
       end
 

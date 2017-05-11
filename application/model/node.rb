@@ -548,21 +548,15 @@ module DTK
       self.class.pbuilderid(self)
     end
     def self.pbuilderid(node)
-      CommandAndControl.pbuilderid(node) || fail(Error, "Node '#{node.display_name}' with id #{node.id} does not have an internal communication ID")
+      ret = 
+        if node.is_assembly_wide_node?()
+          'docker-executor'
+        else
+          NodeComponent.instance_id(node)
+        end
+      ret || fail(Error, "Node '#{node.display_name}' with id #{node.id} does not have an internal communication ID")
     end
 
-    def persistent_dns
-      get_hostname_external_ref()[:persistent_dns]
-    end
-
-    def elastic_ip
-      get_hostname_external_ref()[:elastic_ip]
-    end
-
-    def get_hostname_external_ref
-      get_field?(:hostname_external_ref) || {}
-    end
-    private :get_hostname_external_ref
 
     # TODO: these may be depracted
     def update_ordered_component_ids(order)

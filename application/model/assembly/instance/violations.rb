@@ -54,9 +54,8 @@ module DTK
         mod_refs_viols = find_violations__module_refs(cmps)
         num_of_target_nodes = find_violations__num_of_target_nodes()
         any_unset_attributes = ! unset_attr_viols.empty?
-        semantic_viols = find_violations__semantic(cmps, any_unset_attributes: any_unset_attributes)
 
-        Violations.new(unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + semantic_viols)
+        Violations.new(unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes)
       end
 
       private
@@ -76,15 +75,6 @@ module DTK
         node_attr_viols = node_attrs.map { |a| Violation::ReqUnsetAttr.new(a, :node) }
 
         assembly_attr_viols + component_attr_viols + node_attr_viols
-      end
-
-      def find_violations__semantic(components, params = {})
-        if target_service = Service::Target.create_from_assembly_instance?(self, components: components)
-          CommandAndControl.find_violations_in_target_service(target_service, params) 
-        else
-          service = Service.new(self, components: components)
-          CommandAndControl.find_violations_in_node_components(service, params) 
-        end
       end
 
       def find_violations__cmp_constraints(nodes_and_cmps, cmp_idhs)

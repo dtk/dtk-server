@@ -71,10 +71,9 @@ module DTK; class Attribute
         check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?
 
         init_av_pair = av_pair.clone
-        check_if_node_property(av_pair) unless opts[:skip_node_property_check]
 
         unless init_av_pair == av_pair
-          set_attributes(base_object, [init_av_pair], opts.merge(skip_node_property_check: true, do_not_raise: true))
+          set_attributes(base_object, [init_av_pair], opts.merge(do_not_raise: true))
         end
 
         # if needed as indicated by opts, create_attr_pattern also creates attribute
@@ -177,18 +176,6 @@ module DTK; class Attribute
       return cardinality[:value_asserted].to_i > new_value.to_i
     end
 
-    def self.check_if_node_property(av_pair)
-      if pattern = av_pair[:pattern]
-        tokens = pattern.split('/')
-        return unless tokens.size == 2
-
-        node_name, attribute_name = tokens
-
-        np_component = CommandAndControl.node_property_component
-        av_pair[:pattern] = "#{node_name}/#{np_component}/#{attribute_name}" if is_node_component_attribute?(attribute_name)
-      end
-    end
-
     def self.node_component_attribute?(node, attribute_name)
       if is_node_component_attribute?(attribute_name)
         component_type = CommandAndControl.node_property_component_type(:properties)
@@ -199,10 +186,5 @@ module DTK; class Attribute
       end
     end
     
-    private
-    def self.is_node_component_attribute?(attribute_name)
-      CommandAndControl.node_property_legal_attributes.include?(attribute_name.to_sym)
-    end
-
   end
 end; end

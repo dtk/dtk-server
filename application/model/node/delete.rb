@@ -126,8 +126,9 @@ end
       end
 
       def execute_destroy_and_delete(opts = {})
-        suceeeded = CommandAndControl.destroy_node?(self)
-        return false unless suceeeded
+        # TODO: DTK-3010: no special node delete; remove this comment when remove commmented out below
+        # suceeeded = CommandAndControl.destroy_node?(self)
+        # return false unless suceeeded
         delete_object(opts)
       end
 

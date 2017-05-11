@@ -20,18 +20,18 @@ module DTK
   module CommandAndControlAdapter
   end
   class CommandAndControl
-    r8_nested_require('command_and_control', 'adapters/iaas')
-    r8_nested_require('command_and_control', 'adapters/node_config')
-    r8_nested_require('command_and_control', 'install_script')
+    require_relative('command_and_control/adapters/iaas')
+    require_relative('command_and_control/adapters/node_config')
+    require_relative('command_and_control/install_script')
 
     def self.create_without_task
-      new()
+      new
     end
 
     def initialize(task = nil, top_task_idh = nil)
       @top_task_idh = top_task_idh
       if task
-        @task_idh =  task.id_handle()
+        @task_idh =  task.id_handle
 
         @task_action = task[:executable_action]
         @klass = self.class.load_for(@task_action)
@@ -40,7 +40,7 @@ module DTK
     attr_reader :task_idh, :top_task_idh, :task_action, :klass
 
     def self.execute_task_action(task, top_task_idh)
-      new(task, top_task_idh).execute().merge(task_id: task.id())
+      new(task, top_task_idh).execute.merge(task_id: task.id)
     end
     def execute
       klass.execute(task_idh, top_task_idh, task_action)
@@ -60,23 +60,14 @@ module DTK
       end
     end
 
-    def self.install_script(node, opts={})
-      InstallScript.install_script(node, opts)
+    def self.node_config_server_host
+      klass = load_config_node_adapter
+      klass.server_host
     end
 
-    def self.discover(filter, timeout, limit, client)
-      klass = load_for_node_config()
-      klass.discover(filter, timeout, limit, client)
-    end
-
-    def self.node_action_results(result, action)
-      klass = load_for_node_config()
-      klass.action_results(result, action)
-    end
-
-    def self.errors_in_node_action_result?(result, action = nil)
-      klass = load_for_node_config()
-      klass.errors_in_node_action_result?(result, action)
+    def self.node_config_adapter_cloud_config_options(node, bindings)
+      klass = load_for_node_config
+      klass.cloud_config_options(node, bindings)
     end
 
     # This takes into account what is needed for the node_config_adapter
@@ -85,100 +76,28 @@ module DTK
       klass.install_script(node, bindings)
     end
 
-    def self.node_config_adapter_cloud_config_os_type
-      klass = load_for_node_config
-      klass.cloud_config_os_type
+    def self.install_script(node, opts={})
+      InstallScript.install_script(node, opts)
     end
 
-    def self.node_config_adapter_cloud_config_options(node, bindings)
+    def self.discover(filter, timeout, limit, client)
       klass = load_for_node_config
-      klass.cloud_config_options(node, bindings)
+      klass.discover(filter, timeout, limit, client)
+    end
+
+    def self.node_action_results(result, action)
+      klass = load_for_node_config
+      klass.action_results(result, action)
+    end
+
+    def self.errors_in_node_action_result?(result, action = nil)
+      klass = load_for_node_config
+      klass.errors_in_node_action_result?(result, action)
     end
 
     def self.pbuilderid(node)
       klass = load_iaas_for(node: node)
       klass.pbuilderid(node)
-    end
-
-    # Types that have Iaas service properties
-    TypesWithIaasProperties = [:ec2] # TODO: DTK-2948; need to iterate over all
-
-    def self.find_violations_in_target_service(target_service, params = {})
-      TypesWithIaasProperties.inject([]) do |a, iaas_type|
-        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_target_service(target_service, params)
-      end
-    end
-
-    def self.find_violations_in_node_components(service, params = {})
-      TypesWithIaasProperties.inject([]) do |a, iaas_type|
-        a + load_for_aux(:iaas, iaas_type.to_s).find_violations_in_node_components(service, params)
-      end
-    end
-
-    def self.create_nodes_from_service(service, params = {})
-      TypesWithIaasProperties.inject([]) do |a, iaas_type|
-        a + load_for_aux(:iaas, iaas_type.to_s).create_nodes_from_service(service, params)
-      end
-    end
-
-    def self.node_property_legal_attributes
-      TypesWithIaasProperties.inject([]) { |a, iaas_type| a + load_for_aux(:iaas, iaas_type.to_s).node_property_legal_attributes }
-    end
-
-    def self.references_image?(target, node_external_ref)
-      klass = load_iaas_for(target: target)
-      klass.references_image?(node_external_ref)
-    end
-
-    def self.start_instances(nodes)
-      klass = load_iaas_for(node: nodes.first)
-      klass.start_instances(nodes)
-    end
-
-    def self.stop_instances(nodes)
-      klass = load_iaas_for(node: nodes.first)
-      klass.stop_instances(nodes)
-    end
-
-    def self.check_iaas_properties(iaas_type, iaas_properties, opts = {})
-      klass = load_for_aux(:iaas, iaas_type.to_s)
-      klass.check_iaas_properties(iaas_properties, opts)
-    end
-
-    def self.get_and_process_availability_zones(iaas_type, iaas_properties, region)
-      klass = load_for_aux(:iaas, iaas_type.to_s)
-      klass.get_availability_zones(iaas_properties, region)
-    end
-
-    def self.find_matching_node_binding_rule(node_binding_rules, target)
-      target.update_object!(:iaas_type, :iaas_properties)
-      klass = load_iaas_for(target: target)
-      klass.find_matching_node_binding_rule(node_binding_rules, target)
-    end
-
-    def self.node_config_server_host
-      klass = load_config_node_adapter()
-      klass.server_host()
-    end
-
-    def self.destroy_node?(node, opts = {})
-      klass = load_iaas_for(node: node)
-      klass.destroy_node?(node, opts)
-    end
-
-    def self.associate_elastic_ip(node)
-      klass = load_iaas_for(node: node)
-      klass.associate_elastic_ip(node)
-    end
-
-    def self.get_and_update_node_state!(node, attribute_names)
-      klass = load_iaas_for(node: node)
-      klass.get_and_update_node_state!(node, attribute_names)
-    end
-
-    def self.get_node_operational_status(node)
-      klass = load_iaas_for(node: node)
-      klass.get_node_operational_status(node)
     end
 
     def self.request__get_logs(task, nodes, callbacks, context)
@@ -197,7 +116,7 @@ module DTK
     end
 
     def self.request__execute_action_per_node(agent, action, nodes_hash, callbacks)
-      klass = load_for_node_config()
+      klass = load_for_node_config
       klass.request_execute_action_per_node(agent, action, nodes_hash, callbacks)
     end
 
@@ -207,12 +126,12 @@ module DTK
     end
 
     def self.initiate_node_action(method, node, callbacks, context)
-      klass = load_for_node_config()
+      klass = load_for_node_config
       klass.send(method, node, callbacks, context)
     end
     # TODO: convert poll_to_detect_node_ready to use more general form above
     def self.poll_to_detect_node_ready(node, opts)
-      klass = load_for_node_config()
+      klass = load_for_node_config
       klass.poll_to_detect_node_ready(node, opts)
     end
 
@@ -222,7 +141,7 @@ module DTK
       case key
        when :node
         node = val
-        case iaas_type = node.get_iaas_type()
+        case iaas_type = node.get_iaas_type
          when :ec2_instance then :ec2
          when :ec2_image then :ec2
          when :bosh_instance then :bosh
@@ -267,7 +186,7 @@ module DTK
     end
 
     def self.load_for(task_or_task_action)
-      adapter_type, adapter_name = task_or_task_action.ret_command_and_control_adapter_info()
+      adapter_type, adapter_name = task_or_task_action.ret_command_and_control_adapter_info
       adapter_name ||= R8::Config[:command_and_control][adapter_type][:type]
       fail ErrorCannotLoadAdapter.new unless adapter_type && adapter_name
       load_for_aux(adapter_type, adapter_name)
@@ -280,7 +199,7 @@ module DTK
         r8_nested_require('command_and_control', "adapters/#{adapter_type}/#{adapter_name}")
         if base_class = base_class_when_instance_style_adapter?(adapter_name)
           klass = base_class.const_get adapter_name.to_s.capitalize
-          Adapters[adapter_type][adapter_name] = klass.create_without_task()
+          Adapters[adapter_type][adapter_name] = klass.create_without_task
         else
           Adapters[adapter_type][adapter_name] = CommandAndControlAdapter.const_get adapter_name.to_s.capitalize
         end

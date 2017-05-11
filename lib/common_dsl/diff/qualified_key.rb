@@ -22,7 +22,7 @@ module DTK
       # If this refers to element under a node than node object wil be returned; otherwise nil will be returned
       # if component is asembly level
       def self.parent_node?(qualified_key, assembly_instance)
-        if parent_key_elements = parent_key_elements?
+        if parent_key_elements = qualified_key.parent_key_elements?
           if node_name = node_name_if_node?(parent_key_elements.last)
             assembly_instance.get_node?([:eq, :display_name, node_name]) || 
               fail(Error, "Unexpected that assembly '#{assembly_instance.display_name}' does not have a node with name '#{node_name}'")
@@ -43,39 +43,40 @@ module DTK
 
       ParentComponentInfo = Struct.new(:component_name, :node_name)
       def parent_component_info
-        parent_key_elements   = parent_key_elements? || fail("Unexpected that (#{self.inspect}) has no parent")
+        parent_key_elements  = parent_key_elements? || fail("Unexpected that (#{self.inspect}) has no parent")
 
         component_key_element = parent_key_elements.last 
         fail "Unexpected that parent_key_elements.last is not a component" unless component_key_element[:type] == :component
         component_name = component_key_element[:key]
-
+        
         node_name = nil
         if parent_key_elements.size > 1
           node_key_element = parent_key_elements.last(2)[0]
           node_name = node_name_if_node?(node_key_element) || fail("Unexpected that node_key_element is not a node")
         end
-        ret = ParentComponentInfo.new(component_name, node_name)
-        pp ret
-        ret
+        ParentComponentInfo.new(component_name, node_name)
       end
-
-      private 
-
+      
       def parent_key_elements?
         if key_elements.size > 1
           key_elements[0..key_elements.size-2]
         end
       end
 
-      def node_name_if_node?(key_element)
+      private 
+
+      def self.node_name_if_node?(key_element)
         if key_element[:type] == :node 
           key_element[:key]
         elsif node_name = node_name_if_node_component?(key_element)
           node_name
         end
       end
+      def node_name_if_node?(key_element)
+        self.class.node_name_if_node?(key_element)
+      end
       
-      def node_name_if_node_component?(key_element)
+      def self.node_name_if_node_component?(key_element)
         if key_element[:type] == :component
           NodeComponent.node_name_if_node_component?(key_element[:key])
         end

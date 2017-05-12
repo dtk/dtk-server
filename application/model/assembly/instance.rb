@@ -190,7 +190,10 @@ module DTK; class  Assembly
 
     def exec(params)
       task_action = params[:task_action]
-
+      require 'debugger'
+      Debugger.wait_connection = true
+      Debugger.start_remote
+      debugger
       # check if action is called on component or on service instance action
       if task_action
         component_name, method_name = nil, nil
@@ -268,7 +271,15 @@ module DTK; class  Assembly
       task     = Task::Hierarchical.get_and_reify(task_idh)
       workflow = Workflow.create(task)
       workflow.defer_execution()
-      return { task_id: task_id }
+
+    
+      breakpoint = check_for_breakpoint(task)
+      return { task_id: task_id, breakpoint: breakpoint}
+    end
+
+    # Mock for testing
+    def check_for_breakpoint(task)
+      return true
     end
 
     def execute_cmp_action(params, component_id, method_name, augmented_cmps)

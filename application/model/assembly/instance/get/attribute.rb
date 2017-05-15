@@ -97,11 +97,14 @@ module DTK; class Assembly; class Instance; module Get
 
     def filter_component(filter_component, all_attrs)
       ret = []
-      filter_component.gsub!('::','__')
+      filter_component = filter_component.split(",")
+
       all_attrs.component_attrs.each do |attr|
         unless attr[:nested_component].nil? 
-          if attr[:nested_component][:display_name].include?(filter_component)
-            ret << attr
+          filter_component.each do |cmp|
+            if attr[:nested_component][:display_name].include?(cmp.gsub('::','__'))
+              ret << attr
+            end
           end
         end
       end

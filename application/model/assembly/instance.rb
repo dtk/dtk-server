@@ -229,11 +229,13 @@ module DTK; class  Assembly
             size_attributes << { display_name: attribute_name, node_name: attribute_obj[:node][:display_name] }
           end
         else
-          attribute_name = attr_pattern.attribute_name
-          if attribute_name.eql?('image')
-            image_attributes << { display_name: attribute_name, node_name: attr_pattern.node[:display_name] }
-          elsif attribute_name.eql?('size')
-            size_attributes << { display_name: attribute_name, node_name: attr_pattern.node[:display_name] }
+          if attr_pattern.respond_to?(:attribute_name)
+            attribute_name = attr_pattern.attribute_name
+            if attribute_name.eql?('image')
+              image_attributes << { display_name: attribute_name, node_name: attr_pattern.node[:display_name] }
+            elsif attribute_name.eql?('size')
+              size_attributes << { display_name: attribute_name, node_name: attr_pattern.node[:display_name] }
+            end
           end
         end
       end

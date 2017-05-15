@@ -150,27 +150,71 @@ module DTK; class Assembly
     end
 
     def add_attribute_links(assembly_instance)
-      assembly_attributes = assembly_instance.get_assembly_level_attributes
-      other_attributes    = assembly_instance.get_augmented_node_and_component_attributes
       links_from          = []
       target              = assembly_instance.get_target
-      # model_handle.createMH(:attribute_link_to)
+      assembly_attributes = assembly_instance.get_assembly_level_attributes
+      node_attributes, cmp_attributes = assembly_instance.get_augmented_node_and_component_attributes
+
       assembly_attributes.each do |assembly_attribute|
         attribute_links_to = AttributeLinkTo.get_for_attribute_id(model_handle.createMH(:attribute_link_to), assembly_attribute[:ancestor_id])
 
         links_from += attribute_links_to.map do |attribute_link_to|
-          {
-            ref: "attribute_link:#{attribute_link_to[:id]}-#{assembly_attribute[:id]}", 
-            datacenter_datacenter_id: target.id,
-            input_id: attribute_link_to.id, 
-            output_id: assembly_attribute.id, 
-            type: 'external', 
-            function: 'eq' 
-          }
+          if matching_attribute = find_matching_component(attribute_link_to[:component_ref], cmp_attributes, node_attributes)
+            {
+              ref: "attribute_link:#{matching_attribute[:id]}-#{assembly_attribute[:id]}", 
+              datacenter_datacenter_id: target.id,
+              input_id: assembly_attribute.id,
+              output_id: matching_attribute.id,
+              type: 'external', 
+              function: 'eq' 
+            }
+          end
         end      
       end
 
+      # temporary, to remove empty array element
+      if links_from.last.nil?
+        links_from.delete(links_from.last)
+      end
       Model.create_from_rows(target.model_handle.create_childMH(:attribute_link), links_from, convert: true)
+    end
+
+    def find_matching_component(component_ref, cmp_attributes, node_attributes)
+      cmp_ref_size       = component_ref.split('/').size
+      matching_attribute = nil
+
+      if cmp_ref_size == 3
+        cmp_attributes.each do |attr|
+          cmp_name  = nil
+          attr_name = attr[:display_name]
+          node_name = (attr[:node]||{})[:display_name]
+          if n_component = attr[:nested_component]
+            cmp_name = n_component[:display_name].gsub('__','::')
+          end
+          full_name = ""
+          full_name << "#{node_name}/" if node_name
+          full_name << "#{cmp_name}/" if cmp_name
+          full_name << "#{attr_name}" if attr_name
+          if component_ref == full_name
+            matching_attribute = attr
+            break
+          end
+        end
+      elsif cmp_ref_size == 2
+        node_attributes.each do |attr|
+          attr_name = attr[:display_name]
+          node_name = (attr[:node]||{})[:display_name]
+          full_name = ""
+          full_name << "#{node_name}/" if node_name
+          full_name << "#{attr_name}" if attr_name
+          if component_ref == full_name
+            matching_attribute = attr
+            break
+          end
+        end
+      end
+
+      matching_attribute
     end
 
     def self.create_or_update_from_instance(project, assembly_instance, service_module_name, assembly_template_name, opts = {})

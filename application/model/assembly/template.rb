@@ -153,18 +153,24 @@ module DTK; class Assembly
       assembly_attributes = assembly_instance.get_assembly_level_attributes
       other_attributes    = assembly_instance.get_augmented_node_and_component_attributes
       links_from          = []
-      attribute_mh        = nil
+      target              = assembly_instance.get_target
       # model_handle.createMH(:attribute_link_to)
       assembly_attributes.each do |assembly_attribute|
-        attribute_mh ||= assembly_attribute.model_handle_with_auth_info
         attribute_links_to = AttributeLinkTo.get_for_attribute_id(model_handle.createMH(:attribute_link_to), assembly_attribute[:ancestor_id])
 
-        attribute_links_to.each do |attribute_link_to|
-          links_from << { :ref => "attribute_link:#{attribute_link_to[:id]}-#{assembly_attribute[:id]}", :input_id => attribute_link_to[:id], :output_id => assembly_attribute[:id], :type => 'external', :function => 'eq' }
+        links_from += attribute_links_to.map do |attribute_link_to|
+          {
+            ref: "attribute_link:#{attribute_link_to[:id]}-#{assembly_attribute[:id]}", 
+            datacenter_datacenter_id: target.id,
+            input_id: attribute_link_to.id, 
+            output_id: assembly_attribute.id, 
+            type: 'external', 
+            function: 'eq' 
+          }
         end      
       end
 
-      Model.create_from_rows(attribute_mh.create_childMH(:attribute_link), links_from, convert: true)
+      Model.create_from_rows(target.model_handle.create_childMH(:attribute_link), links_from, convert: true)
     end
 
     def self.create_or_update_from_instance(project, assembly_instance, service_module_name, assembly_template_name, opts = {})

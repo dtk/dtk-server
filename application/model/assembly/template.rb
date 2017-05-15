@@ -144,7 +144,27 @@ module DTK; class Assembly
         LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, opts)
       end
 
+      add_attribute_links(assembly_instance)
+
       assembly_instance
+    end
+
+    def add_attribute_links(assembly_instance)
+      assembly_attributes = assembly_instance.get_assembly_level_attributes
+      other_attributes    = assembly_instance.get_augmented_node_and_component_attributes
+      links_from          = []
+      attribute_mh        = nil
+      # model_handle.createMH(:attribute_link_to)
+      assembly_attributes.each do |assembly_attribute|
+        attribute_mh ||= assembly_attribute.model_handle_with_auth_info
+        attribute_links_to = AttributeLinkTo.get_for_attribute_id(model_handle.createMH(:attribute_link_to), assembly_attribute[:ancestor_id])
+
+        attribute_links_to.each do |attribute_link_to|
+          links_from << { :ref => "attribute_link:#{attribute_link_to[:id]}-#{assembly_attribute[:id]}", :input_id => attribute_link_to[:id], :output_id => assembly_attribute[:id], :type => 'external', :function => 'eq' }
+        end      
+      end
+
+      Model.create_from_rows(attribute_mh.create_childMH(:attribute_link), links_from, convert: true)
     end
 
     def self.create_or_update_from_instance(project, assembly_instance, service_module_name, assembly_template_name, opts = {})

@@ -36,6 +36,9 @@ module DTK
         detail_to_include = []
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
+        all               = boolean_request_params(:all)
+        filter_component  = request_params(:filter_component)
+        format            = request_params(:format)
 
         if request_params(:links)
           detail_to_include << :attribute_links
@@ -47,10 +50,11 @@ module DTK
           opts.merge!(node_cmp_name: true)
         end
 
+        # Obsolete..?
         if component_id = request_params(:component_id)
           component_id = "#{ret_component_id(:component_id, assembly_instance, filter_by_node: true)}" unless (component_id =~ /^[0-9]+$/)
         end
-
+        
         additional_filter_proc = Proc.new do |e|
           attr = e[:attribute]
           (!attr.is_a?(Attribute)) || !attr.filter_when_listing?({})
@@ -64,6 +68,11 @@ module DTK
 
         opts.merge!(truncate_attribute_values: true, mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
+        opts.merge!(all: all, filter_component: filter_component)
+
+        # Format the response so it contains only name-vlaue pair without the additional info.
+        #attributes = assembly_instance.info_about(:attributes, opts)
+        #format_response(attributes) if format.include?("YAML") 
         rest_ok_response assembly_instance.info_about(:attributes, opts), datatype: datatype
       end
       # TODO: will subsume required_attributes by attributes

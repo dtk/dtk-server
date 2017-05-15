@@ -48,6 +48,7 @@ module DTK; class Assembly; class Instance; module Get
       assembly_attrs = get_assembly_level_attributes(filter_proc)
       node_attrs, component_attrs = get_augmented_node_and_component_attributes(filter_proc)
       # TODO: The pruning below might go in get_augmented_node_and_component_attributes
+      # Don't add component_attrs by default
       component_attrs.reject! do |attr|
         (not attr[:nested_component].get_field?(:only_one_per_node)) && attr.is_title_attribute?()
       end
@@ -94,9 +95,30 @@ module DTK; class Assembly; class Instance; module Get
       end
     end
 
+    def filter_component(filter_component, all_attrs)
+      ret = []
+      filter_component.gsub!('::','__')
+      all_attrs.component_attrs.each do |attr|
+        unless attr[:nested_component].nil? 
+          if attr[:nested_component][:display_name].include?(filter_component)
+            ret << attr
+          end
+        end
+      end
+      ret
+    end
+
+    def ret_print_form_component_attrs(component_attrs, opts)
+      opts_attr = opts.merge(level: :component, assembly: self)
+      component_attrs = Attribute.print_form(component_attrs, opts_attr)
+    end
+
     def get_attributes_print_form_aux(opts = Opts.new)
       filter_proc = opts[:filter_proc]
+      filter_component = opts[:filter_component]
       all_attrs = get_attributes_all_levels_struct(filter_proc)
+      node_attrs      = []
+      component_attrs = []
 
       # remove all assembly_wide_node attributes
       all_attrs.node_attrs.reject! { |r| r[:node] && Node.is_assembly_wide_node?(r[:node]) }
@@ -106,11 +128,17 @@ module DTK; class Assembly; class Instance; module Get
         attr.print_form(opts.merge(level: :assembly))
       end
 
-      opts_attr = opts.merge(level: :component, assembly: self)
-      component_attrs = Attribute.print_form(all_attrs.component_attrs, opts_attr)
+      unless filter_component.empty?
+        filtered_component_attrs = filter_component(filter_component, all_attrs) 
+        component_attrs = ret_print_form_component_attrs(filtered_component_attrs, opts)
+        assembly_attrs  = []
+      end
 
-      node_attrs = all_attrs.node_attrs.map do |aug_attr|
-        aug_attr.print_form(opts.merge(level: :node))
+      if opts[:all]
+        component_attrs = ret_print_form_component_attrs(all_attrs.component_attrs, opts)
+        node_attrs = all_attrs.node_attrs.map do |aug_attr|
+            aug_attr.print_form(opts.merge(level: :node))
+        end
       end
       (assembly_attrs + node_attrs + component_attrs).sort { |a, b| a[:display_name] <=> b[:display_name] }
     end

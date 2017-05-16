@@ -158,10 +158,10 @@ module DTK; class  Assembly
         end
         
         # command_and_control_action = Task.create_for_command_and_control_action(assembly_instance, 'destroy_node?', node_idh.get_id, node, opts)
-        delete_from_database = Task.create_for_delete_from_database(assembly_instance, nil, node, opts)
+        # delete_from_database = Task.create_for_delete_from_database(assembly_instance, nil, node, opts)
         
         # task.add_subtask(command_and_control_action) if command_and_control_action
-        task.add_subtask(delete_from_database) if delete_from_database
+        # task.add_subtask(delete_from_database) if delete_from_database
         return task if opts[:return_task]
         
         task = task.save_and_add_ids

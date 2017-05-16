@@ -135,6 +135,13 @@ module DTK; class  Assembly
           # recompute the locked module refs
           ModuleRefs::Lock.create_or_update(self)
         end
+
+        if opts[:delete_node_if_last_cmp]
+          if node && node.get_components.empty?
+            delete_node(node.id_handle, opts) unless node.is_assembly_wide_node?
+          end
+        end
+
         ret
       end
     end

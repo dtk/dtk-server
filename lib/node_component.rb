@@ -96,10 +96,10 @@ module DTK
       aug_nodes = assembly.get_nodes_with_components_and_their_attributes
 
       # indexed by the user friendly component name
-      ndx_top_level_components = {} 
+      ndx_top_level_components = {}
       aug_nodes.each do |aug_node| 
         if aug_node.is_assembly_wide_node?  
-          aug_node[:components].each { |component| ndx_top_level_components.merge!(component.display_name_print_form => component) }
+          (aug_node[:components]||{}).each { |component| ndx_top_level_components.merge!(component.display_name_print_form => component) }
         end
       end
       

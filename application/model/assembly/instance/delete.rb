@@ -152,7 +152,7 @@ module DTK; class  Assembly
 
         # this will delete node as component node
         if node_component_node
-          if node_component_node.get_components.empty?
+          if opts[:delete_node_as_component_node] || node_component_node.get_components.empty?
             delete_node(node_component_node.id_handle, opts) unless node_component_node.is_assembly_wide_node?
           end
         end

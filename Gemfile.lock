@@ -19,6 +19,7 @@ GIT
 GIT
   remote: git://github.com/dtk/dtk-dsl.git
   revision: c8383fdfd9cf12a7236df387665e0c13ed44798d
+  branch: DTK-2938-node-components
   specs:
     dtk-dsl (1.0.6)
 
@@ -199,6 +200,3 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
-
-BUNDLED WITH
-   1.14.3

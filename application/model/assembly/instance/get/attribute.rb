@@ -38,31 +38,24 @@ module DTK; class Assembly; class Instance; module Get
     end
 
     def get_attributes_all_levels
-      assembly_attrs = get_assembly_level_attributes
-      node_attrs, component_attrs = get_augmented_node_and_component_attributes
-      assembly_attrs + component_attrs + node_attrs
+      assembly_attrs  = get_assembly_level_attributes
+      component_attrs = get_augmented_component_attributes
+      assembly_attrs + component_attrs
     end
 
-    AttributesAllLevels = Struct.new(:assembly_attrs, :component_attrs, :node_attrs)
+    AttributesAllLevels = Struct.new(:assembly_attrs, :component_attrs)
     def get_attributes_all_levels_struct(filter_proc = nil)
       assembly_attrs = get_assembly_level_attributes(filter_proc)
-      node_attrs, component_attrs = get_augmented_node_and_component_attributes(filter_proc)
-      # TODO: The pruning below might go in get_augmented_node_and_component_attributes
+      component_attrs = get_augmented_component_attributes(filter_proc)
+      # TODO: The pruning below might go in get_augmented_component_attributes
       component_attrs.reject! do |attr|
         (not attr[:nested_component].get_field?(:only_one_per_node)) && attr.is_title_attribute?()
       end
-      AttributesAllLevels.new(assembly_attrs, component_attrs, node_attrs)
+      AttributesAllLevels.new(assembly_attrs, component_attrs)
     end
 
-    # returns [node_attrs, component_attrs]
-    def get_augmented_node_and_component_attributes(filter_proc = nil)
-      node_attrs = get_objs_helper(:node_attributes, :attribute, filter_proc: filter_proc, augmented: true)
-
-      # DTK-2536; For issues 1 and 2, we should get rid of os_identifier
-      node_attrs.delete_if{|attr| attr[:display_name].eql?('os_identifier')}
-
-      component_attrs = get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
-      [node_attrs, component_attrs]
+    def get_augmented_component_attributes(filter_proc = nil)
+      get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
     end
 
     private
@@ -70,9 +63,6 @@ module DTK; class Assembly; class Instance; module Get
     def get_attributes_print_form_aux(opts = Opts.new)
       filter_proc = opts[:filter_proc]
       all_attrs = get_attributes_all_levels_struct(filter_proc)
-
-      # remove all assembly_wide_node attributes
-      all_attrs.node_attrs.reject! { |r| r[:node] && Node.is_assembly_wide_node?(r[:node]) }
 
       filter_proc = opts[:filter_proc]
       assembly_attrs = all_attrs.assembly_attrs.map do |attr|
@@ -82,10 +72,13 @@ module DTK; class Assembly; class Instance; module Get
       opts_attr = opts.merge(level: :component, assembly: self)
       component_attrs = Attribute.print_form(all_attrs.component_attrs, opts_attr)
 
-      node_attrs = all_attrs.node_attrs.map do |aug_attr|
-        aug_attr.print_form(opts.merge(level: :node))
-      end
-      (assembly_attrs + node_attrs + component_attrs).sort { |a, b| a[:display_name] <=> b[:display_name] }
+      # Assembly attributes first
+      sort_attributes(assembly_attrs) + sort_attributes(component_attrs)
     end
+
+    def sort_attributes(attributes)
+      attributes.sort { |a, b| a.display_name <=> b.display_name }
+    end
+
   end
 end; end; end; end

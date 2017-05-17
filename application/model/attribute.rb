@@ -60,28 +60,6 @@ module DTK
       'name'
     end
 
-    def self.set_aws_required_attributes?(service_instance)
-      filter_proc = lambda {|a| (a[:node][:display_name] == 'assembly_wide') && AwsReqAttributes.include?(a[:attribute][:display_name]) && a[:attribute].is_unset }
-      node_attrs, component_attrs = service_instance.get_augmented_node_and_component_attributes(filter_proc)
-
-      unless node_attrs.empty? && component_attrs.empty?
-        aws_metadata_values = Attribute.get_attributes_from_aws_metadata(AwsReqAttributes)
-
-        node_attrs.each do |node_attr|
-          if new_attr_value = aws_metadata_values[node_attr[:display_name]]
-            node_attr.set_attribute_value(new_attr_value)
-          end
-        end
-
-        component_attrs.each do |cmp_attr|
-          if new_attr_value = aws_metadata_values[cmp_attr[:display_name]]
-            cmp_attr.set_attribute_value(new_attr_value)
-          end
-        end
-      end
-    end
-    AwsReqAttributes = ['vpc_id', 'subnet_id', 'group_id', 'group_name']
-
     # TODO: may make this a real field in attribute
     def title
       self[:attribute_value] if is_title_attribute?()

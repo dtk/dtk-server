@@ -56,7 +56,7 @@ module DTK
       def initialize(aug_attr, opts = Opts.new)
         # @aug_attr has to be set before other functions
         @aug_attr = aug_attr
-        @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format, :with_assembly_wide_node).merge(level: opts[:level] || find_level()))
+        @display_name_prefix =  opts[:display_name_prefix] || display_name_prefix(opts.slice(:format, :with_assembly_wide_node).merge(level: opts[:level] || find_level))
         @index_map = opts[:index_map]
         @truncate_attribute_value = opts[:truncate_attribute_values]
         @raw_attribute_value = opts[:raw_attribute_value]
@@ -69,16 +69,16 @@ module DTK
       end
 
       def print_form
-        attr_name = attr_name_special_processing() || attr_name_default()
+        attr_name = attr_name_special_processing || attr_name_default
 
         attr_info = {
           name: attr_name,
           display_name: "#{@display_name_prefix}#{attr_name}",
-          datatype: datatype_print_form(),
+          datatype: datatype_print_form,
           description: @aug_attr[:description] || @aug_attr[:display_name]
         }
-        value = value_print_form()
-        unless value.nil?()
+        value = value_print_form
+        unless value.nil?
           if @truncate_attribute_value
             truncate_size = (@truncate_attribute_value.is_a?(Fixnum) ? @truncate_attribute_value : DefaultTruncateSize)
             if value.is_a?(String) && value.size > truncate_size
@@ -97,7 +97,7 @@ module DTK
       def self.augment_with_attribute_links!(ret, assembly, raw_attributes)
         ndx_attrs = raw_attributes.inject({}) { |h, a| h.merge(a[:id] => a) }
         ndx_attr_mappings = {}
-        assembly.get_augmented_attribute_mappings().each do |r|
+        assembly.get_augmented_attribute_mappings.each do |r|
           ndx = r[:input_id]
           pntr = ndx_attr_mappings[ndx] ||= []
           output_id = r[:output_id]
@@ -140,7 +140,7 @@ module DTK
       LinkedToPuppetHeader = 'external_ref(puppet_header)'
 
       def attr_name_default
-        index_map_string = (@index_map ? @index_map.inspect() : '')
+        index_map_string = (@index_map ? @index_map.inspect : '')
         "#{@aug_attr[:display_name]}#{index_map_string}"
       end
 
@@ -161,9 +161,9 @@ module DTK
          when :component
           node = node()
           if Node.is_assembly_wide_node?(node) && !opts[:with_assembly_wide_node]
-            format.gsub(/\$node\//, '').gsub(/\$component/, component().display_name_print_form())
+            format.gsub(/\$node\//, '').gsub(/\$component/, component.display_name_print_form)
           else
-            format.gsub(/\$node/, node[:display_name]).gsub(/\$component/, component().display_name_print_form())
+            format.gsub(/\$node/, node[:display_name]).gsub(/\$component/, component.display_name_print_form)
           end
         end
       end
@@ -189,8 +189,10 @@ module DTK
               PrintValueNil
             else
               if @mark_unset_required && @aug_attr[:required]
-                # dont mark as required input ports since they will be propagated
-                unless @aug_attr[:is_port] && @aug_attr[:port_type_asserted] == 'input'
+                # dont mark as required input ports since they will be propagated as well as dynamic ones
+                if (@aug_attr[:is_port] && @aug_attr[:port_type_asserted] == 'input') or @aug_attr[:dynamic]
+                  nil
+                else
                   PrintValueUnsetRequired
                 end
               end
@@ -241,8 +243,8 @@ module DTK
       end
 
       def find_level
-        if node()
-          component() ? :component : :node
+        if node
+          component ? :component : :node
         else
           :assembly
         end

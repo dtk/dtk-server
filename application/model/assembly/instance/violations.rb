@@ -64,17 +64,9 @@ module DTK
         filter_proc = lambda { |a| a.required_unset_attribute?() }
         assembly_attr_viols = get_assembly_level_attributes(filter_proc).map { |a| Violation::ReqUnsetAttr.new(a, :assembly) }
         filter_proc = lambda { |r| r[:attribute].required_unset_attribute?() }
-        node_attrs, component_attrs = get_augmented_node_and_component_attributes(filter_proc)
+        component_attrs = get_augmented_component_attributes(filter_proc)
         component_attr_viols = component_attrs.map { |a| Violation::ReqUnsetAttr.new(a, :component) }
-        # remove attribute violations if assembly wide node
-        node_attrs.delete_if do |n_attr|
-          if node = n_attr[:node]
-            Node.is_assembly_wide_node?(node)
-          end
-        end
-        node_attr_viols = node_attrs.map { |a| Violation::ReqUnsetAttr.new(a, :node) }
-
-        assembly_attr_viols + component_attr_viols + node_attr_viols
+        assembly_attr_viols + component_attr_viols
       end
 
       def find_violations__cmp_constraints(nodes_and_cmps, cmp_idhs)

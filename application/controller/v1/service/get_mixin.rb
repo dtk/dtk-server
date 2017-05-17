@@ -64,8 +64,9 @@ module DTK
 
         opts.merge!(truncate_attribute_values: true, mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
-        rest_ok_response assembly_instance.info_about(:attributes, opts), datatype: datatype
+        rest_ok_response assembly_instance.list_attributes(opts), datatype: datatype
       end
+
       # TODO: will subsume required_attributes by attributes
       def required_attributes
         rest_ok_response assembly_instance.get_attributes_print_form(Opts.new(filter: :required_unset_attributes))

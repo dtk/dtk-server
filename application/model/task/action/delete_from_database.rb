@@ -50,7 +50,7 @@ module DTK; class Task
 
           if self[:node] || self[:component]
             send_opts = deleting_last_node?(assembly_instance) ? { do_not_update_task_template: true } : {}
-            send_opts.merge!(delete_node_if_last_cmp: true) if self[:component]
+            # send_opts.merge!(delete_node_if_last_cmp: true) if self[:component]
             assembly_instance.send(self[:delete_action], *self[:delete_params], send_opts)
           else
             component_idh = assembly.id_handle.createIDH(id: assembly.id(), model_name: :component)

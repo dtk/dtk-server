@@ -82,7 +82,7 @@ module DTK
 
     # returns a DTK::NodeComponent object if the component is a node component
     def node_component?
-      NodeComponent.node_component?(component)
+      NodeComponent.node_component?(self)
     end
     
     def self.pending_changes_cols

@@ -27,6 +27,9 @@ module DTK
           user_object  = CurrentSession.new.user_object()
 
           execution_context(task, workitem, task_start) do
+            node_component = task[:executable_action].node_component_in_action 
+            node           = node_component.node
+
             callbacks = {
               on_msg_received: proc do |msg|
                 inspect_agent_response(msg)
@@ -36,11 +39,8 @@ module DTK
                   result = { type: :completed_create_node, task_id: task_id }
                   event = { detected_node: { senderid: msg[:senderid] } }
                   log_participant.end(:complete_succeed, event.merge(task_id: task_id))
-                  node = task[:executable_action][:node]
-                  node.update_operational_status!(:running)
 
-                  # these must be called before get_and_propagate_dynamic_attributes
-                  node.associate_elastic_ip?()
+                  node.update_operational_status!(:running)
 
                   action.get_and_propagate_dynamic_attributes(result)
                   set_result_succeeded(workitem, result, task, action)
@@ -60,7 +60,7 @@ module DTK
                 end
               end
             }
-            poll_to_detect_node_ready(workflow, action[:node], callbacks)
+            poll_to_detect_node_ready(workflow, node, callbacks)
           end
         end
 

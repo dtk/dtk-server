@@ -17,8 +17,7 @@
 #
 module DTK; class Task
   class Action
-    # Actions that configure a node
-    # TODO: see if misnomer since these can be set of assembly level actions that 
+    # TODO: DTK-2938; we want to rename ConfigNode since now a misnomer
     class ConfigNode < Base
       def initialize(type, object, task_idh = nil, assembly_idh = nil)
         # TODO: clean up so dont have to look for assembly_idh in two places
@@ -76,6 +75,16 @@ module DTK; class Task
       end
       def component_actions
         self.class.component_actions(self)
+      end
+
+      def node_component_in_action?
+        if component_actions.size == 1
+          component_actions.first.component.node_component?
+        end
+      end
+      
+      def node_component_in_action
+        node_component_in_action? || fail(Error, "Unexpected that node_component_in_action?  is nil")
       end
 
       def set_intra_node_stages!(intra_node_stages)

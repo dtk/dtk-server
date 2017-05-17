@@ -20,15 +20,14 @@ module DTK
     module RuoteGenerateProcessDefs
       require_relative('generate_process_defs/context')
       require_relative('generate_process_defs/bulk_create')
-      include ContextMixin
 
       @@count = 0
-      def compute_process_def(task, guards)
+      # TODO: remove _guards which is always nil now since no gaurds are being used
+      def compute_process_def(task, _guards)
         count = @@count += 1 #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
         top_task_idh = task.id_handle
         name = "process-#{count}"
-        #TODO: this needs to be changed if we use guards again in the temporal ordering
-        context = Context.create(guards, top_task_idh)
+        context = Context::NoGuards.new(top_task_idh)
         ['define', { 'name' => name }, [compute_process_body(task, context)]]
       end
 
@@ -48,12 +47,6 @@ module DTK
           post_part = participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
           sequence(main, post_part)
         when :config
-          # TODO: double check that guards are deprecated and remove code if so
-          guards = 
-            if guard_tasks = context.get_guard_tasks(action)
-              ret_guards(guard_tasks)
-            end
-
           if action.execute_on_server?
             main = participant_executable_action(:execute_on_node, task, context, task_type: 'config_node', task_end: true, task_start: true)
             sequence([main])
@@ -64,7 +57,7 @@ module DTK
                 participant_executable_action(:sync_agent_code, task, context, task_type: 'sync_agent_code')
               end
                 main = participant_executable_action(:execute_on_node, task, context, task_type: 'config_node', task_end: true)
-            sequence_tasks = [guards, sync_agent_code, authorize_action, main].compact
+            sequence_tasks = [sync_agent_code, authorize_action, main].compact
             sequence(*sequence_tasks)
           end
         when :delete_from_database

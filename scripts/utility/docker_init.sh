@@ -44,8 +44,6 @@ ARBITER_CONTAINER=${4:-dtk-arbiter}
 NAME=${6:-dtk-docker-${DOCKER_ID}}
 USER=${7:-docker-test}
 PASS=${8:-r8server}
-STOMP_USERNAME=${9:-dtk1}
-STOMP_PASSWORD=${10:-marionette}
 
 if [[ $UPGRADE -eq 0 ]]; then
 	rm -rf /${CONTAINER}

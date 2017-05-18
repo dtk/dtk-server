@@ -27,8 +27,9 @@ module DTK
           user_object  = CurrentSession.new.user_object()
 
           execution_context(task, workitem, task_start) do
-            node_component = task[:executable_action].node_component_in_action 
-            node           = node_component.node
+#            node_component = task[:executable_action].node_component_in_action 
+#            node           = node_component.node
+            node = task[:executable_action][:node]
 
             callbacks = {
               on_msg_received: proc do |msg|

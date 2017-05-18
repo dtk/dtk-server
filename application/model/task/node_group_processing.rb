@@ -18,6 +18,34 @@
 module DTK
   class Task < Model
     module NodeGroupProcessingMixin
+
+      def node_or_node_groups_tasks
+        component_actions = self[:executable_action][:component_actions]
+        fail Error, "Unexpected that component_actions.size != 1" unless component_actions.size == 1
+        component_action = component_actions.first
+
+        unless node_component = component_action.component.node_component?
+          fail Error, "Unexpected that node_component? is nil"
+        end
+        node_or_ng = node_component.node
+        if node_or_ng.is_node_group?
+        # TODO: ***DTK-2938; problem may be using same id
+          node_component.node_group.get_node_group_members.map { |ngm| task_with_specified_component_action_node(component_action, ngm) }
+
+        else
+          [task_with_specified_component_action_node(component_action, node_or_ng)]
+        end
+      end
+
+      def task_with_specified_component_action_node(component_action, node)
+        updated_component_action = component_action.merge(node: node)
+        executable_action = self[:executable_action].merge(component_actions: [updated_component_action]) 
+        merge(executable_action: executable_action)
+      end
+      private :task_with_specified_component_action_node
+
+      # TODO: DTK-2938; may be able to deprecate all below this
+
       def node_group_member?
         (self[:executable_action] || {})[:node_group_member]
       end

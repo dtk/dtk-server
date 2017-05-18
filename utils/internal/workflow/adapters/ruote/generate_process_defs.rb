@@ -39,13 +39,10 @@ module DTK
         action_type = action.type_for_workflow
 
         case action_type
-        when :power_on_node
-          detect_when_ready = participant_executable_action(:power_on_node, task, context, task_type: 'power_on_node', task_end: true, task_start: true)
-          sequence([detect_when_ready])
         when :create_node
           main = participant_executable_action(:execute_on_node, task, context, task_start: true)
-          post_part = participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
-          sequence(main, post_part)
+          detect_when_ready = detect_created_nodes_are_ready(task, context)
+          sequence(main, detect_when_ready)
         when :config
           if action.execute_on_server?
             main = participant_executable_action(:execute_on_node, task, context, task_type: 'config_node', task_end: true, task_start: true)
@@ -70,17 +67,21 @@ module DTK
           main = participant_executable_action(:cleanup, task, context, task_type: 'cleanup', task_start: true, task_end: true)
           sequence([main])
 
-        # TODO: These are deprecated
-        when :install_agent
-          main = participant_executable_action(:install_agent, task, context, task_type: 'install_agent', task_start: true, task_end: true)
-          sequence([main])
-        when :execute_smoketest
-          main = participant_executable_action(:execute_smoketest, task, context, task_type: 'execute_smoketest', task_start: true, task_end: true)
-          sequence([main])
-
         else
           fail Error, "Unexpected action type for workflow '#{action_type}'"
         end
+      end
+
+      def detect_created_nodes_are_ready(task, context)
+        subtasks = task.node_or_node_groups_tasks
+        if subtasks.size == 1
+          detect_created_nodes_are_ready_base(subtasks.first, context)
+        else
+        concurrence(subtasks.map { |subtask| detect_created_nodes_are_ready_base(subtasks.first, context)})
+        end
+      end
+      def detect_created_nodes_are_ready_base(task, context)
+        participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
       end
 
       #### synactic processing

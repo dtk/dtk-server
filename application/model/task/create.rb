@@ -138,7 +138,8 @@ module DTK; class Task
         else
           assembly.get_field?(:display_name)
         end
-      "delete '#{what}' from database"
+      # "delete '#{what}' from database"
+      "delete from database"
     end
 
     def self.create_for_command_and_control_action(assembly, action, params, node, opts = {})

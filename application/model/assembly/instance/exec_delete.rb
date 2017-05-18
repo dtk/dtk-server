@@ -119,7 +119,7 @@ module DTK; class  Assembly
       
       def exec__delete_node(node_idh, opts = {})
         assembly_instance = opts[:assembly_instance] || self
-        task = opts[:cmp_task] || Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
+        task = opts[:top_task] || Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
         ret = {
           assembly_instance_id: assembly_instance.id,
           assembly_instance_name: assembly_instance.display_name_print_form
@@ -136,7 +136,7 @@ module DTK; class  Assembly
           ordered_components.each do |component|
             next if component.get_field?(:component_type).eql?('ec2__node')
             cmp_action = nil
-            cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete nested component')
+            cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
             cmp_opts.merge!(delete_params: [component.id_handle, node.id])
             
             begin
@@ -222,8 +222,13 @@ module DTK; class  Assembly
         end
         
         self_subtask = delete_instance_task(self, opts)
-        task.add_subtask(self_subtask)
-        
+
+        if is_target_service_instance?
+          task.add_subtask(self_subtask)
+        else
+          task = self_subtask
+        end
+
         task = task.save_and_add_ids
         
         workflow = Workflow.create(task)
@@ -246,12 +251,12 @@ module DTK; class  Assembly
             # order components by 'delete' action inside assembly workflow if exists
             ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
             ordered_components.each do |component|
-              cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
+              cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
 
               if component.is_node_component?
                 node_component = NodeComponent.node_component(component)
                 if node = node_component.node
-                  node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], cmp_task: cmp_top_task))
+                  node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task))
                 end
               end
 

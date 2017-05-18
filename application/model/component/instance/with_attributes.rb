@@ -30,7 +30,14 @@ module DTK
 
       def self.components_with_attributes(components)
         ndx_attributes = ndx_attributes(components)
-        components.map { |component| new(component, ndx_attributes[component.id]) }
+        components.map do |component| 
+          unless attributes = ndx_attributes[component.id]
+            Log.error("Unexpected that ndx_attributes(components)[component.id] is nil")
+            attributes = []
+          end
+
+          new(component, attributes) 
+        end
       end
 
       def attribute(name)

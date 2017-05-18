@@ -29,6 +29,7 @@ module DTK
         name = "process-#{count}"
         context = Context::NoGuards.new(top_task_idh)
         ['define', { 'name' => name }, [compute_process_body(task, context)]]
+        raise 'here'
       end
 
       private

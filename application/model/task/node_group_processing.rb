@@ -76,7 +76,7 @@ module DTK
       private
 
       def self.decompose!(task, opts = {})
-        case task.basic_type()
+        case task.basic_type
           when :executable_action
             decompose_executable_action!(task, opts)
           when :decomposed_node_group
@@ -91,27 +91,42 @@ module DTK
       end
 
       def self.decompose_executable_action!(task, opts = {})
-        # noop if this is not a node group that decomposes
-        ea = task[:executable_action]
-        return unless ea.node_is_node_group?()
+        # noop if this is not a node group that decomposes or node group component
+        executable_action = task[:executable_action]
+        if node_group_members = node_group_members?(executable_action) 
 
-        # modify task so that it is a concurrent decomposed task
-        task[:temporal_order]      = 'concurrent'
-        ea[:decomposed_node_group] = true
-        node_group_members         = ea.nodes
-
-        # used if user wants to execute action on one node group member only
-        if node_group_member = opts[:node_group_member]
-          node_group_members.reject!{ |node| node[:display_name] != node_group_member }
-          fail ErrorUsage.new("Specified node group member '#{node_group_member}' does not exist!") if node_group_members.empty?
+          # modify task so that it is a concurrent decomposed task
+          task[:temporal_order]      = 'concurrent'
+          executable_action[:decomposed_node_group] = true
+          
+          # used if user wants to execute action on one node group member only
+          if node_group_member = opts[:node_group_member]
+            node_group_members.reject!{ |node| node.display_name != node_group_member }
+            fail(ErrorUsage, "Specified node group member '#{node_group_member}' does not exist!") if node_group_members.empty?
+          end
+          
+          task[:subtasks] = node_group_members.map { |node| node_group_member_subtask(node, task) }
         end
-
-        task[:subtasks] = node_group_members.map { |node| node_group_member(node, task) }
+        task
       end
 
-      def self.node_group_member(node, parent_task)
+
+      def self.node_group_members?(executable_action)
+        executable_action.node_is_node_group? ? executable_action.nodes : component_node_group_members?(executable_action)
+      end
+
+      def self.component_node_group_members?(executable_action)
+        component_actions = executable_action[:component_actions]
+        if component_actions.size == 1
+          if node_component = component_actions.first.component.node_component?
+            node_component.get_members_if_node_group?
+          end
+        end
+      end
+
+      def self.node_group_member_subtask(node, parent_task)
         executable_action = parent_task[:executable_action].create_node_group_member(node)
-        Task.create_stub(parent_task.model_handle(), executable_action: executable_action)
+        Task.create_stub(parent_task.model_handle, executable_action: executable_action)
       end
     end
   end

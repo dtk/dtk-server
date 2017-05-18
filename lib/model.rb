@@ -351,11 +351,15 @@ module DTK
     end
 
     def id_handle(hash_info = nil)
+      # TODO: DTK-2015: temp workaround; @id_handle shoudl be created with id
+      @id_handle[:guid] ||= self[:id]
       hash_info ? @id_handle.createIDH(hash_info) : @id_handle
     end
 
     def id_handle_with_auth_info
       # TODO: can be made more efficient by putting this info in @id_handle during initial create
+      # TODO: DTK-2015: temp workaround; @id_handle shoudl be created with id
+      @id_handle[:guid] ||= self[:id]
       return id_handle() if id_handle()[:group_id]
       group_id = group_id() || (update_object!(:group_id))[:group_id]
       @id_handle.merge!(group_id: group_id) if group_id

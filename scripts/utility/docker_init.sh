@@ -39,11 +39,13 @@ DOCKER_ID=$(date +%Y%m%d%H%M%S)
 
 ADDRESS=${1}
 UPGRADE=${2}
-CONTAINER=${3:-dtk}
-ARBITER_CONTAINER=${4:-dtk-arbiter}
-NAME=${6:-dtk-docker-${DOCKER_ID}}
-USER=${7:-docker-test}
-PASS=${8:-r8server}
+DTK_SERVER_BRANCH=${3-master}
+DTK_ARBITER_BRANCH=${4:-master}
+CONTAINER=${5:-dtk}
+ARBITER_CONTAINER=${6:-dtk-arbiter}
+NAME=${7:-dtk-docker-${DOCKER_ID}}
+USER=${8:-docker-test}
+PASS=${9:-r8server}
 
 if [[ $UPGRADE -eq 0 ]]; then
 	rm -rf /${CONTAINER}
@@ -103,7 +105,11 @@ echo -e "\nStarting a new Docker Container: ${ARBITER_CONTAINER}"
 HOST_VOLUME="/${CONTAINER}"
 
 # start the dtk-server container
-docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}
+if [[ $DTK_SERVER_BRANCH == 'master' ]]; then
+  docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}
+else
+  docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}:${DTK_SERVER_BRANCH}
+fi
 
 # wait for dtk-arbiter ssh keypair to be generated
 while [[ ! -f $HOST_VOLUME/arbiter/arbiter_remote ]]; do
@@ -118,4 +124,8 @@ if [[ -e /var/run/docker.sock ]]; then
 fi
 
 # start the dtk-arbiter container
-docker run -e GIT_USERNAME=${GIT_USERNAME} --name ${ARBITER_CONTAINER} -v ${HOST_VOLUME}:/host_volume -e HOST_VOLUME=${HOST_VOLUME} ${ADDITIONAL_ARGS} --restart=on-failure -td ${ARBITER_IMAGE}
+if [[ $DTK_ARBITER_BRANCH == 'master' ]]; then
+  docker run -e GIT_USERNAME=${GIT_USERNAME} --name ${ARBITER_CONTAINER} -v ${HOST_VOLUME}:/host_volume -e HOST_VOLUME=${HOST_VOLUME} ${ADDITIONAL_ARGS} --restart=on-failure -td ${ARBITER_IMAGE}
+else
+  docker run -e GIT_USERNAME=${GIT_USERNAME} --name ${ARBITER_CONTAINER} -v ${HOST_VOLUME}:/host_volume -e HOST_VOLUME=${HOST_VOLUME} ${ADDITIONAL_ARGS} --restart=on-failure -td ${ARBITER_IMAGE}:${DTK_ARBITER_BRANCH}
+fi

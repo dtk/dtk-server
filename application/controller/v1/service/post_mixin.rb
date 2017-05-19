@@ -141,6 +141,7 @@ module DTK
       def uninstall
         recursive = boolean_request_params(:recursive)
         delete    = boolean_request_params(:delete)
+        force    = boolean_request_params(:force)
         nodes     = assembly_instance.info_about(:nodes, datatype: :node)
 
         # if --delete is sent then execute delete workflow to delete nodes as components and then delete service instance
@@ -153,7 +154,7 @@ module DTK
           }
           assembly_instance.exec__delete(Opts.new(opts_hash))
         else
-          assembly_instance.uninstall(recursive: recursive, delete: delete)
+          assembly_instance.uninstall(recursive: recursive, delete: delete, force: force)
         end
 
         rest_ok_response nodes 

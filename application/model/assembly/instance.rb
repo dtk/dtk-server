@@ -73,7 +73,7 @@ module DTK; class  Assembly
       if nodes.empty? && get_augmented_components.empty?
         CommonModule::ServiceInstance.delete_from_model_and_repo(self)
       else
-        fail ErrorUsage, "Service instance '#{display_name}' cannot be deleted because it is not empty. You can either use '--delete' option to force uninstall service instance or execute 'dtk service delete' command first." unless opts[:delete]
+        fail ErrorUsage, "Service instance '#{display_name}' cannot be deleted because it is not empty. You can either use '--force' option to force uninstall service instance or execute 'dtk service delete' command first." unless opts[:force]
         Assembly::Instance.delete(id_handle(self), destroy_nodes: true, uninstall: true) 
       end
     end

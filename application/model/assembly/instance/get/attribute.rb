@@ -101,7 +101,7 @@ module DTK; class Assembly; class Instance; module Get
 
       all_attrs.component_attrs.each do |attr|
         unless attr[:nested_component].nil? 
-          filter_component.each do |cmp|
+          filter_component.each do |cmp| 
             if attr[:nested_component][:display_name].include?(cmp.gsub('::','__'))
               ret << attr
             end
@@ -135,6 +135,8 @@ module DTK; class Assembly; class Instance; module Get
         filtered_component_attrs = filter_component(filter_component, all_attrs) 
         component_attrs = ret_print_form_component_attrs(filtered_component_attrs, opts)
         assembly_attrs  = []
+        #TODO: temporary set to false 
+        opts[:all] = false
       end
 
       if opts[:all]

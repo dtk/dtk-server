@@ -36,7 +36,8 @@ module DTK
         detail_to_include = []
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
-        all               = boolean_request_params(:all)
+        # TODO: temporary set to true, until '--all' flag is being added
+        all               = true #boolean_request_params(:all) 
         filter_component  = request_params(:filter_component)
         format            = request_params(:format)
 
@@ -50,7 +51,6 @@ module DTK
           opts.merge!(node_cmp_name: true)
         end
 
-        # Obsolete..?
         if component_id = request_params(:component_id)
           component_id = "#{ret_component_id(:component_id, assembly_instance, filter_by_node: true)}" unless (component_id =~ /^[0-9]+$/)
         end

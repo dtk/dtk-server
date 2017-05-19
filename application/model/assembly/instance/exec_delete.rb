@@ -197,7 +197,7 @@ module DTK; class  Assembly
         ret.merge!(task_id: task.id)
         ret
       end
-
+      # returns nil if there is no task to run
       def exec__delete(opts = {})
         task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
         ret = {
@@ -221,7 +221,7 @@ module DTK; class  Assembly
           delete_recursive(self, task, opts)
         end
         
-        self_subtask = delete_instance_task(self, opts)
+        return nil unless self_subtask = delete_instance_task?(self, opts)
 
         if is_target_service_instance?
           task.add_subtask(self_subtask)
@@ -241,7 +241,11 @@ module DTK; class  Assembly
       private
 
       def delete_instance_task(assembly_instance, opts = {})
+        delete_instance_task?(assembly_instance, opts) || fail(Error, "Unexpectd that delete_instance_task?(assembly_instance, opts) is nil") 
+      end
+      def delete_instance_task?(assembly_instance, opts = {})
         task  = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
+        has_steps = false
         nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
 
         if assembly_wide_node = assembly_instance.has_assembly_wide_node?
@@ -271,20 +275,21 @@ module DTK; class  Assembly
               end
 
               delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, assembly_wide_node, cmp_opts)
+              has_steps = true
               cmp_top_task.add_subtask(cmp_action) if cmp_action
               cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
               task.add_subtask(cmp_top_task)
             end
           end
-        else
-          fail ErrorUsage, "Service instance has no nodes or components to be deleted." if nodes.empty?
+        end
+        unless has_steps
+          if opts[:uninstall] # if from uninstall return nil
+            return nil
+          else
+            fail ErrorUsage, "Service instance has no components to be deleted." 
+          end
         end
 
-        # nodes.each do |node|
-          # node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle]))
-          # task.add_subtask(node_top_task) if node_top_task
-        # end
-        
         unless opts[:donot_delete_assembly_from_database]
           delete_assembly_subtask = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
           task.add_subtask(delete_assembly_subtask)

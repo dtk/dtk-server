@@ -142,7 +142,6 @@ module DTK
         recursive = boolean_request_params(:recursive)
         delete    = boolean_request_params(:delete)
         force    = boolean_request_params(:force)
-        nodes     = assembly_instance.info_about(:nodes, datatype: :node)
 
         # if --delete is sent then execute delete workflow to delete nodes as components and then delete service instance
         if delete
@@ -152,12 +151,18 @@ module DTK
             recursive: recursive,
             uninstall: true
           }
-          assembly_instance.exec__delete(Opts.new(opts_hash))
+          
+          exec__delete_info = assembly_instance.exec__delete(Opts.new(opts_hash))
         else
           assembly_instance.uninstall(recursive: recursive, delete: delete, force: force)
         end
 
-        rest_ok_response nodes 
+        response = 
+          unless exec__delete_info.nil? 
+            { message: "Delete procedure started. For more information use 'dtk task-status'."}
+          end
+        
+        rest_ok_response response
       end
 
       def exec

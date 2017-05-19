@@ -46,13 +46,15 @@ module DTK
             main = participant_executable_action(:execute_on_node, task, context, task_type: 'config_node', task_end: true, task_start: true)
             sequence([main])
           else
-            authorize_action = participant_executable_action(:authorize_node, task, context, task_type: 'authorize_node', task_start: true)
+            node_is_ready = participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'detect_created_node_is_ready', task_start: true)
+
+            authorize_action = participant_executable_action(:authorize_node, task, context, task_type: 'authorize_node')
             sync_agent_code =
               if R8::Config[:node_agent_git_clone][:mode] != 'off'
                 participant_executable_action(:sync_agent_code, task, context, task_type: 'sync_agent_code')
               end
                 main = participant_executable_action(:execute_on_node, task, context, task_type: 'config_node', task_end: true)
-            sequence_tasks = [sync_agent_code, authorize_action, main].compact
+            sequence_tasks = [node_is_ready, sync_agent_code, authorize_action, main].compact
             sequence(*sequence_tasks)
           end
         when :delete_from_database

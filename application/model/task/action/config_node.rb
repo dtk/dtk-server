@@ -77,16 +77,6 @@ module DTK; class Task
         self.class.component_actions(self)
       end
 
-      def node_component_in_action?
-        if component_actions.size == 1
-          component_actions.first.component.node_component?
-        end
-      end
-      
-      def node_component_in_action
-        node_component_in_action? || fail(Error, "Unexpected that node_component_in_action?  is nil")
-      end
-
       def set_intra_node_stages!(intra_node_stages)
         self[:intra_node_stages] = intra_node_stages
       end

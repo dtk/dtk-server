@@ -84,12 +84,6 @@ module DTK
         rest_ok_response assembly_instance.get_attributes_print_form(Opts.new(filter: :required_unset_attributes))
       end
 
-      def format_yaml_response(response)
-        ret = []        
-        response.each {|item| ret << {name: item[:name], value: item[:value]}}
-        ret
-      end
-
       def components
         datatype = :component
         opts = Opts.new(detail_level: nil)

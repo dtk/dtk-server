@@ -28,7 +28,7 @@ describe "Target setup and update" do
     system("dtk module uninstall -v #{target_version} -y -d #{target_location} #{target_module}")
     system("rm -rf #{target_location}")
     system("mkdir #{target_location}")
-    system("dtk module install -y -d #{target_location} #{target_module}")
+    system("dtk module install --update-deps -d #{target_location} #{target_module}")
   end
 
   context "List assemblies contained in this module" do

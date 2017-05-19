@@ -106,7 +106,9 @@ module DTK
       card = attribute.cardinality
       new_card = card - amount
       if new_card < 0
-        fail ErrorUsage.new("Existing cardinality (#{card}) is less than amount to decrease it by (#{amount})")
+        # instead of throwing error just set cardinality to 0 (need for nodes as components delete node group)
+        new_card = 0
+        # fail ErrorUsage.new("Existing cardinality (#{card}) is less than amount to decrease it by (#{amount})")
       end
       Node::NodeAttribute.create_or_set_attributes?([self], :cardinality, new_card)
       new_card

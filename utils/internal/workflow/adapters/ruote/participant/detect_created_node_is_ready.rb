@@ -30,7 +30,7 @@ module DTK
             node = task[:executable_action][:node]
 
             # TODO: DTK-2938: below is needed if this is a node group member; allows it to find 
-            # in poll_to_detect_node_ready its parent
+            # in poll_to_detect_node_ready the node node group's parent
             unless node.get_field?(:assembly_id)
               Log.info("filling in assembly id for node: #{node.inspect}")
               if assembly_instance = action.assembly_instance
@@ -48,10 +48,10 @@ module DTK
                   event = { detected_node: { senderid: msg[:senderid] } }
                   log_participant.end(:complete_succeed, event.merge(task_id: task_id))
 
+                  # TODO: DTK-2938:  think can remove below
                   node.update_operational_status!(:running)
 
                   action.get_and_propagate_dynamic_attributes(result)
-                  set_result_succeeded(workitem, result, task, action)
                   delete_task_info(workitem)
 
                   reply_to_engine(workitem)

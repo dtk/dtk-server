@@ -70,14 +70,24 @@ module DTK
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
         opts.merge!(all: all, filter_component: filter_component)
 
-        # Format the response so it contains only name-vlaue pair without the additional info.
-        #attributes = assembly_instance.info_about(:attributes, opts)
-        #format_response(attributes) if format.include?("YAML") 
-        rest_ok_response assembly_instance.info_about(:attributes, opts), datatype: datatype
+        response = 
+          if format.include?("yaml")   
+            format_yaml_response(assembly_instance.info_about(:attributes, opts))
+          else
+            assembly_instance.info_about(:attributes, opts)
+          end
+
+        rest_ok_response response, datatype: datatype
       end
       # TODO: will subsume required_attributes by attributes
       def required_attributes
         rest_ok_response assembly_instance.get_attributes_print_form(Opts.new(filter: :required_unset_attributes))
+      end
+
+      def format_yaml_response(response)
+        ret = []        
+        response.each {|item| ret << {name: item[:name], value: item[:value]}}
+        ret
       end
 
       def components

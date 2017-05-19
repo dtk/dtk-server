@@ -29,6 +29,15 @@ module DTK
           execution_context(task, workitem, task_start) do
             node = task[:executable_action][:node]
 
+            # TODO: DTK-2938: below is needed if this is a node group member; allows it to find 
+            # in poll_to_detect_node_ready its parent
+            unless node.get_field?(:assembly_id)
+              Log.info("filling in assembly id for node: #{node.inspect}")
+              if assembly_instance = action.assembly_instance
+                node[:assembly_id] = assembly_instance.id
+              end
+            end
+
             callbacks = {
               on_msg_received: proc do |msg|
                 inspect_agent_response(msg)

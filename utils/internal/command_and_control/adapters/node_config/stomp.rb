@@ -64,7 +64,6 @@ module DTK
         ret
       end
 
-      # TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
       def self.poll_to_detect_node_ready(node, opts)
         rc = opts[:receiver_context]
         callbacks = {

@@ -43,7 +43,7 @@
           convert: true,
           join_type: :inner,
           join_cond: { id: :node_group_relation__node_group_id },
-          cols: [:id, :group_id, :display_name, :type]
+          cols: [:id, :group_id, :display_name, :type, :assembly_id]
        }]
     },
     target_ref: {

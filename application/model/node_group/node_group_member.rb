@@ -29,7 +29,7 @@ module DTK
         # no op
       end
 
-      # returns NodeGroupMember object if node group member; otehrwise retuns nil
+      # returns NodeGroupMember object if node group member; otherwise retuns nil
       def self.node_group_member?(node)
         if node.kind_of?(NodeGroupMember)
           node
@@ -72,23 +72,36 @@ module DTK
       private
 
       def node_group(opts = {})
-        return @node_group if @node_group
+        @node_group ||= get_node_group(opts)
+      end
+
+      def get_node_group(opts = [])
         sp_hash = {
           cols: [:id, :node_group],
           filter: [:eq, :node_id, id()]
         }
+        
         nodes = Model.get_objs(model_handle(:node_group_relation), sp_hash).map { |r| r[:node_group] }
+        if assembly_id = get_field?(:assembly_id)
+          filtered_nodes = nodes.select { |node| node[:assembly_id] == assembly_id }
+          nodes = filtered_nodes unless filtered_nodes.empty?
+        else
+          filtered_nodes = nodes.select { |node| ! node[:assembly_id].nil? }
+          nodes = filtered_nodes unless filtered_nodes.empty?
+        end
+
         unless nodes.size == 1
           if opts[:raise_errors].nil? or opts[:raise_errors]
             fail Error.new("Unexpected that rows.size (#{nodes.size}) does not equal 1")
           end
         end
-        ret = nodes.first
-        unless ret.is_node_group?()
-          fail Error.new("Unexpected that node (#{ret.inspect}) connected to node group member (#{get_field?(:display_name)}) is not a node group")
+
+        if ret = nodes.first
+          fail Error.new("Unexpected that node (#{ret.inspect}) connected to node group member (#{get_field?(:display_name)}) is not a node group") unless ret.is_node_group?
+          NodeGroup.create_as(ret)
         end
-        @node_group = NodeGroup.create_as(ret)
       end
+
     end
   end
 end

@@ -223,8 +223,15 @@ module DTK; class Task
         end
       end
 
+      def assembly_instance
+        unless ret = (self[:assembly_idh] && IDHandle.new(self[:assembly_idh]).create_object(model_name: :assembly_instance))
+          Log.error("Unexpected that self[:assembly_idh] is nil")
+        end
+        ret
+      end
+
       def get_and_update_attributes__assembly_attrs!(_task_mh)
-        if assembly = self[:assembly_idh] && IDHandle.new(self[:assembly_idh]).create_object(model_name: :assembly)
+        if assembly = assembly_instance
         assembly_attr_vals = assembly.get_assembly_level_attributes()
           unless assembly_attr_vals.empty?
             self[:assembly_attributes] = assembly_attr_vals

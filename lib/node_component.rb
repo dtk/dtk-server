@@ -143,11 +143,16 @@ module DTK
     end
 
     def self.assembly_from_component(component)
-      component.model_handle.createIDH(model_name: :assembly_instance, id: component.get_field?(:assembly_id)).create_object
+      assembly_instance(component)
     end
 
     def self.assembly_from_node(node)
-      node.model_handle.createIDH(model_name: :assembly_instance, id: node.get_field?(:assembly_id)).create_object
+      assembly_instance(node)
+    end
+
+    def self.assembly_instance(node_or_component)
+      assembly_id = node_or_component.get_field?(:assembly_id) || fail(Error, "Unexpected that the following object does not have an assembly id: #{node_or_component.inspect}")
+      node_or_component.model_handle.createIDH(model_name: :assembly_instance, id: assembly_id).create_object
     end
 
   end

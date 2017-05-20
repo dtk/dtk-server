@@ -131,7 +131,7 @@ module DTK; class Assembly; class Instance; module Get
         attr.print_form(opts.merge(level: :assembly))
       end
 
-      unless filter_component.empty?
+      unless (filter_component||"").empty?
         filtered_component_attrs = filter_component(filter_component, all_attrs) 
         component_attrs = ret_print_form_component_attrs(filtered_component_attrs, opts)
         assembly_attrs  = []

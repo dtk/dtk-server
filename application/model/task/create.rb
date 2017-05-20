@@ -69,27 +69,42 @@ module DTK; class Task
     end
 
     def get_delete_workflow_order(assembly)
-      target_idh            = target_idh_from_assembly(assembly)
-      task_mh               = target_idh.create_childMH(:task)
+      target_idh = target_idh_from_assembly(assembly)
+      task_mh    = target_idh.create_childMH(:task)
 
+      ret = nil
       begin
         task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'delete' })
       rescue Task::Template::ParsingError => e
-        return
+        return ret
       rescue Task::Template::TaskActionNotFoundError => e
-        return
+        return ret
       end
 
       if serialization_form = task_template_content && task_template_content.serialization_form
-        components_list = []
-
+        ret = []
         if subtasks = serialization_form[:subtasks]
           subtasks.each do |subtask|
-            subtask[:ordered_components].each{ |cmp| components_list << cmp.gsub!('::', '__') }
+            ret += delete_subtype_component_types(subtask)
           end
         end
+        pp [:heerreeeeorder, ret]
+        ret
+      end
+    end
 
-        components_list.flatten
+    # TODO: DTK-3010; this is hack for DTK-3010; want to call parsing logic
+    COMPONENT_OR_ACTION_KEYS = [:ordered_components, :components, :actions, :component, :action]
+    def delete_subtype_component_types(delete_subtask)
+      if matching_key = COMPONENT_OR_ACTION_KEYS.find { |key| delete_subtask.has_key?(key) }
+        component_or_actions = delete_subtask[matching_key]
+        component_or_actions = [component_or_actions] unless component_or_actions.kind_of?(::Array)
+        component_or_actions.map do |item|
+          # convert to component type form and strip off action
+          item.gsub('::', '__').gsub(/\.[^\.]+$/, '')
+        end
+      else
+        []
       end
     end
   end

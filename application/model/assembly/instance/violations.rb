@@ -142,11 +142,12 @@ module DTK
           end
         end
 
-        unless multiple_ns.empty?
-          multiple_ns.each do |k, v|
-            ret << Violation::MultipleNamespacesIncluded.new(k, v)
-          end
-        end
+        # TODO: since the staging operation picks one of multiple namespaces, we dont want this to be a blocking violation
+        # unless multiple_ns.empty?
+        #  multiple_ns.each do |k, v|
+        #    ret << Violation::MultipleNamespacesIncluded.new(k, v)
+        #  end
+        # end
 
         ret
       end

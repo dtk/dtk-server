@@ -117,6 +117,7 @@ module DTK; class Assembly; class Instance; module Get
     end
 
     def get_attributes_print_form_aux(opts = Opts.new)
+      opts[:all] = true
       filter_proc = opts[:filter_proc]
       filter_component = opts[:filter_component]
       all_attrs = get_attributes_all_levels_struct(filter_proc)

@@ -160,7 +160,7 @@ module DTK; class BaseModule
         end
         ref
       end
-      fail ErrorUsage, "Cannot delete the component module because the following:\n  #{refs.join("\n  ")}"
+      fail ErrorUsage, "Cannot delete the module because the following:\n  #{refs.join("\n  ")}"
     end
 
     def raise_error_if_dependency(branch, version)
@@ -178,7 +178,7 @@ module DTK; class BaseModule
           version = cmp[:module_branch][:version]
           full_name = "#{cmp[:namespace][:display_name]}:#{cmp[:component_module][:display_name]}"
           full_name << "(#{version})" if version && !version.eql?('master')
-          refs << "Reference to component module '#{full_name}'"
+          refs << "Reference to module '#{full_name}'"
         end
       end
 
@@ -187,11 +187,11 @@ module DTK; class BaseModule
           version = srv[:module_branch][:version]
           full_name = "#{srv[:namespace][:display_name]}:#{srv[:service_module][:display_name]}"
           full_name << "(#{version})" if version && !version.eql?('master')
-          refs << "Reference to service module '#{full_name}'"
+          refs << "Reference to module '#{full_name}'"
         end
       end
 
-      fail ErrorUsage, "Cannot delete the component module because the following:\n  #{refs.join("\n  ")}"
+      fail ErrorUsage, "Cannot uninstall the module because the following:\n  #{refs.join("\n  ")}"
     end
   end
 end; end

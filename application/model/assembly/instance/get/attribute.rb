@@ -48,7 +48,6 @@ module DTK; class Assembly; class Instance; module Get
       assembly_attrs = get_assembly_level_attributes(filter_proc)
       component_attrs = get_augmented_component_attributes(filter_proc)
       # TODO: The pruning below might go in get_augmented_component_attributes
-      # Don't add component_attrs by default
       component_attrs.reject! do |attr|
         (not attr[:nested_component].get_field?(:only_one_per_node)) && attr.is_title_attribute?()
       end
@@ -62,34 +61,45 @@ module DTK; class Assembly; class Instance; module Get
     private
 
     def get_attributes_print_form_aux(opts = Opts.new)
-      opts[:all] = true
-      filter_proc = opts[:filter_proc]
-      filter_component = opts[:filter_component]
-      all_attrs = get_attributes_all_levels_struct(filter_proc)
-      node_attrs      = []
-      component_attrs = []
+      all_attrs = get_attributes_all_levels_struct(opts[:filter_proc])
 
-      filter_proc = opts[:filter_proc]
       assembly_attrs = all_attrs.assembly_attrs.map do |attr|
         attr.print_form(opts.merge(level: :assembly))
       end
 
-      unless (filter_component||"").empty?
-        filtered_component_attrs = filter_component(filter_component, all_attrs) 
-        component_attrs = ret_print_form_component_attrs(filtered_component_attrs, opts)
-        assembly_attrs  = []
-        #TODO: temporary set to false 
-        opts[:all] = false
-      end
+      component_attrs = get_component_attributes_print_form_aux(all_attrs.component_attrs, opts)
 
-      if opts[:all]
-        component_attrs = ret_print_form_component_attrs(all_attrs.component_attrs, opts)
-        node_attrs = all_attrs.node_attrs.map do |aug_attr|
-            aug_attr.print_form(opts.merge(level: :node))
-        end
-      end
       # Assembly attributes first
       sort_attributes(assembly_attrs) + sort_attributes(component_attrs)
+    end
+
+    def get_component_attributes_print_form_aux(component_attrs, opts = Opts.new)
+      if opts[:all]
+        ret_print_form_component_attrs(component_attrs, opts)
+      elsif filter_component = opts[:filter_component]
+        # if filter component than just components that meet this filter
+        ret_print_form_component_attrs(filter_components(filter_component, component_attrs), opts)
+      else
+        # if all not selected and no fiter component that no component attributes
+        []
+      end
+    end
+
+    def filter_components(filter, component_attrs)
+      regexp_filters = filter.split(",").map do | user_friendly_componet_name|
+        Regexp.new("^#{user_friendly_componet_name.gsub('::','__')}")
+      end
+      ret = []
+      component_attrs.each do |attr|
+        if component = attr[:nested_component]
+          ret << attr if regexp_filters.find { |regexp| component.display_name =~ regexp }
+        end
+      end
+      ret
+    end
+
+    def ret_print_form_component_attrs(component_attrs, opts = Opts.new)
+      Attribute.print_form(component_attrs, opts.merge(level: :component, assembly: self))
     end
 
     def sort_attributes(attributes)

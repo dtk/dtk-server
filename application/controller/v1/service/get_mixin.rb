@@ -36,9 +36,11 @@ module DTK
         detail_to_include = []
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
-        # TODO: temporary set to true, until '--all' flag is being added
-        all               = true #boolean_request_params(:all) 
         filter_component  = request_params(:filter_component)
+        
+        # TODO: temporary set to true if and only if no component filter, until '--all' flag is being added
+        # then wil be #boolean_request_params(:all) 
+        all               = filter_component.nil?
         format            = request_params(:format)
 
         if request_params(:links)
@@ -66,7 +68,7 @@ module DTK
           end
         end
 
-        opts.merge!(truncate_attribute_values: true, mark_unset_required: true)
+        opts.merge!(truncate_attribute_values: !format.include?('yaml'), mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
         opts.merge!(all: all, filter_component: filter_component)
         response = 

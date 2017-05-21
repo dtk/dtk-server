@@ -3,7 +3,7 @@ source 'https://rubygems.org'
 # dtk gems
 gem 'dtk-common', :github => 'dtk/dtk-common'
 gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
-gem 'dtk-dsl', :github => 'dtk/dtk-dsl', :branch => 'DTK-2938-node-components'
+gem 'dtk-dsl', :github => 'dtk/dtk-dsl', :branch => 'master-candidate'
 
 # required to start a server
 gem 'ramaze', '2012.04.14'

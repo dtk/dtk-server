@@ -74,7 +74,8 @@ module DTK; class Assembly; class Instance; module Get
     end
 
     def get_component_attributes_print_form_aux(component_attrs, opts = Opts.new)
-      if opts[:all]
+      # default for opts[:all] is true
+      if opts[:all].nil? ? true : opts[:all]
         ret_print_form_component_attrs(component_attrs, opts)
       elsif filter_component = opts[:filter_component]
         # if filter component than just components that meet this filter

@@ -29,6 +29,13 @@ module Ramaze::Helper
       create_obj([:service_id, :service_instance], ::DTK::Assembly::Instance)
     end
 
+
+    def format_yaml_response(response)
+      ret = []
+      response.each {|item| ret << {name: item[:name], value: item[:value]}}
+      ret
+    end
+
     def generate_new_service_name(assembly_template, service_module)
       assembly_name = assembly_template.display_name
       name_seed = "#{service_module.display_name}#{NEW_SERVICE_NAME_DELIM}#{assembly_name}"

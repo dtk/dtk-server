@@ -22,7 +22,7 @@ describe '(Staging And Deploying Assemblies) Test Case 15: Converge service inst
     # Install/clone r8:test_delete module with required dependency modules
     system("mkdir #{module_location}")
     system("dtk module clone -v #{version} #{module_name} #{module_location}")
-    system("dtk module install -y -d #{module_location} #{module_name}")
+    system("dtk module install --update-deps -d #{module_location} #{module_name}")
   end
 
   context "Stage assembly from module" do

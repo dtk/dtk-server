@@ -36,6 +36,10 @@ module DTK
         detail_to_include = []
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
+        # TODO: temporary set to true, until '--all' flag is being added
+        all               = true #boolean_request_params(:all) 
+        filter_component  = request_params(:filter_component)
+        format            = request_params(:format)
 
         if request_params(:links)
           detail_to_include << :attribute_links
@@ -50,7 +54,7 @@ module DTK
         if component_id = request_params(:component_id)
           component_id = "#{ret_component_id(:component_id, assembly_instance, filter_by_node: true)}" unless (component_id =~ /^[0-9]+$/)
         end
-
+        
         additional_filter_proc = Proc.new do |e|
           attr = e[:attribute]
           (!attr.is_a?(Attribute)) || !attr.filter_when_listing?({})
@@ -64,7 +68,14 @@ module DTK
 
         opts.merge!(truncate_attribute_values: true, mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
-        rest_ok_response assembly_instance.list_attributes(opts), datatype: datatype
+        opts.merge!(all: all, filter_component: filter_component)
+        response = 
+          if format.include?('yaml')   
+            format_yaml_response(assembly_instance.list_attributes(opts))
+          else
+            assembly_instance.list_attributes(opts)
+          end
+        rest_ok_response response, datatype: datatype
       end
 
       # TODO: will subsume required_attributes by attributes

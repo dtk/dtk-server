@@ -261,16 +261,25 @@ module DTK
         rest_ok_response assembly_instance.set_as_default_target
       end
 
-      def unmanage
+      def eject
         assembly_instance = assembly_instance()
         component_ref     = required_request_params(:component_ref)
-        matching_components = assembly_instance.get_augmented_components(Opts.new(filter_component: component_ref))
+
+        components = assembly_instance.info_about(:components)
+        components.reject! { |comp| !component_ref.eql?(comp[:display_name]) }
+
+        fail ErrorUsage.new("Component '#{component_ref}' does not match any components") if components.empty?
+        fail ErrorUsage.new("Unexpected that component name '#{component_ref}' match multiple components") if components.size > 1
+
+        component      = components.first
+        aug_components = assembly_instance.get_augmented_components
+        matching_components = aug_components.select { |comp| component[:id] == comp[:id] }
+
         fail ErrorUsage.new("Component '#{component_ref}' does not match any components") if matching_components.empty?
         fail ErrorUsage.new("Unexpected that component name '#{component_ref}' match multiple components") if matching_components.size > 1
 
-        # component = matching_components.first
         component = ::DTK::Component::Instance.create_from_component(matching_components.first)
-        node = component.get_node
+        node      = component.get_node
         assembly_instance.delete_component(component.id_handle, node.id, { delete_node_as_component_node: true})
 
         service_instance_branch = assembly_instance.get_service_instance_branch

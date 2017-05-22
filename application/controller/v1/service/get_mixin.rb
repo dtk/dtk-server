@@ -72,7 +72,8 @@ module DTK
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
         opts.merge!(all: all, filter_component: filter_component)
         response = 
-          if format.include?('yaml')   
+          if format.include?('yaml')
+            opts.merge!(:yaml_format => true)
             format_yaml_response(assembly_instance.list_attributes(opts))
           else
             assembly_instance.list_attributes(opts)

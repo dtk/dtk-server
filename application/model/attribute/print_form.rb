@@ -61,6 +61,7 @@ module DTK
         @truncate_attribute_value = opts[:truncate_attribute_values]
         @raw_attribute_value = opts[:raw_attribute_value]
         @mark_unset_required = opts[:mark_unset_required]
+        @format              = opts[:yaml_format]
       end
       private :initialize
 
@@ -183,6 +184,8 @@ module DTK
 
       def value_print_form(opts = {})
         value = (opts.key?(:nested_val) ? opts[:nested_val] : @aug_attr[:attribute_value])
+        return value if (value.is_a?(Hash) || value.is_a?(Array)) && @format
+
         if value.nil?
           ret =
             if opts[:nested]

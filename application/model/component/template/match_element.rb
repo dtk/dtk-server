@@ -120,13 +120,14 @@ module DTK
                    [:oneof, :version, versions],
                    [:eq, :assembly_id, nil],
                    [:eq, :node_node_id, nil],
+                   [:eq, :type, 'template'],
                    [:oneof, :component_type, cmp_types]]
         }
         Component::Template.augment_with_namespace!(Component::Template.get_objs(project_idh.createMH(:component), sp_hash))
       end
       
       
-      def self.match_base_module?(matches, base_module_local_params)
+      def match_base_module?(matches, base_module_local_params)
         namespace = base_module_local_params.namespace
         version   = base_module_local_params.version
         matches.find { |match| match[:namespace] == namespace and match[:version] = version }

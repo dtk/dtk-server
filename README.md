@@ -17,14 +17,14 @@ Fastest way to deploy  Dtk Server is with a Docker container. Docker image [getd
 - Pull the latest Dtk Server Docker image with `docker pull getdtk/dtk-server`
 
 - Select a container root directory on host which will be used by the Docker container for persistence (e.g. `/usr/share/docker/dtk`), and create `dtk.config` (e.g. `/usr/share/docker/dtk/dtk.config`) with following content:
-
-      USERNAME=dtk-user
-      PASSWORD=somepassword
-      PUBLIC_ADDRESS=<public address of the docker host>
-      ## optionally set git user and email for install-client.sh script
-      # GIT_EMAIL=
-      # GIT_USER=
-
+```
+USERNAME=dtk-user
+PASSWORD=somepassword
+PUBLIC_ADDRESS=<public address of the docker host>
+## optionally set git user and email for install-client.sh script
+# GIT_EMAIL=
+# GIT_USER=
+```
 
 More information about the dtk.config file can be found in [dtk.config.example](dtk.config.example)
 

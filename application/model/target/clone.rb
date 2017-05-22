@@ -87,22 +87,14 @@ module DTK
         port_link_idhs = clone_copy_output.children_id_handles(level, :port_link)
         create_attribute_links__clone_if_needed(target, port_link_idhs)
 
+        # TODO: is this still being used?
         if settings = opts[:service_settings]
           settings.apply_settings(target, assembly)
         end
 
-        add_service_module_task_templates(assembly, clone_copy_output)
+        update_task_templates(assembly, nodes, clone_copy_output)
 
-        begin
-          m_ref_opts = {raise_errors: true}
-          m_ref_opts.merge!(version: opts[:version]) if opts[:version]
-          ModuleRefs::Lock.create_or_update(assembly, m_ref_opts)
-        rescue ModuleRef::Missing::Error => e
-          includes = ModuleRefs::Tree.create(assembly).hash_form()
-          str_includes = keys_to_string(includes)
-          e.message << "\n#{str_includes.to_yaml}"
-          raise e
-        end
+        create_locked_module_refs(assembly, version: opts[:version])
 
         level = 2
         component_child_hashes = clone_copy_output.children_hash_form(level, :component)
@@ -114,6 +106,30 @@ module DTK
         StateChange.create_pending_change_items(component_new_items)
       end
 
+      def self.update_task_templates(assembly, nodes, clone_copy_output)
+        add_node_component_tasks_if_needed(assembly, nodes)
+        add_service_module_task_templates(assembly, clone_copy_output) # TODO: is this still being used?
+      end
+
+      def self.add_node_component_tasks_if_needed(assembly, nodes)
+        assembly_wide_node = nil
+        real_nodes         = []
+        nodes.each do |node|
+          if node.is_assembly_wide_node?
+            assembly_wide_node = node
+          else
+            real_nodes << node
+          end
+        end
+        return if real_nodes.empty? or assembly_wide_node.nil?
+        NodeComponent.node_components(real_nodes, assembly).map do |node_component|
+          component = node_component.component
+          node_name = node_component.node.display_name
+          task_template_opts = { component_title: node_name, insert_strategy: :insert_at_start }
+          Task::Template::ConfigComponents.update_when_added_component_or_action?(assembly, assembly_wide_node, component, task_template_opts)
+        end
+      end
+      
       def self.add_service_module_task_templates(assembly, clone_copy_output)
         module_branch_id = assembly.get_field?(:module_branch_id)
         module_branch    = assembly.model_handle(:module_branch).createIDH(id: module_branch_id).create_object()
@@ -128,6 +144,21 @@ module DTK
 
         Task::Template.clone_to_assembly(assembly, task_templates)
 
+      end
+
+      # opts can have keys
+      #   :version
+      def self.create_locked_module_refs(assembly, opts = {})
+        begin
+          m_ref_opts = {raise_errors: true}
+          m_ref_opts.merge!(version: opts[:version]) if opts[:version]
+          ModuleRefs::Lock.create_or_update(assembly, m_ref_opts)
+        rescue ModuleRef::Missing::Error => e
+          includes = ModuleRefs::Tree.create(assembly).hash_form()
+          str_includes = keys_to_string(includes)
+          e.message << "\n#{str_includes.to_yaml}"
+          raise e
+        end
       end
 
       def self.keys_to_string(hash)

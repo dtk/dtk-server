@@ -132,6 +132,19 @@ module DTK; class  Assembly
           node_component_node = node_component.node
         end
 
+        # this will delete node as component node
+        if node_component_node
+          if opts[:delete_node_as_component_node] || node_component_node.get_components.empty?
+            unless node_component_node.is_assembly_wide_node?
+              if node_component_node.is_node_group?
+                delete_node_group(node_component_node.id_handle, opts)
+              else
+                delete_node(node_component_node.id_handle, opts)
+              end
+            end
+          end
+        end
+
         node ||= component_idh.createIDH(model_name: :node, id: component[:node_node_id]).create_object()
         ret = nil
         Transaction do
@@ -147,19 +160,6 @@ module DTK; class  Assembly
         if opts[:delete_node_if_last_cmp]
           if node && node.get_components.empty?
             delete_node(node.id_handle, opts) unless node.is_assembly_wide_node?
-          end
-        end
-
-        # this will delete node as component node
-        if node_component_node
-          if opts[:delete_node_as_component_node] || node_component_node.get_components.empty?
-            unless node_component_node.is_assembly_wide_node?
-              if node_component_node.is_node_group?
-                delete_node_group(node_component_node.id_handle, opts)
-              else
-                delete_node(node_component_node.id_handle, opts)
-              end
-            end
           end
         end
 

@@ -31,9 +31,7 @@ module Ramaze::Helper
 
 
     def format_yaml_response(response)
-      ret = []
-      response.each {|item| ret << {name: item[:name], value: item[:value]}}
-      ret
+      response.map { |info| { name: info[:display_name], value: info[:value] } }
     end
 
     def generate_new_service_name(assembly_template, service_module)

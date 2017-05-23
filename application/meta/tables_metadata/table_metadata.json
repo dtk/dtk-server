@@ -384,7 +384,6 @@
     "order": [
       "id",
       "service_instance",
-      "status",
       "last_run",
       "assembly_template",
       "target",
@@ -397,7 +396,6 @@
       "created_at": "created_at.get_date",
       "id": "dtk_id",
       "assembly_template": "assembly_template",
-      "status": "op_status",
       "last_run": "last_task_run_status",
       "target": "target"
     }

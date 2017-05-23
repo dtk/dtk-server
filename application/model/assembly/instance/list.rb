@@ -29,7 +29,10 @@ module DTK; class Assembly::Instance
         assembly_mh = assembly_mh.createMH(:assembly_instance) # to insure right mh type
         assembly_rows = get_info__flat_list(assembly_mh, opts)
 
-        if opts[:detail_level].nil?
+        # TODO: fix so dont put workspace in first place
+        assembly_rows.reject! { |assembly_instance| Workspace.is_workspace?(assembly_instance) }
+
+          if opts[:detail_level].nil?
           if opts[:include_namespaces]
             Log.error('Unexpected that opts[:include_namespaces] is true')
           end

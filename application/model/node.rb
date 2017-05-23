@@ -493,6 +493,7 @@ module DTK
       get_and_update_operational_status!()
     end
 
+    # TODO: DTK-3024: remove of fix up for node components
     def get_and_update_operational_status!
       update_obj!(:type, :external_ref, :operational_status)
       if is_staged?()

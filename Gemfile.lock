@@ -1,26 +1,26 @@
 GIT
   remote: git://github.com/dtk/dtk-common-core.git
-  revision: 837b1c8270c856a2f55294985c19794c3503112a
+  revision: 1f1c1b3945c838471751016c1fd672fb2b22bc24
   specs:
-    dtk-common-core (0.10.1)
+    dtk-common-core (0.11.0)
       rest-client (= 1.6.7)
 
 GIT
   remote: git://github.com/dtk/dtk-common.git
-  revision: 04beded5e295cc59a6d079aed82e2de2c1f24fd7
+  revision: 0ea963585d95b7ad5199d156ba46452729b73508
   specs:
-    dtk-common (0.10.3)
+    dtk-common (0.11.0)
       colorize (~> 0.5.8)
-      dtk-common-core (= 0.10.1)
+      dtk-common-core (= 0.11.0)
       erubis (~> 2.7)
       grit (~> 2.5)
       rugged (~> 0.17.0.b7)
 
 GIT
   remote: git://github.com/dtk/dtk-dsl.git
-  revision: c8383fdfd9cf12a7236df387665e0c13ed44798d
+  revision: eb9a3a3411a3d45939778ea3bfeb91ea5f3d7dfb
   specs:
-    dtk-dsl (1.0.6)
+    dtk-dsl (1.1.0)
 
 GEM
   remote: https://rubygems.org/

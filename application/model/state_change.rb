@@ -17,10 +17,9 @@
 #
 module DTK
   class StateChange < Model
-    r8_nested_require('state_change', 'get_pending_changes')
-    r8_nested_require('state_change', 'create')
-    r8_nested_require('state_change', 'assembly')
-    r8_nested_require('state_change', 'node_centric')
+    require_relative('state_change/get_pending_changes')
+    require_relative('state_change/create')
+    require_relative('state_change/assembly')
 
     extend GetPendingChangesClassMixin
     extend CreateClassMixin

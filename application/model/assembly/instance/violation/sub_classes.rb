@@ -198,7 +198,7 @@ module DTK
         end
 
         def description(opts = {})
-          "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}. Use 'print-includes' to see more details."
+          "Module '#{@included_module}' included in dsl is mapped to multiple namespaces: #{@namespaces.join(', ')}."
         end
       end
 

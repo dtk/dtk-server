@@ -24,14 +24,9 @@ module DTK; class Attribute
       existing_attrs.each do |attr|
         attr.update_object!(:node_node_id, :component_component_id, :semantic_data_type) # proactive in fields needed
         new_val = ndx_new_vals[attr[:id]]
-        special_processing, error = SpecialProcessing::ValueCheck.error_special_processing?(attr, new_val)
-        if special_processing
-          errors << error if error
-        else
-          unless opts[:only_special_processing]
-            if semantic_data_type = attr[:semantic_data_type]
-              errors << Error.new(attr, new_val) unless SemanticDatatype.is_valid?(semantic_data_type, new_val)
-            end
+        unless opts[:only_special_processing]
+          if semantic_data_type = attr[:semantic_data_type]
+            errors << Error.new(attr, new_val) unless SemanticDatatype.is_valid?(semantic_data_type, new_val)
           end
         end
         

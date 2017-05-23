@@ -22,14 +22,15 @@ module DTK
       # If this refers to element under a node than node object wil be returned; otherwise nil will be returned
       # if component is asembly level
       def self.parent_node?(qualified_key, assembly_instance)
-        key_elements = qualified_key.key_elements
-        if key_elements.size == 2 and key_elements[0].type.to_sym == :node
-          node_name = key_elements[0].key
-          assembly_instance.get_node?([:eq, :display_name, node_name]) || 
-            fail(Error, "Unexpected that assembly '#{assembly_instance.display_name}' does not have a node with name '#{node_name}'")
+        if parent_key_elements = qualified_key.parent_key_elements?
+          if node_name = node_name_if_node?(parent_key_elements.last)
+            assembly_instance.get_node?([:eq, :display_name, node_name]) || 
+              fail(Error, "Unexpected that assembly '#{assembly_instance.display_name}' does not have a node with name '#{node_name}'")
+          end
         end
       end
 
+      # TODO: DTK-2938; think below shoudl be written in terms of parent_node? or its subfunctions node_name_if_node?(
       # if node attribute returns [node_name, attribute_name]; otherwise returns nil
       def self.is_node_attribute?(qualified_key)
         key_elements = qualified_key.key_elements
@@ -40,17 +41,45 @@ module DTK
         end
       end
 
-      def self.parent_component_name?(qualified_key, opts = {})
-        node_name      = nil
-        component_name = nil
-        qualified_key.key_elements.each do |element|
-          if element[:type] == :component
-            component_name = element[:key]
-          elsif element[:type] == :node
-            node_name = element[:key]
-          end
+      ParentComponentInfo = Struct.new(:component_name, :node_name)
+      def parent_component_info
+        parent_key_elements  = parent_key_elements? || fail("Unexpected that (#{self.inspect}) has no parent")
+
+        component_key_element = parent_key_elements.last 
+        fail "Unexpected that parent_key_elements.last is not a component" unless component_key_element[:type] == :component
+        component_name = component_key_element[:key]
+        
+        node_name = nil
+        if parent_key_elements.size > 1
+          node_key_element = parent_key_elements.last(2)[0]
+          node_name = node_name_if_node?(node_key_element) || fail("Unexpected that node_key_element is not a node")
         end
-        opts[:include_node] ? "#{node_name}/#{component_name}" : component_name
+        ParentComponentInfo.new(component_name, node_name)
+      end
+      
+      def parent_key_elements?
+        if key_elements.size > 1
+          key_elements[0..key_elements.size-2]
+        end
+      end
+
+      private 
+
+      def self.node_name_if_node?(key_element)
+        if key_element[:type] == :node 
+          key_element[:key]
+        elsif node_name = node_name_if_node_component?(key_element)
+          node_name
+        end
+      end
+      def node_name_if_node?(key_element)
+        self.class.node_name_if_node?(key_element)
+      end
+      
+      def self.node_name_if_node_component?(key_element)
+        if key_element[:type] == :component
+          NodeComponent.node_name_if_node_component?(key_element[:key])
+        end
       end
 
     end

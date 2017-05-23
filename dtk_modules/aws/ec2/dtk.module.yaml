@@ -1,0 +1,423 @@
+---
+module: aws/ec2
+version: master
+dependencies:
+  dtk-provider/ruby-provider: master
+  aws/aws_stdlib: master
+  dtk/host: master
+assemblies:
+  single_node:
+    components:
+    - node[n1]:
+        attributes:
+          size: micro
+        components:
+        - host::hostname:
+            attributes:
+              hostname: n1
+    actions:
+      create:
+        subtasks:
+        - name: create n1
+          components:
+          - ec2::node[n1]
+        - name: set host name
+          components:
+          - host::hostname
+  test:
+    components:
+    - ec2::profile[xenial]:
+        attributes:
+          image: xenial
+    - node[n1]:
+        attributes:
+          size: micro
+        components:
+        - host::hostname:
+            attributes:
+              hostname: test
+    - node[n2]:
+        attributes:
+          size: micro
+    actions:
+      create:
+        subtasks:
+        - name: set ec2 profile dynamic attributes
+          components:
+          - ec2::profile[xenial]
+        - name: create nodes
+          subtask_order: concurrent
+          subtasks:
+          - name: create n1
+            node: assembly_wide
+            components:
+            - ec2::node[n1]
+          - name: create n2
+            node: assembly_wide
+            components:
+            - ec2::node[n2]
+        - name: set host name
+          components:
+          - host::hostname
+  node_group:
+    components:
+    - node[n1]:
+        attributes:
+          size: micro
+    - node_group[grp]:
+        attributes:
+          size: micro
+          cardinality: 2
+        components:
+        - host::hostname:
+            attributes:
+              hostname: grp
+    actions:
+      create:
+        subtasks:
+        - name: create nodes
+          subtask_order: concurrent
+          subtasks:
+          - name: create n1
+            node: assembly_wide
+            components:
+            - ec2::node[n1]
+          - name: create node group grp
+            node: assembly_wide
+            components:
+            - ec2::node_group[grp]
+        - name: set host name
+          components:
+          - host::hostname
+component_defs:
+  profile:
+    attributes:
+      name:
+        type: string
+        required: true
+      subnet_id:
+        type: string
+        required: true
+        description: This property specifies the ID of the subnet that you want to
+          launch the instance into.
+      enable_public_ip_in_subnet:
+        description: Enable public ip on instance launch
+        type: boolean
+        default: true
+      security_group_id:
+        type: string
+        required: true
+        description: A list that contains the security group IDs for VPC security
+          groups to assign to the Amazon EC2 instance.
+      iam_instance_profile:
+        type: string
+        description: An instance profile
+      key_name:
+        type: string
+        description: Provides the name of the Amazon EC2 key pair.
+      size:
+        type: string
+        description: Logical size
+      image:
+        type: string
+        description: Logical image type
+      vpc_images:
+        type: hash
+        hidden: true
+        dynamic: true
+        description: Hash that maps logical name and size of image to image_id and instance_type
+      security_group_ids:
+        type: array
+        dynamic: true
+        required: true
+        description: A list that contains the security group IDs for VPC security
+          groups to assign to the Amazon EC2 instance.
+    singleton: false
+    link_defs:
+      network_aws::vpc_subnet:
+        attribute_mappings:
+        - "$default_keypair -> key_name"
+        - "$images -> vpc_images"
+        - "$subnet_id -> subnet_id"
+        - "$enable_public_ip_in_subnet -> enable_public_ip_in_subnet"
+      network_aws::security_group:
+        attribute_mappings:
+        - "$group_id -> security_group_id"
+    actions:
+      create:
+        function:
+          type: ruby_function
+          outputs:
+            security_group_ids: |
+              lambda do |security_group_id|
+                [security_group_id]
+              end
+  node:
+    attributes:
+      name:
+        type: string
+        required: true
+      discovered:
+        type: boolean
+        default: false
+      dtk_debug:
+        type: boolean
+        default: false
+      credentials_handle:
+        type: hash
+        hidden: true
+      dtk_agent_info:
+        type: hash
+        required: true
+        hidden: true
+        description: Parameters used to compute cloud-int script to configure DTK
+          agent to connect to dtk server
+      size:
+        type: string
+        description: Logical size
+      image:
+        type: string
+        description: Logical image type
+      vpc_images:
+        type: hash
+        hidden: true
+        description: Hash that maps logical name and size of image to image_id and instance_type
+      host_addresses_ipv4:
+        type: array
+        dynamic: true
+      admin_state:
+        type: string
+        input: true
+        dynamic: true
+        description: 'Desired state of node; legal values are: powered_on, powered_off'
+      image_id:
+        type: string
+        input: true
+        dynamic: true
+        description: Provides the unique ID of the Amazon Machine Image (AMI) that
+          was assigned during registration.
+      os_type:
+        type: string
+        input: true
+        dynamic: true
+      instance_type:
+        type: string
+        input: true
+        dynamic: true
+        description: The instance type, such as t2.micro.
+      security_group_ids:
+        type: array
+        description: A list that contains the security group IDs for VPC security
+          groups to assign to the Amazon EC2 instance.
+      subnet_id:
+        type: string
+        description: This property specifies the ID of the subnet that you want to
+          launch the instance into.
+      enable_public_ip_in_subnet:
+        description: Enable public ip on instance launch
+        type: boolean
+        default: true
+      client_token:
+        type: string
+        description: to ensure idempotency when creating a ec2 instance
+      instance_id:
+        type: string
+        input: true
+        dynamic: true
+      iam_instance_profile:
+        type: string
+        description: An instance profile
+      key_name:
+        type: string
+        description: Provides the name of the Amazon EC2 key pair.
+      tags:
+        type: hash
+        description: tags for ec2 instance
+      block_device_mappings:
+        type: array
+        dynamic: true
+        input: true
+        description: Defines a set of Amazon Elastic Block Store block device mappings,
+          ephemeral instance store block device mappings, or both.
+      instance_state:
+        type: string
+        dynamic: true
+      private_ip_address:
+        type: string
+        dynamic: true
+      public_ip_address:
+        type: string
+        dynamic: true
+      private_dns_name:
+        type: string
+        dynamic: true
+      public_dns_name:
+        type: string
+        dynamic: true
+    singleton: false
+    link_defs:
+      ec2::profile:
+        attribute_mappings:
+        - "$vpc_images -> vpc_images"
+        - "$image -> image"
+        - "$size  -> size"
+
+        - "$subnet_id -> subnet_id"
+        - "$enable_public_ip_in_subnet -> enable_public_ip_in_subnet"
+        - "$security_group_ids -> security_group_ids"
+        - "$key_name -> key_name"
+    providers:
+      ruby:
+        gems:
+        - aws_sdk
+        - mime
+        - byebug
+    actions:
+      create:
+        type: ruby
+        entrypoint: bin/node__converge.rb
+      delete:
+        type: ruby
+        entrypoint: bin/node__delete.rb
+      start:
+        type: ruby
+        entrypoint: bin/node__start.rb
+      stop:
+        type: ruby
+        entrypoint: bin/node__stop.rb
+  test_client:
+    attributes:
+      server_host_address:
+        type: string
+    link_defs:
+      host::hostname:
+        attribute_mappings:
+        - "$node.host_address -> server_host_address"
+  node_group:
+    attributes:
+      name:
+        type: string
+        required: true
+      discovered:
+        type: boolean
+        default: false
+        constant: true
+      dtk_debug:
+        type: boolean
+        default: false
+      credentials_handle:
+        type: hash
+        hidden: true
+      dtk_agent_info:
+        type: hash
+        required: true
+        hidden: true
+        description: Parameters used to compute cloud-int script to configure DTK
+          agent to connect to dtk server
+      size:
+        type: string
+        description: Logical size
+      image:
+        type: string
+        description: Logical image type
+      vpc_images:
+        type: hash
+        hidden: true
+        description: Hash that maps logical name and size of image to image_id and instance_type
+      image_id:
+        type: string
+        input: true
+        dynamic: true
+        description: Provides the unique ID of the Amazon Machine Image (AMI) that
+          was assigned during registration.
+      os_type:
+        type: string
+        input: true
+        dynamic: true
+      instance_type:
+        type: string
+        input: true
+        dynamic: true
+        description: The instance type, such as t2.micro.
+      cardinality:
+        type: integer
+        default: 2
+      host_addresses_ipv4:
+        type: array
+        dynamic: true
+      admin_state:
+        type: string
+        input: true
+        dynamic: true
+        description: 'Desired state of node; legal values are: powered_on, powered_off'
+
+      security_group_ids:
+        type: array
+        required: true
+        description: A list that contains the security group IDs for VPC security
+          groups to assign to the Amazon EC2 instance.
+      subnet_id:
+        type: string
+        required: true
+        description: This property specifies the ID of the subnet that you want to
+          launch the instance into.
+      enable_public_ip_in_subnet:
+        description: Enable public ip on instance launch
+        type: boolean
+        default: true
+      client_token:
+        type: string
+        description: to ensure idempotency when creating ec2 instance
+      iam_instance_profile:
+        type: string
+        description: An instance profile
+      key_name:
+        type: string
+        description: Provides the name of the Amazon EC2 key pair.
+      tags:
+        type: hash
+        description: tags for ec2 instance
+      block_device_mappings:
+        type: array
+        dynamic: true
+        input: true
+        description: Defines a set of Amazon Elastic Block Store block device mappings,
+          ephemeral instance store block device mappings, or both.
+      instances:
+        type: array
+        dynamic: true
+        input: true
+        description: 'element specific info with keys: instance_id, ami_launch_index,
+          instance_state, private_ip_address, public_ip_address, private_dns_name,
+          public_dns_name, block_device_mappings'
+    singleton: false
+    link_defs:
+      ec2::profile:
+        attribute_mappings:
+        - "$vpc_images -> vpc_images"
+        - "$image -> image"
+        - "$size  -> size"
+
+        - "$subnet_id -> subnet_id"
+        - "$enable_public_ip_in_subnet -> enable_public_ip_in_subnet"
+        - "$security_group_ids -> security_group_ids"
+        - "$key_name -> key_name"
+    providers:
+      ruby:
+        gems:
+        - aws_sdk
+        - mime
+        - byebug
+    actions:
+      create:
+        type: ruby
+        entrypoint: bin/node_group__converge.rb
+      delete:
+        type: ruby
+        entrypoint: bin/node_group__delete.rb
+      start:
+        type: ruby
+        entrypoint: bin/node_group__start.rb
+      stop:
+        type: ruby
+        entrypoint: bin/node_group__stop.rb

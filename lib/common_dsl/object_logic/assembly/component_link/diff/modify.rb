@@ -15,16 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL 
-  class ObjectLogic::Assembly
-    class ComponentLink::Diff
+module DTK
+  module CommonDSL 
+    class ObjectLogic::Assembly::ComponentLink::Diff
       class Modify < CommonDSL::Diff::Element::Modify
-        def process(_result, _opts = {})
-          # result does not need to be updated since attribute changes dont entail service-side
-          # modification to dsl
-          nil
+        include Mixin
+        
+        def process(result, opts = {})
+          base_link_params          = ret_base_link_params(assembly_instance, qualified_key)
+          current_dep_link_params   = current_val.dependency_link_params(assembly_instance)
+          new_dep_link_params       = new_val.dependency_link_params(assembly_instance)
+          
+          pp(current_dep_link_params: current_dep_link_params, base_link_params: base_link_params, new_dep_link_params: new_dep_link_params)
+          Log.error'TODO: DTK-2005 Need to finsh logic for ObjectLogic::Assembly::ComponentLink::Diff'
         end
       end
     end
   end
-end; end
+end

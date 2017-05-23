@@ -59,7 +59,12 @@ module DTK
       def type
         Aux.underscore(Aux.demodulize(self.class.to_s)).to_sym
       end
-      
+
+      def type_for_workflow
+        ret = type
+        ret == :config_node ? TypeForWorkflowWhenConfigNode.type(self) : ret
+      end
+
       # can be overwritten
       def long_running?
         nil
@@ -71,6 +76,30 @@ module DTK
         nil
       end
 
+      module TypeForWorkflowWhenConfigNode 
+        CONFIG_NODE_TYPE = :config
+        CREATE_NODE_TYPE = :create_node
+
+        def self.type(config_action)
+          create_node_type?(config_action) || CONFIG_NODE_TYPE
+        end
+
+        private
+
+        def self.create_node_type?(config_action)
+          component_actions = config_action[:component_actions] || []
+          return nil unless component_actions.size == 1
+          component_action = component_actions.first
+
+          return nil unless component = component_action[:component]
+          return nil unless component.is_node_component?
+
+          action_method_obj = component_action[:action_method]
+          action_method = (action_method_obj && action_method_obj[:method_name]) || :create
+          action_method == :create ? CREATE_NODE_TYPE : nil
+        end
+
+      end
     end
   end
 end

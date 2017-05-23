@@ -54,9 +54,8 @@ module DTK
         mod_refs_viols = find_violations__module_refs(cmps)
         num_of_target_nodes = find_violations__num_of_target_nodes()
         any_unset_attributes = ! unset_attr_viols.empty?
-        semantic_viols = find_violations__semantic(cmps, any_unset_attributes: any_unset_attributes)
 
-        Violations.new(unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes + semantic_viols)
+        Violations.new(unset_attr_viols + cmp_constraint_viols + unconn_req_service_refs + mod_refs_viols + cmp_parsing_errors + num_of_target_nodes)
       end
 
       private
@@ -65,26 +64,9 @@ module DTK
         filter_proc = lambda { |a| a.required_unset_attribute?() }
         assembly_attr_viols = get_assembly_level_attributes(filter_proc).map { |a| Violation::ReqUnsetAttr.new(a, :assembly) }
         filter_proc = lambda { |r| r[:attribute].required_unset_attribute?() }
-        node_attrs, component_attrs = get_augmented_node_and_component_attributes(filter_proc)
+        component_attrs = get_augmented_component_attributes(filter_proc)
         component_attr_viols = component_attrs.map { |a| Violation::ReqUnsetAttr.new(a, :component) }
-        # remove attribute violations if assembly wide node
-        node_attrs.delete_if do |n_attr|
-          if node = n_attr[:node]
-            Node.is_assembly_wide_node?(node)
-          end
-        end
-        node_attr_viols = node_attrs.map { |a| Violation::ReqUnsetAttr.new(a, :node) }
-
-        assembly_attr_viols + component_attr_viols + node_attr_viols
-      end
-
-      def find_violations__semantic(components, params = {})
-        if target_service = Service::Target.create_from_assembly_instance?(self, components: components)
-          CommandAndControl.find_violations_in_target_service(target_service, params) 
-        else
-          service = Service.new(self, components: components)
-          CommandAndControl.find_violations_in_node_components(service, params) 
-        end
+        assembly_attr_viols + component_attr_viols
       end
 
       def find_violations__cmp_constraints(nodes_and_cmps, cmp_idhs)
@@ -160,11 +142,12 @@ module DTK
           end
         end
 
-        unless multiple_ns.empty?
-          multiple_ns.each do |k, v|
-            ret << Violation::MultipleNamespacesIncluded.new(k, v)
-          end
-        end
+        # TODO: since the staging operation picks one of multiple namespaces, we dont want this to be a blocking violation
+        # unless multiple_ns.empty?
+        #  multiple_ns.each do |k, v|
+        #    ret << Violation::MultipleNamespacesIncluded.new(k, v)
+        #  end
+        # end
 
         ret
       end

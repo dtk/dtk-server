@@ -53,6 +53,7 @@ module DTK; class Task; class Status
               #       Check DTK-738 ticket for more details
               source = 'instance'
               unless l3[:component][:node_node_id] == l2[:executable_action][:node][:id]
+                # TODO: DTK-2938: see if change to use service id to name is right or even if this line is ever reached
                 node_group = NodeGroup.id_to_name(model_handle, l3[:component][:node_node_id])
                 source = 'node_group'
               end

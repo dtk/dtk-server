@@ -60,6 +60,7 @@ module DTK; class Task; class Status
       ndx_errors ||= task.get_ndx_errors()
       if ndx_errors[task[:id]]
         el[:errors] = format_errors(ndx_errors[task[:id]])
+        el[:failed_component] = add_failed_component(task)
       end
 
       # TODO: on 7/14/2015 does not look like el[:logs] is being displayed. 
@@ -128,6 +129,18 @@ module DTK; class Task; class Status
         ret[:type] = error[:type]
       end
       ret
+    end
+
+    def self.add_failed_component(task)
+      if e_action = task[:executable_action]
+        if cmp = (e_action[:component_actions]||{}).first
+          if action_method = cmp[:action_method]
+            if action_method[:method_name] == 'delete'
+              (cmp[:component]||{})[:display_name]
+            end
+          end
+        end
+      end
     end
 
     def self.format_logs(logs)

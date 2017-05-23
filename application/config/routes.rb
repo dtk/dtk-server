@@ -51,7 +51,8 @@ DTK::ReactorRoute.draw do
   post 'api/v1/services/:service_id/start'             => 'v1::service#start'
   post 'api/v1/services/:service_id/stop'              => 'v1::service#stop'
   post 'api/v1/services/:service_id/update_from_repo'  => 'v1::service#update_from_repo'
-  post 'api/v1/services/:service_id/set_attribute'    => 'v1::service#set_attribute'
+  post 'api/v1/services/:service_id/set_attribute'     => 'v1::service#set_attribute'
+  post 'api/v1/services/:service_id/eject'             => 'v1::service#eject'
   post 'api/v1/services/:service_id/:task_action'      => 'v1::service#exec'
   post 'api/v1/services/generate_service_name'         => 'v1::service#generate_service_name'
 

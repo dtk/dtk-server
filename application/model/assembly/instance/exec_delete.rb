@@ -119,7 +119,7 @@ module DTK; class  Assembly
       
       def exec__delete_node(node_idh, opts = {})
         assembly_instance = opts[:assembly_instance] || self
-        task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete node')
+        task = opts[:top_task] || Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
         ret = {
           assembly_instance_id: assembly_instance.id,
           assembly_instance_name: assembly_instance.display_name_print_form
@@ -136,27 +136,32 @@ module DTK; class  Assembly
           ordered_components.each do |component|
             next if component.get_field?(:component_type).eql?('ec2__node')
             cmp_action = nil
-            cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
+            cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
             cmp_opts.merge!(delete_params: [component.id_handle, node.id])
             
             begin
-              cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if node.get_admin_op_status.eql?('running')
+              cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts)# if node.get_admin_op_status.eql?('running')
             rescue Task::Template::ParsingError => e
               Log.info("Ignoring component 'delete' action does not exist.")
             end
+
+            delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, node, cmp_opts)
+            cmp_top_task.add_subtask(cmp_action) if cmp_action
+            cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
+            task.add_subtask(cmp_top_task)
             
-            if cmp_action
-              cmp_top_task.add_subtask(cmp_action)
-              task.add_subtask(cmp_top_task)
-            end
+            # if cmp_action
+              # cmp_top_task.add_subtask(cmp_action)
+              # task.add_subtask(cmp_top_task)
+            # end
           end
         end
         
-        command_and_control_action = Task.create_for_command_and_control_action(assembly_instance, 'destroy_node?', node_idh.get_id, node, opts)
-        delete_from_database = Task.create_for_delete_from_database(assembly_instance, nil, node, opts)
+        # command_and_control_action = Task.create_for_command_and_control_action(assembly_instance, 'destroy_node?', node_idh.get_id, node, opts)
+        # delete_from_database = Task.create_for_delete_from_database(assembly_instance, nil, node, opts)
         
-        task.add_subtask(command_and_control_action) if command_and_control_action
-        task.add_subtask(delete_from_database) if delete_from_database
+        # task.add_subtask(command_and_control_action) if command_and_control_action
+        # task.add_subtask(delete_from_database) if delete_from_database
         return task if opts[:return_task]
         
         task = task.save_and_add_ids
@@ -192,7 +197,7 @@ module DTK; class  Assembly
         ret.merge!(task_id: task.id)
         ret
       end
-
+      # returns nil if there is no task to run
       def exec__delete(opts = {})
         task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
         ret = {
@@ -216,9 +221,14 @@ module DTK; class  Assembly
           delete_recursive(self, task, opts)
         end
         
-        self_subtask = delete_instance_task(self, opts)
-        task.add_subtask(self_subtask)
-        
+        return nil unless self_subtask = delete_instance_task?(self, opts)
+
+        if is_target_service_instance?
+          task.add_subtask(self_subtask)
+        else
+          task = self_subtask
+        end
+
         task = task.save_and_add_ids
         
         workflow = Workflow.create(task)
@@ -231,9 +241,13 @@ module DTK; class  Assembly
       private
 
       def delete_instance_task(assembly_instance, opts = {})
-      task  = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
+        delete_instance_task?(assembly_instance, opts) || fail(Error, "Unexpectd that delete_instance_task?(assembly_instance, opts) is nil") 
+      end
+      def delete_instance_task?(assembly_instance, opts = {})
+        task  = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
+        has_steps = false
         nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
-        
+
         if assembly_wide_node = assembly_instance.has_assembly_wide_node?
           if components = assembly_wide_node.get_components
             cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
@@ -241,31 +255,41 @@ module DTK; class  Assembly
             # order components by 'delete' action inside assembly workflow if exists
             ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
             ordered_components.each do |component|
-              cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
+              cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
+
+              if component.is_node_component?
+                node_component = NodeComponent.node_component(component)
+                if node = node_component.node
+                  node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task))
+                end
+              end
+
               cmp_action   = nil
               cmp_opts.merge!(delete_params: [component.id_handle, assembly_wide_node.id])
               
               begin
-                cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if assembly_wide_node.get_admin_op_status.eql?('running')
+                # no need to check if admin_op_status is 'running' with nodes as components so commented that out for now
+                cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts)# if assembly_wide_node.get_admin_op_status.eql?('running')
               rescue Task::Template::ParsingError => e
                 Log.info("Ignoring component 'delete' action does not exist.")
               end
-              
+
               delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, assembly_wide_node, cmp_opts)
+              has_steps = true
               cmp_top_task.add_subtask(cmp_action) if cmp_action
               cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
               task.add_subtask(cmp_top_task)
             end
           end
-        else
-          fail ErrorUsage, "Service instance has no nodes or components to be deleted." if nodes.empty?
         end
-        
-        nodes.each do |node|
-          node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle]))
-          task.add_subtask(node_top_task) if node_top_task
+        unless has_steps
+          if opts[:uninstall] # if from uninstall return nil
+            return nil
+          else
+            fail ErrorUsage, "Service instance has no components to be deleted." 
+          end
         end
-        
+
         unless opts[:donot_delete_assembly_from_database]
           delete_assembly_subtask = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
           task.add_subtask(delete_assembly_subtask)

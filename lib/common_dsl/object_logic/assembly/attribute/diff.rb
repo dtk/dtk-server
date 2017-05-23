@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::Attribute
+module DTK
+  class CommonDSL::ObjectLogic::Assembly::Attribute
     class Diff < CommonDSL::Diff::Base
       class Modify < CommonDSL::Diff::Element::Modify
         def process(_result, _opts = {})
@@ -33,6 +33,7 @@ module DTK; module CommonDSL
         end
 
         def update_and_propagate_attribute_when_node_property?
+          Log.error("DTK-2938: need to check that this is working right")
           node_name, attribute_name = CommonDSL::Diff::QualifiedKey.is_node_attribute?(@qualified_key)
           if attribute_name
             if node_component_attribute = ::DTK::Attribute::Pattern.node_component_attribute?(parent_node_when_node_attribute, attribute_name)
@@ -47,4 +48,4 @@ module DTK; module CommonDSL
       end
     end
   end
-end; end
+end

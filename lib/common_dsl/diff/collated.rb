@@ -34,7 +34,9 @@ module DTK
       def process(result, opts = {})
         Sort::ForProcess.sort_keys(@diffs.keys).each do |collate_key|
           diffs_of_same_type = @diffs[collate_key]
-          diffs_of_same_type.each { |diff| diff.process(result, opts) }
+          diffs_of_same_type.each do |diff| 
+            diff.process(result, opts) 
+          end
         end
         result
       end

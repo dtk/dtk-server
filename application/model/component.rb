@@ -71,85 +71,20 @@ module DTK
       ]
     end
 
-    # context can have keys
-    #  :assembly_id
-    #  :allow_external_component (Boolean)
-    def self.check_valid_id(model_handle, id, context = {})
-      filter = add_assembly_id_clause?([:eq, :id, id], context)
-      check_valid_id_helper(model_handle, id, filter)
-    end
-
-    # The method name_to_id is just used for component instances;
-    # The possible forms for name are
-    #   node/component_name
-    #   node/module_name::component_name
-    #   component_name
-    #   module_name::component_name
-    # the later two are for assemble wide components
-    #
-    # context can have keys
-    #  :assembly_id
-    #  :allow_external_component (Boolean)
-    def self.name_to_id(model_handle, name, context = {})
-      if context.empty?
-        return name_to_id_default(model_handle, name)
-      end
-
-      assembly_id              = context[:assembly_id]
-      allow_external_component = context[:allow_external_component]
-
-      display_name = Component.display_name_from_user_friendly_name(name)
-      # setting node_prefix to true, but node_name can be nil, meaning an assembly-wide component instance
-      node_name, cmp_type, cmp_title = ComponentTitle.parse_component_display_name(display_name, node_prefix: true)
-
-      sp_hash = {
-        cols:   [:id, :node, :assembly_id],
-        filter: add_assembly_id_clause?(Component::Instance.filter(cmp_type, cmp_title), context)
-      }
-      
-      rows = get_objs(model_handle, sp_hash).select do |r|
-        r[:node][:display_name] == node_name or r[:node].is_assembly_wide_node?
-      end
-
-      if context[:filter_by_node] && node_name
-        rows.reject!{|cmp| cmp[:node][:display_name] != node_name}
-      end
-      
-      case rows.size
-      when 1
-        rows.first[:id]
-      when 0
-        fail ErrorNameDoesNotExist.new(name, pp_object_type())
-      else # rows.size > 1
-        # if allow_external_component, favor a component instance in the service instance 
-        if allow_external_component and assembly_id
-          internal_to_assembly = rows.select { |r| r[:assembly_id] == assembly_id }
-          if internal_to_assembly.size == 1
-            return internal_to_assembly.first[:id]
-          end
-        end
-        fail ErrorNameAmbiguous.new(name, rows.map { |r| r[:id] }, pp_object_type())
-      end
-    end
-
-    # context can have keys
-    #  :assembly_id
-    #  :allow_external_component (Boolean)
-    def self.add_assembly_id_clause?(base_filter, context = {})
-      ret = base_filter
-      if assembly_id = context[:assembly_id]
-        unless context[:allow_external_component ]
-          ret = [:and, ret, [:eq, :assembly_id, assembly_id]]
-        end
-      end
-      ret
-    end
-    private_class_method :add_assembly_id_clause?
-
     def get_node
       get_obj_helper(:node)
     end
 
+    # returns true if component is a node component 
+    def is_node_component?
+      NodeComponent.is_node_component?(self)
+    end
+
+    # returns a DTK::NodeComponent object if the component is a node component
+    def node_component?
+      NodeComponent.node_component?(self)
+    end
+    
     def self.pending_changes_cols
       [:id, :node_for_state_change_info, :display_name, :basic_type, :external_ref, :node_node_id, :only_one_per_node, :extended_base_id, :implementation_id, :group_id]
     end
@@ -561,7 +496,7 @@ module DTK
         attr = r[:attribute]
         attr.merge(component_attrs) if attr and not attribute_is_filtered?(attr, attr_filters)
       end.compact
-      attributes = AttributeComplexType.flatten_attribute_list(filtered_attrs)
+      attributes = Attribute::ComplexType.flatten_attribute_list(filtered_attrs)
       component.merge(attributes: attributes)
     end
 
@@ -707,7 +642,7 @@ module DTK
       # if component_and_attrs.first[:attribute] null there shoudl only be one element in component_and_attrs
       return component.merge(attributes: []) unless component_and_attrs.first[:attribute]
       opts = { flatten_nil_value: true }
-      component.merge(attributes: AttributeComplexType.flatten_attribute_list(component_and_attrs.map { |r| r[:attribute] }, opts))
+      component.merge(attributes: Attribute::ComplexType.flatten_attribute_list(component_and_attrs.map { |r| r[:attribute] }, opts))
     end
 
     def get_attributes_unraveled(to_set = {}, opts = {})
@@ -723,7 +658,7 @@ module DTK
         to_set[:component_id] = sample[:component_component_id]
       end
 
-      flattened_attr_list = AttributeComplexType.flatten_attribute_list(raw_attributes, opts)
+      flattened_attr_list = Attribute::ComplexType.flatten_attribute_list(raw_attributes, opts)
       i18n = get_i18n_mappings_for_models(:attribute)
       flattened_attr_list.map do |a|
         unless a[:hidden]

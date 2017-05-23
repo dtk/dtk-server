@@ -38,115 +38,74 @@ module DTK; class Assembly; class Instance; module Get
     end
 
     def get_attributes_all_levels
-      assembly_attrs = get_assembly_level_attributes
-      node_attrs, component_attrs = get_augmented_node_and_component_attributes
-      assembly_attrs + component_attrs + node_attrs
+      assembly_attrs  = get_assembly_level_attributes
+      component_attrs = get_augmented_component_attributes
+      assembly_attrs + component_attrs
     end
 
-    AttributesAllLevels = Struct.new(:assembly_attrs, :component_attrs, :node_attrs)
+    AttributesAllLevels = Struct.new(:assembly_attrs, :component_attrs)
     def get_attributes_all_levels_struct(filter_proc = nil)
       assembly_attrs = get_assembly_level_attributes(filter_proc)
-      node_attrs, component_attrs = get_augmented_node_and_component_attributes(filter_proc)
-      # TODO: The pruning below might go in get_augmented_node_and_component_attributes
-      # Don't add component_attrs by default
+      component_attrs = get_augmented_component_attributes(filter_proc)
+      # TODO: The pruning below might go in get_augmented_component_attributes
       component_attrs.reject! do |attr|
         (not attr[:nested_component].get_field?(:only_one_per_node)) && attr.is_title_attribute?()
       end
-      AttributesAllLevels.new(assembly_attrs, component_attrs, node_attrs)
+      AttributesAllLevels.new(assembly_attrs, component_attrs)
     end
 
-    # returns [node_attrs, component_attrs]
-    def get_augmented_node_and_component_attributes(filter_proc = nil)
-      node_attrs = get_objs_helper(:node_attributes, :attribute, filter_proc: filter_proc, augmented: true)
-
-      # DTK-2536; For issues 1 and 2, we should get rid of os_identifier
-      node_attrs.delete_if{|attr| attr[:display_name].eql?('os_identifier')}
-
-      component_attrs = get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
-      move_node_components_to_node_attrs!(node_attrs, component_attrs)
-      [node_attrs, component_attrs]
+    def get_augmented_component_attributes(filter_proc = nil)
+      get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
     end
 
     private
 
-    # moves component_attrs that are node property components to node_attrs
-    def move_node_components_to_node_attrs!(node_attrs, component_attrs)
-      # TODO: unify with Attribute::PrintForm.convert_if_node_component!
-      node_cmp_types = CommandAndControl.node_property_component_names.map { |n| n.gsub(/::/,'__') }
-      component_attrs.reject! do |aug_attr|
-        if node_cmp_types.include?(aug_attr[:nested_component][:component_type])
-          # check if this attribute is already a node attribute
-          # TODO: DTK-2489: donthave these in two places
-          name = aug_attr[:display_name]
-          node_id = aug_attr[:node][:id]
+    def get_attributes_print_form_aux(opts = Opts.new)
+      all_attrs = get_attributes_all_levels_struct(opts[:filter_proc])
 
-          # give precedence to component attributes over node
-          if n_attr = node_attrs.find { |node_attr| node_attr[:display_name] == name and node_attr[:node][:id] == node_id }
-            aug_attr.delete(:nested_component)
-            node_attrs.delete(n_attr)
-            node_attrs << aug_attr
-          else
-            # delete :nested_component key to make this a node attribute and put in noe attribute list
-            aug_attr.delete(:nested_component) 
-            node_attrs << aug_attr
-          end
-          true # true so gets deleted if node_cmp_types contains aug_attr
-        end
+      assembly_attrs = all_attrs.assembly_attrs.map do |attr|
+        attr.print_form(opts.merge(level: :assembly))
+      end
+
+      component_attrs = get_component_attributes_print_form_aux(all_attrs.component_attrs, opts)
+
+      # Assembly attributes first
+      sort_attributes(assembly_attrs) + sort_attributes(component_attrs)
+    end
+
+    def get_component_attributes_print_form_aux(component_attrs, opts = Opts.new)
+      # default for opts[:all] is true
+      if opts[:all].nil? ? true : opts[:all]
+        ret_print_form_component_attrs(component_attrs, opts)
+      elsif filter_component = opts[:filter_component]
+        # if filter component than just components that meet this filter
+        ret_print_form_component_attrs(filter_components(filter_component, component_attrs), opts)
+      else
+        # if all not selected and no fiter component that no component attributes
+        []
       end
     end
 
-    def filter_component(filter_component, all_attrs)
+    def filter_components(filter, component_attrs)
+      regexp_filters = filter.split(",").map do | user_friendly_componet_name|
+        Regexp.new("^#{user_friendly_componet_name.gsub('::','__')}")
+      end
       ret = []
-      filter_component = filter_component.split(",")
-
-      all_attrs.component_attrs.each do |attr|
-        unless attr[:nested_component].nil? 
-          filter_component.each do |cmp| 
-            if attr[:nested_component][:display_name].include?(cmp.gsub('::','__'))
-              ret << attr
-            end
-          end
+      component_attrs.each do |attr|
+        if component = attr[:nested_component]
+          ret << attr if regexp_filters.find { |regexp| component.display_name =~ regexp }
         end
       end
       ret
     end
 
-    def ret_print_form_component_attrs(component_attrs, opts)
-      opts_attr = opts.merge(level: :component, assembly: self)
-      component_attrs = Attribute.print_form(component_attrs, opts_attr)
+    def ret_print_form_component_attrs(component_attrs, opts = Opts.new)
+      Attribute.print_form(component_attrs, opts.merge(level: :component, assembly: self))
     end
 
-    def get_attributes_print_form_aux(opts = Opts.new)
-      opts[:all] = true
-      filter_proc = opts[:filter_proc]
-      filter_component = opts[:filter_component]
-      all_attrs = get_attributes_all_levels_struct(filter_proc)
-      node_attrs      = []
-      component_attrs = []
-
-      # remove all assembly_wide_node attributes
-      all_attrs.node_attrs.reject! { |r| r[:node] && Node.is_assembly_wide_node?(r[:node]) }
-
-      filter_proc = opts[:filter_proc]
-      assembly_attrs = all_attrs.assembly_attrs.map do |attr|
-        attr.print_form(opts.merge(level: :assembly))
-      end
-
-      unless (filter_component||"").empty?
-        filtered_component_attrs = filter_component(filter_component, all_attrs) 
-        component_attrs = ret_print_form_component_attrs(filtered_component_attrs, opts)
-        assembly_attrs  = []
-        #TODO: temporary set to false 
-        opts[:all] = false
-      end
-
-      if opts[:all]
-        component_attrs = ret_print_form_component_attrs(all_attrs.component_attrs, opts)
-        node_attrs = all_attrs.node_attrs.map do |aug_attr|
-            aug_attr.print_form(opts.merge(level: :node))
-        end
-      end
-      (assembly_attrs + node_attrs + component_attrs).sort { |a, b| a[:display_name] <=> b[:display_name] }
+    def sort_attributes(attributes)
+      attributes.sort { |a, b| a.display_name <=> b.display_name }
     end
+
   end
 end; end; end; end

@@ -15,8 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::Workflow
+module DTK
+  class CommonDSL::ObjectLogic::Assembly::Workflow
     class Diff < CommonDSL::Diff::Base 
       require_relative('diff/mixin')
       # mixin must be loaded first
@@ -25,4 +25,5 @@ module DTK; module CommonDSL
       require_relative('diff/modify')
     end
   end
-end; end
+end
+

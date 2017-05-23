@@ -27,6 +27,17 @@ module DTK
           user_object  = CurrentSession.new.user_object()
 
           execution_context(task, workitem, task_start) do
+            node = task[:executable_action][:node]
+
+            # TODO: DTK-2938: below is needed if this is a node group member; allows it to find 
+            # in poll_to_detect_node_ready the node node group's parent
+            unless node.get_field?(:assembly_id)
+              Log.info("filling in assembly id for node: #{node.inspect}")
+              if assembly_instance = action.assembly_instance
+                node[:assembly_id] = assembly_instance.id
+              end
+            end
+
             callbacks = {
               on_msg_received: proc do |msg|
                 inspect_agent_response(msg)
@@ -36,15 +47,11 @@ module DTK
                   result = { type: :completed_create_node, task_id: task_id }
                   event = { detected_node: { senderid: msg[:senderid] } }
                   log_participant.end(:complete_succeed, event.merge(task_id: task_id))
-                  node = task[:executable_action][:node]
+
+                  # TODO: DTK-2938:  think can remove below
                   node.update_operational_status!(:running)
 
-                  # these must be called before get_and_propagate_dynamic_attributes
-                  node.associate_elastic_ip?()
-                  node.associate_persistent_dns?()
-
-                  action.get_and_propagate_dynamic_attributes(result, non_null_attributes: ['host_addresses_ipv4'])
-                  set_result_succeeded(workitem, result, task, action)
+                  action.get_and_propagate_dynamic_attributes(result)
                   delete_task_info(workitem)
 
                   reply_to_engine(workitem)
@@ -61,7 +68,7 @@ module DTK
                 end
               end
             }
-            poll_to_detect_node_ready(workflow, action[:node], callbacks)
+            poll_to_detect_node_ready(workflow, node, callbacks)
           end
         end
 

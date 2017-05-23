@@ -30,7 +30,7 @@ module DTK; class Node
 
       def self.model_name(type)
         case type.to_sym
-        when :node_group_stub, :node_group_staged then :service_node_group
+        when :node_group_stub, :node_group_staged then :node_group
         when :node_group_instance then :node_group
         else fail Error.new("Unexpected node group type (#{type})")
         end

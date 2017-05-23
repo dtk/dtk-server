@@ -23,13 +23,13 @@ module DTK
         require_relative('assembly/attributes')
         require_relative('assembly/nodes')
         require_relative('assembly/components')
-        require_relative('assembly/node_property_component')
-
+ 
         module Mixin
           def process_assembly!(parsed_assembly, module_local_params, opts = {})
-            if parsed_nodes = parsed_assembly.val(:Nodes)
-              NodePropertyComponent.create_node_property_components?(parsed_nodes)
-            end
+            # The method process_node_components! shifts around and can add to :components and : node fields in parsed_assembly
+            NodeComponent::Parsing::CommonModule.process_node_components!(parsed_assembly)
+            # TODO: DTK-2967: rather than having NodeComponent::Parsing::CommonModule do special processing looking :node section and asbtract nodes
+            # in parsed assemblies to get below to work; we should update below
 
             if module_version = module_local_params.version
               module_version = nil if module_version.eql?('master')

@@ -311,7 +311,7 @@ module DTK
       pruned_attrs = attributes.reject do |a|
         a[:hidden] || (keep_ids and not keep_ids.include?(a[:id]))
       end
-      flattten_attrs = AttributeComplexType.flatten_attribute_list(pruned_attrs)
+      flattten_attrs = Attribute::ComplexType.flatten_attribute_list(pruned_attrs)
       flattten_attrs.each do |a|
         val = a[:attribute_value]
         if val.nil?

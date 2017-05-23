@@ -36,9 +36,11 @@ module DTK
         detail_to_include = []
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
-        # TODO: temporary set to true, until '--all' flag is being added
-        all               = true #boolean_request_params(:all) 
         filter_component  = request_params(:filter_component)
+        
+        # TODO: temporary set to true if and only if no component filter, until '--all' flag is being added
+        # then wil be #boolean_request_params(:all) 
+        all               = filter_component.nil?
         format            = request_params(:format)
 
         if request_params(:links)
@@ -66,19 +68,19 @@ module DTK
           end
         end
 
-        opts.merge!(truncate_attribute_values: true, mark_unset_required: true)
+        opts.merge!(truncate_attribute_values: !format.include?('yaml'), mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
         opts.merge!(all: all, filter_component: filter_component)
-
         response = 
-          if format.include?("yaml")   
-            format_yaml_response(assembly_instance.info_about(:attributes, opts))
+          if format.include?('yaml')
+            opts.merge!(:yaml_format => true)
+            format_yaml_response(assembly_instance.list_attributes(opts))
           else
-            assembly_instance.info_about(:attributes, opts)
+            assembly_instance.list_attributes(opts)
           end
-
         rest_ok_response response, datatype: datatype
       end
+
       # TODO: will subsume required_attributes by attributes
       def required_attributes
         rest_ok_response assembly_instance.get_attributes_print_form(Opts.new(filter: :required_unset_attributes))
@@ -101,7 +103,7 @@ module DTK
       end
 
       def component_links
-        rest_ok_response assembly_instance.list_service_links(hide_assembly_wide_node: true), datatype: :service_link
+        rest_ok_response assembly_instance.list_component_links, datatype: :service_link
       end
 
       def dependent_modules

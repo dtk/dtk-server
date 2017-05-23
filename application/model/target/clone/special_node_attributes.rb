@@ -19,7 +19,9 @@ module DTK
   class Target
     module Clone
       module SpecialNodeAttributes
-        def self.process!(nodes)
+        def self.process(nodes, assembly)
+          NodeComponent.node_components(nodes, assembly).each { |node_component| node_component.set_special_attributes }
+          # TODO: DTK-2938: remove below
           process_name_attribute!(nodes)
           process_cardinality_attribute!(nodes)
         end

@@ -15,9 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class  Assembly
-  class Instance
-    module ListClassMixin
+module DTK; class Assembly::Instance
+  module List
+    require_relative('list/nodes')
+    require_relative('list/actions')
+
+    module ClassMixin
       def list_with_workspace(assembly_mh, opts = {})
         get(assembly_mh, opts)
       end
@@ -26,7 +29,10 @@ module DTK; class  Assembly
         assembly_mh = assembly_mh.createMH(:assembly_instance) # to insure right mh type
         assembly_rows = get_info__flat_list(assembly_mh, opts)
 
-        if opts[:detail_level].nil?
+        # TODO: fix so dont put workspace in first place
+        assembly_rows.reject! { |assembly_instance| Workspace.is_workspace?(assembly_instance) }
+
+          if opts[:detail_level].nil?
           if opts[:include_namespaces]
             Log.error('Unexpected that opts[:include_namespaces] is true')
           end
@@ -38,7 +44,7 @@ module DTK; class  Assembly
 
           if opts[:include_namespaces]
             assembly_templates = assembly_rows.map { |a| a[:assembly_template] }.compact
-            Template.augment_with_namespaces!(assembly_templates)
+            Assembly::Template.augment_with_namespaces!(assembly_templates)
           end
           list_aux(assembly_rows, attr_rows, opts)
         end
@@ -67,7 +73,10 @@ module DTK; class  Assembly
       end
     end
 
-    module ListMixin
+    module Mixin
+      include Actions::Mixin
+      include Nodes::Mixin
+
       def info_about(about, opts = Opts.new)
         case about
         when :attributes
@@ -77,7 +86,7 @@ module DTK; class  Assembly
         when :components
           list_components(opts)
         when :nodes
-          opts.merge!(cols: Node.common_columns() + [:target])
+          opts.merge!(cols: Node.common_columns + [:target])
           list_nodes(opts)
         when :modules
           list_component_modules(opts)
@@ -139,117 +148,14 @@ module DTK; class  Assembly
         unsorted_ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
       end
 
-      def list_nodes(opts = Opts.new)
-        opts.merge!(remove_node_groups: false)
-        nodes = get_nodes__expand_node_groups(opts)
-
-        # remove assembly wide nodes
-        nodes.reject!{ |node| node.is_assembly_wide_node? }
-        # remove soft-deleted node group members
-        nodes.reject!{ |node| node[:ng_member_deleted] }
-
-        nodes.each do |node|
-          set_node_display_name!(node)
-          set_node_admin_op_status!(node)
-          if external_ref = node[:external_ref]
-            external_ref[:dns_name] ||= external_ref[:routable_host_address] #TODO: should be cleaner place to put this
-          end
-          if target = node[:target]
-            if target[:iaas_properties]
-              target[:iaas_properties][:security_group] ||=
-                target[:iaas_properties][:security_group_set].join(',') if target[:iaas_properties][:security_group_set]
-            end
-          end
-          set_os_type_on_node_group_member!(node) if node[:os_type].nil? and is_node_group_member?(node.id_handle)
-          set_ec2_properties_attributes?(node)
-
-          node.sanitize!()
-
-          is_assembly_wide_node = node.is_assembly_wide_node?
-        
-          # we set dtk-client-type since we need to distinguish between node / node-group
-          is_node_group_member     = is_node_group_member?(node.id_handle())
-
-          # if node is not part of node group we set nil
-          node[:dtk_client_type]   = node.is_node_group? ? :node_group : is_node_group_member ? :node_group_node : nil
-
-          # remove node group or assembly wide node from list commands
-          node[:dtk_client_hidden] = node.is_node_group? || is_assembly_wide_node
-
-          # remove assembly wide node from dtk context
-          node[:dtk_context_hidden] = is_assembly_wide_node
-        end
-
-        nodes.sort { |a, b| a[:display_name] <=> b[:display_name] }
-      end
-      private :list_nodes
-
-      # TODO: change so that node group members have os_type set, rather than neding to fill it in
-      def set_os_type_on_node_group_member!(node_group_member)
-        if node_group_parent = find_parent_of_node_group_member?(node_group_member)
-          node_group_member[:os_type] = node_group_parent.get_field?(:os_type)
-        end
-      end
-      private :set_os_type_on_node_group_member!
-      def find_parent_of_node_group_member?(node_group_member)
-        ng_mh = node_group_member.model_handle(:node_group)
-        if ndx_node_group = NodeGroup.get_node_groups_containing_nodes(ng_mh, Node::Filter::NodeList.new([node_group_member.id_handle]))
-          if node_group_id__node_group = ndx_node_group[node_group_member.id]
-            node_group_id__node_group.values.first
-          end
-        end
-      end
-      private :find_parent_of_node_group_member?
-
-      def set_ec2_properties_attributes?(node)
-        node_property_cmp =
-          if node.node_group_member?
-            parent_ng = find_parent_of_node_group_member?(node)
-            parent_ng.ret_node_property_component
-          else
-            node.ret_node_property_component
-          end
-
-        if node_property_cmp
-          attribute_values  = node_property_cmp.get_direct_attribute_values(:value)
-          external_ref      = node[:external_ref]||{}
-
-          NodePropertyAttributes.each do |np_attribute|
-            if !node[np_attribute] && !external_ref[np_attribute]
-              if value = attribute_values[np_attribute][:value]
-                if np_attribute == :os_type
-                  node[np_attribute] = value
-                else
-                  external_ref.merge!(np_attribute => value)
-                end
-              end
-            end
-          end
-        end
-      end
-      NodePropertyAttributes = [:os_type, :size, :image]
-
-      def set_node_display_name!(node)
-        node[:display_name] = node.assembly_node_print_form()
-      end
-
-      def set_node_admin_op_status!(node)
-        if node.is_node_group?()
-          node[:admin_op_status] = nil
-        end
-      end
-      private :set_node_display_name!, :set_node_admin_op_status!
 
       def list_components(opts = Opts.new)
         aug_cmps      = get_augmented_components(opts)
         node_cmp_name = opts[:node_cmp_name]
 
-        # DTK-2535 1. In service instance, hide the 'node property components'
-        list_components__remove_node_property_components!(aug_cmps)
-
         cmps_print_form = aug_cmps.map do |r|
           namespace      = r[:namespace]
-          node_name      = "#{r[:node][:display_name]}/"
+          node_name      = "#{node_component_ref(r[:node])}/"
           version        = r[:version]
           hide_node_name = node_cmp_name || Node.is_assembly_wide_node?(r[:node])
           display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(r, namespace)}"
@@ -267,158 +173,24 @@ module DTK; class  Assembly
       end
 
       def display_name_print_form(_opts = {})
-        pretty_print_name()
+        pretty_print_name
       end
 
       def print_includes
-        ModuleRefs::Tree.create(self).hash_form()
-      end
-
-      def list_actions(type = nil)
-        list = []
-
-        if type.nil? || type.eql?('service')
-          service_actions = get_task_templates(set_display_names: true)
-          create_action = service_actions.find{ |action| action[:display_name].eql?('create')}
-          if service_actions.empty? || create_action.nil?
-            # this will generate simple create action for service instance
-            Task::Template.get_serialized_content(self, nil)
-            service_actions = get_task_templates(set_display_names: true)
-          end
-
-          service_actions.each do |service_action|
-            list << { display_name: service_action[:display_name], action_type: "service" }
-          end
-        end
-
-        if type.nil? || type.eql?('component')
-          components = get_augmented_components()
-          cmps_list  = {}
-
-          components.each do |component|
-            component_action = component[:component_type].gsub('__', '::')
-            component_name   = component[:display_name].match(/.*(\[.*\])/)
-            node_name        = nil
-
-            node = component[:node]
-            node_name = node[:display_name]
-
-            if node && node.is_node_group?
-              node_group_member_actions = expand_node_group_members(component_action, component_name, node)
-              cmps_list[component_action] = (cmps_list[component_action]||[]) + node_group_member_actions unless node_group_member_actions.empty?
-            else
-              cmps_list[component_action] = (cmps_list[component_action]||[]) + [{ node: node_name, component_action: component_action, component_name: component_name}]
-            end
-          end
-
-          sorted_cmps_list = filter_components_by_nodes(cmps_list)
-          list.concat(sorted_cmps_list)
-
-          component_actions = Task::Template::Action::AdHoc.list(self, :component_instance, {return_nodes: true})
-          cmp_actions_list  = {}
-          component_actions.each do |cmp_action|
-            name      = cmp_action[:component_type]
-            node      = cmp_action[:node]
-            node_name = nil
-            cmp_title = nil
-
-            if component_instance = cmp_action[:component_instance]
-              if component_instance.include?('/')
-                match = component_instance.match(/(^[\w\-\:]*)\/(.*)/)
-                node_name, cmp_name = match[1], match[2]
-                # ignore assembly wide component actions
-                #next if node_name.eql?('assembly_wide')
-              end
-
-              if component_instance.include?("[")
-                cmp_title = component_instance.match(/.*(\[.*\])/)
-              end
-            end
-
-            component_action = cmp_title ? "#{name}[NAME].#{cmp_action[:method_name]}" : "#{name}.#{cmp_action[:method_name]}"
-            name             = "#{name}.#{cmp_action[:method_name]}"
-
-            if node && node.is_node_group?
-              node_group_member_actions = expand_node_group_members(component_action, cmp_title, node)
-              cmp_actions_list[name] = (cmp_actions_list[name]||[]) + node_group_member_actions unless node_group_member_actions.empty?
-            else
-              cmp_actions_list[name] = (cmp_actions_list[name]||[]) + [{ node: node_name, component_action: component_action, component_name: cmp_title}]
-            end
-          end
-
-          sorted_cmp_actions_list = filter_components_by_nodes(cmp_actions_list, { actions: true })
-          list.concat(sorted_cmp_actions_list)
-        end
-
-        list.uniq
-      end
-
-      # if there is node group in service instance, expand node group memebers and display them in list-actions
-      def expand_node_group_members(component_action, component_name, node)
-        actions = []
-
-        # add node group name to list action
-        actions << { node: node[:display_name], component_action: component_action, component_name: component_name }
-
-        members = node.get_node_group_members
-        members.sort_by! { |m| m[:index].to_i }
-
-        if members.size <= 2
-          members.each do |member|
-            actions << { node: member[:display_name], component_action: component_action, component_name: component_name }
-          end
-        else
-          first_index = members.first[:index]
-          last_index = members.last[:index]
-          actions << { node: "#{node[:display_name]}:[#{first_index}-#{last_index}]", component_action: component_action, component_name: component_name }
-        end
-
-        actions
-      end
-
-      def filter_components_by_nodes(cmps_list, opts = {})
-        sorted_list = []
-
-        cmps_list.each do |k,v|
-          if v.size > 1
-            nodes    = []
-            cmp_name = nil
-
-            v.each do |val|
-              nodes    << val[:node] if val[:node]
-              cmp_name = val[:component_name] if val[:component_name]
-            end
-
-            display_name = v.first[:component_action]
-            nodes.uniq!
-
-            if nodes.size > 1
-              display_name = "{#{nodes.join(',')}}/#{display_name}"
-              display_name = "#{display_name}[NAME]" if cmp_name && opts[:actions].nil?
-            else
-              display_name = "#{nodes.first}/#{display_name}"
-              display_name = "#{display_name}[NAME]" if cmp_name && opts[:actions].nil?
-            end
-
-            sorted_list << { display_name: display_name, action_type: "component" }
-          else
-            val_hash     = v.first
-            display_name = val_hash[:component_action]
-            display_name = "#{val_hash[:node]}/#{display_name}" if val_hash[:node]
-            display_name = "#{display_name}[NAME]" if val_hash[:component_name] && opts[:actions].nil?
-            sorted_list << { display_name: display_name, action_type: "component" }
-          end
-        end
-
-        sorted_list
+        ModuleRefs::Tree.create(self).hash_form
       end
 
       private
 
+      def node_component_ref(node)
+        # TODO: hard coding this to ec2
+        NodeComponent.node_component_ref(:ec2, node.display_name)
+      end
+
       def convert_to_component_print_form(aug_cmp, opts = Opts.new)
         node_cmp_name  = opts[:node_cmp_name]
         namespace      = aug_cmp[:namespace]
-        node_name      = "#{aug_cmp[:node][:display_name]}/"
+        node_name      = "#{node_component_ref(aug_cmp[:node])}/"
         hide_node_name = node_cmp_name || Node.is_assembly_wide_node?(aug_cmp[:node])
         display_name   = "#{hide_node_name ? '' : node_name}#{Component::Instance.print_form(aug_cmp, namespace)}"
         aug_cmp.hash_subset(:id).merge(display_name: display_name)
@@ -441,7 +213,7 @@ module DTK; class  Assembly
           if deps = aug_cmp[:dependencies]
             ndx_els = {}
             deps.each do |dep|
-              if depends_on = dep.depends_on_print_form?()
+              if depends_on = dep.depends_on_print_form?
                 el = ndx_els[depends_on] ||= []
                 sb_cmp_ids =  dep.satisfied_by_component_ids
                 ndx_els[depends_on] += (sb_cmp_ids - el)
@@ -504,7 +276,7 @@ module DTK; class  Assembly
         aug_cmps.map do | aug_cmp |
           qualified_cmp_name = convert_to_component_print_form(aug_cmp)
           if assembly_id = ndx_cmps_to_assemblies[aug_cmp[:id]]
-            unless assembly_id == id()
+            unless assembly_id == id
               qualified_cmp_name = "#{qualified_cmp_name} (#{ndx_assembly_names[assembly_id]})"
             end
           end

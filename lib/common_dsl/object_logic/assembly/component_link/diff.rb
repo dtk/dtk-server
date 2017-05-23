@@ -15,16 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::ComponentLink
-    # class Diff < CommonDSL::Diff::Set
+module DTK
+  class CommonDSL::ObjectLogic::Assembly::ComponentLink
     class Diff < CommonDSL::Diff::Base
-      class Add < CommonDSL::Diff::Element::Add
-        require_relative('diff/add')
-        require_relative('diff/delete')
-        require_relative('diff/modify')
-      end
+      require_relative('diff/mixin')
+      # mixin must be before add and modify
+      require_relative('diff/add')
+      require_relative('diff/delete')
+      require_relative('diff/modify')
     end
   end
-end; end
+end
+
 

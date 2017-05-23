@@ -46,7 +46,7 @@ module DTK; class Attribute
         ret = []
         @attribute_stacks.each do |r|
           if r[:node].is_node_group?()
-            ret += attribute_idhs_on_service_node_group(r[:attribute])
+            ret += attribute_idhs_on_node_group(r[:attribute])
           end
         end
         ret
@@ -74,7 +74,7 @@ module DTK; class Attribute
         Model.get_objs(attr_mh, sp_hash)
       end
 
-      def attribute_idhs_on_service_node_group(node_group_attribute)
+      def attribute_idhs_on_node_group(node_group_attribute)
         sp_hash = {
           cols: [:id, :display_name, :group_id],
           filter: [:eq, :ancestor_id, node_group_attribute.id()]

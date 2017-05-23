@@ -15,11 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; module CommonDSL 
-  class ObjectLogic::Assembly::Node
+module DTK
+  class CommonDSL::ObjectLogic::Assembly::Node
     class Diff < CommonDSL::Diff::Set 
       require_relative('diff/add')
       require_relative('diff/delete')
     end
   end
-end; end
+end
+

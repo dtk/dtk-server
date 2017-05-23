@@ -18,8 +18,7 @@
 module DTK; class  Assembly
   class Instance < self
     r8_require('../service_associations')
-    require_relative('instance/service_link_mixin')
-    require_relative('instance/service_link')
+    require_relative('instance/component_link')
     require_relative('instance/action')
     require_relative('instance/violation')
     require_relative('instance/violations')
@@ -30,20 +29,18 @@ module DTK; class  Assembly
     require_relative('instance/add')
     require_relative('instance/delete')
     require_relative('instance/exec_delete')
-    require_relative('instance/node_component')
     require_relative('instance/service_setting')
     require_relative('instance/node_status')
     require_relative('instance/lock')
     require_relative('instance/dsl_location')
 
-    include ServiceLinkMixin
+    include ComponentLink::Mixin
     include ViolationsMixin
-    include ListMixin
-    extend ListClassMixin
+    include List::Mixin
+    extend List::ClassMixin
     include DeleteMixin
     extend DeleteClassMixin
     include ExecDeleteMixin
-    include NodeComponentMixin
     include GetMixin
     extend GetClassMixin
     include ComponentTemplateMixin
@@ -76,7 +73,7 @@ module DTK; class  Assembly
       if nodes.empty? && get_augmented_components.empty?
         CommonModule::ServiceInstance.delete_from_model_and_repo(self)
       else
-        fail ErrorUsage, "Service instance '#{display_name}' cannot be deleted because it is not empty. You can either use '--delete' option to force uninstall service instance or execute 'dtk service delete' command first." unless opts[:delete]
+        fail ErrorUsage, "Service instance '#{display_name}' cannot be deleted because it is not empty. You can either use '--force' option to force uninstall service instance or execute 'dtk service delete' command first." unless opts[:force]
         Assembly::Instance.delete(id_handle(self), destroy_nodes: true, uninstall: true) 
       end
     end
@@ -171,9 +168,6 @@ module DTK; class  Assembly
         # return if ambiguous attributes (component and node have same name and attribute)
         return attr_patterns if attr_patterns.is_a?(Hash) && attr_patterns[:ambiguous]
 
-        # set os_type if image attribute is changed; also validate size attribute if set
-        validate_and_fill_image_or_size_attributes?(attr_patterns, opts) unless opts[:skip_image_and_size_validation]
-
         if opts[:update_meta]
           created_cmp_level_attrs = attr_patterns.select { |r| r.type == :component_level && r.created?() }
           unless created_cmp_level_attrs.empty?
@@ -194,76 +188,28 @@ module DTK; class  Assembly
       attr_patterns
     end
 
-    def validate_and_fill_image_or_size_attributes?(attr_patterns, opts = {})
-      image_attributes, size_attributes = ret_image_and_size_attributes(attr_patterns)
-      reified_nodes = CommandAndControl.create_nodes_from_service(Service.new(self))
-
-      unless image_attributes.empty?
-        image_attributes.each do |image_attribute|
-          node = reified_nodes.find { |rn| rn.node[:display_name].eql?(image_attribute[:node_name]) }
-          node.validate_and_fill_in_ami_and_os_type!(rewrite_values: true, raise_errors: true)
-        end
-      end
-
-      unless size_attributes.empty?
-        size_attributes.each do |size_attribute|
-          node = reified_nodes.find { |rn| rn.node[:display_name].eql?(size_attribute[:node_name]) }
-          node.validate_and_fill_in_instance_type!(rewrite_values: true, raise_errors: true)
-        end
-      end
-    end
-    private :validate_and_fill_image_or_size_attributes?
-
-    def ret_image_and_size_attributes(attr_patterns)
-      image_attributes = []
-      size_attributes  = []
-
-      attr_patterns.each do |attr_pattern|
-        if attr_pattern.type == :explicit_id
-          attribute_obj  = Attribute.get_augmented(model_handle.createMH(:attribute), [:eq, :id, attr_pattern.id]).first
-          attribute_name = attribute_obj[:display_name]
-
-          if attribute_name.eql?('image')
-            image_attributes << { display_name: attribute_name, node_name: attribute_obj[:node][:display_name] }
-          elsif attribute_name.eql?('size')
-            size_attributes << { display_name: attribute_name, node_name: attribute_obj[:node][:display_name] }
-          end
-        else
-          attribute_name = attr_pattern.attribute_name
-          if attribute_name.eql?('image')
-            image_attributes << { display_name: attribute_name, node_name: attr_pattern.node[:display_name] }
-          elsif attribute_name.eql?('size')
-            size_attributes << { display_name: attribute_name, node_name: attr_pattern.node[:display_name] }
-          end
-        end
-      end
-
-      [image_attributes, size_attributes]
-    end
-    private :ret_image_and_size_attributes
-
     def exec(params)
       task_action = params[:task_action]
 
       # check if action is called on component or on service instance action
       if task_action
-        component_id, method_name = nil, nil
+        component_name, method_name = nil, nil
 
         if match = task_action.match(/^(.*)\.(\w*)$/)
-          component_id, method_name = $1, $2
+          component_name, method_name = $1, $2
         else
-          component_id = task_action
+          component_name = task_action
         end
 
-        # component_id, method_name = task_action.split(ACTION_DELIMITER)
-        augmented_cmps = check_if_augmented_component(params, component_id, { include_assembly_cmps: true })
+        # component_name, method_name = task_action.split(ACTION_DELIMITER)
+        augmented_cmps = check_if_augmented_component(params, component_name, { include_assembly_cmps: true })
 
         # check if component and service level action with same name
-        check_if_ambiguous(component_id) unless augmented_cmps.empty?
+        check_if_ambiguous(component_name) unless augmented_cmps.empty?
 
         # if task_action.include?(ACTION_DELIMITER) || !augmented_cmps.empty?
         if (task_action.include?(ACTION_DELIMITER) && method_name) || !augmented_cmps.empty?
-          return execute_cmp_action(params, component_id, method_name, augmented_cmps)
+          return execute_cmp_action(params, component_name, method_name, augmented_cmps)
         end
       end
 
@@ -489,6 +435,10 @@ module DTK; class  Assembly
     end
 
     def self.name_to_id(model_handle, name)
+      name_to_object(model_handle, name).id
+    end
+
+    def self.name_to_object(model_handle, name)
       parts = name.split('/')
       augmented_sp_hash =
         if parts.size == 1
@@ -508,7 +458,7 @@ module DTK; class  Assembly
         else
           fail ErrorNameInvalid.new(name, pp_object_type())
         end
-      name_to_id_helper(model_handle, name, augmented_sp_hash)
+      name_to_object_helper(model_handle, name, augmented_sp_hash)
     end
 
     # TODO: probably move to Assembly
@@ -519,6 +469,16 @@ module DTK; class  Assembly
     # version associated with assembly
     def assembly_version
       @assembly_version ||= ModuleVersion.ret(self)
+    end
+
+    #returns a node group object if node_idh is a node group member of this assembly instance
+    def is_node_group_member?(node_idh)
+      sp_hash = {
+        cols: [:id, :display_name, :group_id, :node_members],
+        filter: [:eq, :assembly_id, id()]
+      }
+      node_id = node_idh.get_id()
+      Model.get_objs(model_handle(:node), sp_hash).find { |ng| ng[:node_member].id == node_id }
     end
 
     private
@@ -553,16 +513,6 @@ module DTK; class  Assembly
       }
       
       get_obj(target.model_handle(:assembly_instance), sp_hash)
-    end
-
-    #returns a node group object if node_idh is a node group member of this assembly instance
-    def is_node_group_member?(node_idh)
-      sp_hash = {
-        cols: [:id, :display_name, :group_id, :node_members],
-        filter: [:eq, :assembly_id, id()]
-      }
-      node_id = node_idh.get_id()
-      Model.get_objs(model_handle(:node), sp_hash).find { |ng| ng[:node_member].id == node_id }
     end
 
     def order_components_by_workflow(components, workflow_delete_order)

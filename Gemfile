@@ -3,10 +3,9 @@ source 'https://rubygems.org'
 # dtk gems
 gem 'dtk-common', :github => 'dtk/dtk-common'
 gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
-gem 'dtk-dsl', :github => 'dtk/dtk-dsl'
+gem 'dtk-dsl', :github => 'dtk/dtk-dsl', :branch => 'master-candidate'
 
 # required to start a server
-gem 'fog'
 gem 'ramaze', '2012.04.14'
 gem 'sequel', '3.25.0'
 gem 'activesupport'
@@ -26,6 +25,9 @@ gem 'awesome_print', '1.1.0'
 gem 'celluloid'
 gem 'excon'
 gem 'mime'
+
+# TODO: might make this conditional whether providing a route for sts
+gem 'aws-sdk'
 
 #TODO: moved back to 0.17.0.b7; looks like running into bug with 0.19.0 (7/27/13)
 gem 'rugged', '0.17.0.b7'

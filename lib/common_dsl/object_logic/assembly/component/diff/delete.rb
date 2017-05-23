@@ -30,7 +30,7 @@ module DTK; module CommonDSL
           if augmented_cmps.empty?
             result.add_error_msg("Component '#{qualified_key.print_form}' does not match any components")
           else
-            node          = parent_node? || assembly_instance.has_assembly_wide_node?
+            node          = parent_node
             matching_cmps = augmented_cmps.select{|cmp| cmp[:node][:display_name] == node[:display_name]}
 
             if matching_cmps.size > 1
@@ -46,7 +46,7 @@ module DTK; module CommonDSL
               # - if delete action defined for component then puts an explicit delete action in workflow
               task_template_processor = TaskTemplate.new(assembly_instance, component, node)
 
-              if opts[:force_delete] || !Node.node_has_been_created?(node) || !task_template_processor.component_delete_action_def?
+              if opts[:force_delete] || !node_has_been_created?(node) || !task_template_processor.component_delete_action_def?
                 # if workflow is modified by user, we do not want to change it when deleting component
                 delete_cmp_opts = result.semantic_diffs['WORKFLOWS_MODIFIED'] ? { do_not_update_task_template: true } : {}
                 assembly_instance.delete_component(component.id_handle, node.id, delete_cmp_opts)
@@ -60,6 +60,12 @@ module DTK; module CommonDSL
               result.add_item_to_update(:workflow)
             end
           end
+        end
+
+        private
+        
+        def node_has_been_created?(node)
+          node.get_admin_op_status != 'pending'
         end
 
       end

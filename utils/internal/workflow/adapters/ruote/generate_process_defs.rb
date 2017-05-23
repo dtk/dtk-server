@@ -15,22 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require 'json'
 module DTK
   module WorkflowAdapter
-    # TODO: reformat so this is not mixin but class
     module RuoteGenerateProcessDefs
-      r8_nested_require('generate_process_defs', 'context')
-      r8_nested_require('generate_process_defs', 'bulk_create')
-      include ContextMixin
+      require_relative('generate_process_defs/context')
+      require_relative('generate_process_defs/bulk_create')
 
       @@count = 0
-      def compute_process_def(task, guards)
+      # TODO: remove _guards which is always nil now since no gaurds are being used
+      def compute_process_def(task, _guards)
         count = @@count += 1 #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
-        top_task_idh = task.id_handle()
+        top_task_idh = task.id_handle
         name = "process-#{count}"
-        #TODO: this needs to be changed if we use guards again in the temporal ordering
-        context = Context.create(guards, top_task_idh)
+        context = Context::NoGuards.new(top_task_idh)
         ['define', { 'name' => name }, [compute_process_body(task, context)]]
       end
 
@@ -38,49 +35,39 @@ module DTK
 
       ####semantic processing
       def decomposition(task, context)
-        action = task[:executable_action]
-        # Task::Action::PowerOnNode must be tested before Task::Action::CreateNode
-        if action.is_a?(Task::Action::PowerOnNode)
-          detect_when_ready = participant_executable_action(:power_on_node, task, context, task_type: 'power_on_node', task_end: true, task_start: true)
-          sequence([detect_when_ready])
-        elsif action.is_a?(Task::Action::InstallAgent)
-          main = participant_executable_action(:install_agent, task, context, task_type: 'install_agent', task_start: true, task_end: true)
-          sequence([main])
-        elsif action.is_a?(Task::Action::ExecuteSmoketest)
-          main = participant_executable_action(:execute_smoketest, task, context, task_type: 'execute_smoketest', task_start: true, task_end: true)
-          sequence([main])
-        elsif action.is_a?(Task::Action::CreateNode)
-          main = participant_executable_action(:create_node, task, context, task_start: true)
-          post_part = participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'post', task_end: true)
-          sequence(main, post_part)
-        elsif action.is_a?(Task::Action::ConfigNode)
-          guards = nil
-          if guard_tasks = context.get_guard_tasks(action)
-            guards = ret_guards(guard_tasks)
-          end
+        action      = task[:executable_action]
+        action_type = action.type_for_workflow
 
+        case action_type
+        when :create_node
+          participant_executable_action(:execute_on_node, task, context, task_start: true, task_end: true)
+        when :config
           if action.execute_on_server?
             main = participant_executable_action(:execute_on_node, task, context, task_type: 'config_node', task_end: true, task_start: true)
             sequence([main])
           else
-            authorize_action = participant_executable_action(:authorize_node, task, context, task_type: 'authorize_node', task_start: true)
+            node_is_ready = participant_executable_action(:detect_created_node_is_ready, task, context, task_type: 'detect_created_node_is_ready', task_start: true)
+
+            authorize_action = participant_executable_action(:authorize_node, task, context, task_type: 'authorize_node')
             sync_agent_code =
               if R8::Config[:node_agent_git_clone][:mode] != 'off'
                 participant_executable_action(:sync_agent_code, task, context, task_type: 'sync_agent_code')
               end
                 main = participant_executable_action(:execute_on_node, task, context, task_type: 'config_node', task_end: true)
-            sequence_tasks = [guards, sync_agent_code, authorize_action, main].compact
+            sequence_tasks = [node_is_ready, sync_agent_code, authorize_action, main].compact
             sequence(*sequence_tasks)
           end
-        elsif action.is_a?(Task::Action::DeleteFromDatabase)
+        when :delete_from_database
           main = participant_executable_action(:delete_from_database, task, context, task_type: 'delete_from_database', task_start: true, task_end: true)
           sequence([main])
-        elsif action.is_a?(Task::Action::CommandAndControlAction)
+        when :command_and_control_action
           main = participant_executable_action(:command_and_control_action, task, context, task_type: 'delete_node', task_start: true, task_end: true)
           sequence([main])
-        elsif action.is_a?(Task::Action::Cleanup)
+        when :cleanup
           main = participant_executable_action(:cleanup, task, context, task_type: 'cleanup', task_start: true, task_end: true)
           sequence([main])
+        else
+          fail Error, "Unexpected action type for workflow '#{action_type}'"
         end
       end
 
@@ -89,7 +76,7 @@ module DTK
         # TODO: below put in hack for DTK-2471 that needs to be cleaned up
         # Does not allow mixed bosh and non bosh
         # This intercepts a create node stages subtask and bulks it up so taht it is a set of queue node tasks with last being dispatch
-        case task.temporal_type()
+        case task.temporal_type
           when :leaf
             BulkCreate.create_node?(task, context, self) || compute_process_executable_action(task, context)
           when :sequential
@@ -127,11 +114,11 @@ module DTK
           'top_task_idh' => context.top_task_idh
         }
 
-        task_id = task.id()
-        Ruote::TaskInfo.set(task_id, context.top_task_idh.get_id(), task_info, task_type: opts[:task_type])
+        task_id = task.id
+        Ruote::TaskInfo.set(task_id, context.top_task_idh.get_id, task_info, task_type: opts[:task_type])
         participant_params = opts.merge(
           task_id: task_id,
-          top_task_id: context.top_task_idh.get_id()
+          top_task_id: context.top_task_idh.get_id
         )
         participant(name, participant_params)
       end

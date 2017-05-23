@@ -36,7 +36,7 @@ module DTK; class Node
       def soft_delete(opts = {})
         return unless is_target_ref?
 
-        node_group_member = ServiceNodeGroup::NodeGroupMember.create_as(self)
+        node_group_member = NodeGroup::NodeGroupMember.create_as(self)
         node_group_member.soft_delete()
       end
 
@@ -64,7 +64,7 @@ end
 
         if is_target_ref?()
           # This wil be a node group member; need to bump down is assocaited node groups cardinality
-          node_group_member = ServiceNodeGroup::NodeGroupMember.create_as(self)
+          node_group_member = NodeGroup::NodeGroupMember.create_as(self)
 
           unless opts[:dont_change_cardinality]
             node_group_member.update_object!(:ng_member_deleted)
@@ -126,8 +126,9 @@ end
       end
 
       def execute_destroy_and_delete(opts = {})
-        suceeeded = CommandAndControl.destroy_node?(self)
-        return false unless suceeeded
+        # TODO: DTK-3010: no special node delete; remove this comment when remove commmented out below
+        # suceeeded = CommandAndControl.destroy_node?(self)
+        # return false unless suceeeded
         delete_object(opts)
       end
 

@@ -15,9 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# There might be anumber of ways to encode this; such as actually adding to schema; one direction looking towards is having effectively foreign
-# keys where for example the linux user can point to  a linux user table.
-# In approach below teher wil be a numeric key genearted which is a handle on object; sometimes an attribute may be key, but not sure always
+# TODO: deprecate
 module DTK; class Component
   class Instance
     class Interpreted < self

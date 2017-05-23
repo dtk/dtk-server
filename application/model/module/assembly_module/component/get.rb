@@ -113,13 +113,8 @@ module DTK; class AssemblyModule
               dsl_parsed: (module_branch || {})[:dsl_parsed],
               module_branch: module_branch
             }
-            # TODO: change so module_branch.get_objs and then if multiple remotes pick default remore or both
-            # right now if teher is multiple remotes getting log message: 
-            # call to get_obj for module_branch (sp_hash={:cols=>[:remote_repo]} returned more than one row
-            if remote_repo = (module_branch.get_obj(cols: [:remote_repo])||{})[:repo_remote]
-              if linked_remote = ModuleUtils::ListMethod.linked_remotes_print_form(([remote_repo]), nil, not_published: nil)
-                to_add.merge!(linked_remotes: linked_remote)
-              end
+            if linked_remote = get_with_branches__recursive_repo_linked_remote?(module_branch)
+              to_add.merge!(linked_remotes: linked_remote)
             end
             r.merge!(to_add)
           end
@@ -127,6 +122,31 @@ module DTK; class AssemblyModule
 
         ret
       end
+
+      def get_with_branches__recursive_repo_linked_remote?(module_branch)
+        # Can be multiple remotes that denote same thing
+        remote_repos = module_branch.get_objs(cols: [:remote_repo]).map { |module_branch| module_branch[:repo_remote] }
+        unless remote_repos.empty?
+          remote_repo =
+            if remote_repos.size == 1
+              remote_repos.first
+            else
+              defaults = remote_repos.select { |remote_repo| remote_repo[:is_default] }
+              case defaults.size
+              when 1
+                defaults.first
+              when 0
+                Log.error("Multiple repo remotes and no defaults; picking one")
+                defaults.first
+              else
+                Log.error("Multiple repo remotes and multiple defaults; picking one of the defaults")
+                remote_repos.first
+              end
+            end
+          ModuleUtils::ListMethod.linked_remotes_print_form(([remote_repo]), nil, not_published: nil)
+        end
+      end
+      
 
       def get_with_branches__direct(opts = {})
         add_module_branches = opts[:get_branch_relationship_info]

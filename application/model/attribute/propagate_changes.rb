@@ -26,7 +26,7 @@ module DTK; class Attribute
       # The diff modify calling function should then report errors with respect to 
       # the qualified key
       LegalValue.raise_error_if_invalid(existing_attrs, ndx_new_vals)
-      SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
+      SpecialProcessing.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
       update_and_propagate_attributes(existing_attribute.model_handle, attribute_rows)
     end
 

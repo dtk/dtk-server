@@ -263,6 +263,9 @@ module DTK
     include ModelDataInstanceMixins
 
 
+    def self.object_from_id(model_handle, id)
+      model_handle.createIDH(id: id).create_object
+    end
 
     def duplicate
       id_handle.create_object.merge(self)
@@ -489,7 +492,11 @@ module DTK
       self.class.Transaction(*args, &block)
     end
     def self.Transaction(*args, &block)
-      @db.transaction(*args, &block)
+      if R8::Config[:debug_no_transactions]
+        yield 
+      else
+        @db.transaction(*args, &block)
+      end
     end
 
     def self.RollbackTransaction

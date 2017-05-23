@@ -272,7 +272,7 @@ module DTK
           attr.merge(node_attrs).merge(cmp_attrs)
         end
       end.compact
-      attributes = AttributeComplexType.flatten_attribute_list(filtered_attrs)
+      attributes = Attribute::ComplexType.flatten_attribute_list(filtered_attrs)
       component.merge(attributes: attributes)
     end
 

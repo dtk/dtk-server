@@ -36,8 +36,6 @@ module DTK
 
             # Not using node-bindings in new dsl, instead will retreive node bindings from node property component
             if components = parsed_node.val(:Components)
-              node_output['node_binding_rs_id'] = NodePropertyComponent.node_bindings_from_node_property_component(components, container_idh)
-
               cmps_output = Components.db_update_hash(container_idh, components, component_module_refs,  module_local_params, opts)
               node_output['component_ref'] = cmps_output unless cmps_output.empty?
             end

@@ -150,11 +150,13 @@ module DTK
         initial_update = boolean_request_params(:initial_update)
         version            = request_params(:version)
         skip_missing_check = request_params(:skip_missing_check)
+        force_parse        = request_params(:force_parse)
         local_params       = local_params(:common_module, module_name, namespace: namespace, version: version)
 
         opts = {
           skip_missing_check: skip_missing_check,
-          initial_update: initial_update
+          initial_update: initial_update,
+          force_parse: force_parse
         }
         rest_ok_response CommonModule::Update::Module.update_from_repo(get_default_project, commit_sha, local_params, opts)
       end

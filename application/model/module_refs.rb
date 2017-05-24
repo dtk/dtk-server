@@ -84,13 +84,13 @@ module DTK
       ret              = false
       module_ref_diffs = get_module_ref_diffs(cmp_modules_with_namespaces)
 
-      if to_add = module_ref_diffs[:add]
-        to_add.each { |cmp_mod| add_or_set_component_module_ref(cmp_mod[:display_name], {namespace_info: cmp_mod[:namespace_name], version_info: cmp_mod[:version_info]}) }
+      if to_delete = module_ref_diffs[:delete]
+        to_delete.each { |cmp_mod| delete_component_module_ref(cmp_mod[:display_name]) }
         ret = true
       end
 
-      if to_delete = module_ref_diffs[:delete]
-        to_delete.each { |cmp_mod| delete_component_module_ref(cmp_mod[:display_name]) }
+      if to_add = module_ref_diffs[:add]
+        to_add.each { |cmp_mod| add_or_set_component_module_ref(cmp_mod[:display_name], {namespace_info: cmp_mod[:namespace_name], version_info: cmp_mod[:version_info]}) }
         ret = true
       end
 

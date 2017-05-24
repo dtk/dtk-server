@@ -261,6 +261,7 @@ module DTK
         rest_ok_response assembly_instance.set_as_default_target
       end
 
+      # TODO: move most of this logic from controller to model
       def eject
         assembly_instance = assembly_instance()
         component_ref     = required_request_params(:component_ref)

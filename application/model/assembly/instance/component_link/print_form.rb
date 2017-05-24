@@ -22,8 +22,8 @@ module DTK
       #   :context
       #   :filter
       def self.list_component_links(assembly_instance, opts = {})
-        get_augmented_port_links(filter: opts[:filter]).map { |port_link| print_form_hash(port_link, context: opts[:context]) } +
-          assembly_instance.get_augmented_ports(mark_unconnected: true).select { |port| port[:unconnected] }.map { |r| print_form_hash(port, pp_opts) }
+        assembly_instance.get_augmented_port_links(filter: opts[:filter]).map { |port_link| print_form_hash(port_link, context: opts[:context]) } +
+          assembly_instance.get_augmented_ports(mark_unconnected: true).select { |port| port[:unconnected] }.map { |r| print_form_hash(r, opts) }
       end
 
       def self.list_possible_component_links(assembly_instance)

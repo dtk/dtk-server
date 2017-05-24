@@ -540,6 +540,7 @@ module DTK; class  Assembly
     
     def get_staged_service_instances(service)
       staged_instances = Assembly::Instance.get(model_handle, target_idhs: [service.get_target.id_handle])
+      staged_instances.reject!{ |si| Workspace.is_workspace?(si) } # TODO: temp until remove workspace
       staged_instances.reject!{ |si| si[:id] == service[:id] }
       staged_instances 
     end

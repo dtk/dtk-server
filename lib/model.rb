@@ -655,7 +655,9 @@ module DTK
     def update_object!(*cols_x)
       cols = (cols_x.include?(:group_id) ? cols_x : cols_x + [:group_id]) #always good to get group_id
       cols = (cols.include?(:display_name) ? cols : cols + [:display_name]) #always good to get display_name
-      cols_to_get =  cols.reject { |col| self.key?(col) }
+      # TODO: DTK-3026: check why below needed to be changes
+      #  cols_to_get =  cols.reject { |col| self.key?(col) }
+      cols_to_get =  cols.select { |col| self[col].nil? }
       return self if cols_to_get.empty?
       debug_mode_possible_extra_db_calls(cols_to_get, :update_object)
       opts = (cols_to_get & [:ref, :ref_num]).empty? ? {} : { keep_ref_cols: true }
@@ -671,7 +673,9 @@ module DTK
     end
     # TODO: deprecate above for below
     def update_obj!(*cols)
-      cols_to_get =  cols.reject { |col| self.key?(col) }
+      # TODO: DTK-3026: check why below needed to be changes
+      #  cols_to_get =  cols.reject { |col| self.key?(col) }
+      cols_to_get =  cols.select { |col| self[col].nil? }
       return self if cols_to_get.empty?
       opts = (cols_to_get & [:ref, :ref_num]).empty? ? {} : { keep_ref_cols: true }
       debug_mode_possible_extra_db_calls(cols_to_get, :update_obj)

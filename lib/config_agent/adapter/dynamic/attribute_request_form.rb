@@ -51,6 +51,7 @@ module DTK
       end
     
       def self.factor_in_node_component_special_value(attribute, opts = {})
+        attribute.update_obj!(:value_derived, :value_asserted)
         value = attribute[:attribute_value]
         return value unless node_component = opts[:node_component]
         is_special_value, special_value = node_component.update_if_dynamic_special_attribute!(attribute)

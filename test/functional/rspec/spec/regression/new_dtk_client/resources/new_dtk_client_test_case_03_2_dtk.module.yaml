@@ -11,15 +11,15 @@ dependencies:
 assemblies:
   test_assembly:
     description: test assembly
-    nodes:
-      node:
+    components:
+    - node[node]:
         attributes:
           image: precise_hvm
           size: micro
         components:
         - stdlib
         - mysql::server
-    workflows:
+    actions:
       create:
         subtasks:
         - name: create nodes

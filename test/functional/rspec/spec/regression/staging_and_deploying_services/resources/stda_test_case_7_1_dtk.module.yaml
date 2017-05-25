@@ -3,15 +3,14 @@ dsl_version: 1.0.0
 module: newclient/stda_test_case_7
 version: master
 license: Apache 2.0
-
 dependencies:
   aws/ec2: master
   puppetlabs/stdlib: master
 assemblies:
   simple:
     description: simple
-    nodes:
-      slave:
+    components:
+    - node[slave]:
         attributes:
           image: precise_hvm
           size: micro
@@ -19,7 +18,7 @@ assemblies:
           type: group
         components:
         - stdlib
-    workflows:
+    actions:
       create:
         subtasks:
         - name: create nodes

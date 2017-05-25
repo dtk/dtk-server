@@ -6,8 +6,8 @@ dependencies:
   r8/stdlib: master
 assemblies:
   simple_link:
-    nodes:
-      source:
+    components:
+    - node[source]:
         attributes:
           image: precise
           size: micro
@@ -15,10 +15,10 @@ assemblies:
         - stdlib
         - unit_test_9::attribute_test
         - unit_test_9::source:
-            component_links:
+            links:
               unit_test_9::sink:
               - sink/unit_test_9::sink
-      sink:
+    - node[sink]:
         attributes:
           image: precise
           size: micro
@@ -26,8 +26,18 @@ assemblies:
         - stdlib
         - unit_test_9::sink
   fan_in:
-    nodes:
-      source1:
+    components:
+    - node[source1]:
+        attributes:
+          image: precise
+          size: micro
+        components:
+        - stdlib
+        - unit_test_9::source:
+            links:
+              unit_test_9::sink:
+              - sink/unit_test_9::sink
+    - node[source2]:
         attributes:
           image: precise
           size: micro
@@ -37,17 +47,7 @@ assemblies:
             component_links:
               unit_test_9::sink:
               - sink/unit_test_9::sink
-      source2:
-        attributes:
-          image: precise
-          size: micro
-        components:
-        - stdlib
-        - unit_test_9::source:
-            component_links:
-              unit_test_9::sink:
-              - sink/unit_test_9::sink
-      sink:
+    - node[sink]:
         attributes:
           image: precise
           size: micro
@@ -55,8 +55,8 @@ assemblies:
         - stdlib
         - unit_test_9::sink
   fan_out:
-    nodes:
-      source:
+    components:
+    - node[source1]:
         attributes:
           image: precise_hvm
           size: small
@@ -67,14 +67,14 @@ assemblies:
               unit_test_9::sink:
               - sink1/unit_test_9::sink
               - sink2/unit_test_9::sink
-      sink1:
+    - node[sink1]:
         attributes:
           image: precise
           size: micro
         components:
         - stdlib
         - unit_test_9::sink
-      sink2:
+    - node[sink2]:
         attributes:
           image: precise
           size: micro
@@ -83,11 +83,13 @@ assemblies:
         - unit_test_9::sink
 component_defs:
   sink:
-    external_ref:
-      puppet_class: unit_test::sink
+    actions:
+      create:
+        puppet_class: unit_test::sink
   source:
-    external_ref:
-      puppet_class: unit_test::source
+    actions:
+      create:
+        puppet_class: unit_test::source
     attributes:
       upstream:
         type: array
@@ -101,8 +103,9 @@ component_defs:
         attribute_mappings:
         - "$node.host_address -> upstream"
   attribute_test:
-    external_ref:
-      puppet_class: unit_test::attribute_test
+    actions:
+      create:
+        puppet_class: unit_test::attribute_test
     attributes:
       array_attr:
         type: array

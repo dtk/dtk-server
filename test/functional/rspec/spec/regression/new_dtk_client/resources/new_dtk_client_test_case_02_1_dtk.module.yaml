@@ -5,21 +5,20 @@ version: master
 keywords: bootstrap
 description: test123
 license: Apache 2.0
-
 dependencies:
   aws/ec2: master
   puppetlabs/stdlib: master
 assemblies:
   master_assembly_name:
     description: test assembly
-    nodes:
-      node:
+    components:
+    - node[node]:
         attributes:
           image: precise_hvm
           size: micro
         components:
         - stdlib
-    workflows:
+    actions:
       create:
         subtasks:
         - name: create nodes

@@ -71,7 +71,7 @@ module DTK; class ModuleRefs
       def choose_namespaces_and_versions!(opts = {})
         strategy = opts[:strategy] || DefaultStrategy
         if strategy == :pick_first_level
-          choose_namespaces__pick_first_level!()
+          choose_namespaces__pick_first_level!(opts)
         else
           fail Error.new("Currently not supporting namespace resolution strategy '#{strategy}'")
         end
@@ -159,15 +159,26 @@ module DTK; class ModuleRefs
       end
       BaseVersion = nil
 
-      def choose_namespaces__pick_first_level!(_opts = {})
+      def choose_namespaces__pick_first_level!(opts = {})
+        base_module_refs = nil
+        if assembly_instance = opts[:assembly_instance]
+          base_module_refs = ret_base_module_refs(assembly_instance)
+        end
+        # assembly_instance.get_parent.get_service_module.get_component_module_refs
         each_pair do |module_name, els|
           if els.size > 1
-            first_el = els.sort { |a, b| a.level <=> b.level }.first
+            sorted_els = els.sort { |a, b| a.level <=> b.level }
+            first_el = sorted_els.first
+            first_el_level = first_el.level
             #warning only if first_el does not have level 1 and multiple namesapces
-            unless first_el.level == 1
+            unless first_el_level == 1
               namespaces = els.map(&:namespace).uniq
               if namespaces.size > 1
                 Log.error("Multiple namespaces (#{namespaces.join(',')}) for '#{module_name}'; picking one '#{first_el.namespace}'")
+              end
+              # calculate right module ref lock based on dependency specified in base module
+              if selected_el = find_matching_element_by_parent_module_refs!(first_el, sorted_els, base_module_refs)
+                first_el = selected_el
               end
             end
             self[module_name] = [first_el]
@@ -178,6 +189,32 @@ module DTK; class ModuleRefs
 
       def each_element(&block)
         values.each { |els| els.each { |el| block.call(el) } }
+      end
+
+      def ret_base_module_refs(assembly_instance)
+        if parent = assembly_instance.get_parent
+          if parent_service_module = parent.get_service_module
+            parent_service_module.get_component_module_refs
+          end
+        end
+      end
+
+      def find_matching_element_by_parent_module_refs!(first_el, sorted_els, base_module_refs)
+        return unless base_module_refs
+
+        name           = first_el.module_name
+        level          = first_el.level
+        same_level_els = sorted_els.select { |el| level == el.level }
+
+        return unless same_level_els.size > 1
+
+        component_modules = base_module_refs.component_modules || {}
+        if matching_module_ref = component_modules[name] || component_modules[name.to_sym]
+          version_info = matching_module_ref[:version_info]
+          if matching_by_version = same_level_els.find {|el| (el.version == version_info) || el.version == version_info.to_s }
+            matching_by_version
+          end
+        end
       end
     end
   end

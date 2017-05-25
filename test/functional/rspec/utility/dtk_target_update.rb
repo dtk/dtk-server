@@ -4,18 +4,18 @@ require './lib/dtk_common'
 # Target specific properties
 service_location = '~/dtk/'
 target_location = "/tmp/network"
-target_module = 'aws/network'
+target_module = 'aws/aws_target'
 target_assembly_template = 'target_iam'
 target_service_name = 'target_iam'
 target_name = 'target_iam'
-target_version = '1.0.4'
+target_version = 'master'
 
 # Target attributes
 default_keypair = 'testing_use1'
 
 # Module specific properties
 module_location = '/tmp/network'
-module_name = 'aws/network'
+module_name = 'aws/aws_target'
 service_name = 'target_iam'
 
 dtk_common = Common.new('', '')

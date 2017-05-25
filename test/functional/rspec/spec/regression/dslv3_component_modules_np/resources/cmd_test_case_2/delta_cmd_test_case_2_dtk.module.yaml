@@ -5,18 +5,19 @@ version: master
 keywords: test
 description: test module
 license: Apache 2.0
-
+dependencies:
+  aws/ec2: master
 assemblies:
   test_assembly:
     description: test assembly
-    nodes:
-      node:
+    components:
+    - node[node]:
         attributes:
           image: precise_hvm
           size: micro
         components:
         - cmd_test_case_2::delta_component
-    workflows:
+    actions:
       create:
         subtasks:
         - name: create nodes

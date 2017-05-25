@@ -14,13 +14,9 @@ assemblies:
           size: micro
         components:
         - wget
-    workflows:
+    actions:
       create:
         subtasks:
-        - name: create node
-          node: assembly_wide
-          components:
-          - ec2::node[node]
         - name: wget
           components:
           - wget

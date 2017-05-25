@@ -3,20 +3,20 @@ dsl_version: 1.0.0
 module: test/target_test_module_02
 version: master
 license: Apache 2.0
-
 dependencies:
   puppetlabs/stdlib: master
+  aws/ec2: master
 assemblies:
   test_assembly:
     description: test assembly
-    nodes:
-      node:
+    components:
+    - node[node]:
         attributes:
           image: precise_hvm
           size: micro
         components:
         - stdlib
-    workflows:
+    actions:
       create:
         subtasks:
         - name: create nodes

@@ -113,7 +113,9 @@ module DTK
 
     # deletes both local and remore branch
     def delete_instance_and_repo_branch
-      RepoManager.delete_local_and_remote_branch(get_field?(:branch), self)
+      # added 'if self[:repo_id]' as fix for DTK-3029 because in some cases when dependency is installed
+      # we have common module created for it but it's branch is not tied to any repo
+      RepoManager.delete_local_and_remote_branch(get_field?(:branch), self) if self[:repo_id]
       delete_instance(id_handle())
     end
 

@@ -238,7 +238,7 @@ module DTK
 
       def ret_value(attr, node_components = nil)
         return node_components if attr[:display_name] == '__node_components' && node_components #TODO: clean-up
-        attr.update_obj!(:value_derived, :value_asserted)
+        update_attribute_value!(attr)
         ret = attr[:attribute_value]
         case attr[:data_type]
          when 'boolean'

@@ -68,12 +68,12 @@ module DTK
           if base_match = base_module_local_params && match_base_module?(matches, base_module_local_params)
             matched << base_match
           else
-            raise_error_ambiguous_module_ref
+            raise_error_ambiguous_module_ref(matches)
           end
         end
       end
 
-      def raise_error_ambiguous_module_ref
+      def raise_error_ambiguous_module_ref(matches)
         # TODO: may put in logic that sees if one is service modules ns and uses that one when multiple matches
         module_name = Component.module_name(component_type)
         error_params = {

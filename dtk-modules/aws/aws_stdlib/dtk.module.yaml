@@ -1,0 +1,6 @@
+---
+dsl_version: 
+module: aws/aws_stdlib
+version: master
+dependencies:
+  dtk_stdlib/dtk_stdlib: master

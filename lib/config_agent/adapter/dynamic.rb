@@ -38,7 +38,7 @@ module DTK; class ConfigAgent
         execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, component)
         
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
-        instance_attributes = AttributeRequestForm.component_attribute_values(component_action, service_instance_name)
+        instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
         
         msg = {
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,

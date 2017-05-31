@@ -33,9 +33,10 @@ module DTK
         { attribute.display_name => attribute_info(attribute, opts) }
       end
       
-      def self.component_attribute_values(component_action, service_instance_name)
+      def self.component_attribute_values(component_action, assembly_instance)
+        attributes = system_attributes(assembly_instance).merge(assembly_level_attributes(assembly_instance))
         node_component = NodeComponent.node_component?(component_action.component)
-        component_action.attributes.inject(service_wide_attribute_values(service_instance_name)) do |h, attr|
+        component_action.attributes.inject(attributes) do |h, attr|
           # prune dynamic attributes that are not also inputs
           (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(transform_attribute(attr, node_component:  node_component))
         end
@@ -58,21 +59,43 @@ module DTK
         is_special_value ? special_value : value
       end
 
-      SERVICE_WIDE_ATTRIBUTES = {
-        dtk_service_instance: {
-          value_lambda: lambda { |service_instance_name| service_instance_name }, 
+      module AttributeType
+        module Prefix
+          SYSTEM = 'system'
+          ASSEMBLY_LEVEL = 'assembly_level'
+        end
+        DELIM = '.'
+        def self.system_attribute_name(attribute_name)
+          "#{Prefix::SYSTEM}#{DELIM}#{attribute_name}"
+        end
+        def self.assembly_level_attribute_name(attribute_name)
+          "#{Prefix::ASSEMBLY_LEVEL}#{DELIM}#{attribute_name}"
+        end
+      end
+
+      SYSTEM_ATTRIBUTES = {
+        service_instance_name: {
+          value_lambda: lambda { |assembly_instance| assembly_instance.display_name }, 
           dattype: 'string', 
           hidden: false
         }
       }
-      
-      def self.service_wide_attribute_values(service_instance_name)
-        SERVICE_WIDE_ATTRIBUTES.inject({}) do | h, (attr_name, input)|
-          h.merge(attr_name.to_s => Info.new(input[:value_lambda].call(service_instance_name), input[:datatype], input[:hidden]))
+
+
+      def self.system_attributes(assembly_instance)
+        SYSTEM_ATTRIBUTES.inject({}) do |h, (attribute_name, input)|
+          qualified_attribute_name = AttributeType.system_attribute_name(attribute_name)
+          h.merge(qualified_attribute_name => Info.new(input[:value_lambda].call(assembly_instance), input[:datatype], input[:hidden]))
+        end
+      end
+
+      def self.assembly_level_attributes(assembly_instance)
+        assembly_instance.get_assembly_level_attributes.inject({}) do |h, attribute|
+          qualified_attribute_name = AttributeType.assembly_level_attribute_name(attribute.display_name) 
+          h.merge(qualified_attribute_name => Info.new(attribute[:attribute_value], attribute[:data_type], attribute[:hidden]))
         end
       end
       
-
     end
   end
 end        

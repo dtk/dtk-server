@@ -24,7 +24,6 @@ module DTKModule
         IamInstanceProfile.set_iam_instance_profiles(self, instance_ids, params.iam_instance_profile) unless params.iam_instance_profile.nil?
         ret
       end
-
         
       private
 

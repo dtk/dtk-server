@@ -1,0 +1,15 @@
+FROM {{docker_image_base}}
+
+{{dockerfile_prefix}}
+
+# install gems required by ruby provider
+RUN gem install grpc --no-rdoc --no-ri
+RUN gem install mustache --no-rdoc --no-ri
+
+{{#gems}}
+RUN gem install {{name}} -v {{version}} --no-rdoc --no-ri
+{{/gems}}
+
+{{dockerfile_suffix}}
+
+ENTRYPOINT ["{{entrypoint}}"]

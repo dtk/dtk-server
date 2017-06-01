@@ -17,10 +17,10 @@
 #
 module DTK; class Attribute
   class Pattern
-    r8_nested_require('pattern', 'type')
-    r8_nested_require('pattern', 'assembly')
-    r8_nested_require('pattern', 'node')
-    r8_nested_require('pattern', 'term')
+    require_relative('pattern/type')
+    require_relative('pattern/assembly')
+    require_relative('pattern/node')
+    require_relative('pattern/term')
 
     def self.node_name
       (pattern =~ NodeComponentRegexp ? Regexp.last_match(1) : raise_unexpected_pattern(pattern))
@@ -43,7 +43,7 @@ module DTK; class Attribute
     private_class_method :raise_unexpected_pattern
 
     def self.create_attr_pattern(base_object, attr_term, opts = {})
-      create(attr_term, base_object, opts).set_parent_and_attributes!(base_object.id_handle(), opts)
+      create(attr_term, base_object, opts).set_parent_and_attributes!(base_object.id_handle, opts)
     end
 
     # set_attributes can create or set attributes depending on options in opts
@@ -68,20 +68,19 @@ module DTK; class Attribute
 
         # if service instance has components check if there is a node with same name as component
         # if true then it is ambiguous whether using node or component attribute
-        check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?()
+        check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?
 
         init_av_pair = av_pair.clone
-        check_if_node_property(av_pair) unless opts[:skip_node_property_check]
 
         unless init_av_pair == av_pair
-          set_attributes(base_object, [init_av_pair], opts.merge(skip_node_property_check: true, do_not_raise: true))
+          set_attributes(base_object, [init_av_pair], opts.merge(do_not_raise: true))
         end
 
         # if needed as indicated by opts, create_attr_pattern also creates attribute
         pattern = create_attr_pattern(base_object, av_pair[:pattern], opts)
         ret << pattern
         # attribute_idhs are base level attribute id_handles; in contrast to
-        # node_group_member_attribute_idhs, which gives non null set if attribute is on a node and node is a service_node_group
+        # node_group_member_attribute_idhs, which gives non null set if attribute is on a node and node is a node_group
         # purpose of finding node_group_member_attribute_idhs is when explicitly setting node group attribute want to set
         # all its members to same value; only checking for component level and not node level because
         # node level attributes different for each node member
@@ -103,7 +102,7 @@ module DTK; class Attribute
           all_attr_idhs += ngm_attr_idhs
         end
         all_attr_idhs.each do |idh|
-          attribute_rows << { id: idh.get_id(), value_asserted: value }.merge(attr_properties)
+          attribute_rows << { id: idh.get_id, value_asserted: value }.merge(attr_properties)
         end
       end
 
@@ -132,7 +131,7 @@ module DTK; class Attribute
       ndx_new_vals = attribute_rows.inject({}) { |h, r| h.merge(r[:id] => r[:value_asserted]) }
       # TODO: can we get rid of { only_special_processing: true }
       LegalValue.raise_error_if_invalid(existing_attrs, ndx_new_vals, only_special_processing: true)
-      SpecialProcessing::Update.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
+      SpecialProcessing.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
       Attribute.update_and_propagate_attributes(attr_mh, attribute_rows, opts)
       ret
     end
@@ -177,18 +176,6 @@ module DTK; class Attribute
       return cardinality[:value_asserted].to_i > new_value.to_i
     end
 
-    def self.check_if_node_property(av_pair)
-      if pattern = av_pair[:pattern]
-        tokens = pattern.split('/')
-        return unless tokens.size == 2
-
-        node_name, attribute_name = tokens
-
-        np_component = CommandAndControl.node_property_component
-        av_pair[:pattern] = "#{node_name}/#{np_component}/#{attribute_name}" if is_node_component_attribute?(attribute_name)
-      end
-    end
-
     def self.node_component_attribute?(node, attribute_name)
       if is_node_component_attribute?(attribute_name)
         component_type = CommandAndControl.node_property_component_type(:properties)
@@ -199,10 +186,5 @@ module DTK; class Attribute
       end
     end
     
-    private
-    def self.is_node_component_attribute?(attribute_name)
-      CommandAndControl.node_property_legal_attributes.include?(attribute_name.to_sym)
-    end
-
   end
 end; end

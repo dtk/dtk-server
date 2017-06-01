@@ -34,7 +34,7 @@ describe "(Target) Test Case 03: Specified existing subnet id, vpc and security 
     # Install/clone aws:network module with required dependency modules
     system("rm -rf /tmp/network && mkdir /tmp/network")
     system("dtk module clone -v #{target_version} #{target_module} #{target_location}")
-    system("dtk module install -d #{target_location} #{target_module}")
+    system("dtk module install --update-deps -d #{target_location} #{target_module}")
   end
 
   context "List assemblies contained in this module" do

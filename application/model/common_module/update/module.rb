@@ -49,7 +49,7 @@ module DTK
         return ret if @module_branch.is_set_to_sha?(@commit_sha)
 
         @module_branch.pull_repo_changes_and_return_diffs_summary(@commit_sha, force: true) do |repo_diffs_summary| 
-          unless repo_diffs_summary.empty?
+          if !repo_diffs_summary.empty? || opts[:force_parse]
             @module_branch.set_dsl_parsed!(false)
             ret.add_diffs_summary!(repo_diffs_summary)
             top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
@@ -61,11 +61,16 @@ module DTK
             
             unless opts[:skip_missing_check]
               missing_dependencies = check_for_missing_dependencies(parsed_common_module, repo, initial_update: opts[:initial_update])
-              return missing_dependencies if missing_dependencies && missing_dependencies[:missing_dependencies]
+              if missing_dependencies && missing_dependencies[:missing_dependencies]
+                if existing_diffs = ret[:diffs]
+                  (missing_dependencies||{}).merge!(existing_diffs: existing_diffs) unless existing_diffs.empty?
+                end
+                return missing_dependencies
+              end
             end
 
             create_or_update_opts = {
-              parse_needed: parse_needed, 
+              parse_needed: parse_needed,
               diffs_summary: repo_diffs_summary,
               initial_update: opts[:initial_update]
             }

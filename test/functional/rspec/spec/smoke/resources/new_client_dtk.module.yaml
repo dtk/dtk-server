@@ -2,26 +2,21 @@
 dsl_version: 1.0.0
 module: test/dtk_new_client_smoke
 version: master
-keywords: bootstrap
-description: test123
-license: Apache 2.0
-
 dependencies:
+  aws/ec2: master
   puppetlabs/wget: master
 assemblies:
   new_module_assembly:
-    description: test assembly
-    nodes:
-      node:
+    components:
+    - node[node]:
         attributes:
-          image: precise_hvm
+          image: trusty_hvm
           size: micro
         components:
         - wget
-    workflows:
+    actions:
       create:
         subtasks:
-        - name: create nodes
-          node: node
+        - name: wget
           components:
           - wget

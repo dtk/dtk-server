@@ -73,17 +73,17 @@ module DTK
     end
 
     def node_group_member?
-      ServiceNodeGroup::NodeGroupMember.node_group_member?(self)
+      NodeGroup::NodeGroupMember.node_group_member?(self)
     end
 
     # should only be called if self is a node_group_member (it can stil have class DTK::Node
     def node_group_name
-      ServiceNodeGroup::NodeGroupMember.node_group_name(self)
+      NodeGroup::NodeGroupMember.node_group_name(self)
     end
 
     # should only be called if self is a node_group_member (it can stil have class DTK::Node
     def node_group_member_index
-      ServiceNodeGroup::NodeGroupMember.node_group_member_index(self)
+      NodeGroup::NodeGroupMember.node_group_member_index(self)
     end
 
     def is_assembly_wide_node?
@@ -130,12 +130,11 @@ module DTK
       ndx_components.values
     end
 
-    def ret_node_property_component
-      if node_property_component_name = CommandAndControl.node_property_component
-        node_components = get_components(filter: [:eq, :display_name, node_property_component_name.gsub('::', '__')])
-        return nil if node_components.empty?
-        node_components.first
-      end
+    def node_component_ref
+      @node_component_ref ||= NodeComponent.node_component_ref_from_node(self)
+    end
+    def node_component
+      @node_component ||= NodeComponent.node_component_from_node(self)
     end
 
     def self.assembly_node_print_form?(obj)
@@ -258,6 +257,10 @@ module DTK
 
     ######### Model apis
 
+    def assembly
+      @assembly ||= get_assembly? || fail("Unexpcted that node '#{display_name} not tied to an assembly")
+    end
+ 
     def get_assembly?(cols = nil)
       if assembly_id = get_field?(:assembly_id)
         sp_hash = {
@@ -345,6 +348,7 @@ module DTK
       if external_ref = node[:external_ref]
         external_ref.delete(:ssh_credentials)
       end
+      node
     end
     def sanitize!
       self.class.sanitize!(self)
@@ -489,6 +493,7 @@ module DTK
       get_and_update_operational_status!()
     end
 
+    # TODO: DTK-3024: remove of fix up for node components
     def get_and_update_operational_status!
       update_obj!(:type, :external_ref, :operational_status)
       if is_staged?()
@@ -544,25 +549,15 @@ module DTK
       self.class.pbuilderid(self)
     end
     def self.pbuilderid(node)
-      unless ret = CommandAndControl.pbuilderid(node)
-        fail Error.new("Node (#{node.get_field?(:display_name)}) with id (#{node.id}) does not have an #{PBuilderIDPrintName}")
-      end
-      ret
-    end
-    PBuilderIDPrintName = 'internal communication ID'
-
-    def persistent_dns
-      get_hostname_external_ref()[:persistent_dns]
+      ret = 
+        if node.is_assembly_wide_node?()
+          'docker-executor'
+        else
+          NodeComponent.instance_id(node)
+        end
+      ret || fail(Error, "Node '#{node.display_name}' with id #{node.id} does not have an internal communication ID")
     end
 
-    def elastic_ip
-      get_hostname_external_ref()[:elastic_ip]
-    end
-
-    def get_hostname_external_ref
-      get_field?(:hostname_external_ref) || {}
-    end
-    private :get_hostname_external_ref
 
     # TODO: these may be depracted
     def update_ordered_component_ids(order)
@@ -635,10 +630,6 @@ module DTK
       if persistent_hostname?
         CommandAndControl.associate_elastic_ip(self)
       end
-    end
-
-    def associate_persistent_dns?
-      CommandAndControl.associate_persistent_dns?(self)
     end
 
     # Method will remove DNS information for node, this happens when we do not persistent

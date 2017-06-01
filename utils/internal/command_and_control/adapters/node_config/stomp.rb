@@ -64,7 +64,6 @@ module DTK
         ret
       end
 
-      # TODO: change signature to poll_to_detect_node_ready(node,callbacks,context)
       def self.poll_to_detect_node_ready(node, opts)
         rc = opts[:receiver_context]
         callbacks = {
@@ -177,21 +176,26 @@ module DTK
         callbacks = context[:callbacks]
         mc_info = mc_info_for_config_agent(config_agent)
 
-        # do a check-alive of arbiter
+        # TODO: DTK-2938: commented out check alive because added complexity does not seem to give that much value
+        # Also now that detect node is done before any component on node run check alive may
+        # not be providing any value; we can look at enhancing detect node is up by dynamically setting
+        # number of reties and time between retries and calling detect node is up on assembly wide nodes too
+        #
+        # Do a check-alive of arbiter
         # unless discovery or git_access agents are called since they're executed on node initialization
         # or node already checked
+        # callback_mode = false
+        # if node_checked?(DTK::Task.checked_nodes, pbuilderid)
+        #  DTK::Task.checked_nodes.delete_if { |h| h[pbuilderid] }
+        # elsif !['git_access', 'discovery'].include?(mc_info[:agent])
+        #  check_alive(filter, callbacks, context, task_idh) do
+        #    async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
+        #  end
+        #  callback_mode = true
+        # end
+        # async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context) unless callback_mode
 
-        callback_mode = false
-        if node_checked?(DTK::Task.checked_nodes, pbuilderid)
-          DTK::Task.checked_nodes.delete_if { |h| h[pbuilderid] }
-        elsif !['git_access', 'discovery'].include?(mc_info[:agent])
-          check_alive(filter, callbacks, context, task_idh) do
-            async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context)
-          end
-          callback_mode = true
-        end
-     
-        async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context) unless callback_mode
+        async_agent_call(mc_info[:agent], mc_info[:action], msg_content, filter, callbacks, context) 
       end
 
       def self.node_checked?(checked_nodes, pbuilderid)

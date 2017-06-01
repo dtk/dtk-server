@@ -140,7 +140,7 @@ module DTK; class Node; class TargetRef
 
         ng_idhs = node_groups.map(&:id_handle)
         ndx_ng_target_ref_attrs = {}
-        ServiceNodeGroup.get_node_attributes_to_copy(ng_idhs).each do |ng_attr|
+        NodeGroup.get_node_attributes_to_copy(ng_idhs).each do |ng_attr|
           node_group_id = ng_attr.delete(:node_node_id)
 
           target_ref_attr = {}

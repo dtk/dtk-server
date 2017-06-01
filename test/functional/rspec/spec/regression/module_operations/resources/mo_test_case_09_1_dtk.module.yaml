@@ -7,8 +7,8 @@ dependencies:
   r8/unit_test: master
 assemblies:
   simple_link:
-    nodes:
-      source:
+    components:
+    - node[source]:
         attributes:
           image: precise
           size: micro
@@ -16,10 +16,10 @@ assemblies:
         - stdlib
         - unit_test::attribute_test
         - unit_test::source:
-            component_links:
+            links:
               unit_test::sink:
               - sink/unit_test::sink
-      sink:
+    - node[sink]:
         attributes:
           image: precise
           size: micro
@@ -27,28 +27,28 @@ assemblies:
         - stdlib
         - unit_test::sink
   fan_in:
-    nodes:
-      source1:
+    components:
+    - node[source1]:
         attributes:
           image: precise
           size: micro
         components:
         - stdlib
         - unit_test::source:
-            component_links:
+            links:
               unit_test::sink:
               - sink/unit_test::sink
-      source2:
+    - node[source2]:
         attributes:
           image: precise
           size: micro
         components:
         - stdlib
         - unit_test::source:
-            component_links:
+            links:
               unit_test::sink:
               - sink/unit_test::sink
-      sink:
+    - node[sink]:
         attributes:
           image: precise
           size: micro
@@ -56,26 +56,26 @@ assemblies:
         - stdlib
         - unit_test::sink
   fan_out:
-    nodes:
-      source:
+    components:
+    - node[source]:
         attributes:
           image: precise_hvm
           size: small
         components:
         - stdlib
         - unit_test::source:
-            component_links:
+            links:
               unit_test::sink:
               - sink1/unit_test::sink
               - sink2/unit_test::sink
-      sink1:
+    - node[sink1]:
         attributes:
           image: precise
           size: micro
         components:
         - stdlib
         - unit_test::sink
-      sink2:
+    - node[sink2]:
         attributes:
           image: precise
           size: micro

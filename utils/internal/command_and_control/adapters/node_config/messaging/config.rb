@@ -25,25 +25,25 @@ module DTK
         Lock = Mutex.new
 
         def self.install_script(node, bindings)
-          create().install_script(node, bindings)
+          create.install_script(node, bindings)
         end
 
         def install_script(node, bindings)
           all_bindings = install_script_bindings(node, bindings)
-          erubis_object(install_script_erb()).result(all_bindings)
+          erubis_object(install_script_erb).result(all_bindings)
         end
 
         def self.cloud_config_options(node, bindings)
-          create().cloud_config_options(node, bindings)
+          create.cloud_config_options(node, bindings)
         end
 
         def cloud_config_options(node, bindings)
           all_bindings = install_script_bindings(node, bindings)
-          erubis_object(cloud_config_options_erb()).result(all_bindings)
+          erubis_object(cloud_config_options_erb).result(all_bindings)
         end
 
         def self.cloud_config_os_type
-          create().cloud_config_os_type
+          create.cloud_config_os_type
         end
 
         def cloud_config_os_type
@@ -73,7 +73,7 @@ module DTK
         end
 
         def logfile
-          "/var/log/mcollective/#{Common::Aux.running_process_user()}/client.log"
+          "/var/log/mcollective/#{Common::Aux.running_process_user}/client.log"
         end
 
         def erubis_object(erubis_content)
@@ -120,7 +120,7 @@ eos
             ssh_remote_public_key = File.open(R8::Config[:arbiter][:ssh][:remote][:public_key], 'rb') { |f| f.read }
             ssh_remote_private_key = File.open(R8::Config[:arbiter][:ssh][:remote][:private_key], 'rb') { |f| f.read }
             ssh_local_public_key = File.open(R8::Config[:arbiter][:ssh][:local][:public_key], 'rb') { |f| f.read }
-            pbuilderid = (node.pbuilderid() if node.get_iaas_type() == :physical)
+            pbuilderid = (node.pbuilderid if node.get_iaas_type == :physical)
             # order of merge does not matter; keys wont conflict
             bindings.merge(
               arbiter_ssh_remote_public_key: ssh_remote_public_key,
@@ -166,7 +166,7 @@ eos
           end
 
           def get_puppet_version(node)
-            node.attribute().puppet_version(raise_error_if_invalid: true) || ''
+            node.attribute.puppet_version(raise_error_if_invalid: true) || ''
           end
 
           def install_script_erb

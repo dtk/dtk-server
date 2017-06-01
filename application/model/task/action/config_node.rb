@@ -17,8 +17,7 @@
 #
 module DTK; class Task
   class Action
-    # Actions that configure a node
-    # TODO: see if misnomer since these can be set of assembly level actions that 
+    # TODO: DTK-2938; we want to rename ConfigNode since now a misnomer
     class ConfigNode < Base
       def initialize(type, object, task_idh = nil, assembly_idh = nil)
         # TODO: clean up so dont have to look for assembly_idh in two places
@@ -224,8 +223,15 @@ module DTK; class Task
         end
       end
 
+      def assembly_instance
+        unless ret = (self[:assembly_idh] && IDHandle.new(self[:assembly_idh]).create_object(model_name: :assembly_instance))
+          Log.error("Unexpected that self[:assembly_idh] is nil")
+        end
+        ret
+      end
+
       def get_and_update_attributes__assembly_attrs!(_task_mh)
-        if assembly = self[:assembly_idh] && IDHandle.new(self[:assembly_idh]).create_object(model_name: :assembly)
+        if assembly = assembly_instance
         assembly_attr_vals = assembly.get_assembly_level_attributes()
           unless assembly_attr_vals.empty?
             self[:assembly_attributes] = assembly_attr_vals

@@ -55,7 +55,7 @@ module DTK
 
     def self.update_field_def(component, field_def_update)
       # compute default
-      default_assign = AttributeComplexType.ravel_raw_post_hash({ field_def_update['id'] => field_def_update['default'] }, :attribute, component[:id]).first
+      default_assign = Attribute::ComplexType.ravel_raw_post_hash({ field_def_update['id'] => field_def_update['default'] }, :attribute, component[:id]).first
       attr_mh = component.model_handle.createMH(:attribute)
       attr_hash = Aux.hash_subset(field_def_update, UpdateFields - %w(default i18n)).merge(default_assign)
       Model.update_from_rows(attr_mh, [attr_hash], partial_value: true)

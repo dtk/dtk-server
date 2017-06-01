@@ -43,7 +43,6 @@ module DTK
 
                   # these must be called before get_and_propagate_dynamic_attributes
                   node.associate_elastic_ip?()
-                  node.associate_persistent_dns?()
 
                   action.get_and_propagate_dynamic_attributes(result, non_null_attributes: ['host_addresses_ipv4'])
                   Log.info "Successfully started node with id '#{task[:executable_action][:node].instance_id}'"

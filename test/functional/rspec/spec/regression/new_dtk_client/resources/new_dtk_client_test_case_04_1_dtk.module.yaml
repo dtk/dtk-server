@@ -10,14 +10,14 @@ dependencies:
 assemblies:
   test_assembly:
     description: test assembly
-    nodes:
-      node:
+    components:
+    - node[node]:
         attributes:
           image: precise_hvm
           size: micro
         components:
         - stdlib
-    workflows:
+    actions:
       create:
         subtasks:
         - name: create nodes

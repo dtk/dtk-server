@@ -99,12 +99,15 @@ module DTK
 
       def add_dependencies_of_dependencies(cmp_modules_with_namespaces)
         dependencies_of_dependencies = []
+        existing_names = cmp_modules_with_namespaces.map{ |cmp| "#{cmp[:namespace_name]}/#{cmp[:display_name]}" }
         cmp_modules_with_namespaces.each do |cmp_module|
           if module_exists = ComponentModule.module_exists(project, cmp_module[:namespace_name], cmp_module[:display_name], cmp_module[:version_info], :return_module => true)
             if module_branch = module_exists[:module_branch]
               dep_module_refs = module_branch.get_module_refs
               dep_module_refs.each do |dep_module_ref|
-                dependencies_of_dependencies << { :namespace_name => dep_module_ref[:namespace_info], :display_name => dep_module_ref[:display_name], :version_info => dep_module_ref[:version_info] }
+                unless existing_names.include?("#{dep_module_ref[:namespace_info]}/#{dep_module_ref[:display_name]}")
+                  dependencies_of_dependencies << { :namespace_name => dep_module_ref[:namespace_info], :display_name => dep_module_ref[:display_name], :version_info => dep_module_ref[:version_info] }
+                end
               end
             end
           end

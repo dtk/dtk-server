@@ -33,17 +33,16 @@ GIT_USERNAME=dtk1
 DOCKER_ID=$(date +%Y%m%d%H%M%S)
 
 ADDRESS=${1}
-UPGRADE=${2}
-CONTAINER=${3:-dtk}
-ARBITER_CONTAINER=${4:-dtk-arbiter}
+DTK_SERVER_BRANCH=${2-master}
+DTK_ARBITER_BRANCH=${3:-master}
+CONTAINER=${4:-dtk}
+ARBITER_CONTAINER=${5:-dtk-arbiter}
 NAME=${6:-dtk-docker-${DOCKER_ID}}
 USER=${7:-docker-test}
 PASS=${8:-r8server}
-STOMP_USERNAME=${9:-dtk1}
-STOMP_PASSWORD=${10:-marionette}
 HOST_VOLUME="/dtk"
 
-echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}\nGIT_PORT=${SSH_PORT}\nSTOMP_PASSWORD=${STOMP_PASSWORD}\nSTOMP_USERNAME=${STOMP_USERNAME}" > "/${CONTAINER}/dtk.config"
+echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}\nGIT_PORT=${SSH_PORT}" > "/${CONTAINER}/dtk.config"
 
 docker ps | grep dtk > /dev/null
 RUNNING=$?
@@ -93,8 +92,11 @@ echo -e "\nStarting a new Docker Container: ${CONTAINER}"
 echo -e "\nStarting a new Docker Container: ${ARBITER_CONTAINER}"
 
 # start the dtk-server container
-docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}
-
+if [[ $DTK_SERVER_BRANCH == 'master' ]]; then
+  docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}
+else
+  docker run -e REMOTE_REPO_HOST=${REPO_HOST} -e REMOTE_REPO_REST_PORT=${REPO_PORT} --name ${CONTAINER} -v ${HOST_VOLUME}:/host_volume -p ${HTTP_PORT}:80 -p ${MCO_PORT}:6163 -p ${SSH_PORT}:22 -d ${DTK_IMAGE}:${DTK_SERVER_BRANCH}
+fi
 # wait for dtk-arbiter ssh keypair to be generated
 while [[ ! -f $HOST_VOLUME/arbiter/arbiter_remote ]]; do
   sleep 2
@@ -108,4 +110,8 @@ if [[ -e /var/run/docker.sock ]]; then
 fi
 
 # start the dtk-arbiter container
-docker run -e GIT_USERNAME=${GIT_USERNAME} --name ${ARBITER_CONTAINER} -v ${HOST_VOLUME}:/host_volume -e HOST_VOLUME=${HOST_VOLUME} ${ADDITIONAL_ARGS} --restart=on-failure -td ${ARBITER_IMAGE}
+if [[ $DTK_ARBITER_BRANCH == 'master' ]]; then
+  docker run -e GIT_USERNAME=${GIT_USERNAME} --name ${ARBITER_CONTAINER} -v ${HOST_VOLUME}:/host_volume -e HOST_VOLUME=${HOST_VOLUME} ${ADDITIONAL_ARGS} --restart=on-failure -td ${ARBITER_IMAGE}
+else
+  docker run -e GIT_USERNAME=${GIT_USERNAME} --name ${ARBITER_CONTAINER} -v ${HOST_VOLUME}:/host_volume -e HOST_VOLUME=${HOST_VOLUME} ${ADDITIONAL_ARGS} --restart=on-failure -td ${ARBITER_IMAGE}:${DTK_ARBITER_BRANCH}
+fi

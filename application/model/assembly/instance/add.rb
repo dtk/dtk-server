@@ -41,18 +41,18 @@ module DTK
             # one reason it may not be is if its a node group member
             sp_hash = {
               cols: [:id, :display_name, :group_id, :ordered_component_ids],
-              filter: [:and, [:eq, :id, node_idh.get_id()], [:eq, :assembly_id, id()]]
+              filter: [:and, [:eq, :id, node_idh.get_id], [:eq, :assembly_id, id]]
             }
             
             unless node = Model.get_obj(model_handle(:node), sp_hash)
               if node_group = is_node_group_member?(node_idh)
                 fail ErrorUsage.new("Not implemented: adding a component to a node group member; a component can only be added to the node group (#{node_group[:display_name]}) itself")
               else
-                fail ErrorIdInvalid.new(node_idh.get_id(), :node)
+                fail ErrorIdInvalid.new(node_idh.get_id, :node)
               end
             end
           else
-            node = create_assembly_wide_node?()
+            node = assembly_wide_node
           end
           
           cmp_instance_idh = nil
@@ -61,7 +61,7 @@ module DTK
           Transaction do
             # add the component
             cmp_instance_idh = node.add_component(aug_cmp_template, opts.merge(component_title: component_title))
-            component = cmp_instance_idh.create_object()
+            component = cmp_instance_idh.create_object
 
             # update the module refs
             add_component__update_component_module_refs?(aug_cmp_template[:component_module], aug_cmp_template[:namespace], version: aug_cmp_template[:version])
@@ -148,31 +148,28 @@ module DTK
             fail ErrorUsage.new("Node (#{node_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
           end
           
-          target = get_target()
+          target = get_target
           node_template = Node::Template.find_matching_node_template(target, node_binding_ruleset: node_binding_rs)
           
           override_attrs = {
             display_name: node_name,
-            assembly_id: id()
+            assembly_id: id
           }
           override_attrs.merge!(type: 'assembly_wide') if opts[:assembly_wide]
-          clone_opts = node_template.source_clone_info_opts()
+          clone_opts = node_template.source_clone_info_opts
           new_obj = target.clone_into(node_template, override_attrs, clone_opts)
           new_obj
         end
 
-        def create_assembly_wide_node?
+        def assembly_wide_node
           sp_hash = {
             cols: [:id, :display_name, :group_id, :ordered_component_ids],
-            filter: [:and, [:eq, :type, Node::Type::Node.assembly_wide], [:eq, :assembly_id, id()]]
+            filter: [:and, [:eq, :type, Node::Type::Node.assembly_wide], [:eq, :assembly_id, id]]
           }
-          node = Model.get_obj(model_handle(:node), sp_hash)
-          
-          unless node
+          unless node = Model.get_obj(model_handle(:node), sp_hash)
             node_idh = add_node('assembly_wide', nil, assembly_wide: true)
-            node = node_idh.is_a?(Node) ? node_idh : node_idh.create_object()
+            node = node_idh.is_a?(Node) ? node_idh : node_idh.create_object
           end
-          
           node
         end
 
@@ -185,7 +182,7 @@ module DTK
             fail ErrorUsage.new("Node (#{node_group_name}) already belongs to #{pp_object_type} (#{get_field?(:display_name)})")
           end
           
-          target = get_target()
+          target = get_target
           node_template = Node::Template.find_matching_node_template(target, node_binding_ruleset: node_binding_rs)
           
           self.update_object!(:display_name)
@@ -193,16 +190,16 @@ module DTK
           
           override_attrs = {
             display_name: node_group_name,
-            assembly_id: id(),
+            assembly_id: id,
             type: 'node_group_staged',
             ref: ref
           }
           
-          clone_opts = node_template.source_clone_info_opts()
+          clone_opts = node_template.source_clone_info_opts
           new_obj = target.clone_into(node_template, override_attrs, clone_opts)
           Node::NodeAttribute.create_or_set_attributes?([new_obj], :cardinality, cardinality)
           
-          node_group_obj = new_obj.create_obj_optional_subclass()
+          node_group_obj = new_obj.create_obj_optional_subclass
           node_group_obj.add_group_members(cardinality.to_i)
           
           # TODO: for some reason, node group members targets are populated with wrong target id; fixing that here
@@ -233,7 +230,7 @@ module DTK
           cmp_modules_with_namespaces = component_module.merge(namespace_name: namespace[:display_name], version_info: version_info)
           if update_needed = component_module_refs.update_object_if_needed!([cmp_modules_with_namespaces])
             # This saves teh upadte to the object model
-            component_module_refs.update()
+            component_module_refs.update
           end
         end
 

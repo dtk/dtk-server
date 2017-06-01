@@ -191,7 +191,7 @@ end
           convert: true,
           join_type: :inner,
           join_cond: { id: :input_port__component_id },
-          cols: [:id, :display_name, :group_id]
+          cols: [:id, :display_name, :group_id, :assembly_id]
         },
         {
           model_name: :node,
@@ -215,7 +215,7 @@ end
           convert: true,
           join_type: :inner,
           join_cond: { id: :output_port__component_id },
-          cols: [:id, :display_name, :group_id]
+          cols: [:id, :display_name, :group_id, :assembly_id]
         },
         {
           model_name: :node,

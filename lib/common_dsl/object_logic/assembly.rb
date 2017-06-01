@@ -23,8 +23,10 @@ module DTK
 
         require_relative('assembly/attribute')
         require_relative('assembly/component_link')
-        # attribute must be before node and component
-        require_relative('assembly/node')
+        # attribute must be before component
+        # TODO: DTK-2938: remove all files under assembly/node after making sure that logic incorporated elsewhere
+        # require_relative('assembly/node')
+
         require_relative('assembly/component')
         require_relative('assembly/workflow')
 
@@ -34,19 +36,9 @@ module DTK
         
         def generate_content_input!(assembly_instance)
           set_id_handle(assembly_instance)
-          nodes = ContentInputHash.new
-          components = ContentInputHash.new
-          Node.generate_content_input(assembly_instance).each do | key, content_input_node |
-            if content_input_node[:is_assembly_wide_node]
-              components.merge!(content_input_node.val(:Components) || {})
-            else
-              nodes.merge!(key => content_input_node)
-            end
-          end
 
           # TODO: add assembly level attributes
-          set(:Nodes, nodes) unless nodes.empty?
-          set(:Components, components) unless components.empty?
+          set?(:Components, Component.generate_content_input(assembly_instance))
           set(:Workflows, Workflow.generate_content_input(assembly_instance))
           self
         end
@@ -57,7 +49,6 @@ module DTK
         #  :impacted_files
         def diff?(assembly_parse, qualified_key, opts = {})
           aggregate_diffs?(qualified_key, opts) do |diff_set|
-            diff_set.add_diff_set? Node, val(:Nodes), assembly_parse.val(:Nodes)
             diff_set.add_diff_set? Component, val(:Components), assembly_parse.val(:Components)
             diff_set.add_diff_set? Workflow, val(:Workflows), assembly_parse.val(:Workflows)
             # TODO: need to add diffs on all subobjects

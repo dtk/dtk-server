@@ -65,8 +65,18 @@ module DTK; class Attribute
         ret
       end
 
-      def get_service_node_group(opts = {})
-        get_node(opts.merge(subclass_model_name: :service_node_group))
+      def get_node_group(opts = {})
+        get_node(opts.merge(subclass_model_name: :node_group))
+      end
+
+      def get_component?(opts = {})
+        if component_id = get_field?(:component_component_id)
+          sp_hash = {
+            cols: opts[:cols] || [:id, :group_id, :display_name, :component_type],
+            filter: [:eq, :id, component_id]
+          }
+          Component.get_obj(model_handle(:component), sp_hash)
+        end
       end
 
       private

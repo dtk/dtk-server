@@ -109,7 +109,7 @@ module DTK
           if opts[:from_common_module]
             "Cannot uninstall a module if one or more service instances (#{assembly_names.join(',')}) created from it exist"
           else
-            "Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})"
+            "Cannot uninstall a module if one or more of its service instances exist (#{assembly_names.join(',')})"
           end
         fail ErrorUsage, error_msg
       end
@@ -134,7 +134,7 @@ module DTK
         if opts[:no_error_if_does_not_exist]
           return ret
         else
-          fail ErrorUsage.new("Version '#{version}' for the specified service module does not exist")
+          fail ErrorUsage.new("Version '#{version}' for the specified module does not exist")
         end
       end
 
@@ -143,7 +143,7 @@ module DTK
         assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
         unless assoc_assemblies.empty?
           assembly_names = assoc_assemblies.map { |a| a[:display_name] }
-          fail ErrorUsage.new("Cannot delete a service module if one or more of its service instances exist in a target (#{assembly_names.join(',')})")
+          fail ErrorUsage.new("Cannot uninstall a module if one or more of its service instances exist (#{assembly_names.join(',')})")
         end
         Assembly::Template.delete_assemblies_nodes(assembly_templates.map(&:id_handle))
       end
@@ -160,8 +160,8 @@ module DTK
         delete_version(version)
       else
         unless module_branch = get_module_branch_matching_version(version)
-          fail ErrorUsage.new("Version '#{version}' for specified service module does not exist!") if version
-          fail ErrorUsage.new("Base version for specified service module does not exist. You have to specify version you want to delete!")
+          fail ErrorUsage.new("Version '#{version}' for specified module does not exist!") if version
+          fail ErrorUsage.new("Base version for specified module does not exist. You have to specify version you want to delete!")
         end
         delete_object()
       end
@@ -336,7 +336,7 @@ module DTK
       case rows.size
        when 0 then nil
        when 1 then rows.first
-       else fail ErrorUsage.new("Cannot find unique service module given service_module_name=#{name_or_id}")
+       else fail ErrorUsage.new("Cannot find unique module given module name '#{name_or_id}'")
       end
     end
 

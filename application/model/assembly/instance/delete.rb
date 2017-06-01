@@ -101,6 +101,7 @@ module DTK; class  Assembly
 
         component_filter = [:and, [:eq, :id, component_idh.get_id()], [:eq, :assembly_id, id()]]
         node = nil
+        node_component_node = nil
         # first check that node belongs to this assebmly
         if node_id.is_a?(Fixnum)
           sp_hash = {
@@ -117,13 +118,33 @@ module DTK; class  Assembly
         # also check that component_idh belongs to this instance and to this node
         sp_hash = {
           #:only_one_per_node,:ref are put in for info needed when getting title
-          cols: [:id, :display_name, :node_node_id, :only_one_per_node, :ref],
+          cols: [:id, :display_name, :node_node_id, :only_one_per_node, :ref, :component_type, :assembly_id],
           filter: component_filter
         }
         component = Component::Instance.get_obj(model_handle(:component), sp_hash)
         unless component
           fail ErrorIdInvalid.new(component_idh.get_id(), :component)
         end
+
+        # if node as component take node so it can be deleted at the end
+        if component.is_node_component?
+          node_component = NodeComponent.node_component(component)
+          node_component_node = node_component.node
+        end
+
+        # this will delete node as component node
+        if node_component_node
+          if opts[:delete_node_as_component_node] || node_component_node.get_components.empty?
+            unless node_component_node.is_assembly_wide_node?
+              if node_component_node.is_node_group?
+                delete_node_group(node_component_node.id_handle, opts)
+              else
+                delete_node(node_component_node.id_handle, opts)
+              end
+            end
+          end
+        end
+
         node ||= component_idh.createIDH(model_name: :node, id: component[:node_node_id]).create_object()
         ret = nil
         Transaction do
@@ -135,6 +156,13 @@ module DTK; class  Assembly
           # recompute the locked module refs
           ModuleRefs::Lock.create_or_update(self)
         end
+
+        if opts[:delete_node_if_last_cmp]
+          if node && node.get_components.empty?
+            delete_node(node.id_handle, opts) unless node.is_assembly_wide_node?
+          end
+        end
+
         ret
       end
     end

@@ -51,5 +51,19 @@ module DTK
     def interpret_error(error_in_result, _components)
       error_in_result
     end
+
+    # TODO: DTK-3026: if dynamically updating values; no need to initially load values
+    def self.update_attribute_value!(attribute)
+      [:value_derived, :value_asserted].each { |k| attribute.delete(k) }
+      attribute.update_obj!(:value_derived, :value_asserted)
+      attribute
+    end
+
+    private
+
+    def update_attribute_value!(attribute)
+      self.class.update_attribute_value!(attribute)
+    end
+    
   end
 end

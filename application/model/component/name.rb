@@ -17,10 +17,13 @@
 
 module DTK
   class Component
-    # Class and isntance method for displaying component related names
-    # TODO: might split into component instance and component template specfic methods
+    # Class and instance method for displaying component related names
+    # TODO: just partially split into component instance and component template specific methods
     module Name
+      require_relative('name/instance')
       module ClassMixin
+        include Instance::ClassMixin
+        
         COMPONENT_TYPE_DELIM = '__'
         DISPLAY_NAME_DELIM = '::'
         NAMESPACE_DELIM = ':'
@@ -59,7 +62,6 @@ module DTK
         def module_name(component_type)
           component_type.split(COMPONENT_TYPE_DELIM).first
         end
-
 
         def display_name_print_form(display_name, opts = {})
           ret = component_type_print_form(display_name, opts)

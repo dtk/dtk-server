@@ -19,6 +19,7 @@ module DTK; class Task; class Template
   class Content
     class InsertActionHelper
       require_relative('insert_action_helper/insert_at_end')
+      require_relative('insert_action_helper/insert_at_start')
       require_relative('insert_action_helper/insert_at_start_in_subtask')
 
       # opts can have keys
@@ -96,6 +97,7 @@ module DTK; class Task; class Template
 
       InsertStrategies = {
         insert_at_end: InsertAtEnd,
+        insert_at_start: InsertAtStart,
         insert_at_start_in_subtask: InsertAtStartInSubtask
       }
 

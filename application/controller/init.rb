@@ -120,7 +120,7 @@ end
 # system fns for controller
 require __DIR__('action_set')
 
-%w(account library target state_change node_group node component attribute user task assembly messages component_module service_module test_module node_module metadata namespace integration developer).each do |controller_file|
+%w(account library target state_change component attribute user assembly messages component_module service_module test_module node_module metadata namespace integration developer).each do |controller_file|
   require __DIR__(controller_file)
 end
 

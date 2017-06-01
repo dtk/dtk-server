@@ -31,7 +31,7 @@ module DTK; module CommonDSL
           end
           return unless  aug_cmp_template
 
-          node = parent_node? || assembly_instance.create_assembly_wide_node?
+          node = parent_node
           new_component_idh = add_component_to_node(node, aug_cmp_template, component_title: component_title?)
           
           result.add_item_to_update(:workflow) # workflow will be updated with spliced in new component

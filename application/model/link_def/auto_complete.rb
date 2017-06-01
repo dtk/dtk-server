@@ -84,22 +84,23 @@ module DTK; class LinkDef
 
       component = components.first
       if dependencies = component[:dependencies]
-        unlinked_link_defs = get_unlinked_link_defs(dependencies)
-        # Log.info("Auto-linking components output:")
-        # Log.info("#{component[:id]} => nil") if unlinked_link_defs.empty?
-
-        unlinked_link_defs.each do |link_def|
+        get_unlinked_link_defs(dependencies).each do |link_def|
           matching_cmps = check_if_matching_cmps(link_def, aug_cmps, component)
-          if matching_cmps.empty?
-            # Log.info("#{component[:id]} => { #{link_def} => [] }")
-          elsif matching_cmps.size > 1
-            # Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
-          else
-            # Log.info("#{component[:id]} => { #{link_def} => #{matching_cmps} }")
-            matching_cmp = matching_cmps.first
-            output_cmp_idh = matching_cmp.id_handle()
-            assembly.add_service_link?(input_cmp_idh, output_cmp_idh)
+          if matching_cmps.size > 1
+            # favor matching cmps in this assembly
+            this_assembly_matching_cmps = matching_cmps.select { |aug_cmp| aug_cmp[:assembly_id] == assembly.id }
+            matching_cmps = this_assembly_matching_cmps unless this_assembly_matching_cmps.empty?
           end
+
+          case matching_cmps.size
+          when 1
+            assembly.add_component_link(input_cmp_idh.create_object, matching_cmps.first)
+          when 0
+            # no matches
+          else
+            # more than 1 match
+          end
+
         end
       end
     end

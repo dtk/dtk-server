@@ -48,8 +48,10 @@ module DTK; class Task; class Template
       def add_subtasks!(parent_task, internode_stage_index, assembly_idh = nil)
         ret = []
         each_node_actions do |node_actions|
-          if node_actions.is_node_component_task?
-            add_delete_node_subtasks(parent_task, node_actions, ret)
+          # TODO: DTK-2938: removed but need to be replaced with logic that inserts delete actions for nodes
+          # if node_actions.is_node_component_task?
+          #  add_delete_node_subtasks(parent_task, node_actions, ret)
+          if false
           else
             if action = node_actions.add_subtask!(parent_task, internode_stage_index, assembly_idh)
               ret << action

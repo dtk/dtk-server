@@ -29,7 +29,7 @@ module DTK; class ConfigAgent
         assembly_instance     = opts[:assembly]
         component_action      = task_info[:component_actions].first
         method_name           = component_action.method_name? || 'create'
-        component             = component_action[:component]
+        component             = component_action.component
         component_template    = component_template(component)
         service_instance_name = assembly_instance.display_name
         dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)

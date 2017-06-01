@@ -15,213 +15,195 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: need to reconcile or have better names on this versus ServiceNodeGroup
 module DTK
-  # This class represents objects that are group of nodes in a target that are grouped together
-  # they leave seperately from assemblies
   class NodeGroup < Node
-    r8_nested_require('node_group', 'clone')
-    include Clone::Mixin
+    require_relative('node_group/id_name_helper')
+    require_relative('node_group/clone')
+    require_relative('node_group/node_group_member')
+    require_relative('node_group/cache')
+    
+    def self.check_valid_id(model_handle, id)
+      IdNameHelper.check_valid_id(model_handle, id)
+    end
+    def self.name_to_id(model_handle, name)
+      IdNameHelper.name_to_id(model_handle, name)
+    end
+    def self.id_to_name(model_handle, id)
+      IdNameHelper.id_to_name(model_handle, id)
+    end
+    # TODO: DTK-2938: from deprcated application/model/node_group; make sure dont need
+    # below which is called at  https://github.com/dtk/dtk-server/blob/c51fd400e023ad297395674c75ed6362da20650b/application/model/task/status/list_form.rb#L56
+    # def NodeGroup.id_to_name(model_handle, id)
+    #  sp_hash =  {
+    #    cols: [:display_name],
+    #    filter: [:and,
+    #             [:eq, :id, id],
+    #             [:eq, :type, 'node_group_instance'],
+    #             [:neq, :datacenter_datacenter_id, nil]]
+    #  }
+    #  rows_raw = get_objs(model_handle, sp_hash)
+    #  rows_raw.first[:display_name]
+    # end
 
-    def self.get_component_info_for_action_list(nodes, opts = {})
-      ret = opts[:add_on_to] || opts[:seed] || []
-      # TODO: <update-target-node-groups>
-      # currently not using so short circuiting
-      return ret
 
-      return ret if nodes.empty?
-      # find node_to_ng mapping
-      node_filter = opts[:node_filter] || Node::Filter::NodeList.new(nodes.map(&:id_handle))
-      node_to_ng = get_node_groups_containing_nodes(nodes.first.model_handle(:node_group), node_filter)
-      node_group_ids = node_to_ng.values.map(&:keys).flatten.uniq
+    # clone_components_to_members returns array with each element being a cloned component
+    # on node_members with their attributes; it clones if necssary
+    # if opts[:node_group_components] then filter to only include components corresponding
+    # to these node_group_components
+    def clone_and_get_components_with_attrs(node_members, opts = {})
+      Clone.clone_and_get_components_with_attrs(self, node_members, opts)
+    end
+
+    # called when bumping up cardinaility in a service instance
+    def add_group_members(new_cardinality)
+      target = get_target
+      assembly = get_assembly?
+      new_tr_idhs = nil
+      Transaction do
+        ndx_new_tr_idhs = TargetRef::Input::BaseNodes.create_linked_target_refs?(target, assembly, [self], new_cardinality: new_cardinality)
+        unless new_tr_idhs = ndx_new_tr_idhs && ndx_new_tr_idhs[id]
+          fail Error.new('Unexpected that new_tr_idhs is empty')
+        end
+
+        # add attribute mappings, cloning if needed
+        create_attribute_links__clone_if_needed(target, new_tr_idhs)
+
+        # find or add state change for node group and then add state change objects for new node members
+        node_group_sc = StateChange.create_pending_change_item?(new_item: id_handle, parent: target.id_handle)
+        node_group_sc_idh = node_group_sc.id_handle
+        new_items_hash = new_tr_idhs.map { |idh| { new_item: idh, parent: node_group_sc_idh } }
+        StateChange.create_pending_change_items(new_items_hash)
+      end
+      new_tr_idhs
+    end
+
+    def delete_group_members(new_cardinality, soft_delete = false)
+      node_members = get_node_group_members
+      num_to_delete = node_members.size - new_cardinality
+      # to find ones to delete;
+      # first look for  :admin_op_status == pending"
+      # then pick ones with highest index
+      #TODO: can be more efficient then needing to sort who thing
+      sorted = node_members.sort do |a, b|
+        a_op = (a[:admin_op_status] ? 1 : 0)
+        b_op = (b[:admin_op_status] ? 1 : 0)
+        if b_op != a_op
+          b_op <=> a_op
+        else
+          (b[:index] || 0).to_i <=> (a[:index] || 0).to_i
+        end
+      end
+      to_delete = (0...num_to_delete).map { |i| sorted[i] }
+
+      if soft_delete
+        to_delete.each(&:soft_delete)
+      else
+        to_delete.each(&:destroy_and_delete)
+      end
+    end
+
+    def bump_down_cardinality(amount = 1)
+      card = attribute.cardinality
+      new_card = card - amount
+      if new_card < 0
+        # instead of throwing error just set cardinality to 0 (need for nodes as components delete node group)
+        new_card = 0
+        # fail ErrorUsage.new("Existing cardinality (#{card}) is less than amount to decrease it by (#{amount})")
+      end
+      Node::NodeAttribute.create_or_set_attributes?([self], :cardinality, new_card)
+      new_card
+    end
+
+    def get_node_group_members
+      self.class.get_node_group_members(id_handle)
+    end
+    def self.get_node_group_members(node_group_idh)
+      get_ndx_node_group_members([node_group_idh]).values.first || []
+    end
+
+    def self.get_ndx_node_group_members(node_group_idhs)
+      ret = {}
+      return ret if node_group_idhs.empty?
       sp_hash = {
-        cols: Node::Instance.component_list_fields() + [:component_list],
-        filter: [:oneof, :id, node_group_ids + nodes.map { |n| n[:id] }]
+        cols: [:id, :display_name, :node_members],
+        filter: [:oneof, :id, node_group_idhs.map(&:get_id)]
       }
-      rows = get_objs(nodes.first.model_handle(), sp_hash)
-
-      ndx_cmps = {}
-      ndx_node_ng_info = {}
-      rows.each do |r|
-        cmp = r[:component]
-        cmp_id = cmp[:id]
-        ndx_cmps[cmp_id] ||= cmp
-        pntr = ndx_node_ng_info[r[:id]] ||= { node_or_ng: r.hash_subset(:id, :display_name) }
-        (pntr[:component_ids] ||= []) << cmp_id
-      end
-      # add titles to components that are non singletons
-      Component::Instance.add_title_fields?(ndx_cmps.values)
-
-      nodes.each do |node|
-        # find components on the node group
-        (node_to_ng[node[:id]] || {}).each_key do |ng_id|
-          if node_ng_info = ndx_node_ng_info[ng_id]
-            node_ng_info[:component_ids].each do |cmp_id|
-              el = ndx_cmps[cmp_id].merge(
-                node: node,
-                source: { type: 'node_group', object: node_ng_info[:node_or_ng] }
-              )
-              ret << el
-            end
-          end
+      mh = node_group_idhs.first.createMH
+      get_objs(mh, sp_hash).each do |ng|
+        node_member = ng[:node_member]
+        target = ng[:target]
+        node_member.merge!(target: target) if target
+        if index = TargetRef.node_member_index(node_member)
+          node_member.merge!(index: index)
         end
-
-        # find components on the node
-        ((ndx_node_ng_info[node[:id]] || {})[:component_ids] || []).each do |cmp_id|
-          el = ndx_cmps[cmp_id].merge(
-            node: node,
-            source: { type: 'node', object: node }
-          )
-          ret << el
-        end
+        ndx = ng[:id]
+        (ret[ndx] ||= []) << node_member
       end
-
       ret
     end
 
-    def self.create_instance(target_idh, display_name, opts = {})
-      create_row = {
-        ref: display_name,
-        display_name: display_name,
-        datacenter_datacenter_id: target_idh.get_id(),
-        type: 'node_group_instance'
-      }
-      ng_mh = target_idh.create_childMH(:node)
-      new_ng_idh = create_from_row(ng_mh, create_row)
-      if opts[:spans_target]
-        NodeGroupRelation.create_to_span_target?(new_ng_idh, target_idh, donot_check_if_exists: true)
+    # making robust so checks if node_or_ngs has node groups already
+    def self.expand_with_node_group_members?(node_or_ngs, opts = {})
+      ret = node_or_ngs
+      ng_idhs = node_or_ngs.select(&:is_node_group?).map(&:id_handle)
+      if ng_idhs.empty?
+        return ret
       end
-      new_ng_idh
-    end
-
-    def self.list(model_handle)
-      sp_hash = {
-        cols: [:id, :display_name, :description],
-        filter: [:eq, :type, 'node_group_instance']
-      }
-      get_objs(model_handle, sp_hash)
-    end
-
-    # TODO: change to having node group having explicit links or using a saved search
-    def get_node_group_members
-      sp_hash = {
-        cols: [:node_members]
-      }
-      rows = get_objs(sp_hash)
-      if target_idh = NodeGroupRelation.spans_target?(rows.map { |r| r[:node_group_relation] })
-        target_idh.create_object().get_node_group_members()
-      else
-        rows.map { |r| r[:node_member] }
-      end
-    end
-
-    # returns node group to node mapping for each node matching node filter
-    # for is {node_id => {ng_id1 => ng1,..}
-    # possible that node_id does not appear meaning that this node does not belong to any group
-    # TODO: this can potentially be expensive to compute without enhancements
-    def self.get_node_groups_containing_nodes(mh, node_filter)
-      ng_mh = mh.createMH(:node)
-      # TODO: more efficient to push node_filte into sql query
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :node_members]
-      }
-      node_to_ng = {}
-      target_nodes = {}
-      get_objs(ng_mh, sp_hash).each do |r|
-        node_group = r.hash_subset(:id, :group_id, :display_name)
-        if target_idh = r[:node_group_relation].spans_target?
-          target_id = target_idh.get_id()
-          target_nodes[target_id] ||= node_filter.filter(target_idh.create_object().get_node_group_members()).map { |n| n[:id] }
-          target_nodes[target_id].each do |n_id|
-            (node_to_ng[n_id] ||= {})[node_group[:id]] ||= node_group
+      ndx_node_members = get_ndx_node_group_members(ng_idhs)
+      ndx_ret = {}
+      node_or_ngs.each do |n|
+        if n.is_node_group?
+          ndx_ret.merge!(n.id => n) unless opts[:remove_node_groups]
+          # (ndx_node_members[n[:id]]||[]).each{|n|ndx_ret.merge!(n.id => n)}
+          (ndx_node_members[n[:id]] || []).each do |node|
+            if opts[:add_group_member_components]
+              components = n.info_about(:components)
+              node.merge!(components: components) unless components.empty?
+            end
+            ndx_ret.merge!(node.id => node)
           end
-        elsif node_filter.include?(r[:node_member])
-          (node_to_ng[r[:node_member][:id]] ||= {})[node_group[:id]] ||= node_group
+        else
+          ndx_ret.merge!(n.id => n)
         end
       end
-      node_to_ng
+      ndx_ret.values
     end
 
-    def self.check_valid_id(model_handle, id)
-      filter =
-        [:and,
-         [:eq, :id, id],
-         [:eq, :type, 'node_group_instance'],
-         [:neq, :datacenter_datacenter_id, nil]]
-      check_valid_id_helper(model_handle, id, filter)
-    end
-
-    def self.name_to_id(model_handle, name)
-      sp_hash =  {
-        cols: [:id],
-        filter: [:and,
-                 [:eq, :display_name, name],
-                 [:eq, :type, 'node_group_instance'],
-                 [:neq, :datacenter_datacenter_id, nil]]
-      }
-      name_to_id_helper(model_handle, name, sp_hash)
-    end
-
-    def self.id_to_name(model_handle, id)
-      sp_hash =  {
-        cols: [:display_name],
-        filter: [:and,
-                 [:eq, :id, id],
-                 [:eq, :type, 'node_group_instance'],
-                 [:neq, :datacenter_datacenter_id, nil]]
-      }
-      rows_raw = get_objs(model_handle, sp_hash)
-      rows_raw.first[:display_name]
-    end
-
-    def get_canonical_template_node
-      get_objs(cols: [:canonical_template_node]).map { |r| r[:template_node] }.first
-    end
-
-    def clone_and_add_template_node(template_node)
-      # clone node into node group's target
-      target_idh = id_handle.get_top_container_id_handle(:target, auth_info_from_self: true)
-      target = target_idh.create_object()
-      cloned_node_id = target.add_item(template_node.id_handle)
-      target.update_ui_for_new_item(cloned_node_id)
-
-      # add node group relationship
-      cloned_node = model_handle(:node).createIDH(id: cloned_node_id).create_object()
-      add_member(cloned_node, target_idh, dont_check_redundancy: true)
-      cloned_node.id_handle
-    end
-
-    def add_member(instance_node, target_idh, opts = {})
-      node_id = instance_node[:id]
-      ng_id = self[:id]
-      # check for redundancy
-      unless opts[:dont_check_redundancy]
-        sp_hash = {
-          cols: [:id],
-          filter: [:and, [:eq, :node_id, node_id], [:eq, :node_group_id, ng_id]]
-        }
-        redundant_links = Model.get_objs(model_handle(:node_group_relation), sp_hash)
-        fail Error.new('Node already member of node group') unless redundant_links.empty?
+    def self.get_node_groups?(node_or_ngs)
+      ndx_ret = {}
+      node_or_ngs.each do |n|
+        ndx_ret.merge!(n.id => n) if n.is_node_group?
       end
-      # create the node_group_relation item to indicate node group membership
-      create_row = {
-        ref: "n#{node_id}-ng#{ng_id}",
-        node_id: node_id,
-        node_group_id: ng_id,
-        datacenter_datacenter_id: target_idh.get_id
-      }
-      Model.create_from_rows(model_handle(:node_group_relation), [create_row])
 
-      # clone the components and links associated with node group to teh node
-      clone_into_node(instance_node)
+      (ndx_ret.empty? ? ndx_ret : ndx_ret.values)
     end
 
-    def delete
-      Model.delete_instance(id_handle())
+    def self.get_node_attributes_to_copy(node_group_idhs)
+      Node.get_target_ref_attributes(node_group_idhs, cols: NodeAttributesToCopy)
+    end
+    NodeAttributesToCopy = (Attribute.common_columns + [:ref, :node_node_id]).uniq - [:id]
+
+    def destroy_and_delete(opts = {})
+      get_node_group_members.map { |node| node.destroy_and_delete(opts) }
+      delete_object(members_are_deleted: true)
     end
 
-    def destroy_and_delete(_opts = {})
-      delete()
+    def delete_object(opts = {})
+      unless opts[:members_are_deleted]
+        get_node_group_members.map { |node| node.delete_object(opts) }
+      end
+      super(opts)
+    end
+
+    private
+
+    def create_attribute_links__clone_if_needed(target, target_ref_idhs)
+      port_links = get_port_links
+      return if port_links.empty?
+      opts_create_links = { set_port_link_temporal_order: true, filter: { target_ref_idhs: target_ref_idhs } }
+      port_links.each do |port_link|
+        port_link.create_attribute_links__clone_if_needed(target.id_handle, opts_create_links)
+      end
     end
   end
 end

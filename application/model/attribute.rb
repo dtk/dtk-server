@@ -15,18 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: move files to inside DTK::Attribute
-files =
-  [
-   'dependency_analysis',
-   'group',
-   'complex_type'
-  ]
-r8_nested_require('attribute', files)
 module DTK
   class Attribute < Model
     set_relation_name(:attribute, :attribute)
 
+    require_relative('attribute/dependency_analysis')
+    require_relative('attribute/group')
+    require_relative('attribute/complex_type')
     require_relative('attribute/get_method')
     require_relative('attribute/meta')
     require_relative('attribute/datatype')
@@ -41,10 +36,10 @@ module DTK
 
     include GetMethod::Mixin
     extend GetMethod::ClassMixin
-    include AttributeGroupInstanceMixin
+    include GroupInstanceMixin
     include DatatypeMixin
-    extend AttrDepAnalaysisClassMixin
-    extend AttributeGroupClassMixin
+    extend DependencyAnalysisClassMixin
+    extend GroupClassMixin
     include ConstantMixin
     include PrintFormMixin
     extend PrintFormClassMixin
@@ -64,28 +59,6 @@ module DTK
     def self.default_title_field
       'name'
     end
-
-    def self.set_aws_required_attributes?(service_instance)
-      filter_proc = lambda {|a| (a[:node][:display_name] == 'assembly_wide') && AwsReqAttributes.include?(a[:attribute][:display_name]) && a[:attribute].is_unset }
-      node_attrs, component_attrs = service_instance.get_augmented_node_and_component_attributes(filter_proc)
-
-      unless node_attrs.empty? && component_attrs.empty?
-        aws_metadata_values = Attribute.get_attributes_from_aws_metadata(AwsReqAttributes)
-
-        node_attrs.each do |node_attr|
-          if new_attr_value = aws_metadata_values[node_attr[:display_name]]
-            node_attr.set_attribute_value(new_attr_value)
-          end
-        end
-
-        component_attrs.each do |cmp_attr|
-          if new_attr_value = aws_metadata_values[cmp_attr[:display_name]]
-            cmp_attr.set_attribute_value(new_attr_value)
-          end
-        end
-      end
-    end
-    AwsReqAttributes = ['vpc_id', 'subnet_id', 'group_id', 'group_name']
 
     # TODO: may make this a real field in attribute
     def title
@@ -185,7 +158,7 @@ module DTK
       return true if attribute_value().nil?
       return false unless self[:data_type] == 'json'
       return nil unless self[:semantic_type]
-      has_req_fields = AttributeComplexType.has_required_fields_given_semantic_type?(attribute_value(), self[:semantic_type])
+      has_req_fields = ComplexType.has_required_fields_given_semantic_type?(attribute_value(), self[:semantic_type])
       return nil if has_req_fields.nil?
       has_req_fields ? false : true
     end
@@ -227,7 +200,7 @@ module DTK
       ret = []
       ndx_nodes = {}
       component_actions.each do |action|
-        AttributeComplexType.flatten_attribute_list(action[:attributes], flatten_nil_value: true).each do |attr|
+        ComplexType.flatten_attribute_list(action[:attributes], flatten_nil_value: true).each do |attr|
           ret << attr.merge(component: action[:component], node: action[:node], task_id: task[:id])
         end
         if opts[:include_node_attributes]
@@ -354,16 +327,16 @@ module DTK
       cmp_el = cmp_name ? cmp_name.gsub(/::.+$/, '') : nil
       attr_name = self[:display_name]
       token_array = ([node_or_group_name, cmp_el] + Aux.tokenize_bracket_name(attr_name)).compact
-      AttributeComplexType.serialze(token_array)
+      ComplexType.serialze(token_array)
     end
 
     def qualified_attribute_id_aux(node_or_group_id_formatted = nil)
       cmp_id = self.key?(:component) ? self[:component][:id] : nil
-      cmp_id_formatted = AttributeComplexType.container_id(:component, cmp_id)
-      attr_id_formatted = AttributeComplexType.container_id(:attribute, self[:id])
-      item_path = AttributeComplexType.item_path_token_array(self) || []
+      cmp_id_formatted = ComplexType.container_id(:component, cmp_id)
+      attr_id_formatted = ComplexType.container_id(:attribute, self[:id])
+      item_path = ComplexType.item_path_token_array(self) || []
       token_array = ([node_or_group_id_formatted, cmp_id_formatted, attr_id_formatted] + item_path).compact
-      AttributeComplexType.serialze(token_array)
+      ComplexType.serialze(token_array)
     end
 
     def self.unravelled_value(val, path)

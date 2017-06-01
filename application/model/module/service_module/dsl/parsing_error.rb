@@ -74,12 +74,12 @@ module DTK
 
       class AmbiguousModuleRef < self
         def initialize(params = {})
-          err_msg = 'Reference to ?module_type module (?module_name) is ambiguous; it belongs to the namespaces (?namespaces); one of these namespaces should be selected and added to the dependencies section'
+          err_msg = 'Reference to module (?module_name) is ambiguous; it belongs to the namespaces (?namespaces); one of these namespaces should be selected and added to the dependencies section'
 
           err_params = Params.new(
             module_type: params[:module_type],
             module_name: params[:module_name],
-            namespaces: params[:namespaces].join(',')
+            namespaces: params[:namespaces].join(', ')
           )
           super(err_msg, err_params)
         end

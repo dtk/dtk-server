@@ -16,153 +16,113 @@
 # limitations under the License.
 #
 module DTK; class NodeGroup
-  module Clone; module Mixin
-    def clone_post_copy_hook(clone_copy_output, opts = {})
-      return if opts[:no_post_copy_hook]
-      super_opts = opts.merge(donot_create_pending_changes: true, donot_create_internal_links: true)
-      super(clone_copy_output, super_opts)
-      opts[:outermost_ports] = super_opts[:outermost_ports] if super_opts[:outermost_ports]
-
-      clone_source_obj = clone_copy_output.source_object
-      component = clone_copy_output.objects.first
-      override_attrs = { ng_component_id: component[:id] }
-      node_clone_opts = [:ret_new_obj_with_cols].inject({}) do |h, k|
-        opts.key?(k) ? h.merge(k => opts[k]) : h
+  module Clone
+    # clone_components_to_members returns array with each element being a cloned component
+    # on node_members with their attributes; it clones if necssary
+    # if opts[:node_group_components] then filter to only include components corresponding
+    # to these node_group_components
+    def self.clone_and_get_components_with_attrs(node_group, node_members, opts = {})
+      needs_cloning, cloned_components = determine_cloned_components(node_group, node_members, opts)
+      ret = needs_cloning.map do |pair|
+        clone_component(pair.node_group_component, pair.node_group_member)
       end
-      get_node_group_members().each { |node| node.clone_into(clone_source_obj, override_attrs, node_clone_opts) }
-    end
-
-    # clone components and links on this node group to node
-    def clone_into_node(node)
-      # get the components on the node group (except those created through link def on create event since these wil be created in clone_external_attribute_links call
-      ng_cmps = get_objs(cols: [:cmps_for_clone_into_node]).map { |r| r[:component] }
-      return if ng_cmps.empty?
-      node_external_ports = clone_components(ng_cmps, node)
-      clone_external_attribute_links(node_external_ports, node)
-    end
-
-                  private
-
-    def clone_components(node_group_cmps, node)
-      external_ports = []
-      # order components to respect dependencies
-      ComponentOrder.derived_order(node_group_cmps) do |ng_cmp|
-        clone_opts = {
-          ret_new_obj_with_cols: [:id, :display_name],
-          outermost_ports: [],
-          use_source_impl_and_template: true,
-          no_constraint_checking: true
-        }
-        override_attrs = { ng_component_id: ng_cmp[:id] }
-        node.clone_into(ng_cmp, override_attrs, clone_opts)
-        external_ports += clone_opts[:outermost_ports]
+      unless cloned_components.empty?
+        ret += get_components_with_attributes(cloned_components)
       end
-      external_ports
+      ret
     end
 
-    def clone_external_attribute_links(node_external_ports, node)
-      port_link_info = ret_port_link_info(node_external_ports)
-      return if port_link_info.empty?
-      # TODO: can also look at approach were if one node member exists already can do simpler copy
-      port_link_info.each do |pl|
-        port_link = pl[:node_group_port_link]
-        port_link.create_attribute_links(node.id_handle)
-      end
-    end
+    private
 
-    def ret_port_link_info(node_external_ports)
-      ret = []
-      return ret if node_external_ports.empty?
-      # TODO: this makes asseumption that can find cooresponding port on node group by matching on port display_name
-      # get the node group ports that correspond to node_external_ports
-      # TODO: this can be more efficient if made into ajoin
-      ng_id = id()
-      fail Error.new('Need to check: semantics of :link_def_info has changed to use outer joins')
-      sp_hash = {
-        cols: [:id, :link_def_info, :display_name],
-        filter: [:and, [:eq, :node_node_id, ng_id], [:oneof, :display_name, node_external_ports.map { |r| r[:display_name] }]]
+    # returns a cloned component with a field :attributes, which has all the components attributes
+    def self.clone_component(node_group_cmp, node_group_member)
+      clone_opts = {
+        include_list: [:attribute],
+        ret_new_obj_with_cols: [:id, :group_id, :display_name],
+        ret_clone_copy_output: true,
+        no_violation_checking: true
       }
-      ng_ports = Model.get_objs(model_handle(:port), sp_hash)
-      ng_port_ids = ng_ports.map { |r| r[:id] }
+      override_attrs = { attribute: { hidden: true } }
+      clone_copy_output = node_group_member.clone_into(node_group_cmp, override_attrs, clone_opts)
+      node_member_cmp = clone_copy_output.objects.first
+      level = 1
+      attributes = clone_copy_output.children_objects(level, :attribute)
+      node_member_cmp.merge(attributes: attributes)
+    end
 
-      # get the ng_port links
+    ComponentNodePair = Struct.new(:node_group_component, :node_group_member)
+    # returns two arrays [needs_cloning, cloned_components]
+    # needs_cloning has elements of type ComponentNodePairs
+    #   where component is node group component and node is node member
+    # cloned_components is array with cloned components
+    # if opts[:node_group_components] then filter to only include components corresponding
+    # to these node_group_components
+    def self.determine_cloned_components(node_group, node_members, opts)
+      needs_cloning = []
+      cloned_components = []
+      ret = [needs_cloning, cloned_components]
+      return ret if node_members.empty?()
+      node_group_id = node_group.id()
       sp_hash = {
-        cols: [:id, :group_id, :input_id, :output_id, :temporal_order],
-        filter: [:or, [:oneof, :input_id, ng_port_ids], [:oneof, :output_id, ng_port_ids]]
+        cols: [:id, :group_id, :display_name, :node_node_id, :ancestor_id],
+        filter: [:oneof, :node_node_id, node_members.map(&:id) + [node_group_id]]
       }
-      ng_port_links = Model.get_objs(model_handle(:port_link), sp_hash)
+      # ndx_cmps is double indexed by [node_id][cmp_id]
+      ndx_cmps = {}
+      cmp_mh = node_group.model_handle(:component)
+      Model.get_objs(cmp_mh, sp_hash).each do |cmp|
+        node_id = cmp[:node_node_id]
+        cmp_id = cmp[:id]
+        (ndx_cmps[node_id] ||= {}).merge!(cmp_id => cmp)
+      end
 
-      # form the node_port_link_hashes by subsitituting corresponding node port sfor ng ports
-      ndx_node_port_ids = node_external_ports.inject({}) { |h, r| h.merge(r[:display_name] => r[:id]) }
-      ndx_ng_ports = ng_ports.inject({}) { |h, r| h.merge(r[:id] => r) }
-      ng_port_links.map do |ng_pl|
-        if ng_port_ids.include?(ng_pl[:input_id])
-          index = :input_id
-          ng_port_id = ng_pl[:input_id]
-        else
-          index = :output_id
-          ng_port_id = ng_pl[:output_id]
+      ndx_ng_cmps = ndx_cmps[node_group_id] || {}
+      ng_cmp_ids = ndx_ng_cmps.keys
+      if restricted_cmps = opts[:node_group_components]
+        ng_cmp_ids &= restricted_cmps.map(&:id)
+      end
+
+      return ret if ng_cmp_ids.empty?
+
+      node_members.each do |node|
+        # for each node group component id see if there is a corresponding component on
+        # the node (member) by looking at if there is cloned component that has
+        # ancestor_id as as matching ng_cmp_id
+        #
+        # To enable this compute an ndx that takes ancestor_id to cmp_id;
+        # this is possible because cmps_on_node has unique ancestor_ids
+        cmps_on_node = (ndx_cmps[node.id] || {}).values
+        ndx_ancestor_id_to_cmp = cmps_on_node.inject({}) { |h, r| h.merge(r[:ancestor_id] => r) }
+        ng_cmp_ids.each do |ng_cmp_id|
+          if cloned_cmp = ndx_ancestor_id_to_cmp[ng_cmp_id]
+            cloned_components << cloned_cmp
+          else
+            ng_cmp = ndx_ng_cmps[ng_cmp_id]
+            # node is of type Node and we want to use type NodeGroupMember
+            node_group_member = NodeGroupMember.create_as(node)
+            needs_cloning << ComponentNodePair.new(ng_cmp, node_group_member)
+          end
         end
-        port_display_name = ndx_ng_ports[ng_port_id][:display_name]
-        node_port_id = ndx_node_port_ids[port_display_name]
-        other_index = (index == :input_id ? :output_id : :input_id)
-        { node_group_port_link: ng_pl, node_port_link_hash: { index => node_port_id, other_index => ng_pl[other_index] } }
       end
+      ret
     end
-  end; end
+
+    def self.get_components_with_attributes(components)
+      ret = []
+      return ret if components.empty?
+      ndx_cmps = components.inject({}) do |h, cmp|
+        h.merge(cmp[:id] => cmp.merge(attributes: []))
+      end
+      sp_hash = {
+        cols: [:id, :group_id, :display_name, :component_component_id],
+        filter: [:oneof, :component_component_id, ndx_cmps.keys]
+      }
+      attr_mh = components.first.model_handle(:attribute)
+      Model.get_objs(attr_mh, sp_hash).each do |attr|
+        ndx = attr[:component_component_id]
+        ndx_cmps[ndx][:attributes] << attr
+      end
+      ndx_cmps.values
+    end
+  end
 end; end
-
-=begin
-TODO: ***; may want to put in version of this for varaibles taht are not input ports; so change to var at node group level propagates to teh node members; for matching would not leverage the component ng_component_id
-
-TODO: currently not used because instead treating node group more like proxy for node members; keeping in
-for now in case turns out taking this approach will be more efficient
-      node_components = get_node_group_members().map{|node|node.clone_into(clone_source_obj,override_attrs,node_clone_opts)}
-
-      unless node_components.empty?
-        ng_component = clone_copy_output.objects.first
-        add_links_between_ng_and_node_components(ng_component,node_components)
-      end
-
-    end
-   private
-
-# this is use technique that links between ng and component attributes and indirect propagation; problematic when the node groupo side has output attribute
-alternative is adding links at time that node to ng link is added and special processing when attribute changed at ng level
-     def add_links_between_ng_and_node_components(ng_cmp,node_cmps)
-       # get all the relevant attributes
-       ng_cmp_id = ng_cmp[:id]
-       ng_plus_node_cmp_ids = node_cmps.map{|r|r[:id]} + [ng_cmp_id]
-       attr_mh = ng_cmp.model_handle(:attribute)
-
-       cols = AttributeLink.attribute_info_cols()
-       cols << AttrFieldToMatchOn unless cols.include?(AttrFieldToMatchOn)
-       cols << :component_component_id unless cols.include?(:component_component_id)
-       sp_hash = {
-         :cols => cols,
-         :filter => [:oneof, :component_component_id, ng_plus_node_cmp_ids]
-       }
-       attrs = Model.get_objs(attr_mh,sp_hash)
-       return if attrs.empty?
-
-       # partition into attributes on node group and ones on nodes
-       # index by AttrFieldToMatchOn
-       ng_ndx = attrs.select{|r|r[:component_component_id] == ng_cmp_id}.inject({}) do |h,r|
-         h.merge(r[AttrFieldToMatchOn] => r[:id])
-       end
-       # build up link rows to create
-       attr_link_rows = attrs.select{|r|r[:component_component_id] != ng_cmp_id}.map do |r|
-         index = r[AttrFieldToMatchOn]
-         {
-           :output_id => ng_ndx[index],
-           :input_id => r[:id],
-           :function => "eq"
-         }
-       end
-       opts = {:donot_create_pending_changes => true, :attr_rows => attrs}
-       parent_idh =  id_handle().get_top_container_id_handle(:target,:auth_info_from_self => true)
-       AttributeLink.create_attribute_links(parent_idh,attr_link_rows,opts)
-     end
-
-     AttrFieldToMatchOn = :display_name
-=end

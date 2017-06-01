@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#TODO: clean this file up; much cut and paste. moving methods we want to keep towards the top
 module DTK; class Task
   module CreateClassMixin
     def create_from_assembly_instance?(assembly, opts = {})
@@ -70,27 +69,42 @@ module DTK; class Task
     end
 
     def get_delete_workflow_order(assembly)
-      target_idh            = target_idh_from_assembly(assembly)
-      task_mh               = target_idh.create_childMH(:task)
+      target_idh = target_idh_from_assembly(assembly)
+      task_mh    = target_idh.create_childMH(:task)
 
+      ret = nil
       begin
         task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'delete' })
       rescue Task::Template::ParsingError => e
-        return
+        return ret
       rescue Task::Template::TaskActionNotFoundError => e
-        return
+        return ret
       end
 
       if serialization_form = task_template_content && task_template_content.serialization_form
-        components_list = []
-
+        ret = []
         if subtasks = serialization_form[:subtasks]
           subtasks.each do |subtask|
-            subtask[:ordered_components].each{ |cmp| components_list << cmp.gsub!('::', '__') }
+            ret += delete_subtype_component_types(subtask)
           end
         end
+        pp [:heerreeeeorder, ret]
+        ret
+      end
+    end
 
-        components_list.flatten
+    # TODO: DTK-3010; this is hack for DTK-3010; want to call parsing logic
+    COMPONENT_OR_ACTION_KEYS = [:ordered_components, :components, :actions, :component, :action]
+    def delete_subtype_component_types(delete_subtask)
+      if matching_key = COMPONENT_OR_ACTION_KEYS.find { |key| delete_subtask.has_key?(key) }
+        component_or_actions = delete_subtask[matching_key]
+        component_or_actions = [component_or_actions] unless component_or_actions.kind_of?(::Array)
+        component_or_actions.map do |item|
+          # convert to component type form and strip off action
+          item.gsub('::', '__').gsub(/\.[^\.]+$/, '')
+        end
+      else
+        []
       end
     end
   end
@@ -139,7 +153,8 @@ module DTK; class Task
         else
           assembly.get_field?(:display_name)
         end
-      "delete '#{what}' from database"
+      # "delete '#{what}' from database"
+      "delete from database"
     end
 
     def self.create_for_command_and_control_action(assembly, action, params, node, opts = {})
@@ -175,11 +190,13 @@ module DTK; class Task
           # TODO: misnomer Action::PowerOnNode; they really just do 'wait until started' 
           start_nodes_task = NodesTask.create_subtask(Action::PowerOnNode, task_mh, node_scs)
         end
+        # TODO: DTK-2938; remove
         # create nodes
-        unless nodes_to_create.empty?
-          node_scs = StateChange::Assembly.node_state_changes(:create_node, assembly, target_idh, just_leaf_nodes: true, nodes: nodes_to_create)
-          create_nodes_task = NodesTask.create_subtask(Action::CreateNode, task_mh, node_scs)
-        end
+        # unless nodes_to_create.empty?
+        #  node_scs = StateChange::Assembly.node_state_changes(:create_node, assembly, target_idh, just_leaf_nodes: true, nodes: nodes_to_create)
+        #  create_nodes_task = NodesTask.create_subtask(Action::CreateNode, task_mh, node_scs)
+        # end
+        create_nodes_task = nil
        when :smoketest then nil # smoketest should not create a node
        else
         fail Error.new("Unexpected component_type (#{component_type})")
@@ -269,107 +286,6 @@ module DTK; class Task
 
       assembly_config_changes = StateChange::Assembly.component_state_changes(assembly, component_type)
       create_running_node_task_from_assembly(task_mh, assembly_config_changes, opts)
-    end
-
-    #This is is the 'inventory node groups', not the node groups in the service instances'
-    def create_from_node_group(node_group_idh, commit_msg = nil)
-      ret = nil
-      target_idh = node_group_idh.get_parent_id_handle_with_auth_info()
-      task_mh = target_idh.create_childMH(:task)
-      node_mh = target_idh.create_childMH(:node)
-      node_group = node_group_idh.create_object()
-
-      create_nodes_changes = StateChange::NodeCentric::SingleNodeGroup.node_state_changes(target_idh, node_group: node_group)
-      create_nodes_task = create_nodes_task(task_mh, create_nodes_changes)
-
-      config_nodes_changes = StateChange::NodeCentric::SingleNodeGroup.component_state_changes(node_mh, node_group: node_group)
-      config_nodes_task = config_nodes_task(task_mh, config_nodes_changes)
-
-      ret = create_new_task(task_mh, temporal_order: 'sequential', node_id: node_group_idh.get_id(), display_name: 'node_group_converge', commit_message: commit_msg)
-      if create_nodes_task && config_nodes_task
-        ret.add_subtask(create_nodes_task)
-        ret.add_subtask(config_nodes_task)
-      else
-        if sub_task = create_nodes_task || config_nodes_task
-          ret.add_subtask(create_nodes_task || config_nodes_task)
-        else
-          ret = nil
-        end
-      end
-      ret
-    end
-    # TODO: might collapse these different creates for node, node_group, assembly
-    def create_from_node(node_idh, commit_msg = nil)
-      ret = nil
-      target_idh = node_idh.get_parent_id_handle_with_auth_info()
-      task_mh = target_idh.create_childMH(:task)
-      node_mh = target_idh.create_childMH(:node)
-      node = node_idh.create_object().update_object!(:display_name)
-
-      create_nodes_changes = StateChange::NodeCentric::SingleNode.node_state_changes(target_idh, node: node)
-      create_nodes_task = create_nodes_task(task_mh, create_nodes_changes)
-
-      # TODO: need to update this to :use_task_templates
-      config_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh, node: node)
-      config_nodes_task = config_nodes_task(task_mh, config_nodes_changes)
-
-      ret = create_new_task(task_mh, temporal_order: 'sequential', node_id: node_idh.get_id(), display_name: 'node_converge', commit_message: commit_msg)
-      if create_nodes_task && config_nodes_task
-        ret.add_subtask(create_nodes_task)
-        ret.add_subtask(config_nodes_task)
-      else
-        if sub_task = create_nodes_task || config_nodes_task
-          ret.add_subtask(create_nodes_task || config_nodes_task)
-        else
-          ret = nil
-        end
-      end
-      ret
-    end
-
-    def power_on_from_node(node_idh, commit_msg = nil)
-      ret = nil
-      target_idh = node_idh.get_parent_id_handle_with_auth_info()
-      task_mh = target_idh.create_childMH(:task)
-      node_mh = target_idh.create_childMH(:node)
-      node = node_idh.create_object().update_object!(:display_name)
-
-      power_on_nodes_changes = StateChange::NodeCentric::SingleNode.component_state_changes(node_mh, node: node)
-      power_on_nodes_task = create_running_node_task(task_mh, power_on_nodes_changes, node: node)
-
-      ret = create_new_task(task_mh, temporal_order: 'sequential', node_id: node_idh.get_id(), display_name: 'node_converge', commit_message: commit_msg)
-      if power_on_nodes_task
-        ret.add_subtask(power_on_nodes_task)
-      else
-        ret = nil
-      end
-      ret
-    end
-
-    # TODO: might deprecate
-    def create_from_pending_changes(parent_idh, state_change_list)
-      task_mh = parent_idh.create_childMH(:task)
-      grouped_state_changes = group_by_node_and_type(state_change_list)
-      grouped_state_changes.each_key do |type|
-        unless [Action::CreateNode, Action::ConfigNode].include?(type)
-          Log.error("treatment of task action type #{type} not yet treated; it will be ignored")
-          grouped_state_changes.delete(type)
-          next
-        end
-      end
-      # if have both create_node and config node then top level has two stages create_node then config node
-      create_nodes_task = create_nodes_task(task_mh, grouped_state_changes[Action::CreateNode])
-      config_nodes_task = config_nodes_task(task_mh, grouped_state_changes[Action::ConfigNode])
-      if create_nodes_task && config_nodes_task
-        ret = create_new_task(task_mh, temporal_order: 'sequential')
-        ret.add_subtask(create_nodes_task)
-        ret.add_subtask(config_nodes_task)
-        ret
-      else
-        ret = create_new_task(task_mh, temporal_order: 'sequential')
-        ret.add_subtask(create_nodes_task || config_nodes_task) #only one wil be non null
-        ret
-      end
     end
 
     private

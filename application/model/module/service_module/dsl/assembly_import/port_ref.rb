@@ -52,18 +52,18 @@ module DTK; class ServiceModule
         cmp_link_value = component_link_hash.values.first
         cmp_link_value = "assembly_wide#{Seperators[:node_component]}#{cmp_link_value}" unless cmp_link_value.include?(Seperators[:node_component])
 
-        if cmp_link_value =~ ServiceLinkTarget
+        if cmp_link_value =~ ComponentLinkTarget
           output_node = Regexp.last_match(1); output_cmp_name = Regexp.last_match(2)
           input = parsed_endpoint(input_node, input_cmp_name, link_def_ref)
           output = parsed_endpoint(output_node, output_cmp_name, link_def_ref)
           { input: input, output: output }
         else
-          fail ParsingError.new("Ill-formed component link ?file_path ?1\nIt should have form: \n  ?2", component_link_hash, ServiceLinkLegalForm, err_opts)
+          fail ParsingError.new("Ill-formed component link ?file_path ?1\nIt should have form: \n  ?2", component_link_hash, ComponentLinkLegalForm, err_opts)
         end
       end
       PortRefRegex = Regexp.new("(^.+)#{Seperators[:node_component]}(.+)#{Seperators[:component_link_def_ref]}(.+$)")
-      ServiceLinkTarget = Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
-      ServiceLinkLegalForm = 'LinkType: Node/Component'
+      ComponentLinkTarget = Regexp.new("(^.+)#{Seperators[:node_component]}(.+$)")
+      ComponentLinkLegalForm = 'LinkType: Node/Component'
 
       # ports are augmented with field :parsed_port_name
       def matching_id(aug_ports, opts = {})

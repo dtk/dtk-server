@@ -141,10 +141,28 @@ module DTK
       def uninstall
         recursive = boolean_request_params(:recursive)
         delete    = boolean_request_params(:delete)
+        force    = boolean_request_params(:force)
 
-        nodes = assembly_instance.info_about(:nodes, datatype: :node)
-        assembly_instance.uninstall(recursive: recursive, delete: delete)
-        rest_ok_response nodes 
+        # if --delete is sent then execute delete workflow to delete nodes as components and then delete service instance
+        if delete
+          opts_hash = {
+            delete_action: 'delete',
+            delete_params: [assembly_instance.id_handle],
+            recursive: recursive,
+            uninstall: true
+          }
+          
+          exec__delete_info = assembly_instance.exec__delete(Opts.new(opts_hash))
+        else
+          assembly_instance.uninstall(recursive: recursive, delete: delete, force: force)
+        end
+
+        response = 
+          unless exec__delete_info.nil? 
+            { message: "Delete procedure started. For more information use 'dtk task-status'."}
+          end
+        
+        rest_ok_response response
       end
 
       def exec
@@ -241,6 +259,37 @@ module DTK
 
       def set_default_target
         rest_ok_response assembly_instance.set_as_default_target
+      end
+
+      # TODO: move most of this logic from controller to model
+      def eject
+        assembly_instance = assembly_instance()
+        component_ref     = required_request_params(:component_ref)
+
+        components = assembly_instance.info_about(:components)
+        components.reject! { |comp| !component_ref.eql?(comp[:display_name]) }
+
+        fail ErrorUsage.new("Component '#{component_ref}' does not match any components") if components.empty?
+        fail ErrorUsage.new("Unexpected that component name '#{component_ref}' match multiple components") if components.size > 1
+
+        component      = components.first
+        aug_components = assembly_instance.get_augmented_components
+        matching_components = aug_components.select { |comp| component[:id] == comp[:id] }
+
+        fail ErrorUsage.new("Component '#{component_ref}' does not match any components") if matching_components.empty?
+        fail ErrorUsage.new("Unexpected that component name '#{component_ref}' match multiple components") if matching_components.size > 1
+
+        component = ::DTK::Component::Instance.create_from_component(matching_components.first)
+        node      = component.get_node
+        assembly_instance.delete_component(component.id_handle, node.id, { delete_node_as_component_node: true})
+
+        service_instance_branch = assembly_instance.get_service_instance_branch
+        DTK::CommonDSL::Generate::ServiceInstance.generate_dsl(assembly_instance, service_instance_branch)
+
+        response = CommonModule::ModuleRepoInfo.new(service_instance_branch)
+        response.merge!(repo_updated: true)
+
+        rest_ok_response response
       end
 
       private

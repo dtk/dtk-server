@@ -27,7 +27,7 @@ module DTK; class Node
 
       def is_node_group?
         # short circuit
-        return true if (is_a?(NodeGroup) || is_a?(ServiceNodeGroup))
+        return true if (is_a?(NodeGroup) || is_a?(NodeGroup))
         Type::NodeGroup.isa?(get_field?(:type))
       end
 

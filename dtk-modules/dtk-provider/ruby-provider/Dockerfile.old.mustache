@@ -1,0 +1,11 @@
+FROM {{docker_image_base}}
+
+{{dockerfile_prefix}}
+
+{{#gems}}
+RUN gem install {{name}} -v {{version}} --no-rdoc --no-ri
+{{/gems}}
+
+{{dockerfile_suffix}}
+
+ENTRYPOINT ["{{entrypoint}}"]

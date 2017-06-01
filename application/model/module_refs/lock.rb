@@ -156,7 +156,7 @@ module DTK
       def self.compute_elements(assembly_instance, types, opts = {})
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance, opts)
         collapsed = module_refs_tree.collapse(Aux.hash_subset(opts, [:raise_errors]))
-        collapsed.choose_namespaces_and_versions!()
+        collapsed.choose_namespaces_and_versions!(assembly_instance: assembly_instance)
         collapsed.add_implementations!(assembly_instance)
 
         ret = new(assembly_instance)

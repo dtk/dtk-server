@@ -1,0 +1,112 @@
+---
+module: aws/aws_target
+version: master
+dependencies:
+  aws/ec2: master
+  aws/identity_aws: 1.0.1
+  aws/image_aws: master
+  aws/network_aws: master
+assemblies:
+  target_keys:
+    description: Simple AWS VPC target
+    components:
+    - image_aws
+    - identity_aws::role[na]
+    - identity_aws::credentials
+    - network_aws::setup
+    - network_aws::vpc[vpc1]:
+        attributes:
+          region: us-east-1
+    - network_aws::vpc_subnet[vpc1-default]
+    - network_aws::security_group[vpc1-default]:
+        attributes:
+          group_name: default
+    - ec2::profile[aws-target]
+    actions:
+      create:
+        subtask_order: sequential
+        subtasks:
+        - name: aws credentials setup
+          ordered_components:
+          - identity_aws::credentials
+          - identity_aws::role[na]
+          - network_aws::setup
+        - name: aws vpc initialization
+          components:
+          - network_aws::vpc[vpc1]
+        - name: aws vpc subnet setup
+          components:
+          - network_aws::vpc_subnet[vpc1-default]
+        - name: aws vpc security group setup
+          components:
+          - network_aws::security_group[vpc1-default]
+        - name: ec2::profile
+          components:
+          - ec2::profile[aws-target]
+      delete:
+        subtask_order: sequential
+        subtasks:
+        - name: aws vpc security group delete
+          components:
+          - network_aws::security_group[vpc1-default]
+        - name: aws vpc subnet delete
+          components:
+          - network_aws::vpc_subnet[vpc1-default]
+        - name: aws vpc cleanup of resources
+          components:
+          - network_aws::vpc[vpc1]
+        - name: aws credentials cleanup of resources
+          ordered_components:
+          - identity_aws::credentials
+          - identity_aws::role[na]
+          - network_aws::setup
+  target_iam:
+    description: Simple AWS VPC target with IAM roles
+    components:
+    - image_aws
+    - identity_aws::role[ec2-dtk-access]
+    - network_aws::vpc[vpc1]:
+        attributes:
+          region: us-east-1
+    - network_aws::vpc_subnet[vpc1-default]
+    - network_aws::security_group[vpc1-default]:
+        attributes:
+          group_name: default
+    - ec2::profile[aws-target]:
+        attributes:
+          image: amazon
+          size: small
+    actions:
+      create:
+        subtask_order: sequential
+        subtasks:
+        - name: aws credentials setup
+          components:
+          - identity_aws::role[ec2-dtk-access]
+        - name: aws vpc initialization
+          components:
+          - network_aws::vpc[vpc1]
+        - name: aws vpc subnet setup
+          components:
+          - network_aws::vpc_subnet[vpc1-default]
+        - name: aws vpc security group setup
+          components:
+          - network_aws::security_group[vpc1-default]
+        - name: ec2::profile
+          components:
+          - ec2::profile[aws-target]
+      delete:
+        subtask_order: sequential
+        subtasks:
+        - name: aws vpc security group delete
+          components:
+          - network_aws::security_group[vpc1-default]
+        - name: aws vpc subnet delete
+          components:
+          - network_aws::vpc_subnet[vpc1-default]
+        - name: aws vpc cleanup of resources
+          components:
+          - network_aws::vpc[vpc1]
+        - name: aws role cleanup of resources
+          components:
+          - identity_aws::role[ec2-dtk-access]

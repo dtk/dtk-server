@@ -25,23 +25,38 @@ module DTK
         end
       end
 
-      def self.transform_attribute(attribute)
-        { attribute.display_name => attribute_info(attribute) }
+      # TODO: DTK-2938; might remove this special logic around node component
+
+      # opts can have keys:
+      #   :node_component
+      def self.transform_attribute(attribute, opts = {})
+        { attribute.display_name => attribute_info(attribute, opts) }
       end
       
       def self.component_attribute_values(component_action, service_instance_name)
+        node_component = NodeComponent.node_component?(component_action.component)
         component_action.attributes.inject(service_wide_attribute_values(service_instance_name)) do |h, attr|
           # prune dynamic attributes that are not also inputs
-          (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(transform_attribute(attr))
+          (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(transform_attribute(attr, node_component:  node_component))
         end
       end
 
       private
 
-      def self.attribute_info(attribute)
-        Info.new(attribute[:attribute_value], attribute[:data_type], attribute[:hidden])
+      # opts can have keys:
+      #   :node_component
+      def self.attribute_info(attribute, opts = {})
+        value = factor_in_node_component_special_value(attribute, opts)
+        Info.new(value, attribute[:data_type], attribute[:hidden])
       end
-
+    
+      def self.factor_in_node_component_special_value(attribute, opts = {})
+        ConfigAgent.update_attribute_value!(attribute)
+        value = attribute[:attribute_value]
+        return value unless node_component = opts[:node_component]
+        is_special_value, special_value = node_component.update_if_dynamic_special_attribute!(attribute)
+        is_special_value ? special_value : value
+      end
 
       SERVICE_WIDE_ATTRIBUTES = {
         dtk_service_instance: {

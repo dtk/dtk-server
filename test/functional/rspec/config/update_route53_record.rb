@@ -3,8 +3,15 @@ require 'fog'
 hosted_zone_id = ARGV[0]
 record = ARGV[1]
 new_value = ARGV[2]
+use_iam_instance_profile = ARGV[3]
 
-dns = Fog::DNS.new({:provider => 'AWS'})
+dns = nil
+
+if use_iam_instance_profile
+  dns = Fog::DNS.new({:provider => 'AWS', :use_iam_profile => true })
+else
+  dns = Fog::DNS.new({:provider => 'AWS'})
+end
 
 zone = dns.zones.get(hosted_zone_id)
 record_name = zone.records.get(record)

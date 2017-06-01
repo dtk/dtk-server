@@ -6,20 +6,17 @@
       "instance_id",
       "size",
       "os",
-      "op_status",
-      "dns_name"
+      "instance_state",
+      "dns_address"
     ],
     "mapping": {
-      "name": "display_name",
-      "region": "external_ref.region",
-      "dns_name": "external_ref.dns_name",
-      "size": "external_ref.size",
-      "instance_id": "external_ref.instance_id",
-      "zone": "external_ref.availability_zone",
-      "os": "os_type",
-      "op_status": "admin_op_status",
       "id": "dtk_id",
-      "managed": "managed"
+      "name": "display_name",
+      "instance_id": "instance_id",
+      "size": "size",
+      "os": "os_type",
+      "instance_state": "instance_state",
+      "dns_address": "dns_address"
     }
   },
   "node_group": {
@@ -387,7 +384,6 @@
     "order": [
       "id",
       "service_instance",
-      "status",
       "last_run",
       "assembly_template",
       "target",
@@ -400,7 +396,6 @@
       "created_at": "created_at.get_date",
       "id": "dtk_id",
       "assembly_template": "assembly_template",
-      "status": "op_status",
       "last_run": "last_task_run_status",
       "target": "target"
     }

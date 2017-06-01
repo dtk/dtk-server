@@ -40,7 +40,7 @@ module DTK; module CommonDSL
         
         def generate_content_input?
           unless prune?
-            set_id_handle(@attribute)
+            set_id_handle(attribute)
             set(:Value,  attribute_value)
             if tags = tags?
               add_tags!(tags)
@@ -67,6 +67,8 @@ module DTK; module CommonDSL
 
         private
 
+        attr_reader :attribute
+
         # Could be overwritten
         def prune?
           false
@@ -81,8 +83,6 @@ module DTK; module CommonDSL
           case type
           when :assembly
             new(type, attribute)
-          when :node
-            Node::Attribute.new(type, attribute)
           when :component
             Component::Attribute.new(type, attribute, opts)
           else
@@ -97,11 +97,11 @@ module DTK; module CommonDSL
         end
 
         def attribute_value
-          @attribute_value ||= @attribute.convert_value_to_ruby_object(value_field: :attribute_value, donot_raise_error: true)
+          @attribute_value ||= attribute.convert_value_to_ruby_object(value_field: :attribute_value, donot_raise_error: true)
         end
 
         def attribute_name
-          self.class.attribute_name(@attribute)
+          self.class.attribute_name(attribute)
         end
 
         def self.attribute_name(attribute)

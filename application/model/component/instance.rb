@@ -17,7 +17,8 @@
 #
 module DTK; class Component
   class Instance < self
-    r8_nested_require('instance', 'interpreted')
+    require_relative('instance/with_attributes')
+    require_relative('instance/interpreted')
 
     def get_action_def?(method_name, opts = {})
       get_action_defs({ filter: [:eq, :method_name, method_name] }.merge(opts)).first

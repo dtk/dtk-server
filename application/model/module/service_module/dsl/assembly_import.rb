@@ -108,34 +108,35 @@ module DTK; class ServiceModule
       attr_mh    = nil
 
       ndx_assembly_hashes.each do |assembly_ref, assembly|
-        assembly_idh        = @container_idh.get_child_id_handle(:component, assembly_ref)
-        attributes          = assembly[:attributes]
-        selected_assembly   = assemblies.find {|s_assembly| s_assembly[:ref] == assembly_ref }
-        selected_attributes = selected_assembly.get_attributes
+        assembly_idh = @container_idh.get_child_id_handle(:component, assembly_ref)
+        if attributes = assembly[:attributes]
+          selected_assembly   = assemblies.find {|s_assembly| s_assembly[:ref] == assembly_ref }
+          selected_attributes = selected_assembly.get_attributes
 
-        attributes.each do |attr_name, attribute|
-          attribute = attribute[:value]
-          selected_attribute = selected_attributes.find{ |s_attr| s_attr[:display_name] == attr_name }
-          attr_mh ||= selected_attribute.model_handle
-          attr_idh ||= attr_mh.createIDH(id: selected_attribute[:id])
-          if link_to = attribute['links_to']
-            if link_to.is_a?(Array)
-              link_to.each do |lt|
-                links_to << { :ref => "#{attr_name}-#{lt}", :display_name => "#{attr_name}-#{lt}", :component_ref => lt, :attribute_id => selected_attribute[:id] }
+          attributes.each do |attr_name, attribute|
+            attribute = attribute[:value]
+            selected_attribute = selected_attributes.find{ |s_attr| s_attr[:display_name] == attr_name }
+            attr_mh ||= selected_attribute.model_handle
+            attr_idh ||= attr_mh.createIDH(id: selected_attribute[:id])
+            if link_to = attribute['links_to']
+              if link_to.is_a?(Array)
+                link_to.each do |lt|
+                  links_to << { :ref => "#{attr_name}-#{lt}", :display_name => "#{attr_name}-#{lt}", :component_ref => lt, :attribute_id => selected_attribute[:id] }
+                end
+              else
+                links_to << { :ref => "#{attr_name}-#{link_to}", :display_name => "#{attr_name}-#{link_to}", :component_ref => link_to, :attribute_id => selected_attribute[:id] }
               end
-            else
-              links_to << { :ref => "#{attr_name}-#{link_to}", :display_name => "#{attr_name}-#{link_to}", :component_ref => link_to, :attribute_id => selected_attribute[:id] }
             end
-          end
-          if link_from = attribute['links_from']
-            links_from << { :ref => "#{attr_name}-#{link_from}", :display_name => "#{attr_name}-#{link_from}", :component_ref => link_from, :attribute_id => selected_attribute[:id] }
+            if link_from = attribute['links_from']
+              links_from << { :ref => "#{attr_name}-#{link_from}", :display_name => "#{attr_name}-#{link_from}", :component_ref => link_from, :attribute_id => selected_attribute[:id] }
+            end
           end
         end
       end
 
       # TODO: Aldin - need to add update if exists
-      Model.create_from_rows(attr_mh.create_childMH(:attribute_link_to), links_to, convert: true)
-      Model.create_from_rows(attr_mh.create_childMH(:attribute_link_from), links_from, convert: true)
+      Model.create_from_rows(attr_mh.create_childMH(:attribute_link_to), links_to, convert: true) unless links_to.empty?
+      Model.create_from_rows(attr_mh.create_childMH(:attribute_link_from), links_from, convert: true) unless links_from.empty?
     end
 
     def self.import_assembly_top(assembly_ref, assembly_hash, module_branch, module_name, opts = {})

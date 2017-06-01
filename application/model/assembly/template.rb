@@ -145,45 +145,61 @@ module DTK; class Assembly
       end
 
       add_attribute_links(assembly_instance)
-
       assembly_instance
     end
 
+    # TODO DTK-2999: will refactor
     def add_attribute_links(assembly_instance)
+      links            = []
       links_from          = []
       target              = assembly_instance.get_target
       assembly_attributes = assembly_instance.get_assembly_level_attributes
-      node_attributes, cmp_attributes = assembly_instance.get_augmented_node_and_component_attributes
+      # node_attributes, cmp_attributes = assembly_instance.get_augmented_node_and_component_attributes
+      cmp_attributes = assembly_instance.get_augmented_component_attributes
 
       assembly_attributes.each do |assembly_attribute|
-        attribute_links_to = AttributeLinkTo.get_for_attribute_id(model_handle.createMH(:attribute_link_to), assembly_attribute[:ancestor_id])
+        attribute_links_to   = AttributeLinkTo.get_for_attribute_id(model_handle.createMH(:attribute_link_to), assembly_attribute[:ancestor_id])
+        attribute_links_from = AttributeLinkFrom.get_for_attribute_id(model_handle.createMH(:attribute_link_from), assembly_attribute[:ancestor_id])
 
-        links_from += attribute_links_to.map do |attribute_link_to|
-          if matching_attribute = find_matching_component(attribute_link_to[:component_ref], cmp_attributes, node_attributes)
+        links += attribute_links_to.map do |attribute_link_to|
+          if matching_attribute = find_matching_attribute(attribute_link_to[:component_ref], cmp_attributes)
             {
-              ref: "attribute_link:#{matching_attribute[:id]}-#{assembly_attribute[:id]}", 
+              ref: "attribute_link:#{matching_attribute[:id]}-#{assembly_attribute[:id]}",
+              datacenter_datacenter_id: target.id,
+              input_id: matching_attribute.id,
+              output_id: assembly_attribute.id,
+              type: 'external',
+              function: 'eq'
+            }
+          else
+            next
+          end
+        end
+
+        links += attribute_links_from.map do |attribute_link_from|
+          if matching_attribute = find_matching_attribute(attribute_link_from[:component_ref], cmp_attributes)
+            {
+              ref: "attribute_link:#{matching_attribute[:id]}-#{assembly_attribute[:id]}",
               datacenter_datacenter_id: target.id,
               input_id: assembly_attribute.id,
               output_id: matching_attribute.id,
-              type: 'external', 
-              function: 'eq' 
+              type: 'external',
+              function: 'eq'
             }
+          else
+            next
           end
-        end      
+        end
       end
 
-      # temporary, to remove empty array element
-      if links_from.last.nil?
-        links_from.delete(links_from.last)
-      end
-      Model.create_from_rows(target.model_handle.create_childMH(:attribute_link), links_from, convert: true)
+      Model.create_from_rows(target.model_handle.create_childMH(:attribute_link), links, convert: true)
     end
 
-    def find_matching_component(component_ref, cmp_attributes, node_attributes)
+    def find_matching_attribute(component_ref, cmp_attributes, node_attributes = nil)
       cmp_ref_size       = component_ref.split('/').size
       matching_attribute = nil
 
-      if cmp_ref_size == 3
+      # if cmp_ref_size == 2
         cmp_attributes.each do |attr|
           cmp_name  = nil
           attr_name = attr[:display_name]
@@ -192,7 +208,7 @@ module DTK; class Assembly
             cmp_name = n_component[:display_name].gsub('__','::')
           end
           full_name = ""
-          full_name << "#{node_name}/" if node_name
+          full_name << "#{node_name}/" if node_name && !node_name.eql?('assembly_wide')
           full_name << "#{cmp_name}/" if cmp_name
           full_name << "#{attr_name}" if attr_name
           if component_ref == full_name
@@ -200,19 +216,19 @@ module DTK; class Assembly
             break
           end
         end
-      elsif cmp_ref_size == 2
-        node_attributes.each do |attr|
-          attr_name = attr[:display_name]
-          node_name = (attr[:node]||{})[:display_name]
-          full_name = ""
-          full_name << "#{node_name}/" if node_name
-          full_name << "#{attr_name}" if attr_name
-          if component_ref == full_name
-            matching_attribute = attr
-            break
-          end
-        end
-      end
+      # elsif cmp_ref_size == 2
+      #   node_attributes.each do |attr|
+      #     attr_name = attr[:display_name]
+      #     node_name = (attr[:node]||{})[:display_name]
+      #     full_name = ""
+      #     full_name << "#{node_name}/" if node_name
+      #     full_name << "#{attr_name}" if attr_name
+      #     if component_ref == full_name
+      #       matching_attribute = attr
+      #       break
+      #     end
+      #   end
+      # end
 
       matching_attribute
     end

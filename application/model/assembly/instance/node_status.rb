@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+# TODO: probably deprecte and put these under NodeComponent
 # Methods relating to both op and admin status
 module DTK; class  Assembly; class Instance
   module NodeStatusMixin
@@ -84,7 +85,7 @@ module DTK; class  Assembly; class Instance
       end.nil?
     end
 
-    def self.node_status(type,node)
+    def self.node_status(type, node)
       case type
         when :admin 
           node.get_field?(:admin_op_status)

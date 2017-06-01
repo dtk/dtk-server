@@ -31,7 +31,7 @@ module DTK; class Task
       ret = NodeGroupProcessing.decompose_node_groups!(task, opts)
 
       # raise error if any its nodes are not running
-      not_running_nodes = ret.get_associated_nodes().select { |n| n.get_and_update_operational_status!() != 'running' }
+      not_running_nodes = NodeComponent.node_components(ret.get_associated_nodes, assembly).select { |node_component| ! node_component.node_is_running? }
       unless not_running_nodes.empty?
         node_is = (not_running_nodes.size == 1 ? 'node is' : 'nodes are')
         node_names = not_running_nodes.map(&:display_name).join(', ')

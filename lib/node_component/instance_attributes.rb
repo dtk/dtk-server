@@ -43,6 +43,10 @@ module DTK
           end
           ret
         end
+
+        def node_is_running?
+          instance_attributes.node_is_running?
+        end
       end
       
       def initialize(node, attributes_name_value_hash)
@@ -64,6 +68,14 @@ module DTK
       def self.instance_id(node_or_node_group_member)
         instance_attributes(node_or_node_group_member).value(:instance_id)
       end
+
+      def node_is_running?
+        instance_state_is_running_values.include?(instance_state?)
+      end
+
+      def instance_state?
+        value?(:instance_state)
+      end
       
       private
 
@@ -79,7 +91,11 @@ module DTK
       def iaas_normalize(attributes_name_value_hash)
         fail Error::NoMethodForConcreteClass.new(self.class)
       end
-      
+
+      def instance_state_is_running_values
+        fail Error::NoMethodForConcreteClass.new(self.class)
+      end
+
       def display_name_hash(node, opts = {})
         { display_name: node.assembly_node_print_form }
       end

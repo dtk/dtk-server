@@ -35,6 +35,10 @@ module DTK
       def normalize(name)
         NORMALIZE_MAPPING[name] || name
       end      
+
+      def instance_state_is_running_values
+        ['running']
+      end
     end
   end
 end

@@ -151,7 +151,7 @@ module DTK
         end
 
         def description(opts = {})
-          "Component (#{@augmented_port.display_name_print_form()}) has an unmet dependency"
+          "Component (#{@augmented_port.display_name_print_form(hide_assembly_wide_node: true)}) has an unmet dependency"
         end
       end
 

@@ -28,5 +28,49 @@ module DTK
       }
       get_objs(mh, sp_hash)
     end
+
+    def self.get_for_attribute_ids(mh, attribute_ids)
+      sp_hash = {
+        cols: [:id, :ref, :display_name, :component_ref, :attribute_id],
+        filter: [:oneof, :attribute_id, attribute_ids]
+      }
+      get_objs(mh, sp_hash)
+    end
+
+    def self.create_or_update(parent_mh, links_to)
+      to_add     = []
+      to_delete  = []
+      existing   = []
+      attr_ids   = links_to.map{ |lf| lf[:attribute_id] }
+      link_to_mh = parent_mh.create_childMH(:attribute_link_to)
+      links      = get_for_attribute_ids(link_to_mh, attr_ids)
+
+      links_to.each do |link_to|
+        matching_links = links.select{ |link| link[:attribute_id] == link_to[:attribute_id]}
+        if matching_links.empty?
+          to_add << link_to
+        else
+          matching_link_names = matching_links.map{ |ml| ml[:display_name] }
+          if matching_link_names.include?(link_to[:display_name])
+            existing << link_to
+          else
+            to_add << link_to
+          end
+        end
+      end
+
+      links.each do |link|
+        if to_add.find { |ta| ta[:display_name] == link[:display_name] && ta[:attribute_id] == link[:attribute_id] }
+          next
+        elsif existing.find { |ex| ex[:display_name] == link[:display_name] && ex[:attribute_id] == link[:attribute_id] }
+          next
+        else
+          to_delete << link
+        end
+      end
+
+      Model.delete_instances(to_delete.map{ |td| td.id_handle })
+      Model.create_from_rows(link_to_mh, to_add, convert: true)
+    end
   end
 end

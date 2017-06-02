@@ -20,12 +20,57 @@ module DTK
     def self.common_columns
       [:id, :group_id, :display_name, :component_red]
     end
+
     def self.get_for_attribute_id(mh, attribute_id)
       sp_hash = {
         cols: [:id, :ref, :display_name, :component_ref, :attribute_id],
         filter: [:eq, :attribute_id, attribute_id]
       }
       get_objs(mh, sp_hash)
+    end
+
+    def self.get_for_attribute_ids(mh, attribute_ids)
+      sp_hash = {
+        cols: [:id, :ref, :display_name, :component_ref, :attribute_id],
+        filter: [:oneof, :attribute_id, attribute_ids]
+      }
+      get_objs(mh, sp_hash)
+    end
+
+    def self.create_or_update(parent_mh, links_from)
+      to_add       = []
+      to_delete    = []
+      existing     = []
+      attr_ids     = links_from.map{ |lf| lf[:attribute_id] }
+      link_from_mh = parent_mh.create_childMH(:attribute_link_from)
+      links        = get_for_attribute_ids(link_from_mh, attr_ids)
+
+      links_from.each do |link_from|
+        matching_links = links.select{ |link| link[:attribute_id] == link_from[:attribute_id]}
+        if matching_links.empty?
+          to_add << link_from
+        else
+          matching_link_names = matching_links.map{ |ml| ml[:display_name] }
+          if matching_link_names.include?(link_from[:display_name])
+            existing << link_from
+          else
+            to_add << link_from
+          end
+        end
+      end
+
+      links.each do |link|
+        if to_add.find { |ta| ta[:display_name] == link[:display_name] && ta[:attribute_id] == link[:attribute_id] }
+          next
+        elsif existing.find { |ex| td[:display_name] == link[:display_name] && ex[:attribute_id] == link[:attribute_id] }
+          next
+        else
+          to_delete << link
+        end
+      end
+
+      Model.delete_instances(to_delete.map{ |td| td.id_handle })
+      Model.create_from_rows(link_from_mh, to_add, convert: true)
     end
   end
 end

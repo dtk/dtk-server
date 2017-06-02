@@ -192,6 +192,7 @@ module DTK; class Assembly
         end
       end
 
+      links.reject! { |link| link.nil? }
       Model.create_from_rows(target.model_handle.create_childMH(:attribute_link), links, convert: true)
     end
 

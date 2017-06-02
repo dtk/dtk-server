@@ -134,9 +134,10 @@ module DTK; class ServiceModule
         end
       end
 
-      # TODO: Aldin - need to add update if exists
-      Model.create_from_rows(attr_mh.create_childMH(:attribute_link_to), links_to, convert: true) unless links_to.empty?
-      Model.create_from_rows(attr_mh.create_childMH(:attribute_link_from), links_from, convert: true) unless links_from.empty?
+      AttributeLinkTo.create_or_update(attr_mh, links_to) unless links_to.empty?
+      AttributeLinkFrom.create_or_update(attr_mh, links_from) unless links_from.empty?
+      # Model.create_from_rows(attr_mh.create_childMH(:attribute_link_to), links_to, convert: true) unless links_to.empty?
+      # Model.create_from_rows(attr_mh.create_childMH(:attribute_link_from), links_from, convert: true) unless links_from.empty?
     end
 
     def self.import_assembly_top(assembly_ref, assembly_hash, module_branch, module_name, opts = {})

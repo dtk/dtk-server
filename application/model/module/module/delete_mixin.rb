@@ -172,13 +172,18 @@ module DTK; class BaseModule
       return if components.empty? && services.empty?
 
 
-      refs = []
+      refs       = []
+      refs_names = []
+
       unless components.empty?
         components.each do |cmp|
           version = cmp[:module_branch][:version]
           full_name = "#{cmp[:namespace][:display_name]}:#{cmp[:component_module][:display_name]}"
           full_name << "(#{version})" if version && !version.eql?('master')
-          refs << "Reference to module '#{full_name}'"
+          unless refs_names.include?(full_name)
+            refs_names << full_name
+            refs << "Reference to module '#{full_name}'"
+          end
         end
       end
 
@@ -187,7 +192,10 @@ module DTK; class BaseModule
           version = srv[:module_branch][:version]
           full_name = "#{srv[:namespace][:display_name]}:#{srv[:service_module][:display_name]}"
           full_name << "(#{version})" if version && !version.eql?('master')
-          refs << "Reference to module '#{full_name}'"
+          unless refs_names.include?(full_name)
+            refs_names << full_name
+            refs << "Reference to module '#{full_name}'"
+          end
         end
       end
 

@@ -96,7 +96,18 @@ module DTK; class Task; class Status
       subtasks = task.subtasks()
       num_subtasks = subtasks.size
       if num_subtasks > 0
-        if opts[:summarize_node_groups] && (ea && ea[:node].is_node_group?())
+        if num_subtasks == 1 && !subtasks.first[:executable_action_type].nil? 
+          ea = subtasks.first[:executable_action]
+          if subtasks.first[:executable_action_type].include?("ConfigNode") #|| subtasks.first[:display_name].include?("configure_node")
+            el.merge!(Task::Action::ConfigNode.status(ea, opts))
+            return ret
+          elsif subtasks.first[:executable_action_type].include?("DeleteFromDatabase")
+            el.merge!(Task::Action::DeleteFromDatabase.status(ea, opts))
+            return ret
+          end
+        end
+
+        if opts[:summarize_node_groups] && (ea && ea[:node].is_node_group?()) 
           NodeGroupSummary.new(subtasks).add_summary_info!(el) do
             subtasks.flat_map { |st| status_table_form(st, opts, level + 1) }
           end

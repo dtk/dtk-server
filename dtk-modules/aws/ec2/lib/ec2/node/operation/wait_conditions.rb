@@ -67,8 +67,9 @@ module DTKModule
           attempts = 0
           instance_info_array = nil
           while attempts < max_attempts
-            instance_info_array = Operation.describe_instances(client, instance_ids)
-            if conditions_met_all_instances?(instance_info_array, &wait_conditions)
+            # To prevent raise condition where it looks for instance before it is registed we trap
+            instance_info_array = Operation.describe_instances(client, instance_ids) rescue nil
+            if instance_info_array && conditions_met_all_instances?(instance_info_array, &wait_conditions)
               return instance_info_array
             else
               attempts += 1

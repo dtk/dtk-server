@@ -4,9 +4,6 @@ module DTKModule
       require_relative('resource/operation')
       require_relative('resource/output_settings')
 
-      # TODO: this shoudl be moved to module aws/ec2
-      #require_relative('resource/ec2')
-
       attr_reader :attributes, :client
 
       def initialize(credentials_handle, name, attributes)
@@ -29,15 +26,9 @@ module DTKModule
         fail "This method should be overwritten by concrete class"
       end
 
-      DEFAULT_REGION = 'us-east-1'
-
+      # credentials_handle can be nil, a ::Hash or AwsCredentialHandle object
       def client_opts(credentials_handle)
-        # credentials_handle can be nil
-        ret = { region: (credentials_handle || {})[:region] || DEFAULT_REGION }
-        if credentials = CredentialHandler.aws_credentials(credentials_handle)
-          ret.merge!(credentials: credentials)
-        end
-        ret
+        AwsCredentialHandle.aws_credentials_and_region(credentials_handle)
       end
 
     end

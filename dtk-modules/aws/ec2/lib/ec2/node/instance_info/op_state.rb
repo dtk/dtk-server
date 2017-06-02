@@ -35,7 +35,7 @@ module DTKModule
       end
 
       STATE_TYPES = {
-        run: ['pending', 'running'],
+        run: ['running'],
         stop: ['stopping', 'stopped'],
         terminate: ['shutting-down', 'terminated'] 
       }

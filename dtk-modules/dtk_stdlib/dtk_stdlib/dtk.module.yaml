@@ -1,4 +1,3 @@
 ---
-dsl_version: 
 module: dtk_stdlib/dtk_stdlib
 version: master

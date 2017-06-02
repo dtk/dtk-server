@@ -1,10 +1,24 @@
 module DTKModule
   module DTK
     class Attributes
+      require_relative('attributes/attribute_type')
       module Mixin
-        def wrap(av_hash, &body)
+        # opts can have keys:
+        #   :attributes_class
+        def wrap(av_hash, opts = {},& body)
           begin 
-            response = body.call(Attributes.new(av_hash))
+            attributes_class = opts[:attributes_class] || Attributes
+            response = 
+              case body.arity
+              when 1
+                body.call(attributes_class.new(av_hash))
+              when 3
+                split_av_hash = AttributeType.split(av_hash)
+                args = [split_av_hash[:component], split_av_hash[:assembly_level], split_av_hash[:system]].map { |av_hash|  attributes_class.new(av_hash)}
+                body.call(*args)
+              else
+                fail "Arity of body must be 1 or 3"
+              end
             response.respond_to?(:hash_form) ? response.hash_form : response
           rescue Error::Usage => usage_error
             usage_error.hash_form
@@ -26,7 +40,7 @@ module DTKModule
       def values?(*attribute_names)
         value?(*attribute_names)
       end
-      
+
       def value(*attribute_names)
         raise_if_missing_attributes(*attribute_names)
         values?(*attribute_names)
@@ -53,9 +67,9 @@ module DTKModule
       end
 
       private
-      
-      attr_reader :av_hash
 
+      attr_reader :av_hash
+      
       def has_value?(attribute_name)
         !av_hash[attribute_name].nil?
       end

@@ -4,7 +4,6 @@ version: master
 dependencies:
   dtk-provider/ruby-provider: master
   aws/aws_stdlib: master
-  dtk/host: master
 assemblies:
   single_node:
     components:
@@ -12,53 +11,16 @@ assemblies:
         attributes:
           size: micro
         components:
-        - host::hostname:
-            attributes:
-              hostname: n1
+        - ec2::test_node_component 
     actions:
       create:
         subtasks:
         - name: create n1
           components:
           - ec2::node[n1]
-        - name: set host name
+        - name: test_node_component
           components:
-          - host::hostname
-  test:
-    components:
-    - ec2::profile[xenial]:
-        attributes:
-          image: xenial
-    - node[n1]:
-        attributes:
-          size: micro
-        components:
-        - host::hostname:
-            attributes:
-              hostname: test
-    - node[n2]:
-        attributes:
-          size: micro
-    actions:
-      create:
-        subtasks:
-        - name: set ec2 profile dynamic attributes
-          components:
-          - ec2::profile[xenial]
-        - name: create nodes
-          subtask_order: concurrent
-          subtasks:
-          - name: create n1
-            node: assembly_wide
-            components:
-            - ec2::node[n1]
-          - name: create n2
-            node: assembly_wide
-            components:
-            - ec2::node[n2]
-        - name: set host name
-          components:
-          - host::hostname
+          - ec2::test_node_component
   node_group:
     components:
     - node[n1]:
@@ -69,9 +31,7 @@ assemblies:
           size: micro
           cardinality: 2
         components:
-        - host::hostname:
-            attributes:
-              hostname: grp
+        - ec2::test_node_component
     actions:
       create:
         subtasks:
@@ -86,9 +46,9 @@ assemblies:
             node: assembly_wide
             components:
             - ec2::node_group[grp]
-        - name: set host name
+        - name: test_node_component
           components:
-          - host::hostname
+          - ec2::test_node_component
 component_defs:
   profile:
     attributes:
@@ -125,7 +85,8 @@ component_defs:
         type: hash
         hidden: true
         dynamic: true
-        description: Hash that maps logical name and size of image to image_id and instance_type
+        description: Hash that maps logical name and size of image to image_id and
+          instance_type
       security_group_ids:
         type: array
         dynamic: true
@@ -133,13 +94,25 @@ component_defs:
         description: A list that contains the security group IDs for VPC security
           groups to assign to the Amazon EC2 instance.
     singleton: false
+    dependencies:
+    - subnet:
+        choices:
+        - component: network_aws::vpc_subnet
+        - component: aws_vpc::subnet
     link_defs:
       network_aws::vpc_subnet:
+        dependency_name: subnet
         attribute_mappings:
         - "$default_keypair -> key_name"
         - "$images -> vpc_images"
         - "$subnet_id -> subnet_id"
         - "$enable_public_ip_in_subnet -> enable_public_ip_in_subnet"
+      aws_vpc::subnet:
+        dependency_name: subnet
+        attribute_mappings:
+        - "$subnet_id -> subnet_id"
+        - "$enable_public_ip_in_subnet -> enable_public_ip_in_subnet"
+        - "$images -> vpc_images"
       network_aws::security_group:
         attribute_mappings:
         - "$group_id -> security_group_id"
@@ -181,7 +154,8 @@ component_defs:
       vpc_images:
         type: hash
         hidden: true
-        description: Hash that maps logical name and size of image to image_id and instance_type
+        description: Hash that maps logical name and size of image to image_id and
+          instance_type
       host_addresses_ipv4:
         type: array
         dynamic: true
@@ -261,7 +235,7 @@ component_defs:
         - "$vpc_images -> vpc_images"
         - "$image -> image"
         - "$size  -> size"
-
+        - "$iam_instance_profile -> iam_instance_profile"
         - "$subnet_id -> subnet_id"
         - "$enable_public_ip_in_subnet -> enable_public_ip_in_subnet"
         - "$security_group_ids -> security_group_ids"
@@ -285,14 +259,7 @@ component_defs:
       stop:
         type: ruby
         entrypoint: bin/node__stop.rb
-  test_client:
-    attributes:
-      server_host_address:
-        type: string
-    link_defs:
-      host::hostname:
-        attribute_mappings:
-        - "$node.host_address -> server_host_address"
+
   node_group:
     attributes:
       name:
@@ -323,7 +290,8 @@ component_defs:
       vpc_images:
         type: hash
         hidden: true
-        description: Hash that maps logical name and size of image to image_id and instance_type
+        description: Hash that maps logical name and size of image to image_id and
+          instance_type
       image_id:
         type: string
         input: true
@@ -350,7 +318,6 @@ component_defs:
         input: true
         dynamic: true
         description: 'Desired state of node; legal values are: powered_on, powered_off'
-
       security_group_ids:
         type: array
         required: true
@@ -397,7 +364,7 @@ component_defs:
         - "$vpc_images -> vpc_images"
         - "$image -> image"
         - "$size  -> size"
-
+        - "$iam_instance_profile -> iam_instance_profile"
         - "$subnet_id -> subnet_id"
         - "$enable_public_ip_in_subnet -> enable_public_ip_in_subnet"
         - "$security_group_ids -> security_group_ids"
@@ -421,3 +388,18 @@ component_defs:
       stop:
         type: ruby
         entrypoint: bin/node_group__stop.rb
+
+  test_node_component:
+    actions:
+      create:
+        commands:
+        - RUN hostname test-client
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 

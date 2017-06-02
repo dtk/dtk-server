@@ -50,6 +50,10 @@ module DTK
         ASSEMBLY_WIDE_NODE_NAME : 
           node_component_ref(:ec2, node.display_name, node_type: node_type_from_node(node))
       end
+
+      def assembly_wide_node_name
+        ASSEMBLY_WIDE_NODE_NAME
+      end
       
       private
 

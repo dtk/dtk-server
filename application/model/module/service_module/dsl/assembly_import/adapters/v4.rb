@@ -30,8 +30,6 @@ module DTK; class ServiceModule
 
         Description = 'description'
 
-        NodeBindings = 'node_bindings'
-
         WorkflowAction = 'workflow_action'
         Variations::WorkflowAction = ['workflow_action', 'assembly_action']
 
@@ -41,25 +39,63 @@ module DTK; class ServiceModule
         Workflow = 'workflow'
 
         Target = 'target'
+
+        Nodes = 'nodes'
+        Components = 'components'
+        ComponentLinks = 'component_links'
+        ComponentLinkTargetValue = 'value'
       end
 
       def self.assembly_iterate(service_module, hash_content, opts, &block)
         assembly_hash = (Constant.matches?(hash_content, :Assembly) || {}).merge(Constant.hash_subset(hash_content, AssemblyKeys))
         assembly_ref = service_module.assembly_ref(Constant.matches?(hash_content, :Name), opts[:module_version])
         assemblies_hash = { assembly_ref => assembly_hash }
-        node_bindings_hash = Constant.matches?(hash_content, :NodeBindings)
+        node_bindings_hash = nil # TODO: deprecating this 
         block.call(assemblies_hash, node_bindings_hash)
       end
       AssemblyKeys = [:Name, :Description, :Workflows, :Workflow, :Target]
 
-      def self.parse_node_bindings_hash!(node_bindings_hash, opts = {})
-        if hash = NodeBindings::DSL.parse!(node_bindings_hash, opts)
-          DBUpdateHash.new(hash)
+      # returns Array with each element being Hash with keys :parsed_component_link, :base_cmp_name
+      def self.parse_component_links(assembly_hash, opts = {})
+        ret = []
+        ndx_component_info(assembly_hash).each_pair do |node_name, node_hash|
+          node_hash.each_pair do |base_component_name, component_hash|
+            if component_links = Constant.matches?(component_hash, :ComponentLinks) 
+              ParsingError.raise_error_if_not(component_links, Hash, type: 'component link', context: { base_component_name => component_hash })
+              component_links.each_pair do |link_def_type, target_or_targets|
+                targets = (target_or_targets.kind_of?(::Array) ? target_or_targets : [target_or_targets])
+                targets.each do |target_hash|
+                  unless target = Constant.matches?(target_hash, :ComponentLinkTargetValue) 
+                    Log.error("Unexpected form of component link target: #{target_hash.inspect}")
+                    next
+                  end
+                  component_link_hash = { link_def_type => target }
+                  parsed_component_link = PortRef.parse_component_link(node_name, base_component_name, component_link_hash, opts)
+                  ret << { parsed_component_link: parsed_component_link, base_cmp_name: base_component_name }
+                end
+              end
+            end
+          end
         end
+        ret
       end
 
       private
 
+      # Normalizes to form { node_name => { component_name => component_hash }} 
+      def self.ndx_component_info(assembly_hash)
+        ret = {}
+        (Constant.matches?(assembly_hash, :Nodes) || {}).each_pair do |node_name, node_hash|
+          (Constant.matches?(node_hash, :Components) || {}).each_pair do |component_name, component_hash|
+            (ret[node_name] ||= {})[component_name] ||= component_hash
+          end
+        end
+        (Constant.matches?(assembly_hash, :Components) || {}).each_pair do |component_name, component_hash|
+          (ret[NodeComponent.assembly_wide_node_name] ||= {})[component_name] ||= component_hash
+        end
+        ret
+      end
+      
       def self.import_task_templates(assembly_hash, opts = {})
         ret = DBUpdateHash.new()
         workflows_to_parse =
@@ -207,3 +243,19 @@ module DTK; class ServiceModule
     end
   end
 end; end
+
+=begin
+{:name=>"single_node",
+ :components=>{"ec2::node[n1]"=>{:attributes=>{"size"=>{:value=>"micro"}}}},
+ :workflows=>
+ {"create"=>
+  {:subtasks=>
+   [{:name=>"create n1", :components=>["ec2::node[n1]"]},
+    {:name=>"test_node_component",
+     :components=>["ec2::test_node_component"]}]}},
+ :nodes=>
+ {"n1"=>{:components=>{"ec2::test_node_component"=>{}}},
+  "assembly_wide"=>
+  {:components=>
+   {"ec2::node[n1]"=>{:attributes=>{"size"=>{:value=>"micro"}}}}}}}
+=end

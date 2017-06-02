@@ -56,12 +56,6 @@ module DTK; class ServiceModule
             db_updates_cmp = version_proc_class.import_assembly_top(ref, assem, @module_branch, @module_name, opts)
             @db_updates_assemblies['component'].merge!(db_updates_cmp)
 
-            # parse_node_bindings_hash! with opts below
-            # removes elements of node_bindings_hash that are not of form: {node => node_template}
-            if db_updates_node_bindings = version_proc_class.parse_node_bindings_hash!(node_bindings_hash, remove_non_legacy: true)
-              db_updates_cmp.values.first.merge!('node_bindings' => db_updates_node_bindings.mark_as_complete())
-            end
-
             # if bad node reference, return error and continue with module import
             imported_nodes = version_proc_class.import_nodes(@container_idh, @module_branch, ref, assem, node_bindings_hash, @component_module_refs, opts)
             return imported_nodes if ParsingError.is_error?(imported_nodes)
@@ -256,10 +250,6 @@ module DTK; class ServiceModule
       CachedAdapterClasses[integer_version] = DynamicLoader.load_and_return_adapter_class('assembly_import', adapter_name, opts)
     end
     CachedAdapterClasses = {}
-
-    def self.parse_node_bindings_hash!(_node_bindings_hash, _opts = {})
-      nil
-    end
 
     def self.import_component_refs(container_idh, _assembly_name, components_hash, component_module_refs, opts = {})
       ret = {}

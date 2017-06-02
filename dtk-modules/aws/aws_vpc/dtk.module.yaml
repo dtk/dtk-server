@@ -1,0 +1,193 @@
+---
+module: aws/aws_vpc
+version: master
+dependencies:
+  dtk-provider/ruby-provider: master
+  aws/aws_stdlib: master
+assemblies:
+  discover_subnet:
+    description: Discover subnet
+    components:
+    - aws_vpc::subnet[vpc1-default]:
+        attributes:
+          discovered: true
+  create_subnet:
+    description: Create subnet
+    components:
+    - aws_vpc::subnet[tenant]:
+        attributes:
+          discovered: false	
+          vpc_id: vpc-366eef52
+          vpc_cidr_block: 172.31.0.0/16
+          subnet_length: 28
+           
+component_defs:
+  vpc:
+    attributes:
+      name:
+        description: DTK name
+        type: string
+        required: true
+      region:
+        description: AWS region
+        type: string
+      vpc_id:
+        description: AWS VPC id
+        type: string
+      cidr_block:
+        type: string
+        dynamic: true
+
+    singleton: false
+
+  subnet:
+    attributes:
+      name:
+        type: string
+        required: true
+
+      # dtk attributes
+      discovered:
+        type: boolean
+        default: true
+      dtk_debug:
+        type: boolean
+        default: false
+      credentials_handle:
+        type: hash
+        hidden: true
+
+      region:
+        description: AWS region
+        type: string
+        input: true
+        dynamic: true
+
+      gateway:
+        description: Type of gateway action - internet, none, undef
+        type: string
+        default: internet
+      subnet_id:
+        description: AWS VPC subnet id
+        dynamic: true
+        input: true
+        type: string
+      vpc_id:
+        description: Automatically passed from vpc_aws::vpc
+        type: string
+        dynamic: true
+        input: true
+      vpc_cidr_block:
+        description: Automatically passed from vpc_aws::vpc
+        type: string
+      availability_zone:
+        type: string
+        dynamic: true
+        input: true
+      subnet_cidr_block:
+        description: When specified, new subnet will be created with this cidr block
+        type: string
+        dynamic: true
+        input: true
+      subnet_length:
+        description: Length of subnet that will be created
+        type: integer
+        dynamic: true
+        input: true
+      enable_public_ip_in_subnet:
+        description: Enable public ip on instance launch
+        type: boolean
+        default: true
+
+      images_all_regions:
+        type: hash
+        hidden: true
+      images:
+        type: hash
+        hidden: true
+        dynamic: true
+
+    singleton: false
+    link_defs:
+      aws_vpc::vpc:
+        attribute_mappings:
+        - $vpc_id -> vpc_id
+        - $cidr_block -> vpc_cidr_block
+      image_aws:
+        attribute_mappings:
+        - $images -> images_all_region
+
+    providers:
+      ruby:
+        gems:
+        - aws_sdk
+        - rest-client
+        - ipaddress
+        - byebug
+    actions:
+      create:
+        type: ruby
+        entrypoint: bin/subnet__converge.rb
+      delete:
+        type: ruby
+        entrypoint: bin/subnet__delete.rb
+
+  security_group:
+    attributes:
+      name:
+        type: string
+        required: true
+      group_id:
+        description: AWS security group id
+        dynamic: true
+        input: true
+        type: string
+      group_name:
+        description: AWS security group name
+        dynamic: true
+        input: true
+        type: string
+      description:
+        description: AWS security group description
+        type: string
+        default: security_group
+      constant_rules:
+        description: Set of constant rules, can be overriden by user
+        type: array
+        default:
+        - protocol: tcp
+          port_range: 22-22
+          source: 0.0.0.0/0
+        - protocol: tcp
+          port_range: 0-65535
+          source: SAME
+      dynamic_rules:
+        description: Set of additional/dynamic rules that user can specify
+        type: array
+        default: []
+      vpc_id:
+        description: Automatically passed from vpc_aws::vpc
+        type: string
+      region:
+        description: Automatically passed from vpc_aws::vpc
+        type: string
+      auto_discovery:
+        type: string
+        hidden: true
+      role_name:
+        type: string
+        required: true
+    singleton: false
+    actions:
+      create:
+        puppet_definition: vpc_aws::security_group
+      delete:
+        puppet_definition: vpc_aws::security_group_delete
+    link_defs:
+      vpc_aws::vpc:
+        attribute_mappings:
+        - $vpc_id -> vpc_id
+        - $region -> region
+      vpc_aws::subnet:
+        attribute_mappings:
+        - $auto_discovery -> auto_discovery

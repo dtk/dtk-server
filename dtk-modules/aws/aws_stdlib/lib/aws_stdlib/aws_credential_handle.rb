@@ -10,7 +10,7 @@ module DTKModule
       end
 
       # In methods below credentials_handle can be nil, a ::Hash or AwsCredentialHandle object
-      def self.aws_credentials_and_region(credentials_handle)
+      def self.aws_credentials_and_region_hash(credentials_handle)
         { region: region(credentials_handle) }.merge(aws_credentials(credentials_handle)) 
       end
 
@@ -19,8 +19,9 @@ module DTKModule
       def region
         self[:region] || DEFAULT_REGION
       end
-      
+
       private
+
       def self.region(credentials_handle)
         if credentials_handle.respond_to?(:region)
           credentials_handle.region

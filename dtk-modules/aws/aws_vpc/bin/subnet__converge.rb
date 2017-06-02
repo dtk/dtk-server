@@ -1,0 +1,12 @@
+require_relative('../lib/aws_vpc')
+module DTKModule
+  def self.execute(attributes)
+    Aws::Stdlib.wrap(attributes) do |attributes|
+      attributes.debug_break_point?
+      credentials_handle = attributes.aws_credentials_handle
+      dynamic_attributes = Aws::Vpc::Subnet.converge(credentials_handle, attributes.value(:name), attributes)
+      DTK::Response::Ok.new(dynamic_attributes)
+    end
+  end
+end
+

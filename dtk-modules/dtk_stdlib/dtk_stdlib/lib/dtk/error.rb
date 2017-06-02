@@ -35,12 +35,18 @@ module DTKModule
 
       private
       
-      ERROR_BACKTRACE_DEPTH = 5
       ERROR_BACKTRACE_INDENT = ' ' * 6
       def add_backtrace!(error_message, backtrace_array)
-        backtrace = backtrace_array[0..ERROR_BACKTRACE_DEPTH].join("#{ERROR_BACKTRACE_INDENT}\n")
+        backtrace = prune_backtrace_depth(backtrace_array).join("#{ERROR_BACKTRACE_INDENT}\n")
         error_message << "\n\n#{backtrace}"
       end
+
+      DEFAULT_ERROR_BACKTRACE_DEPTH = 5
+      STOP_POINT_REGEXP = /ruby-provider\/init/
+      def prune_backtrace_depth(backtrace_array)
+        depth = backtrace_array.find_index { |line| line =~ STOP_POINT_REGEXP } || DEFAULT_ERROR_BACKTRACE_DEPTH
+        backtrace_array[0..depth]
+      end      
 
       module Key
         def self.error_code

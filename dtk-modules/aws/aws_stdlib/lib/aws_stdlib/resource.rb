@@ -7,12 +7,16 @@ module DTKModule
       attr_reader :attributes, :client
 
       def initialize(credentials_handle, name, attributes)
-        @name              = name
-        @attributes        = attributes
-        @client            = aws_client_class.new(client_opts(credentials_handle))
+        aws_credentials_and_region_hash = AwsCredentialHandle.aws_credentials_and_region_hash(credentials_handle)
+        @name               = name
+        @attributes         = attributes
+        @region             = aws_credentials_and_region_hash[:region]
+        @client             = aws_client_class.new(aws_credentials_and_region_hash)
       end
 
       private
+
+      attr_reader :region 
 
       def aws_api_operation(operation_type)
         aws_api_operation_class(operation_type).new(self)
@@ -24,11 +28,6 @@ module DTKModule
 
       def aws_client_class
         fail "This method should be overwritten by concrete class"
-      end
-
-      # credentials_handle can be nil, a ::Hash or AwsCredentialHandle object
-      def client_opts(credentials_handle)
-        AwsCredentialHandle.aws_credentials_and_region(credentials_handle)
       end
 
     end

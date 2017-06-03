@@ -122,7 +122,7 @@ module DTK
           cmp_or_cmps = (@component_types.size == 1) ? 'Component' : 'Components'
           is_are = (@component_types.size == 1) ? 'is' : 'are'
           
-          "#{cmp_or_cmps} of type (#{@component_types.join(', ')}) #{is_are} missing and #{is_are} required for a target service instance"
+          "#{cmp_or_cmps} of type '#{@component_types.join(', ')}' #{is_are} missing and #{is_are} required for a target service instance"
         end
       end
 
@@ -137,7 +137,7 @@ module DTK
         end
 
         def description(opts = {})
-          "On assembly node (#{@node[:display_name]}): #{@constraint[:description]}"
+          "On node '#{@node[:display_name]}': #{@constraint[:description]}"
         end
       end
 
@@ -151,7 +151,27 @@ module DTK
         end
 
         def description(opts = {})
-          "Component (#{@augmented_port.display_name_print_form(hide_assembly_wide_node: true)}) has an unmet dependency"
+          "Component '#{@augmented_port.display_name_print_form(hide_assembly_wide_node: true)}' is missing required #{dependency_ref}"
+        end
+
+        private
+
+        attr_reader :augmented_port
+        
+        def component_ref
+          augmented_port.display_name_print_form(hide_assembly_wide_node: true)
+        end
+
+        def dependency_ref
+          if dependency_name = dependency_name?
+            "dependency '#{dependency_name}'"
+          else
+            "dependency"
+          end
+        end
+        
+        def dependency_name?
+          (augmented_port[:link_def] || {})[:link_type]
         end
       end
 

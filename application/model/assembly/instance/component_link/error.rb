@@ -31,19 +31,33 @@ module DTK
 
       def self.raise_link_name_error(matching_link_types, base_component, dep_component, opts = {})
         base_component_name = base_component.component_type_print_form
-        dep_component_name = dep_component.component_type_print_form
-        error_msg = 
-          if link_name =  opts[:link_name]
-            "Specified link name '#{link_name}' does not match any of the dependencies defined between component type '#{base_component_name}' and component type '#{dep_component_name}': #{matching_link_types.join(',')}"
-          elsif matching_link_types.empty?
-            "There are no links defined between component type '#{base_component_name}' and component type '#{dep_component_name}'"
-          elsif matching_link_types.size > 1
-            "Ambiguous which link between component type '#{base_component_name}' and component type '#{dep_component_name}' selected; select one of #{matching_link_types.join(',')})"
-          end
+        dep_component_name =  dep_component.component_type_print_form
+        specified_link_name = (opts[:link_name] == dep_component_name ? nil : opts[:link_name]) # nil if linkanem same as depedency or opts[:link_name] is nil
+        common_args = [matching_link_types, base_component_name, dep_component_name]
+        error_msg = (specified_link_name ? error_message_when_specified_link_name(specified_link_name, *common_args) : error_message_when_no_specified_link_name(*common_args))
         fail ErrorUsage, error_msg if error_msg
       end
-
+      
       private
+      
+      def self.error_message_when_specified_link_name(specified_link_name, matching_link_types, base_component_name, dep_component_name)
+        if matching_link_types.empty?
+          "There are no links defined from component type '#{base_component_name}' to component type '#{dep_component_name}'"
+        else
+          "Specified link name '#{specified_link_name}' does not match any links defined from component type '#{base_component_name}' to component type '#{dep_component_name}'; legal link names are: #{matching_link_types.join(', ')}"
+        end
+      end
+
+      def self.error_message_when_no_specified_link_name(matching_link_types, base_component_name, dep_component_name)
+        case matching_link_types.size
+        when 0
+          "There are no links defined from component type '#{base_component_name}' to component type '#{dep_component_name}'"
+        when 1        
+          "The link from component type '#{base_component_name}' to component type '#{dep_component_name}' must be specified with link name '#{matching_link_types.first}'"
+        else
+          "The link from component type '#{base_component_name}' to component type '#{dep_component_name}' must be specified with link name from: #{matching_link_types.join(',')}"
+        end
+      end
 
       def self.component_link_ref(base_component_name, dep_component_name, opts = {})
         "link " + (opts[:link_name] ? "'#{opts[:link_name]}' " : " ") + "on base component '#{base_component_name}' to dependent component '#{dep_component_name}'"

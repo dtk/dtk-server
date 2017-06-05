@@ -36,8 +36,7 @@ module DTK
         
         def generate_content_input!(assembly_instance)
           set_id_handle(assembly_instance)
-
-          # TODO: add assembly level attributes
+          set?(:Attributes, Attribute.generate_content_input?(:assembly, (assembly_instance.get_assembly_level_attributes || {})))
           set?(:Components, Component.generate_content_input(assembly_instance))
           set(:Workflows, Workflow.generate_content_input(assembly_instance))
           self

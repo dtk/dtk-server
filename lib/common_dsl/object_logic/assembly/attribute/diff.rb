@@ -19,11 +19,12 @@ module DTK
   class CommonDSL::ObjectLogic::Assembly::Attribute
     class Diff < CommonDSL::Diff::Base
       class Modify < CommonDSL::Diff::Element::Modify
-        def process(_result, _opts = {})
+        def process(result, _opts = {})
           # result does not need to be updated since attribute changes dont entail service-side
           # modification to dsl
           self.class.update_and_propagate_attribute(existing_object, new_val)
           update_and_propagate_attribute_when_node_property?
+          result.add_item_to_update(:assembly)
         end
 
         private

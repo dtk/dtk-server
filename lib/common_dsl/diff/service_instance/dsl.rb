@@ -88,7 +88,7 @@ module DTK; module CommonDSL
               collated_diffs.process(diff_result, { service_instance_branch: module_branch }.merge(opts))
               DiffErrors.raise_if_any_errors(diff_result)
               Aux.stop_for_testing?(:push_diff) # for debug
-              
+
               # items_to_update are things that need to be updated in repo from what at this point are in object model
               items_to_update = diff_result.items_to_update
               if diff_result.items_to_update.include?(:workflow)

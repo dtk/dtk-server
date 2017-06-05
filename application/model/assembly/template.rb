@@ -200,36 +200,35 @@ module DTK; class Assembly
       cmp_ref_size       = component_ref.split('/').size
       matching_attribute = nil
 
-      # if cmp_ref_size == 2
-        cmp_attributes.each do |attr|
-          cmp_name  = nil
-          attr_name = attr[:display_name]
-          node_name = (attr[:node]||{})[:display_name]
-          if n_component = attr[:nested_component]
-            cmp_name = n_component[:display_name].gsub('__','::')
-          end
-          full_name = ""
-          full_name << "#{node_name}/" if node_name && !node_name.eql?('assembly_wide')
-          full_name << "#{cmp_name}/" if cmp_name
-          full_name << "#{attr_name}" if attr_name
-          if component_ref == full_name
-            matching_attribute = attr
-            break
-          end
+      cmp_attributes.each do |attr|
+        cmp_name  = nil
+        attr_name = attr[:display_name]
+        node_name = (attr[:node]||{})[:display_name]
+
+        if n_component = attr[:nested_component]
+          cmp_name = n_component[:display_name].gsub('__','::')
         end
-      # elsif cmp_ref_size == 2
-      #   node_attributes.each do |attr|
-      #     attr_name = attr[:display_name]
-      #     node_name = (attr[:node]||{})[:display_name]
-      #     full_name = ""
-      #     full_name << "#{node_name}/" if node_name
-      #     full_name << "#{attr_name}" if attr_name
-      #     if component_ref == full_name
-      #       matching_attribute = attr
-      #       break
-      #     end
-      #   end
-      # end
+
+        full_name            = ""
+        full_name_new_format = ""
+
+        full_name << "#{node_name}/" if node_name && !node_name.eql?('assembly_wide')
+        full_name_new_format << "node[#{node_name}]/" if node_name && !node_name.eql?('assembly_wide')
+
+        full_name << "#{cmp_name}/" if cmp_name
+        full_name_new_format << "#{cmp_name}/" if cmp_name
+
+        full_name << "#{attr_name}" if attr_name
+        full_name_new_format << "#{attr_name}" if attr_name
+
+        if component_ref == full_name
+          matching_attribute = attr
+          break
+        elsif component_ref == full_name_new_format
+          matching_attribute = attr
+          break
+        end
+      end
 
       matching_attribute
     end

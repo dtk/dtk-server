@@ -18,7 +18,8 @@ GIT
 
 GIT
   remote: git://github.com/dtk/dtk-dsl.git
-  revision: eb9a3a3411a3d45939778ea3bfeb91ea5f3d7dfb
+  revision: b7883ddb8cb77c93c3fa4ac2921ed45df381907a
+  branch: DTK-2999
   specs:
     dtk-dsl (1.1.0)
 
@@ -199,3 +200,6 @@ DEPENDENCIES
   sshkeyauth (= 0.0.11)
   stomp (= 1.1.9)
   thin
+
+BUNDLED WITH
+   1.15.1

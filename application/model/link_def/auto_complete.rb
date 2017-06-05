@@ -121,7 +121,9 @@ module DTK; class LinkDef
       matching_cmps  = []
       constraints    = nil
       preferences    = nil
-      link_def_links = LinkDef.get_link_def_links([link_def.id_handle()], cols: [:id, :display_name, :content, :link_def_id])
+      link_def_links = LinkDef.get_link_def_links([link_def.id_handle()], cols: [:id, :display_name, :content, :link_def_id, :remote_component_type])
+
+      dependent_component_types = link_def_links.map { |link| link[:remote_component_type] }.uniq
 
       # get constraints from link_def dsl content and use them later to match link_defs on auto-complete
       if link_def_content = !link_def_links.empty? && link_def_links.first[:content]
@@ -132,26 +134,17 @@ module DTK; class LinkDef
       end
 
       preferences_matching_cmps = []
-      if link_type = link_def[:link_type]
-        aug_cmps.each do |cmp|
-          # TODO: DTK-2725: update below to have match that handles case where link_type
-          # is a label refering to a choice
-          cmp_name = cmp[:component_type].gsub('__','::')
-
-          if node = link_type.include?('/') && cmp[:node]
-            cmp_name = "#{node[:display_name]}/#{cmp_name}"
+      aug_cmps.each do |cmp|
+        # TODO: ignoring info we initially put in and still can have that matches whether on saem 'node' or not
+        if dependent_component_types.include?(cmp[:component_type])
+          if constraints
+            matching_cmps << cmp if matching_constraints?(constraints, cmp, this_cmp)
+          else
+            matching_cmps << cmp if preferences.nil?
           end
 
-          if link_type.eql?(cmp_name)
-            matching_cmps << cmp if constraints.nil? && preferences.nil?
-
-            if constraints && matching_constraints?(constraints, cmp, this_cmp)
-              matching_cmps << cmp
-            end
-
-            if index = preferences && matching_constraints?(preferences, cmp, this_cmp, { preferences: true })
-              preferences_matching_cmps[index] = cmp
-            end
+          if index = preferences && matching_constraints?(preferences, cmp, this_cmp, { preferences: true })
+            preferences_matching_cmps[index] = cmp
           end
         end
       end

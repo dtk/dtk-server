@@ -150,12 +150,12 @@ module DTK; class Assembly
 
     # TODO DTK-2999: will refactor
     def add_attribute_links(assembly_instance)
-      links            = []
+      links               = []
       links_from          = []
       target              = assembly_instance.get_target
       assembly_attributes = assembly_instance.get_assembly_level_attributes
-      # node_attributes, cmp_attributes = assembly_instance.get_augmented_node_and_component_attributes
-      cmp_attributes = assembly_instance.get_augmented_component_attributes
+      cmp_attributes      = assembly_instance.get_augmented_component_attributes
+      propagate           = []
 
       assembly_attributes.each do |assembly_attribute|
         attribute_links_to   = AttributeLinkTo.get_for_attribute_id(model_handle.createMH(:attribute_link_to), assembly_attribute[:ancestor_id])
@@ -163,6 +163,10 @@ module DTK; class Assembly
 
         links += attribute_links_to.map do |attribute_link_to|
           if matching_attribute = find_matching_attribute(attribute_link_to[:component_ref], cmp_attributes)
+            if value_asserted = assembly_attribute[:value_asserted]
+              propagate << { id: assembly_attribute[:id], value_asserted: value_asserted, old_value_asserted: nil }
+            end
+
             {
               ref: "attribute_link:#{matching_attribute[:id]}-#{assembly_attribute[:id]}",
               datacenter_datacenter_id: target.id,
@@ -171,13 +175,15 @@ module DTK; class Assembly
               type: 'external',
               function: 'eq'
             }
-          else
-            next
           end
         end
 
         links += attribute_links_from.map do |attribute_link_from|
           if matching_attribute = find_matching_attribute(attribute_link_from[:component_ref], cmp_attributes)
+            if value_asserted = matching_attribute[:value_asserted]
+              propagate << { id: matching_attribute[:id], value_asserted: value_asserted, old_value_asserted: nil }
+            end
+
             {
               ref: "attribute_link:#{matching_attribute[:id]}-#{assembly_attribute[:id]}",
               datacenter_datacenter_id: target.id,
@@ -186,14 +192,15 @@ module DTK; class Assembly
               type: 'external',
               function: 'eq'
             }
-          else
-            next
           end
         end
       end
 
       links.reject! { |link| link.nil? }
       Model.create_from_rows(target.model_handle.create_childMH(:attribute_link), links, convert: true)
+
+      # this will propagate attribute value through link_to and link_from when staging service instance
+      Attribute.propagate_and_optionally_add_state_changes(target.model_handle.create_childMH(:attribute), propagate)
     end
 
     def find_matching_attribute(component_ref, cmp_attributes, node_attributes = nil)

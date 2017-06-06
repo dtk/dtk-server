@@ -62,7 +62,7 @@ module DTK
       links.each do |link|
         if to_add.find { |ta| ta[:display_name] == link[:display_name] && ta[:attribute_id] == link[:attribute_id] }
           next
-        elsif existing.find { |ex| td[:display_name] == link[:display_name] && ex[:attribute_id] == link[:attribute_id] }
+        elsif existing.find { |ex| ex[:display_name] == link[:display_name] && ex[:attribute_id] == link[:attribute_id] }
           next
         else
           to_delete << link

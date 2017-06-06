@@ -37,7 +37,6 @@ module DTK; class LinkDef
       end
     end
 
-    # TODO: AUTO-COMPLETE-LINKS: this needs to be enhanced to be a general mechanism to auto complete links
     def self.create_internal_links(_node, component, node_link_defs_info)
       # get link_defs in node_link_defs_info that relate to internal links not linked already that connect to component
       # on either end. what is returned are link defs annotated with their possible links

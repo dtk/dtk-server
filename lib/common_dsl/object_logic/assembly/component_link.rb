@@ -41,7 +41,7 @@ module DTK; module CommonDSL
         def generate_content_input?
           set_id_handle(component_link)
           dependent_component = component_link[:output_component]
-          set(:Value, dependent_component.display_name_print_form)
+          set(:Value, dependent_component_ref(dependent_component, component_link[:output_node]))
           unless base_assembly_instance.id == dependent_component.get_field?(:assembly_id)
             set(:ExternalServiceName, service_name(dependent_component))
           end 
@@ -76,6 +76,14 @@ module DTK; module CommonDSL
           content_input_links.keys.sort.inject(ContentInputHash.new) do |h, key|
             h.merge(key => content_input_links[key])
           end
+        end
+
+        def dependent_component_ref(dependent_component, dependent_node)
+          node_ref = ''
+          unless dependent_node.is_assembly_wide_node?
+            node_ref << "#{dependent_node.node_component.component.display_name_print_form}/"
+          end
+          "#{node_ref}#{dependent_component.display_name_print_form}"
         end
 
         def component_link_name

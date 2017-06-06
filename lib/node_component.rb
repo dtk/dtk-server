@@ -107,7 +107,7 @@ module DTK
       aug_nodes.each do |aug_node|
         unless  aug_node.is_assembly_wide_node?
           ndx = node_component_ref_from_node(aug_node)
-          # TODO: DTK-2938: see if ndx_top_level_components[ndx].nil? is legitiamte value. Saw it when delete node component
+          # TODO: DTK-2938: see if ndx_top_level_components[ndx].nil? i spossible. May be happening when delete node component
           if top_level_component = ndx_top_level_components[ndx]
             top_level_component.merge!(:components => aug_node[:components])
           end

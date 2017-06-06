@@ -51,18 +51,22 @@ module DTK;
       # returns [component_name, node_name] # node_name can be nil
       def component_and_node_names
         component_name = node_name = nil
-        split = dependency.split('/')
         error = false
-        case split.size
-        when 1
-          component_name = split[0]
-        when 2
-          component_name = split[1]
-          error = true unless node_name = NodeComponent.node_name_if_node_component?(split[0])
-        else
+        unless dependency.kind_of?(::String)
           error = true
+        else
+          split = dependency.split('/')
+          case split.size
+          when 1
+            component_name = split[0]
+          when 2
+            component_name = split[1]
+            error = true unless node_name = NodeComponent.node_name_if_node_component?(split[0])
+          else
+            error = true
+          end
         end
-        fail ErrorUsage, "The term '#{dependency}' does not have valid syntax for a component link dependency" if error        
+        fail ErrorUsage, "The term '#{dependency.inspect}' does not have valid syntax for a component link dependency" if error        
         [component_name, node_name]
       end
 

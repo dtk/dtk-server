@@ -42,6 +42,8 @@ module DTK; class ServiceModule
           fail ParsingError.new("Ill-formed port ref (#{port_ref})", err_opts)
         end
       end
+
+      # TODO: DTK-3039: Code below only matches form NODE_NAME/... rather than node[NODE_NAME]/.. or ec2::mode[NODE_NAME]/..
       def self.parse_component_link(input_node, input_cmp_name, component_link_hash, opts = {})
         err_opts = Opts.new(opts).slice(:file_path)
         unless component_link_hash.size == 1

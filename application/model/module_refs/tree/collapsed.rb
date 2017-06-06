@@ -194,7 +194,7 @@ module DTK; class ModuleRefs
       def ret_base_module_refs(assembly_instance)
         if parent = assembly_instance.get_parent
           if parent_service_module = parent.get_service_module
-            parent_service_module.get_component_module_refs
+            parent_service_module.get_component_module_refs(parent[:version])
           end
         end
       end

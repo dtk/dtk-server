@@ -21,14 +21,13 @@ module DTK
       class Modify < CommonDSL::Diff::Element::Modify
         include Mixin
         
-        def process(result, opts = {})
-          base_link_params          = ret_base_link_params(assembly_instance, qualified_key)
-          current_dep_link_params   = current_val.dependency_link_params(assembly_instance)
-          new_dep_link_params       = new_val.dependency_link_params(assembly_instance)
-          
-          pp(current_dep_link_params: current_dep_link_params, base_link_params: base_link_params, new_dep_link_params: new_dep_link_params)
-          Log.error'TODO: DTK-2005 Need to finsh logic for ObjectLogic::Assembly::ComponentLink::Diff'
+        def process(result, _opts = {})
+          new_dep_link_params = new_val.dependency_link_params(assembly_instance)
+
+          delete_component_link!(result, assembly_instance)
+          add_component_link!(result, assembly_instance, new_dep_link_params)
         end
+
       end
     end
   end

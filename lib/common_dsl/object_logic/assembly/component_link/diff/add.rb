@@ -21,21 +21,16 @@ module DTK
       class Add < CommonDSL::Diff::Element::Add
         include Mixin
 
-        def process(result, opts = {})
+        def process(result, _opts = {})
           assembly_instance    = service_instance.assembly_instance
-          # TODO: DTK-3005: this does not handle link other than explicit link name; need to pass this into parse
-          link_name            = relative_distinguished_name
-          base_link_params     = ret_base_link_params(assembly_instance, qualified_key)
           dep_link_params      = component_link_value.dependency_link_params(assembly_instance)
-
-          assembly_instance.add_component_link_from_link_params(base_link_params, dep_link_params, link_name: link_name)
-          result.add_item_to_update(:assembly)
+          add_component_link!(result, assembly_instance, dep_link_params)
         end
 
         private
 
         def component_link_value 
-          @component_link_valu ||= ComponentLink::Value.new(parse_object.value, parse_object.external_service_name?)
+          @component_link_value ||= ComponentLink::Value.new(parse_object.value, parse_object.external_service_name?)
         end
 
       end

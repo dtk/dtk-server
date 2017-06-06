@@ -200,7 +200,7 @@ module DTK; class Assembly
       Model.create_from_rows(target.model_handle.create_childMH(:attribute_link), links, convert: true)
 
       # this will propagate attribute value through link_to and link_from when staging service instance
-      Attribute.propagate_and_optionally_add_state_changes(target.model_handle.create_childMH(:attribute), propagate)
+      Attribute.propagate_and_optionally_add_state_changes(target.model_handle.create_childMH(:attribute), propagate) unless propagate.empty?
     end
 
     def find_matching_attribute(component_ref, cmp_attributes, node_attributes = nil)

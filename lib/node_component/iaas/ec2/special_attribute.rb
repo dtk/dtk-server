@@ -64,7 +64,7 @@ module DTK
           end
           value = special_value_info[:value].call(node_component)
           SpecialAttributeValue.new(attribute_symbol, value)
-      end
+        end
         
         def self.dtk_agent_info(node)
           template_bindings = {

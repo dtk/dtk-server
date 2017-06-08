@@ -20,12 +20,12 @@ module DTK; class ServiceModule
     require_relative('adapters/v4')
     module PortProcessing
       # raises, rather than returns, parsing errors
-      def self.add_port_and_port_links(port)
+      def self.add_port_and_port_links(parent)
         # port links can only be imported in after ports created
         # add ports to assembly nodes
         db_updates_port_links = {}
-        port.ndx_assembly_hashes.each do |assembly_ref, assembly|
-          assembly_idh = port.container_idh.get_child_id_handle(:component, assembly_ref)
+        parent.ndx_assembly_hashes.each do |assembly_ref, assembly|
+          assembly_idh = parent.container_idh.get_child_id_handle(:component, assembly_ref)
           ports = add_needed_ports(assembly_idh)
 
           # if ndx_version_proc_classes is not set will use latest assembly import v4
@@ -33,20 +33,20 @@ module DTK; class ServiceModule
           # dtk-server/application/model/common_module/import/service_module/assembly.rb
           # will rewrite this later remove version_proc_class completely
           #
-          # version_proc_class = port.ndx_version_proc_classes[assembly_ref]
-          version_proc_class = port.ndx_version_proc_classes[assembly_ref]||XYZ::ServiceModule::AssemblyImport::V4
+          # version_proc_class = parent.ndx_version_proc_classes[assembly_ref]
+          version_proc_class = parent.ndx_version_proc_classes[assembly_ref] || XYZ::ServiceModule::AssemblyImport::V4
 
           opts = {}
-          if file_path = port.ndx_assembly_file_paths[assembly_ref]
+          if file_path = parent.ndx_assembly_file_paths[assembly_ref]
             opts[:file_path] = file_path
           end
           port_links = version_proc_class.import_port_links(assembly_idh, assembly_ref, assembly, ports, opts)
 
           db_updates_port_links.merge!(port_links)
-          ports.each { |p| port.ndx_ports[p[:id]] = p }
+          ports.each { |p| parent.ndx_ports[p[:id]] = p }
         end
         # Within import_port_links does the mark as complete for port links
-        Model.input_hash_content_into_model(port.container_idh, 'component' => db_updates_port_links)
+        Model.input_hash_content_into_model(parent.container_idh, 'component' => db_updates_port_links)
       end
 
       def self.create_assembly_template_ports?(link_defs_info, opts = {})
@@ -71,7 +71,7 @@ module DTK; class ServiceModule
         ndx_existing_ports = get_ndx_existing_ports(port_mh, link_defs_info, opts)
         # create create-hashes for both local side and remote side ports
         # Need to index by node because create_from_rows can only insert under one parent
-      ndx_rows = {}
+        ndx_rows = {}
         link_defs_info.each do |ld_info|
           if link_def = ld_info[:link_def]
             node = ld_info[:node]
@@ -83,10 +83,10 @@ module DTK; class ServiceModule
             else
               pntr = ndx_rows[node[:id]] ||= { node: node, ndx_create_rows: {} }
               pntr[:ndx_create_rows][port[:ref]] ||= port
-          end
+            end
           end
         end
-
+        
         # add the remote ports
         link_defs_info.generate_link_def_link_pairs do |link_def, link|
           remote_component_type = link[:remote_component_type]
@@ -104,7 +104,7 @@ module DTK; class ServiceModule
             end
           end
         end
-
+        
         new_rows = []
         ndx_rows.values.each do |r|
           create_port_mh = r[:node].model_handle_with_auth_info.create_childMH(:port)
@@ -123,21 +123,21 @@ module DTK; class ServiceModule
         unless port_idhs_to_delete.empty?()
           Model.delete_instances(port_idhs_to_delete)
         end
-
+        
         # for new rows need to splice in node info
-      unless new_rows.empty?
-        sp_hash = {
-          cols: [:id, :node],
+        unless new_rows.empty?
+          sp_hash = {
+            cols: [:id, :node],
             filter: [:oneof, :node_node_id, new_rows.map { |p| p[:parent_id] }]
           }
-        ndx_port_node = Model.get_objs(port_mh, sp_hash).inject({}) do |h, r|
+          ndx_port_node = Model.get_objs(port_mh, sp_hash).inject({}) do |h, r|
             h.merge(r[:id] => r[:node])
           end
-        new_rows.each { |r| r.merge!(node: ndx_port_node[r[:id]]) }
-      end
+          new_rows.each { |r| r.merge!(node: ndx_port_node[r[:id]]) }
+        end
         ret + new_rows
       end
-
+      
       # returns hash where each key value has form
       # PortID:
       #  port: PORT

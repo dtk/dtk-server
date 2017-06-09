@@ -43,6 +43,10 @@ module DTK
           true
         end
 
+        def self.install(project, local_params, remote_params, client_rsa_pub_key)
+          new(project, local_params, remote_params, client_rsa_pub_key, remote_exists: true).install
+        end
+
         private
         
         def self.info_type

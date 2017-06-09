@@ -104,6 +104,22 @@ module DTK
         rest_ok_response 
       end
 
+      def install_service_info
+        namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
+        version = request_params(:version)
+
+        remote_params = remote_params_dtkn(:service_module, namespace, module_name, version)
+        local_params  = local_params(:service_module, module_name, namespace: namespace, version: version)
+
+        CommonModule::Info::Service::Remote.install(get_default_project, local_params, remote_params, rsa_pub_key)
+        rest_ok_response
+      end
+
+      def install_on_server
+        namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
+        version = request_params(:version)
+      end
+
       def publish_to_remote
         namespace, module_name, version, rsa_pub_key = required_request_params(:namespace, :module_name, :version, :rsa_pub_key)
 

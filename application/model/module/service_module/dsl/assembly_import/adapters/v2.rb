@@ -42,17 +42,15 @@ module DTK; class ServiceModule
       #    and late-binding; for this we need to determine if error raised is because link def not defined or because there is a pointer to a component
       #    that does not exist; for former that would just be an error
       # Implemnting initially 2 because easiest to implement and less 'disruptive' than 1
+      # TODO: DTK-3039: switched to option 1
       def self.import_port_links(assembly_idh, assembly_ref, assembly_hash, ports, opts = {})
         # augment ports with parsed display_name
         augment_with_parsed_port_names!(ports)
         port_links = DBUpdateHash.new
         parse_component_links(assembly_hash, opts).each do |component_link_info|
           error_or_nil, input_port_hash, output_port_hash = find_matching_port_info(component_link_info, ports, opts)
-          unless error_or_nil
-            port_links.merge!(port_link_to_add(assembly_idh, input_port_hash, output_port_hash))
-          else
-            Log.error_pp(error_or_nil)
-          end
+          fail error_or_nil if error_or_nil
+          port_links.merge!(port_link_to_add(assembly_idh, input_port_hash, output_port_hash))
         end
 
         port_links.mark_as_complete(assembly_id: @existing_assembly_ids)

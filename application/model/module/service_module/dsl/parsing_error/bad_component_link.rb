@@ -31,7 +31,7 @@ module DTK; class ServiceModule; class ParsingError
     class BadTarget < self
       def initialize(link_def_ref, base_cmp_name, target_component = nil, opts = Opts.new)
         err_params = err_params(link_def_ref, base_cmp_name, target_component: target_component)
-        err_msg = "Component ?base_cmp_name's component link '?link_def_ref' refers to a component instance "
+        err_msg = "Component '?base_cmp_name' component link '?link_def_ref' refers to a component instance "
         if target_component
           err_msg << "'?target_component' that does not exist"
         else

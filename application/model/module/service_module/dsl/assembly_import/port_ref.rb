@@ -75,9 +75,27 @@ module DTK; class ServiceModule
       end
 
       # ports are augmented with field :parsed_port_name
-      def matching_port(aug_ports, opts = {})
-        aug_ports.find { |port| matching_port__match?(port) } || matching_port__error(opts)
+      def matching_port(aug_ports, parsed_component_link, opts = {})
+        aug_ports.find { |port| matching_port__match?(port) } || matching_port__error(parsed_component_link, opts)
       end
+
+      def component_ref_print_form
+        component_ref_print_form? || fail(Error, "Unexpected that component_ref_print_form? is nil")
+      end
+
+      ASSEMBLY_WIDE_NODE_NAME = 'assembly_wide'
+      def component_ref_print_form?
+        if node_name = self[:node]
+          if component_type = self[:component_type]
+            ret = ''
+            ret << "#{node_name}/" unless node_name == ASSEMBLY_WIDE_NODE_NAME
+            ret << Component.component_type_print_form(component_type)
+            ret << "[#{self[:title]}]" if self[:title]
+            ret
+          end
+        end
+      end
+
 
       private
 
@@ -92,27 +110,17 @@ module DTK; class ServiceModule
         InternalForm.component_ref(cmp_type_ext_form)
       end
 
-      def matching_port__error(opts = {})
-        unless opts[:do_not_throw_error]
-          Error.new("Cannot find match to (#{self.inspect})")
-        end
+      def matching_port__error(parsed_component_link, opts = {})
+        Error.new("Cannot find match to (#{self.inspect})") unless opts[:do_not_throw_error]
 
-        link_def_ref  = self[:link_def_ref]
-        base_cmp_name = opts[:base_cmp_name]
-
-        opts_err = Opts.new(opts).slice(:file_path)
+        link_def_ref       = self[:link_def_ref]
+        opts_err           = Opts.new(opts).slice(:file_path)
+        base_component_ref = parsed_component_link[:input].component_ref_print_form
         if opts[:is_output]
-          ParsingError::BadComponentLink::BadTarget.new(link_def_ref, base_cmp_name, target_component?, opts_err)
+          target_component_ref = parsed_component_link[:output].component_ref_print_form?
+          ParsingError::BadComponentLink::BadTarget.new(link_def_ref, base_component_ref, target_component_ref, opts_err)
         else
-          ParsingError::BadComponentLink::NoLinkDef.new(link_def_ref, base_cmp_name, opts_err)
-        end
-      end
-
-      def target_component?
-        if node = self[:node]
-          if component_type = self[:component_type]
-            "#{node}/#{Component.component_type_print_form(component_type)}"
-          end
+          ParsingError::BadComponentLink::NoLinkDef.new(link_def_ref, base_component_ref, opts_err)
         end
       end
 
@@ -126,7 +134,7 @@ module DTK; class ServiceModule
           self[:link_def_ref] == p[:link_def_ref] &&
           self[:title] == p[:title]
       end
-
+      
       def matching_port__match_on_assembly_id?(aug_port)
         self[:assembly_id].nil? || (self[:assembly_id] == aug_port[:assembly_id])
       end

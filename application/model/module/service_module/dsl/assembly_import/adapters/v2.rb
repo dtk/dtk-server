@@ -66,20 +66,19 @@ module DTK; class ServiceModule
       def self.find_matching_port_info(component_link_info, ports, opts = {})
         error_or_nil = input_port_hash = output_port_hash = nil
 
-        base_cmp_name         = component_link_info[:base_cmp_name]
         parsed_component_link = component_link_info[:parsed_component_link]
         input                 = parsed_component_link[:input]
         output                = parsed_component_link[:output]
 
-        opts_matching_port = opts.merge(do_not_throw_error: true, base_cmp_name: base_cmp_name)
+        opts_matching_port = opts.merge(do_not_throw_error: true)
 
-        input_port_hash = input.matching_port(ports, opts_matching_port)
+        input_port_hash = input.matching_port(ports, parsed_component_link, opts_matching_port)
         if ParsingError.is_error?(input_port_hash)
           error_or_nil = input_port_hash
           return([error_or_nil, input_port_hash, output_port_hash])
         end
 
-        output_port_hash = output.matching_port(ports, opts_matching_port.merge(is_output: true))
+        output_port_hash = output.matching_port(ports, parsed_component_link, opts_matching_port.merge(is_output: true))
         if ParsingError.is_error?(output_port_hash)
           error_or_nil = output_port_hash
           return([error_or_nil, input_port_hash, output_port_hash])

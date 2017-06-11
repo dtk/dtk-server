@@ -58,6 +58,13 @@ module DTK; class Assembly; class Instance; module Get
       get_objs_helper(:instance_nested_component_attributes, :attribute, filter_proc: filter_proc, augmented: true) 
     end
 
+    def get_required_unset_attributes
+      required_attributes = get_attributes_print_form(Opts.new(filter: :required_unset_attributes))
+      attr_link_mh        = model_handle.createMH(:attribute_link)
+      required_attributes.reject! { |r_attr| !AttributeLink.get_augmented(attr_link_mh, [:eq, :input_id, r_attr[:id]]).empty? }
+      required_attributes
+    end
+
     private
 
     def get_attributes_print_form_aux(opts = Opts.new)

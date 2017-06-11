@@ -83,7 +83,8 @@ module DTK
 
       # TODO: will subsume required_attributes by attributes
       def required_attributes
-        rest_ok_response assembly_instance.get_attributes_print_form(Opts.new(filter: :required_unset_attributes))
+        # required_attrs = assembly_instance.get_attributes_print_form(Opts.new(filter: :required_unset_attributes))
+        rest_ok_response assembly_instance.get_required_unset_attributes
       end
 
       def components

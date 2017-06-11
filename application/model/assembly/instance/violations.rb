@@ -61,10 +61,15 @@ module DTK
       private
 
       def find_violations__unset_attrs
-        filter_proc = lambda { |a| a.required_unset_attribute?() }
-        assembly_attr_viols = get_assembly_level_attributes(filter_proc).map { |a| Violation::ReqUnsetAttr.new(a, :assembly) }
+        filter_proc    = lambda { |a| a.required_unset_attribute?() }
+        assembly_attrs = get_assembly_level_attributes(filter_proc)
+        attr_link_mh   = model_handle.createMH(:attribute_link)
+        assembly_attrs.reject! { |r_attr| !AttributeLink.get_augmented(attr_link_mh, [:eq, :input_id, r_attr[:id]]).empty? }
+        assembly_attr_viols = assembly_attrs.map { |a| Violation::ReqUnsetAttr.new(a, :assembly) }
+
         filter_proc = lambda { |r| r[:attribute].required_unset_attribute?() }
         component_attrs = get_augmented_component_attributes(filter_proc)
+        component_attrs.reject! { |r_attr| !AttributeLink.get_augmented(attr_link_mh, [:eq, :input_id, r_attr[:id]]).empty? }
         component_attr_viols = component_attrs.map { |a| Violation::ReqUnsetAttr.new(a, :component) }
         assembly_attr_viols + component_attr_viols
       end

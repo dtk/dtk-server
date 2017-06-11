@@ -144,7 +144,100 @@ module DTK; class Assembly
         LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, opts)
       end
 
+      add_attribute_links(assembly_instance)
       assembly_instance
+    end
+
+    # TODO DTK-2999: will refactor
+    def add_attribute_links(assembly_instance)
+      links               = []
+      links_from          = []
+      target              = assembly_instance.get_target
+      assembly_attributes = assembly_instance.get_assembly_level_attributes
+      cmp_attributes      = assembly_instance.get_augmented_component_attributes
+      propagate           = []
+
+      assembly_attributes.each do |assembly_attribute|
+        attribute_links_to   = AttributeLinkTo.get_for_attribute_id(model_handle.createMH(:attribute_link_to), assembly_attribute[:ancestor_id])
+        attribute_links_from = AttributeLinkFrom.get_for_attribute_id(model_handle.createMH(:attribute_link_from), assembly_attribute[:ancestor_id])
+
+        links += attribute_links_to.map do |attribute_link_to|
+          if matching_attribute = find_matching_attribute(attribute_link_to[:component_ref], cmp_attributes)
+            if value_asserted = assembly_attribute[:value_asserted]
+              propagate << { id: assembly_attribute[:id], value_asserted: value_asserted, old_value_asserted: nil }
+            end
+
+            {
+              ref: "attribute_link:#{matching_attribute[:id]}-#{assembly_attribute[:id]}",
+              datacenter_datacenter_id: target.id,
+              input_id: matching_attribute.id,
+              output_id: assembly_attribute.id,
+              type: 'external',
+              function: 'eq'
+            }
+          end
+        end
+
+        links += attribute_links_from.map do |attribute_link_from|
+          if matching_attribute = find_matching_attribute(attribute_link_from[:component_ref], cmp_attributes)
+            if value_asserted = matching_attribute[:value_asserted]
+              propagate << { id: matching_attribute[:id], value_asserted: value_asserted, old_value_asserted: nil }
+            end
+
+            {
+              ref: "attribute_link:#{matching_attribute[:id]}-#{assembly_attribute[:id]}",
+              datacenter_datacenter_id: target.id,
+              input_id: assembly_attribute.id,
+              output_id: matching_attribute.id,
+              type: 'external',
+              function: 'eq'
+            }
+          end
+        end
+      end
+
+      links.reject! { |link| link.nil? }
+      Model.create_from_rows(target.model_handle.create_childMH(:attribute_link), links, convert: true)
+
+      # this will propagate attribute value through link_to and link_from when staging service instance
+      Attribute.propagate_and_optionally_add_state_changes(target.model_handle.create_childMH(:attribute), propagate) unless propagate.empty?
+    end
+
+    def find_matching_attribute(component_ref, cmp_attributes, node_attributes = nil)
+      cmp_ref_size       = component_ref.split('/').size
+      matching_attribute = nil
+
+      cmp_attributes.each do |attr|
+        cmp_name  = nil
+        attr_name = attr[:display_name]
+        node_name = (attr[:node]||{})[:display_name]
+
+        if n_component = attr[:nested_component]
+          cmp_name = n_component[:display_name].gsub('__','::')
+        end
+
+        full_name            = ""
+        full_name_new_format = ""
+
+        full_name << "#{node_name}/" if node_name && !node_name.eql?('assembly_wide')
+        full_name_new_format << "node[#{node_name}]/" if node_name && !node_name.eql?('assembly_wide')
+
+        full_name << "#{cmp_name}/" if cmp_name
+        full_name_new_format << "#{cmp_name}/" if cmp_name
+
+        full_name << "#{attr_name}" if attr_name
+        full_name_new_format << "#{attr_name}" if attr_name
+
+        if component_ref == full_name
+          matching_attribute = attr
+          break
+        elsif component_ref == full_name_new_format
+          matching_attribute = attr
+          break
+        end
+      end
+
+      matching_attribute
     end
 
     def self.create_or_update_from_instance(project, assembly_instance, service_module_name, assembly_template_name, opts = {})

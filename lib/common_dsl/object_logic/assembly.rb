@@ -36,8 +36,7 @@ module DTK
         
         def generate_content_input!(assembly_instance)
           set_id_handle(assembly_instance)
-
-          # TODO: add assembly level attributes
+          set?(:Attributes, Attribute.generate_content_input?(:assembly, (assembly_instance.get_assembly_level_attributes || {})))
           set?(:Components, Component.generate_content_input(assembly_instance))
           set(:Workflows, Workflow.generate_content_input(assembly_instance))
           self
@@ -49,6 +48,7 @@ module DTK
         #  :impacted_files
         def diff?(assembly_parse, qualified_key, opts = {})
           aggregate_diffs?(qualified_key, opts) do |diff_set|
+            diff_set.add_diff_set? Attribute, val(:Attributes), assembly_parse.val(:Attributes)
             diff_set.add_diff_set? Component, val(:Components), assembly_parse.val(:Components)
             diff_set.add_diff_set? Workflow, val(:Workflows), assembly_parse.val(:Workflows)
             # TODO: need to add diffs on all subobjects

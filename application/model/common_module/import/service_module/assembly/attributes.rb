@@ -19,14 +19,26 @@ module DTK
   class CommonModule::Import::ServiceModule
     module Assembly
       module Attributes
-        def self.db_update_hash(parsed_attributes)
+        def self.db_update_hash(parsed_attributes, opts = {})
           parsed_attributes.inject(DBUpdateHash.new) do |h, (attr_name, parsed_attribute)|
+            attr_content = nil
             attr_val     = parsed_attribute.val(:Value)
-            attr_content = {
-              'display_name'   => attr_name,
-              'value_asserted' => attr_val,
-              'data_type'      => Attribute::Datatype.datatype_from_ruby_object(attr_val)
-            }
+            if opts[:assembly_attributes]
+              attr_content = {
+                'display_name'   => attr_name,
+                'value_asserted' => attr_val['default'],
+                'data_type'      => attr_val['type'],
+                'required'       => attr_val['required'],
+                'link_to'        => attr_val['links_to'],
+                'link_from'      => attr_val['links_from']
+              }
+            else
+              attr_content = {
+                'display_name'   => attr_name,
+                'value_asserted' => attr_val,
+                'data_type'      => Attribute::Datatype.datatype_from_ruby_object(attr_val)
+              }
+            end
             h.merge(attr_name => attr_content)
           end
         end

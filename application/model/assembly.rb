@@ -34,7 +34,7 @@ module DTK
     ### standard get methods
     def get_assembly_level_attributes(filter_proc = nil)
       sp_hash = {
-        cols: [:id, :display_name, :attribute_value, :data_type, :hidden],
+        cols: [:id, :display_name, :attribute_value, :data_type, :hidden, :ancestor_id],
         filter: [:eq, :component_component_id, id()]
       }
       ret = Model.get_objs(model_handle(:attribute), sp_hash)

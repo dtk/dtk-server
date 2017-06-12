@@ -117,10 +117,6 @@ module DTK; class Task; class Status
           end
         else
           # TODO: Find better way to know which type of task is being executed
-          require 'debugger'
-          Debugger.wait_connection = true
-          Debugger.start_remote
-          debugger
           if ret.first[:type].include?("delete")
             opts.merge!(:type => "delete")
           end

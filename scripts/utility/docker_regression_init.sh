@@ -33,16 +33,16 @@ GIT_USERNAME=dtk1
 DOCKER_ID=$(date +%Y%m%d%H%M%S)
 
 ADDRESS=${1}
-DTK_SERVER_BRANCH=${2-master}
-DTK_ARBITER_BRANCH=${3:-master}
-CONTAINER=${4:-dtk}
-ARBITER_CONTAINER=${5:-dtk-arbiter}
-NAME=${6:-dtk-docker-${DOCKER_ID}}
-USER=${7:-docker-test}
-PASS=${8:-r8server}
-HOST_VOLUME="/dtk"
+HOST_VOLUME=${2-/dtk}
+DTK_SERVER_BRANCH=${3-master}
+DTK_ARBITER_BRANCH=${4:-master}
+CONTAINER=${5:-dtk}
+ARBITER_CONTAINER=${6:-dtk-arbiter}
+NAME=${7:-dtk-docker-${DOCKER_ID}}
+USER=${8:-docker-test}
+PASS=${9:-r8server}
 
-echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}\nGIT_PORT=${SSH_PORT}" > "/${CONTAINER}/dtk.config"
+echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nINSTANCE_NAME=${NAME}\nGIT_PORT=${SSH_PORT}" > "/${HOST_VOLUME}/dtk.config"
 
 docker ps | grep dtk > /dev/null
 RUNNING=$?

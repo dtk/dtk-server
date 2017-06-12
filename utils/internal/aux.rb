@@ -253,6 +253,9 @@ module DTK
         key_value.values.first
       end
 
+      # opts can have keys:
+      #  :file_path
+      #  :do_not_raise
       def json_parse(json, opts = {})
         ret = {}
         if json.empty?
@@ -261,7 +264,7 @@ module DTK
         begin
           ::JSON.parse(json)
         rescue ::JSON::ParserError => e
-          return ErrorUsage::Parsing.new("JSON parsing error #{e} in file", opts[:file_path]) if opts[:do_not_raise]
+          return ErrorUsage::Parsing.new("JSON parsing error #{e} in file", opts[:file_path], Opts.new(log_error: false)) if opts[:do_not_raise]
           raise ErrorUsage::Parsing.new("JSON parsing error #{e} in file", opts[:file_path])
         end
       end

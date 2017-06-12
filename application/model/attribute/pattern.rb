@@ -37,11 +37,6 @@ module DTK; class Attribute
     NodeComponentRegexp = Regexp.new("^node#{DelimWithSelect}\/(component.+$)")
     AttrRegexp = Regexp.new("node[^\/]*\/component#{Delim}\/(attribute.+$)")
 
-    def self.raise_unexpected_pattern(pattern)
-      fail Error.new("Unexpected that pattern (#{pattern}) did not match")
-    end
-    private_class_method :raise_unexpected_pattern
-
     def self.create_attr_pattern(base_object, attr_term, opts = {})
       create(attr_term, base_object, opts).set_parent_and_attributes!(base_object.id_handle, opts)
     end
@@ -57,15 +52,8 @@ module DTK; class Attribute
       return_prompt   = nil
 
       av_pairs.each do |av_pair|
-        value = av_pair[:value]
-        if semantic_data_type = attr_properties[:semantic_data_type]
-          unless value.nil?
-            unless SemanticDatatype.is_valid?(semantic_data_type, value)
-              fail ErrorUsage.new("The value (#{value.inspect}) is not of type (#{semantic_data_type})")
-            end
-          end
-        end
-
+        value          = av_pair[:value]
+        attribute_path = av_pair[:pattern]
         # if service instance has components check if there is a node with same name as component
         # if true then it is ambiguous whether using node or component attribute
         check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?
@@ -85,16 +73,15 @@ module DTK; class Attribute
         # all its members to same value; only checking for component level and not node level because
         # node level attributes different for each node member
         attr_idhs = pattern.attribute_idhs
-        ngm_attr_idhs = pattern.is_a?(Type::ComponentLevel) ? pattern.node_group_member_attribute_idhs : []
-        # TODO: modify; rather than checking datatype; convert attribute value, which might be in string form to right ruby data type
+
         # do not need to check value validity if opts[:create] (since checked already)
         unless opts[:create]
-          attr_idhs.each do |attr_idh|
-            unless value.nil? or pattern.valid_value?(value, attr_idh)
-              fail ErrorUsage.new("The value (#{value.inspect}) is not of type (#{pattern.semantic_data_type(attr_idh)})")
-            end
+          if semantic_data_type = attribute_semantic_data_type?(pattern, attr_idhs)
+            value = SemanticDatatype.raise_error_if_invalid_and_transform_if_needed(value, semantic_data_type, attribute_path)
           end
         end
+
+        ngm_attr_idhs = pattern.is_a?(Type::ComponentLevel) ? pattern.node_group_member_attribute_idhs : []
 
         all_attr_idhs = attr_idhs
         unless ngm_attr_idhs.empty?
@@ -185,6 +172,18 @@ module DTK; class Attribute
         attributes.find { |attribute| attribute.display_name == attribute_name }
       end
     end
-    
+
+    private
+
+    def self.attribute_semantic_data_type?(pattern, attr_idhs)
+      if sample_attr_idh = attr_idhs.first
+        pattern.semantic_data_type(sample_attr_idh)
+      end
+    end
+
+    def self.raise_unexpected_pattern(pattern)
+      fail Error.new("Unexpected that pattern (#{pattern}) did not match")
+    end
+
   end
 end; end

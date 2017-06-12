@@ -19,7 +19,9 @@
 module DTK
   class Attribute
     class SemanticDatatype
-      r8_nested_require('semantic_datatype', 'dsl_builder')
+      require_relative('semantic_datatype/dsl_builder')
+      require_relative('semantic_datatype/convert_from_string')
+
       extend SemanticDatatypeClassMixin
       include SemanticDatatypeMixin
 
@@ -31,7 +33,7 @@ module DTK
         @validation_proc = nil
       end
       # this must be placed here
-      r8_nested_require('semantic_datatype', 'asserted_datatypes')
+      require_relative('semantic_datatype/asserted_datatypes')
 
       def self.default
         DefaultDatatype
@@ -50,6 +52,17 @@ module DTK
           end
         end
         convert_to_internal_form(semantic_data_type, value)
+      end
+
+      # called from Pattern class
+      def self.raise_error_if_invalid_and_transform_if_needed(value, semantic_data_type, attribute_path)
+        if value.kind_of?(::String)
+          value = ConvertFromString.convert_if_non_scalar_type(value, semantic_data_type, attribute_path)
+          unless is_valid?(semantic_data_type, value)
+            fail ErrorUsage, "The value of #{attribute_path} is not of type #{semantic_data_type}" 
+          end
+        end
+        value
       end
 
       def self.is_valid?(semantic_data_type, value)

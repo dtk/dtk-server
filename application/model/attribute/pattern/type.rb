@@ -18,12 +18,12 @@
 module DTK; class Attribute
   class Pattern
     class Type
-      r8_nested_require('type', 'explicit_id')
-      r8_nested_require('type', 'assembly_level')
+      require_relative('type/explicit_id')
+      require_relative('type/assembly_level')
       # common_node_component_level must be before node_level and component_level
-      r8_nested_require('type', 'common_node_component_level')
-      r8_nested_require('type', 'node_level')
-      r8_nested_require('type', 'component_level')
+      require_relative('type/common_node_component_level')
+      require_relative('type/node_level')
+      require_relative('type/component_level')
 
       def initialize(pattern)
         @pattern = pattern
@@ -42,17 +42,6 @@ module DTK; class Attribute
         @attribute_properties = attr_properties
       end
 
-      def valid_value?(str_value, attribute_idh = nil)
-        attr = attribute_stack(attribute_idh)[:attribute]
-        if semantic_data_type = attr[:semantic_data_type]
-          value = ConvertFromString.convert(str_value, semantic_data_type)
-          SemanticDatatype.is_valid?(semantic_data_type, value)
-        else
-          # vacuously true
-          true
-        end
-      end
-
       def semantic_data_type(attribute_idh = nil)
         attribute_stack(attribute_idh)[:attribute][:semantic_data_type]
       end
@@ -65,17 +54,6 @@ module DTK; class Attribute
       private
 
       attr_reader :pattern, :id
-
-      # unify with SemanticDatatype data-drive processing
-      module ConvertFromString
-        # TODO: stub
-        def self.convert(str_value, semantic_data_type)
-          if %w{array hash json}.include?(semantic_data_type)
-            fail ErrorUsage, "Use the 'edit-attribute' command to enter values for a non-scalar attribute"
-          end
-          str_value
-        end
-      end
 
       def create_this_type?(opts)
         if create = opts[:create]

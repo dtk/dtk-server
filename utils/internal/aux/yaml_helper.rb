@@ -25,6 +25,8 @@ module DTK
       yaml_dump(simple_form)
     end
 
+    # opts can have keys:
+    #  :file_path
     def self.parse(content, opts = {})
       ret = {}
       if content.empty?
@@ -33,7 +35,7 @@ module DTK
         begin
           ::YAML.load(content)
          rescue Exception => e
-          ErrorUsage::Parsing::YAML.new("YAML #{e} in file", opts[:file_path])
+           ErrorUsage::Parsing::YAML.new("YAML #{e} in file", opts[:file_path], Opts.new(log_error: false))
         end
       end
     end

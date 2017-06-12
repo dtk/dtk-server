@@ -97,11 +97,15 @@ module DTK; class Task; class Status
       num_subtasks = subtasks.size
       if num_subtasks > 0
         if num_subtasks == 1 && !subtasks.first[:executable_action_type].nil? 
-          ea = subtasks.first[:executable_action]
-          if subtasks.first[:executable_action_type].include?("ConfigNode") #|| subtasks.first[:display_name].include?("configure_node")
+          ea = subtasks.first[:executable_action] 
+          if subtasks.first[:executable_action_type].include?("ConfigNode")
+            if opts[:type]
+              ret = [] if opts[:type].include?("delete")
+            end
             el.merge!(Task::Action::ConfigNode.status(ea, opts))
             return ret
-          elsif subtasks.first[:executable_action_type].include?("DeleteFromDatabase")
+          end
+          if subtasks.first[:executable_action_type].include?("DeleteFromDatabase")
             el.merge!(Task::Action::DeleteFromDatabase.status(ea, opts))
             return ret
           end
@@ -112,6 +116,14 @@ module DTK; class Task; class Status
             subtasks.flat_map { |st| status_table_form(st, opts, level + 1) }
           end
         else
+          # TODO: Find better way to know which type of task is being executed
+          require 'debugger'
+          Debugger.wait_connection = true
+          Debugger.start_remote
+          debugger
+          if ret.first[:type].include?("delete")
+            opts.merge!(:type => "delete")
+          end
           ret += subtasks.sort { |a, b| (a[:position] || 0) <=> (b[:position] || 0) }.flat_map do |st|
             status_table_form(st, opts, level + 1, ndx_errors)
           end

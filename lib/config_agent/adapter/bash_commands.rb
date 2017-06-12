@@ -25,6 +25,8 @@ module DTK; class ConfigAgent; module Adapter
       component_action = config_node[:component_actions].first
       action_name      = component_action.method_name
       cmp_module       = component_action.component_module_name
+      component        = component_action.component
+      assembly         = opts[:assembly]
 
       ret = {
         action_agent_request: {
@@ -33,14 +35,31 @@ module DTK; class ConfigAgent; module Adapter
           action_name: action_name,
           module_name: cmp_module,
           execution_list: commands
-        }
+        },
+        modules: get_base_and_dependent_modules(component, assembly)
       }
 
-      if assembly = opts[:assembly]
+      if assembly
         ret.merge!(service_id: assembly.id(), service_name: assembly.get_field?(:display_name))
       end
 
       ret
+    end
+
+    def get_base_and_dependent_modules(component, assembly_instance)
+      ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance).inject({}) do |h, aug_module_branch|
+        module_info = {
+          repo: aug_module_branch.repo.display_name,
+          branch: aug_module_branch.branch_name,
+          sha: aug_module_branch.current_sha,
+          frozen: !is_assembly_module_version?(aug_module_branch)
+        }
+        h.merge(aug_module_branch.module_name => module_info)
+      end
+    end
+
+    def is_assembly_module_version?(aug_module_branch)
+      ModuleVersion.assembly_module_version?(aug_module_branch.version)
     end
 
     def type

@@ -16,7 +16,7 @@ component_name = 'unit_test::source'
 type = 'unit_test::sink'
 dependency_component_1 = 'sink1/unit_test::sink'
 dependency_component_2 = 'sink2/unit_test::sink'
-attributes_to_check = {"#{node_name}/unit_test::source/upstream" => '[nil, nil]'}
+attributes_to_check = {"#{node_name}/unit_test::source/upstream" => [nil, nil]}
 
 dtk_common = Common.new('', '')
 

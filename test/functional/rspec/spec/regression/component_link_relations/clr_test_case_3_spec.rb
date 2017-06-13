@@ -16,8 +16,8 @@ node_name_2 = 'source2'
 component_name = 'unit_test::source'
 type = 'unit_test::sink'
 dependency_component = 'sink/unit_test::sink'
-attributes_to_check_1 = {"#{node_name_1}/unit_test::source/upstream" => '[nil]'}
-attributes_to_check_2 = {"#{node_name_2}/unit_test::source/upstream" => '[nil]'}
+attributes_to_check_1 = {"#{node_name_1}/unit_test::source/upstream" => [nil]}
+attributes_to_check_2 = {"#{node_name_2}/unit_test::source/upstream" => [nil]}
 
 dtk_common = Common.new(service_name, assembly_name)
 

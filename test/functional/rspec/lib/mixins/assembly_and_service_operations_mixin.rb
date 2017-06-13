@@ -107,7 +107,7 @@ module AssemblyAndServiceOperationsMixin
   def check_if_attributes_exists_in_service_instance(service_instance_name, attributes_to_check)
     puts "Check if attributes exist and are correct in service instance", "---------------------------------------------------"
     attributes_exist = false
-    attributes_list = send_request("/rest/api/v1/services/#{service_instance_name}/attributes", {}, 'get')
+    attributes_list = send_request("/rest/api/v1/services/#{service_instance_name}/attributes?all=&format=yaml", {}, 'get')
     
     puts "Attributes to check:"
     ap attributes_to_check

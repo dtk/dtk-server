@@ -13,10 +13,10 @@ original_module_name = 'cmd_test_case_9_dtk.module.yaml'
 delta_module_content = 'delta_cmd_test_case_9_dtk.module.yaml'
 
 attributes_to_check = {
-  'node/cmd_test_case_9::first_component/hash_attr'    => "{key1=>value1}",
-  'node/cmd_test_case_9::first_component/hash_attr_3'  => "{key1=>nil}",
-  'node/cmd_test_case_9::first_component/hash_attr_4'  => "{key1=>[element1, element2]}",
-  'node/cmd_test_case_9::first_component/hash_attr_5'  => "{key1=>value1, key2=>value2}",
+  "node/cmd_test_case_9::first_component/hash_attr"    => {"key1"=>"value1"},
+  "node/cmd_test_case_9::first_component/hash_attr_3"  => {"key1"=>nil},
+  "node/cmd_test_case_9::first_component/hash_attr_4"  => {"key1"=>["element1", "element2"]},
+  "node/cmd_test_case_9::first_component/hash_attr_5"  => {"key1"=>"value1", "key2"=>"value2"},
 }
 
 dtk_common = Common.new("", "")

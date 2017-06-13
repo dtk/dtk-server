@@ -9,7 +9,7 @@ module_name = 'test/cmd_test_case_1'
 assembly_name = 'test_assembly'
 service_name = 'cmd_test_case_1'
 service_location = "~/dtk/"
-component_to_check = 'node/cmd_test_case_1::second_component'
+component_to_check = "ec2::node[node]/cmd_test_case_1::second_component"
 original_module_name = 'cmd_test_case_1_dtk.module.yaml'
 delta_module_content = 'delta_cmd_test_case_1_dtk.module.yaml'
 

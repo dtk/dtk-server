@@ -20,7 +20,7 @@ assemblies:
     actions:
       create:
         subtasks:
-        - name: create nodes
+        - name: run components
           node: node
           components:
           - cmd_test_case_10::component

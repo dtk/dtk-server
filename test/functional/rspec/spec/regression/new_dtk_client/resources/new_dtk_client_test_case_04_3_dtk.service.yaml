@@ -21,3 +21,39 @@ workflows:
       components:
       - stdlib
       - action_module
+
+---
+dsl_version: 1.0.0
+name: new_dtk_client_test_case_04
+dependencies:
+  aws/aws_stdlib: master
+  dtk_stdlib/dtk_stdlib: master
+  aws/ec2: master
+  dtk/host: master
+  dtk-provider/ruby-provider: master
+  puppetlabs/stdlib: master
+  r8/action_module: master
+components:
+- ec2::node[node]:
+    attributes:
+      discovered: false
+      dtk_debug: false
+      enable_public_ip_in_subnet: true
+      image: precise_hvm
+      key_name: testing_use1
+      security_group_ids:
+      - sg-84c1bffa
+      size: small
+      subnet_id: subnet-a8804f84
+      tags:
+        Name: dtk:new_dtk_client_test_case_04:node
+    links:
+    - target_iam/ec2::profile[aws-target]
+    components:
+    - stdlib
+    - action_module
+actions:
+  create:
+    node: assembly_wide
+    ordered_components:
+    - ec2::node[node]

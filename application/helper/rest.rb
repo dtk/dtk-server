@@ -30,6 +30,12 @@ module Ramaze::Helper
       end
     end
 
+    # opts can have keys:
+    #  :encode_into
+    #  :datatype
+    #  :info
+    #  :warn
+    #  :error # TODO: is this possible
     def rest_ok_response(data = nil, opts = {})
       data ||= {}
       if encode_format = opts[:encode_into]

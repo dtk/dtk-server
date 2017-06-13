@@ -207,8 +207,8 @@ module DTK
       rescue SessionError => e
         # TODO: see why dont have result = auth_unauthorized_response(e.message)
         auth_unauthorized_response(e.message)
-        # rescue ErrorUsage::Warning => e
-        # TODO: handke warnings sepcially; right now handling just like errors
+      rescue ErrorUsage::Warning => warning
+        result = rest_ok_response(warn: warning.message)
       rescue Exception => e
         if e.is_a?(ErrorUsage)
           # TODO: respond_to? is probably not needed

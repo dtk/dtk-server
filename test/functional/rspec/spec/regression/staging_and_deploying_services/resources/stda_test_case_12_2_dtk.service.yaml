@@ -2,30 +2,43 @@
 dsl_version: 1.0.0
 name: stda_test_case_12
 dependencies:
+  aws/aws_stdlib: master
+  dtk_stdlib/dtk_stdlib: master
   aws/ec2: master
-  puppetlabs/stdlib: master
+  dtk/host: master
+  dtk-provider/ruby-provider: master
+  r8/stdlib: master
   puppetlabs/wget: master
 components:
 - wget:
     attributes:
       version: 1.0.0
-nodes:
-  single_node:
+- ec2::node[single_node]:
     attributes:
-      image: precise_hvm
+      discovered: false
+      dtk_debug: false
+      enable_public_ip_in_subnet: true
+      image: trusty_hvm
       size: micro
+      tags:
+        Name: dtk:stda_test_case_12:single_node
+    links:
+    - target_iam/ec2::profile[aws-target]
     components:
     - stdlib
     - wget:
         attributes:
           version: 1.0.0
-workflows:
+actions:
   create:
     subtasks:
+    - name: component ec2::node[single_node]
+      components:
+      - ec2::node[single_node]
     - name: host aggregator
       components:
       - wget
-    - name: create node
+    - name: configure
       node: single_node
       components:
       - stdlib

@@ -2,33 +2,57 @@
 dsl_version: 1.0.0
 name: stda_test_case_16_instance
 dependencies:
+  aws/aws_stdlib: master
+  dtk_stdlib/dtk_stdlib: master
   aws/ec2: master
+  dtk/host: master
+  dtk-provider/ruby-provider: master
   r8/test_delete: master
-nodes:
-  node:
+components:
+- ec2::node[node]:
     attributes:
+      discovered: false
+      dtk_debug: false
+      enable_public_ip_in_subnet: true
       image: trusty_hvm
       size: micro
+      tags:
+        Name: dtk:stda_test_case_16_instance:node
+    links:
+    - target_iam/ec2::profile[aws-target]
     components:
     - test_delete::component:
         attributes:
           file_path: /tmp/test.txt
-  second_node:
+- ec2::node[second_node]:
     attributes:
+      discovered: false
+      dtk_debug: false
+      enable_public_ip_in_subnet: true
       image: trusty_hvm
       size: micro
+      tags:
+        Name: dtk:stda_test_case_16_instance:second_node
+    links:
+    - target_iam/ec2::profile[aws-target]
     components:
     - test_delete::component:
         attributes:
           file_path: /tmp/test.txt
-workflows:
+actions:
   create:
     subtasks:
+    - name: component ec2::node[node]
+      components:
+      - ec2::node[node]
+    - name: component ec2::node[second_node]
+      components:
+      - ec2::node[second_node]
     - name: configure node
       node: node
-      ordered_components:
+      components:
       - test_delete::component
-    - name: configure second node
+    - name: configure second_node
       node: second_node
-      ordered_components:
+      components:
       - test_delete::component

@@ -2,17 +2,31 @@
 dsl_version: 1.0.0
 name: stda_test_case_18_instance
 dependencies:
+  aws/aws_stdlib: master
+  dtk_stdlib/dtk_stdlib: master
   aws/ec2: master
+  dtk/host: master
+  dtk-provider/ruby-provider: master
   r8/test_delete: master
-nodes:
-  node:
+components:
+- ec2::node[node]:
     attributes:
+      discovered: false
+      dtk_debug: false
+      enable_public_ip_in_subnet: true
       image: trusty_hvm
       size: micro
-workflows:
+      tags:
+        Name: dtk:stda_test_case_18_instance:node
+    links:
+    - target_iam/ec2::profile[aws-target]
+actions:
   create:
     subtasks:
+    - name: component ec2::node[node]
+      components:
+      - ec2::node[node]
     - name: configure node
       node: node
-      ordered_components:
+      components:
       - test_delete::component

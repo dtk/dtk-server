@@ -211,6 +211,7 @@ module DTK; class Task
         return nil
       end
 
+      ### TODO: DTK-2974: lines to end: TODO: DTK-2974 should be removed and we will use another mechanism other than check_for_breakpoint to handle breakpoints
       ids = []
       task_template_content.each do |config_node_action|
           config_node_action.each {|action| ids << action[1][0][0].id }
@@ -225,6 +226,7 @@ module DTK; class Task
       }
       serialized_content = DTK::Task::Template::ConfigComponents::Persistence::AssemblyActions.get_serialized_content_from_assembly(assembly, task_action = nil, task_params: opts[:task_params])
       check_for_breakpoint(serialized_content, stages_config_nodes_task)
+      ###### end: TODO: DTK-2974
 
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtask(start_nodes_task) if start_nodes_task

@@ -21,10 +21,13 @@ module DTK; class Task; class Template; class Stage
       def initialize(serialized_multinode_action)
         super(serialized_multinode_action[:name])
         @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
+        @breakpoint = serialized_multinode_action[:breakpoint]
         unless @ordered_components 
           fail ParsingError::MissingComponentOrActionKey.new(serialized_multinode_action, stage: serialized_multinode_action[:name]) 
         end
       end
+
+      attr_reader :breakpoint
 
       def serialization_form(opts = {})
         if opts[:form] == :explicit_instances

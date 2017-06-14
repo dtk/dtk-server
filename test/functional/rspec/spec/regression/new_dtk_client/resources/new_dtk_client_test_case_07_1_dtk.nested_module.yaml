@@ -17,7 +17,6 @@ components:
     actions:
       create:
         puppet_class: mysql::server
-
   db:
     attributes:
       name:
@@ -37,12 +36,10 @@ components:
     actions:
       create:
         puppet_definition: mysql::db
-
   client:
     actions:
       create:
         puppet_class: mysql::client
-
   server_backup:
     attributes:
       backupuser:
@@ -54,7 +51,6 @@ components:
     actions:
       create:
         puppet_class: mysql::server::backup
-
   bindings:
     attributes:
       java_enable:
@@ -74,7 +70,6 @@ components:
     actions:
       create:
         puppet_class: mysql::bindings
-
 includes:
 - staging
 - stdlib

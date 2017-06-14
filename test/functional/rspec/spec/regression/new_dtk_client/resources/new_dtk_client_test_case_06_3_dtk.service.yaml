@@ -8,7 +8,7 @@ dependencies:
   puppetlabs/mysql: 1.0.0
   puppet/nginx: master
   nanliu/staging: master
-  puppetlabs/stdlib: master
+  r8/stdlib: master
   dtk-examples/wordpress: 1.2.0
 nodes:
   wordpress:

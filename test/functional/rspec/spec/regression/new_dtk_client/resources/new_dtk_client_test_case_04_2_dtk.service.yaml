@@ -7,19 +7,15 @@ dependencies:
   aws/ec2: master
   dtk/host: master
   dtk-provider/ruby-provider: master
-  puppetlabs/stdlib: master
+  r8/stdlib: master
 components:
 - ec2::node[node]:
     attributes:
       discovered: false
       dtk_debug: false
       enable_public_ip_in_subnet: true
-      image: precise_hvm
-      key_name: testing_use1
-      security_group_ids:
-      - sg-84c1bffa
+      image: amazon_hvm
       size: small
-      subnet_id: subnet-a8804f84
       tags:
         Name: dtk:new_dtk_client_test_case_04:node
     links:
@@ -28,6 +24,11 @@ components:
     - stdlib
 actions:
   create:
-    node: assembly_wide
-    ordered_components:
-    - ec2::node[node]
+    subtasks:
+    - name: component ec2::node[node]
+      components:
+      - ec2::node[node]
+    - name: configure stdlib
+      node: node
+      components:
+      - stdlib

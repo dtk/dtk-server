@@ -568,7 +568,7 @@ shared_context "Delete module from remote" do |dtk_common, module_name, module_v
   it "deletes module #{module_name} with version #{module_version} from dtkn" do
     puts 'Delete module from remote', '-------------------------'
     pass = true
-    value = `dtk module delete-from-remote -y -v #{module_version} #{module_name}`
+    value = `dtk module delete-from-dtkn -y -v #{module_version} #{module_name}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
     module_exists_on_repoman = dtk_common.module_exists_on_remote?(module_name, module_version)
@@ -584,7 +584,7 @@ shared_context "NEG - Delete module from remote" do |dtk_common, module_name, mo
   it "does not delete module #{module_name} with version #{module_version} from dtkn" do
     puts 'NEG - Delete module from remote', '------------------------------'
     pass = true
-    value = `dtk module delete-from-remote -y -v #{module_version} #{module_name}`
+    value = `dtk module delete-from-dtkn -y -v #{module_version} #{module_name}`
     puts value
     pass = false if ((value.include? "Module '#{module_name}' does not exist on repo manager!") || (value.include? "Module '#{module_name}(#{module_version})' not found in the DTKN Catalog"))
     puts "Delete of module #{module_name} from remote was completed successfully which is not expected!" if pass == true

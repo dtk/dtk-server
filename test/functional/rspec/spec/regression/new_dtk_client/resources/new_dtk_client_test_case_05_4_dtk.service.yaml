@@ -2,41 +2,64 @@
 dsl_version: 1.0.0
 name: new_dtk_client_test_case_05
 dependencies:
+  aws/aws_stdlib: master
+  dtk_stdlib/dtk_stdlib: master
   aws/ec2: master
-  puppetlabs/stdlib: master
-nodes:
-  node:
+  dtk/host: master
+  dtk-provider/ruby-provider: master
+  r8/stdlib: master
+components:
+- ec2::node[node]:
     attributes:
-      image: precise_hvm
+      discovered: false
+      dtk_debug: false
+      enable_public_ip_in_subnet: true
+      image: trusty_hvm
       size: micro
+      tags:
+        Name: dtk:new_dtk_client_test_case_05:node
+    links:
+    - target_iam/ec2::profile[aws-target]
     components:
     - stdlib
-  new_node:
+- ec2::node[new_node]:
     attributes:
-      image: precise_hvm
+      discovered: false
+      dtk_debug: false
+      enable_public_ip_in_subnet: true
+      image: trusty_hvm
       size: micro
+      tags:
+        Name: dtk:new_dtk_client_test_case_05:new_node
+    links:
+    - target_iam/ec2::profile[aws-target]
     components:
     - stdlib
-  new_node_group:
+- ec2::node_group[new_node_group]:
     attributes:
       cardinality: 2
-      type: group
-      image: precise_hvm
+      discovered: false
+      dtk_debug: false
+      image: trusty_hvm
       size: micro
+      tags:
+        Name: dtk:new_dtk_client_test_case_05:new_node_group
+    links:
+    - target_iam/ec2::profile[aws-target]
     components:
     - stdlib
-workflows:
+actions:
   create:
     subtasks:
-    - name: create nodes
-      node: node
+    - name: component ec2::node[node]
       components:
-      - stdlib
-    - name: create new node
-      node: new_node
+      - ec2::node[node]
+    - name: component ec2::node[new_node]
       components:
-      - stdlib
-    - name: create new node group
-      node: new_node
+      - ec2::node[new_node]
+    - name: component ec2::node_group[new_node_group]
+      components:
+      - ec2::node_group[new_node_group]
+    - name: configure stdlib
       components:
       - stdlib

@@ -14,10 +14,7 @@ assemblies:
         components:
         - stdlib
         - unit_test_9::attribute_test
-        - unit_test_9::source:
-            links:
-              unit_test_9::sink:
-              - sink/unit_test_9::sink
+        - unit_test_9::source
     - node[sink]:
         attributes:
           image: precise
@@ -33,20 +30,14 @@ assemblies:
           size: micro
         components:
         - stdlib
-        - unit_test_9::source:
-            links:
-              unit_test_9::sink:
-              - sink/unit_test_9::sink
+        - unit_test_9::source
     - node[source2]:
         attributes:
           image: precise
           size: micro
         components:
         - stdlib
-        - unit_test_9::source:
-            component_links:
-              unit_test_9::sink:
-              - sink/unit_test_9::sink
+        - unit_test_9::source
     - node[sink]:
         attributes:
           image: precise
@@ -62,11 +53,7 @@ assemblies:
           size: small
         components:
         - stdlib
-        - unit_test_9::source:
-            component_links:
-              unit_test_9::sink:
-              - sink1/unit_test_9::sink
-              - sink2/unit_test_9::sink
+        - unit_test_9::source
     - node[sink1]:
         attributes:
           image: precise
@@ -102,30 +89,3 @@ component_defs:
       - location: remote
         attribute_mappings:
         - "$node.host_address -> upstream"
-  attribute_test:
-    actions:
-      create:
-        puppet_class: unit_test::attribute_test
-    attributes:
-      array_attr:
-        type: array
-        default:
-      hash_attr:
-        type: hash
-        default:
-          key1:
-          - element1
-          - element2
-      boolean_attr:
-        type: boolean
-        default: false
-      port_attr:
-        type: port
-        default: 7000
-      integer_attr:
-        type: integer
-        default: 878
-      required_attr:
-        required: true
-      new_port:
-        type: port

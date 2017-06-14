@@ -3,10 +3,9 @@ dsl_version: 1.0.0
 module: test/new_dtk_client_test_case_04
 version: master
 license: Apache 2.0
-
 dependencies:
   aws/ec2: master
-  puppetlabs/stdlib: master
+  r8/stdlib: master
 assemblies:
   test_assembly:
     description: test assembly
@@ -20,7 +19,7 @@ assemblies:
     actions:
       create:
         subtasks:
-        - name: create nodes
+        - name: configure stdlib
           node: node
           components:
           - stdlib

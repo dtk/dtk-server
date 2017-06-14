@@ -23,7 +23,6 @@ module DTK
       require_relative('object_logic/assembly')
       require_relative('object_logic/dependency')
       require_relative('object_logic/component_info_module')
-      require_relative('object_logic/service_info_module')
     end
   end
 end

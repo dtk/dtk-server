@@ -49,6 +49,7 @@ module DTK
        :ended_at,
        :task_id,
        :temporal_order,
+       :breakpoint,
        :position,
        :executable_action_type,
        :executable_action,

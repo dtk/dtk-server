@@ -113,6 +113,7 @@ module DTK; class Task
 
         task_action = opts[:task_action]
         opts_action_list = Aux.hash_subset(opts, [:component_type_filter])
+        opts_action_list.merge!(nodes_as_components_first: true) if opts[:nodes_as_components_first]
         cmp_actions = ActionList::ConfigComponents.get(assembly, opts_action_list)
 
         # first see if there is a persistent serialized task template for assembly instance and that it should be used

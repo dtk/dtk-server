@@ -31,13 +31,13 @@ module DTK
     def initialize(task = nil, top_task_idh = nil)
       @top_task_idh = top_task_idh
       if task
+        breakpoint = task[:breakpoint]
         @task_idh =  task.id_handle
-
-        @task_action = task[:executable_action]
+        @task_action = task[:executable_action].merge(breakpoint: breakpoint)
         @klass = self.class.load_for(@task_action)
       end
     end
-    attr_reader :task_idh, :top_task_idh, :task_action, :klass
+    attr_reader :task_idh, :top_task_idh, :task_action, :klass, :breakpoint
 
     def self.execute_task_action(task, top_task_idh)
       new(task, top_task_idh).execute.merge(task_id: task.id)

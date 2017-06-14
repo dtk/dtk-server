@@ -25,6 +25,7 @@ module DTK
           task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           top_task = workflow.top_task
           task.update_input_attributes!() if task_start
+          breakpoint = task[:breakpoint]
           workitem.fields['guard_id'] = task_id # ${guard_id} is referenced if guard for execution of this
 
           failed_tasks = ret_failed_precondition_tasks(task, workflow.guards[:external])
@@ -54,6 +55,7 @@ module DTK
                   if has_action_results?(task, result)
                     task.add_action_results(result, action)
                   end
+                  
                   process_action_result!(workitem, action, result, task, task_id, task_end)
                   delete_task_info(workitem)
                   reply_to_engine(workitem)
@@ -83,6 +85,7 @@ module DTK
                 end
               end
             }
+
             receiver_context = { callbacks: callbacks, expected_count: 1 }
             workflow.initiate_executable_action(task, receiver_context)
           end

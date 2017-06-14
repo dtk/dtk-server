@@ -151,17 +151,17 @@ module DTK
         async_agent_call('discovery', 'ping', {}, filter, callbacks_checkalive, context_checkalive)
       end
 
-      def self.initiate_execution(task_idh, top_task_idh, config_node, opts)
-        config_agent = ConfigAgent.load(config_node[:config_agent_type])
+      def self.initiate_execution(task_idh, top_task_idh, task_action, opts)
+        config_agent = ConfigAgent.load(task_action[:config_agent_type])
 
         opts_ret_msg = {}
-        if assembly = assembly_instance(task_idh, config_node)
+        if assembly = assembly_instance(task_idh, task_action)
           opts_ret_msg.merge!(assembly: assembly)
         end
 
         task_id     = task_idh.get_id()
         top_task_id = top_task_idh.get_id()
-        msg_content = config_agent.ret_msg_content(config_node, opts_ret_msg.merge!(task_id: task_id, top_task_id: top_task_id))
+        msg_content = config_agent.ret_msg_content(task_action, opts_ret_msg.merge!(task_id: task_id, top_task_id: top_task_id))
 
         added_content = {
           task_id: task_id,
@@ -170,7 +170,7 @@ module DTK
         }
         msg_content.merge!(added_content)
 
-        pbuilderid = Node.pbuilderid(config_node[:node])
+        pbuilderid = Node.pbuilderid(task_action[:node])
         filter = filter_single_fact('pbuilderid', pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]

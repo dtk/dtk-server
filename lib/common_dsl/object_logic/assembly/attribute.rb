@@ -49,6 +49,10 @@ module DTK; module CommonDSL
           end
         end
 
+        def skip_for_generation?
+          super or ! matches_asserted_or_default_tag?
+        end
+
         ### For diffs
         def diff?(attribute_parse, qualified_key)
           unless skip_for_generation?
@@ -68,6 +72,10 @@ module DTK; module CommonDSL
         private
 
         attr_reader :attribute
+
+        def matches_asserted_or_default_tag?
+          matches_tag_type?(:desired__asserted) or matches_tag_type?(:desired__derived__default)
+        end
 
         # Could be overwritten
         def prune?

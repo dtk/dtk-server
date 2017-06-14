@@ -79,12 +79,29 @@ module DTK
         case task.temporal_type
           when :leaf
             BulkCreate.create_node?(task, context, self) || compute_process_executable_action(task, context)
+          # For sequentail and concurrent subatsks want to pass in a breakpooint if its parent has it            
           when :sequential
+            pass_in_breakpoint!(:sequential, task)
             compute_process_body_sequential(task.subtasks, context)
           when :concurrent
+            pass_in_breakpoint!(:concurrent, task)
             BulkCreate.create_nodes?(task.subtasks, context, self) || compute_process_body_concurrent(task.subtasks, context)
           else
-            Log.error('do not have rules to process task')
+            fail Error, "Unexpected temporal type '#{task.temporal_type}'"
+        end
+      end
+
+      # Logic being used to pass in breakpoint is to set it on first for sequential and all for concurrent 
+      def pass_in_breakpoint!(temporal_type, task)
+        if task[:breakpoint]
+          case task.temporal_type
+          when :sequential
+            if subtask = task.subtasks.first
+              subtask[:breakpoint] = true
+            end
+          when :concurrent
+            task.subtasks.map { |subtask| subtask[:breakpoint] = true }
+          end
         end
       end
 

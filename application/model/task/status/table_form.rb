@@ -98,6 +98,10 @@ module DTK; class Task; class Status
       if num_subtasks > 0
         if num_subtasks == 1 && !subtasks.first[:executable_action_type].nil? 
           ea = subtasks.first[:executable_action] 
+          if ndx_errors[subtasks.first[:id]]
+            el[:errors] = format_errors(ndx_errors[subtasks.first[:id]])
+            el[:failed_component] = add_failed_component(task)
+          end
           if subtasks.first[:executable_action_type].include?("ConfigNode")
             if opts[:type]
               ret = [] if opts[:type].include?("delete")

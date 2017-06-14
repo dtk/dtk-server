@@ -14,7 +14,7 @@ module_name = 'test/new_dtk_client_test_case_03'
 assembly_name = 'test_assembly'
 service_name = 'new_dtk_client_test_case_03'
 service_location = "~/dtk/"
-component_to_check = "node/mysql::server"
+component_to_check = "ec2::node[node]/staging"
 
 dtk_common = Common.new('', '')
 

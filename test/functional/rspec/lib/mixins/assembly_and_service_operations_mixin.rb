@@ -119,7 +119,7 @@ module AssemblyAndServiceOperationsMixin
     if attributes_list['status'] == 'ok' && !attributes_list['data'].empty?
       attributes_exist_and_values_correct = []
       attributes_list['data'].each do |attr|
-        if (attributes_to_check.keys.include? attr['display_name']) && (attributes_to_check.values.include? attr['value'])
+        if (attributes_to_check.keys.include? attr['name']) && (attributes_to_check.values.include? attr['value'])
           attributes_exist_and_values_correct << true
         end
       end

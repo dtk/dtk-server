@@ -3,8 +3,8 @@
 # - stage assembly template, delete and uninstall
 # - stage assembly template, converge, delete and uninstall
 # - stage assembly template uninstall --delete
-# - stage assembly template, make local change and do delete with -f flag
 # - neg - stage assembly template, uninstall
+# - stage assembly template, make local change and do delete with -f flag
 # - neg - stage assembly template, make local change and do delete
 
 require './lib/dtk_cli_spec'
@@ -81,24 +81,7 @@ describe "(New DTK client) Test Case 8: Test various options for delete and unin
     include_context "Force uninstall service instance", service_location, service_name
   end
 
-  # 4: stage assembly template, make local change and do delete with -f flag
-  context "Stage updated assembly from module" do
-    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
-  end
-
-  context "Change content of service instance on local filesystem" do
-    include_context "Change content of service instance on local filesystem", full_service_location, update_service_location
-  end
-
-  context "Force delete service instance" do
-    include_context "Force delete service instance", service_location, service_name, dtk_common
-  end
-
-  context "Uninstall service instance" do
-    include_context "Uninstall service instance", service_location, service_name
-  end
-
-  # 5: neg - stage assembly template, uninstall
+  # 4: neg - stage assembly template, uninstall
   context "Stage updated assembly from module" do
     include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
@@ -109,6 +92,23 @@ describe "(New DTK client) Test Case 8: Test various options for delete and unin
 
   context "Delete service instance" do
     include_context "Delete service instance", service_location, service_name, dtk_common
+  end
+
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
+  end
+
+  # 5: stage assembly template, make local change and do delete with -f flag
+  context "Stage updated assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
+  end
+
+  context "Change content of service instance on local filesystem" do
+    include_context "Change content of service instance on local filesystem", full_service_location, update_service_location
+  end
+
+  context "Force delete service instance" do
+    include_context "Force delete service instance", service_location, service_name, dtk_common
   end
 
   context "Uninstall service instance" do

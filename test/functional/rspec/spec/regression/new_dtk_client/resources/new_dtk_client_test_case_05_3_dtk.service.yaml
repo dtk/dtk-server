@@ -45,5 +45,10 @@ actions:
       components:
       - ec2::node[new_node]
     - name: configure stdlib
+      node: node
+      components:
+      - stdlib
+    - name: configure stdlib
+      node: new_node
       components:
       - stdlib

@@ -5,7 +5,7 @@ version: master
 license: Apache 2.0
 dependencies:
   aws/ec2: master
-  r8/stdlib: master
+  puppetlabs/stdlib: master
   puppetlabs/mysql: master
 assemblies:
   test_assembly:

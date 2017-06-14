@@ -6,8 +6,8 @@ license: Apache 2.0
 
 dependencies:
   aws/ec2: master
-  puppetlabs/stdlib: master
-  puppetlabs/mysql: master
+  r8/stdlib: master
+  nanliu/staging: master
 assemblies:
   test_assembly:
     description: test assembly
@@ -18,7 +18,7 @@ assemblies:
           size: micro
         components:
         - stdlib
-        - mysql::server
+        - staging
     actions:
       create:
         subtasks:
@@ -26,4 +26,4 @@ assemblies:
           node: node
           components:
           - stdlib
-          - mysql::server
+          - staging

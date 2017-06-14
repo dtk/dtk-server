@@ -61,16 +61,16 @@ module DTK
           Repo::Remote.new.list_module_info(module_type, client_rsa_pub_key, opts.merge!(ret_versions_array: true))
         end
 
-        def self.populate_common_module_repo_from_component_info(component_module_local, common_module_branch, common_module_repo)
+        def self.populate_common_module_repo_from_component_info(component_module_local, common_module_branch, common_module_repo, opts = {})
           aug_component_module_branch = get_augmented_module_branch_from_local(component_module_local)
           common_module_branch.pull_from_component_module!(aug_component_module_branch)
-          transform_from_component_info(common_module_branch, aug_component_module_branch)
+          transform_from_component_info(common_module_branch, aug_component_module_branch, opts)
           common_module_branch.push_changes_to_repo
         end
         
-        def self.transform_from_component_info(common_module_branch, aug_component_module_branch)
+        def self.transform_from_component_info(common_module_branch, aug_component_module_branch, opts = {})
           RepoManager::Transaction.reset_on_error(common_module_branch) do
-            transform_class.transform_from_component_info(:common_module, common_module_branch, aug_component_module_branch, common_module_dsl_file_path)
+            transform_class.transform_from_component_info(:common_module, common_module_branch, aug_component_module_branch, common_module_dsl_file_path, opts)
             transform_class.commit_all_changes(common_module_branch, commit_msg: 'Loaded component info')
           end
         end

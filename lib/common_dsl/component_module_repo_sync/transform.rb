@@ -22,12 +22,27 @@ module DTK
         require_relative('transform/sync_branch')
         require_relative('transform/service_instance')
 
-        def self.transform_from_component_info(type, module_branch, aug_component_module_branch, dsl_file_path )
+        def self.transform_from_component_info(type, module_branch, aug_component_module_branch, dsl_file_path, opts = {})
           dsl_hash = ObjectLogic::ComponentInfoModule.generate_content_input(type, module_branch, aug_component_module_branch)
           dsl_hash = convert_top_level_symbol_keys_to_strings(dsl_hash) # Needed because skipping Generate
           yaml_text = DSL::YamlHelper.generate(dsl_hash)
           file_path__content_array = [{ path: dsl_file_path, content: yaml_text }]
-          Generate::DirectoryGenerator.add_files(module_branch, file_path__content_array, donot_push_changes: true, no_commit: true)
+
+          if dtk_dsl_parse_helper = opts[:dont_create_file] && opts[:dtk_dsl_parse_helper]
+            component_dsl_info_processor = dtk_dsl_parse_helper.info_processor(:component_info)
+            component_input_files_processor = component_dsl_info_processor.indexed_input_files[:component_dsl_file]
+            module_refs_input_files_processor = component_dsl_info_processor.indexed_input_files[:module_refs]
+
+            file_content = aug_component_module_branch.get_raw_file_content(component_module_dsl_filename)
+            component_input_files_processor.add_content!(component_module_dsl_filename, file_content)
+
+            module_ref_file_content = aug_component_module_branch.get_raw_file_content(module_refs_filename)
+            module_refs_input_files_processor.add_content!(module_refs_filename, module_ref_file_content)
+
+            component_dsl_info_processor.compute_outputs!
+          else
+            Generate::DirectoryGenerator.add_files(module_branch, file_path__content_array, donot_push_changes: true, no_commit: true)
+          end
 
           # delete files in component module form
           base_dir = File.dirname(dsl_file_path)

@@ -17,13 +17,17 @@
 #
 module DTK
   module CommonDSL
-    module ObjectLogic
-      require_relative('object_logic/content_input_hash')
-      require_relative('object_logic/service_instance')
-      require_relative('object_logic/assembly')
-      require_relative('object_logic/dependency')
-      require_relative('object_logic/component_info_module')
-      require_relative('object_logic/service_info_module')
+    # Methods to sync to and from the service instance repo to the component module repos using git subtree operations
+    class ServiceModuleRepoSync
+      # require_relative('component_module_repo_sync/common')
+      require_relative('service_module_repo_sync/transform')
+
+      def initialize(service_module_branch)
+        @service_module_branch = service_module_branch
+      end
+      private :initialize
+      attr_reader :service_module_branch
     end
   end
 end
+

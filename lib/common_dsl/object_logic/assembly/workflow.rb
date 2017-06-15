@@ -29,7 +29,7 @@ module DTK; module CommonDSL
         
         def self.generate_content_input(assembly_instance)
           #  Generates a create workflow if one not explicitly given in dsl which causes this to be written to dsl
-          Task::Template::ConfigComponents.get_or_generate_template_content(:assembly, assembly_instance)
+          Task::Template::ConfigComponents.get_or_generate_template_content(:assembly, assembly_instance, { subtask_order: 'sequential' })
           workflows = assembly_instance.get_task_templates(set_display_names: true)
           unsorted = workflows.inject({}) do |h, workflow| 
             h.merge(workflow.display_name => new(workflow).generate_content_input!)

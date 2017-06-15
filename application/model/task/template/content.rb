@@ -36,7 +36,7 @@ module DTK; class Task
 
       def serialization_form(opts = {})
         ret = nil
-        subtasks = map { |internode_stage| internode_stage.serialization_form(opts) }.compact
+        subtasks = map { |internode_stage| internode_stage.serialization_form(opts.merge(subtask_order: opts[:subtask_order])) }.compact
         return ret if subtasks.empty?
 
         # Dont put in sequential block if just single stage and Constant::Sequential

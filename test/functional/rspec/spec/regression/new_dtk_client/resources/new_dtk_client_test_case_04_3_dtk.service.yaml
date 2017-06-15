@@ -8,7 +8,7 @@ dependencies:
   dtk/host: master
   dtk-provider/ruby-provider: master
   r8/stdlib: master
-  r8/action_module: master
+  nanliu/staging: master
 components:
 - ec2::node[node]:
     attributes:
@@ -23,7 +23,7 @@ components:
     - target_iam/ec2::profile[aws-target]
     components:
     - stdlib
-    - action_module
+    - staging
 actions:
   create:
     subtasks:
@@ -34,4 +34,4 @@ actions:
       node: node
       components:
       - stdlib
-      - action_module
+      - staging

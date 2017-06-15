@@ -7,8 +7,8 @@ dependencies:
   aws/ec2: master
   dtk/host: master
   dtk-provider/ruby-provider: master
-  puppetlabs/stdlib: master
-  r8/action_module: master
+  r8/stdlib: master
+  nanliu/staging: master
 components:
 - ec2::node[node]:
     attributes:
@@ -23,7 +23,7 @@ components:
     - target_iam/ec2::profile[aws-target]
     components:
     - stdlib
-    - action_module
+    - staging
 actions:
   create:
     subtasks:
@@ -39,4 +39,4 @@ actions:
     - name: install action module
       node: node
       components:
-      - action_module
+      - staging

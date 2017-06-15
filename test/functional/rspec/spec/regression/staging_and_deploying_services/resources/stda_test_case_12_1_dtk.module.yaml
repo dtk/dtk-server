@@ -5,7 +5,8 @@ version: master
 license: Apache 2.0
 dependencies:
   aws/ec2: master
-  puppetlabs/stdlib: master
+  r8/stdlib: master
+  puppetlabs/wget: master
 assemblies:
   simple:
     description: simple
@@ -16,6 +17,7 @@ assemblies:
           size: micro
         components:
         - stdlib
+        - wget
     actions:
       create:
         subtasks:
@@ -23,3 +25,4 @@ assemblies:
           node: single_node
           components:
           - stdlib
+          - wget

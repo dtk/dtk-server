@@ -13,13 +13,13 @@ module_location = '~/modules/newclient/stda_test_case_8'
 service_location = "~/dtk/"
 service_name = 'stda_test_case_8'
 assembly_name = 'complex'
-component_to_check_1 = 'elements/stdlib'
-component_to_check_2 = 'single_node/stdlib'
-node_to_check = 'single_node'
-node_group_to_check = 'elements'
+component_to_check_1 = "ec2::node_group[elements]/stdlib"
+component_to_check_2 = "ec2::node[single_node]/stdlib"
+node_to_check = "ec2::node[single_node]"
+node_group_to_check = "ec2::node_group[elements]"
 full_service_location = service_location + service_name
-expected_cardinality_before_delete = 2
-expected_cardinality_after_delete = 1
+attributes_to_check_cardinality_before = {"ec2::node_group[elements]/cardinality" => '2'}
+attributes_to_check_cardinality_after = {"ec2::node_group[elements]/cardinality" => '1'}
 dtk_common = Common.new('', '')
 
 describe '(Staging And Deploying Assemblies) Test Case 8: Stage complex node group example, list nodes, delete nodes, check cardinality, list nodes/components/attributes after delete' do
@@ -47,8 +47,8 @@ describe '(Staging And Deploying Assemblies) Test Case 8: Stage complex node gro
     include_context 'List service instances after stage', dtk_common, service_name
   end
 
-  context "Check node group exist in service instance" do
-    include_context "Check node group exist in service instance", dtk_common, service_name, node_group_to_check, expected_cardinality_before_delete
+  context "Check node group component exist in service instance" do
+    include_context "Check component exist in service instance", dtk_common, service_name, node_group_to_check
   end
 
   context "Check component exist in service instance" do
@@ -59,6 +59,10 @@ describe '(Staging And Deploying Assemblies) Test Case 8: Stage complex node gro
     include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_2
   end
 
+  context "Check cardinality attribute correct in service instance" do
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_cardinality_before
+  end
+
   context "Change content of service instance on local filesystem" do
     include_context "Change content of service instance on local filesystem", full_service_location, updated_node_group_location
   end
@@ -67,12 +71,16 @@ describe '(Staging And Deploying Assemblies) Test Case 8: Stage complex node gro
     include_context "Push service instance changes", service_name, full_service_location
   end
 
-  context "Check node group exist in service instance" do
-    include_context "Check node group exist in service instance", dtk_common, service_name, node_group_to_check, expected_cardinality_after_delete
+  context "Check node group component exist in service instance" do
+    include_context "Check component exist in service instance", dtk_common, service_name, node_group_to_check
   end
 
   context "Check component exist in service instance" do
     include_context "Check component exist in service instance", dtk_common, service_name, component_to_check_1
+  end
+
+  context "Check cardinality attribute correct in service instance" do
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_cardinality_after
   end
 
   context "NEG - Check node exist in service instance" do

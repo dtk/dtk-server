@@ -10,7 +10,7 @@ assemblies:
   simple:
     description: simple
     components:
-    - node[slave]:
+    - node_group[slave]:
         attributes:
           image: precise_hvm
           size: micro

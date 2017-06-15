@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Test Case 14: Using lambda function in dtk.model.yaml
+# Test Case 7: Using lambda function in dtk.model.yaml
 
 require 'rubygems'
 require 'rest_client'
@@ -31,9 +31,9 @@ expected_output_1 = {
   stderr: nil
 }
 
-describe '(Staging And Deploying Assemblies) Test Case 14: Using lambda function in dtk.model.yaml' do
+describe '(Action Framework) Test Case 7: Using lambda function in dtk.model.yaml' do
   before(:all) do
-    puts '**************************************************************************************', ''
+    puts '***********************************************************************', ''
   end
 
   context 'Import service module function' do

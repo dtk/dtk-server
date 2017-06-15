@@ -14,10 +14,10 @@ module_location = '~/modules/newclient/stda_test_case_12'
 service_location = "~/dtk/"
 service_name = 'stda_test_case_12'
 assembly_name = 'simple'
-node_name = 'sigle_node'
+node_name = 'single_node'
 component_name = 'puppetlabs:wget'
 component_to_check_1 = 'wget'
-component_to_check_2 = 'single_node/wget'
+component_to_check_2 = "ec2::node[single_node]/wget"
 attributes_to_check = {'wget/version' => '1.0.0', 'single_node/wget/version' => '1.0.0' }
 full_service_location = service_location + service_name
 dtk_common = Common.new('', '')

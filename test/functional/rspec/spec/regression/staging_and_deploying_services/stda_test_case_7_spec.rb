@@ -13,11 +13,11 @@ module_location = '~/modules/newclient/stda_test_case_7'
 service_location = "~/dtk/"
 service_name = 'stda_test_case_7'
 assembly_name = 'simple'
-component_to_check = 'slave/stdlib'
-node_group_to_check = 'slave'
+attributes_to_check_cardinality_before = {"ec2::node_group[slave]/cardinality" => '2'}
+attributes_to_check_cardinality_after = {"ec2::node_group[slave]/cardinality" => '1'}
+component_to_check = "ec2::node[slave]/stdlib"
+node_group_to_check = "ec2::node_group[slave]"
 full_service_location = service_location + service_name
-expected_cardinality_before_delete = 2
-expected_cardinality_after_delete = 1
 dtk_common = Common.new('', '')
 
 describe '(Staging And Deploying Assemblies) Test Case 7: Stage simple node group example, list nodes, delete node group member, check cardinality, list nodes/components/attributes after delete' do
@@ -45,12 +45,16 @@ describe '(Staging And Deploying Assemblies) Test Case 7: Stage simple node grou
     include_context 'List service instances after stage', dtk_common, service_name
   end
 
-  context "Check node group exist in service instance" do
-    include_context "Check node group exist in service instance", dtk_common, service_name, node_group_to_check, expected_cardinality_before_delete
+  context "Check node group component exist in service instance" do
+    include_context "Check component exist in service instance", dtk_common, service_name, node_group_to_check
   end
 
   context "Check component exist in service instance" do
     include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
+  end
+
+  context "Check cardinality attribute correct in service instance" do
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_cardinality_before
   end
 
   context "Change content of service instance on local filesystem" do
@@ -61,12 +65,16 @@ describe '(Staging And Deploying Assemblies) Test Case 7: Stage simple node grou
     include_context "Push service instance changes", service_name, full_service_location
   end
 
-  context "Check node group exist in service instance" do
-    include_context "Check node group exist in service instance", dtk_common, service_name, node_group_to_check, expected_cardinality_after_delete
+  context "Check node group component exist in service instance" do
+    include_context "Check component exist in service instance", dtk_common, service_name, node_group_to_check
   end
 
   context "Check component exist in service instance" do
     include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
+  end
+
+  context "Check cardinality attribute correct in service instance" do
+    include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_cardinality_after
   end
 
   context "Delete service instance" do

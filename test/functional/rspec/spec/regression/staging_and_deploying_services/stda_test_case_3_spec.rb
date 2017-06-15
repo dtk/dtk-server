@@ -10,7 +10,7 @@ module_location = '~/modules/newclient/bootstrap'
 service_location = "~/dtk/"
 service_name = 'stda_test_case_3_instance'
 assembly_name = 'node_with_params'
-image = 'precise'
+image = 'trusty_hvm'
 size = 'micro'
 dtk_common = Common.new('', '')
 
@@ -28,11 +28,11 @@ describe '(Staging And Deploying Assemblies) Test Case 3: Deploy from assembly (
   end
 
   context "Set attribute for ec2 image" do
-    include_context "Set attribute", service_location, service_name, 'node1/image', image
+    include_context "Set attribute", service_location, service_name, 'ec2::node[node1]/image', image
   end
 
   context "Set attribute for ec2 size" do
-    include_context "Set attribute", service_location, service_name, 'node1/size', size
+    include_context "Set attribute", service_location, service_name, 'ec2::node[node1]/size', size
   end
 
   context "Converge service instance" do

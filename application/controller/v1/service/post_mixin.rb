@@ -175,6 +175,38 @@ module DTK
         end
       end
 
+      # params passed to link are
+      #  required
+      #    :base_component - string in form that appears in 'dtk components'
+      #    :dep_component - string in form that appears in 'dtk components'
+      #  optional
+      #    :service - string that is external service associated with dep_component
+      #    :unlink  - boolean meaning to unlink, rather than link (default is false)
+      #    :link_name - string optionally given
+      def link
+        # TODO: DTK-3009; stub for Almin
+        assembly = dep_assembly = assembly_instance()
+        if request_params(:service)
+          dep_assembly = external_assembly_instance(:service)
+        end
+        unlink = boolean_request_params(:unlink)
+        link_name = request_params(:link_name)
+
+        base_component = ret_component_id_handle(:base_component, assembly)
+        dep_component  = ret_component_id_handle(:dep_component, dep_assembly)
+
+        # TODO: fill out rest
+        service_link_idh = 
+          if unlink
+          # TODO: Almin: add code to do unlink
+          else
+            # TODO: Almin: check if this code works
+            opts =  (link_name ? { link_name: link_name } : {})
+            assembly.add_component_link(base_component, dep_component, opts)
+          end
+        rest_ok_response service_link: service_link_idh.get_id
+      end
+
       def set_attributes
         rest_ok_response assembly_instance.set_attributes(ret_params_av_pairs, update_meta: true, update_dsl: true)
       end
@@ -183,7 +215,7 @@ module DTK
        assembly       = assembly_instance()
        opts           = ret_params_hash(:service_instance, :pattern, :value)
        av_pairs       = ret_params_av_pairs()
-       
+
        if semantic_data_type = ret_request_params(:datatype)
          unless Attribute::SemanticDatatype.isa?(semantic_data_type)
            fail ErrorUsage.new("The term (#{semantic_data_type}) is not a valid data type")

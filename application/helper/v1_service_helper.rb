@@ -29,6 +29,10 @@ module Ramaze::Helper
       create_obj([:service_id, :service_instance], ::DTK::Assembly::Instance)
     end
 
+    def external_assembly_instance(param)
+      create_obj(param, ::DTK::Assembly::Instance)
+    end
+
 
     def format_yaml_response(response)
       response.map { |info| { name: info[:display_name], value: info[:value] } }

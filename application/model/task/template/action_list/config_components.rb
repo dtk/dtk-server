@@ -20,9 +20,7 @@ module DTK; class Task; class Template
     class ConfigComponents < self
       def self.get(assembly, opts = {})
         # component_list_filter_proc includes clause to make sure no target refs
-        component_info = assembly.get_component_info_for_action_list(seed: new, filter_proc: component_list_filter_proc(opts))
-        put_nodes_as_components_on_top(component_info) if opts[:nodes_as_components_first]
-        component_info.set_action_indexes!
+        assembly.get_component_info_for_action_list(seed: new, filter_proc: component_list_filter_proc(opts)).set_action_indexes!
       end
     end
 
@@ -47,13 +45,6 @@ module DTK; class Task; class Template
 
     def self.target_ref?(el)
       el[:node] and el[:node].is_target_ref? 
-    end
-
-    def self.put_nodes_as_components_on_top(component_info)
-      node_actions = component_info.select{ |relevant_action| NodeComponent.node_component?(relevant_action) }
-      node_actions.each {|node_action| component_info.delete(node_action) }
-      component_info.unshift(node_actions)
-      component_info.flatten!
     end
 
   end

@@ -113,7 +113,6 @@ module DTK; class Task
 
         task_action = opts[:task_action]
         opts_action_list = Aux.hash_subset(opts, [:component_type_filter])
-        opts_action_list.merge!(nodes_as_components_first: true) if opts[:nodes_as_components_first]
         cmp_actions = ActionList::ConfigComponents.get(assembly, opts_action_list)
 
         # first see if there is a persistent serialized task template for assembly instance and that it should be used
@@ -122,13 +121,27 @@ module DTK; class Task
           return template_content
         end
 
+        node_as_components = []
+        cmp_actions.each{ |relevant_action| (node_as_components << NodeComponent.node_component?(relevant_action)) if NodeComponent.is_node_component?(relevant_action) }
+        cmp_actions.delete_if { |relevant_action| NodeComponent.is_node_component?(relevant_action) }
+
         # otherwise do the temporal processing to generate template_content
         opts_generate = (node_centric_first_stage?() ? { node_centric_first_stage: true } : {})
         template_content = generate_from_temporal_contraints([:assembly, :node_centric], assembly, cmp_actions, opts_generate)
 
         unless opts[:serialized_form]
           # persist assembly action part of what is generated
-          Persistence::AssemblyActions.persist(assembly, template_content, task_action)
+          Persistence::AssemblyActions.persist(assembly, template_content, task_action, { subtask_order: opts[:subtask_order] })
+        end
+
+        assembly_wide_node = assembly.has_assembly_wide_node?
+        node_as_components.delete_if { |nc| nc.nil? }
+
+        node_as_components.each do |node_component|
+          component = node_component.component
+          node_name = node_component.node.display_name
+          task_template_opts = { component_title: node_name, insert_strategy: :insert_at_start }
+          Task::Template::ConfigComponents.update_when_added_component_or_action?(assembly, assembly_wide_node, component, task_template_opts)
         end
 
         template_content

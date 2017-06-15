@@ -21,9 +21,9 @@ service_name = 'new_dtk_client_test_case_04'
 service_location = '~/dtk/'
 full_service_location = service_location + service_name
 
-attributes_to_check = {'node/image' => 'amazon_hvm', 'node/size' => 'small'}
-component_to_check = 'node/action_module'
-workflow_to_check = 'install_action_module'
+attributes_to_check = {"ec2::node[node]/image" => "amazon_hvm", "ec2::node[node]/size" => "small"}
+component_to_check = "ec2::node[node]/staging"
+workflow_to_check = 'install_staging'
 
 dtk_common = Common.new('', '')
 

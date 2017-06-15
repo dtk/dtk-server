@@ -34,9 +34,9 @@ actions:
       node: node
       components:
       - stdlib
-  install_action_module:
+  install_staging:
     subtasks:
-    - name: install action module
+    - name: install staging module
       node: node
       components:
       - staging

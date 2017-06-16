@@ -90,6 +90,10 @@ module DTK
         module_name = local_params.module_name
         version     = local_params.version
 
+        if CommonModule.exists(project, :common_module, namespace, module_name, version)
+          fail ErrorUsage, "Module '#{local_params.pp_module_ref}' exists already"
+        end
+
         if remote_module_info[:component_info]
           cmp_remote_params = remote_params.merge(module_type: :component_module)
           cmp_local_params  = local_params.merge(module_type: :component_module)
@@ -109,12 +113,12 @@ module DTK
           service_module_local   = common_module_local.merge(module_type: :service_module)
           common_module_repo     = CommonModule.create_repo(common_module_local, no_initial_commit: true, delete_if_exists: true)
           common_module_branch   = CommonModule.create_module_and_branch_obj?(project, common_module_repo.id_handle, common_module_local, opts.merge(return_module_branch: true))
-          aug_service_module_branch = Info::Service.get_augmented_module_branch_from_local(service_module_local)
 
           dtk_dsl_transform_class = ::DTK::DSL::ServiceAndComponentInfo::TransformFrom
           dtk_dsl_parse_helper = dtk_dsl_transform_class.new(namespace, module_name, version)
 
           if remote_module_info[:service_info]
+            aug_service_module_branch = Info::Service.get_augmented_module_branch_from_local(service_module_local)
             Info::Service.transform_from_service_info(common_module_branch, aug_service_module_branch, { dtk_dsl_parse_helper: dtk_dsl_parse_helper })
           end
 

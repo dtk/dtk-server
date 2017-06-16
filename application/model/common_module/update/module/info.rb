@@ -124,11 +124,11 @@ module DTK
           to_delete.each do |cmp_mod|
             next if @module_name == cmp_mod[:display_name]
 
-            cmp_module         = ComponentModule.module_exists(project, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info], return_module: true)
-            assembly_templates = cmp_module.get_associated_assembly_templates
-            matching           = assembly_templates.select{ |at| at[:module_branch_id] == module_branch[:id]}
-
-            fail ErrorUsage, "Unable to delete dependency '#{cmp_mod[:namespace_name]}/#{cmp_mod[:display_name]}' because it is referenced by assemblies: '#{matching.map{|mt|mt[:display_name]}.join(', ')}'!" unless matching.empty?
+            if cmp_module         = ComponentModule.module_exists(project, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info], return_module: true)
+              assembly_templates = cmp_module.get_associated_assembly_templates
+              matching           = assembly_templates.select{ |at| at[:module_branch_id] == module_branch[:id]}
+              fail ErrorUsage, "Unable to delete dependency '#{cmp_mod[:namespace_name]}/#{cmp_mod[:display_name]}' because it is referenced by assemblies: '#{matching.map{|mt|mt[:display_name]}.join(', ')}'!" unless matching.empty?
+            end
           end
         end
       end

@@ -85,38 +85,43 @@ module DTK
       end
 
       def self.install_on_server(project, local_params, remote_params, client_rsa_pub_key, opts = {})
-        remote_module_info = get_module_info(project, remote_params, client_rsa_pub_key, donot_raise_error: true)
-        namespace   = local_params.namespace
-        module_name = local_params.module_name
-        version     = local_params.version
+        remote_module_info   = get_module_info(project, remote_params, client_rsa_pub_key, donot_raise_error: true)
+        namespace            = local_params.namespace
+        module_name          = local_params.module_name
+        version              = local_params.version
+        dtk_dsl_parse_helper = nil
 
         if CommonModule.exists(project, :common_module, namespace, module_name, version)
           fail ErrorUsage, "Module '#{local_params.pp_module_ref}' exists already"
         end
 
-        if remote_module_info[:component_info]
-          cmp_remote_params = remote_params.merge(module_type: :component_module)
-          cmp_local_params  = local_params.merge(module_type: :component_module)
-          CommonModule::Info::Component::Remote.install(project, cmp_local_params, cmp_remote_params, client_rsa_pub_key)
-        end
-
-        if remote_module_info[:service_info]
-          sm_remote_params = remote_params.merge(module_type: :service_module)
-          sm_local_params  = local_params.merge(module_type: :service_module)
-          CommonModule::Info::Service::Remote.install(project, sm_local_params, sm_remote_params, client_rsa_pub_key)
-        end
-
-        dtk_dsl_parse_helper = nil
         Model.Transaction do
-          common_module_local    = local_params.create_local(project)
-          component_module_local = common_module_local.merge(module_type: :component_module)
-          service_module_local   = common_module_local.merge(module_type: :service_module)
-          common_module_repo     = CommonModule.create_repo(common_module_local, no_initial_commit: true, delete_if_exists: true)
-          common_module_branch   = CommonModule.create_module_and_branch_obj?(project, common_module_repo.id_handle, common_module_local, opts.merge(return_module_branch: true))
-          RepoRemote.create_repo_remote?(project.model_handle(:repo_remote), module_name, common_module_repo.display_name, namespace, common_module_repo.id, set_as_default_if_first: true)
+          create_module_opts = {
+              return_module_branch: true,
+              no_initial_commit: true,
+              common_module: true,
+              delete_existing_branch: true,
+              has_remote_repo: true
+            }
+          common_module_branch = CommonModule.create_module(project, local_params, create_module_opts)
 
+          if remote_module_info[:component_info]
+            cmp_remote_params = remote_params.merge(module_type: :component_module)
+            cmp_local_params  = local_params.merge(module_type: :component_module)
+            CommonModule::Info::Component::Remote.install(project, cmp_local_params, cmp_remote_params, client_rsa_pub_key)
+          end
+
+          if remote_module_info[:service_info]
+            sm_remote_params = remote_params.merge(module_type: :service_module)
+            sm_local_params  = local_params.merge(module_type: :service_module)
+            CommonModule::Info::Service::Remote.install(project, sm_local_params, sm_remote_params, client_rsa_pub_key)
+          end
+
+          common_module_local     = local_params.create_local(project)
+          component_module_local  = common_module_local.merge(module_type: :component_module)
+          service_module_local    = common_module_local.merge(module_type: :service_module)
           dtk_dsl_transform_class = ::DTK::DSL::ServiceAndComponentInfo::TransformFrom
-          dtk_dsl_parse_helper = dtk_dsl_transform_class.new(namespace, module_name, version)
+          dtk_dsl_parse_helper    = dtk_dsl_transform_class.new(namespace, module_name, version)
 
           if remote_module_info[:service_info]
             aug_service_module_branch = Info::Service.get_augmented_module_branch_from_local(service_module_local)
@@ -124,7 +129,8 @@ module DTK
           end
 
           if remote_module_info[:component_info]
-            Info::Component.populate_common_module_repo_from_component_info(component_module_local, common_module_branch, common_module_repo, { dont_create_file: true, dtk_dsl_parse_helper: dtk_dsl_parse_helper })
+            common_module_repo = common_module_branch.get_repo
+            Info::Component.populate_common_module_repo_from_component_info(component_module_local, common_module_branch, common_module_repo, { dont_create_file: true, dtk_dsl_parse_helper: dtk_dsl_parse_helper, force: true })
           end
 
           file_path__content_array = []
@@ -134,7 +140,7 @@ module DTK
 
           CommonDSL::Generate::DirectoryGenerator.add_files(common_module_branch, file_path__content_array, donot_push_changes: true, no_commit: true)
           RepoManager.add_all_files_and_commit({ commit_msg: 'Loaded module info' }, common_module_branch)
-          common_module_branch.push_changes_to_repo
+          common_module_branch.push_changes_to_repo(force: true)
         end
 
         install_dependent_modules(dtk_dsl_parse_helper, local_params, remote_params, project, client_rsa_pub_key) if dtk_dsl_parse_helper

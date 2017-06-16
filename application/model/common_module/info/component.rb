@@ -65,7 +65,8 @@ module DTK
           aug_component_module_branch = get_augmented_module_branch_from_local(component_module_local)
           common_module_branch.pull_from_component_module!(aug_component_module_branch)
           transform_from_component_info(common_module_branch, aug_component_module_branch, opts)
-          common_module_branch.push_changes_to_repo
+          push_opts = opts[:force] ? { force: opts[:force] } : {}
+          common_module_branch.push_changes_to_repo(push_opts)
         end
         
         def self.transform_from_component_info(common_module_branch, aug_component_module_branch, opts = {})

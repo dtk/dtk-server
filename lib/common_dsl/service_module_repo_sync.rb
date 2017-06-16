@@ -17,15 +17,17 @@
 #
 module DTK
   module CommonDSL
-    require_relative('common_dsl/file_type')
-    require_relative('common_dsl/diff')
-    # diff must be before generate
-    require_relative('common_dsl/generate')
-    require_relative('common_dsl/parse')
-    require_relative('common_dsl/component_module_repo_sync')
-    require_relative('common_dsl/service_module_repo_sync')
+    # Methods to sync to and from the service instance repo to the component module repos using git subtree operations
+    class ServiceModuleRepoSync
+      # require_relative('component_module_repo_sync/common')
+      require_relative('service_module_repo_sync/transform')
 
-    # object_logic must go last
-    require_relative('common_dsl/object_logic')
+      def initialize(service_module_branch)
+        @service_module_branch = service_module_branch
+      end
+      private :initialize
+      attr_reader :service_module_branch
+    end
   end
 end
+

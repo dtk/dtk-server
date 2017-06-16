@@ -52,24 +52,24 @@ module DTK
 
         def install
           Model.Transaction do
-            # These calls use/create a component module and branch
+            # These calls use/create a service module and branch
             repo_with_branch = get_repo_with_branch? || create_repo_with_branch_if_needed
 
             commit_sha = repo_with_branch.initial_sync_with_remote(remote, remote_repo_info)
 
             # create object in object model that corresponds to remote repo
             module_class.create_repo_remote_object(repo_with_branch, remote, git_repo_name)
-            
+
             module_and_branch_info = module_class.create_module_and_branch_obj?(project, repo_with_branch.id_handle, local)
             module_obj ||= module_and_branch_info[:module_idh].create_object
             module_branch = module_and_branch_info[:module_branch_idh].create_object
             module_branch.set_dsl_parsed!(false)
-            
+
             # process_dsl_and_ret_parsing_errors will raise error if parsing error
             module_obj.process_dsl_and_ret_parsing_errors(repo_with_branch, module_branch, local, set_external_refs: true)
             module_branch.set_sha(commit_sha)
 
-            # This last call creates common module and branch 
+            # This last call creates common module and branch
             common_module_branch = CommonModule.create_module_and_branch_obj?(project, nil, local.merge(module_type: :common_module), return_module_branch: true)
 
             module_branch.set_dsl_parsed!(true)

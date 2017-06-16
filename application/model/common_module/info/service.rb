@@ -51,6 +51,20 @@ module DTK
           import_helper.import_into_model
           module_branch.set_dsl_parsed!(true)
         end
+
+        def self.populate_common_module_repo_from_service_info(service_module_local, common_module_branch, common_module_repo)
+          aug_service_module_branch = get_augmented_module_branch_from_local(service_module_local)
+          common_module_branch.pull_from_service_module!(aug_service_module_branch)
+          transform_from_service_info(common_module_branch, aug_service_module_branch)
+          common_module_branch.push_changes_to_repo
+        end
+
+        def self.transform_from_service_info(common_module_branch, aug_service_module_branch, opts = {})
+          RepoManager::Transaction.reset_on_error(common_module_branch) do
+            transform_class.transform_from_service_info(:common_module, common_module_branch, aug_service_module_branch, common_module_dsl_file_path, opts)
+            transform_class.commit_all_changes(common_module_branch, commit_msg: 'Loaded service info')
+          end
+        end
         
         private
         
@@ -65,6 +79,18 @@ module DTK
           else
             super
           end
+        end
+
+        def self.common_module_dsl_file_path
+          common_module_file_type.canonical_path
+        end
+
+        def self.common_module_file_type
+          @common_module_file_type ||= ::DTK::CommonDSL::FileType::CommonModule::DSLFile::Top
+        end
+
+        def self.transform_class
+          @transform_class ||= CommonDSL::ServiceModuleRepoSync::Transform
         end
         
         # opts can have keys:

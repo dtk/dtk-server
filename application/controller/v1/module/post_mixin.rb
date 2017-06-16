@@ -104,6 +104,44 @@ module DTK
         rest_ok_response 
       end
 
+      def install_service_info
+        namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
+        version = request_params(:version)
+
+        remote_params = remote_params_dtkn(:service_module, namespace, module_name, version)
+        local_params  = local_params(:service_module, module_name, namespace: namespace, version: version)
+
+        CommonModule::Info::Service::Remote.install(get_default_project, local_params, remote_params, rsa_pub_key)
+        rest_ok_response
+      end
+
+      def install_on_server
+        namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
+        version = request_params(:version)
+
+        local_params  = local_params(:common_module, module_name, namespace: namespace, version: version)
+        remote_params = remote_params_dtkn_service_and_component_info(namespace, module_name, version)
+
+        # use latest version if not specified
+        unless version
+          remote_opts = version ? {} : { ignore_missing_base_version: true }
+          response = CommonModule::Remote.get_module_info(get_default_project, remote_params, rsa_pub_key, remote_opts)
+          version  = response[:version]
+          local_params[:version] = version
+          remote_params[:version] = version
+        end
+
+        CommonModule::Remote.install_on_server(get_default_project, local_params, remote_params, rsa_pub_key)
+
+        opts = {
+          skip_missing_check: false,
+          initial_update: true,
+          force_parse: true,
+          install_on_server: true
+        }
+        rest_ok_response CommonModule::Update::Module.update_from_repo(get_default_project, nil, local_params, opts)
+      end
+
       def publish_to_remote
         namespace, module_name, version, rsa_pub_key = required_request_params(:namespace, :module_name, :version, :rsa_pub_key)
 

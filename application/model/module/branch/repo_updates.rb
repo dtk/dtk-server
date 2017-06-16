@@ -23,10 +23,14 @@ module DTK
         # opts can have keys:
         #   :force
         def pull_repo_changes_and_return_diffs_summary(commit_sha, opts = {}, &body)
-          RepoManager::Transaction.reset_on_error(self) do 
+          RepoManager::Transaction.reset_on_error(self) do
             pull_opts = { force: opts[:force], ret_diffs: nil } #by having key :ret_diffs exist in options it will be set
-            pull_from_remote_raise_error_if_merge_needed(pull_opts)
-            repo_diffs_summary = pull_opts[:ret_diffs].ret_summary # pull_from_remote_raise_error_if_merge_needed will have set pull_opts[:ret_diffs]
+            if opts[:install_on_server]
+              repo_diffs_summary = {}
+            else
+              pull_from_remote_raise_error_if_merge_needed(pull_opts)
+              repo_diffs_summary = pull_opts[:ret_diffs].ret_summary # pull_from_remote_raise_error_if_merge_needed will have set pull_opts[:ret_diffs]
+            end
             body.call(repo_diffs_summary)
           end
         end
@@ -70,6 +74,17 @@ module DTK
             external_repo   = aug_component_module_branch.repo
             external_branch = aug_component_module_branch.branch_name
             diffs = RepoManager.pull_from_external_repo(external_repo, external_branch, COMPONENT_MODULE_REMOTE_NAME, self)
+            update_current_sha_from_repo!
+            diffs.ret_summary
+          end
+        end
+
+        SERVICE_MODULE_REMOTE_NAME = 'service_module'
+        def pull_from_service_module!(aug_service_module_branch)
+          RepoManager::Transaction.reset_on_error(self) do
+            external_repo   = aug_service_module_branch.repo
+            external_branch = aug_service_module_branch.branch_name
+            diffs = RepoManager.pull_from_external_repo(external_repo, external_branch, SERVICE_MODULE_REMOTE_NAME, self)
             update_current_sha_from_repo!
             diffs.ret_summary
           end

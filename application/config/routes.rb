@@ -46,6 +46,7 @@ DTK::ReactorRoute.draw do
   post 'api/v1/services/set_default_target'            => 'v1::service#set_default_target'
   post 'api/v1/services/create_workspace'              => 'v1::service#create_workspace'
   post 'api/v1/services/:service_id/cancel_last_task'  => 'v1::service#cancel_last_task'
+  post 'api/v1/services/:service_id/link'             => 'v1::service#link'
   post 'api/v1/services/:service_id/converge'          => 'v1::service#converge'
   post 'api/v1/services/:service_id/set_attributes'    => 'v1::service#set_attributes'
   post 'api/v1/services/:service_id/start'             => 'v1::service#start'

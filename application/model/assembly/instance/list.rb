@@ -183,8 +183,9 @@ module DTK; class Assembly::Instance
       private
 
       def node_component_ref(node)
+        opts = node.is_node_group? ? { node_type: :group } : {}
         # TODO: hard coding this to ec2
-        NodeComponent.node_component_ref(:ec2, node.display_name)
+        NodeComponent.node_component_ref(:ec2, node.display_name, opts)
       end
 
       def convert_to_component_print_form(aug_cmp, opts = Opts.new)

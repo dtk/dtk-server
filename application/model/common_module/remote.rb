@@ -113,6 +113,7 @@ module DTK
           service_module_local   = common_module_local.merge(module_type: :service_module)
           common_module_repo     = CommonModule.create_repo(common_module_local, no_initial_commit: true, delete_if_exists: true)
           common_module_branch   = CommonModule.create_module_and_branch_obj?(project, common_module_repo.id_handle, common_module_local, opts.merge(return_module_branch: true))
+          RepoRemote.create_repo_remote?(project.model_handle(:repo_remote), module_name, common_module_repo.display_name, namespace, common_module_repo.id, set_as_default_if_first: true)
 
           dtk_dsl_transform_class = ::DTK::DSL::ServiceAndComponentInfo::TransformFrom
           dtk_dsl_parse_helper = dtk_dsl_transform_class.new(namespace, module_name, version)

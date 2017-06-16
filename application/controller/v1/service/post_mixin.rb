@@ -96,6 +96,11 @@ module DTK
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
         end
 
+        violations = assembly_instance.find_violations
+        unless violations.empty?
+          return rest_ok_response({ violations: violations.table_form }, datatype: :violation)
+        end
+
         opts = {
           start_nodes: true,
           ret_nodes_to_start: []

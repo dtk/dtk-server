@@ -18,20 +18,19 @@
 module DTK; class Attribute
   class Pattern; class Type
     class ExplicitId < self
-      def initialize(pattern, parent_obj)
+      def initialize(pattern, assembly)
         super(pattern)
-        @id = pattern.to_i
-        if parent_obj.is_a?(::DTK::Node)
-          raise_error_if_not_node_attr_id(@id, parent_obj)
-        elsif parent_obj.is_a?(::DTK::Assembly)
-          raise_error_if_not_assembly_attr_id(@id, parent_obj)
-        else
-          fail Error.new("Unexpected parent object type (#{parent_obj.class})")
-        end
+        @id        = pattern.to_i
+        @attribute = get_attribute?(@id, assembly)
+        fail ErrorUsage, "Illegal attribute id '#{@id}'" unless @attribute
       end
 
       def type
         :explicit_id
+      end
+
+      def semantic_data_type(_attribute_idh = nil)
+        @attribute.get_field?(:semantic_data_type)
       end
 
       attr_reader :attribute_idhs, :id
@@ -43,17 +42,10 @@ module DTK; class Attribute
 
       private
 
-      def raise_error_if_not_node_attr_id(attr_id, node)
-        unless node.get_node_and_component_attributes().find { |r| r[:id] == attr_id }
-          fail ErrorUsage.new("Illegal attribute id (#{attr_id}) for node")
-        end
+      def get_attribute?(attr_id, assembly)
+        assembly.get_attributes_all_levels().find { |r| r[:id] == attr_id }
       end
 
-      def raise_error_if_not_assembly_attr_id(attr_id, assembly)
-        unless assembly.get_attributes_all_levels().find { |r| r[:id] == attr_id }
-          fail ErrorUsage.new("Illegal attribute id (#{attr_id}) for assembly")
-        end
-      end
     end
   end; end
 end; end

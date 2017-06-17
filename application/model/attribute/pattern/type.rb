@@ -42,6 +42,7 @@ module DTK; class Attribute
         @attribute_properties = attr_properties
       end
 
+      # can be overwritten
       def semantic_data_type(attribute_idh = nil)
         attribute_stack(attribute_idh)[:attribute][:semantic_data_type]
       end

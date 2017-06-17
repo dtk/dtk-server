@@ -37,11 +37,12 @@ module DTK
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
         filter_component  = request_params(:filter_component)
+        format            = request_params(:format) || 'table' # default format type is table
         
         # TODO: temporary set to true if and only if no component filter, until '--all' flag is being added
-        # then wil be #boolean_request_params(:all) 
+        # then will be #boolean_request_params(:all) 
         all               = filter_component.nil?
-        format            = request_params(:format)
+
 
         if request_params(:links)
           detail_to_include << :attribute_links
@@ -68,11 +69,12 @@ module DTK
           end
         end
 
-        opts.merge!(truncate_attribute_values: !format.include?('yaml'), mark_unset_required: true)
+        truncate = (format != 'yaml')
+        opts.merge!(truncate_attribute_values: truncate, mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
         opts.merge!(all: all, filter_component: filter_component)
         response = 
-          if format.include?('yaml')
+          if format == 'yaml'
             opts.merge!(:yaml_format => true)
             format_yaml_response(assembly_instance.list_attributes(opts))
           else

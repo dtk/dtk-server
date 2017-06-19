@@ -15,22 +15,22 @@ delta_2_module_content = 'delta_2_cmd_test_case_8_dtk.module.yaml'
 
 # initial check
 attributes_to_check_after_first_converge = {
-  "ec2::node[node]/cmd_test_case_8::first_component/first_attribute"  => 'first_value',
-  "ec2::node[node]/cmd_test_case_8::first_component/second_attribute" => 'second_value'
+  "node/cmd_test_case_8::first_component/first_attribute"  => 'first_value',
+  "node/cmd_test_case_8::first_component/second_attribute" => 'second_value'
 }
 
 # delta check
 attributes_to_check_after_second_converge = {
-  "ec2::node[node]/cmd_test_case_8::first_component/first_attribute" => 'first_value'
+  "node/cmd_test_case_8::first_component/first_attribute" => 'first_value'
 }
 attributes_dont_exist_after_second_converge = {
-  "ec2::node[node]/cmd_test_case_8::first_component/second_attribute" => 'second_value'
+  "node/cmd_test_case_8::first_component/second_attribute" => 'second_value'
 }
 
 # delta 2 check
 attributes_to_check_after_third_converge = {
-  "ec2::node[node]/cmd_test_case_8::first_component/first_attribute" => 'first_value',
-  "ec2::node[node]/cmd_test_case_8::first_component/third_attribute" => 'second_value'
+  "node/cmd_test_case_8::first_component/first_attribute" => 'first_value',
+  "node/cmd_test_case_8::first_component/third_attribute" => 'second_value'
 }
 
 dtk_common = Common.new("", "")

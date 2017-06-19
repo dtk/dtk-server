@@ -5,15 +5,13 @@ require './lib/dtk_common'
 # Target specific properties
 service_location = '~/dtk/'
 target_location = "/tmp/network"
-target_module = 'aws/network'
-target_assembly_template = 'target'
+target_module = 'aws/aws_target'
+target_assembly_template = 'target_iam'
 target_service_name = 'target_test_case_01'
-target_name = 'target'
-target_version = '1.0.3'
+target_name = 'target_iam'
+target_version = 'master'
 
 # Target attributes
-aws_access_key = ENV['AWS_ACCESS_KEY']
-aws_secret_key = ENV['AWS_SECRET_KEY']
 default_keypair = 'testing_use1'
 
 # Module specific properties
@@ -40,14 +38,6 @@ describe "(Target) Test Case 01: Auto-generated vpc data" do
 
   context "Stage target from module" do
     include_context "Stage target from module", target_module, target_location, target_name, target_service_name
-  end
-
-  context "Set attribute for aws access key" do
-    include_context "Set attribute", service_location, target_service_name, 'identity_aws::credentials/aws_access_key_id', aws_access_key
-  end
-
-  context "Set attribute for aws secret access key" do
-    include_context "Set attribute", service_location, target_service_name, 'identity_aws::credentials/aws_secret_access_key', aws_secret_key
   end
 
   context "Set attribute for default keypair" do

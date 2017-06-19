@@ -4,7 +4,7 @@ module: test/target_test_module_01
 version: master
 license: Apache 2.0
 dependencies:
-  puppetlabs/stdlib: master
+  r8/stdlib: master
   aws/ec2: master
 assemblies:
   test_assembly:

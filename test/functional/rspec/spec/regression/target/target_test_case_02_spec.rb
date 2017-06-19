@@ -5,19 +5,17 @@ require './lib/dtk_common'
 # Target specific properties
 service_location = '~/dtk/'
 target_location = "/tmp/network"
-target_module = 'aws/network'
-target_assembly_template = 'target'
+target_module = 'aws/aws_target'
+target_assembly_template = 'target_iam'
 target_service_name = 'target_test_case_02'
-target_name = 'target'
-target_version = '1.0.3'
+target_name = 'target_iam'
+target_version = 'master'
 
 # Target attributes
-aws_access_key = ENV['AWS_ACCESS_KEY']
-aws_secret_key = ENV['AWS_SECRET_KEY']
 default_keypair = 'testing_use1'
-vpc_id = 'vpc-5a63bc3f'
-subnet_length = '28'
-security_group_name = 'target_test'
+vpc_id = 'vpc-d9946ba0'
+security_group_name = 'r8_test_security_group'
+subnet_id = 'subnet-fba81fd7'
 
 # Module specific properties
 initial_module_location = "./spec/regression/target/resources/test_module_02_dtk.module.yaml"
@@ -28,9 +26,9 @@ service_name = 'dtk_test_module_02'
 
 dtk_common = Common.new('', '')
 
-describe "(Target) Test Case 02: Specified subnet length, vpc and security group name" do
+describe "(Target) Test Case 02: Specified existing subnet id, vpc and security group name" do
   before(:all) do
-    puts '**********************************************', ''
+    puts '********************************************************************************', ''
     # Install/clone aws:network module with required dependency modules
     system("rm -rf /tmp/network && mkdir /tmp/network")
     system("dtk module clone -v #{target_version} #{target_module} #{target_location}")
@@ -45,14 +43,6 @@ describe "(Target) Test Case 02: Specified subnet length, vpc and security group
     include_context "Stage target from module", target_module, target_location, target_name, target_service_name
   end
 
-  context "Set attribute for aws access key" do
-    include_context "Set attribute", service_location, target_service_name, 'identity_aws::credentials/aws_access_key_id', aws_access_key
-  end
-
-  context "Set attribute for aws secret access key" do
-    include_context "Set attribute", service_location, target_service_name, 'identity_aws::credentials/aws_secret_access_key', aws_secret_key
-  end
-
   context "Set attribute for default keypair" do
     include_context "Set attribute", service_location, target_service_name, 'network_aws::vpc[vpc1]/default_keypair', default_keypair
   end
@@ -62,7 +52,11 @@ describe "(Target) Test Case 02: Specified subnet length, vpc and security group
   end
 
   context "Set attribute for subnet length" do
-    include_context "Set attribute", service_location, target_service_name, 'network_aws::vpc_subnet[vpc1-default]/subnet_length', subnet_length
+    include_context "Set attribute", service_location, target_service_name, 'network_aws::vpc_subnet[vpc1-default]/vpc_id', vpc_id
+  end
+
+  context "Set attribute for subnet length" do
+    include_context "Set attribute", service_location, target_service_name, 'network_aws::vpc_subnet[vpc1-default]/subnet_id', subnet_id
   end
 
   context "Set attribute for security group name" do

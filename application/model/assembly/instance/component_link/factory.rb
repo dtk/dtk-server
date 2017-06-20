@@ -51,7 +51,7 @@ module DTK
           id_handle = nil
           if port_link.is_a?(Array)
             port_link.each do |pl|
-              if @input_cmp[:id] == pl[:input_component][:id] && @output_cmp[:id] == pl[:output_component][:id]
+              if @input_cmp[:id] == pl[:input_component][:id] #&& @output_cmp[:id] == pl[:output_component][:id]
                 id_handle = pl.id_handle
               end
             end

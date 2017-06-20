@@ -250,7 +250,7 @@ shared_context 'Force uninstall service instance' do |service_location, service_
     pass = true
     service_location = service_location + service_instance
     value = `dtk service uninstall --purge --delete -d #{service_location} -y`
-    sleep 2 # needed to complete uninstall
+    sleep 5 # needed to complete uninstall
     puts value
     pass = false if value.include? 'ERROR'
     puts ''
@@ -308,6 +308,7 @@ shared_context 'Force delete service instance' do |service_location, service_ins
       if delete_info[:pass]
         pass = true
         puts "Service instance is deleted successfully!"
+        sleep 5
       else
         pass = false
         puts "Service instance is not deleted successfully!"

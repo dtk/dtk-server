@@ -10,11 +10,18 @@ dependencies:
   nanliu/staging: master
   r8/stdlib: master
   dtk-examples/wordpress: 1.2.0
-nodes:
-  wordpress:
+components:
+- ec2::node[wordpress]:
     attributes:
+      discovered: false
+      dtk_debug: false
+      enable_public_ip_in_subnet: true
       image: trusty_hvm
       size: small
+      tags:
+        Name: dtk:new_dtk_client_test_case_06:wordpress
+    links:
+    - target_iam/ec2::profile[aws-target]
     components:
     - mysql::server:
         attributes:
@@ -26,18 +33,21 @@ nodes:
           db_password: password
           db_user: user
           version: '3.8'
-        component_links:
-          mysql::db: wordpress/mysql::db
+        links:
+        - ec2::node[wordpress]/mysql::db[wordpress]
     - wordpress::php_config
     - wordpress::nginx_config:
         attributes:
           wp_content: /opt/wordpress/
-        component_links:
-          wordpress::app: wordpress/wordpress::app
-workflows:
+        links:
+        - ec2::node[wordpress]/wordpress::app
+actions:
   create:
     subtask_order: sequential
     subtasks:
+    - name: component ec2::node[wordpress]
+      ordered_components:
+      - ec2::node[wordpress]
     - name: wordpress setup
       ordered_components:
       - wordpress::php_config

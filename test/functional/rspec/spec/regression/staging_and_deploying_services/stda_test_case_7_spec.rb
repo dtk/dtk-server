@@ -15,7 +15,6 @@ service_name = 'stda_test_case_7'
 assembly_name = 'simple'
 attributes_to_check_cardinality_before = {"ec2::node_group[slave]/cardinality" => '2'}
 attributes_to_check_cardinality_after = {"ec2::node_group[slave]/cardinality" => '1'}
-component_to_check = "ec2::node[slave]/stdlib"
 node_group_to_check = "ec2::node_group[slave]"
 full_service_location = service_location + service_name
 dtk_common = Common.new('', '')
@@ -49,10 +48,6 @@ describe '(Staging And Deploying Assemblies) Test Case 7: Stage simple node grou
     include_context "Check component exist in service instance", dtk_common, service_name, node_group_to_check
   end
 
-  context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
-  end
-
   context "Check cardinality attribute correct in service instance" do
     include_context "Check attributes correct in service instance", dtk_common, service_name, attributes_to_check_cardinality_before
   end
@@ -67,10 +62,6 @@ describe '(Staging And Deploying Assemblies) Test Case 7: Stage simple node grou
 
   context "Check node group component exist in service instance" do
     include_context "Check component exist in service instance", dtk_common, service_name, node_group_to_check
-  end
-
-  context "Check component exist in service instance" do
-    include_context "Check component exist in service instance", dtk_common, service_name, component_to_check
   end
 
   context "Check cardinality attribute correct in service instance" do

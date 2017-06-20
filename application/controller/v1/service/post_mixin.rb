@@ -278,7 +278,8 @@ module DTK
            dep_assembly = external_assembly_instance(:service)
          end
          unlink = boolean_request_params(:unlink)
-         link_name = request_params(:link_name)
+         link_name = request_params(:link_name) 
+         link_name = nil if link_name.empty?
 
          #CreateIDH for dep_components
          base_component = ret_component_id_handle(:base_component, assembly).create_object()

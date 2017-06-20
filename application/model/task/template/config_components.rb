@@ -123,16 +123,29 @@ module DTK; class Task
 
         node_as_components = []
         cmp_actions.each{ |relevant_action| (node_as_components << NodeComponent.node_component?(relevant_action)) if NodeComponent.is_node_component?(relevant_action) }
-        cmp_actions.delete_if { |relevant_action| NodeComponent.is_node_component?(relevant_action) }
+        nodes_as_cmps_create_subtask = create_nodes_as_components_subtask(assembly, cmp_actions, node_as_components)
 
         # otherwise do the temporal processing to generate template_content
+        cmp_actions.delete_if { |relevant_action| NodeComponent.is_node_component?(relevant_action) }
         opts_generate = (node_centric_first_stage?() ? { node_centric_first_stage: true } : {})
         template_content = generate_from_temporal_contraints([:assembly, :node_centric], assembly, cmp_actions, opts_generate)
+        template_content.splice_in_at_beginning!([nodes_as_cmps_create_subtask], opts_generate) unless nodes_as_cmps_create_subtask.empty?
 
         unless opts[:serialized_form]
           # persist assembly action part of what is generated
           Persistence::AssemblyActions.persist(assembly, template_content, task_action, { subtask_order: opts[:subtask_order] })
         end
+
+        template_content
+      end
+
+      private
+
+      # using this to create nodes as components creation concurrent subtask
+      def self.create_nodes_as_components_subtask(assembly, assembly_cmp_actions, node_as_components)
+        empty_actions = ActionList::ConfigComponents.new
+        nodes_as_cmps_subtask = generate_from_temporal_contraints([:assembly, :node_centric], assembly, empty_actions, {subtask_order: 'concurrent', custom_name: 'create nodes'})
+        updated = false
 
         assembly_wide_node = assembly.has_assembly_wide_node?
         node_as_components.delete_if { |nc| nc.nil? }
@@ -141,13 +154,19 @@ module DTK; class Task
           component = node_component.component
           node_name = node_component.node.display_name
           task_template_opts = { component_title: node_name, insert_strategy: :insert_at_start }
-          Task::Template::ConfigComponents.update_when_added_component_or_action?(assembly, assembly_wide_node, component, task_template_opts)
+
+          new_action = Action.create(component.merge(node: assembly_wide_node, title: task_template_opts[:component_title]), task_template_opts)
+          gen_constraints_proc = proc { TemporalConstraints::ConfigComponents.get(assembly, assembly_cmp_actions) }
+          insert_opts = {
+            gen_constraints_proc: gen_constraints_proc,
+            add_delete_action: task_template_opts[:add_delete_action],
+            insert_strategy: task_template_opts[:insert_strategy]
+          }
+          nodes_as_cmps_subtask.insert_action?(new_action, assembly_cmp_actions, insert_opts)
         end
 
-        template_content
+        nodes_as_cmps_subtask
       end
-
-      private
 
       def self.raise_error_if_unsupported_action_types(action_types)
         unless action_types.include?(:assembly)

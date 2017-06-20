@@ -31,6 +31,7 @@ module DTK; class Task
       def initialize(object = nil, actions = [], opts = {})
         super()
         @subtask_order = opts[:subtask_order]
+        @custom_name   = opts[:custom_name]
         create_stages!(object, actions, opts) if object
       end
 
@@ -46,7 +47,10 @@ module DTK; class Task
           else
             { Field::Subtasks => subtasks }
         end
-        (@subtask_order ? { Field::SubtaskOrder => @subtask_order } : {}).merge(normalized_subtasks)
+        ret = {}
+        ret.merge!(name: @custom_name) if @custom_name
+        ret.merge!(Field::SubtaskOrder => @subtask_order) if @subtask_order
+        ret.merge(normalized_subtasks)
       end
 
       def create_subtask_instances(task_mh, assembly_idh)

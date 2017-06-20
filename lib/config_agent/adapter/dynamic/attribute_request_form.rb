@@ -18,6 +18,8 @@
 module DTK
   class ConfigAgent::Adapter::Dynamic
     module AttributeRequestForm
+      require_relative('attribute_request_form/system_attribute')
+
       class Info < ::Hash
         def initialize(value, datatype, hidden)
           super()
@@ -34,7 +36,7 @@ module DTK
       end
       
       def self.component_attribute_values(component_action, assembly_instance)
-        attributes = system_attributes(assembly_instance).merge(assembly_level_attributes(assembly_instance))
+        attributes = SystemAttribute.system_attributes(assembly_instance).merge(assembly_level_attributes(assembly_instance))
         node_component = NodeComponent.node_component?(component_action.component)
         component_action.attributes.inject(attributes) do |h, attr|
           # prune dynamic attributes that are not also inputs
@@ -70,22 +72,6 @@ module DTK
         end
         def self.assembly_level_attribute_name(attribute_name)
           "#{Prefix::ASSEMBLY_LEVEL}#{DELIM}#{attribute_name}"
-        end
-      end
-
-      SYSTEM_ATTRIBUTES = {
-        service_instance_name: {
-          value_lambda: lambda { |assembly_instance| assembly_instance.display_name }, 
-          dattype: 'string', 
-          hidden: false
-        }
-      }
-
-
-      def self.system_attributes(assembly_instance)
-        SYSTEM_ATTRIBUTES.inject({}) do |h, (attribute_name, input)|
-          qualified_attribute_name = AttributeType.system_attribute_name(attribute_name)
-          h.merge(qualified_attribute_name => Info.new(input[:value_lambda].call(assembly_instance), input[:datatype], input[:hidden]))
         end
       end
 

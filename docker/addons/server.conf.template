@@ -8,6 +8,7 @@ repo.base_directory = ${HOST_VOLUME}/r8server-repo
 dsl.service.integer_version.default=4
 dsl.component.integer_version.default=4
 
+server_id = ${INSTANCE_NAME}
 server_public_dns = ${PUBLIC_ADDRESS}
 local_repo.host = ${PUBLIC_ADDRESS}
 db.host = /var/run/postgresql

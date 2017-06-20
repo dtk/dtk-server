@@ -46,6 +46,22 @@ module DTK
           port_link.id_handle()
         end
 
+        def remove?
+          port_link = @assembly_instance.get_augmented_port_links
+          id_handle = nil
+          if port_link.is_a?(Array)
+            port_link.each do |pl|
+              if @input_cmp[:id] == pl[:input_component][:id] && @output_cmp[:id] == pl[:output_component][:id]
+                id_handle = pl.id_handle
+              end
+            end
+          else
+            id_handle = port_link.id_handle
+          end
+
+          Assembly::Instance::ComponentLink.delete(id_handle)
+        end
+
         private
 
         # returns input_port,output_port,new_port_created (boolean)

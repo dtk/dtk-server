@@ -40,6 +40,11 @@ module DTK
           ComponentLink::Factory.new(self, base_component.id_handle, dep_component.id_handle, link_name).add?
         end
 
+        def remove_component_link(base_component, dep_component, opts = {})
+          link_name = ComponentLink.find_and_check_link_name(base_component, dep_component,  link_name: opts[:link_name])
+          ComponentLink::Factory.new(self, base_component.id_handle, dep_component.id_handle, link_name).remove?
+        end
+
         # opts can have keys:
         #   :context
         #   :filter

@@ -269,54 +269,28 @@ module DTK
          # TODO: DTK-3009; stub for Almin
          assembly = dep_assembly = assembly_instance()
 
-         if request_params(:service)
+         unless request_params(:service).empty? 
            dep_assembly = external_assembly_instance(:service)
          end
          unlink = boolean_request_params(:unlink)
          link_name = request_params(:link_name)
-         
-         require 'debugger'
-         Debugger.wait_connection = true
-         Debugger.start_remote
-         debugger
+
          #CreateIDH for dep_components
          base_component = ret_component_id_handle(:base_component, assembly).create_object()
          dep_component  = ret_component_id_handle(:dep_component, dep_assembly).create_object()
  
          # TODO: fill out rest
          service_link_idh = 
-          if unlink
-           # TODO: Almin: add code to do unlink
+          if unlink 
+             opts =  (link_name ? { link_name: link_name } : {})
+             assembly.remove_component_link(base_component, dep_component, opts)
            else
-             # TODO: Almin: check if this code works
              opts =  (link_name ? { link_name: link_name } : {})
              assembly.add_component_link(base_component, dep_component, opts)
            end
-         rest_ok_response service_link: service_link_idh.get_id
+        #  rest_ok_response service_link: service_link_idh.get_id
+        rest_ok_response
        end
-
-        # def link
-        #   assembly_instance = assembly_instance()
-        #   unlink = request_params(:unlink)
-        #   base_component = request_params(:base_component)
-        #   dependent_component = request_params(:dependent_component)
-        #   comp = Hash.new
-
-        #   components = assembly_instance.list_components
-        #   components.each do |c|
-        #     if c[:display_name].include?(base_component)
-        #       comp[:base_component] = c
-        #     end
-        #     if c[:display_name].include?(dependent_component)
-        #       comp[:dependent_component] = c
-        #     end
-        #   end
-          
-        #   comp[:base_component] = CommonDSL::ObjectLogic::Assembly::ComponentLink::Diff::Mixin.ret_base_link_params(assembly_instance, base_component)
-        #   dep_link_params       = CommonDSL::ObjectLogic::Assembly::ComponentLink::Diff::Add.component_link_value.dependency_link_params(assembly_instance)
-        #   assembly_instance.add_component_link( comp[:base_component], comp[:dependent_component])
-        #   rest_ok_response assembly_instance.list_component_links, datatype: :service_link
-        # end
 
       def set_default_target
         rest_ok_response assembly_instance.set_as_default_target

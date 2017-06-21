@@ -281,11 +281,9 @@ module DTK
          link_name = request_params(:link_name) 
          link_name = nil if link_name.empty?
 
-         #CreateIDH for dep_components
          base_component = ret_component_id_handle(:base_component, assembly).create_object()
          dep_component  = ret_component_id_handle(:dep_component, dep_assembly).create_object()
- 
-         # TODO: fill out rest
+
          service_link_idh = 
           if unlink 
              opts =  (link_name ? { link_name: link_name } : {})
@@ -294,8 +292,7 @@ module DTK
              opts =  (link_name ? { link_name: link_name } : {})
              assembly.add_component_link(base_component, dep_component, opts)
            end
-        #  rest_ok_response service_link: service_link_idh.get_id
-        rest_ok_response
+        rest_ok_response service_link_idh
        end
 
       def set_default_target

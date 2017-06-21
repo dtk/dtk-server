@@ -30,7 +30,7 @@ module DTK
 
     def self.get_link_defs_matching_antecendent(dep_cmp_template, antec_cmp_template)
       ret = []
-      link_defs = get([dep_cmp_template.id_handle])
+      link_defs = get([dep_cmp_template.id_handle]) 
       return ret if link_defs.empty?
       link_def_idhs = link_defs.map(&:id_handle)
       antec_cmp_type = antec_cmp_template.get_field?(:component_type)

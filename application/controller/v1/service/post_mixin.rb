@@ -262,6 +262,39 @@ module DTK
         rest_ok_response diff_result.hash_for_response
       end
 
+      # params passed to link are
+       #  required
+       #    :base_component - string in form that appears in 'dtk components'
+       #    :dep_component - string in form that appears in 'dtk components'
+       #  optional
+       #    :service - string that is external service associated with dep_component
+       #    :unlink  - boolean meaning to unlink, rather than link (default is false)
+       #    :link_name - string optionally given
+       def link
+         # TODO: DTK-3009; stub for Almin
+         assembly = dep_assembly = assembly_instance()
+
+         unless request_params(:service).empty? 
+           dep_assembly = external_assembly_instance(:service)
+         end
+         unlink = boolean_request_params(:unlink)
+         link_name = request_params(:link_name) 
+         link_name = nil if link_name.empty?
+
+         base_component = ret_component_id_handle(:base_component, assembly).create_object()
+         dep_component  = ret_component_id_handle(:dep_component, dep_assembly).create_object()
+
+         service_link_idh = 
+          if unlink 
+             opts =  (link_name ? { link_name: link_name } : {})
+             assembly.remove_component_link(base_component, dep_component, opts)
+           else
+             opts =  (link_name ? { link_name: link_name } : {})
+             assembly.add_component_link(base_component, dep_component, opts)
+           end
+        rest_ok_response service_link_idh
+       end
+
       def set_default_target
         rest_ok_response assembly_instance.set_as_default_target
       end

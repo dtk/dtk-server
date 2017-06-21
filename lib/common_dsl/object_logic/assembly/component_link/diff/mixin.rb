@@ -29,6 +29,10 @@ module DTK
         end
 
         def delete_component_link!(result, assembly_instance)
+          require 'debugger'
+          Debugger.wait_connection = true
+          Debugger.start_remote
+          debugger
           port_links          = assembly_instance.get_augmented_port_links
           link_name           = relative_distinguished_name
           base_component_info = qualified_key.parent_component_info
@@ -51,6 +55,11 @@ module DTK
         end
 
         def ret_base_link_params(assembly_instance, qualified_key)
+          info = qualified_key.parent_component_info
+          link_params_class::Base.new(assembly_instance, component_name: info.component_name, node_name: info.node_name)
+        end
+
+        def self.ret_base_link_params(assembly_instance, qualified_key)
           info = qualified_key.parent_component_info
           link_params_class::Base.new(assembly_instance, component_name: info.component_name, node_name: info.node_name)
         end

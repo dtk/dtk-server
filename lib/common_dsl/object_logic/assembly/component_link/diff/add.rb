@@ -23,7 +23,7 @@ module DTK
 
         def process(result, _opts = {})
           assembly_instance    = service_instance.assembly_instance
-          dep_link_params      = component_link_value.dependency_link_params(assembly_instance)
+          dep_link_params      = component_link_value.dependency_link_params(assembly_instance) 
           add_component_link!(result, assembly_instance, dep_link_params)
         end
 

@@ -42,8 +42,30 @@ module DTK
               fail Error.new("Unexpected result that matches more than one port link (#{pl_matches.inspect})")
             end
           end
+          fail ErrorUsage.new("Component link already exists.") unless port_link.nil? 
           port_link ||= create_new_port_and_attr_links(input_port, output_port)
-          port_link.id_handle()
+          port_link.id_handle() 
+        end
+
+        def remove?
+          port_link = @assembly_instance.get_augmented_port_links
+          id_handle = nil
+          if port_link.is_a?(Array)
+            port_link.each do |pl|
+              if @input_cmp[:id] == pl[:input_component][:id] #&& @output_cmp[:id] == pl[:output_component][:id]
+                id_handle = pl.id_handle
+              end
+            end
+          else
+            id_handle = port_link.id_handle
+          end
+
+          if id_handle.nil?
+            return fail ErrorUsage.new("Component link does not exists.")
+          else
+            Assembly::Instance::ComponentLink.delete(id_handle)
+          end  
+          
         end
 
         private

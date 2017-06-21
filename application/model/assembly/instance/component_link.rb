@@ -38,13 +38,18 @@ module DTK
         def add_component_link(base_component, dep_component, opts = {})
           link_name = ComponentLink.find_and_check_link_name(base_component, dep_component,  link_name: opts[:link_name])
           ComponentLink::Factory.new(self, base_component.id_handle, dep_component.id_handle, link_name).add?
+          update_dsl
         end
 
+        # opts can have keys:
+        #   :link_name
         def remove_component_link(base_component, dep_component, opts = {})
           link_name = ComponentLink.find_and_check_link_name(base_component, dep_component,  link_name: opts[:link_name])
           ComponentLink::Factory.new(self, base_component.id_handle, dep_component.id_handle, link_name).remove?
+          update_dsl
         end
 
+        
         # opts can have keys:
         #   :context
         #   :filter
@@ -55,8 +60,18 @@ module DTK
         def list_possible_component_links
           PrintForm.list_possible_component_links(self)
         end
+
+        def update_dsl
+          service_instance_branch = AssemblyModule::Service.get_service_instance_branch(self)
+          RepoManager::Transaction.reset_on_error(service_instance_branch) do 
+            CommonDSL::Generate::ServiceInstance.generate_dsl(self, service_instance_branch)
+          end
+          CommonModule::ModuleRepoInfo.new(service_instance_branch)
+        end
+
       end
 
+      
       def initialize(assembly_instance)
         @assembly_instance = assembly_instance
       end

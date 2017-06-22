@@ -268,7 +268,7 @@ module DTK; class Assembly::Instance
 
         sp_hash = {
           cols:   [:id, :group_id, :display_name],
-          filter: [:oneof, :id, aug_cmps.map { |aug_cmp| ndx_cmps_to_assemblies.values.uniq }]
+          filter: [:oneof, :id, aug_cmps.map { |aug_cmp| ndx_cmps_to_assemblies.values.uniq }.uniq.flatten]
         }
         ndx_assembly_names = Assembly::Instance.get_objs(model_handle, sp_hash).inject({}) do |h, r| 
           h.merge(r[:id] => r[:display_name]) 

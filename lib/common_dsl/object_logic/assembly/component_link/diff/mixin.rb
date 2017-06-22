@@ -29,10 +29,6 @@ module DTK
         end
 
         def delete_component_link!(result, assembly_instance)
-          require 'debugger'
-          Debugger.wait_connection = true
-          Debugger.start_remote
-          debugger
           port_links          = assembly_instance.get_augmented_port_links
           link_name           = relative_distinguished_name
           base_component_info = qualified_key.parent_component_info

@@ -38,11 +38,16 @@ module DTK
         create_from_target(node.get_target)
       end
 
-      # Creates a Service::Target object if assembly_instance represents a target service instance
+      # Creates a Service::Target object 
       # opts can have keys
       #  :components
       def self.create_from_assembly_instance?(assembly_instance, opts = {})
-        new(assembly_instance, components: opts[:components]) if isa_target_assembly_instance?(assembly_instance)
+        # TODO: DTK-3076: removed check if isa_target_assembly_instance?(assembly_instance)
+        #       This alows staging with respect to any service instance. we still need to have dtk service list'
+        #       display right by adding a field to component table that has service_parent_id and using that rather than
+        #       target name. Also need to clean up and remove descrete logic categorizing target or not target
+        #       and related default target logic
+        new(assembly_instance, components: opts[:components]) 
       end
 
       # This function is used to help bridge between using targets and service instances

@@ -10,9 +10,9 @@ service_location = '~/dtk/'
 
 dtk_common = Common.new('', '')
 
-describe "DTK Server smoke test with new client" do
+describe "DTK Server smoke test for getting started wordpress example" do
   before(:all) do
-    puts '*************************************', ''
+    puts '***********************************************************', ''
   end
 
   context "Install module from dtkn" do

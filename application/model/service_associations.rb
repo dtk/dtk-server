@@ -15,38 +15,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module XYZ
+module DTK
   class ServiceAssociations < Model
-    def self.create_associations(project, service_instance, parent_service_instance)
-      display_name = "#{service_instance[:display_name]}-#{parent_service_instance[:display_name]}"
+    module Relation
+      PARENT_OF = 'parent-of'
+    end
+
+    def self.create_associations(project, assembly_instance, parent_assembly_instance)
+      display_name = "#{assembly_instance.display_name}-#{parent_assembly_instance.display_name}"
 
       row = {
         ref: display_name,
         display_name: display_name,
-        relationship: 'parent-of',
-        service_antecendent_id: service_instance[:id],
-        service_dependent_id: parent_service_instance[:id]
+        relationship: Relation::PARENT_OF,
+        service_antecendent_id: assembly_instance.id,
+        service_dependent_id: parent_assembly_instance.id
       }
 
-      association_mh = project.id_handle().createMH(:service_associations)
-      Model.create_from_rows(association_mh, [row], convert: true)
+      association_mh = project.model_handle(:service_associations)
+      create_from_rows(association_mh, [row], convert: true)
     end
 
-    def self.get_for_child(project, child_service_instance)
+    def self.get_parent?(assembly_instance)
       sp_hash = {
-        cols: [:dependent_parent_services],
-        filter: [:eq, :service_antecendent_id, child_service_instance[:id]]
+        cols: [:id, :group_id, :display_name, :service_dependent_id],
+        filter: [:and,
+                 [:eq, :service_antecendent_id, assembly_instance.id],
+                 [:eq, :relationship, Relation::PARENT_OF]]
       }
-      associations = Model.get_objs(project.id_handle().createMH(:service_associations), sp_hash)
-
-      service_instances = []
-      associations.each do |association|
-        if service_instance = association[:service_instance]
-          service_instances << service_instance.copy_as_assembly_instance
-        end
+      associations = get_objs(assembly_instance.model_handle(:service_associations), sp_hash)
+      case associations.size
+      when 0
+        nil
+      when 1
+        assembly_instance.model_handle(:assembly_instance).createIDH(id: associations.first[:service_dependent_id]).create_object
+      when 2
+        fail ErrorUsage, "Not treating cases where  service instance has more than 1 parent"
       end
-
-      service_instances
     end
+
   end
 end

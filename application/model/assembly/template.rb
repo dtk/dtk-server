@@ -73,7 +73,7 @@ module DTK; class Assembly
     #  :service_name_globally_scoped - Boolean (default false); alternative is unique wrt to target
     #  :donot_create_modules
     #  :allow_existing_service - Boolean (default false)
-    #  TODO: see if any others used when passing opts to get_augmented_components(opts) and autocomplete_component_links(assembly_instance, aug_cmps, opts)
+    #  TODO: see if any other keys used when passing opts to get_augmented_components(opts) 
     def stage(target, opts = Opts.new)
       service_module = opts[:service_module] || get_service_module
 
@@ -138,10 +138,11 @@ module DTK; class Assembly
       if parent_service_instance = opts[:parent_service_instance]
         ServiceAssociations.create_associations(opts[:project], assembly_instance, parent_service_instance) if assembly_instance
       end
-
+      
+      # assumed that service associations set before calling LinkDef::AutoComplete.autocomplete_component_links
       unless opts[:no_auto_complete]
-        aug_cmps = assembly_instance.get_augmented_components(opts)
-        LinkDef::AutoComplete.autocomplete_component_links(assembly_instance, aug_cmps, opts)
+        
+        LinkDef::AutoComplete.autocomplete_component_links(assembly_instance)
       end
 
       add_attribute_links(assembly_instance)

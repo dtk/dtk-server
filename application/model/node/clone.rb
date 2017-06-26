@@ -92,7 +92,7 @@ module DTK; class Node
           end
           unless internal_node_link_defs_info.empty?
             # TODO: AUTO-COMPLETE-LINKS: not sure if this is place to cal auto complete
-            LinkDef::AutoComplete.create_internal_links(@node, @component, internal_node_link_defs_info)
+            LinkDef::AutoComplete::InternalLinks.create(@component, internal_node_link_defs_info)
           end
         end
 

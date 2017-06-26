@@ -17,11 +17,11 @@
 #
 module DTK
   class LinkDef < Model
-    r8_nested_require('link_def', 'link')
-    r8_nested_require('link_def', 'context')
-    r8_nested_require('link_def', 'auto_complete')
-    r8_nested_require('link_def', 'parse_serialized_form')
-    r8_nested_require('link_def', 'info')
+    require_relative('link_def/link')
+    require_relative('link_def/context')
+    require_relative('link_def/auto_complete')
+    require_relative('link_def/parse_serialized_form')
+    require_relative('link_def/info')
     extend ParseSerializedFormClassMixin
 
     def self.common_columns
@@ -41,15 +41,18 @@ module DTK
 
     def self.get(component_template_idhs)
       ret = []
-      return ret if component_template_idhs.empty?()
+      return ret if component_template_idhs.empty?
       sp_hash = {
-        cols: common_columns(),
+        cols: common_columns,
         filter: [:oneof, :component_component_id, component_template_idhs.map(&:get_id)]
       }
       link_def_mh = component_template_idhs.first.createMH(:link_def)
       get_objs(link_def_mh, sp_hash)
     end
 
+    def get_link_def_links(opts = {})
+      self.class.get_link_def_links([id_handle], opts)
+    end
     def self.get_link_def_links(link_def_idhs, opts = {})
       ret = []
       return ret if link_def_idhs.empty?
@@ -58,7 +61,7 @@ module DTK
         filter = [:and, filter, opts[:filter]]
       end
       sp_hash = {
-        cols: opts[:cols] || Link.common_columns(),
+        cols: opts[:cols] || Link.common_columns,
         filter: filter
       }
       ld_link_mh = link_def_idhs.first.create_childMH(:link_def_link)
@@ -86,7 +89,7 @@ module DTK
         LinkDef.set_link_def_links!(unc_aug_port)
       end
 
-      unc_aug_port.set_port_info!()
+      unc_aug_port.set_port_info!
       (unc_aug_port[:link_def][:link_def_links] || []).each do |ld_link|
         matches = ld_link.ret_matches(unc_aug_port, output_aug_ports)
         ret += matches

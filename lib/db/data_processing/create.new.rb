@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 # TODO: need to refactor to make more efficient
-module XYZ
+module DTK
   class DB
     module DataProcessingCreate
       # creates a new instance w/ref_num bumped if needed
@@ -26,7 +26,7 @@ module XYZ
         if id_handle.is_top?()
           id_handle
         end
-  id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: true
+        id_info = IDInfoTable.get_row_from_id_handle id_handle, raise_error: true
 
         #check if instance or factory
         if id_info[:is_factory]

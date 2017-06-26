@@ -91,9 +91,7 @@ module DTK
             end
 
             if opts[:auto_complete_links]
-              associations = ServiceAssociations.get_for_child(opts[:project], self)
-              opts[:parent_service_instance] = associations unless associations.empty?
-              LinkDef::AutoComplete.autocomplete_component_links(self, [component], opts)
+              LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
             end
           end
           

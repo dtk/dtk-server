@@ -115,6 +115,7 @@ module DTK
           last_task_run_status = r[:last_task_run_status]
           pntr = ndx_ret[r[:id]] ||= r.prune_with_values(
               display_name: r.pretty_print_name(pp_opts),
+              service_context: (context = ServiceAssociations.get_parent?(r)) && context.display_name,
               last_task_run_status: last_task_run_status,
               # TODO: will deprecate :execution_status after removing it from smoketests
               execution_status: last_task_run_status || 'staged',
@@ -125,6 +126,7 @@ module DTK
             pntr[:module_branch_id] ||= module_branch_id
           end
 
+          # TODO: wil deprecate settig :target once we make sure not used anywhere
           if target = r[:target]
             if target[:iaas_properties]
               sec_group_set = target[:iaas_properties][:security_group_set]
@@ -173,7 +175,7 @@ module DTK
           nodes.reject! { |n| Node.is_assembly_wide_node?(n) } if opts[:remove_assembly_wide_node]
           # TODO: this is misleading since admin not op status returned
           summary_node_status = (summary_node_status(:admin, nodes, r[:last_task_run_status]) if respond_to?(:summary_node_status))
-          r.merge(op_status: summary_node_status, nodes: nodes).slice(:id, :display_name, :op_status, :last_task_run_status, :execution_status, :module_branch_id, :version, :assembly_template, :target, :nodes, :created_at, :keypair, :security_groups)
+          r.merge(op_status: summary_node_status, nodes: nodes).slice(:id, :display_name, :op_status, :last_task_run_status, :service_context, :execution_status, :module_branch_id, :version, :assembly_template, :target, :nodes, :created_at, :keypair, :security_groups)
         end
 
         sanitize!(unsorted) if opts[:sanitize]

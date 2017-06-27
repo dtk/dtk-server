@@ -173,8 +173,6 @@ module DTK
         factory.create_assembly?(:instance, instance_assigns, workspace_name, opts)
       end
 
-      protected
-
       def create_assembly?(type, assigns, workspace_name = nil, opts = {})
         ref = workspace_name ? "#{AssemblyFields[:ref]}_#{workspace_name}" : AssemblyFields[:ref]
         display_name = workspace_name ? workspace_name : AssemblyFields[:component_type]

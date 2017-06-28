@@ -96,7 +96,7 @@ module DTK
           node = e[:node]
           (!node.is_a?(Node)) || !Node::TargetRef.is_target_ref?(node)
         end
-
+        
         if request_params(:dependencies)
           opts.merge!(detail_to_include: [:component_dependencies])
           datatype = :component_with_dependencies
@@ -106,7 +106,21 @@ module DTK
       end
 
       def component_links
-        rest_ok_response assembly_instance.list_component_links, datatype: :service_link
+        opts = Opts.new(detail_level: nil)  
+        opts.merge!(detail_to_include: [:component_dependencies])
+
+        dep_component = assembly_instance.info_about(:components, opts)
+        cmp_links = assembly_instance.list_component_links
+        
+        dep_component.each do |cmp|
+          cmp_links.each do |link|
+            if link[:type] == cmp[:depends_on] #TODO Almin: Refactor this!
+              link.merge!(satisfied_by: cmp[:satisfied_by])
+            end
+          end
+        end
+
+        rest_ok_response cmp_links, datatype: :service_link
       end
 
       def dependent_modules

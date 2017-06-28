@@ -64,8 +64,14 @@ module DTK
           end
         end
 
-        return [matching_elements.first.aug_component] if matching_elements.size < 2
-        prune_using_preferences(matching_elements, explicit_preferences: preferences)
+        case matching_elements.size
+        when 0
+          []
+        when 1
+          [matching_elements.first.aug_component]
+        else
+          prune_using_preferences(matching_elements, explicit_preferences: preferences)
+        end
       end
 
       protected 

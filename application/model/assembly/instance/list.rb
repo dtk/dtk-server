@@ -222,7 +222,7 @@ module DTK; class Assembly::Instance
             end
             ndx_els.map do |depends_on, sb_cmp_ids|
               satisfied_by = (sb_cmp_ids.empty? ? nil : sb_cmp_ids.map { |cmp_id| ndx_component_print_form[cmp_id] }.join(', '))
-              { depends_on: depends_on, satisfied_by: satisfied_by }
+              { depends_on: depends_on, satisfied_by: satisfied_by, id: sb_cmp_ids }
             end
           end
         end

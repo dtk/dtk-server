@@ -460,18 +460,18 @@
       "base_component",
       "type",
       "dependent_component",
+      "satisfied_by",
       "required",
-      "description",
-      "satisfied_by"
+      "description"
     ],
     "mapping": {
       "id": "dtk_id",
       "base_component": "base_component",
       "type": "dtk_type",
       "dependent_component": "dependent_component",
+      "satisfied_by": "satisfied_by",
       "required": "required",
-      "description": "description",
-      "satisfied_by": "satisfied_by"
+      "description": "description"
     }
   },
   "service_link_from_component": {

@@ -48,8 +48,10 @@ module DTK
         create_action = service_actions.find{ |action| action[:display_name].eql?('create')}
         if service_actions.empty? || create_action.nil?
           # this will generate simple create action for service instance
+          # Calling assembly_instance.get_task_templates the second time after
+          # Task::Template.get_serialized_content will have different result 
           Task::Template.get_serialized_content(assembly_instance, nil)
-          service_actions = get_task_templates(set_display_names: true)
+          service_actions = assembly_instance.get_task_templates(set_display_names: true)
         end
         
         service_actions.each do |service_action|

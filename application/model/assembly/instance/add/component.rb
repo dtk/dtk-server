@@ -36,10 +36,9 @@ module DTK
             node = Component.check_node(self, node_idh)
             component = nil          
             Transaction do
-              # add the component
               component = node.add_component(aug_cmp_template, component_title: opts[:component_title], detail_to_include: [:component_dependencies]).create_object
               if opts[:update_workflow]
-                Component.update_workflow(self, node, component, Aux.hash_subset(opts, [:skip_if_not_found, :splice_in_delete_action]))
+                Component.update_workflow(self, node, component, Aux.hash_subset(opts, [:component_title, :skip_if_not_found, :splice_in_delete_action]))
               end
               
               if opts[:auto_complete_links]
@@ -79,7 +78,7 @@ module DTK
             action_def = cmp_instance.get_action_def?('delete')
             update_opts.merge!(:action_def => action_def)
           end
-          if component_title = opts[:omponent_title]
+          if component_title = opts[:component_title]
             update_opts.merge!(:component_title => component_title)
           end
           Task::Template::ConfigComponents.update_when_added_component_or_action?(action_instance, node, component, update_opts)

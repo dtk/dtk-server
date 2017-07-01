@@ -29,10 +29,11 @@ module DTK; module CommonDSL
             aug_cmp_template = nil
             result.add_error_msg(e.message)
           end
-          return unless  aug_cmp_template
+          return unless aug_cmp_template
 
           node = parent_node
-          new_component_idh = add_component_to_node(node, aug_cmp_template, component_title: component_title?)
+          new_component_idh = assembly_instance.add_component(node.id_handle, aug_cmp_template, component_title: component_title?, auto_complete_links: true, update_workflow: true)
+
           
           result.add_item_to_update(:workflow) # workflow will be updated with spliced in new component
           result.add_item_to_update(:assembly) # this is to account for fact that when component is added, default attributes will also be added
@@ -47,12 +48,6 @@ module DTK; module CommonDSL
           @component_type ||= ::DTK::Component.component_type_from_user_friendly_name(component_name)
         end
 
-        # opts can have keys:
-        #   :component_title
-        def add_component_to_node(node, aug_cmp_template, opts = {})
-          assembly_instance.add_component(node.id_handle, aug_cmp_template, opts[:component_title])
-        end
-        
         def set_attribute_overrides(result, new_component_idh)
           return if attributes_semantic_parse_hash.empty?
           

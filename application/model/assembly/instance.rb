@@ -44,7 +44,7 @@ module DTK; class  Assembly
     include GetMixin
     extend GetClassMixin
     include ComponentTemplateMixin
-    include AddMixin
+    include Add::Mixin
     include NodeStatusMixin
     extend NodeStatusClassMixin
     include NodeStatusToFixMixin

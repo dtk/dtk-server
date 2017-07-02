@@ -19,12 +19,9 @@ module DTK
   class ConfigAgent::Adapter::Dynamic
     module ErrorResults
       module Mixin
-        
-        def errors_in_result?(result, _action)
-          pp ['calling errors_in_result?', result]
-          #        unless [:succeeded, :ok].include?(payload[:status])
-          #            payload[:error] ? [payload[:error]] : (payload[:errors] || [])
 
+        # TODO: if this is not overwritten, remove
+        def errors_in_result?(result, _action)
           nil
         end
         

@@ -199,7 +199,9 @@ module DTK
       # return unless repo_user
 
       model_name = model_handle[:model_name]
-      return unless repo_user.has_direct_access?(model_name)
+      unless model_name == :common_module
+        return unless repo_user.has_direct_access?(model_name)
+      end
 
       # confusing since it is going to gitolite
       RepoManager.delete_user(username)
@@ -211,10 +213,12 @@ module DTK
         # repo user acls deleted by foriegn key cascade
       end
 
-      if repo_user.any_direct_access_except?(model_name)
-        repo_user.update_direct_access(model_name, false)
-      else
-        delete_instance(repo_user.id_handle)
+      unless model_name == :common_module
+        if repo_user.any_direct_access_except?(model_name)
+          repo_user.update_direct_access(model_name, false)
+        else
+          delete_instance(repo_user.id_handle)
+        end
       end
     end
 

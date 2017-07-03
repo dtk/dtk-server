@@ -38,6 +38,7 @@ module DTK
           repoman_registration_error = e.message
         end
 
+        CommonModule.remove_user_direct_access(model_handle_with_private_group(:common_module), username)
         ServiceModule.remove_user_direct_access(model_handle_with_private_group(:service_module), username)
         ComponentModule.remove_user_direct_access(model_handle_with_private_group(:component_module), username)
 

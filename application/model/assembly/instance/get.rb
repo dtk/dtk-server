@@ -325,7 +325,7 @@ module DTK; class Assembly; class Instance
       target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
       filter = [:and, [:eq, :type, 'composite'], target_filter, opts[:filter]].compact
       col, needs_empty_nodes = list_virtual_column?(opts[:detail_level])
-      cols = [:id, :ref, :display_name, :group_id, :component_type, :version, :created_at, col].compact
+      cols = [:id, :ref, :display_name, :group_id, :component_type, :version, :created_at, :specific_type, col].compact
       ret = get(assembly_mh, { cols: cols }.merge(opts))
       return ret unless needs_empty_nodes
 

@@ -149,6 +149,10 @@ module DTK
             pntr.merge!(created_at: created_at)
           end
 
+          if specific_type = r[:specific_type]
+            pntr.merge!(specific_type: specific_type)
+          end
+
           if node = format_node!(pntr[:ndx_nodes], r[:node], opts)
             format_components_and_attributes(node, r, ndx_attrs, opts)
           end
@@ -171,6 +175,7 @@ module DTK
         end
 
         unsorted = ndx_ret.values.map do |r|
+          r[:display_name] = r[:display_name] + "*" unless r[:specific_type].nil?
           nodes = r[:ndx_nodes].values
           nodes.reject! { |n| Node.is_assembly_wide_node?(n) } if opts[:remove_assembly_wide_node]
           # TODO: this is misleading since admin not op status returned

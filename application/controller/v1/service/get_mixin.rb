@@ -116,15 +116,25 @@ module DTK
         dep_component.each do |cmp|
           cmp_ids = cmp[:id] unless cmp[:id].nil?
           cmp_id = ''
-          if cmp_ids.is_a?(Array) && cmp_ids.size >= 1
+          if cmp_ids.is_a?(Array) && cmp_ids.size == 1
             cmp_ids.each do |id|
               cmp_id = id
-            end 
+            end
           elsif cmp_ids.is_a?(Fixnum)
             cmp_id = cmp_ids
           end
           cmp_links.each do |link|
             if link[:type] == cmp[:depends_on] 
+              if cmp_ids.size > 1 
+                split = cmp[:satisfied_by].split(',')
+                if split.size > 1
+                  split.each_with_index do |stat, index|
+                    if link[:linked_cmp_id] == cmp[:id][index]
+                      link.merge!(satisfied_by: stat.strip)
+                    end
+                  end
+                end
+              end
               if cmp_id == link[:linked_cmp_id]
                  link.merge!(satisfied_by: cmp[:satisfied_by])
               end

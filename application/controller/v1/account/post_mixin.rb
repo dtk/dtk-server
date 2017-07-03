@@ -92,11 +92,14 @@ module DTK
           repoman_registration_error   = e.message
         end
 
-        # Service call
+        # Service module call
         match_service, repo_user_service = ServiceModule.add_user_direct_access(model_handle_with_private_group(:service_module), rsa_pub_key, username)
 
-        # Module call
+        # Component module call
         match_module, repo_user_module = ComponentModule.add_user_direct_access(model_handle_with_private_group(:component_module), rsa_pub_key, username)
+
+        # Common module call
+        match_module, repo_user_module = CommonModule.add_user_direct_access(model_handle_with_private_group(:common_module), rsa_pub_key, username)
 
         # match is boolean to see if there has been natch
         match = match_service && match_module

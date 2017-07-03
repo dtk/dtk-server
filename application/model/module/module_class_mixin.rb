@@ -179,8 +179,9 @@ module DTK
       repo_user, match = RepoUser.add_repo_user?(:client, model_handle.createMH(:repo_user), { public: rsa_pub_key }, username)
       model_name = model_handle[:model_name]
 
-      repo_user.update_direct_access(model_name, true)
+      repo_user.update_direct_access(model_name, true) unless model_name == :common_module
       repos = get_all_repos(model_handle)
+
       unless repos.empty?
         repo_names = repos.map { |r| r[:repo_name] }
         RepoManager.set_user_rights_in_repos(repo_user[:username], repo_names, DefaultAccessRights)
@@ -253,7 +254,7 @@ module DTK
     def get_all_repos(mh)
       get_objs(mh, cols: [:repos]).inject({}) do |h, r|
         repo = r[:repo]
-        h[repo[:id]] ||= repo
+        h[repo[:id]] ||= repo if h && repo
         h
       end.values
     end

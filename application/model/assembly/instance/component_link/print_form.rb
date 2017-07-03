@@ -47,7 +47,7 @@ module DTK
 
      private
 
-      Info = Struct.new(:service_type, :base_ref, :dep_ref, :required, :description) 
+      Info = Struct.new(:service_type, :base_ref, :dep_ref, :linked_cmp_id, :required, :description) 
       def self.print_form_hash(object, opts = {})
         info = 
           if object.is_a?(PortLink)
@@ -61,11 +61,12 @@ module DTK
         ret = {
           id: object.id,
           type: info.service_type,
-          base_component: info.base_ref
+          base_component: info.base_ref,
         }
         ret.merge!(dependent_component: info.dep_ref) if info.dep_ref
         ret.merge!(required: info.required) if info.required
         ret.merge!(description: info.description) if info.description
+        ret.merge!(linked_cmp_id: info.linked_cmp_id) if info.linked_cmp_id
         ret
       end
 
@@ -80,12 +81,13 @@ module DTK
           dep_ref  = port_ref(port_link, :input)
         end
         service_type = port_link[:input_port].link_def_name
+        linked_cmp_id = port_link[:output_port][:component_id]
 
-        Info.new(service_type, base_ref, dep_ref, required, description) 
+        Info.new(service_type, base_ref, dep_ref, linked_cmp_id, required, description) 
       end
 
       def self.print_form_hash__from_port(port)
-        dep_ref = required = description = nil
+        dep_ref = required = description = linked_cmp_id = nil
 
         base_ref     = port.display_name_print_form
         service_type = port.link_def_name
@@ -94,7 +96,7 @@ module DTK
           required = port[:required]
           description = port[:description]
         end
-        Info.new(service_type, base_ref, dep_ref, required, description) 
+        Info.new(service_type, base_ref, dep_ref, linked_cmp_id, required, description) 
       end
 
       def self.port_ref(port_link, dir)

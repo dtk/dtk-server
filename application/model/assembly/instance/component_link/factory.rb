@@ -30,7 +30,7 @@ module DTK
 
         def add?
           port_link = nil
-          input_port, output_port, new_port_created = add_or_ret_ports?()
+          input_port, output_port, new_port_created = add_or_ret_ports?()          
           unless new_port_created
             # see if there is an existing port link
             # TODO: may also add filter on component_type
@@ -48,16 +48,19 @@ module DTK
         end
 
         def remove?
-          port_link = @assembly_instance.get_augmented_port_links
+          port_links = @assembly_instance.get_augmented_port_links
           id_handle = nil
-          if port_link.is_a?(Array)
-            port_link.each do |pl|
-              if @input_cmp[:id] == pl[:input_component][:id] #&& @output_cmp[:id] == pl[:output_component][:id]
+          if port_links.is_a?(Array)
+            port_links.each do |pl|
+              if @input_cmp[:id] == pl[:input_component][:id] && @output_cmp[:id] == pl[:output_component][:id]
                 id_handle = pl.id_handle
+                if pl[:input_component][:assembly_id] != pl[:output_component][:assembly_id]
+                  id_handle = pl.id_handle
+                end
               end
             end
           else
-            id_handle = port_link.id_handle
+            id_handle = port_links.id_handle
           end
 
           if id_handle.nil?

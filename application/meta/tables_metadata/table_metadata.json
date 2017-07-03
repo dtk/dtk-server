@@ -457,17 +457,19 @@
   "service_link": {
     "order": [
       "id",
-      "type",
       "base_component",
+      "type",
       "dependent_component",
+      "satisfied_by",
       "required",
       "description"
     ],
     "mapping": {
       "id": "dtk_id",
-      "type": "dtk_type",
       "base_component": "base_component",
+      "type": "dtk_type",
       "dependent_component": "dependent_component",
+      "satisfied_by": "satisfied_by",
       "required": "required",
       "description": "description"
     }

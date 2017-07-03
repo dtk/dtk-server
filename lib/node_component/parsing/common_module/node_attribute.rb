@@ -20,14 +20,6 @@ module DTK
     class Parsing::CommonModule
       class NodeAttribute < self
         ATTRIBUTES_FOR_COMPONENT = ['image', 'size']
-        NODE_GROUP_ATTRIBUTE_MAPPING = {
-          :type        => 'type',
-          :cardinality => 'cardinality'
-        }
-        NODE_GROUP_ATTRIBUTE_NAMES = NODE_GROUP_ATTRIBUTE_MAPPING.values
-
-        TYPE_GROUP_VALUE = 'group'
-
         def self.move_attributes_to_node_component!(node_component, parsed_node_or_component)
           return unless parsed_attributes = parsed_node_or_component.val(:Attributes)
 
@@ -48,24 +40,21 @@ module DTK
           remove_keys!(parsed_node_or_component, :Attributes, attr_val_pairs.keys)
         end
 
+        NODE_GROUP_ATTRIBUTE_INFO = {
+          'type' => { copy: false, override: 'group'},
+          'cardinality' => { copy: true }
+        }
         def self.move_component_node_group_attributes_under_node!(parsed_node, parsed_component)
-          overrides = { NODE_GROUP_ATTRIBUTE_MAPPING[:type] => TYPE_GROUP_VALUE }
-          move_component_attributes_under_node!(parsed_node, parsed_component, NODE_GROUP_ATTRIBUTE_NAMES, overrides: overrides)
+          parsed_attributes = parsed_component.val(:Attributes) || canonical_hash
+
+          NODE_GROUP_ATTRIBUTE_INFO.each_pair do |name, info|
+            value = info[:override] || find_attribute_value?(parsed_attributes, name)
+            set_attribute!(parsed_node, name, value) unless value.nil?
+            remove_keys!(parsed_component, :Attributes, [name]) unless info[:copy]
+          end
         end
         
         private
-
-        # opts can have keys:
-        #  :overrides
-        def self.move_component_attributes_under_node!(parsed_node, parsed_component, attribute_names, opts = {})
-          overrides = opts[:overrides] || {}
-          parsed_attributes = parsed_component.val(:Attributes) || canonical_hash
-          attribute_names.each do |name|
-            value = (overrides.has_key?(name) ? overrides[name] : find_attribute_value?(parsed_attributes, name))
-            set_attribute!(parsed_node, name, value) unless value.nil?
-          end
-          remove_keys!(parsed_component, :Attributes, attribute_names)
-        end
         
         def self.set_attribute!(parsed_node_or_component, attribute_name, value)
           parsed_attributes = parsed_node_or_component.val(:Attributes) || canonical_hash

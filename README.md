@@ -79,13 +79,14 @@ This command will invoke the script from above directly:
 ```
 
 ##### Upgrading the container
-To upgrade Dtk container to a newer version, execute the following commands:
+To upgrade Dtk container to a newer release, simply rerun the bootstrap script:  
+```
+\curl -sSL https://getserver.dtk.io | bash -s /usr/share/docker/dtk
+```
+To get the latest docker image which is built from master branch:  
 
 ```
-docker pull getdtk/dtk-server # pull the latest image
-docker stop dtk # stop the running container
-docker rm dtk # remove the container, container data will be perserved in container root directory
-docker run --name dtk -v /usr/share/docker/dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/dtk-server # start the container
+\curl -sSL https://getserver.dtk.io | bash -s -- -t latest /usr/share/docker/dtk
 ```
 
 ___

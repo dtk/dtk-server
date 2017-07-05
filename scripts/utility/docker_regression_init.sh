@@ -24,8 +24,8 @@ fi
 
 DTK_IMAGE=${DTK_IMAGE-getdtk/dtk-server}
 ARBITER_IMAGE=${ARBITER_IMAGE-getdtk/dtk-arbiter}
-REPO_HOST=repoman1.internal.r8network.com
-REPO_PORT=443
+REPO_HOST=dtknet.servicecatalog.it
+REPO_PORT=7001
 MCO_PORT=6163
 SSH_PORT=2222
 HTTP_PORT=8080

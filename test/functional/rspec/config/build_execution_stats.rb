@@ -15,9 +15,8 @@ ActiveRecord::Base.establish_connection(dbconfig['dbconnection'])
 build_id = ARGV[0]
 file_name = ARGV[1]
 retrieve_limit = ARGV[2]
-test_suite_name = ARGV[3]
-test_reporter_url = ARGV[4]
-suite_name = dbconfig['options']['suite']
+test_reporter_url = ARGV[3]
+test_suite_name = dbconfig['options']['suite']
 
 if retrieve_limit == nil
   @query = "select tr.* from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{suite_name}' order by tr.created_at desc limit 1"

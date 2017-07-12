@@ -34,12 +34,13 @@ module DTK; class ConfigAgent
         service_instance_name = assembly_instance.display_name
         dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
-        
+        breakpoint  = task_info[:breakpoint]
+
         execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, component)
-        
+
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
-        
+
         msg = {
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
           provider_type: dynamic_provider.type,
@@ -50,7 +51,8 @@ module DTK; class ConfigAgent
             instance: instance_attributes,
           },
           modules: get_base_and_dependent_modules(component, assembly_instance),
-          execution_environment: execution_environment
+          execution_environment: execution_environment,
+          breakpoint: breakpoint
         }          
         msg
       end

@@ -55,7 +55,11 @@ end
 @formatted_rate = sprintf('%.2f', @rate.to_f)
 @formatted_duration = sprintf('%.2f', @duration.to_f)
 
-File.open(file_name, 'w') { |f| f.write("#{report}Build name: #{@build}\nDuration: #{@formatted_duration}s\nSuccess rate: #{@formatted_rate}%\nTest steps count: #{@test_steps_count}\nTest steps passed: #{@test_steps_pass_count}\nTest steps failed: #{@test_steps_failed_count}\nTest reporter page: #{test_reporter_url}/test-runs/#{@test_run_id}/test-cases\n") }
+if test_reporter_url == nil
+  File.open(file_name, 'w') { |f| f.write("#{report}Build name: #{@build}\nDuration: #{@formatted_duration}s\nSuccess rate: #{@formatted_rate}%\nTest steps count: #{@test_steps_count}\nTest steps passed: #{@test_steps_pass_count}\nTest steps failed: #{@test_steps_failed_count}\n") }
+else
+  File.open(file_name, 'w') { |f| f.write("#{report}Build name: #{@build}\nDuration: #{@formatted_duration}s\nSuccess rate: #{@formatted_rate}%\nTest steps count: #{@test_steps_count}\nTest steps passed: #{@test_steps_pass_count}\nTest steps failed: #{@test_steps_failed_count}\nTest reporter page: #{test_reporter_url}/test-runs/#{@test_run_id}/test-cases\n") }
+end
 
 sql = "select count(tc.test_group) from test_suites ts, test_runs tr, test_cases tc where ts.id=tr.test_suites_id and tr.id=tc.test_runs_id and tr.build='#{build_id}' and ts.suite='#{test_suite_name}' group by tc.test_group"
 number_of_scripts = TestRun.find_by_sql(sql)

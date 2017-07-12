@@ -19,9 +19,9 @@ test_reporter_url = ARGV[3]
 test_suite_name = dbconfig['options']['suite']
 
 if retrieve_limit == nil
-  @query = "select tr.* from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{suite_name}' order by tr.created_at desc limit 1"
+  @query = "select tr.* from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{test_suite_name}' order by tr.created_at desc limit 1"
 elsif retrieve_limit == 'all'
-  @query = "select tr.* from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{suite_name}' order by tr.created_at desc"
+  @query = "select tr.* from test_runs tr, test_suites ts where ts.id = tr.test_suites_id and tr.build LIKE '#{build_id}' and ts.suite LIKE '#{test_suite_name}' order by tr.created_at desc"
 else 
   raise Exception, 'Invalid parameter value.'
 end

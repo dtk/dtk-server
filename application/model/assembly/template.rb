@@ -44,7 +44,7 @@ module DTK; class Assembly
        when false
         tags.delete('target') if tags.include?('target')
        else
-        fail ErrorUsage.new("Invalid value #{value} for target key. Valid values are: true, false")
+        fail ErrorUsage.new("Invalid value #{value} for context key. Valid values are: true, false")
        end
 
       Model.update_from_hash_assignments(id_handle, tags: tags)

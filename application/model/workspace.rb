@@ -76,7 +76,7 @@ module DTK
       current_target = get_target
       if current_target && current_target.id == target.id
         if mode == :direct
-          fail ErrorUsage::Warning.new("Target is already set to #{target.get_field?(:display_name)}")
+          fail ErrorUsage::Warning.new("Context is already set to #{target.get_field?(:display_name)}")
         end
         return
       end

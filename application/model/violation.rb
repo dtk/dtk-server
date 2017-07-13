@@ -57,7 +57,7 @@ module DTK
     def self.vt_model_name(vtttype)
       ret = VTModelName[vtttype]
       return ret if ret
-      fail Error.new("Unexpected violaition target type #{vtttype}")
+      fail Error.new("Unexpected violaition context type #{vtttype}")
     end
     VTModelName = {
       'target_node_id_handle' => :node

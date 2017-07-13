@@ -59,7 +59,7 @@ module DTK; class NodeBindings::NodeTarget
           # when reach here the values wil have been mapped to canonical values
           if legal_values = (Fields[key] || {})[:canonical_values]
             unless legal_values.include?(value)
-              Log.info("Illegal value for node target key #{key}=#{value.inspect}; legal vaules are #{legal_values.inspect}")
+              Log.info("Illegal value for node context key #{key}=#{value.inspect}; legal vaules are #{legal_values.inspect}")
               true
             end
           end

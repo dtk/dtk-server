@@ -41,7 +41,7 @@ module XYZ
 
     def hash_content_for_single_target(target_id_handle, opts = {})
       target_id_info = get_row_from_id_handle(target_id_handle)
-      fail Error.new("Target given (#{target_id_handle}) does not exist") unless target_id_info
+      fail Error.new("Context given (#{target_id_handle}) does not exist") unless target_id_info
       prefix =
         if opts[:prefix_is_top] then '/'
         elsif target_id_info[:uri] =~ %r{(^/.+?/.+?)/.+$} then Regexp.last_match(1)

@@ -38,7 +38,7 @@ module Ramaze::Helper
       target = target_service.target
       unless Service::Target.create_from_target(target).is_converged?
         instance = opts[:is_workspace] ? 'create workspace' : 'stage service instance'
-        fail ErrorUsage.new "You are trying to #{instance} in target '#{target.get_field?(:display_name)}' which is not converged. Please go to target service instance, converge it and then retry this command"
+        fail ErrorUsage.new "You are trying to #{instance} in context '#{target.get_field?(:display_name)}' which is not converged. Please go to context service instance, converge it and then retry this command"
       end
     end
 

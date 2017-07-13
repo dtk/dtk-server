@@ -249,7 +249,7 @@ module DTK; class  Assembly
 
             unless dep_assemblies.empty?
               dep_assembly_names = dep_assemblies.map{ |a| a.get_field?(:display_name) }.join(', ')
-              fail ErrorUsage.new("The target service '#{assembly.get_field?(:display_name)}' cannot be deleted because the service instance(s) (#{dep_assembly_names}) are dependent on it")
+              fail ErrorUsage.new("The context service '#{assembly.get_field?(:display_name)}' cannot be deleted because the service instance(s) (#{dep_assembly_names}) are dependent on it")
             end
             if deleted_target_is_default?(target)
               # make builtin target the default

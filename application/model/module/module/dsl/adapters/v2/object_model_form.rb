@@ -404,9 +404,9 @@ module DTK; class ModuleDSL; class V2
         end
         loc ||= DefaultLinkType
         case loc
-         when 'local' then 'internal'
-         when 'remote' then 'external'
-         else fail ParsingError.new('Ill-formed dependency location type (?1)', loc)
+        when 'local' then 'internal'
+        when 'remote' then 'external'
+        else fail ParsingError::Location.new(loc)
         end
       end
 

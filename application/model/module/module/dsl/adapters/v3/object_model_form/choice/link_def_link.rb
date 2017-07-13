@@ -26,20 +26,15 @@ module DTK; class ModuleDSL; class V3
 
       def initialize(raw, dep_cmp_name, base_cmp)
         super(raw, dep_cmp_name, base_cmp)
-        @dependency_name = nil
+        @dependency_name         = nil
         @explicit_dependency_ref = false
-        @required = true
+        @required                = true
       end
 
       def convert(link_def_link, opts = {})
-        in_attr_mappings = link_def_link['attribute_mappings']
+        in_attr_mappings = link_def_link['attribute_mappings'] || []
         constraints = link_def_link['constraints']
         preferences = link_def_link['preferences']
-
-        if in_attr_mappings.nil? && constraints.nil? && preferences.nil?
-          err_msg_fragment = 'is missing the attribute mappings section'
-          raise_error(link_def_link, err_msg_fragment)
-        end
 
         if in_attr_mappings && !in_attr_mappings.is_a?(Array)
           err_msg_fragment = 'is ill-formed'
@@ -48,8 +43,8 @@ module DTK; class ModuleDSL; class V3
 
         unless type = opts[:link_type] || link_def_link_type(link_def_link)
           opts_collect_constants = {}
-          ret = [dup().convert(link_def_link, opts_collect_constants.merge!(link_type: :external)).first,
-                 dup().convert(link_def_link, opts_collect_constants.merge!(link_type: :internal)).first]
+          ret = [dup.convert(link_def_link, opts_collect_constants.merge!(link_type: :external)).first,
+                 dup.convert(link_def_link, opts_collect_constants.merge!(link_type: :internal)).first]
           if constants = opts_collect_constants[:constants]
             opts.merge!(constants: constants)
           end
@@ -63,7 +58,7 @@ module DTK; class ModuleDSL; class V3
         end
 
         if in_attr_mappings
-          ret_info['attribute_mappings'] = in_attr_mappings.map { |in_am| convert_attribute_mapping(in_am, base_cmp(), dep_cmp(), opts) }
+          ret_info['attribute_mappings'] = in_attr_mappings.map { |in_am| convert_attribute_mapping(in_am, base_cmp, dep_cmp, opts) }
         end
 
         if constraints
@@ -74,7 +69,7 @@ module DTK; class ModuleDSL; class V3
           ret_info['preferences'] = preferences
         end
 
-        set_single_possible_link!(dep_cmp(), ret_info)
+        set_single_possible_link!(dep_cmp, ret_info)
 
         if @dependency_name = link_def_link['dependency_name']
           @explicit_dependency_ref = true
@@ -89,15 +84,21 @@ module DTK; class ModuleDSL; class V3
 
       def raise_error(link_def_link, err_msg_fragment)
         err_msg = "The following link defs section on component '?1' #{err_msg_fragment}: ?2"
-        fail ParsingError.new(err_msg, base_cmp_print_form(), dep_cmp_print_form() => link_def_link)
+        fail ParsingError.new(err_msg, base_cmp_print_form, dep_cmp_print_form => link_def_link)
       end
 
       def link_def_link_type(link_info)
-        if loc = link_info['location']
+        if same_node = link_info['same_node']
+          case same_node.to_s
+          when 'true' then 'internal'
+          when 'false' then 'external'
+          else fail ParsingError.new("The value '?1' is an illegal value for the 'same_node' key. Legal values are: true or false.", same_node)
+          end
+        elsif loc = link_info['location']
           case loc
           when 'local' then 'internal'
           when 'remote' then 'external'
-          else fail ParsingError.new('Ill-formed dependency location type (?1)', loc)
+          else fail ParsingError::Location.new(loc)
           end
         end
       end

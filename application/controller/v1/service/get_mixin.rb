@@ -106,6 +106,8 @@ module DTK
       end
 
       def component_links
+        require 'ruby-debug'
+        debugger
         opts = Opts.new(detail_level: nil)  
         opts.merge!(detail_to_include: [:component_dependencies])
         opts.merge!(remote_links: true)

@@ -18,7 +18,10 @@
 module DTK
   class ModuleDSL
     class ParsingError
-      class LinkDef < self
+      class Location < self
+        def initialize(location)
+          super("Ill-formed location type '?1'. Legal values are: 'local' or 'remote'.", location)
+        end
       end
     end
   end

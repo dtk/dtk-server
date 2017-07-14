@@ -111,7 +111,7 @@
                                     convert: true,
                                     join_type: :left_outer,
                                     join_cond: { id: :link_def__component_component_id },
-                                    cols: [:id, :display_name, :component_type, :node_node_id, :implementation_id, :extended_base]
+                                    cols: [:id, :display_name, :component_type, :node_node_id, :implementation_id, :extended_base, :assembly_id]
                                   },
                                   {
                                     model_name: :link_def_link,

@@ -17,12 +17,13 @@
 #
 module DTK
   class PortLink < Model
+    require_relative('port_link/component_info')
     def self.common_columns
       [:id, :group_id, :input_id, :output_id, :assembly_id, :temporal_order]
     end
 
     def self.check_valid_id(model_handle, id, opts = {})
-      if opts.empty?()
+      if opts.empty?
         check_valid_id_default(model_handle, id)
       elsif Aux.has_just_these_keys?(opts, [:assembly_idh])
         sp_hash = {
@@ -31,9 +32,9 @@ module DTK
         }
         rows = get_objs(model_handle, sp_hash)
         unless port_link = rows.first
-          fail ErrorIdInvalid.new(id, pp_object_type())
+          fail ErrorIdInvalid.new(id, pp_object_type)
         end
-        unless port_link[:assembly_id] == opts[:assembly_idh].get_id()
+        unless port_link[:assembly_id] == opts[:assembly_idh].get_id
           fail ErrorUsage.new("Port with id (#{id}) does not belong to assembly")
         end
         id
@@ -74,7 +75,7 @@ module DTK
           update(temporal_order: temporal_order)
         end
       end
-      opts_create = Aux.hash_subset(opts, [:filter]).merge(port_link_idh: id_handle())
+      opts_create = Aux.hash_subset(opts, [:filter]).merge(port_link_idh: id_handle)
       AttributeLink.create_from_link_defs__clone_if_needed(parent_idh, link_def_context, opts_create)
       self
     end
@@ -103,7 +104,7 @@ module DTK
         {
           input_id: link[:input_id],
           output_id: link[:output_id],
-          datacenter_datacenter_id: target_idh.get_id(),
+          datacenter_datacenter_id: target_idh.get_id,
           ref: ref
         }.merge(override_attrs)
       end
@@ -117,59 +118,13 @@ module DTK
       self.class.get_link_def_context?(parent_idh, self)
     end
     def self.get_link_def_context?(parent_idh, port_link_hash)
-      ret = nil
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :component_type, :direction, :link_type, :link_def_info, :node_node_id],
-        filter: [:oneof, :id, [port_link_hash[:input_id], port_link_hash[:output_id]]]
-      }
-      ports_with_link_def_info = get_objs(parent_idh.createMH(:port), sp_hash)
-      local_port_cmp_rows = ports_with_link_def_info.select { |r| (r[:link_def] || {})[:local_or_remote] == 'local' }
-      return ret if local_port_cmp_rows.empty?
-      local_port_cmp_info = local_port_cmp_rows.first #all elements wil agree on the parts aside from link_def_link
-
-      remote_port_cmp_rows = ports_with_link_def_info.select { |r| r[:id] != local_port_cmp_info[:id] }
-      if remote_port_cmp_rows.empty?
-        fail Error.new('Unexpected result that a remote port cannot be found')
+      unless component_info = ComponentInfo.get?(parent_idh, port_link_hash)
+        return nil
       end
-      remote_port_cmp_info = remote_port_cmp_rows.first
-
-      return ret unless local_port_cmp_info[:link_type] == remote_port_cmp_info[:link_type]
-      # find the matching link_def_link
-      remote_cmp_type = remote_port_cmp_info[:component_type]
-
-      # look for matching link
-      components_coreside = (local_port_cmp_info[:node_node_id] == remote_port_cmp_info[:node_node_id])
-      match = local_port_cmp_rows.find do |r|
-        possible_link = r[:link_def_link] || {}
-        if possible_link[:remote_component_type] == remote_cmp_type
-          if components_coreside
-            possible_link[:type] == 'internal'
-          else
-            possible_link[:type] == 'external'
-          end
-        end
+      unless link_def_link = component_info.matching_link_def_link?
+        return nil 
       end
-      return ret unless match
-
-      # get remote component
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :node_node_id, :component_type, :implementation_id, :extended_base],
-        filter: [:and, Component::Instance.filter(remote_port_cmp_info.component_type, remote_port_cmp_info.title?()),
-                 [:eq, :node_node_id, remote_port_cmp_info[:node_node_id]]
-                   ]
-      }
-      local_cmp = local_port_cmp_info[:component]
-      rows = Model.get_objs(local_cmp.model_handle(), sp_hash)
-      if rows.size == 1
-        remote_cmp = rows.first
-      elsif rows.empty?
-        fail Error.new('Unexpected that no remote component found')
-      else
-        fail Error.new('Unexpected that getting remote port link component does not return unique element')
-      end
-      link_def_link = match[:link_def_link].merge!(local_component_type: local_cmp[:component_type])
-
-      LinkDef::Context.create(link_def_link, [{ component: local_cmp }, { component: remote_cmp }])
+      LinkDef::Context.create(link_def_link, [{ component: component_info.local_component }, { component: component_info.remote_component }])
     end
   end
 

@@ -39,7 +39,12 @@ module DTK
             matching_cmps = dependency_candidates.matching_components(link_def, base_aug_component)
             case matching_cmps.size
             when 1
-              assembly_instance.add_component_link(base_aug_component, matching_cmps.first)
+              begin
+                assembly_instance.add_component_link(base_aug_component, matching_cmps.first)
+              rescue => e
+                Log.error_pp(["TODO: Trapped error after auto link; auto link should be refined to avoid this", e])
+                nil
+              end
             when 0
               # no matches
             else

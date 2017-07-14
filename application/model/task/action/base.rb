@@ -139,10 +139,10 @@ module DTK; class Task
       end
       
       # generic; can be overwritten
-      def self.node_status(object, _opts)
+      def self.node_status(object, opts = {})
         ret = PrettyPrintHash.new
         node = object[:node] || {}
-        if name = node_status__name(node)
+        if name = node_status__name(node, opts)
           ret.merge!(name: name)
         end
         if node.respond_to?(:is_node_group?) and node.is_node_group?
@@ -153,8 +153,9 @@ module DTK; class Task
         end
         ret
       end
-      
-      def self.node_status__name(node)
+
+      # generic; can be overwritten      
+      def self.node_status__name(node, _opts = {})
         node && Node.assembly_node_print_form?(node)
       end
     end

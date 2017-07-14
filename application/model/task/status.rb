@@ -18,18 +18,18 @@
 module DTK
   class Task
     class Status
-      r8_nested_require('status', 'type')
-      r8_nested_require('status', 'hash_output')
-      r8_nested_require('status', 'table_form')
-      r8_nested_require('status', 'list_form')
-      r8_nested_require('status', 'stream_form')
+      require_relative('status/type')
+      require_relative('status/hash_output')
+      require_relative('status/table_form')
+      require_relative('status/list_form')
+      require_relative('status/stream_form')
 
       private
 
-      def self.get_status_aux(ref_obj_idh,ref_obj_type,filter,opts={})
+      def self.get_status_aux(ref_obj_idh, ref_obj_type, filter, opts={})
         top_level_task = get_top_level_most_recent_task(ref_obj_idh,ref_obj_type,filter)
-        task_structure = Hierarchical.get(top_level_task.id_handle(), reify: true)
-        status_opts = Hash.new.merge(no_components: false, no_attributes: true)
+        task_structure = Hierarchical.get(top_level_task.id_handle, reify: true)
+        status_opts = { no_components: false, no_attributes: true, ref_obj_idh: ref_obj_idh }
         status_opts.merge!(summarize_node_groups: true) if (opts[:detail_level]||{})[:summarize_node_groups]
         case opts[:format]
           when :table
@@ -44,7 +44,7 @@ module DTK
       def self.get_top_level_most_recent_task(ref_obj_idh, ref_obj_type, filter)
         task_mh = ref_obj_idh.createMH(:task)
         unless task = Task.get_top_level_most_recent_task(task_mh, filter)
-          task_obj = ref_obj_idh.create_object().update_object!(:display_name)
+          task_obj = ref_obj_idh.create_object.update_object!(:display_name)
           fail ErrorUsage.new("No tasks found for #{ref_obj_type} (#{task_obj[:display_name]})")
         end
         task
@@ -52,13 +52,13 @@ module DTK
 
       class Assembly < self
         def self.get_status(assembly_idh, opts = {})
-          filter = [:eq, :assembly_id, assembly_idh.get_id()]
+          filter = [:eq, :assembly_id, assembly_idh.get_id]
           get_status_aux(assembly_idh, :assembly, filter, opts)
         end
 
         module StreamForm
           def self.get_status(assembly_idh, opts = {})
-            filter = [:eq, :assembly_id, assembly_idh.get_id()]
+            filter = [:eq, :assembly_id, assembly_idh.get_id]
             top_level_task = Status.get_top_level_most_recent_task(assembly_idh, :service_instance, filter)
             Status::StreamForm.status(top_level_task, opts)
           end
@@ -67,21 +67,21 @@ module DTK
 
       class Node < self
         def self.get_status(node_idh, opts = {})
-          filter = [:eq, :node_id, node_idh.get_id()]
+          filter = [:eq, :node_id, node_idh.get_id]
           get_status_aux(node_idh, :node, filter, opts)
         end
       end
 
       class NodeGroup < self
         def self.get_status(node_group_idh, opts = {})
-          filter = [:eq, :node_id, node_group_idh.get_id()]
+          filter = [:eq, :node_id, node_group_idh.get_id]
           get_status_aux(node_group_idh, :node_group, filter, opts)
         end
       end
 
       class Target < self
         def self.get_status(target_idh, opts = {})
-          filter = [:eq, :target_id, target_idh.get_id()]
+          filter = [:eq, :target_id, target_idh.get_id]
           get_status_aux(target_idh, :target, filter, opts)
         end
       end
@@ -90,7 +90,7 @@ module DTK
     module StatusMixin
       # TODO: move to own file
       def status_hash_form(opts, level = 1)
-        set_and_return_types!()
+        set_and_return_types!
         ret = PrettyPrintHash.new
         if level == 1
           ret.add(self, :type, :id, :status, :commit_message?)
@@ -116,7 +116,7 @@ module DTK
             ret.merge!(Action::CreateNode.status(ea, opts))
           end
         end
-        errors = get_errors()
+        errors = get_errors
         ret[:errors] = errors unless errors.empty?
         ret
       end

@@ -159,7 +159,6 @@ module DTK
 
       def task_status
         assembly_instance = assembly_instance()
-
         response =
           if request_params(:form) == 'stream_form'
             element_detail = request_params(:element_detail)||{}

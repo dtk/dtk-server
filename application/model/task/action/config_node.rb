@@ -330,6 +330,28 @@ module DTK; class Task
         end
       end
 
+      private
+
+      REMOTE_SERVICE_DELIMETER = '/'
+      def self.node_status__name(node, opts = {})
+        if ret = (node && Node.assembly_node_print_form?(node))
+          if node_assembly_instance = assembly_instance_if_component_is_remote?(node, opts)
+            ret = "#{node_assembly_instance.display_name}#{REMOTE_SERVICE_DELIMETER}#{ret}"
+          end
+          ret
+        end
+      end
+
+      def self.assembly_instance_if_component_is_remote?(node, opts = {})
+        if (opts[:ref_obj_idh]  || {})[:model_name] == :assembly_instance 
+          base_assembly_instance  = opts[:ref_obj_idh].create_object
+          if node_assembly_instance_id = node.get_field?(:assembly_id)
+            if base_assembly_instance.id != node_assembly_instance_id
+              node.model_handle(:assembly_instance).createIDH(id: node_assembly_instance_id).create_object
+            end
+          end
+        end
+      end
 
     end
   end

@@ -17,9 +17,8 @@
 #
 module DTK; class Task; class Status
   module TableForm
-    DURATION_ACCURACY = 1
-
-    r8_nested_require('table_form', 'node_group_summary')
+    DURATION_ACCURACY = 1 
+    require_relative('table_form/node_group_summary')
     module Mixin
       def status_table_form(opts)
         TableForm.status_table_form_top(self, opts)

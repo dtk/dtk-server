@@ -136,8 +136,30 @@ module DTK; class Component
       end
     end
 
-    # these are port links that are connected on either end to the components in component_idhs
-    def self.get_port_links(component_idhs)
+    # This makes update to component instances that refer to components in one service instance that link to components in other services
+    # and are ones that should run on teh node of the these other components
+    def self.update_components_on_remote_nodes!(component_instances, assembly_instance)
+      return if component_instances.empty? 
+      port_links = get_port_links(component_instances.map(&:id_handle), input: true)
+      unless port_links.empty?
+        port_links.map{ |port_link| PortLink::ComponentInfo.get?(assembly_instance.id_handle, port_link) }.compact.each do |component_info|
+          if component_info.component_on_remote_node?
+            component_id       = component_info.local_endpoint.component.id
+            component_instance = component_instances.find { |ci| ci.id == component_id }
+            remote_node        = component_info.remote_endpoint.node.update_obj!(:display_name, :group_id, :external_ref, :ordered_component_ids, :type)
+
+            component_instance[:node] = remote_node
+          end
+        end
+      end
+    end
+
+    # If no options given this method returns  port links that are connected on either end to the components in component_idhs
+    # opts can have keys:
+    #   :input (Boolean)
+    #   :output (Boolean)
+    # Both :input and :output cannot be true
+    def self.get_port_links(component_idhs, opts = {})
       ret = []
       return ret if component_idhs.empty?
       sp_hash = {
@@ -145,12 +167,21 @@ module DTK; class Component
         filter: [:oneof, :component_id, component_idhs.map(&:get_id)]
       }
       port_mh = component_idhs.first.createMH(:port)
-      port_ids = Model.get_objs(port_mh, sp_hash).map { |r| r[:id] }
+      port_ids = Model.get_objs(port_mh, sp_hash).map(&:id)
       return ret if port_ids.empty?
+
+      filter =
+        if opts[:input]
+          [:oneof, :input_id, port_ids]
+        elsif opts[:output]
+          [:oneof, :output_id, port_ids]
+        else
+          [:or, [:oneof, :input_id, port_ids], [:oneof, :output_id, port_ids]]
+        end
 
       sp_hash = {
         cols: PortLink.common_columns(),
-        filter: [:or, [:oneof, :input_id, port_ids], [:oneof, :output_id, port_ids]]
+        filter: filter
       }
       port_link_mh = component_idhs.first.createMH(:port_link)
       Model.get_objs(port_link_mh, sp_hash)

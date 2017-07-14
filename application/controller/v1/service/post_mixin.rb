@@ -105,14 +105,11 @@ module DTK
           start_nodes: true,
           ret_nodes_to_start: []
         }
-
-        require 'ruby-debug'
-        debugger
         unless task = Task.create_from_assembly_instance?(assembly_instance, opts)
           fail ErrorUsage, "There are no steps in the action to execute"
         end
         task.save!
-        fail 'here'
+
         # TODO: DTK-2915; not sure if we need any more; test this when converge from stopped state
         # still have to use start_instances until we implement this to start from workflow task
         unless (opts[:ret_nodes_to_start]||[]).empty?

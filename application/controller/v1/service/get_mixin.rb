@@ -106,12 +106,10 @@ module DTK
       end
 
       def component_links
-        require 'ruby-debug'
-        debugger
         opts = Opts.new(detail_level: nil)  
         opts.merge!(detail_to_include: [:component_dependencies])
         opts.merge!(remote_links: true)
-        #TODO Almin: Refactor this before merging to master
+        #TODO Below shoud be cleaned up and moved out of controller
         dep_component = assembly_instance.info_about(:components, opts)
         cmp_links = assembly_instance.list_component_links
 

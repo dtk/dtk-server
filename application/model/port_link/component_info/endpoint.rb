@@ -27,12 +27,12 @@ module DTK
 
       def component
         # if multiple ports they will have same node_component
-        self.aug_ports.first[:component] || fail("Unexpected that aug_ports.first[:component] is nil")
+        self.canonical_aug_port[:component] || fail("Unexpected that canonical_aug_port[:component] is nil")
       end
       
       def node_id
         # if multiple ports they will have same node_node_id
-        self.aug_ports.first[:node_node_id] || fail("Unexpected that aug_ports.first[:node_node_id] is nil")
+        self.canonical_aug_port[:node_node_id] || fail("Unexpected that canonical_aug_port[:node_node_id] is nil")
       end
 
       def is_assembly_wide_node?
@@ -45,13 +45,26 @@ module DTK
 
       def link_type
         # if multiple ports they will have same link_type
-        self.aug_ports.first[:link_type] || fail("Unexpected that aug_ports.first[:link_type] is nil")
+        self.canonical_aug_port[:link_type] || fail("Unexpected that canonical_aug_port[:link_type] is nil")
       end
 
-      protected
+      def link_def
+        # if multiple ports they will have same link_def
+        self.canonical_aug_port[:link_def] || fail("Unexpected that canonical_aug_port[:link_def] is nil")
+      end
 
       def node
-        @node ||= self.component.model_handle(:node).createIDH(id: self.node_id).create_object
+        @node ||= model_handle(:node).createIDH(id: self.node_id).create_object
+      end
+
+      def canonical_aug_port
+        @canonical_aug_port ||= self.aug_ports.first ||  fail("Unexpected that self.aug_ports.first is nil")
+      end
+
+      private
+
+      def model_handle(model_name)
+        self.aug_ports.first.model_handle(model_name)
       end
 
     end

@@ -26,6 +26,8 @@ module DTK
       end
       private :initialize
 
+      attr_reader :local_endpoint, :remote_endpoint
+
       def self.get?(parent_idh, port_link_hash)
         local_endpoint, remote_endpoint = get_endpoints?(parent_idh, port_link_hash)
         if local_endpoint and remote_endpoint
@@ -33,15 +35,6 @@ module DTK
         end
       end
       
-      def local_component 
-        @local_component ||= self.local_endpoint.component
-      end
-
-      def remote_component 
-        # remote_component treated differntly than local_component because we need to get more info about it
-        @remote_component ||= get_remote_component
-      end
-
       def matching_link_def_link?
         return nil unless self.local_endpoint.link_type ==  self.remote_endpoint.link_type
 
@@ -50,7 +43,7 @@ module DTK
           if possible_link[:remote_component_type] == remote_component_type
             case possible_link[:type]
             when 'internal'
-              self.components_on_same_node? or self.same_node_cross_service_instance?
+              self.components_on_same_node? or self.component_on_remote_node?
             when 'external'
               ! self.components_on_same_node?
             else 
@@ -61,10 +54,29 @@ module DTK
         end
         match && match[:link_def_link].merge!(local_component_type: self.local_component_type)
       end
-      
+
+      def local_component 
+        @local_component ||= self.local_endpoint.component
+      end
+
+      def remote_component 
+        # remote_component treated differently than local_component because we need to get more info about it
+        @remote_component ||= get_remote_component
+      end
+
+      def component_on_remote_node?
+        if @component_on_remote_node.nil?
+          ret = false
+          if self.local_component.get_field?(:assembly_id) != self.remote_component.get_field?(:assembly_id)
+            ret = true if self.just_internal_link? and self.local_endpoint.is_assembly_wide_node? and ! self.remote_endpoint.is_assembly_wide_node?
+          end
+          @component_on_remote_node = ret
+        else
+          @component_on_remote_node
+        end
+      end
+
       protected
-      
-      attr_reader :local_endpoint, :remote_endpoint
       
       def local_component_type
         @local_component_type ||= self.local_component[:component_type]
@@ -82,27 +94,14 @@ module DTK
         end
       end
 
-      def same_node_cross_service_instance?
-        if @same_node_cross_service_instance.nil?
-          ret = false
-          if self.local_component.get_field?(:assembly_id) != self.remote_component.get_field?(:assembly_id)
-            ret = true if self.local_endpoint.is_assembly_wide_node?
-          end
-          @same_node_cross_service_instance = ret
-        else
-          @same_node_cross_service_instance
-        end
+      def just_internal_link?
+        self.link_def[:has_internal_link] and ! self.link_def[:has_external_link] 
+      end      
+      
+      def link_def
+        @link_def ||= self.local_endpoint.link_def
       end
-
-      def components_on_same_node?
-        if @components_on_same_node.nil?
-          @components_on_same_node ||= (self.local_endpoint.node_id == self.remote_endpoint.node_id)
-        else
-          @components_on_same_node
-        end
-      end
-
-
+      
       private
       
       # returns [local_endpoint, remote_endpoint] or nil
@@ -134,8 +133,7 @@ module DTK
         }
         Model.get_obj(self.local_component.model_handle, sp_hash)
       end
-      
+
     end
-    
   end
 end

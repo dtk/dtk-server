@@ -53,7 +53,14 @@ module DTK
                 nested_module_name           = aug_cmp_template.component_module.module_name
 
                 if matching_module_branch = existing_aug_module_branches[nested_module_name]
-                  CommonDSL::ComponentModuleRepoSync.pull_from_component_modules(service_instance.get_service_instance_branch, [matching_module_branch])
+                  matching_module_branches = [matching_module_branch]
+                  matching_module_branch.get_module_refs.each do |module_ref|
+                    if module_ref_branch = existing_aug_module_branches[module_ref[:display_name]]
+                      matching_module_branches << module_ref_branch
+                    end
+                  end
+
+                  CommonDSL::ComponentModuleRepoSync.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
                 end
               end
             end

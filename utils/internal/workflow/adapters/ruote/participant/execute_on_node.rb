@@ -48,6 +48,7 @@ module DTK
             user_object  = CurrentSession.new.user_object()
             callbacks = {
               on_msg_received: proc do |msg|
+                debug = false # TODO: Move this
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
@@ -55,10 +56,14 @@ module DTK
                   if has_action_results?(task, result)
                     task.add_action_results(result, action)
                   end
-                  
-                  process_action_result!(workitem, action, result, task, task_id, task_end)
+
+                  if msg[:body][:data].first
+                    debug = true
+                  end
+
+                  process_action_result!(workitem, action, result, task, task_id, task_end, debug)
                   delete_task_info(workitem)
-                  reply_to_engine(workitem)
+                  reply_to_engine(workitem) unless debug
                 end
               end,
               on_timeout: proc do
@@ -138,7 +143,7 @@ module DTK
           Model.get_objs(task.model_handle, sp_hash)
         end
 
-        def process_action_result!(workitem, action, result, task, task_id, task_end)
+        def process_action_result!(workitem, action, result, task, task_id, task_end, debug)
           if errors_in_result = errors_in_result?(result, action)
             event, errors = task.add_event_and_errors(:complete_failed, :config_agent, errors_in_result)
             if event
@@ -146,9 +151,13 @@ module DTK
             end
             cancel_upstream_subtasks(workitem)
             set_result_failed(workitem, result, task)
-          else
+          else 
             event = task.add_event(:complete_succeeded, result)
             log_participant.end(:complete_succeeded, task_id: task_id)
+            if debug
+              set_result_debugging(workitem, result, task, action) 
+              task_end = false
+            end
             set_result_succeeded(workitem, result, task, action) if task_end
             action.get_and_propagate_dynamic_attributes(result)
           end

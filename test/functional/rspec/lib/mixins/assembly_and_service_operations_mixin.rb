@@ -205,7 +205,7 @@ module AssemblyAndServiceOperationsMixin
     service_deleted
   end
 
-  def stage_service_instance(service_instance_name, target = nil)
+  def stage_service_instance(service_instance_name, context = nil)
     #Get list of assemblies, extract selected assembly, stage service and return its id
     puts "Stage service:", "--------------"
     service_id = nil
@@ -221,13 +221,13 @@ module AssemblyAndServiceOperationsMixin
       assembly_id = test_template['id']
       puts "Assembly id: #{assembly_id}"
 
-      if @is_target
-        stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :is_target => @is_target}) 
+      if @is_context
+        stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :is_context => @is_context}) 
       else
-        unless target
+        unless context
           stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name})
         else
-          stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :target_id=>target})
+          stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :service_module_name => service_instance_name, :context_id=>context})
         end
       end
 
@@ -248,7 +248,7 @@ module AssemblyAndServiceOperationsMixin
   end
 
   # Commands used from old dtk client
-  def stage_service(target = nil)
+  def stage_service(context = nil)
     #Get list of assemblies, extract selected assembly, stage service and return its id
     puts "Stage service:", "--------------"
     service_id = nil
@@ -264,13 +264,13 @@ module AssemblyAndServiceOperationsMixin
       assembly_id = test_template['id']
       puts "Assembly id: #{assembly_id}"
 
-      if @is_target
-        stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :is_target => @is_target})  
+      if @is_context
+        stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :is_context => @is_context})  
       else
-        unless target
+        unless context
           stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name})
         else
-          stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :target_id=>target})
+          stage_service_response = send_request('/rest/assembly/stage', {:assembly_id=>assembly_id, :name=>@service_name, :context_id=>context})
         end
       end
 
@@ -298,16 +298,16 @@ module AssemblyAndServiceOperationsMixin
    return components_list
  end
 
- def get_default_target_service
-   puts "Get default target service instance id:", "---------------------------------------"
+ def get_default_context_service
+   puts "Get default context service instance id:", "---------------------------------------"
    service_id = nil
-   default_target_service_response = send_request('/rest/assembly/get_default_target', {})
+   default_context_service_response = send_request('/rest/assembly/get_default_context', {})
 
-   if default_target_service_response['status'] == 'ok'
-     puts "Default target service instance succesfully found."
-     service_id = default_target_service_response['data']['id']
+   if default_context_service_response['status'] == 'ok'
+     puts "Default context service instance succesfully found."
+     service_id = default_context_service_response['data']['id']
     else
-      puts "Default target service was not succesfully found."
+      puts "Default context service was not succesfully found."
     end
 
     puts ''
@@ -426,18 +426,18 @@ module AssemblyAndServiceOperationsMixin
     return attribute_exists
   end
 
-  def link_attributes(service_id, source_attribute, target_attribute)
+  def link_attributes(service_id, source_attribute, context_attribute)
     puts "Link attributes:", "----------------"
     attributes_linked = false
 
-    link_attributes_response = send_request('/rest/assembly/add_ad_hoc_attribute_links', {:assembly_id=>service_id, :target_attribute_term=>target_attribute, :source_attribute_term=>"$#{source_attribute}"})
+    link_attributes_response = send_request('/rest/assembly/add_ad_hoc_attribute_links', {:assembly_id=>service_id, :context_attribute_term=>context_attribute, :source_attribute_term=>"$#{source_attribute}"})
     pretty_print_JSON(link_attributes_response)
 
     if link_attributes_response['status'] == 'ok'
-      puts "Link between #{source_attribute} attribute and #{target_attribute} attribute is established!"
+      puts "Link between #{source_attribute} attribute and #{context_attribute} attribute is established!"
       attributes_linked = true
     else
-      puts "Link between #{source_attribute} attribute and #{target_attribute} attribute is not established!"
+      puts "Link between #{source_attribute} attribute and #{context_attribute} attribute is not established!"
     end
     puts ""
     return attributes_linked
@@ -969,19 +969,19 @@ module AssemblyAndServiceOperationsMixin
     return component_deleted_successfully
   end
 
-  def delete_target(target_name)
-    puts "Delete target:", "-----------------"
-    target_deleted = false
-    delete_target_service_response = send_request('/rest/assembly/delete', {:assembly_id=>target_name})
+  def delete_context(context_name)
+    puts "Delete context:", "-----------------"
+    context_deleted = false
+    delete_context_service_response = send_request('/rest/assembly/delete', {:assembly_id=>context_name})
 
-    if (delete_target_service_response['status'] == "ok")
-      puts "Target service deleted successfully!"
-      target_deleted = true
+    if (delete_context_service_response['status'] == "ok")
+      puts "context service deleted successfully!"
+      context_deleted = true
     else
-      puts "Target service was not deleted successfully!"
+      puts "context service was not deleted successfully!"
     end
     puts ""
-    return target_deleted
+    return context_deleted
   end
 
   def push_assembly_updates(service_id, service_module)
@@ -1062,7 +1062,7 @@ module AssemblyAndServiceOperationsMixin
   end
 
   def list_services_by_property(key, value)
-        # Get list of existing workspace service instances in a specific target
+        # Get list of existing workspace service instances in a specific context
     puts "List service instances with #{value} value for #{key} property:", "----------------------------------------------------------------------------------"
     service_instance_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance', :include_namespaces => true})
     filtered_services = nil

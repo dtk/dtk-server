@@ -8,7 +8,7 @@ require File.expand_path('../client_access/dtk_client_accessor', __FILE__)
 require File.expand_path('../mixins/assembly_and_service_operations_mixin.rb', __FILE__)
 require File.expand_path('../mixins/node_operations_mixin.rb', __FILE__)
 require File.expand_path('../mixins/workspace_mixin.rb', __FILE__)
-require File.expand_path('../mixins/target_mixin.rb', __FILE__)
+require File.expand_path('../mixins/context_mixin.rb', __FILE__)
 require File.expand_path('../mixins/component_modules_mixin.rb', __FILE__)
 require File.expand_path('../mixins/component_modules_version_mixin.rb', __FILE__)
 require File.expand_path('../mixins/service_modules_mixin.rb', __FILE__)
@@ -22,7 +22,7 @@ class Common
 	include AssemblyAndServiceOperationsMixin
 	include NodeOperationsMixin
 	include WorkspaceMixin
-	include TargetMixin
+	include ContextMixin
 	include ComponentModulesMixin
 	include ServiceModulesMixin
 	include TestModulesMixin
@@ -31,7 +31,7 @@ class Common
 	include ModulesMixin
 
 	attr_accessor :server, :port, :endpoint, :username, :password
-	attr_accessor :service_name, :service_id, :workspace_id, :is_target, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace, :node_group
+	attr_accessor :service_name, :service_id, :workspace_id, :is_context, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace, :node_group
 	attr_accessor :component_module_id_list, :component_module_name_list
 
 	$opts = {
@@ -40,7 +40,7 @@ class Common
 		:cookies => {}
 	}
 
-	def initialize(service_name, assembly_name, is_target=false)
+	def initialize(service_name, assembly_name, is_context=false)
 		config_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), '..', "config/config.yaml")))		
 
 		@service_name = service_name
@@ -53,7 +53,7 @@ class Common
 	  @password = config_yml['r8server']['password']
 	  @server_log = config_yml['r8server']['log']
 	  @ssh_key = config_yml['r8server']['ssh_key']
-	  @is_target = is_target
+	  @is_context = is_context
 
 		#used as placeholders for component ids/names for specific module that are accumulated
 		@component_module_id_list = Array.new()

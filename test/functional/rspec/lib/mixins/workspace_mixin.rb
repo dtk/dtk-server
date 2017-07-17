@@ -22,7 +22,7 @@ module WorkspaceMixin
     content_purged
   end
 
-  def create_workspace(workspace_name = nil, workspace_target = nil)
+  def create_workspace(workspace_name = nil, workspace_context = nil)
     puts 'Create workspace:', '-----------------'
     workspace_created = false
     puts workspace_name    
@@ -30,7 +30,7 @@ module WorkspaceMixin
 
     create_workspace_params = {}
     create_workspace_params[:workspace_name] = workspace_name if workspace_name
-    create_workspace_params[:parent_service] = workspace_target if workspace_target
+    create_workspace_params[:parent_service] = workspace_context if workspace_context
 
     create_workspace_response = send_request('/rest/assembly/create_workspace', create_workspace_params)
     pretty_print_JSON(create_workspace_response)
@@ -51,8 +51,8 @@ module WorkspaceMixin
     workspace_created
   end
 
-  def delete_workspaces_in_target(target_instance = 'target', assembly_template = 'workspace', workspace_name = 'workspace')
-    puts "Delete workspace instances in #{target_instance} target service instance", "------------------------------------------------------------------------"
+  def delete_workspaces_in_context(context_instance = 'context', assembly_template = 'workspace', workspace_name = 'workspace')
+    puts "Delete workspace instances in #{context_instance} context service instance", "------------------------------------------------------------------------"
     
     workspace_instance_list = []
     workspace_instance_list = list_services_by_property("assembly_template", assembly_template)
@@ -62,7 +62,7 @@ module WorkspaceMixin
   
     if workspace_instance_list
       puts "Workspace instances list "
-      extracted_workspace_id_list = workspace_instance_list.select { |x| x['target'] == target_instance }
+      extracted_workspace_id_list = workspace_instance_list.select { |x| x['context'] == context_instance }
       extracted_workspace_id_list = extracted_workspace_id_list.map { |x| x['id'] }
       extracted_workspace_id_list.uniq!
       extracted_workspace_id_list.each do |id| 
@@ -90,20 +90,20 @@ module WorkspaceMixin
     workspace_instances_deleted
   end
 
-  def list_existing_workspaces(target_instance = 'target', assembly_template = 'workspace')
-    # Get list of existing workspace service instances in a specific target
-    puts "List workspace service instances in #{target_instance}:", "-------------------------------------------------------"
+  def list_existing_workspaces(context_instance = 'context', assembly_template = 'workspace')
+    # Get list of existing workspace service instances in a specific context
+    puts "List workspace service instances in #{context_instance}:", "-------------------------------------------------------"
     service_instance_list = send_request('/rest/assembly/list', {:detail_level=>'nodes', :subtype=>'instance', :include_namespaces => true})
     workspace_instance_list = nil
 
     if service_instance_list['status'] == 'ok' 
-      workspace_instance_list = service_instance_list['data'].select{ |x| x['assembly_template'] == assembly_template && x['target'] == target_instance }
+      workspace_instance_list = service_instance_list['data'].select{ |x| x['assembly_template'] == assembly_template && x['context'] == context_instance }
       
       if workspace_instance_list.length.zero?
-        puts "No workspace service instances found for #{target_instance} target instance."
+        puts "No workspace service instances found for #{context_instance} context instance."
         workspace_instance_list = nil
       else
-        puts "#{workspace_instance_list.length} workspace service instances found for #{target_instance} target instance: "
+        puts "#{workspace_instance_list.length} workspace service instances found for #{context_instance} context instance: "
         pretty_print_JSON(workspace_instance_list) 
       end
     else

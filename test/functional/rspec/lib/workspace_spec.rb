@@ -221,29 +221,29 @@ shared_context 'Create assembly from workspace content' do |dtk_common, service_
 end
 
 shared_context 'Create workspace instance' do |dtk_common, workspace_name|
-  it "Creates workspace #{workspace_name} in default target" do
+  it "Creates workspace #{workspace_name} in default context" do
     workspace_created = dtk_common.create_workspace(workspace_name)
     expect(workspace_created).to eq(true)
   end
 end
 
-shared_context 'Create workspace instance with target' do |dtk_common, workspace_name, workspace_target|
-  it "Creates workspace #{workspace_name} in #{workspace_target} target" do
-    workspace_created = dtk_common.create_workspace(workspace_name, workspace_target)
+shared_context 'Create workspace instance with context' do |dtk_common, workspace_name, workspace_context|
+  it "Creates workspace #{workspace_name} in #{workspace_context} context" do
+    workspace_created = dtk_common.create_workspace(workspace_name, workspace_context)
     expect(workspace_created).to eq(true)
   end
 end
 
-shared_context 'Delete workspace instances in default target' do |dtk_common|
-  it "Deletes workspace instances present in default target" do
-    workspace_instances_deleted = dtk_common.delete_workspaces_in_target("target")
+shared_context 'Delete workspace instances in default context' do |dtk_common|
+  it "Deletes workspace instances present in default context" do
+    workspace_instances_deleted = dtk_common.delete_workspaces_in_context("context")
     expect(workspace_instances_deleted).to eq(true)
   end
 end
 
-shared_context 'Delete workspace instances in target' do |dtk_common, target_instance, workspace_template|
-  it "Deletes workspace instances present in #{target_instance}" do
-    workspace_instances_deleted = dtk_common.delete_workspaces_in_target(target_instance, workspace_template)
+shared_context 'Delete workspace instances in context' do |dtk_common, context_instance, workspace_template|
+  it "Deletes workspace instances present in #{context_instance}" do
+    workspace_instances_deleted = dtk_common.delete_workspaces_in_context(context_instance, workspace_template)
     expect(workspace_instances_deleted).to eq(true)
   end
 end

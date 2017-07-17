@@ -72,43 +72,43 @@ shared_context 'Stage assembly from module' do |module_name, module_location, as
   end
 end
 
-shared_context 'Stage assembly from module to specific target' do |module_name, module_location, assembly_name, service_name, target_name|
-  it "stages assembly #{assembly_name} from module #{module_name} in target #{target_name}" do
-    puts 'Stage assembly from module to specific target', '---------------------------------------------'
+shared_context 'Stage assembly from module to specific context' do |module_name, module_location, assembly_name, service_name, context_name|
+  it "stages assembly #{assembly_name} from module #{module_name} in context #{context_name}" do
+    puts 'Stage assembly from module to specific context', '---------------------------------------------'
     pass = true
-    value = `dtk module stage --parent #{target_name} -d #{module_location} -n #{service_name} #{assembly_name}`
+    value = `dtk module stage --parent #{context_name} -d #{module_location} -n #{service_name} #{assembly_name}`
     puts value
     pass = false if value.include? 'ERROR'
-    puts "Assembly #{assembly_name} is staged to #{target_name} successfully!" if pass == true
-    puts "Assembly #{assembly_name} is not staged to #{target_name} successfully!" if pass == false
+    puts "Assembly #{assembly_name} is staged to #{context_name} successfully!" if pass == true
+    puts "Assembly #{assembly_name} is not staged to #{context_name} successfully!" if pass == false
     puts ''
     expect(pass).to eq(true)
   end
 end
 
-shared_context 'Stage target from module' do |target_name, target_location, assembly_name, service_name|
-  it "stages target #{assembly_name} from module #{target_name}" do
-    puts 'Stage target from module', '-------------------------'
+shared_context 'Stage context from module' do |context_name, context_location, assembly_name, service_name|
+  it "stages context #{assembly_name} from module #{context_name}" do
+    puts 'Stage context from module', '-------------------------'
     pass = true
-    value = `dtk module stage --target -d #{target_location} -n #{service_name} #{assembly_name}`
+    value = `dtk module stage --context -d #{context_location} -n #{service_name} #{assembly_name}`
     puts value
     pass = false if value.include? 'ERROR'
-    puts "Target #{assembly_name} is staged successfully!" if pass == true
-    puts "Target #{assembly_name} is not staged successfully!" if pass == false
+    puts "context #{assembly_name} is staged successfully!" if pass == true
+    puts "context #{assembly_name} is not staged successfully!" if pass == false
     puts ''
     expect(pass).to eq(true)
   end
 end
 
-shared_context 'Set default target' do |target_service_name|
-  it "sets target #{target_service_name} as default one" do
-    puts 'Set default target', '------------------'
+shared_context 'Set default context' do |context_service_name|
+  it "sets context #{context_service_name} as default one" do
+    puts 'Set default context', '------------------'
     pass = true
-    value = `dtk service set-default-target #{target_service_name}`
+    value = `dtk service set-default-context #{context_service_name}`
     puts value
     pass = false if value.include? 'ERROR'
-    puts "Target #{target_service_name} is set as default one!" if pass == true
-    puts "Target #{target_service_name} is not set as default one!" if pass == false
+    puts "context #{context_service_name} is set as default one!" if pass == true
+    puts "context #{context_service_name} is not set as default one!" if pass == false
     puts ''
     expect(pass).to eq(true)
   end

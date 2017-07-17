@@ -55,13 +55,13 @@ module DTK
           iaas_properties_array = [IAASProperties.create_generic(target_name)]
         elsif [:ec2_classic, :ec2_vpc].include?(target_type)
           unless region = property_hash[:region]
-            fail ErrorUsage.new("Region is required for target created in '#{provider.get_field?(:iaas_type)}' provider type!")
+            fail ErrorUsage.new("Region is required for context created in '#{provider.get_field?(:iaas_type)}' provider type!")
           end
           target_name ||= provider.default_target_name(:ec2, region: region)
           # raises errors if problems with any params
           iaas_properties_array = IAASProperties::Ec2.check_and_compute_needed_iaas_properties(target_name, target_type, provider, property_hash)
         else
-          fail ErrorUsage.new("Target type '#{target_type}' is not supported")
+          fail ErrorUsage.new("Context type '#{target_type}' is not supported")
         end
 
         # proactively getting needed columns on provider
@@ -201,7 +201,7 @@ module DTK
 
       def self.set_default_target(target, opts = {})
         current_default_target = DefaultTarget.set(target, opts)
-        ResponseInfo.info('Default target changed from ?current_default_target to ?new_default_target',
+        ResponseInfo.info('Default context changed from ?current_default_target to ?new_default_target',
                           current_default_target: current_default_target,
                           new_default_target: target)
       end

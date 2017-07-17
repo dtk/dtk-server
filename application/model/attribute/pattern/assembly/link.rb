@@ -47,7 +47,7 @@ module DTK; class Attribute::Pattern
         assembly_idh = assembly.id_handle()
         target_attr_pattern = Target.create_attr_pattern(assembly, target_attr_term)
         if target_attr_pattern.attribute_idhs.empty?
-          fail ErrorUsage.new("No matching attribute to target term (#{target_attr_term})")
+          fail ErrorUsage.new("No matching attribute to context term (#{target_attr_term})")
         end
         source_is_antecdent = !target_attr_pattern.is_antecedent?()
         source_attr_pattern = Source.create_attr_pattern(assembly, source_attr_term, source_is_antecdent)

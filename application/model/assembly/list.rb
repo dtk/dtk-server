@@ -128,6 +128,7 @@ module DTK
 
           # TODO: wil deprecate settig :target once we make sure not used anywhere
           if target = r[:target]
+            pntr.merge!(target_model_handle: target.model_handle)
             if target[:iaas_properties]
               sec_group_set = target[:iaas_properties][:security_group_set]
               target[:iaas_properties][:security_group] ||= sec_group_set.join(',') if sec_group_set
@@ -147,6 +148,10 @@ module DTK
 
           if created_at = r[:created_at]
             pntr.merge!(created_at: created_at)
+          end
+
+          if specific_type = r[:specific_type]
+            pntr.merge!(specific_type: specific_type)
           end
 
           if node = format_node!(pntr[:ndx_nodes], r[:node], opts)
@@ -171,6 +176,10 @@ module DTK
         end
 
         unsorted = ndx_ret.values.map do |r|
+          target = Target::Instance.get_default_target(r[:target_model_handle], ret_singleton_target: true, prune_builtin_target: true) unless r[:target_model_handle].nil?
+          if target[:display_name] == r[:display_name]
+            r[:display_name] = r[:display_name] + "*" 
+          end
           nodes = r[:ndx_nodes].values
           nodes.reject! { |n| Node.is_assembly_wide_node?(n) } if opts[:remove_assembly_wide_node]
           # TODO: this is misleading since admin not op status returned

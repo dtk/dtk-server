@@ -42,7 +42,7 @@ module DTK; class Target
           if opts[:return_all]
             targets
           else
-            Log.error("Unexpected that more than 1 target is returned") unless opts[:ret_singleton_target]
+            Log.error("Unexpected that more than 1 context is returned") unless opts[:ret_singleton_target]
             nil
           end
         end
@@ -57,7 +57,7 @@ module DTK; class Target
         return ret unless target
 
         if current_default_target && (current_default_target.id == target.id)
-          fail ErrorUsage::Warning.new("Default target is already set to #{current_default_target[:display_name]}")
+          fail ErrorUsage::Warning.new("Default context is already set to #{current_default_target[:display_name]}")
         end
 
         all_default = get(target.model_handle(), { return_all: true })

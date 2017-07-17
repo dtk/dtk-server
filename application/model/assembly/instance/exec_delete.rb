@@ -213,7 +213,7 @@ module DTK; class  Assembly
         end
         
         if !opts[:recursive] && is_target_service_instance?
-          fail ErrorUsage, "The target service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-r' to remove all." unless staged_instances.empty?
+          fail ErrorUsage, "The context service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-r' to remove all." unless staged_instances.empty?
         end
         
         if opts[:recursive]

@@ -87,7 +87,7 @@ module DTK
       #   :add_nested_modules - Boolean (default: false)
       def stage_service(assembly_template, service_module_class, opts = Opts.new)
         unless is_converged? 
-          fail ErrorUsage, "Cannot stage a service instance in a target service instance '#{target}' that is not converged."
+          fail ErrorUsage, "Cannot stage a service instance in a context service instance '#{target}' that is not converged."
         end
         Model.Transaction do
           # if :allow_existing_service is true then new_assembly_instance can be existing assembly_instance

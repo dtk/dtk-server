@@ -66,7 +66,7 @@ module DTK; class ServiceModule
                 targets = (target_or_targets.kind_of?(::Array) ? target_or_targets : [target_or_targets])
                 targets.each do |target_hash|
                   unless target = Constant.matches?(target_hash, :ComponentLinkTargetValue) 
-                    Log.error("Unexpected form of component link target: #{target_hash.inspect}")
+                    Log.error("Unexpected form of component link context: #{target_hash.inspect}")
                     next
                   end
                   component_link_hash = { link_def_type => target }

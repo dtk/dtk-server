@@ -76,7 +76,7 @@ shared_context 'Stage assembly from module to specific context' do |module_name,
   it "stages assembly #{assembly_name} from module #{module_name} in context #{context_name}" do
     puts 'Stage assembly from module to specific context', '---------------------------------------------'
     pass = true
-    value = `dtk module stage --parent #{context_name} -d #{module_location} -n #{service_name} #{assembly_name}`
+    value = `dtk module stage --context #{context_name} -d #{module_location} -n #{service_name} #{assembly_name}`
     puts value
     pass = false if value.include? 'ERROR'
     puts "Assembly #{assembly_name} is staged to #{context_name} successfully!" if pass == true
@@ -90,7 +90,7 @@ shared_context 'Stage context from module' do |context_name, context_location, a
   it "stages context #{assembly_name} from module #{context_name}" do
     puts 'Stage context from module', '-------------------------'
     pass = true
-    value = `dtk module stage --context -d #{context_location} -n #{service_name} #{assembly_name}`
+    value = `dtk module stage --base -d #{context_location} -n #{service_name} #{assembly_name}`
     puts value
     pass = false if value.include? 'ERROR'
     puts "context #{assembly_name} is staged successfully!" if pass == true

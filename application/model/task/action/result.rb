@@ -29,6 +29,12 @@ module DTK
         end
       end
 
+      class Debugging < self
+        def initialize(hash = {})
+          super(hash)
+        end
+      end
+
       class Failed < self
         def initialize(error)
           super()

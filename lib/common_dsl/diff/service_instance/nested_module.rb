@@ -30,11 +30,11 @@ module DTK; module CommonDSL
         private :initialize
 
         # Processes changes to the nested module content and dsl 
-        def self.process_nested_module_changes(diff_result, service_instance, service_module_branch, all_impacted_file_paths)
+        def self.process_nested_module_changes(diff_result, service_instance, service_module_branch, all_impacted_file_paths, opts = {})
+          ndx_existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
           if nested_modules_info = impacted_nested_modules_info?(service_module_branch, all_impacted_file_paths)
             # Find existing aug_module_branches for service instance nested modules and for each one impacted 
             # create a service instance specfic branch if needed; ndx_existing_aug_module_branches is indexed by nested module name
-            ndx_existing_aug_module_branches = service_instance.aug_component_module_branches.inject({}) { |h, r| h.merge(r[:module_name] => r) }
             nested_modules_info.each do |nested_module_info|
               nested_module_name = nested_module_info.module_name
               unless existing_aug_mb = ndx_existing_aug_module_branches[nested_module_name]
@@ -43,6 +43,8 @@ module DTK; module CommonDSL
               new(existing_aug_mb, nested_module_info, service_instance, service_module_branch).process(diff_result)
             end
           end
+
+          delete_nested_module_directories?(ndx_existing_aug_module_branches, service_module_branch, opts)
         end
 
         def process(diff_result)
@@ -66,6 +68,20 @@ module DTK; module CommonDSL
         end
 
         private
+
+        def self.delete_nested_module_directories?(ndx_existing_aug_module_branches, service_module_branch, opts = {})
+          current_module_refs = opts[:current_module_refs] || []
+
+          unless current_module_refs.empty?
+            current_mr_names = current_module_refs.map { |cmr| cmr[:module_name] }
+            new_mr_names     = ndx_existing_aug_module_branches.keys
+            to_delete        = current_mr_names - new_mr_names
+
+            to_delete.each do |mr|
+              RepoManager.delete_directory?("modules/#{mr}", {push_changes: true}, service_module_branch)
+            end
+          end
+        end
 
         # returns array of Parse::NestedModuleInfo objects or nil if none
         def self.impacted_nested_modules_info?(service_module_branch, all_impacted_file_paths)

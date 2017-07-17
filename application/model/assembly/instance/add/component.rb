@@ -44,6 +44,11 @@ module DTK
               if opts[:auto_complete_links]
                 LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
               end
+
+              # need to update module_refs_lock to add new component which will be used below to pull nested component module into service instance if needed
+              ModuleRefs::Lock.create_or_update(self, opts)
+
+              Component.pull_component_module_repos(aug_cmp_template, opts[:service_instance])
             end
             component.id_handle 
           end
@@ -82,6 +87,24 @@ module DTK
             update_opts.merge!(:component_title => component_title)
           end
           Task::Template::ConfigComponents.update_when_added_component_or_action?(action_instance, node, component, update_opts)
+        end
+
+        def self.pull_component_module_repos(aug_cmp_template, service_instance)
+          if service_instance
+            existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
+            nested_module_name           = aug_cmp_template.component_module.module_name
+
+            if matching_module_branch = existing_aug_module_branches[nested_module_name]
+              matching_module_branches = [matching_module_branch]
+              matching_module_branch.get_module_refs.each do |module_ref|
+                if module_ref_branch = existing_aug_module_branches[module_ref[:display_name]]
+                  matching_module_branches << module_ref_branch
+                end
+              end
+
+              CommonDSL::ComponentModuleRepoSync.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
+            end
+          end
         end
 
       end

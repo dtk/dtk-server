@@ -78,7 +78,7 @@ module DTK; class Task; class Template
         ret = OrderedHash.new()
         if node_name = node_name()
           node_field_term = ((node() && node().is_node_group?()) ? Constant::NodeGroup : Constant::Node).to_sym
-          ret[node_field_term] = node_name
+          ret[node_field_term] = node_name unless node_name.eql?('assembly_wide')
         end
         if execution_blocks.size == 1
           # if single execution block then we remove this level of nesting

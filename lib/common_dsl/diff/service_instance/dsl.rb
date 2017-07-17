@@ -28,7 +28,13 @@ module DTK; module CommonDSL
           if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
             service_instance_parse = dsl_file_obj.parse_content(:service_instance)
             service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
-            
+
+            # process dependencies first
+            if cmp_modules_with_namespaces = ret_cmp_modules_with_namespaces(service_instance_parse[:dependent_modules] || {})
+              component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
+              component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
+            end
+
             # compute base diffs
             if base_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen, impacted_files: impacted_files)
               # collate the diffs
@@ -106,6 +112,21 @@ module DTK; module CommonDSL
             end
           end
         end
+
+        def self.cmp_modules_with_namespaces_hash(module_name_input, namespace_name_input, version_input)
+        {
+          display_name: module_name_input,
+          namespace_name: namespace_name_input,
+          version_info: version_input
+        }
+      end
+
+      def self.ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts = {})
+        cmp_modules_with_namespaces = (parsed_dependent_modules || {}).map do |namespace_name, version|
+          module_namespace, module_name = namespace_name.split('/')
+          cmp_modules_with_namespaces_hash(module_name, module_namespace, version)
+        end.compact
+      end
 
       end
     end

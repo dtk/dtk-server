@@ -30,12 +30,14 @@ module DTK; class ConfigAgent
         component_action      = task_info[:component_actions].first
         method_name           = component_action.method_name? || 'create'
         component             = component_action.component
+        node                  = task_info[:node]
         component_template    = component_template(component)
         service_instance_name = assembly_instance.display_name
-        dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
+
+        dynamic_provider      = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
         
-        execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, component)
+        execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, node)
         
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
@@ -94,8 +96,8 @@ module DTK; class ConfigAgent
       module ExecutionEnvironment
         EPHEMERAL_CONTAINER = 'ephemeral_container'
         NATIVE = 'native'
-        def self.execution_environment(dynamic_provider, component)
-          if component.get_node.is_assembly_wide_node?
+        def self.execution_environment(dynamic_provider, node)
+          if node.is_assembly_wide_node?
             docker_file = dynamic_provider.docker_file? || fail(Error, "Unexpected that 'dynamic_provider.docker_file?' is nil")
             { type: EPHEMERAL_CONTAINER, docker_file: docker_file }
           else

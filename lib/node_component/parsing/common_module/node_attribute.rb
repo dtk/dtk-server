@@ -19,7 +19,7 @@ module DTK
   class NodeComponent
     class Parsing::CommonModule
       class NodeAttribute < self
-        ATTRIBUTES_FOR_COMPONENT = ['image', 'size']
+        ATTRIBUTES_FOR_COMPONENT = ['image', 'size', 'dns']
         def self.move_attributes_to_node_component!(node_component, parsed_node_or_component)
           return unless parsed_attributes = parsed_node_or_component.val(:Attributes)
 

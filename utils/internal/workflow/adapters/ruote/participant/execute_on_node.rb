@@ -58,7 +58,10 @@ module DTK
                     task.add_action_results(result, action)
                   end
 
-                  if msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"] #Find better way for triggering this Debug
+                  Log.info("Recevied port? #{msg[:body][:data][:data]}")
+                  if msg[:body][:data][:data].is_a?(Hash)
+                    msg_data = msg[:body][:data][:data]
+                    if msg_data.key?("dynamic_attributes") && !msg_data["dynamic_attributes"]["dtk_debug_port"].nil?
                     debug = true
                     if method_name = action.action_method?
                       debug = false if method_name[:method_name].eql?('delete')
@@ -67,8 +70,9 @@ module DTK
                     $port_number = msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"] if $port_number.nil?
                     Log.info("port number from arbiter: #{$port_number}")
 
-                    port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. "}
+                    port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
                     task.add_event(:info, port_msg)
+                  end
                   end
 
                   process_action_result!(workitem, action, result, task, task_id, task_end, debug)

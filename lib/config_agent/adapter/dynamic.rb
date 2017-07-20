@@ -35,9 +35,9 @@ module DTK; class ConfigAgent
         dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
         breakpoint  = task_info[:breakpoint]
-        
+
         debug_port_request = true if opts[:debug_port_request]
-        execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, component)
+        execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, component, opts = {breakpoint: breakpoint, assembly_instance: assembly_instance})
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
 
@@ -72,12 +72,7 @@ module DTK; class ConfigAgent
           breakpoint: breakpoint,
           debug_port_request: opts[:debug_port_request],
           debug_port_received: $port_number
-<<<<<<< HEAD
         }           
-=======
-        }  
-        Log.info("This is message2: #{msg[:debug_port_received]}")        
->>>>>>> Adding better handling of port and response message
         msg
       end
       ARBITER_REQUEST_PROTOCOL_VERSION = 1
@@ -160,6 +155,3 @@ module DTK; class ConfigAgent
     end
   end
 end; end
-
-Contact GitHub API Training Shop Blog About
-© 2017 GitHub, Inc. Terms Privacy Security Status Help

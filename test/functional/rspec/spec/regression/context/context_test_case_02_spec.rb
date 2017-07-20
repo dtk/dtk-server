@@ -15,7 +15,7 @@ context_version = 'master'
 default_keypair = 'testing_use1'
 vpc_id = 'vpc-d9946ba0'
 security_group_name = 'r8_test_security_group'
-subnet_id = 'subnet-fba81fd7'
+subnet_id = 'subnet-99c00fb5'
 
 # Module specific properties
 initial_module_location = "./spec/regression/context/resources/test_module_02_dtk.module.yaml"
@@ -26,7 +26,7 @@ service_name = 'dtk_test_module_02'
 
 dtk_common = Common.new('', '')
 
-describe "(context) Test Case 02: Specified existing subnet id, vpc and security group name" do
+describe "(Context) Test Case 02: Specified existing subnet id, vpc and security group name" do
   before(:all) do
     puts '********************************************************************************', ''
     # Install/clone aws:network module with required dependency modules

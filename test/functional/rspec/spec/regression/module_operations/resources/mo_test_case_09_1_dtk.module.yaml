@@ -10,14 +10,14 @@ assemblies:
     components:
     - node[source]:
         attributes:
-          image: precise
+          image: xenial_hvm
           size: micro
         components:
         - stdlib
         - unit_test::source
     - node[sink]:
         attributes:
-          image: precise
+          image: xenial_hvm
           size: micro
         components:
         - stdlib
@@ -26,21 +26,21 @@ assemblies:
     components:
     - node[source1]:
         attributes:
-          image: precise
+          image: xenial_hvm
           size: micro
         components:
         - stdlib
         - unit_test::source
     - node[source2]:
         attributes:
-          image: precise
+          image: xenial_hvm
           size: micro
         components:
         - stdlib
         - unit_test::source
     - node[sink]:
         attributes:
-          image: precise
+          image: xenial_hvm
           size: micro
         components:
         - stdlib
@@ -49,21 +49,21 @@ assemblies:
     components:
     - node[source]:
         attributes:
-          image: precise_hvm
-          size: small
+          image: xenial_hvm
+          size: micro
         components:
         - stdlib
         - unit_test::source
     - node[sink1]:
         attributes:
-          image: precise
+          image: xenial_hvm
           size: micro
         components:
         - stdlib
         - unit_test::sink
     - node[sink2]:
         attributes:
-          image: precise
+          image: xenial_hvm
           size: micro
         components:
         - stdlib

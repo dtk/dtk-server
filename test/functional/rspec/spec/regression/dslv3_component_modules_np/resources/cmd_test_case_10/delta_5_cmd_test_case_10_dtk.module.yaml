@@ -13,7 +13,7 @@ assemblies:
     components:
     - node[node]:
         attributes:
-          image: precise_hvm
+          image: xenial_hvm
           size: micro
         components:
         - cmd_test_case_10::component

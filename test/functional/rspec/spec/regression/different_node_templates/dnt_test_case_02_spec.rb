@@ -11,16 +11,16 @@ assembly_name = 'rails_app_local'
 service_name = 'rails_local_app_with_datadog'
 remote_module = 'dtk-examples/rails'
 remote_module_location = '/tmp/rails'
-remote_module_version = '1.0.0'
+remote_module_version = 'master'
 service_location = '~/dtk/'
 api_key = 'ccb08354705864db6041d30fc4621529'
 app_key = 'af01ce7a8180b837f53b01f914ea7f0f82f4d6ba'
 
 dtk_common = Common.new('', '')
 
-describe "Converge rails local app with datadog integration" do
+describe "(Different node templates) Converge rails local app with datadog integration" do
   before(:all) do
-    puts '*************************************************', ''
+    puts '****************************************************************************', ''
   end
 
   context "Install module from dtkn" do

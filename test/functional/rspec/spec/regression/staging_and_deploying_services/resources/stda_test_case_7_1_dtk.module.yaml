@@ -12,7 +12,7 @@ assemblies:
     components:
     - node_group[slave]:
         attributes:
-          image: precise_hvm
+          image: trusty_hvm
           size: micro
           cardinality: 2
           type: group

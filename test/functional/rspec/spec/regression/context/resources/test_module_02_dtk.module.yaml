@@ -1,6 +1,6 @@
 ---
 dsl_version: 1.0.0
-module: test/target_test_module_02
+module: test/context_test_module_02
 version: master
 license: Apache 2.0
 dependencies:
@@ -12,7 +12,7 @@ assemblies:
     components:
     - node[node]:
         attributes:
-          image: precise_hvm
+          image: xenial_hvm
           size: micro
         components:
         - stdlib

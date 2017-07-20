@@ -12,13 +12,13 @@ assemblies:
     components:
     - node[single_node]:
         attributes:
-          image: precise_hvm
+          image: trusty_hvm
           size: micro
         components:
         - stdlib
     - node_group[elements]:
         attributes:
-          image: precise_hvm
+          image: trusty_hvm
           size: micro
           cardinality: 2
         components:

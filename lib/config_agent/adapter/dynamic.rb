@@ -72,8 +72,7 @@ module DTK; class ConfigAgent
           breakpoint: breakpoint,
           debug_port_request: opts[:debug_port_request],
           debug_port_received: $port_number
-        }  
-        Log.info("This is message2: #{msg[:debug_port_received]}")        
+        }           
         msg
       end
       ARBITER_REQUEST_PROTOCOL_VERSION = 1

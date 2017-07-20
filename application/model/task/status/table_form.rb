@@ -56,6 +56,7 @@ module DTK; class Task; class Status
       # putting idents in
       el[:type]  = "#{' ' * (2 * (level - 1))}#{qualified_index}#{type}"
       el[:index], el[:sub_index] = qualified_index.split('.').collect(&:to_i)
+      ndx_info ||= task.get_ndx_info()
       ndx_errors ||= task.get_ndx_errors()
       if ndx_errors[task[:id]]
         el[:errors] = format_errors(ndx_errors[task[:id]])
@@ -100,6 +101,15 @@ module DTK; class Task; class Status
           if ndx_errors[subtasks.first[:id]]
             el[:errors] = format_errors(ndx_errors[subtasks.first[:id]])
             el[:failed_component] = add_failed_component(task)
+          end
+
+          if ndx_info[subtasks.first[:id]]
+            ndx_info[subtasks.first[:id]].each do |st|
+              if st[:event].is_a?(Hash)
+                info_msg = {message: st[:event][:info]}
+                el[:info] = format_info(info_msg)
+              end
+            end
           end
           if subtasks.first[:executable_action_type].include?("ConfigNode")
             if opts[:type]
@@ -152,6 +162,26 @@ module DTK; class Task; class Status
       end
       ret
     end
+
+       def self.format_info(info)
+        ret = nil
+        if ret
+          ret[:message] << "\n\n"
+        else
+          ret = { message: '' }
+        end
+
+        if info.is_a? String
+          info, temp = {}, info
+          info[:message] = temp
+        end
+
+        info_msg = ''
+        info_msg << (info[:message] || 'error')
+        ret[:message] << info_msg
+        #ret[:type] = error[:type]    
+        ret
+       end
 
     def self.add_failed_component(task)
       if e_action = task[:executable_action]

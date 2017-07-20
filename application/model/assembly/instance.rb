@@ -190,10 +190,7 @@ module DTK; class  Assembly
 
     def exec(params)
       task_action = params[:task_action]
-      require 'debugger'
-      Debugger.wait_connection = true
-      Debugger.start_remote
-      debugger
+ 
       # check if action is called on component or on service instance action
       if task_action
         component_name, method_name = nil, nil

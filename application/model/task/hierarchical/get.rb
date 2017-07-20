@@ -62,6 +62,9 @@ module DTK; class Task
       def get_ndx_errors
         self.class.get_ndx_errors(hierarchical_task_idhs())
       end
+       def get_ndx_info
+        self.class.get_ndx_info(hierarchical_task_idhs())
+      end
       
       def get_associated_nodes
         ndx_nodes = Hash.new

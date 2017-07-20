@@ -49,6 +49,7 @@ module DTK
             callbacks = {
               on_msg_received: proc do |msg|
                 debug = false # TODO: Move this
+                $port_number = nil
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
@@ -57,8 +58,17 @@ module DTK
                     task.add_action_results(result, action)
                   end
 
-                  if msg[:body][:data].first
+                  if msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"] #Find better way for triggering this Debug
                     debug = true
+                    if method_name = action.action_method?
+                      debug = false if method_name[:method_name].eql?('delete')
+                    end
+                    port_msg = []                     
+                    $port_number = msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"] if $port_number.nil?
+                    Log.info("port number from arbiter: #{$port_number}")
+
+                    port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. "}
+                    task.add_event(:info, port_msg)
                   end
 
                   process_action_result!(workitem, action, result, task, task_id, task_end, debug)

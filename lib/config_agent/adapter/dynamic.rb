@@ -35,11 +35,28 @@ module DTK; class ConfigAgent
         dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
         breakpoint  = task_info[:breakpoint]
-
+        
+        debug_port_request = true if opts[:debug_port_request]
         execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, component)
-
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
+
+        if debug_port_request
+          msg = {
+          protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
+          provider_type: dynamic_provider.type,
+          service_instance: service_instance_name,
+          component: component_request_form(component_action),
+          attributes: { 
+            provider: provider_attributes,
+            instance: instance_attributes,
+          },
+          modules: get_base_and_dependent_modules(component, assembly_instance),
+          execution_environment: execution_environment,
+            debug_port_request: debug_port_request
+          }
+          return msg
+        end
 
         msg = {
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
@@ -52,8 +69,11 @@ module DTK; class ConfigAgent
           },
           modules: get_base_and_dependent_modules(component, assembly_instance),
           execution_environment: execution_environment,
-          breakpoint: breakpoint
-        }          
+          breakpoint: breakpoint,
+          debug_port_request: opts[:debug_port_request],
+          debug_port_received: $port_number
+        }  
+        Log.info("This is message2: #{msg[:debug_port_received]}")        
         msg
       end
       ARBITER_REQUEST_PROTOCOL_VERSION = 1

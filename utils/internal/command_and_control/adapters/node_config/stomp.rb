@@ -106,7 +106,7 @@ module DTK
         async_agent_call('git_access', 'add_rsa_info', params, filter, callbacks, context)
       end
 
-      def self.async_agent_call(agent, method, params, filter_x, callbacks, context_x)
+      def self.async_agent_call(agent, method, params, filter_x, callbacks, context_x)        
         msg = {
           agent: agent,
           method: method
@@ -158,13 +158,27 @@ module DTK
         if assembly = assembly_instance(task_idh, task_action)
           opts_ret_msg.merge!(assembly: assembly)
         end
-
+        task = Task::Hierarchical.get_and_reify(task_idh)
         task_id     = task_idh.get_id()
         top_task_id = top_task_idh.get_id()
         # TODO: DTK-2974: Almin code is updated so if task_action is an action that is flagged as a breakpoint, task_action[:breakpoint] wil be true
         # The code config_agent.ret_msg_content will call ret_msg_content on config_agent, which is associated with type of object. Right now we are only hanlding case where config_agent is of type ConfigAgent::Adapter::Dynamic
         # So for ConfigAgent::Adapter::Dynamic.ret_msg_content that looks if the passed in first object has  key :breakpoint set to true and tehn do breakpoint processing. for all other ConfigAgent::Adapter types we can just for time being ignote a breakpoint. Later we can warn user or through a parsing error when workflow is updated
-        msg_content = config_agent.ret_msg_content(task_action, opts_ret_msg.merge!(task_id: task_id, top_task_id: top_task_id))
+        if task_action[:breakpoint]
+           debug_port_request = true
+           msg_content_with_port = config_agent.ret_msg_content(task_action, opts_ret_msg.merge!(task_id: task_id, top_task_id: top_task_id, debug_port_request: debug_port_request))
+
+           pbuilderid = Node.pbuilderid(task_action[:node])
+           context = opts[:receiver_context]
+           callbacks = context[:callbacks]
+           filter = filter_single_fact('pbuilderid', pbuilderid)
+           mc_info = mc_info_for_config_agent(config_agent)
+           #result type r
+           async_agent_call(mc_info[:agent], mc_info[:action], msg_content_with_port, filter, callbacks, context) 
+        end
+          
+        msg_content = config_agent.ret_msg_content(task_action, opts_ret_msg.merge!(task_id: task_id, top_task_id: top_task_id, debug_port_request: false))
+        
 
         added_content = {
           task_id: task_id,

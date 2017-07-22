@@ -175,11 +175,12 @@ module DTK
           end
         end
 
+        target_model_handle = ndx_ret.values.first && ndx_ret.values.first[:target_model_handle]
+        default_target = target_model_handle && Target::Instance.get_default_target(target_model_handle, ret_singleton_target: true, prune_builtin_target: true)
+          
         unsorted = ndx_ret.values.map do |r|
-          target = Target::Instance.get_default_target(r[:target_model_handle], ret_singleton_target: true, prune_builtin_target: true) unless r[:target_model_handle].nil?
-          if target[:display_name] == r[:display_name]
-            r[:display_name] = r[:display_name] + "*" 
-          end
+          r[:display_name] = r[:display_name] + "*" if default_target and default_target.display_name == r.display_name
+
           nodes = r[:ndx_nodes].values
           nodes.reject! { |n| Node.is_assembly_wide_node?(n) } if opts[:remove_assembly_wide_node]
           # TODO: this is misleading since admin not op status returned

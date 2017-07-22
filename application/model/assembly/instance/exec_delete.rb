@@ -220,7 +220,7 @@ module DTK; class  Assembly
           fail ErrorUsage, "You can use recursive delete with target service instances only!" unless is_target_service_instance?
           delete_recursive(self, task, opts)
         end
-        
+
         return nil unless self_subtask = delete_instance_task?(self, opts)
 
         if is_target_service_instance?
@@ -231,11 +231,9 @@ module DTK; class  Assembly
 
         task = task.save_and_add_ids
         
-        workflow = Workflow.create(task)
-        workflow.defer_execution
+        Workflow.create(task).defer_execution
         
-        ret.merge!(task_id: task.id)
-        ret
+        ret.merge(task_id: task.id)
       end
 
       private

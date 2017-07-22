@@ -72,32 +72,42 @@ module DTK; class Task
       target_idh = target_idh_from_assembly(assembly)
       task_mh    = target_idh.create_childMH(:task)
 
-      ret = nil
+      task_template_content = nil
       begin
         task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'delete' })
       rescue Task::Template::ParsingError => e
-        return ret
+        return nil
       rescue Task::Template::TaskActionNotFoundError => e
-        return ret
+        return get_reversed_create_workflow_order(assembly)
       end
-
+      component_order_from_task_template_content(:delete, task_template_content)
+    end
+    
+    private
+      
+    def component_order_from_task_template_content(type, task_template_content)
       if serialization_form = task_template_content && task_template_content.serialization_form
-        ret = []
-        if subtasks = serialization_form[:subtasks]
-          subtasks.each do |subtask|
-            ret += delete_subtype_component_types(subtask)
-          end
+        (serialization_form[:subtasks] || []).inject([]) { |a, subtask| a + subtype_component_types(type, subtask) }
+      end
+    end
+
+    def get_reversed_create_workflow_order(assembly)
+      if task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly)
+        if create_order = component_order_from_task_template_content(:create, task_template_content)
+          create_order.reverse
         end
-        pp [:heerreeeeorder, ret]
-        ret
       end
     end
 
     # TODO: DTK-3010; this is hack for DTK-3010; want to call parsing logic
-    COMPONENT_OR_ACTION_KEYS = [:ordered_components, :components, :actions, :component, :action]
-    def delete_subtype_component_types(delete_subtask)
-      if matching_key = COMPONENT_OR_ACTION_KEYS.find { |key| delete_subtask.has_key?(key) }
-        component_or_actions = delete_subtask[matching_key]
+    COMPONENT_OR_ACTION_KEYS = {
+      delete: [:ordered_components, :components, :actions, :component, :action],
+      create: [:ordered_components, :components, :component]
+    }
+    def subtype_component_types(type, subtask)
+      keys = COMPONENT_OR_ACTION_KEYS[type]
+      if matching_key = keys.find { |key| subtask.has_key?(key) }
+        component_or_actions = subtask[matching_key]
         component_or_actions = [component_or_actions] unless component_or_actions.kind_of?(::Array)
         component_or_actions.map do |item|
           # convert to component type form and strip off action

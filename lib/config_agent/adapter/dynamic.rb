@@ -67,6 +67,10 @@ module DTK; class ConfigAgent
       # TODO: DTK-2848: use component to prune list
       def get_base_and_dependent_modules(component, assembly_instance)
         ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance).inject({}) do |h, aug_module_branch|
+          # TODO: DTK-3111; see if any harm in updating aug_module_branch current sha
+          #       Need to check if frozen then it does not use this
+          aug_module_branch.update_current_sha_from_repo!
+
           module_info = {
             repo: aug_module_branch.repo.display_name,
             branch: aug_module_branch.branch_name,

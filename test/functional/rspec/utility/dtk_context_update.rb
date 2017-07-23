@@ -20,7 +20,7 @@ service_name = 'context_iam'
 
 dtk_common = Common.new('', '')
 
-describe "context setup and update" do
+describe "Context setup and update" do
   before(:all) do
     puts '**********************************************', ''
     system("dtk service uninstall -y -r --force -d #{service_location}/#{service_name}")

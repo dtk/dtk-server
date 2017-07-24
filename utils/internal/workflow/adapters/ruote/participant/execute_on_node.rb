@@ -40,7 +40,7 @@ module DTK
           execution_context(task, workitem, task_start) do
             if action.execute_on_server?
               result = workflow.process_executable_action(task)
-              process_action_result!(workitem, action, result, task, task_id, task_end)
+              process_action_result!(workitem, action, result, task, task_id, task_end, false)
               delete_task_info(workitem)
               return reply_to_engine(workitem)
             end
@@ -57,22 +57,22 @@ module DTK
                   if has_action_results?(task, result)
                     task.add_action_results(result, action)
                   end
-
+                  port_msg = []
                   Log.info("Recevied port? #{msg[:body][:data][:data]}")
                   if msg[:body][:data][:data].is_a?(Hash)
                     msg_data = msg[:body][:data][:data]
                     if msg_data.key?("dynamic_attributes") && !msg_data["dynamic_attributes"]["dtk_debug_port"].nil?
-                    debug = true
-                    if method_name = action.action_method?
-                      debug = false if method_name[:method_name].eql?('delete')
-                    end
-                    port_msg = []                     
-                    $port_number = msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"] if $port_number.nil?
-                    Log.info("port number from arbiter: #{$port_number}")
+                      debug = true
+                      if method_name = action.action_method?
+                        debug = false if method_name[:method_name].eql?('delete')
+                      end
+                                        
+                      $port_number = msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"] if $port_number.nil?
+                      Log.info("port number from arbiter: #{$port_number}")
 
-                    port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
-                    task.add_event(:info, port_msg)
-                  end
+                      port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
+                      task.add_event(:info, port_msg)
+                    end
                   end
 
                   process_action_result!(workitem, action, result, task, task_id, task_end, debug)
@@ -157,7 +157,7 @@ module DTK
           Model.get_objs(task.model_handle, sp_hash)
         end
 
-        def process_action_result!(workitem, action, result, task, task_id, task_end, debug)
+        def process_action_result!(workitem, action, result, task, task_id, task_end, debug = {})
           if errors_in_result = errors_in_result?(result, action)
             event, errors = task.add_event_and_errors(:complete_failed, :config_agent, errors_in_result)
             if event

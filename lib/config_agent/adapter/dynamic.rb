@@ -35,9 +35,9 @@ module DTK; class ConfigAgent
         dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
         breakpoint  = task_info[:breakpoint]
-        
+
         debug_port_request = true if opts[:debug_port_request]
-        execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, component)
+        execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, component, opts = {breakpoint: breakpoint, assembly_instance: assembly_instance})
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
 
@@ -115,8 +115,9 @@ module DTK; class ConfigAgent
       module ExecutionEnvironment
         EPHEMERAL_CONTAINER = 'ephemeral_container'
         NATIVE = 'native'
-        def self.execution_environment(dynamic_provider, component)
-          if component.get_node.is_assembly_wide_node?
+        def self.execution_environment(dynamic_provider, component, opts = {})
+          update_dynamic_provider_attributes(dynamic_provider, opts) if opts[:breakpoint]
+          if component.get_node.is_assembly_wide_node?            
             docker_file = dynamic_provider.docker_file? || fail(Error, "Unexpected that 'dynamic_provider.docker_file?' is nil")
             { type: EPHEMERAL_CONTAINER, docker_file: docker_file }
           else
@@ -124,7 +125,16 @@ module DTK; class ConfigAgent
             { type: NATIVE, bash: bash }
           end
         end
+
+        def self.update_dynamic_provider_attributes(dynamic_provider, opts)
+          dynamic_provider.provider_attributes.each do |attr|
+            if attr[:display_name].eql?("gems") && !attr[:attribute_value].is_a?(Array)
+              attr[:attribute_value] << 'byebug' unless attr[:attribute_value].nil? || attr[:attribute_value].include?('byebug') 
+            end
+          end
+        end  
       end
+
 
       module Sanitize
         def self.sanitize_message(msg)

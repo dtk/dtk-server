@@ -61,8 +61,8 @@ module DTK; class Task
           task_hash = {
             display_name: internode_stage.name || DefaultNameProc.call(stage_index, size == 1),
             temporal_order: 'concurrent'
-          }          
-          if breakpoint = internode_stage.breakpoint
+          }        
+          if defined? internode_stage.breakpoint
             task_hash.merge!(breakpoint: true)
           end
           internode_stage_task = Task.create_stub(task_mh, task_hash)

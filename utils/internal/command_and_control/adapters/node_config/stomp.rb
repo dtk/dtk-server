@@ -173,7 +173,6 @@ module DTK
            callbacks = context[:callbacks]
            filter = filter_single_fact('pbuilderid', pbuilderid)
            mc_info = mc_info_for_config_agent(config_agent)
-           #result type r
            async_agent_call(mc_info[:agent], mc_info[:action], msg_content_with_port, filter, callbacks, context) 
         end
           

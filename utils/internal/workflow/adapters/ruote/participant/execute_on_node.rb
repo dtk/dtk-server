@@ -49,7 +49,6 @@ module DTK
             callbacks = {
               on_msg_received: proc do |msg|
                 debug = false # TODO: Move this
-                $port_number = nil
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
@@ -58,20 +57,30 @@ module DTK
                     task.add_action_results(result, action)
                   end
                   port_msg = []
-                  Log.info("Recevied port? #{msg[:body][:data][:data]}")
+                  Log.info("Recevied port? #{msg[:body][:data][:data]}")  
                   if msg[:body][:data][:data].is_a?(Hash)
                     msg_data = msg[:body][:data][:data]
+                    if !msg_data["dynamic_attributes"]["public_dns_name"].nil?
+                       $public_dns = msg_data["dynamic_attributes"]["public_dns_name"]
+                    end
                     if msg_data.key?("dynamic_attributes") && !msg_data["dynamic_attributes"]["dtk_debug_port"].nil?
                       debug = true
                       if method_name = action.action_method?
                         debug = false if method_name[:method_name].eql?('delete')
                       end
-                                        
-                      $port_number = msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"] if $port_number.nil?
-                      Log.info("port number from arbiter: #{$port_number}")
 
-                      port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
+                      if $port_number.nil? || !$port_number.eql?(msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"])
+                        $port_number = msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"] 
+                      end
+                      Log.info("port number from arbiter: #{$port_number}")
+                      if $public_dns.nil?
+                        port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."} 
+                      else
+                        port_msg = {info:"Please use 'byebug -R #{$public_dns}:#{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
+                      end
                       task.add_event(:info, port_msg)
+                    else
+                      $port_number = nil
                     end
                   end
 

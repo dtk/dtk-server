@@ -61,10 +61,11 @@ module DTK; class Task
           task_hash = {
             display_name: internode_stage.name || DefaultNameProc.call(stage_index, size == 1),
             temporal_order: 'concurrent'
-          }        
+          }
 
-          if internode_stage.breakpoint
+          if res = internode_stage.breakpoint rescue false
             task_hash.merge!(breakpoint: true)
+            Log.info("AAAAA")
           end
           internode_stage_task = Task.create_stub(task_mh, task_hash)
           all_actions += internode_stage.add_subtasks!(internode_stage_task, stage_index, assembly_idh)

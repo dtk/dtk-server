@@ -41,11 +41,14 @@ module DTK; class Task
             executable_action_type: executable_action ? Aux.demodulize(executable_action.class.to_s) : nil,
             executable_action: executable_action
           }
+
           cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message]
           cols.each { |col| row.merge!(col => hash_row[col]) }
           [:assembly_id, :node_id, :target_id].each do |col|
             row[col] = hash_row[col] || SQL::ColRef.null_id
           end
+          row[:breakpoint] = (hash_row[:breakpoint].nil? ? false : hash_row[:breakpoint]) 
+
           row
         end
         new_idhs = Model.create_from_rows(model_handle, rows, convert: true, do_not_update_info_table: true)

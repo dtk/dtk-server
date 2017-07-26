@@ -25,6 +25,7 @@ module DTK
           task_id, action, workflow, task, task_start, task_end = %w(task_id action workflow task task_start task_end).map { |k| params[k] }
           top_task = workflow.top_task
           task.update_input_attributes!() if task_start
+          breakpoint = task[:breakpoint]
           workitem.fields['guard_id'] = task_id # ${guard_id} is referenced if guard for execution of this
 
           failed_tasks = ret_failed_precondition_tasks(task, workflow.guards[:external])
@@ -39,7 +40,7 @@ module DTK
           execution_context(task, workitem, task_start) do
             if action.execute_on_server?
               result = workflow.process_executable_action(task)
-              process_action_result!(workitem, action, result, task, task_id, task_end)
+              process_action_result!(workitem, action, result, task, task_id, task_end, false)
               delete_task_info(workitem)
               return reply_to_engine(workitem)
             end
@@ -47,6 +48,7 @@ module DTK
             user_object  = CurrentSession.new.user_object()
             callbacks = {
               on_msg_received: proc do |msg|
+                debug = false # TODO: Move this
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
@@ -54,9 +56,38 @@ module DTK
                   if has_action_results?(task, result)
                     task.add_action_results(result, action)
                   end
-                  process_action_result!(workitem, action, result, task, task_id, task_end)
+                  port_msg = []
+                  Log.info("Recevied port? #{msg[:body][:data][:data]}")  
+                  if msg[:body][:data][:data].is_a?(Hash)
+                    msg_data = msg[:body][:data][:data]
+                    if !msg_data["dynamic_attributes"].nil? && !msg_data["dynamic_attributes"]["public_dns_name"].nil?
+                       $public_dns = msg_data["dynamic_attributes"]["public_dns_name"]
+                    end
+                    if msg_data.key?("dynamic_attributes") && !msg_data["dynamic_attributes"]["dtk_debug_port"].nil?
+                      debug = true
+                      if method_name = action.action_method?
+                        debug = false if method_name[:method_name].eql?('delete')
+                      end
+
+                      if $port_number.nil? || !$port_number.eql?(msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"])
+                        $port_number = msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"]
+                      end
+
+                      if $public_dns.nil?
+                        port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
+                      else
+                        port_msg = {info:"Please use 'byebug -R #{$public_dns}:#{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
+                        $public_dns = nil
+                      end
+                      task.add_event(:info, port_msg)
+                    else
+                      $port_number = nil
+                    end
+                  end
+
+                  process_action_result!(workitem, action, result, task, task_id, task_end, debug)
                   delete_task_info(workitem)
-                  reply_to_engine(workitem)
+                  reply_to_engine(workitem) unless debug
                 end
               end,
               on_timeout: proc do
@@ -83,6 +114,7 @@ module DTK
                 end
               end
             }
+
             receiver_context = { callbacks: callbacks, expected_count: 1 }
             workflow.initiate_executable_action(task, receiver_context)
           end
@@ -135,7 +167,7 @@ module DTK
           Model.get_objs(task.model_handle, sp_hash)
         end
 
-        def process_action_result!(workitem, action, result, task, task_id, task_end)
+        def process_action_result!(workitem, action, result, task, task_id, task_end, debug = {})
           if errors_in_result = errors_in_result?(result, action)
             event, errors = task.add_event_and_errors(:complete_failed, :config_agent, errors_in_result)
             if event
@@ -143,9 +175,13 @@ module DTK
             end
             cancel_upstream_subtasks(workitem)
             set_result_failed(workitem, result, task)
-          else
+          else 
             event = task.add_event(:complete_succeeded, result)
             log_participant.end(:complete_succeeded, task_id: task_id)
+            if debug
+              set_result_debugging(workitem, result, task, action) 
+              task_end = false
+            end
             set_result_succeeded(workitem, result, task, action) if task_end
             action.get_and_propagate_dynamic_attributes(result)
           end

@@ -141,6 +141,8 @@ module DTK; class Task
         elsif includes_status?(status_array, :failed)
           # if one failed then parent cancelled 
           Status::Type.failed
+        elsif includes_status?(status_array, :debugging)
+          Status::Type.debugging
         elsif includes_status?(status_array, :preconditions_failed)
           # if one failed then parent cancelled 
           Status::Type.failed

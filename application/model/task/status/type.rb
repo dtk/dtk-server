@@ -24,7 +24,8 @@ class DTK::Task::Status
          'succeeded',             
          'failed',
          'cancelled',  
-         'preconditions_failed'
+         'preconditions_failed',
+         'debugging'
         ]
 
     StatusTypes.each do |status|

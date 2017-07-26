@@ -29,7 +29,7 @@ module DTK
          when :start, :initialize_failed
           StartCreateNode.create_start?(action)
          when :complete_succeeded, :complete_failed, :complete_timeout
-          CompleteCreateNode.create_complete?(action, event_type, result)
+          CompleteCreateNode.create_complete?(action, event_type, result)          
         end
       elsif action.is_a?(Task::Action::ConfigNode)
         case event_type
@@ -37,6 +37,8 @@ module DTK
           StartConfigNode.create_start?(action)
          when :complete_succeeded, :complete_failed, :complete_timeout
           CompleteConfigNode.create_complete?(action, event_type, result)
+         when :info
+          CompleteConfigNode.info?(action, event_type, result)
         end
       end
     end
@@ -46,6 +48,9 @@ module DTK
         is_no_op?(action) ? nil : new(action)
       end
       def self.create_complete?(action, status, result)
+        is_no_op?(action) ? nil : new(action, status, result)
+      end
+      def self.info?(action, status, result)
         is_no_op?(action) ? nil : new(action, status, result)
       end
 
@@ -150,6 +155,9 @@ module DTK
         end
         dyn_attrs = dynamic_attributes(status, result)
         hash.merge!(dynamic_attributes: dyn_attrs) unless dyn_attrs.empty?
+        if hash[:event] == "info"
+          hash[:event] = result
+        end
         super(hash)
       end
 

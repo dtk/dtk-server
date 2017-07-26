@@ -80,6 +80,21 @@ module DTK; class Task
       ret
     end
 
+    def get_ndx_info(task_idhs)
+      ret = {}
+      return ret if task_idhs.empty?
+      sp_hash = {
+        cols:   [:task_id, :content],
+        filter: [:oneof, :task_id, task_idhs.map{ |idh| idh.get_id() }]
+      }
+      task_error_mh = task_idhs.first.createMH(:task_event)
+      get_objs(task_error_mh, sp_hash).each do |r|
+        task_id = r[:task_id]
+        (ret[task_id] ||= []) << r[:content]
+      end
+      ret
+    end
+
     def get_ndx_logs(task_idhs)
       ret = {}
       return ret if task_idhs.empty?

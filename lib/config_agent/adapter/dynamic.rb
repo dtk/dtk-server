@@ -120,7 +120,8 @@ module DTK; class ConfigAgent
         EPHEMERAL_CONTAINER = 'ephemeral_container'
         NATIVE = 'native'
         def self.execution_environment(dynamic_provider, component, opts = {})
-          update_dynamic_provider_attributes(dynamic_provider, opts) if opts[:breakpoint]
+          # TODO: this should only be called for ruby provider
+          ActionDef::DynamicProvider.update_gem_attribute_for_byebug!(dynamic_provider.provider_attributes) if opts[:breakpoint]
           if component.get_node.is_assembly_wide_node?            
             docker_file = dynamic_provider.docker_file? || fail(Error, "Unexpected that 'dynamic_provider.docker_file?' is nil")
             { type: EPHEMERAL_CONTAINER, docker_file: docker_file }
@@ -130,13 +131,6 @@ module DTK; class ConfigAgent
           end
         end
 
-        def self.update_dynamic_provider_attributes(dynamic_provider, opts)
-          dynamic_provider.provider_attributes.each do |attr|
-            if attr[:display_name].eql?("gems") && !attr[:attribute_value].is_a?(Array)
-              attr[:attribute_value] << 'byebug' unless attr[:attribute_value].nil? || attr[:attribute_value].include?('byebug') 
-            end
-          end
-        end  
       end
 
 

@@ -27,8 +27,9 @@ module DTK
           else
             @docker_file_set = true
             if dockerfile_template = (@container_component && @container_component.dockerfile_template?) 
+              # TODO: should this case on whether there is byebug enabled for this step
+              ActionDef::DynamicProvider.update_gem_attribute_for_byebug!(provider_attributes)
               attribute_values = provider_attributes.inject({}) { |h, attr| h.merge(attr.display_name => attr[:attribute_value]) }
-              provider_attributes[1][:attribute_value] << 'byebug' #Check if breakpoint is true
               @docker_file = MustacheTemplate.render(dockerfile_template, attribute_values)
             end
           end

@@ -61,6 +61,16 @@ module DTK
       def action_ref_print_form
         "Action method '#{@method_name}' on component '#{@component_template.display_name_print_form}'"
       end
+
+      # TODO: this should only be applied to ruby provider
+      def self.update_gem_attribute_for_byebug!(provider_attributes)
+        provider_attributes.each do |attr|
+          if attr.display_name.eql?('gems') 
+            attr[:attribute_value] ||= []
+            attr[:attribute_value] << 'byebug' unless attr[:attribute_value].include?('byebug') 
+          end
+        end
+      end  
       
       private
 

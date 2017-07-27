@@ -244,30 +244,6 @@ module DTK; class Task
       ret
     end
 
-    def self.check_for_breakpoint(serialized_content, stages_config_nodes_task)
-        stages_config_nodes_task.each do |action|
-        if executable_action = action[:subtasks].first[:executable_action]
-          executable_action[:component_actions].each do |ex|
-            ex[:attributes].each do |attributes|
-             path = attributes[:external_ref][:path]
-             external_ref_name = string_between_markers(path, "[", "]")
-             serialized_content[:subtasks].each do |subtask|
-                unless subtask[:ordered_components].nil?
-                  component = subtask[:ordered_components].first  
-                  unless component.index('[').nil?
-                    cmp = component.slice(0..(component.index('[') - 1))
-                    cmp.gsub!("::","__")
-                    if cmp.include?(external_ref_name) && attributes[:display_name].include?("breakpoint")
-                      attributes[:value_asserted] = subtask[:breakpoint] unless subtask[:breakpoint].nil?
-                    end
-                  end
-                end
-             end
-            end
-          end
-        end
-      end
-    end
 
 
     def self.string_between_markers(string, marker1, marker2) 

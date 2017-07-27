@@ -205,55 +205,6 @@ module DTK
        rest_ok_response response    
       end
 
-
-      def start
-        assembly_instance = assembly_instance()
-
-        # filters only stopped nodes for this assembly
-        nodes, is_valid, error_msg = assembly_instance.nodes_valid_for_stop_or_start(nil, :stopped)
-
-        unless is_valid
-          Log.info(error_msg)
-          return rest_ok_response(errors: [error_msg])
-        end
-
-        opts = {}
-        if (nodes.size == 1)
-          opts.merge!(node: nodes.first)
-        else
-          opts.merge!(nodes: nodes)
-        end
-
-        task = Task.task_when_nodes_ready_from_assembly(assembly_instance, :assembly, opts)
-        task.save!
-
-        Node.start_instances(nodes)
-
-        execute_task(task)
-
-        rest_ok_response task_id: task.id
-      end
-
-      def stop
-        assembly_instance = assembly_instance()
-
-        # cancel task if running on the assembly
-        if running_task = most_recent_task_is_executing?(assembly_instance)
-          cancel_task(running_task.id)
-        end
-
-        nodes, is_valid, error_msg = assembly_instance.nodes_valid_for_stop_or_start(nil, :running)
-
-        unless is_valid
-          Log.info(error_msg)
-          return rest_ok_response(errors: [error_msg])
-        end
-
-        Node.stop_instances(nodes)
-
-        rest_ok_response
-      end
-
       def update_from_repo
         commit_sha = required_request_params(:commit_sha)
         diff_result = CommonModule::Update::ServiceInstance.update_from_repo(get_default_project, commit_sha, service_instance)

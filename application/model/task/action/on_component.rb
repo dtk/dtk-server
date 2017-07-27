@@ -125,8 +125,13 @@ module DTK; class Task
         self[:params] || {}
       end
 
+      # TODO: unify with code ConfigAgent.update_attribute_value!(attribute) 
       def attribute_and_parameter_values
-        params.merge(attributes.inject({}) { |h, attr| h.merge(attr[:display_name] => attr[:attribute_value]) })
+        attribute_value_pairs = attributes.inject({}) do |h, attr| 
+          # Attributes may be not synced with db so updating them with attr.update_attribute_value!
+          h.merge(attr.display_name => attr.update_attribute_value!)
+        end
+        params.merge(attribute_value_pairs)
       end
 
       def action_def(opts = {})

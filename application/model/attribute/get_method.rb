@@ -79,6 +79,13 @@ module DTK; class Attribute
         end
       end
 
+      # updates attribute value from db
+      def update_attribute_value!
+        [:value_derived, :value_asserted].each { |k| delete(k) }
+        update_obj!(:value_derived, :value_asserted)
+        self[:attribute_value]
+      end
+
       private
 
       def ret_implementation_attribute_name_and_type

@@ -235,7 +235,7 @@ module DTK; class Task
           columns: [:id, :display_name, parent_field_name, :external_ref, :attribute_value, :required, :dynamic, :dynamic_input, :port_type, :port_is_external, :data_type, :semantic_type, :hidden]
       }
       serialized_content = DTK::Task::Template::ConfigComponents::Persistence::AssemblyActions.get_serialized_content_from_assembly(assembly, task_action = nil, task_params: opts[:task_params])
-      check_for_breakpoint(serialized_content, stages_config_nodes_task)
+      
       ###### end: TODO: DTK-2974
 
       ret.add_subtask(create_nodes_task) if create_nodes_task

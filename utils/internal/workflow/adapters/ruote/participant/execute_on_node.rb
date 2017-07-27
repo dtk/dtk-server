@@ -61,7 +61,7 @@ module DTK
                   if msg[:body][:data][:data].is_a?(Hash)
                     msg_data = msg[:body][:data][:data]
                     if !msg_data["dynamic_attributes"].nil? && !msg_data["dynamic_attributes"]["public_dns_name"].nil?
-                       $public_dns = msg_data["dynamic_attributes"]["public_dns_name"]
+                       $public_dns = msg_data["dynamic_attributes"]["public_dns_name"]                      
                     end
                     if msg_data.key?("dynamic_attributes") && !msg_data["dynamic_attributes"]["dtk_debug_port"].nil?
                       debug = true
@@ -77,16 +77,17 @@ module DTK
                         port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
                       else
                         port_msg = {info:"Please use 'byebug -R #{$public_dns}:#{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
-                        $public_dns = nil
                       end
                       task.add_event(:info, port_msg)
                     else
                       $port_number = nil
                     end
                   end
-
+                  
                   process_action_result!(workitem, action, result, task, task_id, task_end, debug)
-                  delete_task_info(workitem)
+                  delete_task_info(workitem)               
+                  status_array = top_task.subtasks.map {|st| st.get_field?(:status)}
+                  $public_dns = nil if status_array.all?
                   reply_to_engine(workitem) unless debug
                 end
               end,

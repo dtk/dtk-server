@@ -144,7 +144,7 @@ module AssemblyAndServiceOperationsMixin
     max_num_of_retries = 50
 
     while (count < max_num_of_retries)
-      sleep 5
+      sleep 10
       count += 1
       task_status_response = send_request("/rest/api/v1/services/#{service_instance_name}/task_status", {}, 'get')
       if task_status_response['status'] == 'ok'
@@ -175,7 +175,7 @@ module AssemblyAndServiceOperationsMixin
     max_num_of_retries = 50
 
     while (count < max_num_of_retries)
-      sleep 5
+      sleep 10
       count += 1
       task_status_response = send_request("/rest/api/v1/services/#{service_instance_name}/task_status", {}, 'get')
 

@@ -63,9 +63,9 @@ module DTK; class Task
             temporal_order: 'concurrent'
           }
 
-          if res = internode_stage.breakpoint rescue false
+          if internode_stage.respond_to?(:has_breakpoint?) and internode_stage.has_breakpoint?
             task_hash.merge!(breakpoint: true)
-            Log.info("AAAAA")
+            Log.info("Found breakpoint")
           end
           internode_stage_task = Task.create_stub(task_mh, task_hash)
           all_actions += internode_stage.add_subtasks!(internode_stage_task, stage_index, assembly_idh)

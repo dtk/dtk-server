@@ -27,7 +27,9 @@ module DTK; class Task; class Template; class Stage
         end
       end
 
-      attr_reader :breakpoint
+      def has_breakpoint?
+        @breakpoint
+      end
 
       def serialization_form(opts = {})
         if opts[:form] == :explicit_instances

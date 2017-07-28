@@ -61,12 +61,11 @@ module DTK
                   if msg_data.kind_of?(::Hash)
                     dynamic_attributes = msg_data['dynamic_attributes'] || {}
 
-                    if public_dns_name = dynamic_attributes['public_dns_name']
+                    if public_dns_name = public_dns_name?(action)
                       $public_dns = public_dns_name
                     end
                     
                     if dtk_debug_port = dynamic_attributes['dtk_debug_port']
-                      $remember = true
                       debug = true
                       if method_name = action.action_method?
                         debug = false if method_name[:method_name].eql?('delete')
@@ -80,7 +79,7 @@ module DTK
                       port_msg_hash = { info: "Please use 'byebug -R #{byebug_host_port_ref}' to debug current action." }
                       task.add_event(:info, port_msg_hash)
                     else
-                      $public_dns = nil unless $remember
+                      $public_dns = nil
                       $port_number = nil
                     end
                   end
@@ -167,6 +166,17 @@ module DTK
             filter: [:and, [:eq, :status, 'failed'], [:oneof, :id, guard_task_idhs.map(&:get_id)]]
           }
           Model.get_objs(task.model_handle, sp_hash)
+        end
+
+        def public_dns_name?(action)
+          if node = action[:node]
+            unless node.is_assembly_wide_node? or node.is_node_group?
+              host_addresses = node.node_component.attribute_value?(:host_addresses_ipv4)
+              if host_addresses.size == 1
+                host_addresses.first
+              end
+            end
+          end
         end
 
         def process_action_result!(workitem, action, result, task, task_id, task_end, debug = {})

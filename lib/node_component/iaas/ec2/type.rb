@@ -21,8 +21,6 @@ module DTK
       require_relative('type/instance')
       require_relative('type/group')
 
-
-
     end
   end
 end      

@@ -459,10 +459,7 @@
       "id",
       "base_component",
       "type",
-      "dependent_component",
-      "satisfied_by",
-      "required",
-      "description"
+      "satisfied_by"
     ],
     "mapping": {
       "id": "dtk_id",

@@ -19,10 +19,12 @@ module DTK; class ConfigAgent
   module Adapter
     class Dynamic < ConfigAgent
       require_relative('dynamic/dynamic_attributes')
+      require_relative('dynamic/symbolic_debugging')
       require_relative('dynamic/error_results')
       require_relative('dynamic/attribute_request_form')
 
       include DynamicAttributes::Mixin
+      include SymbolicDebugging::Mixin
       include ErrorResults::Mixin
 
       def ret_msg_content(task_info, opts = {})

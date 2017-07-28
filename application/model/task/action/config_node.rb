@@ -123,6 +123,14 @@ module DTK; class Task
         true
       end
 
+      def process_if_involved_in_symbolic_debugging(task, result)
+        if config_agent_object.respond_to?(:process_if_involved_in_symbolic_debugging)
+          if payload = result[:data]
+            config_agent_object.process_if_involved_in_symbolic_debugging(task, self, payload)
+          end
+        end
+      end
+
       def get_dynamic_attributes(result)
         ret = []
 

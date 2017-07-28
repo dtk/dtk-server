@@ -26,6 +26,10 @@ module DTK
             []
           end
         end 
+
+        def dynamic_attribute_name_raw_value_hash(payload)
+          (payload[:data] || {})['dynamic_attributes'] || {}
+        end
       end      
       
       def self.parse_dynamic_attributes(dyn_attrs, action)

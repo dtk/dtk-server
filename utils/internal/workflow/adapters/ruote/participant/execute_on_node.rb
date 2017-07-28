@@ -57,13 +57,13 @@ module DTK
                     task.add_action_results(result, action)
                   end
                   port_msg = []
-                  Log.info("Recevied port? #{msg[:body][:data][:data]}")  
                   if msg[:body][:data][:data].is_a?(Hash)
                     msg_data = msg[:body][:data][:data]
                     if !msg_data["dynamic_attributes"].nil? && !msg_data["dynamic_attributes"]["public_dns_name"].nil?
                        $public_dns = msg_data["dynamic_attributes"]["public_dns_name"]                      
                     end
                     if msg_data.key?("dynamic_attributes") && !msg_data["dynamic_attributes"]["dtk_debug_port"].nil?
+                      $remember = true
                       debug = true
                       if method_name = action.action_method?
                         debug = false if method_name[:method_name].eql?('delete')
@@ -72,7 +72,7 @@ module DTK
                       if $port_number.nil? || !$port_number.eql?(msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"])
                         $port_number = msg[:body][:data][:data]["dynamic_attributes"]["dtk_debug_port"]
                       end
-
+                      $public_dns = nil unless $remember
                       if $public_dns.nil?
                         port_msg = {info:"Please use 'byebug -R #{$port_number}' to Debug. Step into 'DTKModule.execute(instance_attributes)' to Debug current action."}
                       else
@@ -80,6 +80,7 @@ module DTK
                       end
                       task.add_event(:info, port_msg)
                     else
+                      $public_dns = nil unless $remember
                       $port_number = nil
                     end
                   end

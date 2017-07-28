@@ -26,37 +26,23 @@ module DTK; class ConfigAgent
       include ErrorResults::Mixin
 
       def ret_msg_content(task_info, opts = {})
+        breakpoint            = task_info[:breakpoint]
+        debug_port_request    = (opts[:debug_port_request] ? true : nil)
         assembly_instance     = opts[:assembly]
         component_action      = task_info[:component_actions].first
         method_name           = component_action.method_name? || 'create'
         component             = component_action.component
+        node                  = task_info[:node]
         component_template    = component_template(component)
         service_instance_name = assembly_instance.display_name
-        dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
-        dynamic_provider.raise_error_if_not_valid
-        breakpoint  = task_info[:breakpoint]
 
-        debug_port_request = true if opts[:debug_port_request]
-        execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, component, opts = {breakpoint: breakpoint, assembly_instance: assembly_instance})
+        dynamic_provider      = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
+        dynamic_provider.raise_error_if_not_valid
+
+        execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, node, breakpoint: breakpoint)
+
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
-
-        if debug_port_request
-          msg = {
-          protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
-          provider_type: dynamic_provider.type,
-          service_instance: service_instance_name,
-          component: component_request_form(component_action),
-          attributes: { 
-            provider: provider_attributes,
-            instance: instance_attributes,
-          },
-          modules: get_base_and_dependent_modules(component, assembly_instance),
-          execution_environment: execution_environment,
-            debug_port_request: debug_port_request
-          }
-          return msg
-        end
 
         msg = {
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
@@ -69,12 +55,14 @@ module DTK; class ConfigAgent
           },
           modules: get_base_and_dependent_modules(component, assembly_instance),
           execution_environment: execution_environment,
-          breakpoint: breakpoint,
-          debug_port_request: opts[:debug_port_request],
-          debug_port_received: $port_number
-        }           
+          debug_port_request: debug_port_request
+        }
+        unless debug_port_request
+          msg.merge!(breakpoint: breakpoint, debug_port_received: $port_number)
+        end
         msg
       end
+
       ARBITER_REQUEST_PROTOCOL_VERSION = 1
       
       def type
@@ -119,10 +107,12 @@ module DTK; class ConfigAgent
       module ExecutionEnvironment
         EPHEMERAL_CONTAINER = 'ephemeral_container'
         NATIVE = 'native'
-        def self.execution_environment(dynamic_provider, component, opts = {})
+        # opts can have keys
+        #   :breakpoint (Boolean)
+        def self.execution_environment(dynamic_provider, node, opts = {})
           # TODO: this should only be called for ruby provider
           ActionDef::DynamicProvider.update_gem_attribute_for_byebug!(dynamic_provider.provider_attributes) if opts[:breakpoint]
-          if component.get_node.is_assembly_wide_node?            
+          if node.is_assembly_wide_node?            
             docker_file = dynamic_provider.docker_file? || fail(Error, "Unexpected that 'dynamic_provider.docker_file?' is nil")
             { type: EPHEMERAL_CONTAINER, docker_file: docker_file }
           else

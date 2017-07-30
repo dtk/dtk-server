@@ -168,7 +168,6 @@ module DTK
         end
 
         def public_dns_name?(action)
-          require 'ruby-debug' ; debugger
           if node = action[:node]
             unless node.is_assembly_wide_node?
               # TODO: rescue block until full testing of paths

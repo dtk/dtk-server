@@ -150,6 +150,7 @@ module DTK
       end
 
       def nodes
+        require 'ruby-debug'; debugger
         rest_ok_response assembly_instance.info_about(:nodes), datatype: :node
       end
 

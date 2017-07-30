@@ -89,7 +89,8 @@ module DTK
 
           action_info = Info.new(component_type, component_title, method_name, node: node)
           if node.is_node_group?
-            action_info_array += node_group_member_actions
+            # TODO: DTK-3123; need to write node_group_member_actions
+            # action_info_array += node_group_member_actions
           else
             action_info_array << action_info
           end

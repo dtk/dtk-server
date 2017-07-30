@@ -56,7 +56,7 @@ module DTK
                   if has_action_results?(task, result)
                     task.add_action_results(result, action)
                   end
-        
+
                   msg_data = (result[:data] || {})[:data]
                   if msg_data.kind_of?(::Hash)
                     dynamic_attributes = msg_data['dynamic_attributes'] || {}
@@ -169,11 +169,18 @@ module DTK
         end
 
         def public_dns_name?(action)
+          require 'ruby-debug' ; debugger
           if node = action[:node]
-            unless node.is_assembly_wide_node? or node.is_node_group?
-              host_addresses = node.node_component.attribute_value?(:host_addresses_ipv4)
-              if host_addresses.size == 1
-                host_addresses.first
+            unless node.is_assembly_wide_node?
+              # TODO: rescue block until full testing of paths
+              begin
+                host_addresses = NodeComponent.host_addresses_ipv4(node)
+                if host_addresses.size == 1
+                  host_addresses.first
+                end
+              rescue => e
+                Log.error("Trapped error during host_addresses_ipv4: #{e.inspect}")
+                nil
               end
             end
           end

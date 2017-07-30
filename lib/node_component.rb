@@ -56,6 +56,37 @@ module DTK
       node.display_name
     end
 
+    def self.host_addresses_ipv4(node)
+      if node.is_assembly_wide_node? 
+        []
+      elsif node.is_node_group?
+        Log.error("Unexpected that node group passed to host_addresses_ipv4")  
+        []
+      elsif node_group_parent = assembly_from_node(node).is_node_group_member?(node.id_handle)
+        host_addresses_ipv4_when_node_group_member(node, node_group_parent)
+      else
+        node_component_from_node(node).attribute_value?(:host_addresses_ipv4)
+      end
+    end
+
+    def self.host_addresses_ipv4_when_node_group_member(ngm, node_group_parent)
+      ngm_name = ngm.display_name
+      matched_info = node_component_from_node(node_group_parent).instance_attributes_array.select do |ngm_info | 
+        ngm_info[:display_name] == ngm_name 
+      end
+      case matched_info.size
+      when 0
+        Log.error("Unexpected that no matches to '#{ngm_name}'")
+        []
+      when 1
+        matched_info.first[:host_addresses_ipv4] || []
+      else
+        Log.error("Unexpected that there are multiple matches to '#{ngm_name}'")
+        []
+      end
+    end
+    private_class_method :host_addresses_ipv4_when_node_group_member
+
     # returns an array of DTK::NodeComponents
     def self.node_components(nodes, assembly)
       # indexed by display_name

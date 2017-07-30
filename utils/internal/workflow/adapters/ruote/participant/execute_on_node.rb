@@ -60,12 +60,11 @@ module DTK
                   msg_data = (result[:data] || {})[:data]
                   if msg_data.kind_of?(::Hash)
                     dynamic_attributes = msg_data['dynamic_attributes'] || {}
-
-                    if public_dns_name = public_dns_name?(action)
-                      $public_dns = public_dns_name
-                    end
-                    
                     if dtk_debug_port = dynamic_attributes['dtk_debug_port']
+                      if public_dns_name = public_dns_name?(action)
+                        $public_dns = public_dns_name
+                      end
+
                       debug = true
                       if method_name = action.action_method?
                         debug = false if method_name[:method_name].eql?('delete')

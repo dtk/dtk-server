@@ -83,6 +83,12 @@ module DTK
                     end
                   end
 
+                  if msg_data.kind_of?(::Array) && msg_data.first.has_key?(:error)
+                    Log.info("reset port and public_dns")
+                    $public_dns = nil
+                    $port_number = nil
+                  end
+
                   process_action_result!(workitem, action, result, task, task_id, task_end, debug)
                   delete_task_info(workitem)               
                   status_array = top_task.subtasks.map {|st| st.get_field?(:status)}

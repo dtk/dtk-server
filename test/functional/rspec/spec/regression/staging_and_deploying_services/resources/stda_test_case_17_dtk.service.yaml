@@ -19,7 +19,7 @@ components:
       tags:
         Name: dtk:stda_test_case_17_instance:node
     links:
-    - target_iam/ec2::profile[aws-target]
+    - context_iam/ec2::profile[aws-target]
 actions:
   create:
     subtasks:

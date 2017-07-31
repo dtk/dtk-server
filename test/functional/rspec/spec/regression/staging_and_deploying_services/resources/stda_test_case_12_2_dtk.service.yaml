@@ -23,7 +23,7 @@ components:
       tags:
         Name: dtk:stda_test_case_12:single_node
     links:
-    - target_iam/ec2::profile[aws-target]
+    - context_iam/ec2::profile[aws-target]
     components:
     - stdlib
     - wget:

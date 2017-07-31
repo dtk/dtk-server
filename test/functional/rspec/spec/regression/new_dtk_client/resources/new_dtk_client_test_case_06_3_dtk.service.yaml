@@ -9,7 +9,7 @@ dependencies:
   puppet/nginx: master
   nanliu/staging: master
   r8/stdlib: master
-  dtk-examples/wordpress: 1.2.0
+  dtk-examples/wordpress: 1.6.0
 components:
 - ec2::node[wordpress]:
     attributes:
@@ -21,7 +21,7 @@ components:
       tags:
         Name: dtk:new_dtk_client_test_case_06:wordpress
     links:
-    - target_iam/ec2::profile[aws-target]
+    - context_iam/ec2::profile[aws-target]
     components:
     - mysql::server:
         attributes:

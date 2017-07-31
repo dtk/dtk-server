@@ -19,7 +19,7 @@ components:
       tags:
         Name: dtk:stda_test_case_8:elements
     links:
-    - target_iam/ec2::profile[aws-target]
+    - context_iam/ec2::profile[aws-target]
     components:
     - stdlib
 actions:

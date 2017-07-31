@@ -19,7 +19,7 @@ components:
       tags:
         Name: dtk:new_dtk_client_test_case_08:node
     links:
-    - target_iam/ec2::profile[aws-target]
+    - context_iam/ec2::profile[aws-target]
     components:
     - stdlib
 actions:

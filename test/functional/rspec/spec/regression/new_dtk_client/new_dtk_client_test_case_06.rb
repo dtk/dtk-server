@@ -45,7 +45,7 @@ describe "(New DTK client) Test Case 6: Test various options for adding/removing
   end
 
   context "Install module from dtkn" do
-    include_context "Install module from dtkn", remote_module, remote_module_location, '1.5.0'
+    include_context "Install module from dtkn", remote_module, remote_module_location, '1.6.0'
   end
 
   context "List assemblies contained in this module" do

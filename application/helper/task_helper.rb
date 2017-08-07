@@ -26,7 +26,7 @@ module Ramaze::Helper
 
     def most_recent_task_is_executing?(assembly)
       if task = ::DTK::Task.get_top_level_most_recent_task(model_handle(:task), [:eq, :assembly_id, assembly.id()])
-        task.has_status?(:executing) && task
+        task.has_status?(:executing) && task || task.has_status?(:debugging) && task
       end
     end
 

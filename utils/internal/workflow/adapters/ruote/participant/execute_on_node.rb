@@ -48,7 +48,9 @@ module DTK
             user_object  = CurrentSession.new.user_object()
             callbacks = {
               on_msg_received: proc do |msg|
-                debug = false # TODO: Move this
+                debug = false
+                port_number = nil
+                public_dns = nil
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
@@ -56,13 +58,13 @@ module DTK
                   if has_action_results?(task, result)
                     task.add_action_results(result, action)
                   end
-
+                  
                   msg_data = (result[:data] || {})[:data]
                   if msg_data.kind_of?(::Hash)
                     dynamic_attributes = msg_data['dynamic_attributes'] || {}
                     if dtk_debug_port = dynamic_attributes['dtk_debug_port']
                       if public_dns_name = public_dns_name?(action)
-                        $public_dns = public_dns_name
+                        public_dns = public_dns_name
                       end
 
                       debug = true
@@ -70,29 +72,35 @@ module DTK
                         debug = false if method_name[:method_name].eql?('delete')
                       end
 
-                      if $port_number.nil? || !$port_number.eql?(dtk_debug_port)
-                        $port_number = dtk_debug_port
+                      if port_number.nil? || !port_number.eql?(dtk_debug_port)
+                        port_number = dtk_debug_port
                       end
 
-                      byebug_host_port_ref = ($public_dns.nil? ? $port_number : "#{$public_dns}:#{$port_number}")
+                      byebug_host_port_ref = (public_dns.nil? ? port_number : "#{public_dns}:#{port_number}")
                       port_msg_hash = { info: "Please use 'byebug -R #{byebug_host_port_ref}' to debug current action." }
-                      task.add_event(:info, port_msg_hash)
+
+                      # If event exists, update it
+                      if event = TaskEvent.get_event?(task)
+                        event.update_content(task, event.id, port_msg_hash)
+                      else
+                        task.add_event(:info, port_msg_hash)
+                      end
                     else
-                      $public_dns = nil
-                      $port_number = nil
+                      public_dns = nil
+                      port_number = nil
                     end
                   end
 
                   if msg_data.kind_of?(::Array) && msg_data.first.has_key?(:error)
                     Log.info("reset port and public_dns")
-                    $public_dns = nil
-                    $port_number = nil
+                    public_dns = nil
+                    port_number = nil
                   end
 
                   process_action_result!(workitem, action, result, task, task_id, task_end, debug)
                   delete_task_info(workitem)               
                   status_array = top_task.subtasks.map {|st| st.get_field?(:status)}
-                  $public_dns = nil if status_array.all?
+                  public_dns = nil if status_array.all?
                   reply_to_engine(workitem) unless debug
                 end
               end,

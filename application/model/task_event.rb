@@ -29,7 +29,7 @@ module DTK
          when :start, :initialize_failed
           StartCreateNode.create_start?(action)
          when :complete_succeeded, :complete_failed, :complete_timeout
-          CompleteCreateNode.create_complete?(action, event_type, result)          
+          CompleteCreateNode.create_complete?(action, event_type, result)
         end
       elsif action.is_a?(Task::Action::ConfigNode)
         case event_type
@@ -41,6 +41,23 @@ module DTK
           CompleteConfigNode.info?(action, event_type, result)
         end
       end
+    end
+
+    def self.get_event?(task)
+      sp_hash = {
+        cols:   [:id, :task_id, :content],
+        filter: [:and, [:eq, :task_id, task.id], [:eq, :type, 'info']]
+      }
+      task_event_mh = task.id_handle.createMH(:task_event)
+      get_obj(task_event_mh, sp_hash)
+      # .each do |r|
+      #   task_id = r[:task_id]
+      #   (ret[task_id] ||= []) << r[:content]
+      # end
+    end
+
+    def self.update_content(task, event_id, content)
+      Model.update_from_rows(task.model_handle.createMH(:task_event), [{id: event_id, content: {event: content}}])
     end
 
     class Event < HashObject

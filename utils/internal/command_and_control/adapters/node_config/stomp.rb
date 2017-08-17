@@ -293,7 +293,11 @@ module DTK
       def self.status_code_errors(result)
         error_message = 
           if message = result[:statusmsg] || result[:error_type]
-            "Action failed with status code #{result[:statuscode]}: #{message}"
+            if message.include?("Deadline")
+              "#{message}, please run 'dtk service converge' again"
+            else
+              "Action failed with status code #{result[:statuscode]}: #{message}"
+            end
           else
             # TODO: legacy that needs to be cleaned up
             action_results = (result[:data] || {})[:data] || []

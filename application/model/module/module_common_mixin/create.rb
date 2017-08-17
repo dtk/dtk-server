@@ -44,16 +44,18 @@ module DTK; module ModuleCommonMixin
 
       local_repo_obj = 
         if module_obj && opts[:common_module]
-          # base_branch just needs to be a random branch on module_obj
-          base_branch = module_obj.get_module_branches.first
-          repo = module_obj.get_repo
-          repo.merge!(branch_name: local.branch_name)
-          add_branch_opts = { delete_existing_branch: opts[:delete_existing_branch] }
-          RepoManager.add_branch_and_push?(local.branch_name, add_branch_opts, base_branch)
-          repo.create_subclass_obj(:repo_with_branch)
+          if repo = module_obj.get_repo?
+            repo.merge!(branch_name: local.branch_name)
+            add_branch_opts = { delete_existing_branch: opts[:delete_existing_branch] }
+            # base_branch just needs to be a random branch on module_obj
+            base_branch = module_obj.get_module_branches.first
+            RepoManager.add_branch_and_push?(local.branch_name, add_branch_opts, base_branch)
+            repo.create_subclass_obj(:repo_with_branch)
+          else
+            create_module__create_repo(local, opts)
+          end
         else
-          create_repo_opts = Aux.hash_subset(opts, [:no_initial_commit, :add_remote_files_info]).merge(delete_if_exists: true)
-          create_repo(local, create_repo_opts)
+          create_module__create_repo(local, opts)
         end
 
       repo_idh = local_repo_obj.id_handle
@@ -70,6 +72,12 @@ module DTK; module ModuleCommonMixin
       opts_info = { version: local.version, module_namespace: local.namespace }
       module_and_branch_info.merge(module_repo_info: module_repo_info(local_repo_obj, module_and_branch_info, opts_info))
     end
+
+    def create_module__create_repo(local, opts = {})
+      create_repo_opts = Aux.hash_subset(opts, [:no_initial_commit, :add_remote_files_info]).merge(delete_if_exists: true)
+      create_repo(local, create_repo_opts)
+    end
+    private :create_module__create_repo
 
     # opts can have keys:
     #   :no_initial_commit

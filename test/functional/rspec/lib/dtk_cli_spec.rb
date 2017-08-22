@@ -190,13 +190,13 @@ shared_context 'Get task status details' do |service_instance_location, stage_nu
         puts 'Returned expected task action details!'
         if ((output[:stderr].nil?) && (!extracted_stage_output.include? 'STDERR'))
           correct_task_action_outputs = true
-        elsif extracted_stage_output.include? "STDERR: #{output[:stderr]}"
+        elsif extracted_stage_output.include? "STDERR:\n  #{output[:stderr]}"
           correct_task_action_outputs = true
         else
           puts 'Returned stderr was not matched with expected one!'
           correct_task_action_outputs = false
+          break
         end
-        break
       else
         puts 'Returned task action details is not the expected one!'
         correct_task_action_outputs = false

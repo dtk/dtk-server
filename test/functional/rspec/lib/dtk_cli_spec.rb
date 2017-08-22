@@ -179,10 +179,10 @@ shared_context 'NEG - Converge service instance' do |service_location, dtk_commo
   end
 end
 
-shared_context 'Get task status details' do |dtk_common, service_module_location, stage_number, expected_output|
+shared_context 'Get task status details' do |service_instance_location, stage_number, expected_output|
   it 'returns task status output and verifies it' do
     correct_task_action_outputs = false
-    task_action_outputs = `dtk service task-status -m stream -d #{service_module_location}`
+    task_action_outputs = `dtk service task-status -m stream -d #{service_instance_location}`
     extracted_stage_output = task_action_outputs.split(stage_number).last.split("-----").first
 
     expected_output.each do |output|

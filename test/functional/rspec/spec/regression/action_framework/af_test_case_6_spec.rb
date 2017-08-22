@@ -12,6 +12,7 @@ module_location = '/tmp/action_module'
 module_name = 'r8/action_module'
 module_version = 'master'
 service_location = '~/dtk/'
+service_instance_location = '~/dtk/af_test_case_6_instance'
 
 dtk_common = Common.new(service_name, assembly_name)
 
@@ -27,8 +28,8 @@ describe '(Action Framework) Test Case 6: Service with five nodes that containt 
   before(:all) do
 	  puts '************************************************************************************************************************', ''
     # Install/clone r8:action_module module with required dependency modules if needed
-    location_exist = `ls #{module_location}"`
-    unless location_exist.include? "No such file or directory"
+    location_exist = `ls #{module_location}`
+    if location_exist.include? "No such file or directory"
       system("mkdir #{module_location}")
       system("dtk module clone -v #{module_version} #{module_name} #{module_location}")
       system("dtk module install --update-deps -d #{module_location} #{module_name}")
@@ -44,15 +45,15 @@ describe '(Action Framework) Test Case 6: Service with five nodes that containt 
   end
 
   context "Get task status details for action executed on #{node_images[0]} node" do
-    include_context 'Get task status details', dtk_common, "STAGE 4", [expected_output_1]
+    include_context 'Get task status details', service_instance_location, "STAGE 4", [expected_output_1]
   end
 
   context "Get task status details for action executed on #{node_images[1]} node" do
-    include_context 'Get task status details', dtk_common, "STAGE 4", [expected_output_1]
+    include_context 'Get task status details', service_instance_location, "STAGE 4", [expected_output_1]
   end
 
   context "Get task status details for action executed on #{node_images[2]} node" do
-    include_context 'Get task status details', dtk_common, "STAGE 4", [expected_output_1]
+    include_context 'Get task status details', service_instance_location, "STAGE 4", [expected_output_1]
   end
 
   context "Delete service instance" do

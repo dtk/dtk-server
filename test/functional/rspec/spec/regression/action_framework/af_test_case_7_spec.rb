@@ -11,8 +11,6 @@ require './lib/assembly_and_service_operations_spec'
 require './lib/service_modules_spec'
 require './lib/component_modules_spec'
 
-STDOUT.sync = true
-
 namespace = 'dtk17'
 service_module_name = 'service_with_lambda'
 imported_service_module_name = 'dtk17:service_with_lambda'

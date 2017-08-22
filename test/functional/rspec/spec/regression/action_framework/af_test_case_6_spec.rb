@@ -1,64 +1,66 @@
-#!/usr/bin/env ruby
 # Test Case 6: Service with five nodes that containt cmp with actions for tailing in nohup
+# This test script will test following: 
+# - converge service instance with action module component
+# - execute actions on node which has nohup tail command
 
-require 'rubygems'
-require 'rest_client'
-require 'pp'
-require 'json'
-require 'awesome_print'
+require './lib/dtk_cli_spec'
 require './lib/dtk_common'
-require './lib/assembly_and_service_operations_spec'
 
-STDOUT.sync = true
-
+assembly_name = 'nohup-log-tailing'
 service_name = 'af_test_case_6_instance'
-service_module_namespace = 'r8'
-assembly_name = 'action_module::nohup-log-tailing'
+module_location = '/tmp/action_module'
+module_name = 'r8/action_module'
+module_version = 'master'
+service_location = '~/dtk/'
+
 dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1 = {
   command: 'nohup tail -f /var/log/dtk/dtk-arbiter.output',
-  status: 0,
-  stderr: nil
+  status: 'succeeded',
+  return_code: 0
 }
 
-node_images=['precise','trusty_hvm','amazon_hvm']
+node_images=['trusty_hvm','amazon_hvm','xenial_hvm']
 
 describe '(Action Framework) Test Case 6: Service with five nodes that containt cmp with actions for tailing in nohup' do
   before(:all) do
-	puts '************************************************************************************************************************', ''
+	  puts '************************************************************************************************************************', ''
+    # Install/clone r8:action_module module with required dependency modules if needed
+    location_exist = `ls #{module_location}"`
+    unless location_exist.include? "No such file or directory"
+      system("mkdir #{module_location}")
+      system("dtk module clone -v #{module_version} #{module_name} #{module_location}")
+      system("dtk module install --update-deps -d #{module_location} #{module_name}")
+    end
   end
 
-  context "Stage service function on #{assembly_name} assembly" do
-    include_context 'Stage with namespace', dtk_common, service_module_namespace
+  context "Stage assembly from module" do
+    include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
-  context 'List services after stage' do
-    include_context 'List services after stage', dtk_common
+  context "Converge service instance" do
+    include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context 'Converge function' do
-    include_context 'Converge', dtk_common
+  context "Get task status details for action executed on #{node_images[0]} node" do
+    include_context 'Get task status details', dtk_common, [expected_output_1]
   end
 
-  context "Get task action details for action executed on #{node_images[0]} node" do
-    include_context 'Get task action details', dtk_common, '2.1', [expected_output_1]
+  context "Get task status details for action executed on #{node_images[1]} node" do
+    include_context 'Get task status details', dtk_common, [expected_output_1]
   end
 
-  context "Get task action details for action executed on #{node_images[1]} node" do
-    include_context 'Get task action details', dtk_common, '2.2', [expected_output_1]
+  context "Get task status details for action executed on #{node_images[2]} node" do
+    include_context 'Get task status details', dtk_common, [expected_output_1]
   end
 
-  context "Get task action details for action executed on #{node_images[2]} node" do
-    include_context 'Get task action details', dtk_common, '2.3', [expected_output_1]
+  context "Delete service instance" do
+    include_context "Delete service instance", service_location, service_name, dtk_common
   end
 
-  context 'Delete and destroy service function' do
-    include_context 'Delete services', dtk_common
-  end
-
-  context 'List services after delete' do
-    include_context 'List services after delete', dtk_common
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
   end
 
   after(:all) do

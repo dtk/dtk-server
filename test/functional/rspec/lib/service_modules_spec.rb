@@ -4,8 +4,6 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 
-STDOUT.sync = true
-
 shared_context 'Import service module' do |service_module_name|
   it "imports #{service_module_name} service module from local filesystem to server" do
     puts 'Import service module:', '----------------------'

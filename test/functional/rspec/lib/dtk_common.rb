@@ -4,16 +4,13 @@ require 'pp'
 require 'json'
 require 'awesome_print'
 require 'yaml'
-require File.expand_path('../client_access/dtk_client_accessor', __FILE__)
 require File.expand_path('../mixins/assembly_and_service_operations_mixin.rb', __FILE__)
 require File.expand_path('../mixins/node_operations_mixin.rb', __FILE__)
-require File.expand_path('../mixins/workspace_mixin.rb', __FILE__)
 require File.expand_path('../mixins/context_mixin.rb', __FILE__)
 require File.expand_path('../mixins/component_modules_mixin.rb', __FILE__)
 require File.expand_path('../mixins/component_modules_version_mixin.rb', __FILE__)
 require File.expand_path('../mixins/service_modules_mixin.rb', __FILE__)
 require File.expand_path('../mixins/service_modules_version_mixin.rb', __FILE__)
-require File.expand_path('../mixins/test_modules_mixin.rb', __FILE__)
 require File.expand_path('../mixins/modules_mixin.rb', __FILE__)
 
 STDOUT.sync = true
@@ -21,17 +18,15 @@ STDOUT.sync = true
 class Common
 	include AssemblyAndServiceOperationsMixin
 	include NodeOperationsMixin
-	include WorkspaceMixin
 	include ContextMixin
 	include ComponentModulesMixin
 	include ServiceModulesMixin
-	include TestModulesMixin
 	include ComponentModulesVersionMixin
 	include ServiceModulesVersionMixin
 	include ModulesMixin
 
 	attr_accessor :server, :port, :endpoint, :username, :password
-	attr_accessor :service_name, :service_id, :workspace_id, :is_context, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace, :node_group
+	attr_accessor :service_name, :service_id, :is_context, :assembly, :node_id, :success, :error_message, :server_log, :ssh_key, :backtrace, :node_group
 	attr_accessor :component_module_id_list, :component_module_name_list
 
 	$opts = {

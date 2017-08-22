@@ -44,15 +44,15 @@ describe '(Action Framework) Test Case 6: Service with five nodes that containt 
   end
 
   context "Get task status details for action executed on #{node_images[0]} node" do
-    include_context 'Get task status details', dtk_common, [expected_output_1]
+    include_context 'Get task status details', dtk_common, "STAGE 4", [expected_output_1]
   end
 
   context "Get task status details for action executed on #{node_images[1]} node" do
-    include_context 'Get task status details', dtk_common, [expected_output_1]
+    include_context 'Get task status details', dtk_common, "STAGE 4", [expected_output_1]
   end
 
   context "Get task status details for action executed on #{node_images[2]} node" do
-    include_context 'Get task status details', dtk_common, [expected_output_1]
+    include_context 'Get task status details', dtk_common, "STAGE 4", [expected_output_1]
   end
 
   context "Delete service instance" do

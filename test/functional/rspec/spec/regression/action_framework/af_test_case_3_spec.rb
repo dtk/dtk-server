@@ -55,19 +55,19 @@ describe '(Action Framework) Test Case 3: Service with two nodes that contain cm
   end
 
   context 'Get task status details for action with one successfull command' do
-    include_context 'Get task status details', dtk_common, [expected_output_1]
+    include_context 'Get task status details', dtk_common, "STAGE 5", [expected_output_1]
   end
 
   context 'Get task status details for action with two successfull commands' do
-    include_context 'Get task status details', dtk_common, [expected_output_2_1, expected_output_2_2]
+    include_context 'Get task status details', dtk_common, "STAGE 6", [expected_output_2_1, expected_output_2_2]
   end
 
   context 'Get task status details for action with one successfull command' do
-    include_context 'Get task status details', dtk_common, [expected_output_1]
+    include_context 'Get task status details', dtk_common, "STAGE 7", [expected_output_1]
   end
 
   context 'Get task status details for action with two successfull commands' do
-    include_context 'Get task status details', dtk_common, [expected_output_2_1, expected_output_2_2]
+    include_context 'Get task status details', dtk_common, "STAGE 8", [expected_output_2_1, expected_output_2_2]
   end
 
   context "Delete service instance" do

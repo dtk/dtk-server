@@ -154,6 +154,59 @@ shared_context 'Converge service instance' do |service_location, dtk_common, ser
   end
 end
 
+shared_context 'NEG - Converge service instance' do |service_location, dtk_common, service_instance, error_message|
+  it "does not converge instance successfully" do
+    puts 'NEG - Converge service instance', '------------------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service converge -d #{service_location}`
+    puts value
+    if value.include? error_message
+      pass = false
+      puts "Service instance was not converged successfully!"
+    else
+      converge_info = dtk_common.check_task_status(service_instance)
+      if converge_info[:pass]
+        pass = true
+        puts "Service instance is converged successfully which was not expected!"
+      else
+        pass = false
+        puts "Service instance was not converged successfully!"
+      end
+    end
+    puts ''
+    expect(pass).to eq(false), converge_info[:error]
+  end
+end
+
+shared_context 'Get task status details' do |dtk_common, service_module_location, stage_number, expected_output|
+  it 'returns task status output and verifies it' do
+    correct_task_action_outputs = false
+    task_action_outputs = `dtk service task-status -m stream -d #{service_module_location}`
+    extracted_stage_output = task_action_outputs.split(stage_number).last.split("-----").first
+
+    expected_output.each do |output|
+      if (((extracted_stage_output.include? "RUN: #{output[:command]}") || (extracted_stage_output.include? "ADD: #{output[:command]}")) && ((extracted_stage_output.include? "STATUS: #{output[:status]}") || (output[:status].nil?)))
+        puts 'Returned expected task action details!'
+        if ((output[:stderr].nil?) && (!extracted_stage_output.include? 'STDERR'))
+          correct_task_action_outputs = true
+        elsif extracted_stage_output.include? "STDERR: #{output[:stderr]}"
+          correct_task_action_outputs = true
+        else
+          puts 'Returned stderr was not matched with expected one!'
+          correct_task_action_outputs = false
+        end
+        break
+      else
+        puts 'Returned task action details is not the expected one!'
+        correct_task_action_outputs = false
+        break
+      end
+    end
+    expect(correct_task_action_outputs).to eq(true)
+  end
+end
+
 shared_context 'Exec action/workflow' do |dtk_common, service_location, service_instance, action_name|
   it "executes action/workflow" do
     puts 'Execute action/workflow', '---------------------------'

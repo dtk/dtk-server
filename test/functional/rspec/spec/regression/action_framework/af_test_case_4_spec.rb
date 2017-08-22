@@ -48,19 +48,19 @@ describe '(Action Framework) Test Case 4: Service with node (node groups = 2) th
   end
 
   context 'Get task status details for action with bash script command' do
-    include_context 'Get task status details', dtk_common, [expected_output_1]
+    include_context 'Get task status details', dtk_common, "STAGE 3", [expected_output_1]
   end
 
   context 'Get task status details for action with bash script command' do
-    include_context 'Get task status details', dtk_common, [expected_output_1]
+    include_context 'Get task status details', dtk_common, "STAGE 3", [expected_output_1]
   end
 
   context 'Get task status details for action with rspec test command' do
-    include_context 'Get task status details', dtk_common, [expected_output_2]
+    include_context 'Get task status details', dtk_common, "STAGE 4", [expected_output_2]
   end
 
   context 'Get task status details for action with rspec test command' do
-    include_context 'Get task status details', dtk_common, [expected_output_2]
+    include_context 'Get task status details', dtk_common, "STAGE 4", [expected_output_2]
   end
 
   context "Delete service instance" do

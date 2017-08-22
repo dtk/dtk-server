@@ -12,6 +12,7 @@ module_location = '/tmp/action_module'
 module_name = 'r8/action_module'
 module_version = 'master'
 service_location = '~/dtk/'
+converge_error_message = "Permissions '0888' are not valid"
 
 dtk_common = Common.new(service_name, assembly_name)
 
@@ -80,27 +81,27 @@ describe '(Action Framework) Test Case 5: Service with one node that contains cm
   end
 
   context "NEG - Converge service instance" do
-    include_context "NEG - Converge service instance", service_location, dtk_common, service_name
+    include_context "NEG - Converge service instance", service_location, dtk_common, service_name, converge_error_message
   end
 
   context 'Get task status details for action with successfull if command' do
-    include_context 'Get task status details', dtk_common, [expected_output_1]
+    include_context 'Get task status details', dtk_common, "STAGE 2", [expected_output_1]
   end
 
   context 'Get task status details for action with successfull unless command' do
-    include_context 'Get task status details', dtk_common, [expected_output_2]
+    include_context 'Get task status details', dtk_common, "STAGE 3", [expected_output_2]
   end
 
   context 'Get task status details for action with successfull create file command' do
-    include_context 'Get task status details', dtk_common, [expected_output_3_1, expected_output_3_2, expected_output_3_3]
+    include_context 'Get task status details', dtk_common, "STAGE 4", [expected_output_3_1, expected_output_3_2, expected_output_3_3]
   end
 
   context 'Get task status details for action with successfull create file with permissions command' do
-    include_context 'Get task status details', dtk_common, [expected_output_4_1, expected_output_4_2]
+    include_context 'Get task status details', dtk_common, "STAGE 5", [expected_output_4_1, expected_output_4_2]
   end
 
   context 'Get task status details for action with failed create command (fake permissions)' do
-    include_context 'Get task status details', dtk_common, [expected_output_5]
+    include_context 'Get task status details', dtk_common, "STAGE 6", [expected_output_5]
   end
 
   context "Delete service instance" do

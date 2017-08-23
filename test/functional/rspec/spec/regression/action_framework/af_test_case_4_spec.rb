@@ -32,8 +32,8 @@ describe '(Action Framework) Test Case 4: Service with node (node groups = 2) th
   before(:all) do
     puts '*****************************************************************************************************************', ''
     # Install/clone r8:action_module module with required dependency modules if needed
-    location_exist = `ls #{module_location}`
-    if location_exist.include? "No such file or directory"
+    location_exist = system("ls #{module_location}")
+    unless location_exist
       system("mkdir #{module_location}")
       system("dtk module clone -v #{module_version} #{module_name} #{module_location}")
       system("dtk module install --update-deps -d #{module_location} #{module_name}")

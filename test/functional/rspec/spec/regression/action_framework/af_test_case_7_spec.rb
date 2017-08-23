@@ -19,15 +19,15 @@ dtk_common = Common.new(service_name, assembly_name)
 expected_output_1 = {
   command: 'cat /tmp/test | grep 55',
   status: 'succeeded',
-  stderr: 0
+  return_code: 0
 }
 
 describe '(Action Framework) Test Case 7: Using lambda function in dtk.model.yaml' do
   before(:all) do
     puts '***********************************************************************', ''
     # Install/clone r8:action_module module with required dependency modules if needed
-    location_exist = `ls #{module_location}`
-    if location_exist.include? "No such file or directory"
+    location_exist = system("ls #{module_location}")
+    unless location_exist
       system("mkdir #{module_location}")
       system("dtk module clone -v #{module_version} #{module_name} #{module_location}")
       system("dtk module install --update-deps -d #{module_location} #{module_name}")

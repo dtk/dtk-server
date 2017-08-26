@@ -32,20 +32,19 @@ module DTK
       ProviderFolder = 'puppet'
 
       def ret_msg_content(config_node, opts = {})
-        cmps_with_attrs = components_with_attributes(config_node)
-        assembly_attrs = assembly_attributes(config_node)
-        puppet_manifests = NodeManifest.new(config_node).generate(cmps_with_attrs, assembly_attrs)
+        assembly          = opts[:assembly]
+        cmps_with_attrs   = components_with_attributes(config_node)
+        assembly_attrs    = assembly_attributes(config_node)
+        puppet_manifests  = NodeManifest.new(config_node, assembly: assembly).generate(cmps_with_attrs, assembly_attrs)
         ret = {
           components_with_attributes: cmps_with_attrs,
           node_manifest: puppet_manifests,
-          inter_node_stage: config_node.inter_node_stage(),
+          inter_node_stage: config_node.inter_node_stage,
           version_context: get_version_context(config_node, opts[:assembly]),
           # TODO: agent not doing puppet version per run; it just can be set when node is created
           puppet_version: config_node[:node][:puppet_version]
         }
-        if assembly = opts[:assembly]
-          ret.merge!(service_id: assembly.id(), service_name: assembly.get_field?(:display_name))
-        end
+        ret.merge!(service_id: assembly.id, service_name: assembly.display_name) if assembly
         ret
       end
 
@@ -85,7 +84,7 @@ module DTK
         var_name_path = (attribute[:external_ref] || {})[:path]
         if var_name_path
           array_form = to_array_form(var_name_path)
-          { name: array_form && array_form[1], type: type() }
+          { name: array_form && array_form[1], type: type }
         end
       end
 
@@ -102,7 +101,7 @@ module DTK
       def get_version_context(config_node, assembly_instance)
         ret =  []
         component_actions = config_node[:component_actions]
-        if component_actions.empty?()
+        if component_actions.empty?
           return ret
         end
         unless (config_node[:state_change_types] & %w(install_component update_implementation converge_component setting)).size > 0
@@ -128,7 +127,7 @@ module DTK
       end
 
       def components_with_attributes(config_node)
-        cmp_actions = config_node.component_actions()
+        cmp_actions = config_node.component_actions
         node_components = cmp_actions.map { |ca| (component_external_ref(ca[:component]) || {})['name'] }.compact
         ndx_cmps = cmp_actions.inject({}) do |h, cmp_action|
           cmp = cmp_action[:component]

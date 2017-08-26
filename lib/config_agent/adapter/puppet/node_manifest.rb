@@ -19,14 +19,15 @@ module DTK; class ConfigAgent; module Adapter
   class Puppet
     class NodeManifest
       def initialize(config_node, opts = {})
+        @assembly                 = opts[:assembly]
         @import_statement_modules = opts[:import_statement_modules] || []
-        @config_node = config_node
+        @config_node              = config_node
       end
 
       def generate(cmps_with_attrs, assembly_attrs)
         # if intra node stages configured 'stages_ids' will not be nil,
         # if stages_ids is nil use generation with total ordering (old implementation)
-        if stages_ids = @config_node.intra_node_stages()
+        if stages_ids = @config_node.intra_node_stages
           generate_with_stages(cmps_with_attrs, assembly_attrs, stages_ids)
         else
           generate_with_total_ordering(cmps_with_attrs, assembly_attrs)
@@ -117,7 +118,7 @@ module DTK; class ConfigAgent; module Adapter
               @class_lines << imp_stmt
             end
             # TODO: see if need \" and quote form
-            attr_str_array = attrs.map { |k, v| "#{k} => #{process_val(v)}" } + [stage_assign()]
+            attr_str_array = attrs.map { |k, v| "#{k} => #{process_val(v)}" } + [stage_assign]
             attr_str = attr_str_array.join(', ')
             @class_lines << "class {\"#{cmp}\": #{attr_str}}"
            when 'definition'
@@ -138,7 +139,7 @@ module DTK; class ConfigAgent; module Adapter
               fail ErrorUsage.new("No name attribute for definition component (#{defn_cmp})")
             end
 
-            if use_anchors_for_class_wrappers?()
+            if use_anchors_for_class_wrappers?
               attr_str_array << "require => #{anchor_ref(:begin)}"
               attr_str_array << "before => #{anchor_ref(:end)}"
             end
@@ -154,14 +155,14 @@ module DTK; class ConfigAgent; module Adapter
         private
 
         def add_definition_lines!(ret)
-          unless @def_lines.empty?()
+          unless @def_lines.empty?
             # putting def in class because defs cannot go in stages
             ret << "class #{class_wrapper} {"
-            if use_anchors_for_class_wrappers?()
+            if use_anchors_for_class_wrappers?
               ret << "  #{anchor(:begin)}"
             end
             @def_lines.each { |line| ret << "  #{line}" }
-            if use_anchors_for_class_wrappers?()
+            if use_anchors_for_class_wrappers?
               ret << "  #{anchor(:end)}"
             end
             ret << '}'
@@ -242,6 +243,7 @@ module DTK; class ConfigAgent; module Adapter
             else
               ['node', node_name, '']
             end
+          add_top_level_assignment!(lines, 'dtk_service_instance_name', @assembly.display_name) if @assembly
           add_top_level_assignment!(lines, 'dtk_assembly_node_type', node_type)
           add_top_level_assignment!(lines, 'dtk_assembly_node_base_name', base_name)
           add_top_level_assignment!(lines, 'dtk_assembly_node_index', index)

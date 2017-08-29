@@ -22,6 +22,7 @@ if [[ ${INIT_DEBUG} == true ]]; then
 fi
 
 PG_VERSION=8.4
+GITOLITE_VERSION=${GITOLITE_VERSION-v3.6.7}
 export HOST_VOLUME=/host_volume
 export TENANT_USER=dtk1
 
@@ -147,7 +148,7 @@ if [[ ! -d ${HOST_VOLUME}/gitolite/ ]]; then
   mkdir -p ${HOST_VOLUME}/gitolite/bin
   mkdir -p ${HOST_VOLUME}/gitolite/.gitolite/logs
   mkdir ${HOST_VOLUME}/gitolite/repositories
-  git clone git://github.com/sitaramc/gitolite ${HOST_VOLUME}/gitolite/src
+  git clone -b ${GITOLITE_VERSION} git://github.com/sitaramc/gitolite ${HOST_VOLUME}/gitolite/src
   chown -R ${TENANT_USER}:${TENANT_USER} ${HOST_VOLUME}/gitolite
   su - ${TENANT_USER} -c "${HOST_VOLUME}/gitolite/src/install -ln ${HOST_VOLUME}/gitolite/bin/"
   su - ${TENANT_USER} -c "${HOST_VOLUME}/gitolite/bin/gitolite setup -pk ${HOST_VOLUME}/ssh/dtk-admin-${TENANT_USER}.pub"

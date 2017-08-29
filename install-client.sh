@@ -94,6 +94,12 @@ else
   gem_path=$(which gem)
 fi
 
+# check if `gem` executable is found
+if [[ -z "$gem_path" ]]; then
+  echo 'Cannot find the `gem` executable. Please make sure Ruby is installed prior to running this script.'
+  exit 1
+fi
+
 # install dtk-client gem
 echo "Installing dtk-client gem"
 $sudo $gem_path install dtk-client --no-rdoc --no-ri $binpath_arg

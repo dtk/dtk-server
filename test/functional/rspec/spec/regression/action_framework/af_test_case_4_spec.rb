@@ -17,13 +17,14 @@ service_instance_location = '~/dtk/af_test_case_4_instance'
 dtk_common = Common.new(service_name, assembly_name)
 
 expected_output_1 = {
-  command: '/bin/sh /etc/puppet/modules/action_module/bash_tests/test_bash.sh',
+  command: '/bin/sh /etc/puppet/modules/action_module/files/bash_tests/test_bash.sh',
   status: 'succeeded',
-  return_code: 0
+  return_code: 0,
+  stderr: 'ls: cannot access /tmp/action_framework_test/test.txt: No such file or directory'
 }
 
 expected_output_2 = {
-  command: '/opt/puppet-omnibus/embedded/bin/rspec /etc/puppet/modules/action_module/rspec_tests/spec/test_spec.rb',
+  command: 'export HOME=/home/ubuntu && cd /etc/puppet/modules/action_module/files/rspec_tests && /opt/puppet-omnibus/embedded/bin/rspec ./spec/test_spec.rb',
   status: 'succeeded',
   return_code: 0
 }

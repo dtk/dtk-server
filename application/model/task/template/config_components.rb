@@ -52,6 +52,12 @@ module DTK; class Task
         # makes sense to also automtically delete component in other workflow actions aside from once in spliced in delete subtask
         action_to_delete = Action.create(component.add_title_field?.merge(node: node))
         delete_action?(assembly, action_to_delete, DefaultTaskActionForUpdates, opts)
+
+        # DTK-3144 - when deleting component we need to delete all it's actions from workflow
+        (component.get_action_defs || []).each do |a_def|
+          action_to_delete = Action.create(component.add_title_field?.merge(node: node), action_def: a_def)
+          delete_action?(assembly, action_to_delete, DefaultTaskActionForUpdates, opts)
+        end
       end
 
       def self.cleanup_after_node_has_been_deleted?(assembly, node)

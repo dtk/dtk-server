@@ -133,7 +133,7 @@ module DTK; class  Assembly
           
           # order components by 'delete' action inside assembly workflow if exists
           ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
-          ordered_components.each do |component|
+          ordered_components.uniq.each do |component|
             next if component.get_field?(:component_type).eql?('ec2__node')
             cmp_action = nil
             cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")

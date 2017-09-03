@@ -24,13 +24,13 @@ module DTK; class Task; class Template
         @assembly              = assembly
         @component             = component
         @method_name           = opts[:method_name]
-        @task_template_content = ret_task_template_content()
+        @task_template_content = ret_task_template_content
       end
 
       attr_reader :task_template_content
 
       def task_action_name
-        ret = component_name()
+        ret = component_name
         if @method_name
           ret << ".#{@method_name}"
         end
@@ -51,26 +51,26 @@ module DTK; class Task; class Template
       end
 
       def ret_task_template_content
-        action_list = get_action_list()
-        Content.parse_and_reify(serialized_content(), action_list)
+        action_list = get_action_list
+        Content.parse_and_reify(serialized_content, action_list)
       end
 
       def serialized_content
-        ret = { node: @component.get_node().get_field?(:display_name) }
-        ret.merge(@method_name ? with_method_name() : without_method_name())
+        ret = { node: @component.get_node.get_field?(:display_name) }
+        ret.merge(@method_name ? with_method_name : without_method_name)
       end
 
       # TODO: encapsulate the delimeters with parsing routines
       def without_method_name
-        { components: [component_name()] }
+        { components: [component_name] }
       end
 
       def with_method_name
-        { actions: ["#{component_name()}.#{@method_name}"] }
+        { actions: ["#{component_name}.#{@method_name}"] }
       end
 
       def component_name
-        @component.display_name_print_form()
+        @component.display_name_print_form
       end
 
       module List
@@ -96,17 +96,17 @@ module DTK; class Task; class Template
 
         def self.action_display_form(component_action, type, opts = {})
           ret = []
-          action_defs = component_action.action_defs()
+          action_defs = component_action.action_defs
           unless action_defs.empty?
             action_defs.each do |action_def|
               ac_def = {
                 component_instance: type == :component_instance && component_action.display_name_print_form(node_prefix: true),
-                component_type: component_action.component_type_print_form(),
+                component_type: component_action.component_type_print_form,
                 method_name: action_def.get_field?(:method_name),
-                display_name: component_action.display_name_print_form()
+                display_name: component_action.display_name_print_form
               }
-              if node = opts[:return_nodes]&& component_action.node
-                ac_def.merge!(node: component_action.node)
+              if node = opts[:return_nodes] && component_action.configured_node
+                ac_def.merge!(node: component_action.configured_node)
               end
               ret << ac_def
             end

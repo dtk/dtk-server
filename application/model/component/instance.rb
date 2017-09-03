@@ -148,6 +148,8 @@ module DTK; class Component
             component_instance = component_instances.find { |ci| ci.id == component_id }
             remote_node        = component_info.remote_endpoint.node.update_obj!(:display_name, :group_id, :external_ref, :ordered_component_ids, :type)
 
+            component_instance[:on_remote_node] = true
+            component_instance[:configured_node] = component_instance[:node]
             component_instance[:node] = remote_node
           end
         end

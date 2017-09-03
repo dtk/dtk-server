@@ -18,7 +18,7 @@
 module DTK; class Task; class Template
   class Action
     class ComponentAction < self
-      r8_nested_require('component_action', 'in_component_group')
+      require_relative('component_action/in_component_group')
       include InComponentGroupMixin
 
       def initialize(component, opts = {})
@@ -26,7 +26,9 @@ module DTK; class Task; class Template
           fail Error.new('ComponentAction.new must be given component argument with :node key')
         end
         super(opts)
-        @component = component
+        @component       = component
+        @on_remote_node  = component[:on_remote_node]
+        @configured_node = component[:configured_node] || component[:node]
       end
       private :initialize
 
@@ -37,6 +39,8 @@ module DTK; class Task; class Template
       def respond_to?(name)
         @component.respond_to?(name) || super
       end
+
+      attr_reader :configured_node
 
       def node
         @component[:node]
@@ -66,7 +70,7 @@ module DTK; class Task; class Template
 
       def match?(node_name, component_name_ref = nil)
          ret =
-          if node_name() == node_name
+          if node_name() == node_name or on_remote_node_match?(node_name)
             if component_name_ref.nil?
               true
             else
@@ -132,6 +136,16 @@ module DTK; class Task; class Template
 
       def is_no_op?
         !!ConfigAgent::Type.is_a?(config_agent_type, :no_op)
+      end
+
+      private
+
+      def on_remote_node_match?(node_name) 
+        on_remote_node? and Node.is_assembly_wide_node_name?(node_name)
+      end
+
+      def on_remote_node?
+        @on_remote_node
       end
 
     end

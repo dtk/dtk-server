@@ -96,6 +96,10 @@ module DTK
       @assembly_wide_type ||= Node::Type::Node.assembly_wide
     end
 
+    def self.is_assembly_wide_node_name?(node_name)
+      is_assembly_wide_node?(type: node_name)
+    end
+
     # opts can have keys
     #  :cols - component columns
     #  :filter - filter on component

@@ -134,7 +134,12 @@ module DTK
           if repo_remotes.empty?
             []
           elsif repo_remotes.size == 1
-            [repo_remotes.first.print_form(opts_pp)]
+            if repo_remotes.first.nil?
+              # TODO: this is for obscure error; see what this is happening
+              []
+            else
+              [repo_remotes.first.print_form(opts_pp)]
+            end
           else
             if default = RepoRemote.default_repo_remote?(repo_remotes)
               # remove all non default dtkn_providers

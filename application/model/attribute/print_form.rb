@@ -92,7 +92,7 @@ module DTK
       end
       UnchangedDisplayCols = [:id, :required]
       UpdateCols = UnchangedDisplayCols + [:description, :display_name, :data_type, :value_derived, :value_asserted]
-      DefaultTruncateSize = 45
+      DefaultTruncateSize = 60
       TruncateSymbols = '...'
 
       def self.augment_with_attribute_links!(ret, assembly, raw_attributes)

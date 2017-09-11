@@ -140,7 +140,12 @@ module DTK; class  Assembly
             cmp_opts.merge!(delete_params: [component.id_handle, node.id])
             
             begin
-              cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts)# if node.get_admin_op_status.eql?('running')
+              create_cmp_action = true
+              if node_component = opts[:node_component]
+                create_cmp_action = node_component.node_is_running?
+              end
+
+              cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if create_cmp_action
             rescue Task::Template::ParsingError => e
               Log.info("Ignoring component 'delete' action does not exist.")
             end
@@ -258,7 +263,7 @@ module DTK; class  Assembly
               if component.is_node_component?
                 node_component = NodeComponent.node_component(component)
                 if node = node_component.node
-                  node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task))
+                  node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task, node_component: node_component))
                 end
               end
 

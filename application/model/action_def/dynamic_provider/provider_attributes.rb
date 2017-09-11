@@ -69,6 +69,8 @@ module DTK
       private
 
       def self.parameters_domain_component(provider_module_name, assembly_instance)
+        require 'ruby-debug'; debugger
+        #component_module_refs      = ModuleRefs.get_component_module_refs_new(assembly_instance)
         component_module_refs      = assembly_instance.component_module_refs
         parameters_component_type = parameters_component_type(provider_module_name)
           

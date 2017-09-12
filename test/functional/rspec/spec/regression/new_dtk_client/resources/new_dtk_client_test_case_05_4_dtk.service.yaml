@@ -12,7 +12,6 @@ components:
 - ec2::node[node]:
     attributes:
       discovered: false
-      dtk_debug: false
       enable_public_ip_in_subnet: true
       image: trusty_hvm
       size: micro
@@ -25,7 +24,6 @@ components:
 - ec2::node[new_node]:
     attributes:
       discovered: false
-      dtk_debug: false
       enable_public_ip_in_subnet: true
       image: trusty_hvm
       size: micro
@@ -39,7 +37,6 @@ components:
     attributes:
       cardinality: 2
       discovered: false
-      dtk_debug: false
       image: trusty_hvm
       size: micro
       tags:

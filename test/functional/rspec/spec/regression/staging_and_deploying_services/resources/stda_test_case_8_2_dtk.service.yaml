@@ -13,7 +13,6 @@ components:
     attributes:
       cardinality: 1
       discovered: false
-      dtk_debug: false
       image: trusty_hvm
       size: micro
       tags:

@@ -13,7 +13,6 @@ components:
 - ec2::node[node]:
     attributes:
       discovered: false
-      dtk_debug: false
       enable_public_ip_in_subnet: true
       image: trusty_hvm
       size: micro

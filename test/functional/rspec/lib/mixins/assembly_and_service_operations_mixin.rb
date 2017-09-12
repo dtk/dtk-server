@@ -141,7 +141,7 @@ module AssemblyAndServiceOperationsMixin
     service_converged = { pass: false, error: nil }
     end_loop = false
     count = 0
-    max_num_of_retries = 50
+    max_num_of_retries = 80
 
     while (count < max_num_of_retries)
       sleep 10

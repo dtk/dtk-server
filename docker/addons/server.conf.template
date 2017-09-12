@@ -40,3 +40,5 @@ repo.git.port = ${GIT_PORT}
 #ec2.keypair =
 #ec2.name_tag.format =
 workflow.temporal_coordination.intra_node = TOTAL_ORDER
+
+# idle.up_time_hours = 2

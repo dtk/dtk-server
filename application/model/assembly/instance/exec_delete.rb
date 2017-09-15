@@ -142,7 +142,9 @@ module DTK; class  Assembly
             begin
               create_cmp_action = true
               if node_component = opts[:node_component]
-                create_cmp_action = node_component.node_is_running?
+                unless node_component.node.is_node_group?
+                  create_cmp_action = node_component.node_is_running?
+                end
               end
 
               cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if create_cmp_action

@@ -32,47 +32,46 @@ module DTK
       end
 
       def attributes
+        # TODO: DTK-3173: temporarily took out node and component filtering until it is fixed up
         assembly_instance = assembly_instance()
         detail_to_include = []
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
-        filter_component  = request_params(:filter_component)
+        # filter_component  = request_params(:filter_component)
         format            = request_params(:format) || 'table' # default format type is table
-        
-        # TODO: temporary set to true if and only if no component filter, until '--all' flag is being added
-        # then will be #boolean_request_params(:all) 
-        all               = filter_component.nil?
+        all, links        = boolean_request_params(:all, :links)
 
 
-        if request_params(:links)
+        if links
           detail_to_include << :attribute_links
           datatype = :workspace_attribute_w_link
         end
 
-        if node_id = request_params(:node_id)
-          node_id = "#{ret_node_id(:node_id, assembly_instance)}" unless (node_id =~ /^[0-9]+$/)
-          opts.merge!(node_cmp_name: true)
-        end
+        # if node_id = request_params(:node_id)
+        #  node_id = "#{ret_node_id(:node_id, assembly_instance)}" unless (node_id =~ /^[0-9]+$/)
+        #  opts.merge!(node_cmp_name: true)
+        # end
 
-        if component_id = request_params(:component_id)
-          component_id = "#{ret_component_id(:component_id, assembly_instance, filter_by_node: true)}" unless (component_id =~ /^[0-9]+$/)
-        end
+        # if component_id = request_params(:component_id)
+        #  component_id = "#{ret_component_id(:component_id, assembly_instance, filter_by_node: true)}" unless (component_id =~ /^[0-9]+$/)
+        #end
         
         additional_filter_proc = Proc.new do |e|
           attr = e[:attribute]
           (!attr.is_a?(Attribute)) || !attr.filter_when_listing?({})
         end
 
-        opts[:filter_proc] = Proc.new do |element|
-          if element_matches?(element, [:node, :id], node_id) && element_matches?(element, [:attribute, :component_component_id], component_id)
-            element if additional_filter_proc.nil? || additional_filter_proc.call(element)
-          end
-        end
+        # opts[:filter_proc] = Proc.new do |element|
+        #  if element_matches?(element, [:node, :id], node_id) && element_matches?(element, [:attribute, :component_component_id], component_id)
+        #    element if additional_filter_proc.nil? || additional_filter_proc.call(element)
+        #  end
+        # end
 
         truncate = (format != 'yaml')
         opts.merge!(truncate_attribute_values: truncate, mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
-        opts.merge!(all: all, filter_component: filter_component)
+        # opts.merge!(all: all, filter_component: filter_component)
+        opts.merge!(all: all)
         response = 
           if format == 'yaml'
             opts.merge!(:yaml_format => true)

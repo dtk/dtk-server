@@ -75,7 +75,7 @@ module DTK
         if parameters_dtk_component = assembly_instance.find_matching_aug_component_template?(parameters_component_type, component_module_refs) 
           Component::Domain::Provider::Parameters.new(parameters_dtk_component)
         else
-          fail ErrorUsage, "The provider module '#{provider_module_name}' is missing a parameters component '#{DOMAIN_COMPONENT_NAME}'"
+          fail ErrorUsage, "Cannot find a dependent module in the service instance for provider '#{provider_module_name}'"
         end
       end
 

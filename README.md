@@ -65,7 +65,7 @@ Assuming the docker container was started as described above, Dtk Client can be 
 ```
 ./install-client.sh [-u user] [-p port] configuration_path
 
-configuration_path   - location of dtk.config file
+configuration_path   - location of dtk.config file directory
 user                 - user on which to install and configure dtk-client
                        defaults to new user named 'dtk-client
 port                 - port where Dtk server is listening

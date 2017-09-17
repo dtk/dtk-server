@@ -30,15 +30,16 @@ module DTK
         legal_types.include?(component.get_field?(:component_type))
       end
 
-      private
+      protected
 
       attr_reader :component
 
       def attributes
         # @component[:attributes] is in case augmented component with attributes
-        @attributes ||= @component[:attributes] || @component.get_attributes
+        @attributes ||= self.component[:attributes] || self.component.get_attributes
       end
 
+      private
 
       def self.legal_types
         if const_defined?(:TYPES)
@@ -54,7 +55,7 @@ module DTK
 
       def attribute_value?(attr_name)
         attr_name = attr_name.to_s
-        if attr = attributes.find { |attr| attr_name == attr[:display_name] }
+        if attr = self.attributes.find { |attr| attr_name == attr[:display_name] }
           attr[:attribute_value]
         end 
       end

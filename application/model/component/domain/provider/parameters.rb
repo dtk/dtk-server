@@ -19,14 +19,14 @@ module DTK
   class Component::Domain
     module Provider
       class Parameters < Component::Domain
-        def initialize(component)
-          super(component)
+        def initialize(component_template)
+          super(component_template)
         end
 
         def attributes_with_overrides(overrides)
           # normalize in case keys are symbols
           overrides = overrides.inject({}) { |h, (a, v)| h.merge(a.to_s => v) }
-          attributes.map do |attribute|
+          self.attributes.map do |attribute|
             el = attribute
             if attribute[:attribute_value].nil?
               override_val = overrides[attribute.display_name]

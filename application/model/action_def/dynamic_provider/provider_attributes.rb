@@ -18,9 +18,9 @@
 module DTK
   class ActionDef::DynamicProvider
     module ProviderAttributes
-      ENTRYPOINT_ATTR_NAME = 'entrypoint'
+      ENTRYPOINT_ATTR_NAME  = 'entrypoint'
       DOMAIN_COMPONENT_NAME = 'provider'
-
+      PROVIDER_NAMESPACE    = 'dtk-provider'
       module Mixin
         def set_provider_attributes!(provider_module_name, provider_attribute_values, assembly_instance)
           @ndx_provider_attributes = ProviderAttributes.ret_ndx_provider_attributes(provider_module_name, provider_attribute_values, assembly_instance)
@@ -62,27 +62,30 @@ module DTK
           else
             err_msg << "parameters: #{missing_required_params.join(', ')}"
           end
-          fail Error,  err_msg
         end
       end
       
       private
 
       def self.parameters_domain_component(provider_module_name, assembly_instance)
-        component_module_refs      = assembly_instance.component_module_refs
-        parameters_component_type = parameters_component_type(provider_module_name)
-          
-        if parameters_dtk_component = assembly_instance.find_matching_aug_component_template?(parameters_component_type, component_module_refs) 
-          Component::Domain::Provider::Parameters.new(parameters_dtk_component)
-        else
+        unless provider_component_module = matching_provider_component_module?(assembly_instance, provider_module_name)
           fail ErrorUsage, "Cannot find a dependent module in the service instance for provider '#{provider_module_name}'"
         end
+        unless provider_component_template = provider_component_module.get_matching_component_template?(DOMAIN_COMPONENT_NAME)
+          fail ErrorUsage, "Cannot find component '#{DOMAIN_COMPONENT_NAME}' in module '#{provider_module_name}'"
+        end
+        Component::Domain::Provider::Parameters.new(provider_component_template)
       end
 
-      def self.parameters_component_type(provider_module_name)
-        Component.component_type_from_module_and_component(provider_module_name, DOMAIN_COMPONENT_NAME)
+      def self.matching_provider_component_module?(assembly_instance, provider_module_name)
+        matching_component_modules = assembly_instance.get_component_modules(:recursive).select do |component_module|
+          component_module.display_name == provider_module_name and
+          component_module[:namespace_name] == PROVIDER_NAMESPACE
+        end
+        fail Error, "Unexpected that there is multiple matching component_modules" if matching_component_modules.size > 1
+        matching_component_modules.first
       end
-      
+
     end
   end
 end

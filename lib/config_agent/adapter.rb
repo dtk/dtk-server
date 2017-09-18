@@ -27,8 +27,8 @@ module DTK
             r8_nested_require('adapter', type)
           end
           klass = const_get Aux.camelize(type.to_s)
-        rescue LoadError
-          raise Error.new("cannot find config agent adapter for type (#{type})")
+        rescue LoadError => e
+          fail Error, "Error dyanmically loading config agent adapter '#{type}': #{e.message}"
         end
         Agents[type] = klass.new()
       end

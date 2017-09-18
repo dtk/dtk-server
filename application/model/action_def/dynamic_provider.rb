@@ -18,8 +18,6 @@
 module DTK
   class ActionDef
     class DynamicProvider
-      RUBY_TYPE = 'ruby'
-
       require_relative('dynamic_provider/container')
       require_relative('dynamic_provider/bash')
       require_relative('dynamic_provider/provider_attributes')

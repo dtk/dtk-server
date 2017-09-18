@@ -19,36 +19,22 @@ module DTK
   module ConfigAgent::Adapter
     class Dynamic
       module ExecutionEnvironment
+        require_relative('execution_environment/breakpoint_processing')
+
         EPHEMERAL_CONTAINER = 'ephemeral_container'
         NATIVE              = 'native'
         # opts can have keys
         #   :breakpoint (Boolean)
         def self.execution_environment(dynamic_provider, node, opts = {})
-          provider_type = dynamic_provider.type
-          update_for_breakpoint!(dynamic_provider, provider_type) if opts[:breakpoint]
+          BreakpointProcessing.process!(dynamic_provider) if opts[:breakpoint] 
 
+          provider_type = dynamic_provider.type
           if node.is_assembly_wide_node?            
             docker_file = dynamic_provider.docker_file? || fail(ErrorUsage, "Cannot find the docker file for the #{provider_type} provider")
             { type: EPHEMERAL_CONTAINER, docker_file: docker_file }
           else
             bash_script = dynamic_provider.bash_script?  || fail(ErrorUsage, "Cannot find the bash script for the #{provider_type} provider")
             { type: NATIVE, bash: bash_script }
-          end
-        end
-
-        private
-
-        BYEBUG_GEM     = 'byebug'
-        GEMS_ATTRIBUTE = 'gems'
-        # TODO: maybe to providers that treat breakpoint
-        def self.update_for_breakpoint!(dynamic_provider, provider_type)
-          if provider_type == ActionDef::DynamicProvider::RUBY_TYPE
-            dynamic_provider.provider_attributes.each do |attr|
-              if attr.display_name.eql?(GEMS_ATTRIBUTE)
-                attr[:attribute_value] ||= []
-                attr[:attribute_value] << BYEBUG_GEM unless attr[:attribute_value].include?(BYEBUG_GEM)
-              end
-            end  
           end
         end
 

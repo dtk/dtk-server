@@ -60,7 +60,7 @@ module DTK
       end
 
       def self.legacy_bash_script_template_for_ruby_provider?(type)
-        if type == ActionDef::DynamicProvider::RUBY_TYPE
+        if type == 'ruby'
         <<eos
 #!/usr/bin/env bash
 

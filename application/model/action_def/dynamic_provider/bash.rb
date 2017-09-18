@@ -18,16 +18,50 @@
 module DTK
   class ActionDef::DynamicProvider
     module Bash
-      DOMAIN_COMPONENT_NAME = 'bash'
+      COMPONENT_NAME = 'bash'
 
       module Mixin
-        def bash?
-          if @bash_set
-            @bash
-          else
-            @bash_set = true
-            #if bash_template = (@container_component && @container_component.dockerfile_template?) 
-            bash_template = <<eos
+        def bash_script?
+          unless @bash_script_is_set
+            @bash_script = ret_bash_script?
+            @bash_script_is_set = true
+          end
+          @bash_script
+        end
+        
+        protected
+
+        def ret_bash_script?
+          if bash_script_template = self.bash_script_template? || Bash.legacy_bash_script_template_for_ruby_provider?(self.type)
+            attribute_values = provider_attributes.inject({}) { |h, attr| h.merge(attr.display_name => attr[:attribute_value]) }
+            MustacheTemplate.render(bash_script_template, attribute_values)
+          end
+        end
+
+        def bash_script_template?
+          self.provider_bash? && self.provider_bash?.bash_script_template?
+        end
+        
+        def provider_bash?
+          unless @provider_bash_is_set
+            @provider_bash_is_set = true
+            @provider_bash = ret_provider_bash?
+          end
+          @provider_bash
+        end
+          
+        private  
+        
+        def ret_provider_bash?
+          if bash_component_template = self.provider_component_module.get_matching_component_template?(Bash::COMPONENT_NAME) 
+            Component::Domain::Provider::Bash.new(bash_component_template)
+          end
+        end
+      end
+
+      def self.legacy_bash_script_template_for_ruby_provider?(type)
+        if type == ActionDef::DynamicProvider::RUBY_TYPE
+        <<eos
 #!/usr/bin/env bash
 
 set -e
@@ -36,12 +70,9 @@ set -e
 gem install {{.}} --no-ri --no-rdoc >/dev/null
 {{/gems}}
 eos
-            attribute_values = provider_attributes.inject({}) { |h, attr| h.merge(attr.display_name => attr[:attribute_value]) } 
-            @bash = MustacheTemplate.render(bash_template, attribute_values)
-          end
         end
       end
-      
+
     end
   end
 end

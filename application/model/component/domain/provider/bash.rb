@@ -17,10 +17,19 @@
 #
 module DTK
   class Component::Domain
-    module Provider
-      require_relative('provider/container')
-      require_relative('provider/bash')
-      require_relative('provider/parameters')
+    module Provider 
+      class Bash < Component::Domain
+        def initialize(component)
+          super(component)
+          @bash_script_template = attribute_value?(:bash_script)
+        end
+
+        def bash_script_template?
+          @bash_script_template
+        end
+
+      end
     end
   end
 end
+

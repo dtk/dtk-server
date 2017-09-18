@@ -19,13 +19,16 @@ module DTK
   class ActionDef::DynamicProvider
     module ProviderAttributes
       ENTRYPOINT_ATTR_NAME  = 'entrypoint'
+      COMPONENT_NAME        = 'provider'
+
       module Mixin
         def provider_attributes
           self.ndx_provider_attributes.values
         end
 
         def entrypoint_attribute
-          self.ndx_provider_attributes[ProviderAttributes::ENTRYPOINT_ATTR_NAME] || raise_error_missing_action_def_param(ProviderAttributes::ENTRYPOINT_ATTR_NAME)
+          self.ndx_provider_attributes[ProviderAttributes::ENTRYPOINT_ATTR_NAME] || 
+            raise_error_missing_action_def_param(ProviderAttributes::ENTRYPOINT_ATTR_NAME)
         end
 
         protected
@@ -40,13 +43,11 @@ module DTK
 
         private
 
-        PARAMETER_COMPONENT_NAME = 'provider'
-
         def ret_provider_parameters
-          if provider_component_template = provider_component_module.get_matching_component_template?(PARAMETER_COMPONENT_NAME) 
+          if provider_component_template = provider_component_module.get_matching_component_template?(ProviderAttributes::COMPONENT_NAME) 
             Component::Domain::Provider::Parameters.new(provider_component_template)
           else
-            fail(ErrorUsage, "Cannot find component '#{PARAMETER_COMPONENT_NAME}' in module '#{provider_component_module.display_name}'")
+            fail(ErrorUsage, "Cannot find component '#{ProviderAttributes::COMPONENT_NAME}' in module '#{provider_component_module.display_name}'")
           end
         end
         
@@ -54,6 +55,7 @@ module DTK
           ProviderAttributes.validate_provider_attributes(provider_attributes, self)
         end
       end
+
 
       def self.validate_provider_attributes(provider_attributes, provider)
         missing_required_params = []
@@ -73,11 +75,7 @@ module DTK
         end
       end
 
-      private
-
-
     end
   end
 end
-
 

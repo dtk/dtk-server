@@ -18,21 +18,18 @@
 module DTK
   class ActionDef::DynamicProvider
     module Container
-      module Mixin
+     COMPONENT_NAME = 'container'
 
+      module Mixin
         def docker_file?
-          if @docker_file_is_set
-            @docker_file
-          else
-            @docker_file_is_set = true
+          unless @docker_file_is_set
             if dockerfile_template = self.dockerfile_template?
-              # TODO: This should be moved to provider itself, but if temporarly stay in here shuld be in attribute mixin
-              # TODO: should this case on whether there is byebug enabled for this step
-              ActionDef::DynamicProvider.update_gem_attribute_for_byebug!(provider_attributes)
-              attribute_values = provider_attributes.inject({}) { |h, attr| h.merge(attr.display_name => attr[:attribute_value]) }
+              attribute_values = self.provider_attributes.inject({}) { |h, attr| h.merge(attr.display_name => attr[:attribute_value]) }
               @docker_file = MustacheTemplate.render(dockerfile_template, attribute_values)
             end
+            @docker_file_is_set = true
           end
+          @docker_file
         end
         
         protected
@@ -42,20 +39,17 @@ module DTK
         end
         
         def provider_container?
-          if @provider_container_is_set
-            @provider_container
-          else
-            @provider_container_is_set = true
+          unless @provider_container_is_set
             @provider_container = ret_provider_container?
+            @provider_container_is_set = true
           end
+          @provider_container
         end
         
         private  
         
-        CONTAINER_COMPONENT_NAME = 'container'
-        
         def ret_provider_container?
-          if container_component_template = self.provider_component_module.get_matching_component_template?(CONTAINER_COMPONENT_NAME) 
+          if container_component_template = self.provider_component_module.get_matching_component_template?(Container::COMPONENT_NAME) 
             Component::Domain::Provider::Container.new(container_component_template)
           end
         end

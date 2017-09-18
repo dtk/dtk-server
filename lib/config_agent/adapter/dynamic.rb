@@ -21,6 +21,7 @@ module DTK; class ConfigAgent
       require_relative('dynamic/dynamic_attributes')
       require_relative('dynamic/error_results')
       require_relative('dynamic/attribute_request_form')
+      require_relative('dynamic/execution_environment')
 
       include DynamicAttributes::Mixin
       include ErrorResults::Mixin
@@ -103,26 +104,6 @@ module DTK; class ConfigAgent
         namespace, module_name = module_name_with_ns.split(FULL_MODULE_NAME_DELIM)
         Aux.hash_subset(component_action[:component].print_form_hash, [:type, :version, :title]).merge(namespace: namespace, module_name: module_name)
       end
-
-      module ExecutionEnvironment
-        EPHEMERAL_CONTAINER = 'ephemeral_container'
-        NATIVE = 'native'
-        # opts can have keys
-        #   :breakpoint (Boolean)
-        def self.execution_environment(dynamic_provider, node, opts = {})
-          # TODO: this should only be called for ruby provider
-          ActionDef::DynamicProvider.update_gem_attribute_for_byebug!(dynamic_provider.provider_attributes) if opts[:breakpoint]
-          if node.is_assembly_wide_node?            
-            docker_file = dynamic_provider.docker_file? || fail(Error, "Unexpected that 'dynamic_provider.docker_file?' is nil")
-            { type: EPHEMERAL_CONTAINER, docker_file: docker_file }
-          else
-            bash = dynamic_provider.bash?  || fail(Error, "Unexpected that 'dynamic_provider.bash?' is nil")
-            { type: NATIVE, bash: bash }
-          end
-        end
-
-      end
-
 
       module Sanitize
         def self.sanitize_message(msg)

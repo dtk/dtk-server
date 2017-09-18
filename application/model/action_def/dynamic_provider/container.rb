@@ -18,15 +18,15 @@
 module DTK
   class ActionDef::DynamicProvider
     module Container
-      DOMAIN_COMPONENT_NAME = 'container'
-
       module Mixin
+
         def docker_file?
-          if @docker_file_set
+          if @docker_file_is_set
             @docker_file
           else
-            @docker_file_set = true
-            if dockerfile_template = (@container_component && @container_component.dockerfile_template?) 
+            @docker_file_is_set = true
+            if dockerfile_template = self.dockerfile_template?
+              # TODO: This should be moved to provider itself, but if temporarly stay in here shuld be in attribute mixin
               # TODO: should this case on whether there is byebug enabled for this step
               ActionDef::DynamicProvider.update_gem_attribute_for_byebug!(provider_attributes)
               attribute_values = provider_attributes.inject({}) { |h, attr| h.merge(attr.display_name => attr[:attribute_value]) }
@@ -34,29 +34,33 @@ module DTK
             end
           end
         end
-      
-        private
-
-        def set_container_component!(provider_module_name, assembly_instance)
-          @container_component = Container.ret_container_domain_component?(provider_module_name, assembly_instance)
-        end
-      end
-      
-      def self.ret_container_domain_component?(provider_module_name, assembly_instance)
-        component_module_refs    = assembly_instance.component_module_refs
-        container_component_type = container_component_type(provider_module_name)
         
-        if container_dtk_component = assembly_instance.find_matching_aug_component_template?(container_component_type, component_module_refs) 
-          Component::Domain::Provider::Container.new(container_dtk_component)
+        protected
+        
+        def dockerfile_template?
+          self.provider_container? && self.provider_container?.dockerfile_template?
+        end
+        
+        def provider_container?
+          if @provider_container_is_set
+            @provider_container
+          else
+            @provider_container_is_set = true
+            @provider_container = ret_provider_container?
+          end
+        end
+        
+        private  
+        
+        CONTAINER_COMPONENT_NAME = 'container'
+        
+        def ret_provider_container?
+          if container_component_template = self.provider_component_module.get_matching_component_template?(CONTAINER_COMPONENT_NAME) 
+            Component::Domain::Provider::Container.new(container_component_template)
+          end
         end
       end
 
-      private      
-  
-      def self.container_component_type(provider_module_name)
-        Component.component_type_from_module_and_component(provider_module_name, DOMAIN_COMPONENT_NAME)
-      end
-      
     end
   end
 end

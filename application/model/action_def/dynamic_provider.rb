@@ -26,22 +26,18 @@ module DTK
       include Bash::Mixin
       include ProviderAttributes::Mixin
 
-      attr_reader :type
-
       def initialize(component_template, method_name, provider_attribute_values, assembly_instance)
-        @component_template   = component_template
-        @method_name          = method_name
-        # @component_template and @method_name need to be set first
-        
-        @type                 = ret_type(provider_attribute_values)
-        @provider_module_name = ret_provider_module_name(@type)
-
-        # provider attributes are an array of DTK::Attribute objects 
-        set_provider_attributes!(@provider_module_name, provider_attribute_values, assembly_instance)
-        set_container_component!(@provider_module_name, assembly_instance)
+        @component_template        = component_template
+        @method_name               = method_name
+        @provider_attribute_values = provider_attribute_values 
+        @assembly_instance         = assembly_instance 
       end
       private :initialize
-      
+
+      def type
+        @type ||= ret_type(self.provider_attribute_values)
+      end
+
       def raise_error_if_not_valid
         validate_provider_attributes
         self
@@ -59,7 +55,7 @@ module DTK
       end
 
       def action_ref_print_form
-        "Action method '#{@method_name}' on component '#{@component_template.display_name_print_form}'"
+        "Action method '#{self.method_name}' on component '#{self.component_template.display_name_print_form}'"
       end
 
       # TODO: this should only be applied to ruby provider
@@ -71,9 +67,39 @@ module DTK
           end
         end
       end  
-      
+
+      protected
+
+      attr_reader :method_name, :component_template, :method_name, :provider_attribute_values, :assembly_instance 
+
+      def provider_module_name 
+        @provider_module_name ||= ret_provider_module_name(self.type)
+      end
+
+      def provider_component_module
+        @provider_component_module ||= ret_provider_component_module
+      end        
+
       private
 
+      def ret_provider_component_module
+        unless @provider_component_module = matching_provider_component_module?
+          fail ErrorUsage, "Cannot find a dependent module in the service instance for provider '#{self.provider_module_name}'"
+        end
+        @provider_component_module
+      end
+
+      PROVIDER_NAMESPACE = 'dtk-provider'
+
+      def matching_provider_component_module?
+        matching_component_modules = self.assembly_instance.get_component_modules(:recursive).select do |component_module|
+          component_module.display_name == self.provider_module_name and
+            component_module[:namespace_name] == PROVIDER_NAMESPACE
+        end
+        fail Error, "Unexpected that there is multiple matching component_modules" if matching_component_modules.size > 1
+        matching_component_modules.first
+      end
+      
       def ret_type(provider_attribute_values)
         provider_attribute_values[:type] || raise_error_missing_action_def_param(:type)
       end

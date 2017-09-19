@@ -15,15 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class Clone
-  class IncrementalUpdate
+module DTK
+  class Clone::IncrementalUpdate
     class Attribute < self
       FieldsToNotCopy = [:id, :ref, :display_name, :group_id, :component_component_id, :value_derived, :value_asserted, :is_port, :port_type_asserted]
       # instance_template_links has type InstanceTemplate::Links
       def self.modify_instances(model_handle, instance_template_links)
-        parent_id_col = model_handle.parent_id_field_name()
-        update_rows = instance_template_links.map do |l|
-          Aux.hash_subset(l.template, l.template.keys - FieldsToNotCopy).merge(id: l.instance.id)
+        parent_id_col = model_handle.parent_id_field_name
+
+        update_rows = instance_template_links.map do |link|
+          template = link.template
+          instance = link.instance
+          # Using id from instance 
+          # and to handle default in template that could have changed mapping template[:value_asserted] to value_derived
+          # Using value_derived in case instance has value_asserted, which will override this
+          Aux.hash_subset(template, template.keys - FieldsToNotCopy).merge(id: instance.id, value_derived: template[:value_asserted])
         end
         Model.update_from_rows(model_handle, update_rows)
       end
@@ -34,14 +40,14 @@ module DTK; class Clone
       def equal_so_dont_modify?(_instance, _template)
         false
       end
-
+      
       def update_opts
         # TODO: can refine to allow deletes if instance has nil value and not in any attribute link
         # can do this by passing in a charachterstic fn
         #{:donot_allow_deletes => true}
         super
       end
-
+      
       def get_ndx_objects(component_idhs)
         ret = {}
         ::DTK::Component.get_attributes(component_idhs, cols_plus: [:component_component_id, :ref]).each do |r|
@@ -51,4 +57,4 @@ module DTK; class Clone
       end
     end
   end
-end; end
+end

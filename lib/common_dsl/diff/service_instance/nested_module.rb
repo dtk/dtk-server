@@ -56,7 +56,6 @@ module DTK; module CommonDSL
           # parsing looks at component module not the service isnatnce repo
           dsl_changed = false
           if impacted_dsl_files = @nested_module_info.restrict_to_dsl_files?
-            pp [:impacted_dsl_files, impacted_dsl_files]
             DSL.process_nested_module_dsl_changes(diff_result, @service_instance, aug_service_specific_mb, impacted_dsl_files)
             dsl_changed = true
           end

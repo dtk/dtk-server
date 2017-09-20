@@ -112,8 +112,12 @@ module DTK; class Attribute
       scalar_attrs = [:id, :value_asserted, :value_derived, :semantic_type]
       attr_link_rows = get_objs_in_set(output_attr_idhs, columns: scalar_attrs + [:linked_attributes])
 
-      # dont propagate to attributes with asserted values TODO: push this restriction into search pattern
-      attr_link_rows.reject! { |r| (r[:input_attribute] || {})[:value_asserted] }
+      # Dont propagate to attributes with directly asserted values
+      # This will overwrite defaults 
+      attr_link_rows.reject! do |r| 
+        input_attribute = r[:input_attribute]
+        input_attribute[:value_asserted] and input_attribute[:is_instance_value]
+      end
       return ret if attr_link_rows.empty?
 
       # output_id__parent_idhs used to splice in parent_id (if it exists

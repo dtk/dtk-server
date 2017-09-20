@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 # TODO: temp until move into meta directory
-module XYZ; class Attribute
+module DTK; class Attribute
   # TOOD: hack taht can be removed when update_object allows virtual types
   module VirtulaDependency
     def self.port_type
@@ -33,9 +33,12 @@ module XYZ; class Attribute
       # columns related to the value
       column :value_asserted, :json, ret_keys_as_symbols: false
       column :value_derived, :json, ret_keys_as_symbols: false
+      column :value_default, :json, ret_keys_as_symbols: false
+
+      # TODO: DTK-2601: Check if we can get rid of is_instance_value (which envolves seeing where it is called because
+      # now setting default as attribute_derived
       column :is_instance_value, :boolean, default: false #to distinguish between when value_asserted is from default versus directly asserted
-      # TODO: not used yet column :value_actual, :json, :ret_keys_as_symbols => false
-      # TODO: may rename attribute_value to desired_value
+
       virtual_column :attribute_value, type: :json, local_dependencies: [:value_asserted, :value_derived],
                                        sql_fn: SQL::ColRef.coalesce(:value_asserted, :value_derived)
 
@@ -197,7 +200,7 @@ module XYZ; class Attribute
            alias: :input_attribute,
            join_type: :inner,
            join_cond: { id: :attribute_link__input_id },
-           cols: [:id, :value_asserted, :value_derived, :semantic_type, :display_name]
+           cols: [:id, :value_asserted, :value_derived, :is_instance_value, :semantic_type, :display_name]
          }
         ]
     end

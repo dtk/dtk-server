@@ -17,17 +17,22 @@
 #
 module DTK; class Attribute
   module PropagateChangesClassMixin
-    def update_and_propagate_attribute_from_diff(existing_attribute, new_val)
-      existing_attrs = [existing_attribute]
-      ndx_new_vals   = { existing_attribute.id => new_val }
-      attribute_rows = [{ id: existing_attribute.id, value_asserted: new_val }]
+    def update_and_propagate_attribute_from_diff(existing_attribute, new_value)
+      existing_attributes = [existing_attribute]
+      ndx_new_values   = { existing_attribute.id => new_value }
+      update_and_propagate_attributes_from_diff(existing_attributes, ndx_new_values)
+    end
+
+    def update_and_propagate_attributes_from_diff(existing_attributes, ndx_new_values)
       # Make method in LegalValue taht just returns info about illegal values; could be list of logal value errors
       # do it so higher level can bulk up multiple errors
       # The diff modify calling function should then report errors with respect to 
       # the qualified key
-      LegalValue.raise_error_if_invalid(existing_attrs, ndx_new_vals)
-      SpecialProcessing.handle_special_processing_attributes(existing_attrs, ndx_new_vals)
-      update_and_propagate_attributes(existing_attribute.model_handle, attribute_rows)
+      LegalValue.raise_error_if_invalid(existing_attributes, ndx_new_values)
+      SpecialProcessing.handle_special_processing_attributes(existing_attributes, ndx_new_values)
+
+      attribute_rows = ndx_new_values.map { | id,  new_value | { id: id, value_derived: new_value } }
+      update_and_propagate_attributes(existing_attributes.first.model_handle, attribute_rows)
     end
 
     # assume attribute_rows all have :value_asserted or all have :value_derived

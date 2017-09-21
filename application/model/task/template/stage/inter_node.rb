@@ -24,9 +24,11 @@ module DTK; class Task; class Template
       require_relative('inter_node/multi_node')
       require_relative('inter_node/nested_subtask')
 
-      def initialize(name = nil)
+      def initialize(name = nil, breakpoint = nil)
         super()
         @name = name
+        #@breakpoint = breakpoint
+        Log.info("Breakpoint in inter_node is set to: #{@breakpoint}")
       end
       attr_accessor :name
 
@@ -166,6 +168,11 @@ module DTK; class Task; class Template
         self
       end
 
+      # def has_breakpoint?
+      #   @breakpoint
+      # end
+
+
       def serialization_form(opts = {})
         subtasks = map_node_actions { |node_actions| node_actions.serialization_form(opts) }.compact
         return nil if subtasks.empty?
@@ -197,13 +204,18 @@ module DTK; class Task; class Template
           end
         end
 
+        #@breakpoint = serialized_content[:breakpoint] if serialized_content[:breakpoint]
+        # require 'debugger'
+        # Debugger.wait_connection = true
+        # Debugger.start_remote
+        # debugger
         if multi_node_type = parse_and_reify_is_multi_node_type?(serialized_content)
           MultiNode.parse_and_reify(multi_node_type, serialized_content, action_list, opts)
         elsif serialized_content[Field::Subtasks]
           NestedSubtask.parse_and_reify(serialized_content, action_list, opts)
         else
           normalized_content = serialized_content[Field::Subtasks] || [serialized_content]
-          ret = parse_and_ret_normalized_content(normalized_content, serialized_content, action_list, opts)
+          ret = parse_and_ret_normalized_content(normalized_content, serialized_content, action_list, opts)          
           !ret.empty? && ret
         end
       end

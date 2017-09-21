@@ -322,12 +322,17 @@ module DTK; class  Assembly
           augmented_cmps.each do |cmp|
             # skip execution of component actions on assembly wide node (service instance component)
             next if (cmp[:node] && cmp[:node][:display_name].eql?('assembly_wide'))
-
+            require 'debugger'
+            Debugger.wait_connection = true
+            Debugger.start_remote
+            debugger
             subtask = Task.create_for_ad_hoc_action(self, cmp, opts)
             task.add_subtask(subtask) if subtask
           end
         end
       end
+
+      task_template_content = get_task_template_content(model_handle(:task_template), component)
 
       ret = {
         assembly_instance_id: self.id(),
@@ -336,6 +341,9 @@ module DTK; class  Assembly
 
       begin
         task = Task.create_for_ad_hoc_action(self, component, opts) if component
+        if task_template_content[:actions].include?(task[:display_name])
+          task[:breakpoint] = task_template_content[:breakpoint]
+        end 
         task = task.save_and_add_ids()
         task[:breakpoint] = params[:breakpoint] if params[:breakpoint]
       rescue Task::Template::ParsingError => e
@@ -349,6 +357,28 @@ module DTK; class  Assembly
       ret.merge!(task_id: task.id())
       ret
     end
+
+      # Gets the task_template with specific ID which contains the subtasks
+      # TODO Move this method
+      #
+      # @param [mh] contains the task_template handle
+      # @param [component] take the current component, however we just need its assmebly_id, maybe not needed?
+      # @return [subtasks] of the task_template
+      def get_task_template_content(mh, component)
+        ret = nil
+        sp_hash = {
+          cols: [:content, :ref],
+          filter: [:eq, :component_component_id, component[:assembly_id]]
+        }
+        template_content = Model.get_objs(mh, sp_hash)
+        #TODO FIX THIS RETURN
+        template_content.each do |st|
+          if st[:ref].eql?("delete")
+            ret = st
+          end
+        end
+        ret[:content][:subtasks].first unless  ret[:content][:subtasks].nil? ||  ret[:content][:subtasks].empty?
+      end
 
     def check_if_augmented_component(params, component_id, opts = {})
       task_params = params[:task_params]

@@ -62,8 +62,8 @@ module DTK
             {
               id: value_info.id,
               value_asserted: nil,
-              value_default: default_value,
               value_derived: default_value,
+              derived_source: Attribute::PropagateChanges::DerivedSource.default(default_value) 
             }
           end
           Model.update_from_rows(self.attribute_mh, update_rows)

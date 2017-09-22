@@ -30,7 +30,7 @@ module DTK
         private
 
         def self.update_and_propagate_attribute(attribute, new_val)
-          ::DTK::Attribute.update_and_propagate_attribute_from_diff(attribute, new_val)        
+          ::DTK::Attribute.update_and_propagate_default(attribute, new_val)        
         end
 
         def update_and_propagate_attribute_when_node_property?

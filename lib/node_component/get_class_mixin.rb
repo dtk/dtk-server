@@ -55,7 +55,7 @@ module DTK
                    [:eq, :display_name, node_name(component)]]
         }
         Node.get_obj(assembly.model_handle(:node), sp_hash) || 
-          fail(Error, "Unexpected that no matching node for componnet '#{component.display_name}'")
+          fail(Error, "Unexpected that no matching node for component '#{component.display_name}'")
       end
 
     end

@@ -19,13 +19,17 @@ module DTK
   class Clone::IncrementalUpdate
     class Attribute < self
       FieldsToNotCopy = [:id, :ref, :display_name, :group_id, :component_component_id, :is_port, :port_type_asserted, :value_asserted]
-      FieldsModified  = [:value_derived, :value_default]
+      FieldsModified  = [:value_derived, :derived_source]
       # instance_template_links has type InstanceTemplate::Links
       def self.modify_instances(model_handle, instance_template_links)
         update_rows = instance_template_links.map { |link| update_row(link) }
         propagate_attributes(model_handle, update_rows)
-        # propagate_attributes must be done before Model.update_from_rows, which updates meta info and (redundantly) updates value fields
-        Model.update_from_rows(model_handle, update_rows)
+        # propagate_attributes must be done before Model.update_from_rows, which updates meta info 
+
+        metadata_update_rows = update_rows.map do |row|
+          row.inject({}) { |h, (k, v) | [:value_derived, :derived_source].include?(k) ? h : h.merge(k => v) }
+        end
+        Model.update_from_rows(model_handle, metadata_update_rows)
       end
 
       private
@@ -40,7 +44,7 @@ module DTK
 
         value_fields_update = {
           value_derived: default_value,
-          value_default: default_value
+          derived_source: ::DTK::Attribute::PropagateChanges::DerivedSource.default(default_value)
         }
         Aux.hash_subset(template, template.keys - (FieldsToNotCopy + FieldsModified)).merge(id: instance.id).merge(value_fields_update)
       end
@@ -56,8 +60,8 @@ module DTK
         end
         # TODO: DTK-2601: the analog method in ib/common_dsl/object_logic/assembly/attribute/diff.rb, which processes updates when doing set attributes
         # calls 'update_and_propagate_attribute_when_node_property?'. Need to check if that method is correct and whether should be called here too
-        # after update_and_propagate_attributes_from_diff
-        ::DTK::Attribute.update_and_propagate_attributes_from_diff(existing_attributes, ndx_new_vals)
+        # after update_and_propagate_multiple_defaults
+        ::DTK::Attribute.update_and_propagate_multiple_defaults(existing_attributes, ndx_new_vals)
       end
 
       # TODO: put in equality test so that does not need to do the modify equal objects

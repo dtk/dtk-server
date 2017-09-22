@@ -33,8 +33,7 @@ module DTK; class Attribute
       # columns related to the value
       column :value_asserted, :json, ret_keys_as_symbols: false
       column :value_derived, :json, ret_keys_as_symbols: false
-      column :value_default, :json, ret_keys_as_symbols: false
-
+      column :derived_source, :json, ret_keys_as_symbols: false
       # TODO: DTK-2601: Check if we can get rid of is_instance_value (which envolves seeing where it is called because
       # now setting default as attribute_derived
       column :is_instance_value, :boolean, default: false #to distinguish between when value_asserted is from default versus directly asserted

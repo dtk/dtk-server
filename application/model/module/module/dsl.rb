@@ -66,7 +66,7 @@ module DTK
         update_opts.merge!(version: opts[:version]) if opts[:version]
         update_model(update_opts)
 
-        ref_integrity_snapshot.raise_error_if_any_violations
+        ref_integrity_snapshot.raise_error_if_any_violations(opts)
         ref_integrity_snapshot.integrity_post_processing
       end
     end

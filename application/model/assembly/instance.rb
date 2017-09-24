@@ -377,6 +377,8 @@ module DTK; class  Assembly
             ret = st
           end
         end
+        # TODO: DTK-3169 Almin; you might be taking this code out (see comments in ticket), but if you dont this leads to error if 
+        # ret is nil
         ret[:content][:subtasks].first unless  ret[:content][:subtasks].nil? ||  ret[:content][:subtasks].empty?
       end
 

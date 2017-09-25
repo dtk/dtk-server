@@ -337,6 +337,7 @@ module DTK; class  Assembly
       begin
         task = Task.create_for_ad_hoc_action(self, component, opts) if component
         task = task.save_and_add_ids()
+        task[:breakpoint] = params[:breakpoint] if params[:breakpoint]
       rescue Task::Template::ParsingError => e
         return ret if params[:noop_if_no_action]
         raise e

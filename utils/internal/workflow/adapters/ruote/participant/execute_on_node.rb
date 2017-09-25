@@ -63,6 +63,8 @@ module DTK
                     if dtk_debug_port = dynamic_attributes['dtk_debug_port']
                       if public_dns_name = public_dns_name?(action)
                         $public_dns = public_dns_name
+                        # Sleep for 20 seconds, until byebug instance is initialized
+                        sleep 20
                       end
 
                       debug = true

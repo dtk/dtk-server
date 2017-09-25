@@ -169,6 +169,9 @@ module DTK
 
       def exec
         params_hash = params_hash(:commit_msg, :task_action, :task_params, :start_assembly, :skip_violations)
+        # Need to get breakpoint as boolean since by default in params_hash method it returns as string
+        breakpoint = boolean_request_params(:breakpoint)
+        params_hash.merge!(:breakpoint => breakpoint)
         response = assembly_instance.exec(params_hash)
         if response[:violations]
           rest_ok_response response, datatype: :violation

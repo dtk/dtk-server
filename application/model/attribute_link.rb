@@ -17,13 +17,13 @@
 #
 module DTK
   class AttributeLink < Model
-    r8_nested_require('attribute_link', 'propagate_mixins')
-    r8_nested_require('attribute_link', 'propagate_changes')
-    r8_nested_require('attribute_link', 'function')
-    r8_nested_require('attribute_link', 'update_delta')
-    r8_nested_require('attribute_link', 'index_map')
-    r8_nested_require('attribute_link', 'propagate_processor')
-    r8_nested_require('attribute_link', 'ad_hoc')
+    require_relative('attribute_link/propagate_mixins')
+    require_relative('attribute_link/propagate_changes')
+    require_relative('attribute_link/function')
+    require_relative('attribute_link/update_delta')
+    require_relative('attribute_link/index_map')
+    require_relative('attribute_link/propagate_processor')
+    require_relative('attribute_link/ad_hoc')
 
     def self.common_columns
       [:id, :group_id, :display_name, :input_id, :output_id, :type, :hidden, :function, :index_map, :assembly_id, :port_link_id]
@@ -75,8 +75,8 @@ module DTK
       add_link_fns!(rows_to_create, attr_info)
 
       # add parent_col and ref
-      parent_col = attr_link_mh.parent_id_field_name()
-      parent_id = parent_idh.get_id()
+      parent_col = attr_link_mh.parent_id_field_name
+      parent_id = parent_idh.get_id
       rows_to_create.each do |row|
         row[parent_col] ||= parent_id
         row[:ref] ||= "attribute_link:#{row[:input_id]}-#{row[:output_id]}"
@@ -155,7 +155,7 @@ module DTK
     def self.get_attribute_info(attr_mh, rows_to_create)
       endpoint_ids = rows_to_create.map { |r| [r[:input_id], r[:output_id]] }.flatten.uniq
       sp_hash = {
-        cols: attribute_info_cols(),
+        cols: attribute_info_cols,
         filter: [:oneof, :id, endpoint_ids]
       }
       get_objs(attr_mh, sp_hash)
@@ -165,8 +165,8 @@ module DTK
       # TODO: may modify to get all constraints from  conn_info_list
       rows_to_create.each do |row|
         # TODO: right now constraints just on input, not output, attributes
-        attr = attr_mh.createIDH(id: row[:input_id]).create_object()
-        constraints = Constraints.new()
+        attr = attr_mh.createIDH(id: row[:input_id]).create_object
+        constraints = Constraints.new
         if row[:link_defs]
           unless row[:conn_info]
            constraints << Constraint::Macro.no_legal_endpoints(row[:link_defs])
@@ -201,28 +201,28 @@ module DTK
     ### special purpose create links ###
     def self.create_links_node_group_members(node_group_id_handle, ng_cmp_id_handle, node_cmp_id_handles)
       node_cmp_mh = node_cmp_id_handles.first.createMH
-      node_cmp_wc = { ancestor_id: ng_cmp_id_handle.get_id() }
+      node_cmp_wc = { ancestor_id: ng_cmp_id_handle.get_id }
       node_cmp_fs = FieldSet.opt([:id], :component)
       node_cmp_ds = get_objects_just_dataset(node_cmp_mh, node_cmp_wc, node_cmp_fs)
 
       attr_mh = node_cmp_mh.create_childMH(:attribute)
 
-      attr_parent_col = attr_mh.parent_id_field_name()
+      attr_parent_col = attr_mh.parent_id_field_name
       node_attr_fs = FieldSet.opt([attr_parent_col, :id, :ref], :attribute)
       node_attr_ds = get_objects_just_dataset(attr_mh, nil, node_attr_fs)
 
-      group_attr_wc = { attr_parent_col => ng_cmp_id_handle.get_id() }
+      group_attr_wc = { attr_parent_col => ng_cmp_id_handle.get_id }
       group_attr_fs = FieldSet.opt([:id, :ref], :attribute)
       group_attr_ds = get_objects_just_dataset(attr_mh, group_attr_wc, group_attr_fs)
 
       # attribute link has same parent as node_group
       attr_link_mh = node_group_id_handle.create_peerMH(:attribute_link)
-      attr_link_parent_id_handle = node_group_id_handle.get_parent_id_handle()
-      attr_link_parent_col = attr_link_mh.parent_id_field_name()
+      attr_link_parent_id_handle = node_group_id_handle.get_parent_id_handle
+      attr_link_parent_col = attr_link_mh.parent_id_field_name
       ref_prefix = 'attribute_link:'
       i1_ds = node_cmp_ds.select(
          { SQL::ColRef.concat(ref_prefix, :input__id.cast(:text), '-', :output__id.cast(:text)) => :ref },
-         { attr_link_parent_id_handle.get_id() => attr_link_parent_col },
+         { attr_link_parent_id_handle.get_id => attr_link_parent_col },
          { input__id: :input_id },
          { output__id: :output_id },
          { 'member' => :type },

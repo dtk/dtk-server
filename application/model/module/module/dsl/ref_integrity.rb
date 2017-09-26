@@ -55,7 +55,10 @@ module DTK
       private
 
       def raise_error_if_dangling_cmp_ref(opts = {})
-        referenced_cmp_template_ids = @snapshot.component_template_ids()
+        # referenced_cmp_template_ids = @snapshot.component_template_ids()
+        # DTK-3197: using new snapshot below instead of above because we need to check against updated component_refs when parsing component_defs part, not the initial ones
+        new_snapshot = opts[:use_new_snapshot] ? Snapshot.new(@component_module) : @snapshot
+        referenced_cmp_template_ids = new_snapshot.component_template_ids()
         return if referenced_cmp_template_ids.empty?
         # this is called within transaction after any deletes are performed (if any)
         # TODO: have ModuleDSL.update_model return if any deletes
@@ -69,7 +72,7 @@ module DTK
           filter: [:oneof, :id, referenced_cmp_template_ids]
         }
         cmp_template_ids_still_present = Model.get_objs(model_handle(:component), sp_hash).map { |r| r[:id] }
-        referenced_cmp_templates = @snapshot.referenced_cmp_templates(cmp_template_ids_still_present)
+        referenced_cmp_templates = new_snapshot.referenced_cmp_templates(cmp_template_ids_still_present)
         unless referenced_cmp_templates.empty?
           fail ParsingError::RefComponentTemplates.new(referenced_cmp_templates)
         end

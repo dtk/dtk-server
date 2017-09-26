@@ -20,7 +20,7 @@ module DTK
     class Component < self
       require_relative('component/transform')
 
-      def create_or_update_from_parsed_common_module?
+      def create_or_update_from_parsed_common_module?(opts = {})
         return unless module_info_exists?
         component_module_branch = create_module_branch_and_repo?(create_implementation: true)
         CommonDSL::Parse.set_dsl_version!(component_module_branch, parsed_common_module)
@@ -40,7 +40,7 @@ module DTK
         sync_component_module_from_common_module
         if parse_needed?
           PerformanceService.start('update_component_info_in_model_from_dsl')
-          update_component_info_in_model_from_dsl(parsed_dependent_modules)
+          update_component_info_in_model_from_dsl(parsed_dependent_modules, opts)
           PerformanceService.end_measurement('update_component_info_in_model_from_dsl')
         end
       end
@@ -79,12 +79,13 @@ module DTK
       end
 
       # TODO: DTK-2766: this uses the legacy parsing routines in the dtk-server gem. Port over to dtk-dsl parsing
-      def update_component_info_in_model_from_dsl(parsed_dependent_modules)
+      def update_component_info_in_model_from_dsl(parsed_dependent_modules, opts = {})
         aug_mb = @aug_component_module_branch # alias
         # TODO: for migration purposes needed the  Implementation.create? method. This shoudl be done during initial create
         impl = aug_mb.get_implementation? || Implementation.create?(project, local_params, aug_mb.repo)
         parse_opts = {
-          donot_update_module_refs: true
+          donot_update_module_refs: true,
+          use_new_snapshot: opts[:use_new_snapshot]
         }
         if parsed_dependent_modules
           parse_opts.merge!(dependent_modules: parsed_dependent_modules.map { |dependent_module| dependent_module.req(:ModuleName) })

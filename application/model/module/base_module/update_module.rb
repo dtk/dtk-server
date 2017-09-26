@@ -118,7 +118,7 @@ module DTK; class BaseModule
 
       opts[:ret_parsed_dsl].add(dsl_obj) if opts[:ret_parsed_dsl]
 
-      update_opts = { version: version }
+      update_opts = { version: version, use_new_snapshot: opts[:use_new_snapshot] }
 
       # when image_aws component is updated; need to check if new images are added and update node-bindings accordingly
       if @base_module[:display_name].eql?('image_aws')

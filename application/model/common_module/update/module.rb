@@ -119,7 +119,7 @@ module DTK
         retried = false
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
         begin
-          create_or_update_component_info(args)
+          create_or_update_component_info(args, use_new_snapshot: true)
           create_or_update_service_info(args) unless retried
         rescue ModuleDSL::ParsingError::RefComponentTemplates => exception
           # if trying to delete components from component info that are deleted from assemblies but not processed
@@ -137,8 +137,8 @@ module DTK
         info_service_object(args_for_create_or_update(parsed_common_module, repo, opts)).check_for_missing_dependencies
       end
 
-      def create_or_update_component_info(args)
-        Info::Component.new(*args).create_or_update_from_parsed_common_module?
+      def create_or_update_component_info(args, opts = {})
+        Info::Component.new(*args).create_or_update_from_parsed_common_module?(opts)
       end
 
       def create_or_update_service_info(args)

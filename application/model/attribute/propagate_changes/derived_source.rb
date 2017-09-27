@@ -44,8 +44,8 @@ module DTK
 
       def self.update_from_propagated(attr_mh, update_deltas)
         return if update_deltas.empty?
-        attributes = update_deltas.map { |attr_hash| attr_mh.createIDH(id: attr_hash[:id]).create_object.merge(attr_hash) }
-        ndx_existing_derived_source = ndx_existing_derived_source(attributes)
+
+        ndx_existing_derived_source = ndx_existing_derived_source(attr_mh, update_deltas.map { |attr_hash| attr_hash[:id] })
 
         update_rows = update_deltas.map do |update_delta|
           id = update_delta[:id]
@@ -54,7 +54,18 @@ module DTK
             derived_source: derived_source_from_propagated(update_delta, ndx_existing_derived_source[id])
           }
         end
-        Model.update_from_rows(attributes.first.model_handle, update_rows) 
+        Model.update_from_rows(attr_mh, update_rows) 
+      end
+
+      def self.update_derived_source_when_dynamic_attributes!(update_rows, attr_mh)
+        return if update_rows.empty?
+
+        ndx_existing_derived_source = ndx_existing_derived_source(attr_mh, update_rows.map { |attr_hash| attr_hash[:id] })
+        update_rows.each do |update_row|
+          id = update_row[:id]
+          update_row[:derived_source] = derived_source_from_dynamic_attribute(update_row, ndx_existing_derived_source[id])
+        end
+        update_rows
       end
 
       def self.default(default_value)
@@ -98,12 +109,12 @@ module DTK
         source_ids.empty? ? {} : { Key::PROPAGATED => { Key::SOURCE_IDS => source_ids.map(&:to_s) } } 
       end
       
-      def self.ndx_existing_derived_source(attributes)
+      def self.ndx_existing_derived_source(attr_mh, attribute_ids)
         sp_hash = {
           cols: [:id, :derived_source],
-          filter: [:oneof, :id, attributes.map(&:id)]
+          filter: [:oneof, :id, attribute_ids]
         }
-        Model.get_objs(attributes.first.model_handle, sp_hash).inject({}) { |h, attribute| h.merge(attribute.id => attribute[:derived_source]) }
+        Model.get_objs(attr_mh, sp_hash).inject({}) { |h, attribute| h.merge(attribute.id => attribute[:derived_source]) }
       end
 
       def self.derived_source_from_propagated(update_delta, existing_derived_source)
@@ -113,6 +124,11 @@ module DTK
           Log.error("unexpected that update_delta[:source_output_id] is nil")
           existing_derived_source
         end
+      end
+
+      def self.derived_source_from_dynamic_attribute(update_row, existing_derived_source)
+        source_id = update_row[:id]
+        deep_merge(existing_derived_source || {}, propagated_hash_form(source_id))
       end
 
       def self.deep_merge(existing_hash, new_hash)
@@ -133,7 +149,7 @@ module DTK
       module Key
         DEFAULT        = 'default'
         PROPAGATED     = 'propagated'
-        SOURCE_IDS     = 'source_idS'
+        SOURCE_IDS     = 'source_ids'
         DEFAULT_VALUE  = 'default_value'
       end
 

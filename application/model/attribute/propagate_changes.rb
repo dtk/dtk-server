@@ -88,7 +88,11 @@ module DTK; class Attribute
             is_instance_value: (val_field == :value_asserted)
           }
         end
-        
+
+        if opts[:dynamic_attributes]
+          PropagateChanges::DerivedSource.update_derived_source_when_dynamic_attributes!(update_rows, attr_mh)
+        end
+
         # make actual changes in database
         opts_update = { partial_value: true }.merge(Aux.hash_subset(opts, :partial_value))
         update_from_rows(attr_mh, update_rows, opts_update)
@@ -102,7 +106,7 @@ module DTK; class Attribute
         #  efficient would be to group by datatype
         # update_and_propagate_attributes(attr_mh, attribute_rows, add_state_changes: false, partial_value: false)
         attribute_rows.each do |attribute_row|
-          update_and_propagate_attributes(attr_mh, [attribute_row], add_state_changes: false, partial_value: false)
+          update_and_propagate_attributes(attr_mh, [attribute_row], add_state_changes: false, partial_value: false, dynamic_attributes: true)
         end
       end
       

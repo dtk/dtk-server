@@ -287,8 +287,10 @@ module DTK; class  Assembly
             end
           end
         end
+
         unless has_steps
-          if opts[:uninstall] # if from uninstall return nil
+          if opts[:uninstall] # if called from uninstall and has no steps, do uninstall and return nil
+            assembly_instance.uninstall(opts)
             return nil
           else
             fail ErrorUsage, "Service instance has no components to be deleted." 

@@ -153,7 +153,9 @@ module DTK
             delete_action: 'delete',
             delete_params: [assembly_instance.id_handle],
             recursive: recursive,
-            uninstall: true
+            uninstall: true,
+            delete: delete,
+            force: force
           }
           
           exec__delete_info = assembly_instance.exec__delete(Opts.new(opts_hash))

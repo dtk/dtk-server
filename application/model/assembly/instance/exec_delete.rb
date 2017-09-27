@@ -150,8 +150,10 @@ module DTK; class  Assembly
               end
 
               cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if create_cmp_action
-              if task_template_content[:actions].include?(cmp_action[:display_name])
-                cmp_action[:breakpoint] = task_template_content[:breakpoint]
+              unless task_template_content.empty? || cmp_action.nil?
+                if task_template_content[:actions].include?(cmp_action[:display_name])
+                  cmp_action[:breakpoint] = task_template_content[:breakpoint]
+                end
               end
             rescue Task::Template::ParsingError => e
               Log.info("Ignoring component 'delete' action does not exist.")
@@ -263,13 +265,17 @@ module DTK; class  Assembly
           filter: [:eq, :component_component_id, component[:assembly_id]]
         }
         template_content = Model.get_objs(mh, sp_hash)
-        #TODO FIX THIS RETURN
         template_content.each do |st|
           if st[:ref].eql?("delete")
             ret = st
           end
         end
-        ret[:content][:subtasks].first unless  ret[:content][:subtasks].nil? ||  ret[:content][:subtasks].empty?
+
+        if ret[:content][:subtasks].nil? || ret[:content][:subtasks].empty?
+          ret = []
+        else 
+          ret[:content][:subtasks].first
+        end
       end
 
       def delete_instance_task(assembly_instance, opts = {})
@@ -298,10 +304,17 @@ module DTK; class  Assembly
 
               cmp_action   = nil
               cmp_opts.merge!(delete_params: [component.id_handle, assembly_wide_node.id])
-              
+
+              task_template_content = get_task_template_content(model_handle(:task_template), component)
+
               begin                
                 # no need to check if admin_op_status is 'running' with nodes as components so commented that out for now
                 cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts)# if assembly_wide_node.get_admin_op_status.eql?('running')
+                unless task_template_content.empty? || cmp_action.nil?
+                  if task_template_content[:actions].include?(cmp_action[:display_name])
+                    cmp_action[:breakpoint] = task_template_content[:breakpoint]
+                  end
+                end
               rescue Task::Template::ParsingError => e
                 Log.info("Ignoring component 'delete' action does not exist.")
               end

@@ -322,10 +322,6 @@ module DTK; class  Assembly
           augmented_cmps.each do |cmp|
             # skip execution of component actions on assembly wide node (service instance component)
             next if (cmp[:node] && cmp[:node][:display_name].eql?('assembly_wide'))
-            require 'debugger'
-            Debugger.wait_connection = true
-            Debugger.start_remote
-            debugger
             subtask = Task.create_for_ad_hoc_action(self, cmp, opts)
             task.add_subtask(subtask) if subtask
           end
@@ -341,9 +337,11 @@ module DTK; class  Assembly
 
       begin
         task = Task.create_for_ad_hoc_action(self, component, opts) if component
-        if task_template_content[:actions].include?(task[:display_name])
-          task[:breakpoint] = task_template_content[:breakpoint]
-        end 
+        unless task_template_content.empty?
+          if task_template_content[:actions].include?(task[:display_name])
+            task[:breakpoint] = task_template_content[:breakpoint]
+          end
+        end
         task = task.save_and_add_ids()
         task[:breakpoint] = params[:breakpoint] if params[:breakpoint]
       rescue Task::Template::ParsingError => e
@@ -371,15 +369,17 @@ module DTK; class  Assembly
           filter: [:eq, :component_component_id, component[:assembly_id]]
         }
         template_content = Model.get_objs(mh, sp_hash)
-        #TODO FIX THIS RETURN
         template_content.each do |st|
           if st[:ref].eql?("delete")
             ret = st
           end
         end
-        # TODO: DTK-3169 Almin; you might be taking this code out (see comments in ticket), but if you dont this leads to error if 
-        # ret is nil
-        ret[:content][:subtasks].first unless  ret[:content][:subtasks].nil? ||  ret[:content][:subtasks].empty?
+
+        if ret[:content][:subtasks].nil? || ret[:content][:subtasks].empty?
+          ret = []
+        else 
+          ret[:content][:subtasks].first
+        end
       end
 
     def check_if_augmented_component(params, component_id, opts = {})

@@ -30,14 +30,14 @@ module DTK
         private
 
         def self.update_and_propagate_attribute(attribute, new_val)
-          ::DTK::Attribute.update_and_propagate_attribute_from_diff(attribute, new_val)        
+          ::DTK::Attribute.update_and_propagate_default(attribute, new_val)        
         end
 
         def update_and_propagate_attribute_when_node_property?
-          Log.error("DTK-2938: need to check that this is working right")
           node_name, attribute_name = CommonDSL::Diff::QualifiedKey.is_node_attribute?(@qualified_key)
           if attribute_name
             if node_component_attribute = ::DTK::Attribute::Pattern.node_component_attribute?(parent_node_when_node_attribute, attribute_name)
+              Log.error("DTK-2601: need to check that this is working right")
               self.class.update_and_propagate_attribute(node_component_attribute, new_val)
             end
           end

@@ -18,9 +18,9 @@
 module DTK
   class LinkDef::Link
     class AttributeMapping < HashObject
-      r8_nested_require('attribute_mapping', 'node_group_processor')
-      r8_nested_require('attribute_mapping', 'augmented')
-      r8_nested_require('attribute_mapping', 'parse_helper')
+      require_relative('attribute_mapping/node_group_processor')
+      require_relative('attribute_mapping/augmented')
+      require_relative('attribute_mapping/parse_helper')
 
       def self.reify(object)
         if object.is_a?(AttributeMapping)
@@ -40,7 +40,7 @@ module DTK
         unless err_msgs.empty?
           err_msg = err_msgs.join(' and ').capitalize
           if opts[:raise_error]
-            fail ErrorUsage.new(err_msg)
+            fail LinkDef::AutoComplete::FatalError.new(err_msg)
           else
             Log.error(err_msg)
             return ret

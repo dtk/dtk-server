@@ -1,18 +1,22 @@
+# This test script is used to test deployment of getting started example: dtk-examples/rails
+# Things that are under test are:
+# - ability to stage and converge rails example and have rails application with postgres/nginx up and running
+
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
 
-assembly_name = 'wordpress_single_node'
-service_name = 'wordpress_getting_started'
-remote_module = 'dtk-examples/wordpress'
-remote_module_location = '/tmp/wordpress'
-remote_module_version = '1.6.0'
+assembly_name = 'rails_single_node'
+service_name = 'rails_single_node_getting_started'
+remote_module = 'dtk-examples/rails'
+remote_module_location = '/tmp/rails'
+remote_module_version = '1.0.0'
 service_location = '~/dtk/'
 
 dtk_common = Common.new('', '')
 
-describe "DTK Server smoke test for getting started wordpress example" do
+describe "Getting started example: dtk-examples/rails" do
   before(:all) do
-    puts '***********************************************************', ''
+    puts '*******************************************', ''
   end
 
   context "Install module from dtkn" do

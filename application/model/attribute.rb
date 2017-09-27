@@ -43,12 +43,12 @@ module DTK
     include ConstantMixin
     include PrintFormMixin
     extend PrintFormClassMixin
-    extend PropagateChangesClassMixin
+    extend PropagateChanges::ClassMixin
     extend MetaClassMixin
     include DerivationType::Mixin
 
     def self.common_columns
-      [:id, :display_name, :group_id, :hidden, :description, :component_component_id, :value_derived, :value_asserted, :semantic_data_type, :semantic_type, :semantic_type_summary, :data_type, :required, :dynamic, :dynamic_input, :cannot_change, :port_type_asserted, :is_port, :external_ref, :read_only, :tags]
+      [:id, :display_name, :group_id, :hidden, :description, :component_component_id, :value_derived, :value_asserted, :derived_source, :semantic_data_type, :semantic_type, :semantic_type_summary, :data_type, :required, :dynamic, :dynamic_input, :cannot_change, :port_type_asserted, :is_port, :external_ref, :read_only, :tags]
     end
 
     def self.legal_display_name?(display_name)

@@ -17,11 +17,11 @@
 #
 module DTK; class AttributeLink
   class UpdateDelta < HashObject
-    r8_nested_require('update_delta', 'delete')
-    r8_nested_require('update_delta', 'simple')
-    r8_nested_require('update_delta', 'array_append')
-    r8_nested_require('update_delta', 'indexed_output')
-    r8_nested_require('update_delta', 'partial')
+    require_relative('update_delta/delete')
+    require_relative('update_delta/simple')
+    require_relative('update_delta/array_append')
+    require_relative('update_delta/indexed_output')
+    require_relative('update_delta/partial')
 
     def self.update_attributes_and_index_maps(attr_mh, update_deltas, opts = {})
       critical_section { update_in_critical_section(attr_mh, update_deltas, opts) }
@@ -70,11 +70,17 @@ module DTK; class AttributeLink
     end
 
     def self.update_aux(update_delta_class, attr_mh, update_deltas, opts = {})
+      update_derived_source(attr_mh, update_deltas)
+
       if update_delta_class.respond_to?(:update_attribute_values)
         update_delta_class.update_attribute_values(attr_mh, update_deltas, opts)
       else
         Simple.update_attribute_values(attr_mh, update_deltas, opts)
       end
+    end
+
+    def self.update_derived_source(attr_mh, update_deltas)
+      Attribute::PropagateChanges::DerivedSource.update_from_propagated(attr_mh, update_deltas)
     end
 
     def self.input_index(link_hash)

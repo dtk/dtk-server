@@ -35,9 +35,10 @@ module DTK
 
         # opts can have keys:
         #   :link_name
+        #   :raise_error
         def add_component_link(base_component, dep_component, opts = {})
-          link_name = ComponentLink.find_and_check_link_name(base_component, dep_component,  link_name: opts[:link_name])
-          ComponentLink::Factory.new(self, base_component.id_handle, dep_component.id_handle, link_name).add?
+          link_name = ComponentLink.find_and_check_link_name(base_component, dep_component,  link_name: opts[:link_name], raise_error: opts[:raise_error])
+          ComponentLink::Factory.new(self, base_component.id_handle, dep_component.id_handle, link_name, raise_error: opts[:raise_error]).add?
           update_dsl
         end
 

@@ -1,22 +1,22 @@
-# Test Case 02: Converge rails local app
+# Test Case 02: Converge wordpress single node scenario
 # This test script will test following: 
-# - converge rails local app on nginx with postgres
+# - converge single node scenario
 
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
 
-assembly_name = 'rails_single_node'
-service_name = 'rails_single_node'
-remote_module = 'dtk-examples/rails'
-remote_module_location = '/tmp/rails'
-remote_module_version = '1.0.0'
+assembly_name = 'wordpress_single_node'
+service_name = 'wordpress_getting_started'
+remote_module = 'dtk-examples/wordpress'
+remote_module_location = '/tmp/wordpress'
+remote_module_version = '1.6.0'
 service_location = '~/dtk/'
 
 dtk_common = Common.new('', '')
 
-describe "(Different node templates) Converge rails local app" do
+describe "(Different node templates) Converge wordpress single node scenario" do
   before(:all) do
-    puts '***************************************************', ''
+    puts '******************************************************************', ''
   end
 
   context "Install module from dtkn" do

@@ -18,6 +18,10 @@
 module DTK
   class LinkDef
     class AutoComplete
+
+      class FatalError < ErrorUsage
+      end
+
       require_relative('auto_complete/dependency_candidates')
       require_relative('auto_complete/internal_links')
 
@@ -40,9 +44,14 @@ module DTK
             case matching_cmps.size
             when 1
               begin
-                assembly_instance.add_component_link(base_aug_component, matching_cmps.first)
+                # Any method called though assembly_instance.add_component_link that wants to raise afatal error should
+                # use FatalError.new(error_msg)
+                # TODO: inceremntally add more fatal errors as determine which shoudl be raised
+                assembly_instance.add_component_link(base_aug_component, matching_cmps.first, raise_error: true)
+              rescue FatalError => e
+                fail e
               rescue => e
-                Log.error_pp(["TODO: Trapped error after auto link; auto link should be refined to avoid this", e])
+                Log.error_pp(["TODO: Trapped error after auto link", e])
                 nil
               end
             when 0
@@ -66,7 +75,7 @@ module DTK
         
         ret_link_defs
       end
-    end
 
+    end
   end
 end

@@ -17,9 +17,9 @@
 #
 module DTK
   class LinkDef::Context
-    r8_nested_require('context', 'term_mappings')
-    r8_nested_require('context', 'node_mappings')
-    r8_nested_require('context', 'value')
+    require_relative('context/term_mappings')
+    require_relative('context/node_mappings')
+    require_relative('context/value')
 
     def self.create(link, link_defs_info)
       new(link, link_defs_info)
@@ -45,7 +45,7 @@ module DTK
 
     # returns array of LinkDef::Link::AttributeMapping::Augmented
     def aug_attr_mappings__clone_if_needed(opts = {})
-      @link.attribute_mappings().inject([]) do |ret, am|
+      @link.attribute_mappings.inject([]) do |ret, am|
         ret + am.aug_attr_mappings__clone_if_needed(self, opts)
       end
     end

@@ -47,6 +47,12 @@ module DTK; module ModuleCommonMixin
           if repo = module_obj.get_repo?
             repo.merge!(branch_name: local.branch_name)
             add_branch_opts = { delete_existing_branch: opts[:delete_existing_branch] }
+            # TODO: DTK-3232; when bug manifested there where two branches in module_obj.get_module_branches and test picking second
+            # had code go through. In this case teh second was the master branch and first was 0.9.1, but cant just pick 
+            # base branch in case only semantic version branches are installed
+            # In summary 'base_branch just needs to be a random branch  ..' is wrong unbless we change code so any branch works
+            # or pick right branch
+
             # base_branch just needs to be a random branch on module_obj
             base_branch = module_obj.get_module_branches.first
             RepoManager.add_branch_and_push?(local.branch_name, add_branch_opts, base_branch)

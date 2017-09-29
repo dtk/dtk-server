@@ -25,6 +25,14 @@ module DTK
       new(link, link_defs_info)
     end
 
+    def local_component_template
+      component_template(:local)
+    end
+
+    def remote_component_template
+      component_template(:remote)
+    end
+
     def initialize(link, link_defs_info)
       @link = link
       @component_mappings = component_mappings(link_defs_info)
@@ -91,5 +99,10 @@ module DTK
       end
       ret
     end
+
+    def component_template(dir)
+      Component::Instance.create_from_component(@component_mappings[dir]).get_component_template_parent
+    end
+
   end
 end

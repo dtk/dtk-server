@@ -32,17 +32,20 @@ module DTK
         end
       end
 
+      # opts can have keys:
+      #   :raise_error
       def aug_attr_mappings__clone_if_needed(link_def_context, opts = {})
         ret = []
         err_msgs = []
         input_attr_obj, input_path = get_context_attr_obj_with_path(err_msgs, :input, link_def_context)
         output_attr_obj, output_path = get_context_attr_obj_with_path(err_msgs, :output, link_def_context)
+ 
         unless err_msgs.empty?
-          err_msg = err_msgs.join(' and ').capitalize
+          aggregated_err_msg = aggregated_error_message(err_msgs, link_def_context)
           if opts[:raise_error]
-            fail LinkDef::AutoComplete::FatalError.new(err_msg)
+            fail LinkDef::AutoComplete::FatalError.new(aggregated_err_msg)
           else
-            Log.error(err_msg)
+            Log.error(aggregated_err_msg)
             return ret
           end
         end
@@ -72,36 +75,52 @@ module DTK
 
       private
 
+      def aggregated_error_message(err_msgs, link_def_context)
+        local_component = link_def_context.local_component_template.display_name_print_form
+        remote_component = link_def_context.remote_component_template.display_name_print_form
+
+        error_or_errors = (err_msgs.size == 1 ? 'There is an error' : 'There  are errors')
+        ret_err_msg = "#{error_or_errors} on componenent '#{local_component} link def to '#{remote_component}':\n"
+        err_msgs.inject(ret_err_msg) { |s, err_msg| s + "  #{err_msg}\n"  }
+      end
+
       # returns [attribute_object,unravel_path] and updates error if any error
       def get_context_attr_obj_with_path(err_msgs, dir, context)
         attr_object = context.find_attribute_object?(self[dir][:term_index])
         unless attr_object && attr_object.value
-          err_msg =
-            if attr_pp_form = pp_form(dir)
-              "attribute matching link def term (#{attr_pp_form}) does not exist"
-            else
-              Log.error("unexpected that have no pp form for: #{inspect}")
-              'attribute matching link def term  does not exist'
-            end
-          err_msgs << err_msg
+          err_msgs << attribute_error_message(dir)
         end
         index_map_path = self[dir][:path]
         # TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
         [attr_object, index_map_path && AttributeLink::IndexMap::Path.create_from_array(index_map_path)]
       end
 
-      def pp_form(direction)
-        if attr = self[direction]
-          if attr_name = attr[:attribute_name]
-            if cmp_type = attr[:component_type]
-              # meaning that it is a component attribute ref
-              "#{Component.component_type_print_form(cmp_type)}.#{attr_name}"
-            elsif attr[:node_name]
-              "node.#{attr_name}"
+      def attribute_error_message(direction)
+        err_msg = 
+          if attr = self[direction]
+            if attr_name = attr[:attribute_name]
+              component_ref = attribute_error_message_component_ref(attr)
+              "Attribute '#{attr_name}' referenced in attribute mapping is not defined on '#{component_ref}'"
             end
           end
+
+        err_msg || attribute_error_message_unknown
+      end
+
+      def attribute_error_message_component_ref(attr)
+        if cmp_type = attr[:component_type]
+          # meaning that it is a component attribute ref
+          Component.component_type_print_form(cmp_type)
+        elsif attr[:node_name]
+          'node'
         end
       end
+
+     def attribute_error_message_unknown
+       Log.error("unexpected that have no pp form for: #{inspect}")
+       'Attribute matching link def term does not exist'
+     end
+
     end
   end
 end

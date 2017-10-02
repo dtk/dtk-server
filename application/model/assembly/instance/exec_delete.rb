@@ -150,11 +150,7 @@ module DTK; class  Assembly
               end
 
               cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if create_cmp_action
-              unless task_template_content.empty? || cmp_action.nil?
-                if task_template_content[:actions].include?(cmp_action[:display_name])
-                  cmp_action[:breakpoint] = task_template_content[:breakpoint]
-                end
-              end
+              update_component_with_breakpoint(task_template_content, cmp_action) unless task_template_content.empty? || cmp_action.nil?    
             rescue Task::Template::ParsingError => e
               Log.info("Ignoring component 'delete' action does not exist.")
             end
@@ -212,7 +208,7 @@ module DTK; class  Assembly
         ret
       end
       # returns nil if there is no task to run
-      def exec__delete(opts = {})
+      def exec__delete(opts = {}) 
         task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
         ret = {
           assembly_instance_id: self.id,
@@ -253,7 +249,7 @@ module DTK; class  Assembly
       private
 
       # Gets the task_template with specific ID which contains the subtasks
-      # TODO: Move this method to another place
+      # TODO: Update method with new way of handling workflows
       #
       # @param [mh] contains the task_template handle
       # @param [component] take the current component, however we just need its assmebly_id, maybe not needed?
@@ -271,11 +267,28 @@ module DTK; class  Assembly
           end
         end
 
-        if ret[:content][:subtasks].nil? || ret[:content][:subtasks].empty?
+        if ret.nil? || 
+           ret[:content][:subtasks].nil? || 
+           ret[:content][:subtasks].empty?
           ret = []
         else 
           ret[:content][:subtasks].first
         end
+      end
+
+      # Updates the current component action with breakpoint
+      #
+      # @param [task_template_content] contains the task_template from database which should have 'breakpoint' attribute
+      # @param [cmp_action] current component action
+      def update_component_with_breakpoint(task_template_content, cmp_action)
+         if task_action = task_template_content[:components] || task_template_content[:actions] 
+            task_action = task_action.first if task_action.is_a?(Array)
+            cmp_action_name = cmp_action[:display_name]
+            cmp_action_name.slice!('.delete') if cmp_action_name.include?('.delete') 
+            if task_action.include?(cmp_action_name)
+              cmp_action[:breakpoint] = task_template_content[:breakpoint]
+            end
+         end
       end
 
       def delete_instance_task(assembly_instance, opts = {})
@@ -310,11 +323,7 @@ module DTK; class  Assembly
               begin                
                 # no need to check if admin_op_status is 'running' with nodes as components so commented that out for now
                 cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts)# if assembly_wide_node.get_admin_op_status.eql?('running')
-                unless task_template_content.empty? || cmp_action.nil?
-                  if task_template_content[:actions].include?(cmp_action[:display_name])
-                    cmp_action[:breakpoint] = task_template_content[:breakpoint]
-                  end
-                end
+                update_component_with_breakpoint(task_template_content, cmp_action) unless task_template_content.empty? || cmp_action.nil?
               rescue Task::Template::ParsingError => e
                 Log.info("Ignoring component 'delete' action does not exist.")
               end

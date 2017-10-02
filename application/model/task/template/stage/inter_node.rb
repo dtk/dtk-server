@@ -204,11 +204,6 @@ module DTK; class Task; class Template
           end
         end
 
-        #@breakpoint = serialized_content[:breakpoint] if serialized_content[:breakpoint]
-        # require 'debugger'
-        # Debugger.wait_connection = true
-        # Debugger.start_remote
-        # debugger
         if multi_node_type = parse_and_reify_is_multi_node_type?(serialized_content)
           MultiNode.parse_and_reify(multi_node_type, serialized_content, action_list, opts)
         elsif serialized_content[Field::Subtasks]

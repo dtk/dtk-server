@@ -270,14 +270,9 @@ module DTK; class  Assembly
       workflow.defer_execution()
 
     
-      breakpoint = check_for_breakpoint(task)
       return { task_id: task_id, breakpoint: breakpoint}
     end
 
-    # Mock for testing
-    def check_for_breakpoint(task)
-      return true
-    end
 
     def execute_cmp_action(params, component_id, method_name, augmented_cmps)
       task_params = nil
@@ -337,13 +332,13 @@ module DTK; class  Assembly
 
       begin
         task = Task.create_for_ad_hoc_action(self, component, opts) if component
+        # Marked
         unless task_template_content.empty?
           if task_template_content[:actions].include?(task[:display_name])
             task[:breakpoint] = task_template_content[:breakpoint]
           end
         end
         task = task.save_and_add_ids()
-        task[:breakpoint] = params[:breakpoint] if params[:breakpoint]
       rescue Task::Template::ParsingError => e
         return ret if params[:noop_if_no_action]
         raise e
@@ -356,12 +351,7 @@ module DTK; class  Assembly
       ret
     end
 
-      # Gets the task_template with specific ID which contains the subtasks
-      # TODO Move this method
-      #
-      # @param [mh] contains the task_template handle
-      # @param [component] take the current component, however we just need its assmebly_id, maybe not needed?
-      # @return [subtasks] of the task_template
+      # Depricated
       def get_task_template_content(mh, component)
         ret = nil
         sp_hash = {
@@ -375,7 +365,9 @@ module DTK; class  Assembly
           end
         end
 
-        if ret[:content][:subtasks].nil? || ret[:content][:subtasks].empty?
+        if ret.nil? || 
+           ret[:content][:subtasks].nil? || 
+           ret[:content][:subtasks].empty?
           ret = []
         else 
           ret[:content][:subtasks].first

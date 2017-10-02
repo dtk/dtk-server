@@ -42,6 +42,9 @@ dtk_common = Common.new('', '')
 describe "(New DTK client) Test Case 6: Test various options for adding/removing/autogenerating component links and service push" do
   before(:all) do
     puts '**********************************************************************************************************************', ''
+    # Install r8:test_delete module with required dependency modules
+    system("mkdir #{module_location}")
+    system("dtk module install --update-deps -d #{module_location} #{module_name}")
   end
 
   context "Install module from dtkn" do

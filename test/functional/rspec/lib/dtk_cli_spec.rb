@@ -435,6 +435,19 @@ shared_context 'Delete initial module on filesystem' do |module_location|
   end
 end
 
+shared_context 'Delete module content on filesystem' do |module_location|
+  it "deletes module contnet on location #{module_location}" do
+    puts 'Delete module content on filesystem', '----------------------------------'
+    pass = false
+    `rm -rf #{module_location}/*`
+    `rm -rf #{module_location}/.git`
+    value = system("ls #{module_location}/ | grep dtk.module.yaml")
+    pass = true if value == false
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context "Clone module on filesystem" do |module_name, module_location|
   it "clones module to local filesystem on location #{module_location}" do
     puts 'Clone module to filesystem', '---------------------------------'

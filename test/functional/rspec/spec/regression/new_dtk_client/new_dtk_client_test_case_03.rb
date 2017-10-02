@@ -35,14 +35,6 @@ describe "(New DTK client) Test Case 3: Test various options for module push" do
     include_context "List assemblies", module_name, assembly_name, dtk_common
   end
 
-  context "Delete module on filesystem" do
-    include_context "Delete initial module on filesystem", module_location
-  end
-
-  context "Install module" do
-    include_context "Install module", module_name, module_location
-  end
-
   context "Change content of module on local filesystem" do
     include_context "Change content of module on local filesystem", module_location, updated_module_location
   end

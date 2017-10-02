@@ -37,6 +37,7 @@ module DTK
         detail_to_include = []
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
+        # TODO: DTK-3173: removed code
         # filter_component  = request_params(:filter_component)
         format            = request_params(:format) || 'table' # default format type is table
         all, links        = boolean_request_params(:all, :links)
@@ -47,6 +48,7 @@ module DTK
           datatype = :workspace_attribute_w_link
         end
 
+        # TODO: DTK-3173: removed code
         # if node_id = request_params(:node_id)
         #  node_id = "#{ret_node_id(:node_id, assembly_instance)}" unless (node_id =~ /^[0-9]+$/)
         #  opts.merge!(node_cmp_name: true)
@@ -61,15 +63,18 @@ module DTK
           (!attr.is_a?(Attribute)) || !attr.filter_when_listing?({})
         end
 
-        # opts[:filter_proc] = Proc.new do |element|
+        #opts[:filter_proc] = Proc.new do |element|
         #  if element_matches?(element, [:node, :id], node_id) && element_matches?(element, [:attribute, :component_component_id], component_id)
         #    element if additional_filter_proc.nil? || additional_filter_proc.call(element)
         #  end
-        # end
+        #end
+        # TODO: DTK-3173: replaced code
+        opts[:filter_proc] = additional_filter_proc
 
         truncate = (format != 'yaml')
         opts.merge!(truncate_attribute_values: truncate, mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
+        # TODO: DTK-3173: removed code
         # opts.merge!(all: all, filter_component: filter_component)
         opts.merge!(all: all)
         response = 

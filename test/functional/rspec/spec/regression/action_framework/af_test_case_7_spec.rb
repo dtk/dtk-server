@@ -25,11 +25,10 @@ expected_output_1 = {
 describe '(Action Framework) Test Case 7: Using lambda function in dtk.model.yaml' do
   before(:all) do
     puts '***********************************************************************', ''
-    # Install/clone r8:action_module module with required dependency modules if needed
+    # Install r8:action_module module with required dependency modules if needed
     location_exist = system("ls #{module_location}")
     unless location_exist
       system("mkdir #{module_location}")
-      system("dtk module clone -v #{module_version} #{module_name} #{module_location}")
       system("dtk module install --update-deps -d #{module_location} #{module_name}")
     end
   end

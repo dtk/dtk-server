@@ -29,9 +29,8 @@ dtk_common = Common.new('', '')
 describe "(Context) Test Case 02: Specified existing subnet id, vpc and security group name" do
   before(:all) do
     puts '********************************************************************************', ''
-    # Install/clone aws:network module with required dependency modules
+    # Install aws:network module with required dependency modules
     system("rm -rf /tmp/network && mkdir /tmp/network")
-    system("dtk module clone -v #{context_version} #{context_module} #{context_location}")
     system("dtk module install --update-deps -d #{context_location} #{context_module}")
   end
 

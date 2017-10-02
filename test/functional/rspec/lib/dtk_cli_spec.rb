@@ -297,20 +297,6 @@ shared_context 'NEG - Uninstall service instance' do |service_location, service_
   end
 end
 
-shared_context 'Force uninstall service instance' do |service_location, service_instance|
-  it "uninstalls service instance with --delete flag" do
-    puts 'Force uninstall instance', '-------------------------'
-    pass = true
-    service_location = service_location + service_instance
-    value = `dtk service uninstall --purge --delete -d #{service_location} -y`
-    sleep 5 # needed to complete uninstall
-    puts value
-    pass = false if value.include? 'ERROR'
-    puts ''
-    expect(pass).to eq(true)
-  end
-end
-
 shared_context 'Delete service instance' do |service_location, service_instance, dtk_common|
   it "deletes service instance content and triggers delete actions if any" do
     puts 'Delete instance', '--------------------'

@@ -77,8 +77,8 @@ describe "(New DTK client) Test Case 8: Test various options for delete and unin
     include_context "Stage assembly from module", module_name, module_location, assembly_name, service_name
   end
 
-  context "Force uninstall service instance" do
-    include_context "Force uninstall service instance", service_location, service_name
+  context "Uninstall service instance" do
+    include_context "Uninstall service instance", service_location, service_name
   end
 
   # 4: neg - stage assembly template, uninstall

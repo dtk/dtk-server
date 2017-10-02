@@ -39,8 +39,8 @@ describe "(New DTK client) Test Case 3: Test various options for module push" do
     include_context "Delete initial module on filesystem", module_location
   end
 
-  context "Clone module on filesystem" do
-    include_context "Clone module on filesystem", module_name, module_location
+  context "Install module" do
+    include_context "Install module", module_name, module_location
   end
 
   context "Change content of module on local filesystem" do

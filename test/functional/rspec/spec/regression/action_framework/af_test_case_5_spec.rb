@@ -68,11 +68,10 @@ expected_output_5 = {
 describe '(Action Framework) Test Case 5: Service with one node that contains cmp with actions (unless/if/file position)' do
   before(:all) do
     puts '**************************************************************************************************************', ''
-    # Install/clone r8:action_module module with required dependency modules if needed
+    # Install r8:action_module module with required dependency modules if needed
     location_exist = system("ls #{module_location}")
     unless location_exist
       system("mkdir #{module_location}")
-      system("dtk module clone -v #{module_version} #{module_name} #{module_location}")
       system("dtk module install --update-deps -d #{module_location} #{module_name}")
     end
   end

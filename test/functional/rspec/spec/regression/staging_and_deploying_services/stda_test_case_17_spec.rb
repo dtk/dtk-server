@@ -23,9 +23,8 @@ dtk_common = Common.new('', '')
 describe '(Staging And Deploying Assemblies) Test Case 17: Converge service instance with component that has delete action and delete this component' do
   before(:all) do
     puts '******************************************************************************************************************************************', ''
-    # Install/clone r8:test_delete module with required dependency modules
+    # Install r8:test_delete module with required dependency modules
     system("mkdir #{module_location}")
-    system("dtk module clone -v #{version} #{module_name} #{module_location}")
     system("dtk module install --update-deps -d #{module_location} #{module_name}")
   end
 

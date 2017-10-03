@@ -18,12 +18,12 @@
 module DTK
   class AttributeLinkFrom < Model
     def self.common_columns
-      [:id, :group_id, :display_name, :component_red]
+      [:id, :group_id, :display_name, :component_ref, :description]
     end
 
     def self.get_for_attribute_id(mh, attribute_id)
       sp_hash = {
-        cols: [:id, :ref, :display_name, :component_ref, :attribute_id],
+        cols: [:id, :ref, :display_name, :component_ref, :attribute_id, :description],
         filter: [:eq, :attribute_id, attribute_id]
       }
       get_objs(mh, sp_hash)
@@ -31,7 +31,7 @@ module DTK
 
     def self.get_for_attribute_ids(mh, attribute_ids)
       sp_hash = {
-        cols: [:id, :ref, :display_name, :component_ref, :attribute_id],
+        cols: [:id, :ref, :display_name, :component_ref, :attribute_id, :description],
         filter: [:oneof, :attribute_id, attribute_ids]
       }
       get_objs(mh, sp_hash)

@@ -115,23 +115,23 @@ module DTK; class ServiceModule
             if link_to = attribute['links_to']
               if link_to.is_a?(Array)
                 link_to.each do |lt|
-                  links_to << { :ref => "#{attr_name}-#{lt}", :display_name => "#{attr_name}-#{lt}", :component_ref => lt, :attribute_id => selected_attribute[:id] }
+                  links_to << { ref: "#{attr_name}-#{lt}", display_name: "#{attr_name}-#{lt}", component_ref: lt, attribute_id: selected_attribute[:id], description: attribute[:description] }
                 end
               else
-                links_to << { :ref => "#{attr_name}-#{link_to}", :display_name => "#{attr_name}-#{link_to}", :component_ref => link_to, :attribute_id => selected_attribute[:id] }
+                links_to << { :ref => "#{attr_name}-#{link_to}", display_name: "#{attr_name}-#{link_to}", component_ref: link_to, attribute_id: selected_attribute[:id], description: attribute[:description] }
               end
             end
             if link_from = attribute['links_from']
-              links_from << { :ref => "#{attr_name}-#{link_from}", :display_name => "#{attr_name}-#{link_from}", :component_ref => link_from, :attribute_id => selected_attribute[:id] }
+              links_from << { :ref => "#{attr_name}-#{link_from}", display_name: "#{attr_name}-#{link_from}", component_ref: link_from, attribute_id: selected_attribute[:id], description: attribute[:description] }
             end
           end
         end
       end
 
+      require 'ruby-debug'; debugger
+
       AttributeLinkTo.create_or_update(attr_mh, links_to) unless links_to.empty?
       AttributeLinkFrom.create_or_update(attr_mh, links_from) unless links_from.empty?
-      # Model.create_from_rows(attr_mh.create_childMH(:attribute_link_to), links_to, convert: true) unless links_to.empty?
-      # Model.create_from_rows(attr_mh.create_childMH(:attribute_link_from), links_from, convert: true) unless links_from.empty?
     end
 
     def self.import_assembly_top(assembly_ref, assembly_hash, module_branch, module_name, opts = {})

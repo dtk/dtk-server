@@ -267,12 +267,14 @@ module DTK; class  Assembly
           end
         end
 
-        if ret.nil? || 
-           ret[:content][:subtasks].nil? || 
-           ret[:content][:subtasks].empty?
+        if ret[:content][:subtasks].nil? || ret[:content][:subtasks].empty?
           ret = []
         else 
-          ret[:content][:subtasks].first
+          if ret[:content][:subtasks].size == 1
+            ret[:content][:subtasks].first
+          else 
+            ret[:content][:subtasks]
+          end
         end
       end
 
@@ -281,14 +283,23 @@ module DTK; class  Assembly
       # @param [task_template_content] contains the task_template from database which should have 'breakpoint' attribute
       # @param [cmp_action] current component action
       def update_component_with_breakpoint(task_template_content, cmp_action)
-         if task_action = task_template_content[:components] || task_template_content[:actions] 
-            task_action = task_action.first if task_action.is_a?(Array)
-            cmp_action_name = cmp_action[:display_name]
-            cmp_action_name.slice!('.delete') if cmp_action_name.include?('.delete') 
-            if task_action.include?(cmp_action_name)
-              cmp_action[:breakpoint] = task_template_content[:breakpoint]
+        cmp_action_name = cmp_action[:display_name]
+        cmp_action_name.slice!('.delete') if cmp_action_name.include?('.delete') 
+        if task_template_content.size == 1
+          task_action = task_template_content[:components] || task_template_content[:actions] 
+          task_action = task_action.first if task_action.is_a?(Array)
+          if task_action.include?(cmp_action_name)
+            cmp_action[:breakpoint] = task_template_content[:breakpoint]
+          end
+        elsif task_template_content.size > 1
+          task_actions = task_template_content
+          task_actions.each do |ta|
+            cmp = ta[:components] || ta[:actions]
+            if cmp.first.include?(cmp_action_name)
+              cmp_action[:breakpoint] = ta[:breakpoint]
             end
-         end
+          end
+        end
       end
 
       def delete_instance_task(assembly_instance, opts = {})

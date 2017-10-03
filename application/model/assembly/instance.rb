@@ -351,7 +351,12 @@ module DTK; class  Assembly
       ret
     end
 
-      # Depricated
+      # Gets the task_template with specific ID which contains the subtasks
+      # 
+      #
+      # @param [mh] contains the task_template handle
+      # @param [component] take the current component, however we just need its assmebly_id, maybe not needed?
+      # @return [subtasks] of the task_template
       def get_task_template_content(mh, component)
         ret = nil
         sp_hash = {
@@ -365,12 +370,14 @@ module DTK; class  Assembly
           end
         end
 
-        if ret.nil? || 
-           ret[:content][:subtasks].nil? || 
-           ret[:content][:subtasks].empty?
+        if ret[:content][:subtasks].nil? || ret[:content][:subtasks].empty?
           ret = []
         else 
-          ret[:content][:subtasks].first
+          if ret[:content][:subtasks].size == 1
+            ret[:content][:subtasks].first
+          else 
+            ret[:content][:subtasks]
+          end
         end
       end
 

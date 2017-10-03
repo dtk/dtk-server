@@ -67,9 +67,9 @@ module DTK
                         sleep 20
                       end
 
-                      debug = true
+                      debug = true  
                       if method_name = action.action_method?
-                        debug = false if method_name[:method_name].eql?('delete')
+                        #debug = false if method_name[:method_name].eql?('delete')
                       end
 
                       if $port_number.nil? || !$port_number.eql?(dtk_debug_port)

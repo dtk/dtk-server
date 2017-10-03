@@ -113,7 +113,7 @@ module DTK; class Task; class Status
           end
           if subtasks.first[:executable_action_type].include?("ConfigNode")
             if opts[:type]
-              ret = [] if opts[:type].include?("delete")
+             # ret = [] if opts[:type].include?("delete")
             end
             el.merge!(Task::Action::ConfigNode.status(ea, opts))
             return ret

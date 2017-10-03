@@ -267,7 +267,7 @@ module DTK; class  Assembly
           end
         end
 
-        if ret[:content][:subtasks].nil? || ret[:content][:subtasks].empty?
+        if  ret.nil? || ret[:content][:subtasks].nil? || ret[:content][:subtasks].empty?
           ret = []
         else 
           if ret[:content][:subtasks].size == 1

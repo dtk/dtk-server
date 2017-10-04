@@ -63,8 +63,10 @@ module DTK
                     if dtk_debug_port = dynamic_attributes['dtk_debug_port']
                       if public_dns_name = public_dns_name?(action)
                         $public_dns = public_dns_name
-                        # Sleep for 20 seconds, until byebug instance is initialized
-                        sleep 20
+                        # Sleep so debug daemon can be ready
+                        if wait = R8::Config[:breakpoint][:wait_time_for_daemon]
+                          sleep R8::Config[:breakpoint][:wait_time_for_daemon]
+                        end
                       end
 
                       debug = true  

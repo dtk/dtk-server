@@ -270,7 +270,7 @@ module DTK; class  Assembly
       workflow.defer_execution()
 
     
-      return { task_id: task_id, breakpoint: breakpoint}
+      return { task_id: task_id }
     end
 
 

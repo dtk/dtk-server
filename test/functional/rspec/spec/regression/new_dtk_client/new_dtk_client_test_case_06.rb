@@ -42,17 +42,9 @@ dtk_common = Common.new('', '')
 describe "(New DTK client) Test Case 6: Test various options for adding/removing/autogenerating component links and service push" do
   before(:all) do
     puts '**********************************************************************************************************************', ''
-    # Install r8:test_delete module with required dependency modules
-    system("mkdir #{module_location}")
-    system("dtk module install --update-deps -d #{module_location} #{module_name}")
-  end
-
-  context "Install module from dtkn" do
-    include_context "Install module from dtkn", remote_module, remote_module_location, '1.6.0'
-  end
-
-  context "List assemblies contained in this module" do
-    include_context "List assemblies", remote_module, assembly_name, dtk_common
+    # Install dtk-examples/wordpress module with required dependency modules
+    system("mkdir #{remote_module_location}")
+    system("dtk module install --update-deps -d #{remote_module_location} #{remote_module}")
   end
 
   context "Stage assembly from module" do

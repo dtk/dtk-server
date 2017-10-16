@@ -76,7 +76,7 @@ module Ramaze::Helper
     def target_with_default(target_id = nil, opts = {})
       target_option, set_default_target =
         if opts[:new_client]
-          ['--parent PARENT', 'dtk service set-default-target TARGET-NAME']
+          ['--context CONTEXT', 'dtk service set-default-context SERVICE-NAME']
         else
           ['-t TARGET-NAME', 'set-default-target TARGET-NAME']
         end
@@ -85,7 +85,7 @@ module Ramaze::Helper
         id_handle(target_id, :target).create_object(model_name: :target_instance) :
         Target::Instance.get_default_target(model_handle(:target), ret_singleton_target: true, prune_builtin_target: true)
 
-      target || fail(DTK::ErrorUsage, "The command was called without '#{target_option}' option and no default target has been set. You can set default target with service instance command '#{set_default_target}'")
+      target || fail(DTK::ErrorUsage, "The command was called without '#{target_option}' option and no default context has been set. You can set default context with service instance command '#{set_default_target}'")
     end
 
     def default_target(opts = {})

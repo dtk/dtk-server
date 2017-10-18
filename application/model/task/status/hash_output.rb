@@ -46,6 +46,7 @@ module DTK
           h.merge(key => opts[key])
         end
         if task_fields = opts[:task_fields_nested] || opts[:task_fields]
+          #task_fields << :info
           ret.merge!(task_fields: task_fields)
         end
         ret

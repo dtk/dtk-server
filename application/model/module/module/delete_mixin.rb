@@ -20,9 +20,9 @@ module DTK; class BaseModule
     def delete_object(opts = {})
       unless opts[:skip_validations]
         assembly_templates = get_associated_assembly_templates
-        unless assembly_templates.empty?
+        unless assembly_templates.empty? || opts[:force]
           assembly_names = assembly_templates.map { |a| a.display_name_print_form(include_namespace: true) }
-          fail ErrorUsage, "Cannot delete the module because the assembly template(s) (#{assembly_names.join(', ')}) reference it."
+          fail ErrorUsage, "Cannot delete the module because the assembly template(s) (#{assembly_names.join(', ')}) reference it. Please use '--force' flag to delete module."
         end
 
         components = get_associated_component_instances
@@ -53,7 +53,7 @@ module DTK; class BaseModule
       end
 
       # check if this module is dependency to other component/service module
-      raise_error_if_dependency(module_branch, version)
+      raise_error_if_dependency(module_branch, version) unless opts[:force]
 
       if implementation = module_branch.get_implementation?
         delete_instance(implementation.id_handle)
@@ -92,10 +92,10 @@ module DTK; class BaseModule
         end
       end
 
-      delete_associated_service_and_component_module_objects(self, version)
+      delete_associated_service_and_component_module_objects(self, version, opts)
 
       if get_module_branches.size > 1
-        delete_version(version)
+        delete_version(version, opts)
       else
         delete_object(opts.merge(skip_validations: true))
       end
@@ -116,15 +116,15 @@ module DTK; class BaseModule
 
     private
 
-    def delete_associated_service_and_component_module_objects(common_module, version)
+    def delete_associated_service_and_component_module_objects(common_module, version, opts)
       delete_associated_params.each_pair do |module_type, module_class|
         model_handle = common_module.model_handle(module_type)
         if module_obj = module_class.find_from_name?(model_handle, common_module.module_namespace, common_module.module_name)
           if module_obj.get_module_branch_matching_version(version)
             if module_obj.get_module_branches.size > 1
-              module_obj.delete_version(version, no_error_if_does_not_exist: true)
+              module_obj.delete_version(version, no_error_if_does_not_exist: true, force: opts[:force])
             else
-              module_obj.delete_object(from_common_module: true)  
+              module_obj.delete_object(from_common_module: true, force: opts[:force])  
             end
           end
         end
@@ -199,7 +199,7 @@ module DTK; class BaseModule
         end
       end
 
-      fail ErrorUsage, "Cannot uninstall the module because the following:\n  #{refs.join("\n  ")}"
+      fail ErrorUsage, "Cannot uninstall the module because the following:\n  #{refs.join("\n  ")} Please use '--force' flag to uninstall module."
     end
   end
 end; end

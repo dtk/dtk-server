@@ -31,6 +31,8 @@ module DTK; class Task::Status::StreamForm
         if opts.add_subtasks?
           leaf_subtasks = add_subtasks_and_return_leaf_subtasks!
           ndx_leaf_subtasks = leaf_subtasks.inject({}) { |h, t| h.merge(t.id => t) }
+          # add info only when debugging
+          add_info!(ndx_leaf_subtasks)
           if opts.add_action_results?
             add_action_results!(ndx_leaf_subtasks)
           end
@@ -82,6 +84,18 @@ module DTK; class Task::Status::StreamForm
         ndx_errors = Task.get_ndx_errors(ndx_leaf_subtasks.values.map { |t| t.id_handle() })
         ndx_errors.each_pair do |task_id, errors|
           ndx_leaf_subtasks[task_id].merge!(errors: errors)
+        end
+      end
+
+      def add_info!(ndx_leaf_subtasks)
+        return if ndx_leaf_subtasks.empty?
+        event = ''
+        ndx_info = Task.get_ndx_info(ndx_leaf_subtasks.values.map { |t| t.id_handle() })
+        ndx_info.each_pair do |task_id, info|
+          info.each do |el|
+            event = el if el[:event].is_a?(Hash)
+          end
+          ndx_leaf_subtasks[task_id].merge!(info: event[:event]) if event.is_a?(Hash)
         end
       end
 

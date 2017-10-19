@@ -58,7 +58,7 @@ module DTK; class Task::Status; class StreamForm
       { 
         add_detail:         true, 
         task_fields:        [:started_at, :ended_at, :status, :position, :display_name],
-        task_fields_nested: [:started_at, :ended_at, :status, :position] 
+        task_fields_nested: [:started_at, :ended_at, :status, :position, :info] 
       }
     end    
 

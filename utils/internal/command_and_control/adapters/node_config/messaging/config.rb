@@ -145,7 +145,8 @@ eos
               stomp_port: R8::Config[:stomp][:port],
               stomp_username: R8::Config[:stomp][:username],
               stomp_password: R8::Config[:stomp][:password],
-              cloud_config_repo_upgrade: R8::Config[:cloud_config][:repo_upgrade]
+              cloud_config_repo_upgrade: R8::Config[:cloud_config][:repo_upgrade],
+              log_level: R8::Config[:arbiter][:log_level]
             )
           end
 
@@ -226,6 +227,7 @@ pbuilderid = <%= pbuilderid %>
 # pbuilderid =
 <% end %>
 private_key = /etc/dtk/ssh/arbiter
+log_level = <%= log_level %>
 EOF
 
 mkdir -p /usr/share/dtk/scripts

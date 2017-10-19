@@ -229,6 +229,7 @@ R8::Config[:arbiter][:queue] = "/queue/arbiter.#{R8.app_user}.reply"
 R8::Config[:arbiter][:update] = true
 R8::Config[:arbiter][:branch] = 'stable'
 R8::Config[:arbiter][:auth_type] = 'ssh'
+R8::Config[:arbiter][:log_level] = 'info'
 
 R8::Config[:cloud_config][:os_type] = 'amazon-linux'
 R8::Config[:cloud_config][:repo_upgrade] = false

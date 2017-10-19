@@ -16,21 +16,22 @@ db.name = dtk1
 
 stomp.host = ${PUBLIC_ADDRESS}
 stomp.port = ${MCOLLECTIVE_PORT}
-stomp.username= ${STOMP_USERNAME}
-stomp.password= ${STOMP_PASSWORD}
-stomp.collective= mcollective
+stomp.username = ${STOMP_USERNAME}
+stomp.password = ${STOMP_PASSWORD}
+stomp.collective = mcollective
 
-arbiter.ssh.local.public_key= ${HOST_VOLUME}/arbiter/arbiter_local.pub
-arbiter.ssh.local.private_key= ${HOST_VOLUME}/arbiter/arbiter_local
-arbiter.ssh.local.authorized_keys= ${HOST_VOLUME}/arbiter/authorized_keys
-arbiter.ssh.remote.public_key= ${HOST_VOLUME}/arbiter/arbiter_remote.pub
-arbiter.ssh.remote.private_key= ${HOST_VOLUME}/arbiter/arbiter_remote
-arbiter.auth_type=ssh
+arbiter.ssh.local.public_key = ${HOST_VOLUME}/arbiter/arbiter_local.pub
+arbiter.ssh.local.private_key = ${HOST_VOLUME}/arbiter/arbiter_local
+arbiter.ssh.local.authorized_keys = ${HOST_VOLUME}/arbiter/authorized_keys
+arbiter.ssh.remote.public_key = ${HOST_VOLUME}/arbiter/arbiter_remote.pub
+arbiter.ssh.remote.private_key = ${HOST_VOLUME}/arbiter/arbiter_remote
+arbiter.auth_type = ssh
+arbiter.log_level = info
 
 arbiter.topic = ${ARBITER_TOPIC}
 arbiter.queue = ${ARBITER_QUEUE}
 
-encryption.cookie_salt   = ${COOKIE_SALT}
+encryption.cookie_salt = ${COOKIE_SALT}
 encryption.password_salt = ${PASSWORD_SALT}
 
 server_port = 443

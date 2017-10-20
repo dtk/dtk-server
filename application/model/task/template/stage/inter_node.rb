@@ -27,8 +27,6 @@ module DTK; class Task; class Template
       def initialize(name = nil, breakpoint = nil)
         super()
         @name = name
-        #@breakpoint = breakpoint
-        Log.info("Breakpoint in inter_node is set to: #{@breakpoint}")
       end
       attr_accessor :name
 

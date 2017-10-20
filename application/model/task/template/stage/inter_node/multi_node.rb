@@ -22,7 +22,6 @@ module DTK; class Task; class Template; class Stage
         super(serialized_multinode_action[:name], serialized_multinode_action[:breakpoint])
         @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
         @breakpoint = serialized_multinode_action[:breakpoint]
-        Log.info("Breakpoint in multi_node is set to: #{@breakpoint}")
         unless @ordered_components 
           fail ParsingError::MissingComponentOrActionKey.new(serialized_multinode_action, stage: serialized_multinode_action[:name]) 
         end

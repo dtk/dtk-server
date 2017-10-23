@@ -26,7 +26,7 @@ module DTK; class BaseModule
         end
 
         components = get_associated_component_instances
-        raise_error_component_refs(components) unless components.empty?
+        raise_error_component_refs(components) unless components.empty? || opts[:force]
       end
 
       impls = get_implementations

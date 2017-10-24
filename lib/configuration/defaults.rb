@@ -53,7 +53,7 @@ R8::Config[:dsl][:service][:format_type][:default] = 'yaml'
 R8::Config[:dsl][:component][:integer_version][:default] = 2
 R8::Config[:dsl][:component][:format_type][:default] = 'yaml'
 
-R8::Config[:log][:level] = 'debug'
+R8::Config[:log][:level] = 'info'
 R8::Config[:log][:path] = "/var/log/dtk/#{R8.app_user}/"
 
 R8::Config[:file_asset][:cache_content] = false

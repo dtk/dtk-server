@@ -25,11 +25,11 @@ module DTK
       # there is an issue with stomp connection, which results in ERROR thrown first time when connecting. This is something that can be ignore
       # it looks like issue with EM stomp client since it does not effect functionaliy. After first error all seems to be working fine.
       @stomp_rdy = false
-      Log.info("Establishing connection to STOMP server with credentials #{R8::Config[:stomp][:username]} / #{safe_print_stomp_password} ...")
+      Log.debug("Establishing connection to STOMP server with credentials #{R8::Config[:stomp][:username]} / #{safe_print_stomp_password} ...")
       connect :login => R8::Config[:stomp][:username], :passcode => R8::Config[:stomp][:password]
 
       if defined?(PhusionPassenger)
-        Log.info("Created second STOMP client due to Passenger bug, this client will be used to sent AMQ messages.")
+        Log.debug("Created second STOMP client due to Passenger bug, this client will be used to sent AMQ messages.")
         create_second_client
       end
 
@@ -103,7 +103,7 @@ module DTK
 
         unless callbacks
           # discard message if not the one requested
-          Log.info("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
+          Log.debug("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
           return
         end
 

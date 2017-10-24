@@ -53,13 +53,13 @@ module DTK
       def register_with_heartbeat_listener(pbuilderid, request_id)
         HeartbeatLock.synchronize do
           @@callback_heartbeat_registry[pbuilderid] = request_id
-          Log.info("Stomp heartbeat message with pbuilderid '#{pbuilderid}' has been registered to request id '#{request_id}'. Waiting for callback.")
+          Log.debug("Stomp heartbeat message with pbuilderid '#{pbuilderid}' has been registered to request id '#{request_id}'. Waiting for callback.")
         end
       end
 
       def register_with_listener(request_id, callbacks)
         @@callback_registry[request_id] = callbacks
-        Log.info("Stomp message ID '#{request_id}' has been registered! Waiting for callback.")
+        Log.debug("Stomp message ID '#{request_id}' has been registered! Waiting for callback.")
       end
 
       def self.process_response(msg, request_id)

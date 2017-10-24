@@ -59,7 +59,7 @@ module DTK
       end
 
       def self.create_stomp_client
-        Log.info("Trying to connect to STOMP server at #{server_host}:#{server_port} ...")
+        Log.debug("Trying to connect to STOMP server at #{server_host}:#{server_port} ...")
         ret = R8EM.connect  server_host, server_port, DTK::StompListener
         ret
       end

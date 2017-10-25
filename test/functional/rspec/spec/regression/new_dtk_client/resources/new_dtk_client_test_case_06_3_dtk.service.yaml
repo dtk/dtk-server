@@ -4,7 +4,7 @@ name: new_dtk_client_test_case_06
 dependencies:
   puppetlabs/apt: master
   puppetlabs/concat: master
-  aws/ec2: master
+  aws/ec2: 0.9.5
   puppetlabs/mysql: 1.0.0
   puppet/nginx: master
   nanliu/staging: master

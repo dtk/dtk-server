@@ -2,7 +2,7 @@
 module: test_ns/unit_test_8
 version: master
 dependencies:
-  aws/ec2: master
+  aws/ec2: 0.9.5
   r8/stdlib: master
 assemblies:
   simple_link:

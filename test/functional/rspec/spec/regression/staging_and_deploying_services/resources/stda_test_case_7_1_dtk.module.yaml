@@ -4,7 +4,7 @@ module: newclient/stda_test_case_7
 version: master
 license: Apache 2.0
 dependencies:
-  aws/ec2: master
+  aws/ec2: 0.9.5
   puppetlabs/stdlib: master
 assemblies:
   simple:

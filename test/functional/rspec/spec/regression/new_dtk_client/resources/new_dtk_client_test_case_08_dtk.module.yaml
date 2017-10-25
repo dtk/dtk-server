@@ -4,7 +4,7 @@ module: test/new_dtk_client_test_case_08
 version: master
 license: Apache 2.0
 dependencies:
-  aws/ec2: master
+  aws/ec2: 0.9.5
   r8/stdlib: master
 assemblies:
   test_assembly:

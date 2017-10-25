@@ -2,11 +2,10 @@
 dsl_version: 1.0.0
 name: stda_test_case_12
 dependencies:
-  aws/aws_stdlib: master
-  dtk_stdlib/dtk_stdlib: master
-  aws/ec2: master
-  dtk/host: master
-  dtk-provider/ruby-provider: master
+  aws/aws_stdlib: 1.0.0
+  dtk_stdlib/dtk_stdlib: 1.0.0
+  aws/ec2: 0.9.5
+  dtk-provider/ruby-provider: 1.0.0
   r8/stdlib: master
 components:
 - ec2::node[single_node]:

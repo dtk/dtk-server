@@ -5,7 +5,7 @@ version: master
 license: Apache 2.0
 
 dependencies:
-  aws/ec2: master
+  aws/ec2: 0.9.5
   r8/stdlib: master
   nanliu/staging: master
 assemblies:

@@ -10,7 +10,7 @@ assembly_name = 'wordpress_multi_node'
 service_name = 'wordpress_multi_node'
 remote_module = 'dtk-examples/wordpress'
 remote_module_location = '/tmp/wordpress'
-remote_module_version = '1.6.0'
+remote_module_version = '1.7.0'
 service_location = '~/dtk/'
 
 dtk_common = Common.new('', '')

@@ -5,10 +5,10 @@ require './lib/dtk_common'
 # context specific properties
 service_location = '~/dtk/'
 context_location = "/tmp/network"
-context_module = 'aws/aws_target'
-context_assembly_template = 'target_iam'
+context_module = 'aws/aws_vpc'
+context_assembly_template = 'discover_using_node_profile'
 context_service_name = 'context_test_case_02'
-context_name = 'target_iam'
+context_name = 'discover_using_node_profile'
 context_version = 'master'
 
 # context attributes
@@ -43,23 +43,19 @@ describe "(Context) Test Case 02: Specified existing subnet id, vpc and security
   end
 
   context "Set attribute for default keypair" do
-    include_context "Set attribute", service_location, context_service_name, 'network_aws::vpc[vpc1]/default_keypair', default_keypair
+    include_context "Set attribute", service_location, context_service_name, 'ec2::profile[default]/key_name', default_keypair
   end
 
   context "Set attribute for vpc" do
-    include_context "Set attribute", service_location, context_service_name, 'network_aws::vpc[vpc1]/vpc_id', vpc_id
+    include_context "Set attribute", service_location, context_service_name, 'aws_vpc::subnet[default]/vpc_id', vpc_id
   end
 
   context "Set attribute for subnet length" do
-    include_context "Set attribute", service_location, context_service_name, 'network_aws::vpc_subnet[vpc1-default]/vpc_id', vpc_id
-  end
-
-  context "Set attribute for subnet length" do
-    include_context "Set attribute", service_location, context_service_name, 'network_aws::vpc_subnet[vpc1-default]/subnet_id', subnet_id
+    include_context "Set attribute", service_location, context_service_name, 'aws_vpc::subnet[default]/subnet_id', subnet_id
   end
 
   context "Set attribute for security group name" do
-    include_context "Set attribute", service_location, context_service_name, 'network_aws::security_group[vpc1-default]/group_name', security_group_name
+    include_context "Set attribute", service_location, context_service_name, 'aws_vpc::security_group[default]/security_group_name', security_group_name
   end
 
   context "Converge service instance" do

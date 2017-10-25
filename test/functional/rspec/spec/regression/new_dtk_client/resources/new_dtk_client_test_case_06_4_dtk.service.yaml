@@ -2,14 +2,20 @@
 dsl_version: 1.0.0
 name: new_dtk_client_test_case_06
 dependencies:
-  puppetlabs/apt: master
-  puppetlabs/concat: master
+  puppetlabs/apt: 1.0.0
+  puppetlabs/aws: master
+  aws/aws_stdlib: 1.0.0
+  puppetlabs/concat: 1.0.0
+  dtk_stdlib/dtk_stdlib: 1.0.0
   aws/ec2: 0.9.5
   puppetlabs/mysql: 1.0.0
-  puppet/nginx: master
+  puppet/nginx: 1.0.0
+  aws/rds: 1.0.1
+  aws/route53: 1.0.0
+  dtk-provider/ruby-provider: 1.0.0
   nanliu/staging: master
-  r8/stdlib: master
-  dtk-examples/wordpress: 1.6.0
+  puppetlabs/stdlib: 1.0.0
+  dtk-examples/wordpress: 1.7.0
 components:
 - ec2::node[wordpress]:
     attributes:

@@ -5,9 +5,9 @@ require './lib/dtk_common'
 service_location = '~/dtk/'
 context_location = "/tmp/network"
 context_module = 'aws/aws_vpc'
-context_assembly_template = 'discover_using_delegated_account'
+context_assembly_template = 'discover_using_node_profile'
 context_service_name = 'context_iam'
-context_name = 'discover_using_delegated_account'
+context_name = 'discover_using_node_profile'
 context_version = 'master'
 
 # context attributes

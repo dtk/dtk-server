@@ -4,27 +4,22 @@ require './lib/dtk_common'
 # context specific properties
 service_location = '~/dtk/'
 context_location = "/tmp/network"
-context_module = 'aws/aws_target'
-context_assembly_template = 'target_iam'
+context_module = 'aws/aws_vpc'
+context_assembly_template = 'discover_using_delegated_account'
 context_service_name = 'context_iam'
-context_name = 'target_iam'
+context_name = 'discover_using_delegated_account'
 context_version = 'master'
 
 # context attributes
 default_keypair = 'testing_use1'
-
-# Module specific properties
-module_location = '/tmp/network'
-module_name = 'aws/aws_target'
-service_name = 'context_iam'
 
 dtk_common = Common.new('', '')
 
 describe "Context setup and update" do
   before(:all) do
     puts '**********************************************', ''
-    system("dtk service uninstall -y -r --force -d #{service_location}/#{service_name}")
-    system("rm -rf #{service_location}/#{service_name}")
+    system("dtk service uninstall -y -r --force -d #{service_location}/#{context_service_name}")
+    system("rm -rf #{service_location}/#{context_service_name}")
     system("dtk module uninstall -v #{context_version} -y -d #{context_location} #{context_module}")
     system("rm -rf #{context_location}")
     system("mkdir #{context_location}")
@@ -40,7 +35,7 @@ describe "Context setup and update" do
   end
 
   context "Set attribute for default keypair" do
-    include_context "Set attribute", service_location, context_service_name, 'network_aws::vpc[vpc1]/default_keypair', default_keypair
+    include_context "Set attribute", service_location, context_service_name, 'ec2::profile[default]/key_name', default_keypair
   end
 
   context "Converge service instance" do

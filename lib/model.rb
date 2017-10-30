@@ -140,7 +140,6 @@ module DTK
       }
       mh = model_handle(:task_template)
       task_template = Model.get_objs(mh, sp_hash)
-      # REfactor
       rows.each do |row|
         task_template.each do |tt|
           if tt[:ref].include?("delete")
@@ -155,7 +154,6 @@ module DTK
               elsif breakpoint_found.first[:actions].nil? && breakpoint_found.first[:components].nil?
                 breakpoint_found.first[:component].first
               end
-              
               breakpoint.gsub!(".delete","")
               if display_name.include?(breakpoint)
                 row[:breakpoint] = breakpoint_found.first[:breakpoint]

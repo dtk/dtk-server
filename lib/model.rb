@@ -115,6 +115,7 @@ module DTK
         sp_hash.merge!(filter: opts[:sql_filter])
       end
       rows = get_objs(cols: [virtual_attr])
+      add_breakpoint(rows)
       ret = 
         if filter_proc = opts[:filter_proc]
           rows.map do |r|
@@ -132,6 +133,37 @@ module DTK
       opts[:remove_dups] ? get_objs_helper_ret_with_remove_dups(ret) : ret
     end
     
+    def add_breakpoint(rows)
+      sp_hash = {
+        cols: [:content, :ref],
+        filter: [:eq, :component_component_id, self[:id]]
+      }
+      mh = model_handle(:task_template)
+      task_template = Model.get_objs(mh, sp_hash)
+      rows.each do |row|
+        task_template.each do |tt|
+          if tt[:ref].include?("delete")
+            breakpoint_found = tt[:content][:subtasks].select {|subt| subt[:breakpoint] == true }
+            unless row[:nested_component].nil? || breakpoint_found.nil? || breakpoint_found.empty?
+              display_name = row[:nested_component][:display_name].gsub!("__","::")
+              breakpoint = 
+              if breakpoint_found.first[:component].nil? && breakpoint_found.first[:components].nil?
+                breakpoint_found.first[:actions].first
+              elsif breakpoint_found.first[:actions].nil? && breakpoint_found.first[:component].nil?
+                breakpoint_found.first[:components].first 
+              elsif breakpoint_found.first[:actions].nil? && breakpoint_found.first[:components].nil?
+                breakpoint_found.first[:component].first
+              end
+              breakpoint.gsub!(".delete","")
+              if display_name.include?(breakpoint)
+                row[:breakpoint] = breakpoint_found.first[:breakpoint]
+              end
+            end
+          end
+        end
+      end
+    end
+
     def get_objs_helper_ret_with_remove_dups(ret)
       unless ret.empty?
         if ret.first.respond_to?(:id)

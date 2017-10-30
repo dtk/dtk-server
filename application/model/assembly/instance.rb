@@ -334,8 +334,11 @@ module DTK; class  Assembly
         task = Task.create_for_ad_hoc_action(self, component, opts) if component
         # Marked
         unless task_template_content.empty?
-          if task_template_content[:actions].include?(task[:display_name])
-            task[:breakpoint] = task_template_content[:breakpoint]
+          task_template_content.each do |ttc|
+            if (ttc.key?(:actions) && ttc[:actions].include?(task[:display_name]))||
+                (ttc.key?(:components) && ttc[:components].include?(task[:display_name]))
+              task[:breakpoint] = ttc[:breakpoint] 
+            end
           end
         end
         task = task.save_and_add_ids()

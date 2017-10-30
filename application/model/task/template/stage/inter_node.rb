@@ -27,8 +27,10 @@ module DTK; class Task; class Template
       def initialize(name = nil, breakpoint = nil)
         super()
         @name = name
+        @breakpoint = breakpoint
       end
-      attr_accessor :name
+      attr_accessor :name 
+      attr_accessor :breakpoint
 
       def self.create_from_single_action(action, opts = {})
         new(stage_name(action, opts)).add_new_execution_block_for_action!(action, opts)
@@ -166,9 +168,22 @@ module DTK; class Task; class Template
         self
       end
 
-      # def has_breakpoint?
-      #   @breakpoint
-      # end
+      def has_breakpoint?
+        self.each do |internode|
+          internode.each do |sub|
+            if sub.is_a?(Array)
+              sub.each do |s|
+                # Finding task with breakpoint
+                if task = s.find { |a| a[:breakpoint] == true }
+                  @breakpoint = task[:breakpoint]
+                else
+                  @breakpoint = false
+                end
+              end
+            end
+          end
+        end
+      end
 
 
       def serialization_form(opts = {})

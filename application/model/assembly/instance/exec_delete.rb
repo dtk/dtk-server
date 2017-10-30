@@ -117,7 +117,7 @@ module DTK; class  Assembly
         ret
       end
       
-      def exec__delete_node(node_idh, opts = {})      
+      def exec__delete_node(node_idh, opts = {}) 
         assembly_instance = opts[:assembly_instance] || self
         task = opts[:top_task] || Task.create_top_level(model_handle(:task), assembly_instance, task_action: 'delete component')
         ret = {
@@ -138,8 +138,6 @@ module DTK; class  Assembly
             cmp_action = nil
             cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
             cmp_opts.merge!(delete_params: [component.id_handle, node.id])
-            
-            task_template_content = get_task_template_content(model_handle(:task_template), component)
 
             begin
               create_cmp_action = true
@@ -149,8 +147,7 @@ module DTK; class  Assembly
                 end
               end
 
-              cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if create_cmp_action
-              update_component_with_breakpoint(task_template_content, cmp_action) unless task_template_content.empty? || cmp_action.nil?    
+              cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts) if create_cmp_action    
             rescue Task::Template::ParsingError => e
               Log.info("Ignoring component 'delete' action does not exist.")
             end
@@ -175,7 +172,7 @@ module DTK; class  Assembly
         return task if opts[:return_task]
         
         task = task.save_and_add_ids
-        
+
         workflow = Workflow.create(task)
         workflow.defer_execution
         
@@ -248,63 +245,10 @@ module DTK; class  Assembly
 
       private
 
-      # Gets the task_template with specific ID which contains the subtasks
-      # TODO: Update method with new way of handling workflows
-      #
-      # @param [mh] contains the task_template handle
-      # @param [component] take the current component, however we just need its assmebly_id, maybe not needed?
-      # @return [subtasks] of the task_template
-      def get_task_template_content(mh, component)
-        ret = nil
-        sp_hash = {
-          cols: [:content, :ref],
-          filter: [:eq, :component_component_id, component[:assembly_id]]
-        }
-        template_content = Model.get_objs(mh, sp_hash)
-        template_content.each do |st|
-          if st[:ref].eql?("delete")
-            ret = st
-          end
-        end
-
-        if  ret.nil? || ret[:content][:subtasks].nil? || ret[:content][:subtasks].empty?
-          ret = []
-        else 
-          if ret[:content][:subtasks].size == 1
-            ret[:content][:subtasks].first
-          else 
-            ret[:content][:subtasks]
-          end
-        end
-      end
-
-      # Updates the current component action with breakpoint
-      #
-      # @param [task_template_content] contains the task_template from database which should have 'breakpoint' attribute
-      # @param [cmp_action] current component action
-      def update_component_with_breakpoint(task_template_content, cmp_action)
-        cmp_action_name = cmp_action[:display_name]
-        cmp_action_name.slice!('.delete') if cmp_action_name.include?('.delete') 
-        if task_template_content.size == 1
-          task_action = task_template_content[:components] || task_template_content[:actions] 
-          task_action = task_action.first if task_action.is_a?(Array)
-          if task_action.include?(cmp_action_name)
-            cmp_action[:breakpoint] = task_template_content[:breakpoint]
-          end
-        elsif task_template_content.size > 1
-          task_actions = task_template_content
-          task_actions.each do |ta|
-            cmp = ta[:components] || ta[:actions]
-            if cmp.first.include?(cmp_action_name)
-              cmp_action[:breakpoint] = ta[:breakpoint]
-            end
-          end
-        end
-      end
-
       def delete_instance_task(assembly_instance, opts = {})
         delete_instance_task?(assembly_instance, opts) || fail(Error, "Unexpectd that delete_instance_task?(assembly_instance, opts) is nil")
       end
+
       def delete_instance_task?(assembly_instance, opts = {}) 
         task  = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
         has_steps = false
@@ -329,12 +273,10 @@ module DTK; class  Assembly
               cmp_action   = nil
               cmp_opts.merge!(delete_params: [component.id_handle, assembly_wide_node.id])
 
-              task_template_content = get_task_template_content(model_handle(:task_template), component)
 
               begin                
                 # no need to check if admin_op_status is 'running' with nodes as components so commented that out for now
                 cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts)# if assembly_wide_node.get_admin_op_status.eql?('running')
-                update_component_with_breakpoint(task_template_content, cmp_action) unless task_template_content.empty? || cmp_action.nil?
               rescue Task::Template::ParsingError => e
                 Log.info("Ignoring component 'delete' action does not exist.")
               end

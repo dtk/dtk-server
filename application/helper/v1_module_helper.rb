@@ -17,6 +17,17 @@
 #
 module Ramaze::Helper
   module V1ModuleHelper
+    def ret_context_assembly_instances(param = :context_service_names)
+      if context_service_names = ret_request_params(param)
+        context_service_names.map do |service_name| 
+          assembly_id = resolve_id_from_name_or_id(service_name, ::DTK::Assembly::Instance)
+          create_assembly_instance_object(assembly_id)
+        end
+      else
+        [default_target(new_client: true)]
+      end
+    end
+
     def remote_params_dtkn_service_and_component_info(namespace, module_name, version = nil)
       ::DTK::ModuleBranch::Location::RemoteParams::DTKNCatalog.new(
           module_type: ::DTK::CommonModule.combined_module_type,

@@ -67,13 +67,17 @@ module Ramaze::Helper
     def ret_assembly_instance_object?(id_param = nil)
       id_param ||= :assembly_id
       if assembly_id = ret_request_param_id?(id_param, Assembly::Instance)
-        id_handle(assembly_id, :component).create_object(model_name: :assembly_instance)
+        create_assembly_instance_object(assembly_id)
       end
     end
 
     def ret_assembly_instance_object(id_param = nil)
       id_param ||= :assembly_id
       assembly_id = ret_request_param_id(id_param, Assembly::Instance)
+      create_assembly_instance_object(assembly_id)
+    end
+
+    def create_assembly_instance_object(assembly_id)
       id_handle(assembly_id, :component).create_object(model_name: :assembly_instance)
     end
 

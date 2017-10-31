@@ -19,7 +19,7 @@ module DTK
     module PostMixin
       def stage
         service_module    = ret_service_module
-        is_target_service = boolean_request_params(:is_target)
+        is_base_service = boolean_request_params(:is_base)
         assembly_name     = request_params(:assembly_name) # could be empty means look for unique assembly in service module
 
         if version = request_params(:version)
@@ -41,10 +41,16 @@ module DTK
         opts = Opts.new(opts)
 
         response =
-          if is_target_service
+          if is_base_service
             target_name = service_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
+            fail 'got here base_service'
+            
             Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
           else
+            context_assembly_instances = ret_context_assembly_instances
+            pp context_assembly_instances
+            fail 'got here'
+
             target_service = ret_target_service_with_default(:target_service, new_client: true)
             # TODO: for testing
             #opts = opts.merge!(allow_existing_service: true)

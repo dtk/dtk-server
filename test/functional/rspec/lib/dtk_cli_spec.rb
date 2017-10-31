@@ -179,7 +179,7 @@ shared_context 'NEG - Converge service instance' do |service_location, dtk_commo
   end
 end
 
-shared_context 'Converge service instance with breakpoint' do |service_location, dtk_common, service_name, subtask_names_with_breakpoint|
+shared_context 'Converge service instance with breakpoint' do |service_location, dtk_common, service_instance, subtask_names_with_breakpoint|
   it "converges service instance and stops accordingly on the breakpoint in subtasks #{subtask_names_with_breakpoint}" do
     puts 'Converge service instance with breakpoint', '-------------------------------------'
     pass = true
@@ -367,7 +367,7 @@ shared_context 'NEG - Delete service instance' do |service_location, service_ins
   end
 end
 
-shared_context 'Delete service instance with breakpoint' do |service_location, dtk_common, service_name, delete_subtask_names_with_breakpoint|
+shared_context 'Delete service instance with breakpoint' do |service_location, dtk_common, service_instance, delete_subtask_names_with_breakpoint|
   it "deletes service instance content and stops accordingly on the breakpoint in subtasks #{delete_subtask_names_with_breakpoint}" do
     puts 'Delete service instance with breakpoint', '---------------------------------------'
     pass = true
@@ -378,7 +378,7 @@ shared_context 'Delete service instance with breakpoint' do |service_location, d
       pass = false
       puts "Service instance was not deleted successfully!"
     else
-      subtask_names_with_breakpoint.each do |subtask|
+      delete_subtask_names_with_breakpoint.each do |subtask|
         debug_passed = dtk_common.check_task_status_with_breakpoint(service_instance, subtask)
         if debug_passed
           puts "Breakpoint on delete subtask #{subtask} works!"

@@ -1,5 +1,5 @@
 ---
-module: test/debugger
+module: test/ruby_provider_test_module
 version: master
 dependencies:
   aws/ec2: 0.9.5

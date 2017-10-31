@@ -228,6 +228,8 @@ pbuilderid = <%= pbuilderid %>
 <% end %>
 private_key = /etc/dtk/ssh/arbiter
 log_level = <%= log_level %>
+arbiter_branch = <%= arbiter_branch %>
+arbiter_update = <%= arbiter_update %>
 EOF
 
 mkdir -p /usr/share/dtk/scripts

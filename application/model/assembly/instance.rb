@@ -302,7 +302,7 @@ module DTK; class  Assembly
         end
 
         # filter component that belongs to specified node
-        component = augmented_cmps.find{|cmp| cmp[:node][:display_name].eql?(node)}
+        component = augmented_cmps.find{|cmp| cmp[:node][:display_name].eql?(node)}        
         fail ErrorUsage, "#{message}!" unless component
       else
         if augmented_cmps.size == 1
@@ -332,12 +332,13 @@ module DTK; class  Assembly
 
       begin
         task = Task.create_for_ad_hoc_action(self, component, opts) if component
-        # Marked
+        # Add breakpoint to task if '--breakpoint' flag is sent        
+        task[:breakpoint] =  params[:breakpoint] if params[:breakpoint]
         unless task_template_content.empty?
           task_template_content.each do |ttc|
             if (ttc.key?(:actions) && ttc[:actions].include?(task[:display_name]))||
                 (ttc.key?(:components) && ttc[:components].include?(task[:display_name]))
-              task[:breakpoint] = ttc[:breakpoint] 
+              task[:breakpoint] = ttc[:breakpoint]
             end
           end
         end

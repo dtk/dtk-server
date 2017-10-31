@@ -22,6 +22,7 @@ module DTK; class Task
       unless task = Create.create_from_assembly_instance?(assembly, opts)
         return ret
       end
+      task[:breakpoint] = opts[:breakpoint] if opts[:breakpoint]
       #alters task if needed to decompose node groups into nodes
       NodeGroupProcessing.decompose_node_groups!(task)
     end

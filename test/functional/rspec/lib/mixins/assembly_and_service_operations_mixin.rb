@@ -172,7 +172,7 @@ module AssemblyAndServiceOperationsMixin
     debug_passed = false
     end_loop = false
     count = 0
-    max_num_of_retries = 10
+    max_num_of_retries = 30
 
     while (count < max_num_of_retries)
       sleep 10

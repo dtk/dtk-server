@@ -179,6 +179,40 @@ shared_context 'NEG - Converge service instance' do |service_location, dtk_commo
   end
 end
 
+shared_context 'Converge service instance with breakpoint' do |service_location, dtk_common, service_name, subtask_names_with_breakpoint|
+  it "converges service instance and stops accordingly on the breakpoint in subtasks #{subtask_names_with_breakpoint}" do
+    puts 'Converge service instance with breakpoint', '-------------------------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service converge -d #{service_location}`
+    puts value
+    if value.include? 'ERROR'
+      pass = false
+      puts "Service instance was not converged successfully!"
+    else
+      subtask_names_with_breakpoint.each do |subtask|
+        debug_passed = dtk_common.check_task_status_with_breakpoint(service_instance, subtask)
+        if debug_passed
+          puts "Breakpoint on subtask #{subtask} works!"
+        else
+          pass = false
+          puts "Breakpoint on subtask #{subtask} does not work!"
+        end
+      end
+
+      converge_info = dtk_common.check_task_status(service_instance)
+      if converge_info[:pass]
+        puts "Service instance is converged successfully!"
+      else
+        pass = false
+        puts "Service instance was not converged successfully!"
+      end
+    end
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
 shared_context 'Get task status details' do |service_instance_location, stage_number, expected_output|
   it 'returns task status output and verifies it' do
     correct_task_action_outputs = false
@@ -328,6 +362,40 @@ shared_context 'NEG - Delete service instance' do |service_location, service_ins
     service_location = service_location + service_instance
     value = `dtk service delete -d #{service_location} -y`
     pass = true if value.include? error_message
+    puts ''
+    expect(pass).to eq(true)
+  end
+end
+
+shared_context 'Delete service instance with breakpoint' do |service_location, dtk_common, service_name, delete_subtask_names_with_breakpoint|
+  it "deletes service instance content and stops accordingly on the breakpoint in subtasks #{delete_subtask_names_with_breakpoint}" do
+    puts 'Delete service instance with breakpoint', '---------------------------------------'
+    pass = true
+    service_location = service_location + service_instance
+    value = `dtk service delete -d #{service_location} -y`
+    puts value
+    if value.include? 'ERROR'
+      pass = false
+      puts "Service instance was not deleted successfully!"
+    else
+      subtask_names_with_breakpoint.each do |subtask|
+        debug_passed = dtk_common.check_task_status_with_breakpoint(service_instance, subtask)
+        if debug_passed
+          puts "Breakpoint on delete subtask #{subtask} works!"
+        else
+          pass = false
+          puts "Breakpoint on delete subtask #{subtask} does not work!"
+        end
+      end
+
+      delete_info = dtk_common.check_delete_task_status(service_instance)
+      if delete_info[:pass]
+        puts "Service instance is deleted successfully!"
+      else
+        pass = false
+        puts "Service instance was not deleted successfully!"
+      end
+    end
     puts ''
     expect(pass).to eq(true)
   end

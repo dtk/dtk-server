@@ -1,0 +1,163 @@
+---
+module: test/debugger
+version: master
+dependencies:
+  aws/ec2: 0.9.5
+assemblies:
+  node_single_debug:
+    description: single debug statement in create/delete
+    components:
+    - node[node]:
+        attributes:
+          image: xenial_hvm
+          size: micro
+        components:
+        - ruby_provider_test_module::test_component[first]
+        - ruby_provider_test_module::test_component[second]
+    actions:
+      create:
+        subtasks:
+        - name: create/converge node
+          components:
+          - ec2::node[node]
+        - name: create first test component
+          components:
+          - ruby_provider_test_module::test_component[first]
+        - name: create second test component
+          components:
+          - ruby_provider_test_module::test_component[second]
+          breakpoint: true
+      delete:
+        subtasks:
+        - name: delete first test component
+          components:
+          - ruby_provider_test_module::test_component[first]
+        - name: delete second test component
+          components:
+          - ruby_provider_test_module::test_component[second]
+          breakpoint: true
+        - name: delete node
+          components:
+          - ec2::node[node]
+  node_multiple_debug:
+    description: multiple debug statements in create/delete
+    components:
+    - node[node]:
+        attributes:
+          image: xenial_hvm
+          size: micro
+        components:
+        - ruby_provider_test_module::test_component[first]
+        - ruby_provider_test_module::test_component[second]
+    actions:
+      create:
+        subtasks:
+        - name: create/converge node
+          components:
+          - ec2::node[node]
+        - name: create first test component
+          components:
+          - ruby_provider_test_module::test_component[first]
+          breakpoint: true
+        - name: create second test component
+          components:
+          - ruby_provider_test_module::test_component[second]
+          breakpoint: true
+      delete:
+        subtasks:
+        - name: delete first test component
+          components:
+          - ruby_provider_test_module::test_component[first]
+          breakpoint: true
+        - name: delete second test component
+          components:
+          - ruby_provider_test_module::test_component[second]
+          breakpoint: true
+        - name: delete node
+          components:
+          - ec2::node[node]
+  assembly_wide_single_debug:
+    description: single debug statement in create/delete
+    components:
+    - ruby_provider_test_module::test_component[first]
+    - ruby_provider_test_module::test_component[second]
+    actions:
+      create:
+        subtasks:
+        - name: create first test component
+          components:
+          - ruby_provider_test_module::test_component[first]
+          breakpoint: true
+        - name: create second test component
+          components:
+          - ruby_provider_test_module::test_component[second]
+      delete:
+        subtasks:
+        - name: delete first test component
+          components:
+          - ruby_provider_test_module::test_component[first]
+        - name: delete second test component
+          components:
+          - ruby_provider_test_module::test_component[second]
+          breakpoint: true
+  assembly_wide_multiple_debug:
+    description: multiple debug statements in create/delete
+    components:
+    - ruby_provider_test_module::test_component[first]
+    - ruby_provider_test_module::test_component[second]
+    - ruby_provider_test_module::test_component[third]
+    - ruby_provider_test_module::test_component[fourth]
+    actions:
+      create:
+        subtasks:
+        - name: create first test component
+          components:
+          - ruby_provider_test_module::test_component[first]
+        - name: create second test component
+          components:
+          - ruby_provider_test_module::test_component[second]
+          breakpoint: true
+        - name: create third test component
+          components:
+          - ruby_provider_test_module::test_component[third]
+        - name: create fourth test component
+          components:
+          - ruby_provider_test_module::test_component[fourth]
+          breakpoint: true
+      delete:
+        subtasks:
+        - name: delete fourth test component
+          components:
+          - ruby_provider_test_module::test_component[fourth]
+          breakpoint: true
+        - name: delete second test component
+          components:
+          - ruby_provider_test_module::test_component[second]
+          breakpoint: true
+        - name: delete third test component
+          components:
+          - ruby_provider_test_module::test_component[third]
+        - name: delete first test component
+          components:
+          - ruby_provider_test_module::test_component[first]
+component_defs:
+  test_component:
+    attributes:
+      name:
+        type: string
+        required: true
+      success:
+        type: boolean
+        input: true
+        dynamic: true
+    singleton: false
+    providers:
+      ruby:
+        gems: 
+    actions:
+      create:
+        type: ruby
+        entrypoint: bin/create.rb
+      delete:
+        type: ruby
+        entrypoint: bin/delete.rb

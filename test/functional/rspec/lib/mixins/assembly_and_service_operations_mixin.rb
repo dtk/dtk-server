@@ -167,6 +167,41 @@ module AssemblyAndServiceOperationsMixin
     service_converged
   end
 
+  def check_task_status_with_breakpoint(service_instance_name, subtask_name_with_breakpoint)
+    puts "Check task status with breakpoint", "---------------------------------"
+    debug_passed = false
+    end_loop = false
+    count = 0
+    max_num_of_retries = 80
+
+    while (count < max_num_of_retries)
+      sleep 10
+      count += 1
+      task_status_response = send_request("/rest/api/v1/services/#{service_instance_name}/task_status", {}, 'get')
+      ap task_status_response
+      if task_status_response['status'] == 'ok'
+        if task_status_response['data'].first['status'] == 'debugging'
+          subtask = task_status_response['data'].select { |subtask| subtask['type'].include? subtask_name_with_breakpoint }.first
+          debug_command = subtask['info']['message'].match(/(byebug -R.+)'/)[1]
+          debug_execution = `echo c | #{debug_command}`
+          puts debug_execution
+          if debug_execution.include? "Connected"
+            debug_passed = true
+            break
+          else
+            debug_passed = false
+            break
+          end
+        end
+      else
+        puts "Service was not converged successfully! Debug cannot proceed"
+        break
+      end
+    end
+    puts ''
+    debug_passed
+  end
+
   def check_delete_task_status(service_instance_name)
     puts "Check delete task status", "------------------------"
     service_deleted = { pass: false, error: nil }

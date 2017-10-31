@@ -338,7 +338,7 @@ module DTK; class  Assembly
           task_template_content.each do |ttc|
             if (ttc.key?(:actions) && ttc[:actions].include?(task[:display_name]))||
                 (ttc.key?(:components) && ttc[:components].include?(task[:display_name]))
-              task[:breakpoint] = ttc[:breakpoint]
+              task[:breakpoint] = ttc[:breakpoint] if task[:breakpoint].nil?
             end
           end
         end

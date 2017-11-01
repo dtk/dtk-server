@@ -24,8 +24,12 @@ module Ramaze::Helper
           create_assembly_instance_object(assembly_id)
         end
       else
-        [default_target(new_client: true)]
+        [ret_default_context_assembly_instance]
       end
+    end
+
+    def ret_default_context_assembly_instance
+      ::DTK::Service::Target.create_from_target(default_target(new_client: true)).assembly_instance
     end
 
     def remote_params_dtkn_service_and_component_info(namespace, module_name, version = nil)

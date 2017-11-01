@@ -42,9 +42,10 @@ DTK::ReactorRoute.draw do
   get  'api/v1/services/:service_id/violations'        => 'v1::service#violations'
   get  'api/v1/services/:service_id/info'              => 'v1::service#info'
 
-  post 'api/v1/services/create'                        => 'v1::service#create'
   post 'api/v1/services/set_default_target'            => 'v1::service#set_default_target'
-  post 'api/v1/services/create_workspace'              => 'v1::service#create_workspace'
+
+  # TODO: not currently supported
+  # post 'api/v1/services/create_workspace'              => 'v1::service#create_workspace'
   post 'api/v1/services/:service_id/cancel_last_task'  => 'v1::service#cancel_last_task'
   post 'api/v1/services/:service_id/link'             => 'v1::service#link'
   post 'api/v1/services/:service_id/converge'          => 'v1::service#converge'

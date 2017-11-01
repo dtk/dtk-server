@@ -34,44 +34,17 @@ module DTK
       end
       private :initialize
 
-      def self.create_from_node(node)
-        create_from_target(node.get_target)
-      end
-
-      # Creates a Service::Target object 
-      # opts can have keys
-      #  :components
-      def self.create_from_assembly_instance?(assembly_instance, opts = {})
-        # TODO: DTK-3076: removed check if isa_target_assembly_instance?(assembly_instance)
-        #       This alows staging with respect to any service instance. we still need to have dtk service list'
-        #       display right by adding a field to component table that has service_parent_id and using that rather than
-        #       target name. Also need to clean up and remove descrete logic categorizing target or not target
-        #       and related default target logic
-        new(assembly_instance, components: opts[:components]) 
-      end
-
-      # This function is used to help bridge between using targets and service instances
-      # There are places in code where target is referenced, but we want to get a handle on a service isnatnce that has
-      def self.create_from_target(target)
-        new(find_assembly_instance_from_target(target), target: target)
-      end
-
-      ###### Just called from v1 controller ######
-      # This method stages a target service
+      # This method stages a base service
       # opts can have keys
       #   :project (required)
-      #   :target_name (required)
       #   :service_module
-      #   :service_name
       #   :no_auto_complete - Boolean (default: false)
       #   :add_nested_modules - Boolean (default: false)
-      def self.stage_target_service(assembly_template, service_module_class, opts = Opts.new)
+      def self.stage_base_service(service_name, assembly_template, opts = Opts.new)
         Model.Transaction do
-          target = create_target_mock(opts[:target_name], opts[:project])
-          stage_opts = common_stage_opts.merge(is_target_service: true).merge(opts)
-          new_assembly_instance = assembly_template.stage(target, stage_opts)
-          fixup_target_name_and_ref!(new_assembly_instance, target)
-          module_repo_info = service_module_class.create_service_instance_and_nested_modules(new_assembly_instance, opts)
+          stage_opts = common_stage_opts.merge(opts)
+          new_assembly_instance = assembly_template.stage(service_name, stage_opts)
+          module_repo_info = CommonModule::ServiceInstance.create_service_instance_and_nested_modules(new_assembly_instance, opts)
           Aux.stop_for_testing?(:stage)
           new_service_info(new_assembly_instance, module_repo_info)
         end
@@ -81,22 +54,38 @@ module DTK
       # opts can have keys
       #   :project
       #   :service_module
-      #   :service_name
       #   :no_auto_complete - Boolean (default: false)
       #   :allow_existing_service - Boolean (default: false)
       #   :add_nested_modules - Boolean (default: false)
-      def stage_service(assembly_template, service_module_class, opts = Opts.new)
-        unless is_converged? 
-          fail ErrorUsage, "Cannot stage a service instance in a context service instance '#{target}' that is not converged."
-        end
+      def self.stage_service(service_name, assembly_template, context_assembly_instances, opts = Opts.new)
+        check_contexts_are_converged(context_assembly_instances)
         Model.Transaction do
           # if :allow_existing_service is true then new_assembly_instance can be existing assembly_instance
-          stage_opts = common_stage_opts.merge(is_target_service: false, parent_service_instance: @assembly_instance).merge(opts)
-          new_assembly_instance = assembly_template.stage(target, stage_opts)
-          module_repo_info = service_module_class.create_service_instance_and_nested_modules(new_assembly_instance, opts)
+          stage_opts = common_stage_opts.merge(context_assembly_instances: context_assembly_instances).merge(opts)
+          new_assembly_instance = assembly_template.stage(service_name, stage_opts)
+          module_repo_info = CommonModule::ServiceInstance.create_service_instance_and_nested_modules(new_assembly_instance, opts)
           Aux.stop_for_testing?(:stage) 
           self.class.new_service_info(new_assembly_instance, module_repo_info)
         end
+      end
+
+      def self.target_when_target_assembly_instance?(assembly)
+        assembly.copy_as_assembly_instance.get_target() if isa_target_assembly_instance?(assembly)
+      end
+
+      # This function is used to help bridge between using targets and service instances
+      # There are places in code where target is referenced, but we want to get a handle on a service isnatnce that has
+      def self.create_from_target(target)
+        new(find_assembly_instance_from_target(target), target: target)
+      end
+
+      def target
+        Log.error("Unexpected that @target is nil") unless @target
+        @target 
+      end
+
+      def display_name
+        @assembly_instance.display_name
       end
 
       private
@@ -104,45 +93,20 @@ module DTK
       def self.common_stage_opts
         Opts.new(donot_create_modules: true)
       end
-      def common_stage_opts
-        self.class.common_stage_opts
-      end
 
-      ###### end: Just called from v1 controller ######
-
-      public
-
-      def target
-        Log.error("Unexpected that @target is nil") unless @target
-        @target
-      end
-
-      def display_name
-        @assembly_instance.display_name
-      end
-
-      def self.target_when_target_assembly_instance?(assembly)
-        assembly.copy_as_assembly_instance.get_target() if isa_target_assembly_instance?(assembly)
-      end
-
-      def is_converged?
-        if status = @assembly_instance && @assembly_instance.get_last_task_run_status?
-          status == 'succeeded'
+      def self.check_contexts_are_converged(context_assembly_instances)
+        context_assembly_instances.each do |context_assembly_instance|
+          unless is_converged?(context_assembly_instance) 
+            context_name = context_assembly_instance.display_name?
+            fail ErrorUsage, "Cannot stage a service instance in a context service instance '#{context_name}' that is not converged."
+          end
         end
       end
 
-      def self.create_target_mock(target_name, project)
-        ref = target_name.downcase.gsub(/ /, '-')
-        create_row = {
-          ref: ref,
-          display_name: target_name,
-          type: 'instance',
-          iaas_type: 'ec2',
-          iaas_properties: {},
-          project_id: project.id
-        }
-        create_opts = { convert: true, ret_obj: { model_name: :target_instance } }
-        Model.create_from_row(project.model_handle(:target), create_row, create_opts)
+      def self.is_converged?(assembly_instance)
+        if status = assembly_instance.get_last_task_run_status?
+          status == 'succeeded'
+        end
       end
 
       private
@@ -176,11 +140,6 @@ module DTK
         }.merge(module_repo_info)
       end
 
-      def self.fixup_target_name_and_ref!(assembly_instance, target)
-        display_name = assembly_instance.get_field?(:display_name)
-        ref          = display_name.downcase.gsub(/ /, '-')
-        target.update(display_name: display_name, ref: ref)
-      end
     end
   end
 end

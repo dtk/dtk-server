@@ -18,9 +18,9 @@
 module DTK
   # New class for Service instances
   class Service
-    r8_nested_require('service', 'target')
-    r8_nested_require('service', 'component')
-    r8_nested_require('service', 'reified')
+    require_relative('service/target')
+    require_relative('service/component')
+    require_relative('service/reified')
 
     attr_reader :assembly_instance
 

@@ -17,53 +17,6 @@
 module DTK
   class V1::ServiceController
     module PostMixin
-      ### For all services
-
-      ### For creating a service instance from an assembly
-      ## Params are
-      ##   :assembly_name
-      ##   :module_id, :module_name, :namespace - Either 'module_id' or 'module_name and namespace' must be given
-      ##   :target_service (optional) - id or name of target (parent) service; if omitted default is used
-      ##   :service_name (optional) - name for new service instance
-      ##   :is_target (optional) - Boolean
-      ##   :no_auto_complete(optional) - Boolean
-      def create
-        service_module    = ret_service_module
-        is_target_service = boolean_request_params(:is_target)
-        assembly_name     = request_params(:assembly_name) # could be empty means look for unique assembly in service module
-
-        if version = request_params(:version)
-          version = nil if BASE_VERSION_STRING.include?(version)
-        else
-           version = compute_latest_version(service_module)
-        end
-        assembly_template = service_module.assembly_template(assembly_name: assembly_name, version: version)
-        service_name = request_params(:service_name) || generate_new_service_name(assembly_template, service_module)
-
-        opts = {
-          project: get_default_project,
-          service_module: service_module,
-          service_name: service_name,
-          no_auto_complete: boolean_request_params(:no_auto_complete),
-          version: version,
-          add_nested_modules: true 
-        }
-        opts = Opts.new(opts)
-
-        response =
-          if is_target_service
-            target_name = service_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
-            Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
-          else
-            target_service = ret_target_service_with_default(:target_service, new_client: true)
-            # TODO: for testing
-            #opts = opts.merge!(allow_existing_service: true)
-            target_service.stage_service(assembly_template, CommonModule::ServiceInstance, opts)
-          end
-        rest_ok_response response
-      end
-      BASE_VERSION_STRING = ['base', 'master'] #TODO: settle on one
-
       ### Service instance specific
       def cancel_last_task
         if running_task = most_recent_task_is_executing?(assembly_instance)

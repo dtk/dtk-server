@@ -18,9 +18,9 @@ module DTK
   class V1::ModuleController
     module PostMixin
       def stage
-        service_module    = ret_service_module
+        service_module  = ret_service_module
         is_base_service = boolean_request_params(:is_base)
-        assembly_name     = request_params(:assembly_name) # could be empty means look for unique assembly in service module
+        assembly_name   = request_params(:assembly_name) # could be empty means look for unique assembly in service module
 
         if version = request_params(:version)
           version = nil if BASE_VERSION_STRING.include?(version)
@@ -28,12 +28,11 @@ module DTK
            version = compute_latest_version(service_module)
         end
         assembly_template = service_module.assembly_template(assembly_name: assembly_name, version: version)
-        service_name = request_params(:service_name) || generate_new_service_name(assembly_template, service_module)
+        service_name      = request_params(:service_name) || generate_new_service_name(assembly_template, service_module)
 
         opts = {
           project: get_default_project,
           service_module: service_module,
-          service_name: service_name,
           no_auto_complete: boolean_request_params(:no_auto_complete),
           version: version,
           add_nested_modules: true 
@@ -42,19 +41,10 @@ module DTK
 
         response =
           if is_base_service
-            target_name = service_name || "#{service_module[:display_name]}-#{assembly_template[:display_name]}"
-            fail 'got here base_service'
-            
-            Service::Target.stage_target_service(assembly_template, CommonModule::ServiceInstance, opts.merge(target_name: target_name))
+            Service::Target.stage_base_service(service_name, assembly_template, opts)
           else
             context_assembly_instances = ret_context_assembly_instances
-            pp context_assembly_instances
-            fail 'got here'
-
-            target_service = ret_target_service_with_default(:target_service, new_client: true)
-            # TODO: for testing
-            #opts = opts.merge!(allow_existing_service: true)
-            target_service.stage_service(assembly_template, CommonModule::ServiceInstance, opts)
+            Service::Target.stage_service(service_name, assembly_template, context_assembly_instances, opts)
           end
         rest_ok_response response
       end

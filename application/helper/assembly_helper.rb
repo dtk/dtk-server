@@ -26,14 +26,6 @@ module Ramaze::Helper
       id_handle(assembly_id, :component).create_object(model_name: (subtype == :instance) ? :assembly_instance : :assembly_template)
     end
 
-    def ret_target_service_with_default(parent_service_param = :parent_service, opts = {})
-      if target_assembly_instance = ret_assembly_instance_object?(parent_service_param)
-        Service::Target::create_from_assembly_instance?(target_assembly_instance)
-      else
-        Service::Target.create_from_target(default_target(opts))
-      end
-    end
-
     def raise_error_if_target_not_convereged(target_service, opts = {})
       target = target_service.target
       unless Service::Target.create_from_target(target).is_converged?

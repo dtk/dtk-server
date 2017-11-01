@@ -60,6 +60,13 @@ module DTK
         rest_ok_response service_module.ret_clone_update_info
       end
 
+      def tasks
+        service = service_object
+        rest_ok_response service.info_about(:tasks)
+      end
+
+=begin
+TODO: probably move to services and leverage stage
       def create_workspace
         workspace_name  = ret_request_params(:workspace_name)
         default_project = get_default_project
@@ -88,12 +95,7 @@ module DTK
 
         rest_ok_response response
       end
-
-      def tasks
-        service = service_object
-        rest_ok_response service.info_about(:tasks)
-      end
-
+=end
     end
   end
 end

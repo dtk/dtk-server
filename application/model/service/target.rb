@@ -65,7 +65,7 @@ module DTK
           new_assembly_instance = assembly_template.stage(service_name, stage_opts)
           module_repo_info = CommonModule::ServiceInstance.create_service_instance_and_nested_modules(new_assembly_instance, opts)
           Aux.stop_for_testing?(:stage) 
-          self.class.new_service_info(new_assembly_instance, module_repo_info)
+          new_service_info(new_assembly_instance, module_repo_info)
         end
       end
 

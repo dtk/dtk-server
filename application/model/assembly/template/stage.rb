@@ -85,7 +85,9 @@ module DTK
           end
           
           if context_assembly_instances = opts[:context_assembly_instances]
-            ServiceAssociations.create_associations(opts[:project], assembly_instance, context_assembly_instances)
+            context_assembly_instances.each do |context_assembly_instance|
+              ServiceAssociations.create_associations(opts[:project], assembly_instance, context_assembly_instance)
+            end
           end
           
           # assumed that service associations set before calling LinkDef::AutoComplete.autocomplete_component_links

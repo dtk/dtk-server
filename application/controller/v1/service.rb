@@ -67,6 +67,7 @@ module DTK
 
 =begin
 TODO: probably move to services and leverage stage
+This now refernces methods that have been deperacted and deleted
       def create_workspace
         workspace_name  = ret_request_params(:workspace_name)
         default_project = get_default_project
@@ -76,7 +77,7 @@ TODO: probably move to services and leverage stage
           workspace_name = Workspace.calculate_workspace_name(instance_list)
         end
 
-        target_service = ret_target_service_with_default(:target_service, new_client: true)
+        target_service = ret_target_service_with_default(:target_service)
         raise_error_if_target_not_convereged(target_service, is_workspace: true)
         target = target_service.target
         target_service_instance = target_service.assembly_instance

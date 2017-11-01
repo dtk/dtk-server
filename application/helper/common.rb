@@ -73,23 +73,21 @@ module Ramaze::Helper
     end
 
     # looks for default if no target is given
-    def target_with_default(target_id = nil, opts = {})
-      target_option, set_default_target =
-        if opts[:new_client]
-          ['--context CONTEXT', 'dtk service set-default-context SERVICE-NAME']
-        else
-          ['-t TARGET-NAME', 'set-default-target TARGET-NAME']
-        end
-
+    def target_with_default(target_id = nil)
       target = target_id ?
-        id_handle(target_id, :target).create_object(model_name: :target_instance) :
+      id_handle(target_id, :target).create_object(model_name: :target_instance) :
         Target::Instance.get_default_target(model_handle(:target), ret_singleton_target: true, prune_builtin_target: true)
 
-      target || fail(DTK::ErrorUsage, "The command was called without '#{target_option}' option and no default context has been set. You can set default context with service instance command '#{set_default_target}'")
+      if target
+        target
+      else
+        target_option, set_default_target = ['--context CONTEXT', 'dtk service set-default-context SERVICE-NAME']
+        fail DTK::ErrorUsage, "The command was called without '#{target_option}' option and no default context has been set. You can set default context with service instance command '#{set_default_target}'"
+      end
     end
 
-    def default_target(opts = {})
-      target_with_default(nil, opts)
+    def default_target
+      target_with_default
     end
 
     def get_default_project

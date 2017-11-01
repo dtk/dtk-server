@@ -118,6 +118,7 @@ module DTK
         end
 
         def set_result_succeeded(workitem, new_result, task, action)
+          Log.debug "Log message Succeeded #{workitem}, #{task}, #{action}"
           task.update_at_task_completion('succeeded', Task::Action::Result::Succeeded.new())
           action.update_state_change_status(task.model_handle, :completed)  #this updates pending state
           set_result_succeeded__stack(workitem, new_result, task, action)
@@ -139,6 +140,7 @@ module DTK
         end
 
         def set_result_failed(_workitem, new_result, task)
+          Log.debug "set_result_failed on AuthorizeNodes: #{_workitem}, #{new_result}, #{task}"
           # Amar: (TODO: Find better solution)
           # Flag that will be checked inside mcollective.poll_to_detect_node_ready and will indicate detection to stop
           # Due to asyc calls, it was the only way I could figure out how to stop node detection task

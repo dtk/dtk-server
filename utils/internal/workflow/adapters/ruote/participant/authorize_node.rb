@@ -39,12 +39,15 @@ module DTK
 
             callbacks = {
               on_msg_received: proc do |msg|
+                Log.debug "Log on message received AutorizeNode: #{msg}"
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement(name(), object_id)
 
                   result = msg[:body].merge('task_id' => task_id)
+                  Log.debug "Log on message received AutorizeNode result: #{result}"
                   if errors = errors_in_result?(result)
+                    Log.debug "Error messages #{errors}"
                     event, errors = task.add_event_and_errors(:complete_failed, :agent_authorize_node, errors)
                     if event
                       log_participant.end(:complete_failed, task_id: task_id, event: event, errors: errors)

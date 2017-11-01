@@ -49,6 +49,7 @@ module DTK
             callbacks = {
               on_msg_received: proc do |msg|
                 debug = false # TODO: Move this
+                Log.debug "Received from Arbiter: #{msg}"
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)

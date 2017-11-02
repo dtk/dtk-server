@@ -55,10 +55,8 @@ module DTK
       #   :project
       #   :service_module
       #   :no_auto_complete - Boolean (default: false)
-      #   :allow_existing_service - Boolean (default: false)
       #   :add_nested_modules - Boolean (default: false)
       def self.stage_service(service_name, assembly_template, context_assembly_instances, opts = Opts.new)
-        check_contexts_are_converged(context_assembly_instances)
         Model.Transaction do
           # if :allow_existing_service is true then new_assembly_instance can be existing assembly_instance
           stage_opts = common_stage_opts.merge(context_assembly_instances: context_assembly_instances).merge(opts)
@@ -93,23 +91,6 @@ module DTK
       def self.common_stage_opts
         Opts.new(donot_create_modules: true)
       end
-
-      def self.check_contexts_are_converged(context_assembly_instances)
-        context_assembly_instances.each do |context_assembly_instance|
-          unless is_converged?(context_assembly_instance) 
-            context_name = context_assembly_instance.display_name?
-            fail ErrorUsage, "Cannot stage a service instance in a context service instance '#{context_name}' that is not converged."
-          end
-        end
-      end
-
-      def self.is_converged?(assembly_instance)
-        if status = assembly_instance.get_last_task_run_status?
-          status == 'succeeded'
-        end
-      end
-
-      private
 
       def self.isa_target_assembly_instance?(assembly_instance)
         if specific_type = assembly_instance.get_field?(:specific_type)

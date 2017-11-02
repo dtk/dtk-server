@@ -164,10 +164,10 @@ if [[ ! -d ${HOST_VOLUME}/r8server-repo/ ]]; then
 fi;
 
 # activemq
-ln -s ${HOST_VOLUME}/activemq/data /opt/activemq/data
 if [[ ! -d ${HOST_VOLUME}/activemq ]]; then
-  mkdir -p ${HOST_VOLUME}/activemq/data
-  rm -rf /opt/activemq/data
+  mkdir -p ${HOST_VOLUME}/activemq
+  mv /opt/activemq/data ${HOST_VOLUME}/activemq/data
+  ln -sf ${HOST_VOLUME}/activemq/data /opt/activemq/
 fi
 /opt/activemq/bin/activemq start &
 

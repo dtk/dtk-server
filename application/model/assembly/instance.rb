@@ -332,10 +332,11 @@ module DTK; class  Assembly
 
       begin
         task = Task.create_for_ad_hoc_action(self, component, opts) if component
-        # Add breakpoint to task if '--breakpoint' flag is sent        
+        # Add breakpoint to task if '--breakpoint' flag is sent
         task[:breakpoint] =  params[:breakpoint] if params[:breakpoint]
         unless task_template_content.empty?
           task_template_content.each do |ttc|
+            next if ttc.is_a?(Array)
             if (ttc.key?(:actions) && ttc[:actions].include?(task[:display_name]))||
                 (ttc.key?(:components) && ttc[:components].include?(task[:display_name]))
               task[:breakpoint] = ttc[:breakpoint] if task[:breakpoint].nil?

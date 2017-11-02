@@ -18,8 +18,11 @@
 module Ramaze::Helper
   module V1ModuleHelper
     def ret_context_assembly_instances(param = :context_service_names)
-      if context_service_names = ret_request_params(param)
-        context_service_names.map do |service_name| 
+      # TODO: DTK-3296: when patch regression tests put in below for uncommented out
+      # if context_service_names = ret_request_params(param)
+      target_service_name = ret_request_params(:target_service)
+      if context_service_names = ret_request_params(param) || (target_service_name && [target_service_name])
+         context_service_names.map do |service_name| 
           assembly_id = resolve_id_from_name_or_id(service_name, ::DTK::Assembly::Instance)
           create_assembly_instance_object(assembly_id)
         end

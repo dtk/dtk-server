@@ -33,6 +33,7 @@ describe "Getting started example: dtk-examples/rails" do
   end
 
   after(:all) do
+    system("rm -rf #{remote_module_location}")
     puts '', ''
   end
 end

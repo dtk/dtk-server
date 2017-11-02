@@ -28,4 +28,7 @@ puppet apply --debug --modulepath dtk-provisioning/modules docker/manifests/stag
 
 apt-get clean && apt-get autoclean && apt-get -y autoremove
 
+# TEMP
+sed -i '/^#.*log4j.logger.org.apache.activemq=/s/^#//' /opt/activemq/conf/log4j.properties
+
 rm -rf /etc/puppet/modules /tmp/* /var/lib/postgresql/ /var/lib/apt/lists/* /var/tmp/* 

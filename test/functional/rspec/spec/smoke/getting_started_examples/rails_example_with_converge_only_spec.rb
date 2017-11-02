@@ -32,6 +32,10 @@ describe "Getting started example: dtk-examples/rails" do
     include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
+  context "Uninstall service instance with --force" do
+    include_context "Uninstall service instance with --force", service_location, service_name
+  end
+
   after(:all) do
     system("rm -rf #{remote_module_location}")
     puts '', ''

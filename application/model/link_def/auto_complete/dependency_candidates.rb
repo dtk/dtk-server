@@ -20,7 +20,7 @@ module DTK
     class DependencyCandidates
       require_relative('dependency_candidates/constraints')
 
-      Element = Struct.new(:position, :aug_component)
+      Element = Struct.new(:depth, :aug_component)
 
       def initialize(assembly_instance)
         # array of Elements
@@ -30,7 +30,7 @@ module DTK
       # opts can have keys:
       #   :components - base components explicitly given
       def base_aug_components(opts = {})
-        ret = self.array.select { |element| element.position == 1 }.map { |element| element.aug_component }
+        ret = self.array.select { |element| element.depth == 1 }.map { |element| element.aug_component }
         if components = opts[:components]
           matching_component_ids = components.map(&:id)
           ret.reject!{ |aug_component| ! matching_component_ids.include?(aug_component.id) }
@@ -80,12 +80,12 @@ module DTK
 
       private
 
-      def dependency_candidates_array(assembly_instance, position)
+      def dependency_candidates_array(assembly_instance, depth)
         ret = get_augmented_components(assembly_instance).map do |aug_component| 
-          Element.new(position, aug_component) 
+          Element.new(depth, aug_component) 
         end
-        if parent_assembly_instance = ServiceAssociations.get_parent?(assembly_instance)
-          ret += dependency_candidates_array(parent_assembly_instance, position + 1)
+        ServiceAssociations.get_parents(assembly_instance).each do |parent_assembly_instance|
+          ret += dependency_candidates_array(parent_assembly_instance, depth + 1)
         end
         ret
       end
@@ -99,8 +99,8 @@ module DTK
       def prune_using_preferences(matching_elements, opts = {})
         fail Error, "Not suppurting explicit_preferences" if opts[:explicit_preferences]
         # prefer element with lower number; 1 - means assembly instance, 2 means its parent, ...
-        closest_position = matching_elements.map(&:position).min
-        matching_elements.select { |element| element.position == closest_position }.map(&:aug_component)
+        closest_depth = matching_elements.map(&:depth).min
+        matching_elements.select { |element| element.depth == closest_depth }.map(&:aug_component)
       end
 
     end

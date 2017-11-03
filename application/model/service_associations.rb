@@ -36,22 +36,23 @@ module DTK
       create_from_rows(association_mh, [row], convert: true)
     end
 
-    def self.get_parent?(assembly_instance)
+    def self.get_parents(assembly_instance)
       sp_hash = {
         cols: [:id, :group_id, :display_name, :service_dependent_id],
         filter: [:and,
                  [:eq, :service_antecendent_id, assembly_instance.id],
                  [:eq, :relationship, Relation::PARENT_OF]]
       }
-      associations = get_objs(assembly_instance.model_handle(:service_associations), sp_hash)
-      case associations.size
-      when 0
-        nil
-      when 1
-        assembly_instance.model_handle(:assembly_instance).createIDH(id: associations.first[:service_dependent_id]).create_object
-      when 2
-        fail ErrorUsage, "Not treating cases where  service instance has more than 1 parent"
+      assembly_instance_mh = assembly_instance.model_handle(:assembly_instance)
+      get_objs(assembly_instance.model_handle(:service_associations), sp_hash).map do |association| 
+        dependent_assembly_instance(assembly_instance_mh, association) 
       end
+    end
+
+    private
+
+    def self.dependent_assembly_instance(assembly_instance_mh, service_association)
+      assembly_instance_mh.createIDH(id: service_association[:service_dependent_id]).create_object
     end
 
   end

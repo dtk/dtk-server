@@ -113,9 +113,11 @@ module DTK
         end
         assembly_rows.each do |r|
           last_task_run_status = r[:last_task_run_status]
+          service_contexts = ServiceAssociations.get_parents(r)
+          service_context = (service_contexts.empty? ? nil : service_contexts.map(&:display_name).join(', '))
           pntr = ndx_ret[r[:id]] ||= r.prune_with_values(
               display_name: r.pretty_print_name(pp_opts),
-              service_context: (context = ServiceAssociations.get_parent?(r)) && context.display_name,
+              service_context: service_context,
               last_task_run_status: last_task_run_status,
               # TODO: will deprecate :execution_status after removing it from smoketests
               execution_status: last_task_run_status || 'staged',

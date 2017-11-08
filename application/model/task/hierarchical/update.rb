@@ -38,7 +38,7 @@ module DTK; class Task
           update_hash = { status: status(:cancelled), result: result, ended_at: now_time_stamp() }
           update(update_hash, no_lock: true)
           # find all leaf tasks that are still executing
-          executing_leaf_tasks = get_leaf_subtasks().select { |t| t.has_status?(:executing) }
+          executing_leaf_tasks = get_leaf_subtasks().select { |t| t.has_status?(:executing) || t.has_status?(:debugging) }
           unless executing_leaf_tasks.empty?
             executing_leaf_tasks.each { |t| t.update(update_hash, no_lock: true) }
           end

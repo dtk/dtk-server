@@ -99,7 +99,7 @@ module DTK
 
     def self.cancel(task)
       task_id = task.id()
-      unless task.has_status?(:executing)
+      unless task.has_status?(:executing) || task.has_status?(:debugging)
         fail ErrorUsage, "Task with id '#{task_id}' is not executing"
       end
 

@@ -19,9 +19,7 @@ module DTK
     module PostMixin
       def stage
         service_module  = ret_service_module
-        # TODO: DTK-3296: when patch regression tests put in below for uncommented out
-        # is_base_service = boolean_request_params(:is_base)
-        is_base_service = (boolean_request_params(:is_base) or boolean_request_params(:is_target))
+        is_base_service = boolean_request_params(:is_base)
 
         assembly_name   = request_params(:assembly_name) # could be empty means look for unique assembly in service module
 

@@ -18,6 +18,7 @@
 module DTK; class Component
   class Instance < self
     require_relative('instance/with_attributes')
+    require_relative('instance/remote_node')
     require_relative('instance/interpreted')
 
     def get_action_def?(method_name, opts = {})
@@ -136,22 +137,18 @@ module DTK; class Component
       end
     end
 
-    # This makes update to component instances that refer to components in one service instance that link to components in other services
-    # and are ones that should run on teh node of the these other components
+    # This makes updates to component instances that refer to components in one service instance that link to components in other services
+    # and are ones that should run on the node of the these other components
     def self.update_components_on_remote_nodes!(component_instances, assembly_instance)
-      return if component_instances.empty? 
-      port_links = get_port_links(component_instances.map(&:id_handle), input: true)
-      unless port_links.empty?
-        port_links.map{ |port_link| PortLink::ComponentInfo.get?(assembly_instance.id_handle, port_link) }.compact.each do |component_info|
-          if component_info.component_on_remote_node?
-            component_id       = component_info.local_endpoint.component.id
-            component_instance = component_instances.find { |ci| ci.id == component_id }
-            remote_node        = component_info.remote_endpoint.node.update_obj!(:display_name, :group_id, :external_ref, :ordered_component_ids, :type)
-
-            component_instance[:on_remote_node] = true
-            component_instance[:configured_node] = component_instance[:node]
-            component_instance[:node] = remote_node
-          end
+      ndx_remote_nodes = RemoteNode.ndx_component_instances_on_remote_nodes(component_instances, assembly_instance)
+      component_instances.each do |component_instance|
+        if remote_node = ndx_remote_nodes[component_instance.id]
+          update_hash = {
+            on_remote_node:  true,
+            configured_node: component_instance[:node],
+            node:            remote_node
+          }
+          component_instance.merge!(update_hash)
         end
       end
     end

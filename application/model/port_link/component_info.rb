@@ -36,14 +36,14 @@ module DTK
       end
       
       def matching_link_def_link?
-        return nil unless self.local_endpoint.link_type ==  self.remote_endpoint.link_type
+        return nil unless self.local_endpoint.link_type == self.remote_endpoint.link_type
 
         match = self.local_endpoint.aug_ports.find do |aug_port|
           possible_link = aug_port[:link_def_link] || {}
           if possible_link[:remote_component_type] == remote_component_type
             case possible_link[:type]
             when 'internal'
-              self.components_on_same_node? or self.component_on_remote_node?
+              self.components_on_same_node? or self.component_directly_on_remote_node?
             when 'external'
               ! self.components_on_same_node?
             else 
@@ -64,20 +64,24 @@ module DTK
         @remote_component ||= get_remote_component
       end
 
-      def component_on_remote_node?
-        if @component_on_remote_node.nil?
+      def component_directly_on_remote_node?
+        if @component_directly_on_remote_node.nil?
           ret = false
           if self.local_component.get_field?(:assembly_id) != self.remote_component.get_field?(:assembly_id)
             ret = true if self.just_internal_link? and self.local_endpoint.is_assembly_wide_node? and ! self.remote_endpoint.is_assembly_wide_node?
           end
-          @component_on_remote_node = ret
+          @component_directly_on_remote_node = ret
         else
-          @component_on_remote_node
+          @component_directly_on_remote_node
         end
       end
 
-      protected
+      def just_internal_link?
+        self.link_def[:has_internal_link] and ! self.link_def[:has_external_link] 
+      end      
       
+      protected
+
       def local_component_type
         @local_component_type ||= self.local_component[:component_type]
       end
@@ -94,10 +98,6 @@ module DTK
         end
       end
 
-      def just_internal_link?
-        self.link_def[:has_internal_link] and ! self.link_def[:has_external_link] 
-      end      
-      
       def link_def
         @link_def ||= self.local_endpoint.link_def
       end

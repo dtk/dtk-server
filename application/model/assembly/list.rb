@@ -114,7 +114,8 @@ module DTK
         assembly_rows.each do |r|
           last_task_run_status = r[:last_task_run_status]
           service_contexts = ServiceAssociations.get_parents(r)
-          service_context = (service_contexts.empty? ? nil : service_contexts.map(&:display_name).join(', '))
+          # using join(',') rather than join(', ') so can cut and paste to put in stage command line -c option"
+          service_context = (service_contexts.empty? ? nil : service_contexts.map(&:display_name).join(','))
           pntr = ndx_ret[r[:id]] ||= r.prune_with_values(
               display_name: r.pretty_print_name(pp_opts),
               service_context: service_context,

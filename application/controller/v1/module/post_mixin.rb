@@ -20,7 +20,6 @@ module DTK
       def stage
         service_module  = ret_service_module
         is_base_service = boolean_request_params(:is_base)
-
         assembly_name   = request_params(:assembly_name) # could be empty means look for unique assembly in service module
 
         if version = request_params(:version)
@@ -29,7 +28,12 @@ module DTK
            version = compute_latest_version(service_module)
         end
         assembly_template = service_module.assembly_template(assembly_name: assembly_name, version: version)
-        service_name      = request_params(:service_name) || generate_new_service_name(assembly_template, service_module)
+
+        if service_name = request_params(:service_name)
+          fail ErrorUsage, "Service '#{service_name}' exists already" if matches_existing_assembly_instance?(service_name, assembly_template)
+        else
+          service_name = generate_new_service_name(assembly_template, service_module)
+        end
 
         opts = {
           project: get_default_project,

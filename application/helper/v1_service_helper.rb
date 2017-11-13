@@ -37,12 +37,19 @@ module Ramaze::Helper
       response.map { |info| { name: info[:display_name], value: info[:value] } }
     end
 
+    def matches_existing_assembly_instance?(service_name, assembly_template)
+      matches = existing_assembly_instances(assembly_template.model_handle(:assembly_instance)).select do |assembly_instance|
+        assembly_instance.display_name == service_name
+      end
+      !matches.empty?
+    end
+
     def generate_new_service_name(assembly_template, service_module)
       assembly_name = assembly_template.display_name
       name_seed = "#{service_module.display_name}#{NEW_SERVICE_NAME_DELIM}#{assembly_name}"
       name_seed_regex = Regexp.new("^#{name_seed}(.*$)")
-      matches = ::DTK::Assembly::Instance.get(service_module.model_handle(:assembly_instance)).select do |assembly|
-        assembly[:display_name] =~ name_seed_regex
+      matches = existing_assembly_instances(assembly_template.model_handle(:assembly_instance)).select do |assembly_instance|
+        assembly_instance.display_name =~ name_seed_regex
       end
 
       if matches.empty?
@@ -60,5 +67,10 @@ module Ramaze::Helper
         "#{name_seed}#{NEW_SERVICE_NAME_DELIM}#{higest_index}"
       end
     end
+
+    def existing_assembly_instances(assembly_instance_mh)
+      ::DTK::Assembly::Instance.get(assembly_instance_mh)
+    end
+
   end
 end

@@ -30,6 +30,10 @@ module DTK; class Task
         update(status: status, result: result, ended_at: now_time_stamp())
       end
 
+      def update_at_task_debugging(status, result)
+        update(status: status, result: result)
+      end
+
       # unlike update_at_task class above this will be called on top level task
 
       RecursiveUpdateLock = Mutex.new

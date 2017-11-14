@@ -39,6 +39,8 @@ module DTK; module WorkflowAdapter
 
       def self.delete(workitem)
         key = get_from_workitem(workitem)
+        # HACK, for now disable removing the first element of the STORE, so we can remove docker containers
+        return if Store.keys[0].include?(key)
         Lock.synchronize { Store.delete(key) }
       end
 

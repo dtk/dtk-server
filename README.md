@@ -14,9 +14,7 @@ Fastest way to deploy  Dtk Server is with a Docker container. Docker image [getd
 #### Preparation
 - [Install Docker](https://docs.docker.com/engine/installation/)
 
-- Pull the latest Dtk Server Docker image with `docker pull getdtk/dtk-server`
-
-- Select a container root directory on host which will be used by the Docker container for persistence (e.g. `/usr/share/docker/dtk`), and create `dtk.config` (e.g. `/usr/share/docker/dtk/dtk.config`) with following content:
+- Select a directory on the host (host volume) which will be used by the Docker container for persistence (e.g. `/usr/share/docker/dtk`), and create `dtk.config` (e.g. `/usr/share/docker/dtk/dtk.config`) with following content:
 ```
 USERNAME=dtk-user
 PASSWORD=somepassword
@@ -28,14 +26,22 @@ PUBLIC_ADDRESS=<public address of the docker host>
 
 More information about the dtk.config file can be found in [dtk.config.example](dtk.config.example)
 
+### Bootstrap Method
+Run this command to spin up a Dtk Server instance, along with dtk-arbiter:    
+```
+\curl -sSL https://getserver.dtk.io | bash -s /usr/share/docker/dtk
+```
+The last argument should be the previously created host volume. Once the command completes successfully, Dtk Server should be listening on the default 8080 port.
+
+### Manual method
 #### Starting the container
-Next step is to start the docker container with the directory from above used as a volume. The Docker container requires some ports to be forwared, for example: HTTP, ActiveMQ and SSH port. Example of starting a Docker container:
+Start the Dtk Server docker container with the directory from above used as a volume. The docker container requires some ports to be forwared, for example: HTTP, ActiveMQ and SSH port. Example of starting a Docker container:
 
 ```
 docker run --name dtk -v /usr/share/docker/dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/dtk-server
 ```
 
-This will pull the latest Dtk Server Docker image that was built.
+This will pull the latest available Dtk Server Docker image (`getdtk/dtk-server`).
 
 Example of starting a Dtk Server Docker container from a tagged Docker image.
 
@@ -43,24 +49,17 @@ Example of starting a Dtk Server Docker container from a tagged Docker image.
 docker run --name dtk -v /usr/share/docker/dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/dtk-server:v0.9.0
 ```
 
-#### Alternate one-line server bootstrap
-This command will automate all of the steps from above:  
-```
-\curl -sSL https://getserver.dtk.io | bash -s /usr/share/docker/dtk
-```
-
-#### Connecting to Dtk Server Docker container
+### Connecting to Dtk Server Docker container
 
 After the container is up and running (will take a minute on the first start), you can connect to it via [dtk-client](https://github.com/rich-reactor8/dtk-client), by running either `dtk` or `dtk-shell` command.
 
-In the Dtk Client prompt you can enter the values set in `dtk.config` (username, password and instance address).
-
-Unless you have SSL, after the prompt, values for `secure_connection` and `http_port` in `~/dtk/client.conf` should be changed to `false` and forwared http port values respectively.
-
-
-Note that if you need to forward GIT SSH port to a different one, you can use the `-e GIT_PORT=<desired_port>`.
-
-### Installing Dtk Client
+#### Installing Dtk Client
+##### Bootstrap method
+Run this command to automatically install and configure Dtk Client.  
+```
+\curl -sSL https://getclient.dtk.io | bash -s /usr/share/docker/dtk
+```
+##### Manual method
 Assuming the docker container was started as described above, Dtk Client can be installed and configured automatically running the [install-client.sh](https://raw.githubusercontent.com/dtk/dtk-server/master/install-client.sh) script:
 ```
 ./install-client.sh [-u user] [-p port] configuration_path
@@ -72,13 +71,13 @@ port                 - port where Dtk server is listening
                        defaults to 8080
 ```
 
-#### Alternate one-line client install
-This command will invoke the script from above directly:  
-```
-\curl -sSL https://getclient.dtk.io | bash -s /usr/share/docker/dtk
-```
+In case the `dtk-client` gem is installed standalone without the `install-client.sh` script, in the Dtk Client prompt you can enter the values set in `dtk.config` (username, password and instance address).
 
-##### Upgrading the container
+Unless you have SSL, after the prompt, values for `secure_connection` and `http_port` in `~/dtk/client.conf` should be changed to `false` and forwared http port values respectively.
+
+Note that if you need to forward GIT SSH port to a different one, you can use the `-e GIT_PORT=<desired_port>`.
+
+#### Upgrading the container
 To upgrade Dtk container to a newer release, simply rerun the bootstrap script:  
 ```
 \curl -sSL https://getserver.dtk.io | bash -s /usr/share/docker/dtk

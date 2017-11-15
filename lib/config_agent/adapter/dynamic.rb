@@ -64,7 +64,7 @@ module DTK; class ConfigAgent
         msg
       end
 
-      ARBITER_REQUEST_PROTOCOL_VERSION = 1
+      ARBITER_REQUEST_PROTOCOL_VERSION = 2
       
       def type
         :dynamic

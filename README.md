@@ -51,7 +51,7 @@ docker run --name dtk -v /usr/share/docker/dtk:/host_volume -p 8080:80 -p 6163:6
 
 ### Connecting to Dtk Server Docker container
 
-After the container is up and running (will take a minute on the first start), you can connect to it via [dtk-client](https://github.com/rich-reactor8/dtk-client), by running either `dtk` or `dtk-shell` command.
+After the container is up and running (will take a minute on the first start), you can connect to it via [dtk-client](https://github.com/rich-reactor8/dtk-client), by running the `dtk` command.
 
 #### Installing Dtk Client
 ##### Bootstrap method

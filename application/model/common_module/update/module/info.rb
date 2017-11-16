@@ -115,7 +115,9 @@ module DTK
         dependencies_of_dependencies
       end
 
+      # TODO: DTK-3335: code below looks like calculating things wrong sometimes; moreover even if it finds to deleet it does nothing so verifing of this can be omitted
       def delete_component_module_refs?(module_branch, parsed_dependent_modules, opts = {})
+        return # TODO: DTK-3335: testing omitting this code
         component_module_refs       = ModuleRefs.get_component_module_refs(module_branch)
         cmp_modules_with_namespaces = ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts)
 

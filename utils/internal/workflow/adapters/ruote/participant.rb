@@ -124,9 +124,9 @@ module DTK
         end
 
         def set_result_debugging(workitem, new_result, task, action)
-          task.update_at_task_completion('debugging', Task::Action::Result::Debugging.new())
+          task.update_at_task_debugging('debugging', Task::Action::Result::Debugging.new())          
           action.update_state_change_status(task.model_handle, :completed)  #this updates pending state
-          set_result_succeeded__stack(workitem, new_result, task, action)
+          #set_result_succeeded__stack(workitem, new_result, task, action)
         end
 
         def set_result_canceled(_workitem, task)

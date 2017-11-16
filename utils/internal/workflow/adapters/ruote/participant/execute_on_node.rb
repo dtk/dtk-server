@@ -94,7 +94,7 @@ module DTK
                   end
 
                   process_action_result!(workitem, action, result, task, task_id, task_end, debug)
-                  delete_task_info(workitem)               
+                  delete_task_info(workitem) unless debug
                   status_array = top_task.subtasks.map {|st| st.get_field?(:status)}
                   $public_dns = nil if status_array.all?
                   reply_to_engine(workitem) unless debug

@@ -42,11 +42,13 @@ case RUBY_VERSION
   end
 end
 
-gem 'mcollective-client', '2.2.3'
+gem 'mcollective-client', '~> 2.5.2'
 gem 'puppet', '3.4.0'
 gem 'stomp', '1.1.9'
 gem 'grit'
 gem 'innate', '2012.03' #version compatible with ramaze','2012.04.14
+
+
 gem 'ruby_parser'
 gem 'docile'
 gem 'redis'

@@ -19,31 +19,8 @@ module DTK
   class Assembly::Instance::ComponentLink::PrintForm
     module Element
       Info = Struct.new(:service_type, :base_ref, :dep_ref, :linked_cmp_id, :required, :description) 
-
-      def self.print_form_hash(object, opts = {})
-        info = 
-          if object.is_a?(DTK::PortLink)
-            PortLink.print_form_hash(object)
-          elsif object.is_a?(DTK::Port)
-            Port.print_form_hash(object)
-          else
-            fail Error, "Unexpected object type '#{object.class}'"
-          end
-        
-        ret = {
-          id: object.id,
-          type: info.service_type,
-          base_component: info.base_ref,
-        }
-        ret.merge!(dependent_component: info.dep_ref) if info.dep_ref
-        ret.merge!(required: info.required) if info.required
-        ret.merge!(description: info.description) if info.description
-        ret.merge!(linked_cmp_id: info.linked_cmp_id) if info.linked_cmp_id
-        ret
-      end
-
       class Port
-        def self.print_form_hash(port)
+        def self.print_form_info(port, _opts = {})
           dep_ref = required = description = linked_cmp_id = nil
           
           base_ref     = port.display_name_print_form(hide_assembly_wide_node: true)
@@ -63,10 +40,10 @@ module DTK
         end
         private :initialize
 
-        def self.print_form_hash(port_link)
-          new(port_link).print_form_hash
+        def self.print_form_info(port_link)
+          new(port_link).print_form_info
         end
-        def print_form_hash
+        def print_form_info
           base_ref = dep_ref = description = required = nil
           # TODO: confusing that input/output on port link does not reflect what is logical input/output
           if self.port_link[:input_port][:direction] == 'input'

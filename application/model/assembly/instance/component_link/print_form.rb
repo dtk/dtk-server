@@ -26,15 +26,13 @@ module DTK
       private :initialize
       
       # opts can have keys:
-      #   :context
       #   :filter
       def self.list_component_links(assembly_instance, opts = {})
         new(assembly_instance).list_component_links(opts)
       end
       def list_component_links(opts = {})
-        component_links = augmented_port_links(filter: opts[:filter]).map { |port_link| Element.print_form_hash(port_link, context: opts[:context]) } +
-          augmented_ports(mark_unconnected: true).select { |port| port[:unconnected] }.map { |r| Element.print_form_hash(r, opts) }
-        fixup!(component_links)
+        component_links_hash_array = connected_component_links_hash_array + unconnected_component_links_hash_array
+        fixup!(component_links_hash_array).sort { |a, b| a[:base_component] <=> b[:base_component] }
       end
       
       def self.list_possible_component_links(assembly_instance)
@@ -55,26 +53,56 @@ module DTK
         poss_conns = LinkDef.find_possible_connections(unc_ports, output_ports)
         poss_conns.map do |r|
           poss_conn = "#{r[:output_port][:id]}:#{r[:output_port].display_name_print_form}"
-          Element.print_form_hash(r[:input_port]).merge(possible_connection: poss_conn)
+          input_port = r[:input_port]
+          to_hash(input_port.id, Element::Port.print_form_info(input_port)).merge(possible_connection: poss_conn)
         end.sort { |a, b| a[:service_ref] <=> b[:service_ref] }
       end
-      
       
       protected
       
       attr_reader :assembly_instance
       
       def component_info 
-        @component_info  ||= ret_component_info
+        @component_info ||= ret_component_info
       end
       
       private
-      
+
+      # opts can have keys:
+      #   :filter
+      def connected_component_links_hash_array(opts = {})
+        augmented_port_links(filter: opts[:filter]).map do |port_link| 
+          to_hash(port_link.id, Element::PortLink.print_form_info(port_link))
+        end
+      end
+  
+      def unconnected_component_links_hash_array
+        augmented_ports(mark_unconnected: true).select { |port| port[:unconnected] }.map do |port| 
+          to_hash(port.id, Element::Port.print_form_info(port))
+        end
+      end
+
+      def to_hash(object_id, print_form_info)
+        info = print_form_info # alias
+        ret = {
+          id: object_id,
+          type: info.service_type,
+          base_component: info.base_ref,
+        }
+        ret.merge!(dependent_component: info.dep_ref) if info.dep_ref
+        ret.merge!(required: info.required) if info.required
+        ret.merge!(description: info.description) if info.description
+        ret.merge!(linked_cmp_id: info.linked_cmp_id) if info.linked_cmp_id
+        ret
+      end
+
       # opts can have keys
       #   :filter
+  
       def augmented_port_links(opts = {})
         self.assembly_instance.get_augmented_port_links(filter: opts[:filter])
       end
+
 
       # opts can have keys
       #   :mark_unconnected

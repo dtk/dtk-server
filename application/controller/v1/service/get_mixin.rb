@@ -110,43 +110,8 @@ module DTK
       end
 
       def component_links
-        opts = Opts.new(detail_level: nil)  
-        opts.merge!(detail_to_include: [:component_dependencies])
-        opts.merge!(remote_links: true)
-        #TODO Below shoud be cleaned up and moved out of controller
-        dep_component = assembly_instance.info_about(:components, opts)
-        cmp_links = assembly_instance.list_component_links
-
-        dep_component.each do |cmp|
-          cmp_ids = cmp[:id] unless cmp[:id].nil?
-          cmp_id = ''
-          if cmp_ids.is_a?(Array) && cmp_ids.size == 1
-            cmp_ids.each do |id|
-              cmp_id = id
-            end
-          elsif cmp_ids.is_a?(Fixnum)
-            cmp_id = cmp_ids
-          end
-          cmp_links.each do |link|
-            if link[:type] == cmp[:depends_on] 
-              if cmp_ids.size > 1 
-                split = cmp[:satisfied_by].split(',')
-                if split.size > 1
-                  split.each_with_index do |stat, index|
-                    if link[:linked_cmp_id] == cmp[:id][index]
-                      link.merge!(satisfied_by: stat.strip)
-                    end
-                  end
-                end
-              end
-              if cmp_id == link[:linked_cmp_id]
-                 link.merge!(satisfied_by: cmp[:satisfied_by])
-              end
-              end
-            end
-          end
-
-        rest_ok_response cmp_links, datatype: :service_link
+        component_links = assembly_instance.list_component_links
+        rest_ok_response component_links, datatype: :service_link
       end
 
       def dependent_modules

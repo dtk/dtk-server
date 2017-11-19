@@ -17,20 +17,34 @@
 #
 module DTK
   class Assembly::Instance::ComponentLink
-    module PrintForm
+    class PrintForm
+      require_relative('print_form/element')
+
+      def initialize(assembly_instance)
+        @assembly_instance = assembly_instance
+      end
+      private :initialize
+      
       # opts can have keys:
       #   :context
       #   :filter
       def self.list_component_links(assembly_instance, opts = {})
-        assembly_instance.get_augmented_port_links(filter: opts[:filter]).map { |port_link| print_form_hash(port_link, context: opts[:context]) } +
-          assembly_instance.get_augmented_ports(mark_unconnected: true).select { |port| port[:unconnected] }.map { |r| print_form_hash(r, opts) }
+        new(assembly_instance).list_component_links(opts)
       end
-
+      def list_component_links(opts = {})
+        component_links = augmented_port_links(filter: opts[:filter]).map { |port_link| Element.print_form_hash(port_link, context: opts[:context]) } +
+          augmented_ports(mark_unconnected: true).select { |port| port[:unconnected] }.map { |r| Element.print_form_hash(r, opts) }
+        fixup!(component_links)
+      end
+      
       def self.list_possible_component_links(assembly_instance)
+        new(assembly_instance).list_possible_component_links
+      end
+      def list_possible_component_links
         ret = []
         output_ports = []
         unc_ports = []
-        assembly_instance.get_augmented_ports(mark_unconnected: true).each do |r|
+        augmented_ports(mark_unconnected: true).each do |r|
           if r[:direction] == 'output'
             output_ports << r
           elsif r[:unconnected]
@@ -41,69 +55,76 @@ module DTK
         poss_conns = LinkDef.find_possible_connections(unc_ports, output_ports)
         poss_conns.map do |r|
           poss_conn = "#{r[:output_port][:id]}:#{r[:output_port].display_name_print_form}"
-          print_form_hash(r[:input_port]).merge(possible_connection: poss_conn)
+          Element.print_form_hash(r[:input_port]).merge(possible_connection: poss_conn)
         end.sort { |a, b| a[:service_ref] <=> b[:service_ref] }
       end
-
-     private
-
-      Info = Struct.new(:service_type, :base_ref, :dep_ref, :linked_cmp_id, :required, :description) 
-      def self.print_form_hash(object, opts = {})
-        info = 
-          if object.is_a?(PortLink)
-            print_form_hash__from_port_link(object)
-          elsif object.is_a?(Port)
-            print_form_hash__from_port(object)
-          else
-            fail Error, "Unexpected object type '#{object.class}'"
-          end
       
-        ret = {
-          id: object.id,
-          type: info.service_type,
-          base_component: info.base_ref,
+      
+      protected
+      
+      attr_reader :assembly_instance
+      
+      def component_info 
+        @component_info  ||= ret_component_info
+      end
+      
+      private
+      
+      # opts can have keys
+      #   :filter
+      def augmented_port_links(opts = {})
+        self.assembly_instance.get_augmented_port_links(filter: opts[:filter])
+      end
+
+      # opts can have keys
+      #   :mark_unconnected
+      def augmented_ports(opts = {})
+        self.assembly_instance.get_augmented_ports(mark_unconnected: opts[:mark_unconnected])
+      end
+
+      # TODO: move from cleanup hack to inside elements.rb
+      def fixup!(component_links)
+        self.component_info.each do |cmp|
+          cmp_ids = cmp[:id] unless cmp[:id].nil?
+          cmp_id = ''
+          if cmp_ids.is_a?(Array) && cmp_ids.size == 1
+            cmp_ids.each do |id|
+              cmp_id = id
+            end
+          elsif cmp_ids.is_a?(Fixnum)
+            cmp_id = cmp_ids
+          end
+          component_links.each do |link|
+            if link[:type] == cmp[:depends_on] 
+              if cmp_ids.size > 1 
+                split = cmp[:satisfied_by].split(',')
+                if split.size > 1
+                  split.each_with_index do |stat, index|
+                    if link[:linked_cmp_id] == cmp[:id][index]
+                      link.merge!(satisfied_by: stat.strip)
+                    end
+                  end
+                end
+              end
+              if cmp_id == link[:linked_cmp_id]
+                link.merge!(satisfied_by: cmp[:satisfied_by])
+              end
+            end
+          end
+        end
+        component_links
+      end
+
+      def ret_component_info
+        opts =  {
+          detail_level: nil,
+          detail_to_include: [:component_dependencies],
+          remote_links: true
         }
-        ret.merge!(dependent_component: info.dep_ref) if info.dep_ref
-        ret.merge!(required: info.required) if info.required
-        ret.merge!(description: info.description) if info.description
-        ret.merge!(linked_cmp_id: info.linked_cmp_id) if info.linked_cmp_id
-        ret
+        self.assembly_instance.info_about(:components, Opts.new(opts))
       end
-
-      def self.print_form_hash__from_port_link(port_link)
-        base_ref = dep_ref = description = required = nil
-        # TODO: confusing that input/output on port link does not reflect what is logical input/output
-        if port_link[:input_port][:direction] == 'input'
-          base_ref = port_ref(port_link, :input)
-          dep_ref  = port_ref(port_link, :output) 
-        else
-          base_ref = port_ref(port_link, :output)
-          dep_ref  = port_ref(port_link, :input)
-        end
-        service_type = port_link[:input_port].link_def_name
-        linked_cmp_id = port_link[:output_port][:component_id]
-
-        Info.new(service_type, base_ref, dep_ref, linked_cmp_id, required, description) 
-      end
-
-      def self.print_form_hash__from_port(port)
-        dep_ref = required = description = linked_cmp_id = nil
-
-        base_ref     = port.display_name_print_form
-        service_type = port.link_def_name
-
-        if link_def = port[:link_def]
-          required = port[:required]
-          description = port[:description]
-        end
-        Info.new(service_type, base_ref, dep_ref, linked_cmp_id, required, description) 
-      end
-
-      def self.port_ref(port_link, dir)
-        aug_port = port_link["#{dir}_port".to_sym].merge(node: port_link["#{dir}_node".to_sym], nested_component: port_link["#{dir}_component".to_sym])
-        aug_port.display_name_print_form(hide_assembly_wide_node: true)
-      end
-
+      
     end
   end
 end
+

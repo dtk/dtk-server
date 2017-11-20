@@ -29,6 +29,7 @@ module DTK
         #  :node_size
         #  :os_type
         #  :no_auto_complete - Boolean (default false)
+        #  :ret_auto_complete_results:
         #  :donot_create_modules
         def stage(service_name, opts = Opts.new)
           Stage.new(self, service_name, opts).stage
@@ -36,14 +37,15 @@ module DTK
       end
 
       def initialize(assembly_template, service_name, opts = Opts.new)
-        @assembly_template          = assembly_template
-        @service_name               = service_name
-        @project                    = opts[:project] || fail(Error.new, "Unexpected that opts[:project] is nil")
-        @version                    = opts[:version]
-        @context_assembly_instances = opts[:context_assembly_instances] || []
-        @opts                       = opts
-        @donot_create_modules       = opts[:donot_create_modules]
-        @no_auto_complete           = opts[:no_auto_complete]
+        @assembly_template            = assembly_template
+        @service_name                 = service_name
+        @project                      = opts[:project] || fail(Error.new, "Unexpected that opts[:project] is nil")
+        @version                      = opts[:version]
+        @context_assembly_instances   = opts[:context_assembly_instances] || []
+        @opts                         = opts
+        @donot_create_modules         = opts[:donot_create_modules]
+        @no_auto_complete             = opts[:no_auto_complete]
+        @ret_auto_complete_results    = opts[:ret_auto_complete_results]
       end
       
       def stage
@@ -65,17 +67,27 @@ module DTK
         # TODO: see if below should also be inside Transaction
 
         # autocomplete_component_links needs to be called after add_context_assembly_instances
-        LinkDef::AutoComplete.autocomplete_component_links(assembly_instance) 
+        # autocomplete_results is of type LinkDef::AutoComplete::Results
+        autocomplete_results = nil
+        unless self.no_auto_complete
+          auto_complete_results = LinkDef::AutoComplete.autocomplete_component_links(assembly_instance)
+          auto_complete_results.fail_if_any_errors
+          # TODO: put in code to insert warnings
+        end
 
         AssemblyAttributeLinks.add(assembly_instance)
 
         fixup_target_name_and_ref(assembly_instance)
-        assembly_instance
+        if self.ret_auto_complete_results 
+          [assembly_instance, auto_complete_results]
+        else
+          assembly_instance
+        end
       end
       
       protected
       
-      attr_reader :assembly_template, :service_name, :project, :version, :context_assembly_instances, :donot_create_modules, :no_auto_complete, :opts
+      attr_reader :assembly_template, :service_name, :project, :version, :context_assembly_instances, :donot_create_modules, :no_auto_complete, :ret_auto_complete_results, :opts
       
       def target
         @target ||= create_target_mock
@@ -103,6 +115,7 @@ module DTK
       end
       
       private
+
       def fail_if_module_unparsed
         fail ErrorUsage, "An assembly template from an unparsed module '#{self.service_module.display_name}' cannot be staged" unless self.service_module_branch.dsl_parsed?
       end

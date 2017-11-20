@@ -43,10 +43,10 @@ module DTK
       def self.stage_base_service(service_name, assembly_template, opts = Opts.new)
         Model.Transaction do
           stage_opts = common_stage_opts.merge(opts)
-          new_assembly_instance = assembly_template.stage(service_name, stage_opts)
+          new_assembly_instance, auto_complete_results = assembly_template.stage(service_name, stage_opts)
           module_repo_info = CommonModule::ServiceInstance.create_service_instance_and_nested_modules(new_assembly_instance, opts)
           Aux.stop_for_testing?(:stage)
-          new_service_info(new_assembly_instance, module_repo_info)
+          new_service_info(new_assembly_instance, module_repo_info, auto_complete_results: auto_complete_results)
         end
       end
 
@@ -60,10 +60,10 @@ module DTK
         Model.Transaction do
           # if :allow_existing_service is true then new_assembly_instance can be existing assembly_instance
           stage_opts = common_stage_opts.merge(context_assembly_instances: context_assembly_instances).merge(opts)
-          new_assembly_instance = assembly_template.stage(service_name, stage_opts)
+          new_assembly_instance, auto_complete_results = assembly_template.stage(service_name, stage_opts)
           module_repo_info = CommonModule::ServiceInstance.create_service_instance_and_nested_modules(new_assembly_instance, opts)
           Aux.stop_for_testing?(:stage) 
-          new_service_info(new_assembly_instance, module_repo_info)
+          new_service_info(new_assembly_instance, module_repo_info, auto_complete_results: auto_complete_results)
         end
       end
 
@@ -89,7 +89,7 @@ module DTK
       private
 
       def self.common_stage_opts
-        Opts.new(donot_create_modules: true)
+        Opts.new(donot_create_modules: true, ret_auto_complete_results: true)
       end
 
       def self.isa_target_assembly_instance?(assembly_instance)
@@ -112,13 +112,21 @@ module DTK
         ret
       end
 
-      def self.new_service_info(assembly_instance, module_repo_info)
-        {
+      # opts can have keys 
+      #  :auto_complete_results
+      def self.new_service_info(assembly_instance, module_repo_info, opts = {})
+        ret = {
           service: {
             name: assembly_instance.display_name_print_form,
             id: assembly_instance.id
           }
         }.merge(module_repo_info)
+        if auto_complete_results = opts[:auto_complete_results]
+          if warnings = auto_complete_results.warning_message?
+            ret.merge!(warnings: warnings)
+          end
+        end
+        ret
       end
 
     end

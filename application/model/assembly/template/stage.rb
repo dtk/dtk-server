@@ -71,8 +71,6 @@ module DTK
         autocomplete_results = nil
         unless self.no_auto_complete
           auto_complete_results = LinkDef::AutoComplete.autocomplete_component_links(assembly_instance)
-          auto_complete_results.fail_if_any_errors
-          # TODO: put in code to insert warnings
         end
 
         AssemblyAttributeLinks.add(assembly_instance)

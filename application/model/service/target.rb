@@ -46,7 +46,7 @@ module DTK
           new_assembly_instance, auto_complete_results = assembly_template.stage(service_name, stage_opts)
           module_repo_info = CommonModule::ServiceInstance.create_service_instance_and_nested_modules(new_assembly_instance, opts)
           Aux.stop_for_testing?(:stage)
-          new_service_info(new_assembly_instance, module_repo_info, auto_complete_results: auto_complete_results)
+          new_service_info(new_assembly_instance, module_repo_info)
         end
       end
 
@@ -63,7 +63,7 @@ module DTK
           new_assembly_instance, auto_complete_results = assembly_template.stage(service_name, stage_opts)
           module_repo_info = CommonModule::ServiceInstance.create_service_instance_and_nested_modules(new_assembly_instance, opts)
           Aux.stop_for_testing?(:stage) 
-          new_service_info(new_assembly_instance, module_repo_info, auto_complete_results: auto_complete_results)
+          new_service_info(new_assembly_instance, module_repo_info)
         end
       end
 
@@ -112,21 +112,13 @@ module DTK
         ret
       end
 
-      # opts can have keys 
-      #  :auto_complete_results
-      def self.new_service_info(assembly_instance, module_repo_info, opts = {})
-        ret = {
+      def self.new_service_info(assembly_instance, module_repo_info)
+        {
           service: {
             name: assembly_instance.display_name_print_form,
             id: assembly_instance.id
           }
         }.merge(module_repo_info)
-        if auto_complete_results = opts[:auto_complete_results]
-          if warnings = auto_complete_results.warning_message?
-            ret.merge!(warnings: warnings)
-          end
-        end
-        ret
       end
 
     end

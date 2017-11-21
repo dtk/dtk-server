@@ -40,10 +40,17 @@ module DTK; class ConfigAgent
         dynamic_provider      = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
 
+        nested_module_info = get_base_and_dependent_modules(component, assembly_instance)
+
+        system_values = {}
+        if base_component_repo = base_component_repo?(nested_module_info, assembly_instance)
+          system_values.merge!(base_component_repo: AttributeRequestForm::Info.new(base_component_repo, 'hash', false))
+        end
+
         execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, node, breakpoint: breakpoint)
 
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
-        instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance)
+        instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance, system_values)
 
         msg = {
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
@@ -54,7 +61,7 @@ module DTK; class ConfigAgent
             provider: provider_attributes,
             instance: instance_attributes,
           },
-          modules: get_base_and_dependent_modules(component, assembly_instance),
+          modules: nested_module_info,
           execution_environment: execution_environment,
           debug_port_request: debug_port_request
         }
@@ -103,6 +110,24 @@ module DTK; class ConfigAgent
         module_name_with_ns = component_action.component_module_name
         namespace, module_name = module_name_with_ns.split(FULL_MODULE_NAME_DELIM)
         Aux.hash_subset(component_action[:component].print_form_hash, [:type, :version, :title]).merge(namespace: namespace, module_name: module_name)
+      end
+
+      def base_component_repo?(nested_module_info, assembly_instance)
+        if service_module = service_module?(assembly_instance)
+          if repo_info = nested_module_info[service_module.display_name]
+            { 
+              repo_url: RepoManager.repo_url(repo_info[:repo]),
+              sha: repo_info[:sha]
+            }
+          end
+        end
+      end
+      
+      def service_module?(assembly_instance)
+        if ancestor_id = assembly_instance.get_field?(:ancestor_id) 
+          assembly_template = assembly_instance.model_handle(:assembly_template).createIDH(id:  ancestor_id).create_object
+          assembly_template.get_service_module
+        end
       end
 
       module Sanitize

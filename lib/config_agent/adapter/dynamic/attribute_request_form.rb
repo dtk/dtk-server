@@ -35,8 +35,9 @@ module DTK
         { attribute.display_name => attribute_info(attribute, opts) }
       end
       
-      def self.component_attribute_values(component_action, assembly_instance)
-        attributes = SystemAttribute.system_attributes(assembly_instance).merge(assembly_level_attributes(assembly_instance))
+      def self.component_attribute_values(component_action, assembly_instance, extra_system_values = {})
+        attributes = SystemAttribute.system_attributes(assembly_instance, extra_system_values)
+        attributes.merge!(assembly_level_attributes(assembly_instance))
         node_component = NodeComponent.node_component?(component_action.component)
         component_action.attributes.inject(attributes) do |h, attr|
           # prune dynamic attributes that are not also inputs

@@ -39,13 +39,19 @@ module DTK
           }
         }
 
-        def self.system_attributes(assembly_instance)
-          SYSTEM_ATTRIBUTES.inject({}) do |h, (attribute_name, input)|
+
+        def self.system_attributes(assembly_instance, extra_system_values = {})
+          ret = SYSTEM_ATTRIBUTES.inject({}) do |h, (attribute_name, input)|
+            value =  input[:value_lambda].call(assembly_instance)
             qualified_attribute_name = AttributeType.system_attribute_name(attribute_name)
-            h.merge(qualified_attribute_name => Info.new(input[:value_lambda].call(assembly_instance), input[:datatype], input[:hidden]))
+            h.merge(qualified_attribute_name =>  Info.new(value, input[:datatype], input[:hidden]))
+          end
+          extra_system_values.inject(ret) do |h, (attribute_name, value_info)|
+            qualified_attribute_name = AttributeType.system_attribute_name(attribute_name)
+            h.merge(qualified_attribute_name => value_info)
           end
         end
-        
+
       end
     end
   end        

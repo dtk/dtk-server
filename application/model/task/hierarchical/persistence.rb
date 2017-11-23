@@ -48,6 +48,11 @@ module DTK; class Task
             row[col] = hash_row[col] || SQL::ColRef.null_id
           end
           row[:breakpoint] = (hash_row[:breakpoint].nil? ? false : hash_row[:breakpoint]) 
+          # require 'debugger'
+          # Debugger.wait_connection = true
+          # Debugger.start_remote
+          # debugger
+          row[:retry] = (hash_row[:retry].nil? ? false : hash_row[:retry]) 
 
           row
         end

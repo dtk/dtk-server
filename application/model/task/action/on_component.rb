@@ -95,9 +95,11 @@ module DTK; class Task
         end
       end
 
-      def component_module_name
+      # opts can have keys:
+      #   :no_namespace
+      def component_module_name(opts = {})
         if component_module = component_module()
-          component_module.full_module_name
+          opts[:no_namespace] ? component_module.display_name : component_module.full_module_name
         end
       end
 

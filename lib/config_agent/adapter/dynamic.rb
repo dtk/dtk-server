@@ -53,7 +53,7 @@ module DTK; class ConfigAgent
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance, system_values)
 
         msg = {
-          protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
+          protocol_version: ArbiterInfo::PROTOCOL_VERSION,
           provider_type: dynamic_provider.type,
           service_instance: service_instance_name,
           component: component_request_form(component_action),
@@ -71,8 +71,6 @@ module DTK; class ConfigAgent
         msg
       end
 
-      ARBITER_REQUEST_PROTOCOL_VERSION = 2
-      
       def type
         :dynamic
       end

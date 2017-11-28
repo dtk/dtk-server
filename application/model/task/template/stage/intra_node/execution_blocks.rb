@@ -92,7 +92,10 @@ module DTK; class Task; class Template
         normalized_content = serialized_node_actions.is_a?(Hash) && serialized_node_actions[Field::ExecutionBlocks]
         normalized_content ||= [serialized_node_actions]
         ret = new()
-        normalized_content.each { |serialized_eb| ret << ExecutionBlock::Ordered.parse_and_reify(serialized_eb, node_name, action_list, opts) }
+        #normalized_content.each  { |serialized_eb| ret << ExecutionBlock::Ordered.parse_and_reify(serialized_eb, node_name, node_retry, action_list, opts) }
+        normalized_content.each do |serialized_eb|
+          ret << ExecutionBlock::Ordered.parse_and_reify(serialized_eb, node_name, action_list, opts)
+        end
         ret
       end
 

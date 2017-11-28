@@ -191,7 +191,7 @@ module DTK; class Task
       task_mh        = target_idh.create_childMH(:task)
 
       ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action]))
-
+  
       nodes_to_create, nodes_wait_for_start = nodes_to_process_in_task(assembly, Aux.hash_subset(opts, [:start_nodes, :ret_nodes_to_start]))
       case component_type
        when :service
@@ -238,7 +238,6 @@ module DTK; class Task
       serialized_content = DTK::Task::Template::ConfigComponents::Persistence::AssemblyActions.get_serialized_content_from_assembly(assembly, task_action = nil, task_params: opts[:task_params])
       
       ###### end: TODO: DTK-2974
-
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtask(start_nodes_task) if start_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?

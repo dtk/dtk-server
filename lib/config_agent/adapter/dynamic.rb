@@ -37,6 +37,11 @@ module DTK; class ConfigAgent
         component_template    = component_template(component)
         service_instance_name = assembly_instance.display_name
 
+        unless task_info[:retry].empty? || task_info[:retry].nil?
+          failure_attempts      = task_info[:retry][:attempts]
+          failure_sleep         = task_info[:retry][:sleep]
+        end
+
         dynamic_provider      = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
 
@@ -52,7 +57,7 @@ module DTK; class ConfigAgent
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance, system_values)
 
-        msg = {
+        msg = { 
           protocol_version: ARBITER_REQUEST_PROTOCOL_VERSION,
           provider_type: dynamic_provider.type,
           service_instance: service_instance_name,
@@ -63,7 +68,9 @@ module DTK; class ConfigAgent
           },
           modules: nested_module_info,
           execution_environment: execution_environment,
-          debug_port_request: debug_port_request
+          debug_port_request: debug_port_request,
+          failure_attempts: failure_attempts,
+          failure_sleep: failure_sleep
         }
         unless debug_port_request
           msg.merge!(breakpoint: breakpoint, debug_port_received: $port_number)

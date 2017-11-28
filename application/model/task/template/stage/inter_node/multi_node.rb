@@ -19,9 +19,10 @@ module DTK; class Task; class Template; class Stage
   class InterNode
     class MultiNode < self
       def initialize(serialized_multinode_action)
-        super(serialized_multinode_action[:name], serialized_multinode_action[:breakpoint])
+        super(serialized_multinode_action[:name], serialized_multinode_action[:breakpoint], serialized_multinode_action[:retry])
         @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
         @breakpoint = serialized_multinode_action[:breakpoint]
+        @retry = serialized_multinode_action[:retry]
         unless @ordered_components 
           fail ParsingError::MissingComponentOrActionKey.new(serialized_multinode_action, stage: serialized_multinode_action[:name]) 
         end
@@ -95,13 +96,14 @@ module DTK; class Task; class Template; class Stage
             matching_actions = action_list.select { |a| a.match_component_ref?(cmp_type, cmp_title) }
             matching_actions.each do |a|
               node_id = a.node_id              
-              pntr = info_per_node[node_id] ||= { actions: [], name: a.node_name, id: node_id }
+              pntr = info_per_node[node_id] ||= { actions: [], name: a.node_name, id: node_id, retry: @retry }
               pntr[:actions] << serialized_action
             end
           end
           info_per_node.each_value do |n|
-            if node_actions = InterNode.parse_and_reify_node_actions?({ Constant::OrderedComponents => n[:actions] }, n[:name], n[:id], action_list)
-              merge!(node_actions) 
+            opts.merge!(:retry_node => n[:retry])
+            if node_actions = InterNode.parse_and_reify_node_actions?({ Constant::OrderedComponents => n[:actions] }, n[:name], n[:id], action_list, opts)
+              merge!(node_actions)
             end
           end
           ret

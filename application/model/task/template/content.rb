@@ -64,7 +64,7 @@ module DTK; class Task
           }
 
           internode_stage.has_breakpoint?
-          task_hash.merge!(breakpoint: internode_stage.breakpoint)          
+          task_hash.merge!(breakpoint: internode_stage.breakpoint, retry: internode_stage.retry)          
           # if internode_stage.respond_to?(:has_breakpoint?) and internode_stage.first[1].first.first[:breakpoint]
           #   task_hash.merge!(breakpoint: true)
           #   Log.info("Found breakpoint")

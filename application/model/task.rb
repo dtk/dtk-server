@@ -50,6 +50,7 @@ module DTK
        :task_id,
        :temporal_order,
        :breakpoint,
+       :retry,
        :position,
        :executable_action_type,
        :executable_action,

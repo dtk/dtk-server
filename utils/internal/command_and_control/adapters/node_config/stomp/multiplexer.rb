@@ -92,6 +92,7 @@ module DTK
             message = create_message(reqid, msg, agent, pbuilderid)
             client.publish(message)
 
+            Log.info("Sending message with session id '#{client.ret_client.connection_frame.headers["session"]}'") if client.ret_client
             # when heartbeat signal comes trough we need to map it to existing request id
             register_with_heartbeat_listener(pbuilderid, reqid) if 'discovery'.eql?(agent)
 

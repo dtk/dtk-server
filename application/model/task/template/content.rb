@@ -73,6 +73,9 @@ module DTK; class Task
           all_actions += internode_stage.add_subtasks!(internode_stage_task, stage_index, assembly_idh)
           ret << internode_stage_task
         end
+        all_actions.each do |a|
+          Log.debug("Runing action #{a[:state_change_types]} on node #{a[:node][:display_name]} type #{a[:node][:type]}")
+        end
         attr_mh = task_mh.createMH(:attribute)
         Task::Action::ConfigNode.add_attributes!(attr_mh, all_actions)
         ret

@@ -8,7 +8,7 @@ class DefaultParticipant
   include Ruote::LocalParticipant
 
   def consume(workitem)
-    puts "* #{workitem.participant_name}"
+    Logs.info "* #{workitem.participant_name}"
     reply_to_engine(workitem)
   end
 end
@@ -17,7 +17,7 @@ class ErrorParticipant
   include Ruote::LocalParticipant
 
   def consume(_workitem)
-    puts 'error'
+    Logs.error 'error'
     fail 'Houston, something is wrong'
   end
 end
@@ -26,7 +26,7 @@ class ErrorHandlerParticipant
   include Ruote::LocalParticipant
 
   def consume(workitem)
-puts 'error handler'
+Logs.info 'error handler'
 # pp Engine.process(Wfid)
 error = workitem.error
 pp [error.class, error]

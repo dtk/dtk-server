@@ -225,7 +225,8 @@ module DTK; class Task
       ### TODO: DTK-2974: lines to end: TODO: DTK-2974 should be removed and we will use another mechanism other than check_for_breakpoint to handle breakpoints
       ids = []
       task_template_content.each do |config_node_action|
-          config_node_action.each {|action| ids << action[1][0][0].id }
+        Log.debug("Config node action: #{config_node_action}")
+        config_node_action.each {|action| ids << action[1][0][0].id }
       end
 
 
@@ -236,7 +237,7 @@ module DTK; class Task
           columns: [:id, :display_name, parent_field_name, :external_ref, :attribute_value, :required, :dynamic, :dynamic_input, :port_type, :port_is_external, :data_type, :semantic_type, :hidden]
       }
       serialized_content = DTK::Task::Template::ConfigComponents::Persistence::AssemblyActions.get_serialized_content_from_assembly(assembly, task_action = nil, task_params: opts[:task_params])
-      
+      Log.debug("Adding subtasks: #{serialized_content}")
       ###### end: TODO: DTK-2974
 
       ret.add_subtask(create_nodes_task) if create_nodes_task
@@ -304,6 +305,7 @@ module DTK; class Task
         task_info_hash.merge!(commit_message: commit_msg)
       end
 
+      Log.info("Creating new task named #{task_info_hash[:display_name]}, temporal order: #{task_info_hash[:temporal_order]}")
       create_new_task(task_mh, task_info_hash)
     end
   end

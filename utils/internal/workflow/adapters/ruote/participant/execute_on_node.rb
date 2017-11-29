@@ -27,6 +27,7 @@ module DTK
           task.update_input_attributes!() if task_start
           breakpoint = task[:breakpoint]
           # DTK-3265 - Almin: refactor this
+          task[:retry] = top_task[:retry] unless top_task[:retry].empty? || top_task[:retry].nil? # Almin: Change this ?
           top_task[:subtasks].each do |sub|
             sub[:subtasks].each do |st|
               if st[:id] == task[:id]
@@ -34,7 +35,6 @@ module DTK
               end
             end
           end
-          task[:retry] = top_task[:retry] unless top_task[:retry].empty? || top_task[:retry].nil? # Almin: Change this ?
           workitem.fields['guard_id'] = task_id # ${guard_id} is referenced if guard for execution of this
 
           failed_tasks = ret_failed_precondition_tasks(task, workflow.guards[:external])

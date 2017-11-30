@@ -50,9 +50,10 @@ module DTK
               assembly_ref_pointer.merge!('task_template' => DBUpdateHash.new(workflows_db_update_hash).mark_as_complete)
             end
 
-            assembly_attrs_db_update_hash = Assembly::Attributes.db_update_hash(parsed_assembly.val(:Attributes) || [], assembly_attributes: true)
-            assembly_ref_pointer.merge!('attribute' => assembly_attrs_db_update_hash.mark_as_complete)
-
+            if parsed_assembly_attributes = parsed_assembly.val(:Attributes)
+              assembly_attrs_db_update_hash = Assembly::Attributes.db_update_hash(parsed_assembly_attributes, assembly_attributes: true)
+              assembly_ref_pointer.merge!('attribute' => assembly_attrs_db_update_hash.mark_as_complete)
+            end
             tags = get_assembly_tags(parsed_assembly)
             assembly_ref_pointer.merge!('tags' => tags)
 

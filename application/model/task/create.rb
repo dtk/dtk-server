@@ -131,7 +131,8 @@ module DTK; class Task
       # TODO: below needs to use action params if they exist
       task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
       subtasks = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
-      create_top_level_task(task_mh, assembly, task_action: task_action_name).add_subtasks(subtasks)
+      #create_top_level_task(task_mh, assembly, task_action: task_action_name).add_subtasks(subtasks)
+      create_top_level_task(task_mh, assembly, task_action: task_action_name, retry: component[:retry]).add_subtasks(subtasks)
     end
 
     def self.create_for_delete_from_database(assembly, component, node, opts = {})
@@ -191,7 +192,7 @@ module DTK; class Task
       task_mh        = target_idh.create_childMH(:task)
 
       ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action]))
-  
+
       nodes_to_create, nodes_wait_for_start = nodes_to_process_in_task(assembly, Aux.hash_subset(opts, [:start_nodes, :ret_nodes_to_start]))
       case component_type
        when :service
@@ -241,7 +242,6 @@ module DTK; class Task
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtask(start_nodes_task) if start_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
-      ret[:retry] = serialized_content[:retry]
       ret
     end
 
@@ -298,7 +298,8 @@ module DTK; class Task
       task_info_hash = {
         assembly_id: assembly.id,
         display_name: opts[:task_action] || 'assembly_converge',
-        temporal_order: opts[:temporal_order] || 'sequential'
+        temporal_order: opts[:temporal_order] || 'sequential',
+        retry: opts[:retry]
       }
       if commit_msg = opts[:commit_msg]
         task_info_hash.merge!(commit_message: commit_msg)

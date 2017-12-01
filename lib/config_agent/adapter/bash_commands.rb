@@ -27,6 +27,8 @@ module DTK; class ConfigAgent; module Adapter
       cmp_module       = component_action.component_module_name
       component        = component_action.component
       assembly         = opts[:assembly]
+      failure_attempts = config_node[:retry][:attempts] || nil
+      failure_sleep    = config_node[:retry][:sleep] || nil
 
       ret = {
         action_agent_request: {
@@ -34,7 +36,9 @@ module DTK; class ConfigAgent; module Adapter
           top_task_id: opts[:top_task_id],
           action_name: action_name,
           module_name: cmp_module,
-          execution_list: commands
+          execution_list: commands,
+          failure_attempts: failure_attempts,
+          failure_sleep: failure_sleep
         },
         modules: get_base_and_dependent_modules(component, assembly)
       }

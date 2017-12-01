@@ -43,7 +43,9 @@ module DTK
           if possible_link[:remote_component_type] == remote_component_type
             case possible_link[:type]
             when 'internal'
-              self.components_on_same_node? or self.component_directly_on_remote_node?
+              # TODO: DTK-3314; check if cremoving below check causes any unintended matches
+              # self.components_on_same_node? or self.component_directly_on_remote_node?
+              true
             when 'external'
               ! self.components_on_same_node?
             else 

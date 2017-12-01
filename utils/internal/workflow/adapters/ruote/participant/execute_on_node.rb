@@ -30,10 +30,6 @@ module DTK
           task[:retry] = top_task[:retry] unless top_task[:retry].empty? || top_task[:retry].nil?
           # Almin, HACK: Consider Changing this.. 
           # Added because delete is making problems with :retry key, need to find where top_task is created and add key on subtasks objects instead of this fix
-          require 'debugger'
-          Debugger.wait_connection = true
-          Debugger.start_remote
-          debugger
           top_task[:subtasks].each do |sub|
             sub[:subtasks].each do |st|
               if st.has_key?(:subtasks)

@@ -29,10 +29,6 @@ module DTK; class Task
       include Stage::InterNode::Factory::StageName
 
       def initialize(object = nil, actions = [], opts = {})
-      require 'debugger'
-      Debugger.wait_connection = true
-      Debugger.start_remote
-      debugger
         super()
         @subtask_order = opts[:subtask_order]
         @custom_name   = opts[:custom_name]
@@ -193,10 +189,6 @@ module DTK; class Task
       end
 
       def create_stages!(object, actions, opts = {})
-      require 'debugger'
-      Debugger.wait_connection = true
-      Debugger.start_remote
-      debugger
         if object.is_a?(TemporalConstraints)
           create_stages_from_temporal_constraints!(object, actions, opts)
         elsif object.is_a?(SerializedContentArray)

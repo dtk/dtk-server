@@ -27,8 +27,10 @@ module DTK; class ConfigAgent; module Adapter
       cmp_module       = component_action.component_module_name
       component        = component_action.component
       assembly         = opts[:assembly]
-      failure_attempts = config_node[:retry][:attempts] || nil
-      failure_sleep    = config_node[:retry][:sleep] || nil
+      unless  config_node[:retry].empty? ||  config_node[:retry].nil?
+        failure_attempts = config_node[:retry][:attempts] || nil
+        failure_sleep    = config_node[:retry][:sleep] || nil
+      end
 
       ret = {
         action_agent_request: {

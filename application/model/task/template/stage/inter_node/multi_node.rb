@@ -19,6 +19,10 @@ module DTK; class Task; class Template; class Stage
   class InterNode
     class MultiNode < self
       def initialize(serialized_multinode_action)
+        require 'debugger'
+        Debugger.wait_connection = true
+        Debugger.start_remote
+        debugger
         super(serialized_multinode_action[:name], serialized_multinode_action[:breakpoint], serialized_multinode_action[:retry])
         @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
         @breakpoint = serialized_multinode_action[:breakpoint]

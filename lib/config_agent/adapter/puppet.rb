@@ -32,6 +32,10 @@ module DTK
       ProviderFolder = 'puppet'
 
       def ret_msg_content(config_node, opts = {})
+      require 'debugger'
+      Debugger.wait_connection = true
+      Debugger.start_remote
+      debugger
         assembly          = opts[:assembly]
         cmps_with_attrs   = components_with_attributes(config_node)
         assembly_attrs    = assembly_attributes(config_node)

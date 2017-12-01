@@ -29,6 +29,10 @@ module DTK
     end
 
     def initialize(task = nil, top_task_idh = nil)
+      require 'debugger'
+      Debugger.wait_connection = true
+      Debugger.start_remote
+      debugger
       @top_task_idh = top_task_idh
       if task
         breakpoint   = task[:breakpoint]

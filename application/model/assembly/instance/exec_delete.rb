@@ -130,7 +130,7 @@ module DTK; class  Assembly
 
         if components = node.get_components
           cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
-
+          
           # order components by 'delete' action inside assembly workflow if exists
           ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
           ordered_components.uniq.each do |component|
@@ -138,6 +138,13 @@ module DTK; class  Assembly
             cmp_action = nil
             cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
             cmp_opts.merge!(delete_params: [component.id_handle, node.id])
+
+            # fix to add :retry to the cmp_top_task
+            task_template_content = get_task_template_content(model_handle(:task_template), component)
+            task_template_content.each do |ttc|
+              cmp = ttc[:components].first.gsub('::', '__').gsub(/\.[^\.]+$/, '')
+              component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
+            end
 
             begin
               create_cmp_action = true
@@ -273,6 +280,12 @@ module DTK; class  Assembly
               cmp_action   = nil
               cmp_opts.merge!(delete_params: [component.id_handle, assembly_wide_node.id])
 
+              # fix to add :retry to the cmp_top_task
+              task_template_content = get_task_template_content(model_handle(:task_template), component)
+              task_template_content.each do |ttc|
+                cmp = ttc[:components].first.gsub('::', '__').gsub(/\.[^\.]+$/, '')
+                component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
+              end
 
               begin                
                 # no need to check if admin_op_status is 'running' with nodes as components so commented that out for now

@@ -36,13 +36,20 @@ module DTK
         cmps_with_attrs   = components_with_attributes(config_node)
         assembly_attrs    = assembly_attributes(config_node)
         puppet_manifests  = NodeManifest.new(config_node, assembly: assembly).generate(cmps_with_attrs, assembly_attrs)
+        unless config_node[:retry].nil? || config_node[:retry].empty?
+          failure_attempts = config_node[:retry][:attempts] || nil
+          failure_sleep    = config_node[:retry][:sleep] || nil
+        end
+
         ret = {
           components_with_attributes: cmps_with_attrs,
           node_manifest: puppet_manifests,
           inter_node_stage: config_node.inter_node_stage,
           version_context: get_version_context(config_node, opts[:assembly]),
           # TODO: agent not doing puppet version per run; it just can be set when node is created
-          puppet_version: config_node[:node][:puppet_version]
+          puppet_version: config_node[:node][:puppet_version],
+          failure_attempts: failure_attempts,
+          failure_sleep: failure_sleep
         }
         ret.merge!(service_id: assembly.id, service_name: assembly.display_name) if assembly
         ret

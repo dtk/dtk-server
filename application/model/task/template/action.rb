@@ -64,6 +64,8 @@ module DTK; class Task; class Template
         if cgn = opts[:component_group_num]
           action = action.in_component_group(cgn)
         end
+
+        action[:retry] = opts[:retry_node] unless opts[:retry_node].nil?
       
         unless method_name
           ret = create(action) 

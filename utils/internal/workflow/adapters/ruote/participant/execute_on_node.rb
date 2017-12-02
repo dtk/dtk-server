@@ -26,6 +26,26 @@ module DTK
           top_task = workflow.top_task
           task.update_input_attributes!() if task_start
           breakpoint = task[:breakpoint]
+          # DTK-3265 - Almin: refactor this
+          task[:retry] = top_task[:retry] unless top_task[:retry].empty? || top_task[:retry].nil?
+          # Almin, HACK: Consider Changing this.. 
+          # Added because delete is making problems with :retry key, need to find where top_task is created and add key on subtasks objects instead of this fix
+          top_task[:subtasks].each do |sub|
+            sub[:subtasks].each do |st|
+              if st.has_key?(:subtasks)
+                st[:subtasks].each do |id|
+                  if id.has_key?(:subtasks)
+                    id[:subtasks].each do |i|
+                      task[:retry] = st[:retry] if i[:id] == task[:id]
+                    end
+                  end
+                end
+              end
+              if st[:id] == task[:id]
+                task[:retry] = sub[:retry] unless sub[:retry].empty? || sub[:retry].nil?
+              end
+            end
+          end
           workitem.fields['guard_id'] = task_id # ${guard_id} is referenced if guard for execution of this
 
           failed_tasks = ret_failed_precondition_tasks(task, workflow.guards[:external])

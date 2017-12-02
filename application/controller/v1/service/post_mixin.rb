@@ -45,12 +45,14 @@ module DTK
 
       def converge
         assembly_instance = assembly_instance()
+        Log.info("Starting converge on service: #{assembly_instance.display_name_print_form}")
         if running_task = most_recent_task_is_executing?(assembly_instance)
           fail ErrorUsage, "Task with id '#{running_task.id}' is already running in assembly. Please wait until task is complete or cancel task."
         end
 
         violations = assembly_instance.find_violations
         unless violations.empty?
+          Log.debug("Found violations: #{violations}")
           return rest_ok_response({ violations: violations.table_form }, datatype: :violation)
         end
 
@@ -73,6 +75,8 @@ module DTK
           assembly_wide_node.update_admin_op_status!(:running)
         end
 
+        task_name_list = task[:subtasks].map {|x| x[:display_name]}
+        Log.info("Executing tasks: #{task_name_list}")
         execute_task(task)
 
         rest_ok_response task_id: task.id

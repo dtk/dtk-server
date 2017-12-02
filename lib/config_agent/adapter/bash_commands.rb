@@ -18,16 +18,18 @@
 module DTK; class ConfigAgent; module Adapter
   class BashCommands < ConfigAgent
     require_relative('bash_commands/interpret_results')
+    require_relative('bash_commands/system_attributes') 
     include InterpretResults::Mixin
 
     def ret_msg_content(config_node, opts = {})
-      commands         = commands(config_node, substitute_template_vars: true)
-      component_action = config_node[:component_actions].first
-      action_name      = component_action.method_name
-      cmp_module       = component_action.component_module_name
-      component        = component_action.component
-      assembly         = opts[:assembly]
-      unless  config_node[:retry].empty? ||  config_node[:retry].nil?
+      assembly_instance      = opts[:assembly]
+      component_action       = config_node[:component_actions].first
+      action_name            = component_action.method_name
+      cmp_module             = component_action.component_module_name
+      cmp_module_simple_name = component_action.component_module_name(no_namespace: true) 
+      component              = component_action.component
+      commands               = commands(config_node, cmp_module_simple_name, substitute_template_vars: true, assembly_instance: assembly_instance)
+       unless  config_node[:retry].empty? ||  config_node[:retry].nil?
         failure_attempts = config_node[:retry][:attempts] || nil
         failure_sleep    = config_node[:retry][:sleep] || nil
       end
@@ -42,11 +44,11 @@ module DTK; class ConfigAgent; module Adapter
           failure_attempts: failure_attempts,
           failure_sleep: failure_sleep
         },
-        modules: get_base_and_dependent_modules(component, assembly)
+        modules: get_base_and_dependent_modules(component, assembly_instance)
       }
 
-      if assembly
-        ret.merge!(service_id: assembly.id(), service_name: assembly.get_field?(:display_name))
+      if assembly_instance
+        ret.merge!(service_id: assembly_instance.id, service_name: assembly_instance.display_name)
       end
 
       ret
@@ -74,7 +76,10 @@ module DTK; class ConfigAgent; module Adapter
 
     private
 
-    def commands(config_node, opts)
+    # opts can have keys
+    #   :substitute_template_vars
+    #   :assembly_instance
+    def commands(config_node, component_module_simple_name, opts= {})
       ret = []
       config_node[:component_actions].each do |component_action|
         attr_and_param_vals = component_action.attribute_and_parameter_values
@@ -82,9 +87,11 @@ module DTK; class ConfigAgent; module Adapter
         # if stdout_and_stderr = true we return combined stdout and stderr in action results
         stdout_and_stderr = stdout_and_stderr(action_def)
 
-        action_def.commands().each do |command|
+        system_attributes = SystemAttributes.attribute_value_hash(component_module_simple_name, assembly_instance: opts[:assembly_instance])
+        
+        action_def.commands.each do |command|
           if opts[:substitute_template_vars] && command.needs_template_substitution?
-            command.bind_template_attributes!(attr_and_param_vals)
+            command.bind_template_attributes!(attr_and_param_vals.merge(system_attributes))
           end
           ret << command_msg_form(command, stdout_and_stderr, component_action, attr_and_param_vals)
         end

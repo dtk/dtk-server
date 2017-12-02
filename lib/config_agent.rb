@@ -18,6 +18,7 @@
 module DTK
   class ConfigAgent
     require_relative('config_agent/type')
+    require_relative('config_agent/arbiter_info')
     require_relative('config_agent/adapter')
     require_relative('config_agent/parse_error')
     require_relative('config_agent/parse_errors_cache')
@@ -64,6 +65,6 @@ module DTK
     def update_attribute_value!(attribute)
       self.class.update_attribute_value!(attribute)
     end
-    
+
   end
 end

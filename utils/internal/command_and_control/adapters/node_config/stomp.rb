@@ -118,6 +118,8 @@ module DTK
         filter = BlankFilter.merge(filter_x).merge('agent' => [agent])
         context = context_x.merge(callbacks: callbacks)
 
+        Log.debug("Sending STOMP message: '#{msg}'")
+        Log.debug("STOMP message filter: '#{filter}'")
         handler.sendreq_with_callback(msg, agent, context, filter)
       end
 
@@ -256,6 +258,7 @@ module DTK
         filter = filter_single_fact('pbuilderid', pbuilderid)
         context = opts[:receiver_context]
         callbacks = context[:callbacks]
+        Log.info("Initating task cancelation")
         async_agent_call('cancel_action', 'run', msg_content, filter, callbacks, context)
       end
 

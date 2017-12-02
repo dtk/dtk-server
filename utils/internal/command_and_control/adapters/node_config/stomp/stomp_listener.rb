@@ -45,6 +45,10 @@ module DTK
       @backup_client = ::Stomp::Client.new(:hosts => [{:login => configuration[:stomp_username], :passcode => configuration[:stomp_password], :host => configuration[:stomp_host], :port => configuration[:stomp_port], :ssl => false}])
     end
 
+    def ret_client
+      @backup_client
+    end
+
     def unbind
       # called when connection completed
       super
@@ -114,6 +118,8 @@ module DTK
 
     def publish(message)
       tries = NUMBER_OF_RETRIES
+
+      Log.info("Sending message to '#{message[:agent]}' worker with request id '#{message[:request_id]}' and pbuilderid '#{message[:pbuilderid]}'")
 
       # we can timeout here, in case stomp not ready
       while !@stomp_rdy

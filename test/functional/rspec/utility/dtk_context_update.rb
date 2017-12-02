@@ -8,7 +8,7 @@ context_module = 'aws/aws_vpc'
 context_assembly_template = 'discover_using_node_profile'
 context_service_name = 'context_iam'
 context_name = 'discover_using_node_profile'
-context_version = '0.9.5'
+context_version = '0.9.6'
 
 # context attributes
 default_keypair = 'testing_use1'

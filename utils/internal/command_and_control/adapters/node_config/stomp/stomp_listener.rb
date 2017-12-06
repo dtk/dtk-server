@@ -105,6 +105,9 @@ module DTK
 
         callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
 
+        Log.debug("Current list of callbacks: #{CommandAndControlAdapter::StompMultiplexer.callback_registry}")
+        Log.debug("List of callbacks for message id: '#{msg_request_id}' \n #{callbacks}")
+
         unless callbacks
           # discard message if not the one requested
           Log.debug("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")

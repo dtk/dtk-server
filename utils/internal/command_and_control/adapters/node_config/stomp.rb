@@ -179,7 +179,7 @@ module DTK
         end
           
         msg_content = config_agent.ret_msg_content(task_action, opts_ret_msg.merge!(task_id: task_id, top_task_id: top_task_id, debug_port_request: false))
-        
+
 
         added_content = {
           task_id: task_id,

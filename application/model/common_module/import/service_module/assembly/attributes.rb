@@ -22,26 +22,34 @@ module DTK
         def self.db_update_hash(parsed_attributes, opts = {})
           parsed_attributes.inject(DBUpdateHash.new) do |h, (attr_name, parsed_attribute)|
             attr_content = nil
-            attr_val     = parsed_attribute.val(:Value)
+            attr_info = parsed_attribute.val(:Value)
             if opts[:assembly_attributes]
+              raise_error_if_ill_formed_assembly_attribute(attr_name, attr_info)
               attr_content = {
                 'display_name'   => attr_name,
-                'value_asserted' => attr_val['default'],
-                'data_type'      => attr_val['type'],
-                'required'       => attr_val['required'],
-                'link_to'        => attr_val['links_to'],
-                'link_from'      => attr_val['links_from']
+                'value_asserted' => attr_info['default'],
+                'data_type'      => attr_info['type'],
+                'required'       => attr_info['required'],
+                'link_to'        => attr_info['links_to'],
+                'link_from'      => attr_info['links_from']
               }
             else
               attr_content = {
                 'display_name'   => attr_name,
-                'value_asserted' => attr_val,
-                'data_type'      => Attribute::Datatype.datatype_from_ruby_object(attr_val)
+                'value_asserted' => attr_info,
+                'data_type'      => Attribute::Datatype.datatype_from_ruby_object(attr_info)
               }
             end
             h.merge(attr_name => attr_content)
           end
         end
+
+        def self.raise_error_if_ill_formed_assembly_attribute(attr_name, attr_info)
+          unless attr_info and (attr_info['links_to'] or attr_info['links_from'])
+            fail ErrorUsage, "Parsing error: Assembly attribute '#{attr_name}' must have key 'links_to' or 'links_from'"
+          end
+        end
+
       end
     end
   end

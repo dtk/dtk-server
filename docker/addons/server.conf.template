@@ -15,7 +15,7 @@ db.host = /var/run/postgresql
 db.name = dtk1
 
 # Default dtk-server log level
-log.level = info
+log.level = ${LOG_LEVEL}
 
 stomp.host = ${PUBLIC_ADDRESS}
 stomp.port = ${MCOLLECTIVE_PORT}
@@ -30,7 +30,7 @@ arbiter.ssh.remote.public_key = ${HOST_VOLUME}/arbiter/arbiter_remote.pub
 arbiter.ssh.remote.private_key = ${HOST_VOLUME}/arbiter/arbiter_remote
 arbiter.auth_type = ssh
 # Default dtk-arbiter log level
-arbiter.log_level = info
+arbiter.log_level = ${LOG_LEVEL}
 
 arbiter.topic = ${ARBITER_TOPIC}
 arbiter.queue = ${ARBITER_QUEUE}

@@ -42,12 +42,13 @@ module DTK; class Task
             executable_action: executable_action
           }
 
-          cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message]
+          cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message, :retry]
           cols.each { |col| row.merge!(col => hash_row[col]) }
           [:assembly_id, :node_id, :target_id].each do |col|
             row[col] = hash_row[col] || SQL::ColRef.null_id
           end
           row[:breakpoint] = (hash_row[:breakpoint].nil? ? false : hash_row[:breakpoint]) 
+          row[:retry] = (hash_row[:retry].nil? ? '' : hash_row[:retry]) 
 
           row
         end

@@ -30,6 +30,7 @@
     executable_action_type: { type: :varchar },
     executable_action: { type: :json }, #gets serialized version of TaskAction::Action
     breakpoint: { type: :boolean },
+    retry: { type: :json },
     assembly_id: { #points to assembly when assembly task
       type: :bigint,
       foreign_key_rel_type: :component,

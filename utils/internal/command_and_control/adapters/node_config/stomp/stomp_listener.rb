@@ -176,6 +176,7 @@ module DTK
       3.times do
         callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
         break if callbacks
+        sleep 1
       end
     end
 

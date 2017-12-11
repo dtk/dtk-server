@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+require 'ruby-debug'
 module DTK
   class CommonModule::Update::Module
     class Info < self
@@ -22,8 +24,6 @@ module DTK
       require_relative('info/component')
 
       attr_reader :module_name, :namespace_name, :version
-
-      private
 
       # opts can have keys:
       #   :parse_needed
@@ -44,7 +44,25 @@ module DTK
         @initial_update               = opts[:initial_update]
       end
 
+      # if module does not exist, create it
+      # else if module branch does not exist, create it
+      # else return module branch
+      # opts can have keys:
+      #   :create_implementation 
+      # Returns module_branchobject
+      def create_module_and_branch?(opts = {})
+        debugger
+        if module_obj = module_exists?
+          module_branch_exists? || create_module_branch
+        else
+          create_module_and_branch(create_implementation: opts[:create_implementation])
+        end
+      end
+
+      protected
+
       attr_reader :project, :local_params, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
+
       def parse_needed?
         @parse_needed
       end
@@ -53,31 +71,24 @@ module DTK
         @diffs_summary
       end
 
-      # if module does not exist, create it
-      # else if module branch does not exist, create it
-      # else return module branch
-      # opts can have keys:
-      #   :create_implementation - Boolean (default: false)
-      def create_module_branch_and_repo?(opts = {})
-        if module_obj = module_class.find_from_name?(project.model_handle(module_type), namespace_name, module_name)
-          namespace_obj = Namespace.find_by_name(project.model_handle(:namespace), namespace_name)
-          if module_branch = module_class.get_workspace_module_branch(project, module_name, version, namespace_obj, no_error_if_does_not_exist: true)
-            module_branch
-          else
-            repo = module_obj.get_repo
-            module_branch = module_class.create_ws_module_and_branch_obj?(project, repo.id_handle, module_name, version, namespace_obj, return_module_branch: true)
-            repo.merge!(branch_name: module_branch[:branch])
-            add_branch_opts = {
-              empty: true,
-              delete_existing_branch: @initial_update
-            }
-            RepoManager.add_branch_and_push?(module_branch[:branch], add_branch_opts, module_branch)
-            module_branch
-          end
-        else
-          module_class.create_module(project, local_params, return_module_branch: true, create_implementation: opts[:create_implementation])
-        end
+      def initial_update?
+        @initial_update
       end
+
+      def namespace_obj 
+        @namespace_obj = Namespace.find_by_name(self.project.model_handle(:namespace), self.namespace_name)
+      end
+
+
+      def parsed_dependent_modules
+        @parsed_dependent_modules ||= parsed_nested_object(:DependentModules)
+      end
+
+      def parsed_assemblies
+        @parsed_assemblies ||= parsed_nested_object(:Assemblies)
+      end
+
+      private
 
       # For module_refs processng
       # opts can have keys
@@ -101,7 +112,7 @@ module DTK
         dependencies_of_dependencies = []
         existing_names = cmp_modules_with_namespaces.map{ |cmp| "#{cmp[:namespace_name]}/#{cmp[:display_name]}" }
         cmp_modules_with_namespaces.each do |cmp_module|
-          if module_exists = ComponentModule.module_exists(project, cmp_module[:namespace_name], cmp_module[:display_name], cmp_module[:version_info], :return_module => true)
+          if module_exists = ComponentModule.module_exists(self.project, cmp_module[:namespace_name], cmp_module[:display_name], cmp_module[:version_info], :return_module => true)
             if module_branch = module_exists[:module_branch]
               dep_module_refs = module_branch.get_module_refs
               dep_module_refs.each do |dep_module_ref|
@@ -124,9 +135,9 @@ module DTK
         diffs = component_module_refs.get_module_ref_diffs(cmp_modules_with_namespaces)
         if to_delete = diffs[:delete]
           to_delete.each do |cmp_mod|
-            next if @module_name == cmp_mod[:display_name]
+            next if self.module_name == cmp_mod[:display_name]
 
-            if cmp_module         = ComponentModule.module_exists(project, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info], return_module: true)
+            if cmp_module         = ComponentModule.module_exists(self.project, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info], return_module: true)
               assembly_templates = cmp_module.get_associated_assembly_templates
               matching           = assembly_templates.select{ |at| at[:module_branch_id] == module_branch[:id]}
               fail ErrorUsage, "Unable to delete dependency '#{cmp_mod[:namespace_name]}/#{cmp_mod[:display_name]}' because it is referenced by assemblies: '#{matching.map{|mt|mt[:display_name]}.join(', ')}'!" unless matching.empty?
@@ -145,9 +156,9 @@ module DTK
       
       def base_module_in?(cmp_modules_with_namespaces)
         !!cmp_modules_with_namespaces.find do |hash|
-            hash[:display_name] == module_name and  
-            hash[:namespace_name] == namespace_name and 
-            hash[:version_info] == version
+            hash[:display_name] == self.module_name and  
+            hash[:namespace_name] == self.namespace_name and 
+            hash[:version_info] == self.version
         end    
       end
 
@@ -159,7 +170,7 @@ module DTK
 
         if to_add = diffs[:add]
           to_add.each do |cmp_mod|
-            unless CommonModule.exists(project, :component_module, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info])
+            unless CommonModule.exists(self.project, :component_module, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info])
               (ret[:missing_dependencies] ||= []) << cmp_mod
             end
           end
@@ -168,20 +179,49 @@ module DTK
         ret
       end
 
-      private
+      def module_exists?
+        self.module_class.find_from_name?(project.model_handle(self.module_type), self.namespace_name, self.module_name)
+      end
+
+      def module_branch_exists?
+        self.module_class.get_workspace_module_branch(self.project, self.module_name, self.version, self.namespace_obj, no_error_if_does_not_exist: true)
+      end
+
+      # opts can have keys:
+      #   create_implementation
+      def create_module_and_branch(opts = {})
+        self.module_class.create_module(self.project, self.local_params, return_module_branch: true, create_implementation: opts[:create_implementation], donot_push_to_repo_manager: true)
+      end
+
+      def create_module_branch
+        repo = module_obj.get_repo
+        module_branch = self.module_class.create_ws_module_and_branch_obj?(self.project, repo.id_handle, self.module_name, self.version, namespace_obj, return_module_branch: true)
+        repo.merge!(branch_name: module_branch[:branch])
+        add_branch_opts = {
+          empty: true,
+          delete_existing_branch: self.initial_update?
+        }
+        # TODO: DTK-3366: removed
+        # RepoManager.add_branch_and_push?(module_branch[:branch], add_branch_opts, module_branch)
+        module_branch
+      end      
+
+      def parsed_nested_object(nested_object_key)
+        self.parsed_common_module.val(nested_object_key)
+      end
 
       def ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts = {})
         cmp_modules_with_namespaces = (parsed_dependent_modules || {}).map do |parsed_module_ref|
           parsed_module_name = parsed_module_ref.req(:ModuleName)
           # For legacy where dependencies can refer to themselves
-          unless @module_name == parsed_module_name
+          unless self.module_name == parsed_module_name
             cmp_modules_with_namespaces_hash(parsed_module_name, parsed_module_ref.req(:Namespace), parsed_module_ref.val(:ModuleVersion))
           end
         end.compact
 
         # add reference to oneself if not there and there is a corresponding component module ref
         if opts[:omit_base_reference] and not base_module_in?(cmp_modules_with_namespaces)
-          cmp_modules_with_namespaces << cmp_modules_with_namespaces_hash(module_name, namespace_name, version)
+          cmp_modules_with_namespaces << cmp_modules_with_namespaces_hash(self.module_name, self.namespace_name, self.version)
         end
 
         cmp_modules_with_namespaces

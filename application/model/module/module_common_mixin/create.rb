@@ -27,6 +27,7 @@ module DTK; module ModuleCommonMixin
     #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     #  :create_implementation - Boolean (default: false)
     #  :has_remote_repo - Boolean (default: false)
+    #  :donot_push_to_repo_manager
     #  :common_module - TODO: see if this is needed and instead use module_type from local_params
     def create_module(project, local_params, opts = {})
       local       = local_params.create_local(project)
@@ -55,7 +56,7 @@ module DTK; module ModuleCommonMixin
 
             # base_branch just needs to be a random branch on module_obj
             base_branch = module_obj.get_module_branches.first
-            RepoManager.add_branch_and_push?(local.branch_name, add_branch_opts, base_branch)
+            RepoManager.add_branch_and_push?(local.branch_name, add_branch_opts, base_branch) unless opts[:donot_push_to_repo_manager]
             repo.create_subclass_obj(:repo_with_branch)
           else
             create_module__create_repo(local, opts)

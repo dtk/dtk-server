@@ -27,6 +27,7 @@ module DTK; module ModuleCommonMixin
     #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     #  :create_implementation - Boolean (default: false)
     #  :has_remote_repo - Boolean (default: false)
+    #  :donot_push_to_repo_manager
     #  :common_module - TODO: see if this is needed and instead use module_type from local_params
     def create_module(project, local_params, opts = {})
       local       = local_params.create_local(project)

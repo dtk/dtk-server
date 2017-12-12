@@ -29,23 +29,23 @@ module DTK
       def create_or_update_from_parsed_common_module?
         if parsed_assemblies = self.parsed_assemblies
           CommonDSL::Parse.set_dsl_version!(self.service_module_branch, self.parsed_common_module)
-          update_component_module_refs(self.service_module_branch, self.parsed_dependent_modules, omit_base_reference: component_defs_exist?, add_recursive_dependencies: true)
+          update_component_module_refs(self.service_module_branch, omit_base_reference: component_defs_exist?, add_recursive_dependencies: true)
 
           # update assemblies before updating module refs because we need to check for references in assemblies when updating module refs
           CommonModule::Info::Service.update_assemblies_from_parsed_common_module(self.project, self.service_module_branch, parsed_assemblies, local_params, raise_if_missing_dependencies: true)
 
-          delete_component_module_refs?(self.service_module_branch, self.parsed_dependent_modules, omit_base_reference: component_defs_exist?)
         end
       end
 
       def transform_from_common_module?
+        fail 'got here'
         transform = Transform.new(self.parsed_common_module, self).compute_service_module_outputs!
         file_path__content_array = transform.file_path__content_array
       end
 
       def check_for_missing_dependencies
         CommonDSL::Parse.set_dsl_version!(self.service_module_branch, self.parsed_common_module)
-        check_and_ret_missing_modules(self.service_module_branch, self.parsed_dependent_modules, omit_base_reference: component_defs_exist?)
+        check_and_ret_missing_modules
       end
 
       protected
@@ -61,6 +61,26 @@ module DTK
       def module_type
         :service_module
       end
+
+      private
+
+      def check_and_ret_missing_modules
+        component_module_refs = ModuleRefs.get_component_module_refs(self.service_module_branch)
+        modules_w_namespaces  = ret_cmp_modules_with_namespaces(omit_base_reference: component_defs_exist?)
+        diffs                 = component_module_refs.get_module_ref_diffs(modules_w_namespaces)
+        ret                   = {}
+
+        if to_add = diffs[:add]
+          to_add.each do |cmp_mod|
+            unless CommonModule.exists(self.project, :component_module, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info])
+              (ret[:missing_dependencies] ||= []) << cmp_mod
+            end
+          end
+        end
+
+        ret
+      end
+
 
     end
   end

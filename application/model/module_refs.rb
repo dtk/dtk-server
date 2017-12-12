@@ -191,7 +191,7 @@ module DTK
       ModuleRef.create_or_update(new_branch, cmrs.component_modules.values)
     end
 
-    def get_module_ref_diffs(cmp_modules_with_namespaces, opts = {})
+    def get_module_ref_diffs(cmp_modules_with_namespaces)
       diffs             = {}
       refs_w_namespaces = module_refs_to_modules_with_namespaces
 

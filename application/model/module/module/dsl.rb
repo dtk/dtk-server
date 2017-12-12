@@ -92,7 +92,14 @@ module DTK
       end
       parsed_name = parse_dsl_filename(dsl_filename)
       opts[:file_path] = dsl_filename
-      input_hash = convert_to_hash(content, parsed_name[:format_type], opts)
+      input_hash = 
+        if content.kind_of?(::Hash)
+          content
+        elsif content.kind_of?(::String)
+          convert_to_hash(content, parsed_name[:format_type], opts)
+        else
+          fail Error, "Unexpected class '#{content.class}'"
+        end
       return input_hash if ParsingError.is_error?(input_hash)
       
       name_attribute_check = name_attribute_integrity_check(input_hash['components'])

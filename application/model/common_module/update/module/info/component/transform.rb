@@ -29,8 +29,8 @@ module DTK
         self
       end
 
-      def file_path__content_array
-        @dtk_dsl_info_processor.output_path_text_pairs.inject([]) { |a, (path, content)| a + [{ path: path, content: content }] }
+      def output_path_hash_pairs
+        @dtk_dsl_info_processor.output_path_hash_pairs
       end
 
       def input_paths

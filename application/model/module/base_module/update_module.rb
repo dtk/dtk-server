@@ -92,6 +92,7 @@ module DTK; class BaseModule
 
     # only returns non nil if parsing error; it traps parsing errors
     # opts can contain keys:
+    #   :dsl_created_info
     #   :config_agent_type
     #   :ret_parsed_dsl
     #   :update_from_includes
@@ -112,7 +113,6 @@ module DTK; class BaseModule
       module_branch.set_dsl_parsed!(false)
       config_agent_type = opts[:config_agent_type] || config_agent_type_default
 
-      # TODO: for efficiency can change parse_dsl to take option opts[:dsl_created_info]
       dsl_obj = parse_dsl(impl_obj, opts.merge(config_agent_type: config_agent_type))
       return dsl_obj if is_parsing_error?(dsl_obj)
 
@@ -121,8 +121,8 @@ module DTK; class BaseModule
       update_opts = { version: version, use_new_snapshot: opts[:use_new_snapshot] }
 
       # when image_aws component is updated; need to check if new images are added and update node-bindings accordingly
-      if @base_module[:display_name].eql?('image_aws')
-        update_node_bindings = check_if_node_bindings_update_needed(@base_module.get_objs(cols: [:components]), dsl_obj.input_hash)
+      if self.base_module[:display_name].eql?('image_aws')
+        update_node_bindings = check_if_node_bindings_update_needed(self.base_module.get_objs(cols: [:components]), dsl_obj.input_hash)
       end
 
       dsl_obj.update_model_with_ref_integrity_check(update_opts)
@@ -143,7 +143,7 @@ module DTK; class BaseModule
         # Can be both parsing errors, in which case is_parsing_error?(update_from_includes) i strue
         # or can be dependency errors in which case external_deps.any_errors? is true
         # If external_deps.any_errors? error dont yet return so can execute UpdateModuleRefs.save_dsl?
-        update_from_includes = UpdateModuleRefs.new(dsl_obj, @base_module).validate_includes_and_update_module_refs
+        update_from_includes = UpdateModuleRefs.new(dsl_obj, self.base_module).validate_includes_and_update_module_refs
         return update_from_includes if is_parsing_error?(update_from_includes)
 
         if external_deps = update_from_includes[:external_dependencies]
@@ -201,6 +201,10 @@ module DTK; class BaseModule
       parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts)
     end
 
+    protected
+
+    attr_reader :base_module, :module_class
+
     private
 
     def check_if_node_bindings_update_needed(base_components, new_input_hash)
@@ -250,7 +254,7 @@ module DTK; class BaseModule
 
       nodes_info = prepare_nodes_info(images_hash)
 
-      container_idh = @base_module.model_handle(:user).create_top
+      container_idh = self.base_module.model_handle(:user).create_top
       hash_content = LibraryNodes.get_hash(in_library: 'public', content: nodes_info)
       hash_content['library']['public']['display_name'] ||= 'public'
       Model.import_objects_from_hash(container_idh, hash_content)
@@ -283,49 +287,40 @@ module DTK; class BaseModule
       ret
     end
 
-    def klass
-      case @module_class
-        when NodeModule
-          NodeModuleDSL
-        else
-          ModuleDSL
-      end
-    end
-
     def ret_local(version)
-      self.class.ret_local(@base_module, version)
+      self.class.ret_local(self.base_module, version)
     end
 
     def parse_dsl(impl_obj, opts = {})
-      klass.parse_dsl(@base_module, impl_obj, opts)
+      ModuleDSL.parse_dsl(self.base_module, impl_obj, opts)
     end
 
     def update_component_module_refs(module_branch, matching_module_refs)
-      UpdateModuleRefs.update_component_module_refs(module_branch, matching_module_refs, @base_module)
+      UpdateModuleRefs.update_component_module_refs(module_branch, matching_module_refs, self.base_module)
     end
 
     def set_dsl_parsed!(boolean)
-      @base_module.set_dsl_parsed!(boolean)
+      self.base_module.set_dsl_parsed!(boolean)
     end
 
     def module_namespace
-      @base_module.module_namespace
+      self.base_module.module_namespace
     end
 
     def module_name
-      @base_module.module_name
+      self.base_module.module_name
     end
 
     def module_type
-      @base_module.module_type
+      self.base_module.module_type
     end
 
     def config_agent_type_default
-      @base_module.config_agent_type_default
+      self.base_module.config_agent_type_default
     end
 
     def get_project
-      @base_module.get_project
+      self.base_module.get_project
     end
 
     def is_parsing_error?(response)

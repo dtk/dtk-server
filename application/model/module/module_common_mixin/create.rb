@@ -30,6 +30,7 @@ module DTK; module ModuleCommonMixin
     #  :donot_push_to_repo_manager
     #  :common_module - TODO: see if this is needed and instead use module_type from local_params
     def create_module(project, local_params, opts = {})
+      debugger
       local       = local_params.create_local(project)
       namespace   = local_params.namespace
       module_name = local_params.module_name
@@ -79,9 +80,14 @@ module DTK; module ModuleCommonMixin
       opts_info = { version: local.version, module_namespace: local.namespace }
       module_and_branch_info.merge(module_repo_info: module_repo_info(local_repo_obj, module_and_branch_info, opts_info))
     end
-
+    
     def create_module__create_repo(local, opts = {})
-      create_repo_opts = Aux.hash_subset(opts, [:no_initial_commit, :add_remote_files_info]).merge(delete_if_exists: true)
+      create_repo_opts = {
+        no_initial_commit:  opts[:no_initial_commit],
+        add_remote_files_info:  opts[:add_remote_files_info],
+        donot_push_to_repo_manager: opts[:donot_push_to_repo_manager],
+        delete_if_exists: true
+      }
       create_repo(local, create_repo_opts)
     end
     private :create_module__create_repo
@@ -90,23 +96,26 @@ module DTK; module ModuleCommonMixin
     #   :no_initial_commit
     #   :add_remote_files_info
     #   :delete_if_exists
+    #   :donot_push_to_repo_manager
     def create_repo(local, opts = {})
       project_idh = local.project.id_handle
-
-      create_opts = {
-        create_branch: local.branch_name,
-        donot_create_master_branch: true,
-        delete_if_exists: opts[:delete_if_exists],
-        # TODO: dont think key 'namespace_name' is used
-        namespace_name: local.namespace
-      }
-      create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
-
-      if add_remote_files_info = opts[:add_remote_files_info]
-        create_opts.merge!(add_remote_files_info: add_remote_files_info)
+      if opts[:donot_push_to_repo_manager]
+        Repo::WithBranch.create_obj?(project_idh.createMH(:repo), local)
+      else
+        create_opts = {
+          create_branch: local.branch_name,
+          donot_create_master_branch: true,
+          delete_if_exists: opts[:delete_if_exists],
+          # TODO: dont think key 'namespace_name' is used
+          namespace_name: local.namespace
+        }
+        create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
+        
+        if add_remote_files_info = opts[:add_remote_files_info]
+          create_opts.merge!(add_remote_files_info: add_remote_files_info)
+        end
+        Repo::WithBranch.create_actual_repo(project_idh, local, create_opts)
       end
-      repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-      Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
     end
 
     # opts can have keys

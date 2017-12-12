@@ -24,6 +24,7 @@ module DTK
         new(assembly_instance).create_service_instance_and_nested_modules(opts)
       end
       def create_service_instance_and_nested_modules(opts = {})
+        debugger
         service_module_branch = get_or_create_module_for_service_instance(opts.merge(delete_existing_branch: true))
         CommonDSL::Generate::ServiceInstance.generate_dsl(self, service_module_branch) do 
           create_nested_modules_dsl_and_objects(service_module_branch) if opts[:add_nested_modules]

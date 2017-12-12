@@ -97,8 +97,7 @@ module DTK
             donot_create_master_branch: true,
             delete_if_exists: false
           }
-          repo_user_acls = RepoUser.authorized_users_acls(project.id_handle)
-          Repo::WithBranch.create_workspace_repo(project.id_handle, local, repo_user_acls, create_opts)
+          Repo::WithBranch.create_actual_repo(project.id_handle, local, repo_user_acls, create_opts)
         end
 
         def module_obj

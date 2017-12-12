@@ -79,6 +79,9 @@ module DTK
         is_heartbeat   = original_msg[:heartbeat]
         is_pong        = original_msg[:pong]
 
+        $retries = original_msg[:body][:data][:data][:retries] unless original_msg[:body][:data][:data][:retries].nil? || original_msg[:body][:data][:data][:retries].empty?
+        Log.info("Number of retries on server left: #{$retries}") # Send to dtk-client from here
+
         # decode message
         if msg_request_id
           Log.debug "Received STOMP message, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."

@@ -110,7 +110,14 @@ module DTK; class Task; class Status
                 el[:info] = format_info(info_msg)
               end
             end
+          end 
+
+          if $retries
+            msg =  "Retries left: #{$retries}"
+            Log.info("Retries in Table Form #{$retries}")
+            el[:info] = format_info(msg)
           end
+
           if subtasks.first[:executable_action_type].include?("ConfigNode")
             if opts[:type]
              # ret = [] if opts[:type].include?("delete")

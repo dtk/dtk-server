@@ -24,9 +24,7 @@ module DTK
         return unless module_info_exists?
         CommonDSL::Parse.set_dsl_version!(self.component_module_branch, self.parsed_common_module)
         
-        if parsed_dependent_modules = self.parsed_dependent_modules
-          update_component_module_refs(self.component_module_branch, self.parsed_dependent_modules)
-        end
+        update_component_module_refs(self.component_module_branch)
 
         update_component_info_in_model_from_dsl(opts) if parse_needed?
       end

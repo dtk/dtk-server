@@ -93,9 +93,10 @@ module DTK
       # For module_refs processng
       # opts can have keys
       #   :omit_base_reference
-      def update_component_module_refs(module_branch, parsed_dependent_modules, opts = {})
+      #   :add_recursive_dependencies
+      def update_component_module_refs(module_branch,opts = {})
         component_module_refs       = ModuleRefs.get_component_module_refs(module_branch)
-        cmp_modules_with_namespaces = ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts)
+        cmp_modules_with_namespaces = ret_cmp_modules_with_namespaces(omit_base_reference: opts[:omit_base_reference])
 
         if opts[:add_recursive_dependencies]
           deps_of_deps = add_dependencies_of_dependencies(cmp_modules_with_namespaces)
@@ -126,26 +127,6 @@ module DTK
         dependencies_of_dependencies
       end
 
-      # TODO: DTK-3335: code below looks like calculating things wrong sometimes; moreover even if it finds to deleet it does nothing so verifing of this can be omitted
-      def delete_component_module_refs?(module_branch, parsed_dependent_modules, opts = {})
-        return # TODO: DTK-3335: testing omitting this code
-        component_module_refs       = ModuleRefs.get_component_module_refs(module_branch)
-        cmp_modules_with_namespaces = ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts)
-
-        diffs = component_module_refs.get_module_ref_diffs(cmp_modules_with_namespaces)
-        if to_delete = diffs[:delete]
-          to_delete.each do |cmp_mod|
-            next if self.module_name == cmp_mod[:display_name]
-
-            if cmp_module         = ComponentModule.module_exists(self.project, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info], return_module: true)
-              assembly_templates = cmp_module.get_associated_assembly_templates
-              matching           = assembly_templates.select{ |at| at[:module_branch_id] == module_branch[:id]}
-              fail ErrorUsage, "Unable to delete dependency '#{cmp_mod[:namespace_name]}/#{cmp_mod[:display_name]}' because it is referenced by assemblies: '#{matching.map{|mt|mt[:display_name]}.join(', ')}'!" unless matching.empty?
-            end
-          end
-        end
-      end
-
       def cmp_modules_with_namespaces_hash(module_name_input, namespace_name_input, version_input)
         { 
           display_name: module_name_input,
@@ -160,23 +141,6 @@ module DTK
             hash[:namespace_name] == self.namespace_name and 
             hash[:version_info] == self.version
         end    
-      end
-
-      def check_and_ret_missing_modules(module_branch, parsed_dependent_modules, opts = {})
-        component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
-        modules_w_namespaces  = ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts)
-        diffs                 = component_module_refs.get_module_ref_diffs(modules_w_namespaces, opts)
-        ret                   = {}
-
-        if to_add = diffs[:add]
-          to_add.each do |cmp_mod|
-            unless CommonModule.exists(self.project, :component_module, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info])
-              (ret[:missing_dependencies] ||= []) << cmp_mod
-            end
-          end
-        end
-
-        ret
       end
 
       def module_exists?
@@ -210,20 +174,22 @@ module DTK
         self.parsed_common_module.val(nested_object_key)
       end
 
-      def ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts = {})
-        cmp_modules_with_namespaces = (parsed_dependent_modules || {}).map do |parsed_module_ref|
+      # opts cna have keys
+      #   :omit_base_reference
+      def ret_cmp_modules_with_namespaces(opts = {})
+        cmp_modules_with_namespaces = (self.parsed_dependent_modules || []).map do |parsed_module_ref|
           parsed_module_name = parsed_module_ref.req(:ModuleName)
           # For legacy where dependencies can refer to themselves
           unless self.module_name == parsed_module_name
             cmp_modules_with_namespaces_hash(parsed_module_name, parsed_module_ref.req(:Namespace), parsed_module_ref.val(:ModuleVersion))
           end
         end.compact
-
+        
         # add reference to oneself if not there and there is a corresponding component module ref
         if opts[:omit_base_reference] and not base_module_in?(cmp_modules_with_namespaces)
           cmp_modules_with_namespaces << cmp_modules_with_namespaces_hash(self.module_name, self.namespace_name, self.version)
         end
-
+        
         cmp_modules_with_namespaces
       end
     end

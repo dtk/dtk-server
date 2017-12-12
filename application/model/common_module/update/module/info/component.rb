@@ -28,8 +28,6 @@ module DTK
           update_component_module_refs(self.component_module_branch, self.parsed_dependent_modules)
         end
 
-        @dsl_files = transformed_component_module_repo_dsl_files
-
         update_component_info_in_model_from_dsl(opts) if parse_needed?
       end
 
@@ -66,11 +64,6 @@ module DTK
         self.class.module_info_exists?(self.parsed_common_module)
       end
 
-      def transformed_component_module_repo_dsl_files
-        transform = Transform.new(self.parsed_common_module, self).compute_component_module_outputs!
-        transform.file_path__content_array
-      end
-
       # TODO: DTK-2766: this uses the legacy parsing routines in the dtk-server gem. Port over to dtk-dsl parsing
       # opts can have keys
       #   :use_new_snapshot
@@ -79,14 +72,26 @@ module DTK
         # TODO: for migration purposes needed the  Implementation.create? method. This shoudl be done during initial create
         impl = aug_mb.get_implementation? || Implementation.create?(self.project, self.local_params, aug_mb.repo)
         parse_opts = {
+          dsl_created_info: dsl_created_info,
           donot_update_module_refs: true,
           use_new_snapshot: opts[:use_new_snapshot]
         }
         if parsed_dependent_modules
           parse_opts.merge!(dependent_modules: (self.parsed_dependent_modules || []).map { |dependent_module| dependent_module.req(:ModuleName) })
         end
+        debugger
         response = aug_mb.component_module.parse_dsl_and_update_model(impl, aug_mb.id_handle, self.version, parse_opts)
         fail response if ModuleDSL::ParsingError.is_error?(response)
+      end
+
+      COMPONENT_YAML_FILENAME = 'dtk.model.yaml'
+      def dsl_created_info
+        transform = Transform.new(self.parsed_common_module, self).compute_component_module_outputs!
+        content = transform.output_path_hash_pairs[COMPONENT_YAML_FILENAME] || fail(Error, "Unexpected that '#{COMPONENT_YAML_FILENAME}' not found")
+        {
+          path: COMPONENT_YAML_FILENAME,
+          content: content
+        }
       end
 
       #TODO: is this needed?
@@ -98,3 +103,4 @@ module DTK
     end
   end
 end
+

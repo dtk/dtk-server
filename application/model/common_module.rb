@@ -23,6 +23,7 @@ module DTK
     require_relative('common_module/remote')
     require_relative('common_module/import') #TODO: should this be removed or have name changed after fully port to new client
     require_relative('common_module/module_repo_info')
+    require_relative('common_module/service_instance_repo_info')
     require_relative('common_module/update')
     require_relative('common_module/info')
     require_relative('common_module/service_instance')

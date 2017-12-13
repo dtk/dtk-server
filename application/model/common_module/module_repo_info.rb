@@ -17,7 +17,6 @@
 #
 module DTK
   class CommonModule
-    # TODO: DTK-2587: ModuleRepoInfo will replace Dtk::ModuleRepoInfo 
     class ModuleRepoInfo < ::Hash
       # opts can have keys:
       #  :ret_remote_info

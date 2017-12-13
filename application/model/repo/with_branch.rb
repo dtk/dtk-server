@@ -35,14 +35,11 @@ module DTK
       end
 
       def self.create_obj?(model_handle, local)
-        repo_name   = repo_name(local)
-        branch_name = local.branch_name
-        sp_hash = {
-          cols: common_columns,
-          filter: [:eq, :repo_name, repo_name]
-        }
-        repo_obj = get_obj(model_handle, sp_hash) || create_obj(model_handle, repo_name)
-        set_branch_name!(repo_obj, branch_name)
+        repo_name          = repo_name(local)
+        repo_display_name  = repo_display_name(local)
+
+        repo_obj = obj_exists?(model_handle, repo_display_name) || create_obj(model_handle, repo_name, repo_display_name)
+        set_branch_name!(repo_obj, local.branch_name)
       end
 
       def initial_sync_with_remote(remote, remote_repo_info)
@@ -62,15 +59,24 @@ module DTK
 
       private
 
-      def self.create_obj(model_handle, repo_name)
+      def self.obj_exists?(model_handle, repo_display_name)
+        sp_hash = {
+          cols: common_columns,
+          filter: [:eq, :display_name, repo_display_name]
+        }
+        get_obj(model_handle, sp_hash)
+      end
+
+      # Returns a Repo object
+      def self.create_obj(model_handle, repo_name, repo_display_name)
         repo_hash = {
-          ref: repo_name,
-          display_name: repo_name,
+          ref: repo_display_name,
+          display_name: repo_display_name,
           repo_name: repo_name,
           local_dir: "#{R8::Config[:repo][:base_directory]}/#{repo_name}" #TODO: should this be set by RepoManager instead
         }
         repo_idh = create_from_row(model_handle, repo_hash)
-        repo_obj = repo_idh.create_object(model_name: :repo_with_branch).merge(repo_hash)
+        repo_idh.create_object(model_name: :repo_with_branch).merge(repo_hash)
       end
 
       def raise_error_if_version_not_on_remote(remote_repo_info, remote_branch)
@@ -82,15 +88,17 @@ module DTK
       def self.set_branch_name!(repo_obj, branch_name)
         repo_obj.merge!(branch_name: branch_name)
       end
+
       def branch_name
-        unless ret = self[:branch_name]
-          fail Error.new("Unexpected that self[:branch_name] is null for: #{inspect}")
-        end
-        ret
+        self[:branch_name] || fail(Error, "Unexpected that self[:branch_name] is null for: #{inspect}")
       end
 
       def self.repo_name(local)
         local.private_user_repo_name
+      end
+
+      def self.repo_display_name(local)
+        local.private_user_repo_display_name
       end
 
       def self.get_objs(mh, sp_hash, opts = {})

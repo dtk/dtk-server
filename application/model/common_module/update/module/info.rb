@@ -51,7 +51,6 @@ module DTK
       #   :create_implementation 
       # Returns module_branchobject
       def create_module_and_branch?(opts = {})
-        debugger
         if module_obj = module_exists?
           module_branch_exists? || create_module_branch
         else

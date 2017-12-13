@@ -27,30 +27,37 @@ module DTK; class ModuleBranch
         end
 
         def self.private_user_repo_name(username, module_type, module_name, module_namespace)
-          repo_name = "#{username}-#{module_namespace}-#{module_name}"
+          common_module_full_name(base_repo_name(username, module_name, module_namespace))
+        end
 
-          case module_type
-            when :service_module
-              return "sm-#{repo_name}"
-            when :test
-              return "tm-#{repo_name}"
-            when :common_module
-              return "m-#{repo_name}"
-            else
-              repo_name
-            end
+        def self.private_user_repo_display_name(username, module_type, module_name, module_namespace)
+          "#{module_type}-#{base_repo_name(username, module_name, module_namespace)}"
         end
 
         private
 
+        def self.base_repo_name(username, module_name, module_namespace)
+          "#{username}-#{module_namespace}-#{module_name}"
+        end
+
+        def self.common_module_full_name(repo_name)
+          "m-#{repo_name}"
+        end
+
         def ret_branch_name(opts = {})
-          self.class.ret_branch_name(@project, version(), opts)
+          self.class.ret_branch_name(@project, version, opts)
         end
 
         def ret_private_user_repo_name
-          username = CurrentSession.new.get_username()
-          namespace_name = module_namespace_name() || Namespace.default_namespace_name
-          Local.private_user_repo_name(username, @component_type, module_name(), namespace_name)
+          username = CurrentSession.new.get_username
+          namespace_name = module_namespace_name || Namespace.default_namespace_name
+          Local.private_user_repo_name(username, module_type, module_name, namespace_name)
+        end
+
+        def ret_private_user_repo_display_name
+          username = CurrentSession.new.get_username
+          namespace_name = module_namespace_name || Namespace.default_namespace_name
+          Local.private_user_repo_display_name(username, module_type, module_name, namespace_name)
         end
 
         #===== helper methods

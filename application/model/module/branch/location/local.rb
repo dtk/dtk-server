@@ -71,8 +71,13 @@ module DTK; class ModuleBranch
       end
 
       def private_user_repo_name
-        @private_user_repo_name ||= ret_private_user_repo_name()
+        @private_user_repo_name ||= ret_private_user_repo_name
       end
+
+      def private_user_repo_display_name
+        @private_user_repo_display_name ||= ret_private_user_repo_display_name
+      end
+
     end
   end
 end; end

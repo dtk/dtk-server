@@ -77,7 +77,6 @@ module DTK
       }
       impl_ref = ref(module_namespace, module_name, branch)
       impl_mh = project.id_handle.create_childMH(:implementation)
-      debugger
       create_from_row?(impl_mh, impl_ref, match_assigns, impl_hash).create_object.merge(impl_hash)
     end
 

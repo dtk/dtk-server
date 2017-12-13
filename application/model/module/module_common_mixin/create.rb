@@ -30,7 +30,6 @@ module DTK; module ModuleCommonMixin
     #  :donot_push_to_repo_manager
     #  :common_module - TODO: see if this is needed and instead use module_type from local_params
     def create_module(project, local_params, opts = {})
-      debugger
       local       = local_params.create_local(project)
       namespace   = local_params.namespace
       module_name = local_params.module_name

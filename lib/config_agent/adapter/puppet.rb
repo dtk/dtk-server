@@ -117,7 +117,9 @@ module DTK
 
         # want components to be unique
         components = component_actions.inject({}) { |h, r| h.merge(r[:component][:id] => r[:component]) }.values
-        ComponentModule::VersionContextInfo.get_in_hash_form(components, assembly_instance)
+ret =        ComponentModule::VersionContextInfo.get_in_hash_form(components, assembly_instance)
+pp ret
+fail Error, "TODO: DTK-3366: Make sure that ComponentModule::VersionContextInfo uses right repo url"
       end
 
       def assembly_attributes(config_node)

@@ -33,7 +33,6 @@ module DTK; class ConfigAgent; module Adapter
         failure_attempts = config_node[:retry][:attempts] || nil
         failure_sleep    = config_node[:retry][:sleep] || nil
       end
-debugger
       ret = {
         action_agent_request: {
           task_id: opts[:task_id],
@@ -44,7 +43,7 @@ debugger
           failure_attempts: failure_attempts,
           failure_sleep: failure_sleep
         },
-        modules: get_base_and_dependent_modules(component, assembly_instance)
+        modules: get_base_and_dependent_modules(assembly_instance)
       }
 
       if assembly_instance
@@ -52,18 +51,6 @@ debugger
       end
 
       ret
-    end
-
-    def get_base_and_dependent_modules(component, assembly_instance)
-      ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance).inject({}) do |h, aug_module_branch|
-        module_info = {
-          repo: aug_module_branch.repo.display_name,
-          branch: aug_module_branch.branch_name,
-          sha: aug_module_branch.current_sha,
-          frozen: !is_assembly_module_version?(aug_module_branch)
-        }
-        h.merge(aug_module_branch.module_name => module_info)
-      end
     end
 
     def is_assembly_module_version?(aug_module_branch)

@@ -70,12 +70,12 @@ module DTK; class ModuleBranch
         @branch_name ||= ret_branch_name()
       end
 
-      def private_user_repo_name
-        @private_user_repo_name ||= ret_private_user_repo_name
+      def repo_name
+        @repo_name ||= ret_repo_name
       end
 
-      def private_user_repo_display_name
-        @private_user_repo_display_name ||= ret_private_user_repo_display_name
+      def repo_display_name
+        @repo_display_name ||= ret_repo_display_name
       end
 
     end

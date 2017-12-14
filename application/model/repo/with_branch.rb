@@ -35,8 +35,8 @@ module DTK
       end
 
       def self.create_obj?(model_handle, local)
-        repo_name          = repo_name(local)
-        repo_display_name  = repo_display_name(local)
+        repo_name          = local.repo_name
+        repo_display_name  = local.repo_display_name
 
         repo_obj = obj_exists?(model_handle, repo_display_name) || create_obj(model_handle, repo_name, repo_display_name)
         set_branch_name!(repo_obj, local.branch_name)
@@ -91,14 +91,6 @@ module DTK
 
       def branch_name
         self[:branch_name] || fail(Error, "Unexpected that self[:branch_name] is null for: #{inspect}")
-      end
-
-      def self.repo_name(local)
-        local.private_user_repo_name
-      end
-
-      def self.repo_display_name(local)
-        local.private_user_repo_display_name
       end
 
       def self.get_objs(mh, sp_hash, opts = {})

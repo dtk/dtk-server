@@ -22,55 +22,50 @@ module DTK; class ModuleBranch
         super
       end
       class Local < Location::Local
-        def self.workspace_branch_name(project, version = nil, opts = {})
-          ret_branch_name(project, version, opts)
+        def self.workspace_branch_name(project, version = nil)
+          ret_branch_name(project, version)
         end
 
-        def self.private_user_repo_name(username, module_type, module_name, module_namespace)
-          common_module_full_name(base_repo_name(username, module_name, module_namespace))
+        def self.repo_name(module_type, module_name, module_namespace)
+          common_module_full_name(base_repo_name(module_name, module_namespace))
         end
 
-        def self.private_user_repo_display_name(username, module_type, module_name, module_namespace)
-          "#{module_type}-#{base_repo_name(username, module_name, module_namespace)}"
+        def self.repo_display_name(module_type, module_name, module_namespace)
+          "#{module_type}-#{base_repo_name(module_name, module_namespace)}"
         end
 
         private
 
-        def self.base_repo_name(username, module_name, module_namespace)
-          "#{username}-#{module_namespace}-#{module_name}"
+        def self.base_repo_name(module_name, module_namespace)
+          "#{module_namespace}-#{module_name}"
         end
 
         def self.common_module_full_name(repo_name)
-          "m-#{repo_name}"
+          repo_name
         end
 
-        def ret_branch_name(opts = {})
-          self.class.ret_branch_name(@project, version, opts)
+        def ret_branch_name
+          self.class.ret_branch_name(self.project, version)
         end
 
-        def ret_private_user_repo_name
-          username = CurrentSession.new.get_username
+        def ret_repo_name
           namespace_name = module_namespace_name || Namespace.default_namespace_name
-          Local.private_user_repo_name(username, module_type, module_name, namespace_name)
+          Local.repo_name(module_type, module_name, namespace_name)
         end
 
-        def ret_private_user_repo_display_name
-          username = CurrentSession.new.get_username
+        def ret_repo_display_name
           namespace_name = module_namespace_name || Namespace.default_namespace_name
-          Local.private_user_repo_display_name(username, module_type, module_name, namespace_name)
+          Local.repo_display_name(module_type, module_name, namespace_name)
         end
 
-        #===== helper methods
+        ASSEMBLY_MODULE_PREFIX = 'service_instance'
+        DEFAULT_MODULE_BRANCH  = 'master'
 
-        def self.ret_branch_name(project, version, opts = {})
-          # user_prefix = "workspace-#{project.get_field?(:ref)}"
-          user_prefix = opts[:version_branch]||"workspace-#{project.get_field?(:ref)}"
+        def self.ret_branch_name(project, version)
           if version.is_a?(ModuleVersion::AssemblyModule)
-            assembly_suffix = "--assembly-#{version.assembly_name}"
-            "#{user_prefix}#{assembly_suffix}"
+            "#{ASSEMBLY_MODULE_PREFIX}--#{version.assembly_name}"
           else
-            version_suffix = ((version && version != BranchNames::VersionFieldDefault) ? "-v#{version}" : '')
-            "#{user_prefix}#{version_suffix}"
+            (version && version != BranchNames::VersionFieldDefault) ? "-v#{version}" : DEFAULT_MODULE_BRANCH
           end
         end
       end

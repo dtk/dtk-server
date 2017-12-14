@@ -33,7 +33,7 @@ module DTK; class ConfigAgent; module Adapter
         failure_attempts = config_node[:retry][:attempts] || nil
         failure_sleep    = config_node[:retry][:sleep] || nil
       end
-
+debugger
       ret = {
         action_agent_request: {
           task_id: opts[:task_id],

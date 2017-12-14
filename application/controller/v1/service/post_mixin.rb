@@ -237,7 +237,7 @@ module DTK
         assembly_instance.delete_component(component.id_handle, node.id, { delete_node_as_component_node: true})
 
         service_instance_branch = assembly_instance.get_service_instance_branch
-        DTK::CommonDSL::Generate::ServiceInstance.generate_dsl(assembly_instance, service_instance_branch)
+        DTK::CommonDSL::Generate::ServiceInstance.generate_dsl_and_push!(assembly_instance, service_instance_branch)
 
         response = CommonModule::ModuleRepoInfo.new(service_instance_branch)
         response.merge!(repo_updated: true)

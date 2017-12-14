@@ -23,12 +23,11 @@ module DTK
           ContentInput.generate_for_service_instance(service_instance, service_module_branch)
         end
         
-        def self.generate_dsl(service_instance, service_module_branch, &body_to_create_nested_component_modules)
+        def self.generate_dsl_and_push!(service_instance, service_module_branch)
           add_service_dsl_files(service_instance, service_module_branch)
-          body_to_create_nested_component_modules.call if body_to_create_nested_component_modules
-          # push_changes done after body_to_create_nested_component_modules because that method updates repo
           RepoManager.push_changes(service_module_branch)
           service_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
+          service_module_branch
         end
         
         private

@@ -106,7 +106,7 @@ module DTK; module CommonDSL
               # items_to_update are things that need to be updated in repo from what at this point are in object model
               unless items_to_update.empty?
                 # update dtk.service.yaml with data from object model
-                Generate::ServiceInstance.generate_dsl(opts[:service_instance], module_branch)
+                Generate::ServiceInstance.generate_dsl_and_push!(opts[:service_instance], module_branch)
                 diff_result.repo_updated = true # means repo updated by server
               end
             end

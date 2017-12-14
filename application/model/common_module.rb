@@ -20,10 +20,10 @@ module DTK
     # Mixins must go first
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
+    require_relative('common_module/module_repo_info')
+    # module_repo_info must be before service_instance
     require_relative('common_module/remote')
     require_relative('common_module/import') #TODO: should this be removed or have name changed after fully port to new client
-    require_relative('common_module/module_repo_info')
-    require_relative('common_module/service_instance_repo_info')
     require_relative('common_module/update')
     require_relative('common_module/info')
     require_relative('common_module/service_instance')

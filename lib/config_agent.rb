@@ -62,6 +62,21 @@ module DTK
 
     private
 
+    def get_base_and_dependent_modules(assembly_instance)
+      # TODO: DTK-3366; see if should do below
+      # aug_module_branch.update_current_sha_from_repo!
+    
+      ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance).inject({}) do |h, aug_module_branch|
+        module_info = {
+          repo: aug_module_branch.repo.repo_name,
+          branch: aug_module_branch.branch_name,
+          sha: aug_module_branch.current_sha,
+          frozen: !is_assembly_module_version?(aug_module_branch)
+        }
+        h.merge(aug_module_branch.module_name => module_info)
+      end
+    end
+
     def update_attribute_value!(attribute)
       self.class.update_attribute_value!(attribute)
     end

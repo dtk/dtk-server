@@ -47,10 +47,10 @@ module DTK; class ConfigAgent
           end
         end
 
-        dynamic_provider      = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
+        dynamic_provider = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid
 
-        nested_module_info = get_base_and_dependent_modules(component, assembly_instance)
+        nested_module_info = get_base_and_dependent_modules(assembly_instance)
 
         system_values = {}
         if base_component_repo = base_component_repo?(nested_module_info, assembly_instance)
@@ -89,23 +89,6 @@ module DTK; class ConfigAgent
       end
       
       private
-      
-      # TODO: DTK-2848: use component to prune list
-      def get_base_and_dependent_modules(component, assembly_instance)
-        ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance).inject({}) do |h, aug_module_branch|
-          # TODO: DTK-3111; see if any harm in updating aug_module_branch current sha
-          #       Need to check if frozen then it does not use this
-          aug_module_branch.update_current_sha_from_repo!
-
-          module_info = {
-            repo: aug_module_branch.repo.display_name,
-            branch: aug_module_branch.branch_name,
-            sha: aug_module_branch.current_sha,
-            frozen: !is_assembly_module_version?(aug_module_branch)
-          }
-          h.merge(aug_module_branch.module_name => module_info)
-        end
-      end
       
       def is_assembly_module_version?(aug_module_branch)
         ModuleVersion.assembly_module_version?(aug_module_branch.version)

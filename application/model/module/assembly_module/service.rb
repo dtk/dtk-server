@@ -23,8 +23,9 @@ module DTK; class AssemblyModule
     #  :service_module
     def initialize(assembly, opts = {})
       super(assembly)
-      @assembly_template_name = assembly_template_name?(assembly)
-      @service_module = opts[:service_module] || get_service_module(assembly)
+      @assembly_template_name = ret_assembly_template_name?(assembly)
+      @service_module         = opts[:service_module] || get_service_module(assembly)
+
       # dynamically computed
       @module_branches = nil
     end
@@ -35,7 +36,7 @@ module DTK; class AssemblyModule
     end
 
     def get_service_instance_branch
-      module_branches.find { |mb| mb.matches_version?(assembly_module_version) }
+      module_branches.find { |mb| mb.matches_version?(self.assembly_module_version) }
     end
 
     # opts can have keys:
@@ -65,7 +66,7 @@ module DTK; class AssemblyModule
        new(assembly).get_or_create_module_for_service_instance(opts)
     end
     def get_or_create_module_for_service_instance(opts = {})
-      if existing_branch = @service_module.get_module_branch_matching_version(assembly_module_version)
+      if existing_branch = self.service_module.get_module_branch_matching_version(self.assembly_module_version)
         return existing_branch unless opts[:delete_existing_branch]
         # existing_branch.delete_instance
       end
@@ -87,17 +88,20 @@ module DTK; class AssemblyModule
     # opts can have keys:
     #   :do_not_raise
     def delete_module?(opts = {})
-      service_module = get_service_module(@assembly, opts)
+      service_module = get_service_module(self.assembly_instance, opts)
       return if service_module == false
-      am_version = assembly_module_version
-      service_module.delete_version?(am_version, donot_delete_meta: true)
+      service_module.delete_version?(self.assembly_module_version, donot_delete_meta: true)
+    end
+
+    protected
+
+    attr_reader :assembly_template_name, :service_module
+
+    def module_branches
+      @module_branches ||= self.service_module.get_module_branches
     end
 
     private
-
-    def module_branches
-      @module_branches ||= @service_module.get_module_branches
-    end
 
     # Creates a repo, repo branch if needed for service and new module branch and returns module branch
     # opts can have keys
@@ -105,10 +109,10 @@ module DTK; class AssemblyModule
     #   :delete_existing_branch
     def create_module_for_service_instance(opts = {})
       base_version = opts[:version]
-      @service_module.create_new_version(base_version, assembly_module_version, delete_existing_branch: opts[:delete_existing_branch])
+      self.service_module.create_new_version(base_version, self.assembly_module_version, delete_existing_branch: opts[:delete_existing_branch])
     end
 
-    def assembly_template_name?(assembly)
+    def ret_assembly_template_name?(assembly)
       if assembly_template = assembly.get_parent
         assembly_template.get_field?(:display_name)
       else

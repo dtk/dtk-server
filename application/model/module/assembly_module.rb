@@ -37,9 +37,11 @@ module DTK
       @assembly
     end
 
-    private
+    protected
 
     attr_reader :assembly_module_version
+
+    private
 
     def self.assembly_module_version(assembly)
       ModuleVersion.ret(assembly)

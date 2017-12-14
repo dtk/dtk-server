@@ -204,6 +204,7 @@ module DTK; module ModuleCommonMixin
     #   :delete_existing_branch (Boolean; default: false)
     #   :frozen
     #   :inherit_frozen_from_base
+    #   :donot_update_model
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_module_branch_with_version(base_version)
         fail ErrorUsage.new("There is no module (#{pp_module_ref}) in the workspace")
@@ -221,7 +222,8 @@ module DTK; module ModuleCommonMixin
         ancestor_branch_idh: aug_base_branch.id_handle, 
         current_sha: new_version_sha, 
         new_branch_name: new_branch_name,
-        dsl_version: aug_base_branch.dsl_version
+        dsl_version: aug_base_branch.dsl_version,
+        donot_update_model: opts[:donot_update_model]                                             
       )
 
       if opts[:inherit_frozen_from_base]

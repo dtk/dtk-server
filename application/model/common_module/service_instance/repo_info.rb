@@ -17,14 +17,16 @@
 #
 module DTK
   class CommonModule
-    class ServiceInstanceRepoInfo < ::Hash
-      def initialize(base_module_branch)
-        replace(base_module: ModuleRepoInfo.new(base_module_branch), nested_modules: [])
-      end
-
-      def add_nested_module!(nested_module_branch)
-        self[:nested_modules] << ModuleRepoInfo.new(nested_module_branch)
-        self
+    class ServiceInstance
+      class RepoInfo < ::Hash
+        def initialize(base_module_branch)
+          replace(base_module: ModuleRepoInfo.new(base_module_branch), nested_modules: [])
+        end
+        
+        def add_nested_module_info!(nested_module_branch)
+          self[:nested_modules] << ModuleRepoInfo.new(nested_module_branch)
+          self
+        end
       end
     end
   end

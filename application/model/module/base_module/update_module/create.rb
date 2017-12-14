@@ -57,18 +57,21 @@ module DTK; class BaseModule; class UpdateModule
       end
 
       dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
-      if klass().contains_dsl_file?(impl_obj)
-        if err = parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts.merge!(project: project))
-          ret.merge!(dsl_parse_error: err)
-        end
-      elsif opts[:scaffold_if_no_dsl]
-        opts_scaffold = Opts.create?(include_modules?: include_modules?(ret[:matching_module_refs], ret[:external_dependencies]))
-        dsl_created_info = ScaffoldImplementation.create_dsl(module_name(), config_agent_type, impl_obj, opts_scaffold)
-        if opts[:commit_dsl]
-          # add dsl file and create DTK module objects from the dsl
-          add_dsl_to_impl_and_create_objects(dsl_created_info, project, impl_obj, module_branch_idh, version, opts)
-        else
-          Log.error('Unexpected that opts[:commit_dsl] is false when opts[:scaffold_if_no_dsl] is true')
+      unless opts[:donot_update_model]
+        fail "DTK-3366: looking for dtk.model.yaml' as opposed to dtk.module.yaml"
+        if ModuleDSL.contains_dsl_file?(impl_obj)
+          if err = parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts.merge!(project: project))
+            ret.merge!(dsl_parse_error: err)
+          end
+        elsif opts[:scaffold_if_no_dsl]
+          opts_scaffold = Opts.create?(include_modules?: include_modules?(ret[:matching_module_refs], ret[:external_dependencies]))
+          dsl_created_info = ScaffoldImplementation.create_dsl(module_name(), config_agent_type, impl_obj, opts_scaffold)
+          if opts[:commit_dsl]
+            # add dsl file and create DTK module objects from the dsl
+            add_dsl_to_impl_and_create_objects(dsl_created_info, project, impl_obj, module_branch_idh, version, opts)
+          else
+            Log.error('Unexpected that opts[:commit_dsl] is false when opts[:scaffold_if_no_dsl] is true')
+          end
         end
       end
 

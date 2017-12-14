@@ -48,7 +48,6 @@ module DTK
           hash.merge!(has_remote: true) if repo.default_remote
         end
         
-
         replace(hash)
       end
     end

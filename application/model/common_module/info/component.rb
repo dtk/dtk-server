@@ -79,7 +79,7 @@ module DTK
         private
 
         def self.transform_class
-          @transform_class ||= CommonDSL::ComponentModuleRepoSync::Transform
+          @transform_class ||= CommonDSL::NestedModuleRepo::Transform
         end
 
         def self.common_module_dsl_file_path

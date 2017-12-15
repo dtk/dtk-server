@@ -18,9 +18,9 @@
 module DTK
   module CommonDSL
     # Methods to sync to and from the service instance repo to the component module repos using git subtree operations
-    class ComponentModuleRepoSync
-      require_relative('component_module_repo_sync/common')
-      require_relative('component_module_repo_sync/transform')
+    class NestedModuleRepo
+      require_relative('nested_module_repo/common')
+      require_relative('nested_module_repo/transform')
 
       def initialize(service_module_branch)
         @service_module_branch = service_module_branch

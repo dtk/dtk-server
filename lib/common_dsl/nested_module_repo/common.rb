@@ -17,7 +17,7 @@
 #
 module DTK
   module CommonDSL
-    class ComponentModuleRepoSync
+    class NestedModuleRepo
       module Common
         NestedModuleFileType = FileType::ServiceInstance::NestedModule
 

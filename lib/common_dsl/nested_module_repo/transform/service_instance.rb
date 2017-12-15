@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL
-  class ComponentModuleRepoSync
+  class NestedModuleRepo
     class Transform
       class ServiceInstance < self
         def initialize(service_module_branch, aug_component_module_branch)

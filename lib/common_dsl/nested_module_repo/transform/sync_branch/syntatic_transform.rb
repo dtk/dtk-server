@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL
-  class ComponentModuleRepoSync
+  class NestedModuleRepo
     class Transform::SyncBranch 
       module SyntaticTransform
         # returns [component_module_dsl_text, module_ref_text]

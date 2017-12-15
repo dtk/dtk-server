@@ -28,15 +28,13 @@ module DTK
       end
       def create_service_instance_and_nested_modules(opts = {})
         base_service_module_branch = get_or_create_module_for_service_instance(opts.merge(delete_existing_branch: true))
+        debugger
         service_module_branch = CommonDSL::Generate::ServiceInstance.generate_dsl_and_push!(self, base_service_module_branch) 
 
         service_instance_repo_info = RepoInfo.new(service_module_branch)
         if opts[:add_nested_modules]
           self.aug_nested_base_module_branches.each do |aug_nested_base_module_branch|
-            component_module = aug_nested_base_module_branch.component_module
-            base_version     = aug_nested_base_module_branch.version
-            # creating new branch, but no need to update the model
-            aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, donot_update_model: true)
+            aug_nested_module_branch = process_nested_module(aug_nested_base_module_branch, service_module_branch)
             service_instance_repo_info.add_nested_module_info!(aug_nested_module_branch)
           end
         end
@@ -113,6 +111,15 @@ module DTK
         end
       end
 
+      def process_nested_module(aug_nested_base_module_branch, service_module_branch)
+        component_module = aug_nested_base_module_branch.component_module
+        base_version     = aug_nested_base_module_branch.version
+        # creating new branch, but no need to update the model
+        aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, donot_update_model: true)
+        CommonDSL::NestedModuleRepo.update_repo_for_stage(service_module_branch, aug_nested_module_branch)
+        aug_nested_module_branch
+      end
+        
       def reload_aug_component_module_branches
         ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance, augment_with_component_modules: true)
       end

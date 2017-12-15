@@ -51,7 +51,7 @@ module DTK; module CommonDSL
           aug_service_specific_mb = @service_instance.get_or_create_for_nested_module(nested_component_module, base_version)
 
           # Push changes to impacted component modules repo
-          ComponentModuleRepoSync.push_to_component_module(@service_module_branch, aug_service_specific_mb, @nested_module_info)
+          NestedModuleRepo.push_to_component_module(@service_module_branch, aug_service_specific_mb, @nested_module_info)
           # TODO: DTK-2708: until use dtk-dsl to parse nested module dsl; need to do push first since'
           # parsing looks at component module not the service isnatnce repo
           dsl_changed = false

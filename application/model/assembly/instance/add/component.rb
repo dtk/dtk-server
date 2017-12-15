@@ -102,7 +102,8 @@ module DTK
                 end
               end
 
-              CommonDSL::ComponentModuleRepoSync.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
+              fail Error, "TODO: DTK-3366; changed CommonDSL::NestedModuleRepo.pull_from_component_modules to update_repo_for_stage"
+              CommonDSL::NestedModuleRepo.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
             end
           end
         end

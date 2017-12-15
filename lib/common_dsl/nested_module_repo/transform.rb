@@ -17,7 +17,7 @@
 #
 module DTK
   module CommonDSL
-    class ComponentModuleRepoSync
+    class NestedModuleRepo
       class Transform
         require_relative('transform/sync_branch')
         require_relative('transform/service_instance')

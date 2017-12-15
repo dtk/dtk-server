@@ -148,7 +148,7 @@ module DTK
         Assembly::Template.delete_assemblies_nodes(assembly_templates.map(&:id_handle))
       end
 
-      CommonDSL::ComponentModuleRepoSync.delete_sync_repo_branch?(module_branch) if opts[:delete_sync_repo_branch]
+      CommonDSL::NestedModuleRepo.delete_sync_repo_branch?(module_branch) if opts[:delete_sync_repo_branch]
       module_branch.delete_instance_and_repo_branch()
       ret
     end

@@ -21,7 +21,7 @@ module DTK
     class NestedModuleRepo
       # TODO: DTK-3366: remove these"
       # require_relative('nested_module_repo/transform')
-      require_relative('nested_module_repo/common')
+      # require_relative('nested_module_repo/common')
 
       def initialize(aug_nested_module_branch)
         @aug_nested_module_branch = aug_nested_module_branch
@@ -33,7 +33,7 @@ module DTK
       end
       def update_repo_for_stage
         source_path      = FileType::CommonModule::DSLFile::Top.canonical_path
-        destination_path = self.nested_module_top_dsl_path
+        destination_path = FileType::ServiceInstance::NestedModule::DSLFile::Top.canonical_path
         RepoManager.move_file(source_path, destination_path, self.aug_nested_module_branch)
         RepoManager.add_all_files_and_commit({}, self.aug_nested_module_branch)
         RepoManager.push_changes(self.aug_nested_module_branch)
@@ -46,15 +46,6 @@ module DTK
 
       def nested_module_top_dsl_path
         @nested_module_top_dsl_path ||= ret_nested_module_top_dsl_path
-      end
-
-      private
-
-      def ret_nested_module_top_dsl_path
-        # TODO: DTK-3366: fix of DTK::DSL so that dont need to pass in nested_module_name
-        nested_module_name = self.aug_nested_module_branch.component_module_name
-        legacy_nested_module_path = Common.nested_module_top_dsl_path(nested_module_name)
-        legacy_nested_module_path.split('/').last
       end
 
     end

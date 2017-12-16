@@ -17,16 +17,7 @@
 #
 module DTK
   module CommonDSL
-    require_relative('common_dsl/file_type')
-    require_relative('common_dsl/directory_type')
-    require_relative('common_dsl/diff')
-    # diff must be before generate
-    require_relative('common_dsl/generate')
-    require_relative('common_dsl/parse')
-    require_relative('common_dsl/nested_module_repo')
-    require_relative('common_dsl/service_module_repo_sync')
-
-    # object_logic must go last
-    require_relative('common_dsl/object_logic')
+    class DirectoryType < ::DTK::DSL::DirectoryType
+    end
   end
 end

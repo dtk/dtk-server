@@ -164,8 +164,12 @@ module DTK
         git_command.merge(cmd_opts, *command_array)
       end
       
-      def git_command__hard_reset(branch_to_reset_from)
-        git_command.reset(cmd_opts, '--hard', branch_to_reset_from)
+      def git_command__hard_reset(branch_to_reset_from =  nil)
+        if branch_to_reset_from
+          git_command.reset(cmd_opts, '--hard', branch_to_reset_from)
+        else
+          git_command.reset(cmd_opts, '--hard')
+        end
       end
       
       def git_command__create_local_branch(branch_name)
@@ -179,6 +183,8 @@ module DTK
       end
       
       def git_command__delete_local_branch(branch_name)
+        # hard reset to clear any working memory
+        git_command__hard_reset
         git_command.branch(cmd_opts, '-D', branch_name)
       end
 

@@ -20,7 +20,6 @@ module DTK
     class NestedModuleRepo
       class Transform
         require_relative('transform/sync_branch')
-        require_relative('transform/service_instance')
 
         def self.transform_from_component_info(type, module_branch, aug_component_module_branch, dsl_file_path, opts = {})
           dsl_hash = ObjectLogic::ComponentInfoModule.generate_content_input(type, module_branch, aug_component_module_branch)

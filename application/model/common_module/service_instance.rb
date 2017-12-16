@@ -28,13 +28,12 @@ module DTK
       end
       def create_service_instance_and_nested_modules(opts = {})
         base_service_module_branch = get_or_create_module_for_service_instance(opts.merge(delete_existing_branch: true))
-        debugger
         service_module_branch = CommonDSL::Generate::ServiceInstance.generate_dsl_and_push!(self, base_service_module_branch) 
 
         service_instance_repo_info = RepoInfo.new(service_module_branch)
         if opts[:add_nested_modules]
           self.aug_nested_base_module_branches.each do |aug_nested_base_module_branch|
-            aug_nested_module_branch = process_nested_module(aug_nested_base_module_branch, service_module_branch)
+            aug_nested_module_branch = process_nested_module(aug_nested_base_module_branch)
             service_instance_repo_info.add_nested_module_info!(aug_nested_module_branch)
           end
         end
@@ -44,9 +43,11 @@ module DTK
       # Returns an augmented module branch pointing to module branch for nested mdoule
       # opts can have keys
       #   :donot_update_model
+      #   :delete_existing_branch
       def get_or_create_for_nested_module(component_module, base_version, opts = {})
         create_opts = {
           donot_update_model: opts[:donot_update_model],
+          delete_existing_branch: opts[:delete_existing_branch],
           base_version: base_version, 
           ret_augmented_module_branch: true
         }
@@ -73,12 +74,10 @@ module DTK
 
       def get_repo_info
         module_repo_info = ModuleRepoInfo.new(get_service_instance_branch)
-        # TODO: do we need 'self' in self.assembly_instance
-        assembly_instance = self.assembly_instance
         {
           service: {
-            name: assembly_instance.display_name_print_form,
-            id: assembly_instance.id
+            name: self.assembly_instance.display_name_print_form,
+            id: self.assembly_instance.id
           }
         }.merge(module_repo_info)
       end
@@ -111,12 +110,16 @@ module DTK
         end
       end
 
-      def process_nested_module(aug_nested_base_module_branch, service_module_branch)
+      def process_nested_module(aug_nested_base_module_branch)
         component_module = aug_nested_base_module_branch.component_module
         base_version     = aug_nested_base_module_branch.version
         # creating new branch, but no need to update the model
-        aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, donot_update_model: true)
-        CommonDSL::NestedModuleRepo.update_repo_for_stage(service_module_branch, aug_nested_module_branch)
+        get_or_create_opts = {
+          donot_update_model: true,
+          delete_existing_branch: true
+        }
+        aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
+        CommonDSL::NestedModuleRepo.update_repo_for_stage(aug_nested_module_branch)
         aug_nested_module_branch
       end
         

@@ -30,6 +30,7 @@ module DTK; class AssemblyModule
     #  :base_version
     #  :checkout_branch
     #  :donot_update_model
+    #  :delete_existing_branch
     def create_module_for_service_instance?(component_module, opts = {})
       fail Error, "Both opts[:ret_augmented_module_branch] and opts[:ret_module_branch] cannot be non null" if opts[:ret_augmented_module_branch] and opts[:ret_module_branch]
       unless component_module.get_workspace_module_branch(self.assembly_module_version)
@@ -38,7 +39,8 @@ module DTK; class AssemblyModule
           sha: opts[:sha],
           inherit_frozen_from_base: true,
           checkout_branch: opts[:checkout_branch],
-          donot_update_model: opts[:donot_update_model]
+          donot_update_model: opts[:donot_update_model],
+          delete_existing_branch: opts[:delete_existing_branch]
         }
         component_module.create_new_version(base_version, self.assembly_module_version, create_opts)
       end

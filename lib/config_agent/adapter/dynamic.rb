@@ -37,8 +37,10 @@ module DTK; class ConfigAgent
         component_template    = component_template(component)
         service_instance_name = assembly_instance.display_name
 
-        failure_attempts      = (task_info[:retry] || {})[:attempts]
-        failure_sleep         = (task_info[:retry] || {}) [:sleep]
+        if task_info.is_a?(Hash)
+          failure_attempts      = (task_info[:retry] || {})[:attempts]
+          failure_sleep         = (task_info[:retry] || {})[:sleep]
+        end
 
         dynamic_provider      = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)
         dynamic_provider.raise_error_if_not_valid

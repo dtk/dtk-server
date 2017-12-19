@@ -30,8 +30,6 @@ module DTK
           service_module_branch
         end
         
-        private
-        
         def self.add_service_dsl_files(service_instance, service_module_branch)
           # content_input is a dsl version independent canonical form that has all content needed to
           content_input = generate_canonical_form(service_instance, service_module_branch)
@@ -42,6 +40,8 @@ module DTK
           file_path__content_array = FileGenerator.generate_yaml_file_path__content_array(:service_instance, top_file_path, content_input, dsl_version)
           DirectoryGenerator.add_files(service_module_branch, file_path__content_array, donot_push_changes: true)
         end
+
+        private
         
         def self.check_for_assembly_wide(content_input)
           if assembly = content_input[:asssembly]

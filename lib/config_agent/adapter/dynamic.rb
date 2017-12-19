@@ -38,13 +38,11 @@ module DTK; class ConfigAgent
         service_instance_name = assembly_instance.display_name
         failure_attempts      = nil
         failure_sleep         = nil
+        task_info_retry       = task_info[:retry] || {}
 
-        if task_info.is_a?(Hash)
-          task_info_retry = task_info[:retry] || {}
-          if task_info_retry.is_a?(Hash)
-            failure_attempts      = task_info_retry[:attempts]
-            failure_sleep         = task_info_retry[:sleep]
-          end
+        if task_info_retry.is_a?(Hash)
+          failure_attempts      = task_info[:retry][:attempts]
+          failure_sleep         = task_info[:retry][:sleep]
         end
 
         dynamic_provider      = ActionDef::DynamicProvider.matching_dynamic_provider(component_template, method_name, assembly_instance)

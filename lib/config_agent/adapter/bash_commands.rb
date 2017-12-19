@@ -29,9 +29,11 @@ module DTK; class ConfigAgent; module Adapter
       cmp_module_simple_name = component_action.component_module_name(no_namespace: true) 
       component              = component_action.component
       commands               = commands(config_node, cmp_module_simple_name, substitute_template_vars: true, assembly_instance: assembly_instance)
-       unless  config_node[:retry].empty? ||  config_node[:retry].nil?
-        failure_attempts = config_node[:retry][:attempts] || nil
-        failure_sleep    = config_node[:retry][:sleep] || nil
+      config_node_retry      = config_node[:retry] || {}
+
+      if config_node_retry.is_a?(Hash)
+        failure_attempts = config_node[:retry][:attempts]
+        failure_sleep    = config_node[:retry][:sleep]
       end
 
       ret = {

@@ -123,7 +123,7 @@ module DTK
       end
 
       def repo_info
-        rest_ok_response service_instance.get_repo_info
+        rest_ok_response service_instance.get_base_module_repo_info
       end
 
       def task_status

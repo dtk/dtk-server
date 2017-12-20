@@ -247,9 +247,16 @@ module DTK; class Task
               # TODO: see if any other way there can be loops
               fail ErrorUsage.new('Loop detected in temporal orders')
             end
-            internode_stage = stage_factory.create(stage_action_indexes)
-            self << internode_stage
-            new_stages << internode_stage
+
+            stage_action_indexes.each do |stage_action_index|
+              internode_stage = stage_factory.create([stage_action_index])
+              self << internode_stage
+              new_stages << internode_stage
+            end
+            # TODO: DTK-3382: removing below for above so dont have multi action stages
+            #internode_stage = stage_factory.create(stage_action_indexes)
+            #self << internode_stage
+            #new_stages << internode_stage
           end
         end
         set_internode_stage_names!(new_stages, opts[:internode_stage_name_proc])

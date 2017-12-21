@@ -65,7 +65,7 @@ module DTK; class ModuleBranch
           if version.is_a?(ModuleVersion::AssemblyModule)
             "#{ASSEMBLY_MODULE_PREFIX}--#{version.assembly_name}"
           else
-            (version && version != BranchNames::VersionFieldDefault) ? "-v#{version}" : DEFAULT_MODULE_BRANCH
+            (version && version != BranchNames::VersionFieldDefault) ? "v#{version}" : DEFAULT_MODULE_BRANCH
           end
         end
       end

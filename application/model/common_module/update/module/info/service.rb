@@ -72,7 +72,7 @@ module DTK
 
         if to_add = diffs[:add]
           to_add.each do |cmp_mod|
-            unless CommonModule.exists(self.project, :component_module, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info])
+            unless CommonModule.exists(self.project, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info])
               (ret[:missing_dependencies] ||= []) << cmp_mod
             end
           end

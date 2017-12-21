@@ -160,7 +160,7 @@ module DTK
       #   :diffs_summary
       #   :initial_update
       def args_for_create_or_update(parsed_common_module, opts = {})  
-        ArgsForCreateOrUpdate.new([self.project, self.local_params, self.module_branch, parsed_common_module, opts])
+        ArgsForCreateOrUpdate.new([self.project, self.local_params, self.repo, self.module_branch, parsed_common_module, opts])
       end
       class ArgsForCreateOrUpdate < ::Array
         def parsed_common_module

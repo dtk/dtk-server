@@ -110,11 +110,8 @@ module DTK
 
     # opts can have keys:
     #  :ret_remote_info
-    def self.exists(project, module_type, namespace, module_name, version, opts = {})
-      if matching_module = get_class_from_module_type(module_type).matching_module_with_module_branch?(project, namespace, module_name, version)
-# TODO: DTK-2852: for testing
-# allows ecists to go throw without repo so then the create repo from module called
-#matching_module[:module_branch][:repo_id] = nil
+    def self.exists(project, namespace, module_name, version, opts = {})
+      if matching_module = matching_module_with_module_branch?(project, namespace, module_name, version)
         ModuleRepoInfo.new(matching_module[:module_branch], ret_remote_info: opts[:ret_remote_info])
       end
     end

@@ -18,6 +18,7 @@ module DTK
   class V1::ModuleController
     module GetMixin
       def assemblies
+        fail "TODO: DTK-3366: need to reafctor"
         # TODO: if  module_name, namespace given filter on this
         module_name, namespace, version = request_params(:module_name, :namespace, :version)
         datatype = :assembly_template_with_module
@@ -34,11 +35,11 @@ module DTK
       end
 
       def exists
-        namespace, module_name, module_type = required_request_params(:namespace, :module_name, :module_type)
+        namespace, module_name = required_request_params(:namespace, :module_name)
 
         version     = request_params(:version) || 'master'
         remote_info = request_params(:remote_info)
-        response    = CommonModule.exists(get_default_project, module_type, namespace, module_name, version, { ret_remote_info: remote_info })
+        response    = CommonModule.exists(get_default_project, namespace, module_name, version, { ret_remote_info: remote_info })
 
         if remote_info && (response || {})[:has_remote]
           rsa_pub_key   = required_request_params(:rsa_pub_key)
@@ -98,7 +99,7 @@ module DTK
         namespace, module_name = required_request_params(:namespace, :module_name)
         version = request_params(:version) || 'master'
         response = {}
-        if module_info = CommonModule.exists(get_default_project, :component_module, namespace, module_name, version, { ret_remote_info: true })
+        if module_info = CommonModule.exists(get_default_project, namespace, module_name, version, { ret_remote_info: true })
           local_params = local_params(:component_module, module_name, namespace: namespace, version: version)
           dependencies = CommonModule.get_local_module_dependencies(get_default_project, local_params)
           response = { :module_info => module_info, :dependencies => dependencies }

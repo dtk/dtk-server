@@ -320,6 +320,17 @@ module DTK; class  Assembly
           delete_assembly_subtask = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
           task.add_subtask(delete_assembly_subtask)
         end
+        # maybe add here sorting of tasks // Test with revers nodes..
+        subtasks = task.subtasks
+        subtasks.each_with_index do |sub, index|
+          if sub.is_a?(Hash)
+            if sub[:display_name].include?("ec2::node")
+              ec2_node = sub              
+              subtasks.delete_at(index)
+              subtasks << ec2_node
+            end
+          end
+        end
         task
       end
   

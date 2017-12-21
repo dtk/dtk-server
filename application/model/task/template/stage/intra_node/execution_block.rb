@@ -119,7 +119,9 @@ module DTK; class Task; class Template
             { Constant::Actions => items }
           elsif items.size == 1 && items.first.is_a?(SerializedComponentGroup)
             { Constant::Components => items.first.components() }
-          else
+          elsif items.size == 1
+           { Constant::Components => items }
+          else 
            { Constant::OrderedComponents => items }
           end
         end

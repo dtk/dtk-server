@@ -30,9 +30,7 @@ module DTK; class Task; class Template
         @breakpoint = breakpoint
         @retry = serialized_retry
       end
-      attr_accessor :name 
-      attr_accessor :breakpoint
-      attr_accessor :retry
+      attr_accessor :name, :breakpoint, :retry 
 
       def self.create_from_single_action(action, opts = {})
         new(stage_name(action, opts)).add_new_execution_block_for_action!(action, opts)

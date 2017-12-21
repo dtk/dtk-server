@@ -96,6 +96,7 @@ module DTK
       end
 
       def install_component_info
+        fail "TODO: DTK-3366: this route should not be called"
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)
 
@@ -107,6 +108,7 @@ module DTK
       end
 
       def install_service_info
+        fail "TODO: DTK-3366: this route should not be called"
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)
 

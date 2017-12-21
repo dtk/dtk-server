@@ -42,17 +42,13 @@ module DTK
         ret = UpdateResponse.new
 
         return ret if self.module_branch.is_set_to_sha?(self.commit_sha)
-
-        pull_opts = { force: true, install_on_server: opts[:install_on_server] }
-        self.module_branch.pull_repo_changes_and_return_diffs_summary(self.commit_sha, pull_opts) do |repo_diffs_summary|
-          if !repo_diffs_summary.empty? || opts[:force_parse]
+        self.module_branch.pull_repo_changes_and_return_diffs_summary(self.commit_sha, force: true) do |repo_diffs_summary|
+          if !repo_diffs_summary.empty? || opts[:force_parse] || opts[:initial_update]
             self.module_branch.set_dsl_parsed!(false)
-            if opts[:install_on_server]
-              top_dsl_file_changed = true
-            else
-              ret.add_diffs_summary!(repo_diffs_summary)
-              top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
-            end
+
+            ret.add_diffs_summary!(repo_diffs_summary)
+            top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
+            top_dsl_file_changed = true if opts[:initial_update]
 
             # TODO: make more efficient by just computing parsed_common_module if parsing
             parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)

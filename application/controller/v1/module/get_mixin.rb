@@ -18,8 +18,6 @@ module DTK
   class V1::ModuleController
     module GetMixin
       def assemblies
-        fail "TODO: DTK-3366: need to reafctor"
-        # TODO: if  module_name, namespace given filter on this
         module_name, namespace, version = request_params(:module_name, :namespace, :version)
         datatype = :assembly_template_with_module
 

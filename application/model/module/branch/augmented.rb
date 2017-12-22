@@ -116,6 +116,7 @@ module DTK
       end
 
       def current_sha
+        update_current_sha_from_repo! unless self[:current_sha] 
         self[:current_sha] || raise_unexpected_nil('self[:current_sha]')
       end
       

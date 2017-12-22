@@ -23,9 +23,11 @@ module DTK
       # opts can have keys
       #   :add_nested_modules
       #   :delete_existing_branch
+      #   :version
       def initialize(assembly_instance, opts = {})
         super(assembly_instance)
-        @base_module_branch = get_or_create_module_for_service_instance(delete_existing_branch: opts[:delete_existing_branch])
+        @base_version       = opts[:version]
+        @base_module_branch = get_or_create_module_for_service_instance(delete_existing_branch: opts[:delete_existing_branch], version: opts[:version])
         @add_nested_modules    = opts[:add_nested_modules]
       end
 
@@ -34,10 +36,12 @@ module DTK
       # Returns CommonModule::ServiceInstance::RepoInfo
       # opts can have keys
       #   :add_nested_modules
+      #   :version
       def self.create_service_instance_and_nested_modules(assembly_instance, opts = {})
         create_opts = {
           add_nested_modules: opts[:add_nested_modules], 
-          delete_existing_branch: true
+          delete_existing_branch: true,
+          version: opts[:version]
         }
         new(assembly_instance, create_opts).create_service_instance_and_nested_modules
       end

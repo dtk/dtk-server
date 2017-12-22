@@ -52,7 +52,7 @@ module DTK
       # Returns module_branchobject
       def create_module_and_branch?(opts = {})
         if module_obj = module_exists?
-          module_branch_exists? || create_module_branch
+          module_branch_exists? || create_module_branch(module_obj)
         else
           create_module_and_branch(create_implementation: opts[:create_implementation])
         end
@@ -156,16 +156,10 @@ module DTK
         self.module_class.create_module(self.project, self.local_params, return_module_branch: true, create_implementation: opts[:create_implementation], donot_push_to_repo_manager: true)
       end
 
-      def create_module_branch
+      def create_module_branch(module_obj)
         repo = module_obj.get_repo
         module_branch = self.module_class.create_ws_module_and_branch_obj?(self.project, repo.id_handle, self.module_name, self.version, namespace_obj, return_module_branch: true)
         repo.merge!(branch_name: module_branch[:branch])
-        add_branch_opts = {
-          empty: true,
-          delete_existing_branch: self.initial_update?
-        }
-        # TODO: DTK-3366: removed
-        # RepoManager.add_branch_and_push?(module_branch[:branch], add_branch_opts, module_branch)
         module_branch
       end      
 

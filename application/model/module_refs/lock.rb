@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require 'ruby-debug'
 module DTK
   class ModuleRefs
     # This object and its associated table (module.module_ref_lock) captures
@@ -32,6 +33,7 @@ module DTK
       attr_reader :assembly_instance
       def initialize(assembly_instance)
         super()
+        debugger
         @assembly_instance = assembly_instance
       end
 

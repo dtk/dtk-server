@@ -50,13 +50,11 @@ module DTK
             top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
             top_dsl_file_changed = true if opts[:initial_update]
 
-            # TODO: make more efficient by just computing parsed_common_module if parsing
-            parsed_common_module = dsl_file_obj_from_repo.parse_content(:common_module)
-            CommonDSL::Parse.set_dsl_version!(self.module_branch, parsed_common_module)
+            CommonDSL::Parse.set_dsl_version!(self.module_branch, self.parsed_common_module)
             parse_needed = (opts[:force_parse] == true or top_dsl_file_changed)
-            
+            # debugger
             unless opts[:skip_missing_check]
-              missing_dependencies = check_for_missing_dependencies(parsed_common_module, initial_update: opts[:initial_update])
+              missing_dependencies = check_for_missing_dependencies(initial_update: opts[:initial_update])
               if missing_dependencies && missing_dependencies[:missing_dependencies]
                 if existing_diffs = ret[:diffs]
                   (missing_dependencies||{}).merge!(existing_diffs: existing_diffs) unless existing_diffs.empty?
@@ -70,7 +68,7 @@ module DTK
               diffs_summary: repo_diffs_summary,
               initial_update: opts[:initial_update]
             }
-            create_or_update_from_parsed_common_module(parsed_common_module, create_or_update_opts)
+            create_or_update_from_parsed_common_module(create_or_update_opts)
           end
           self.module_branch.set_dsl_parsed!(true)
           # This sets sha on branch only after all processing goes through
@@ -89,10 +87,13 @@ module DTK
         @module_branch ||= get_module_branch
       end
 
+      def parsed_common_module 
+        @parsed_common_module ||= self.dsl_file_obj_from_repo.parse_content(:common_module)
+      end
+
       def dsl_file_obj_from_repo
         @dsl_file_obj_from_repo ||= CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(self.module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
       end
-
 
       private
 
@@ -114,8 +115,8 @@ module DTK
       #   :parse_needed
       #   :diffs_summary
       #   :initial_update
-      def create_or_update_from_parsed_common_module(parsed_common_module, opts = {})
-        args    = args_for_create_or_update(parsed_common_module, opts)
+      def create_or_update_from_parsed_common_module(opts = {})
+        args    = args_for_create_or_update(opts)
         retried = false
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
         begin
@@ -133,8 +134,8 @@ module DTK
 
       # opts can have keys: 
       #   :initial_update
-      def check_for_missing_dependencies(parsed_common_module, opts = {})
-        info_service_object(args_for_create_or_update(parsed_common_module, opts)).check_for_missing_dependencies
+      def check_for_missing_dependencies(opts = {})
+        info_service_object(args_for_create_or_update(opts)).check_for_missing_dependencies
       end
 
       def create_or_update_component_info(args, opts = {})
@@ -155,8 +156,8 @@ module DTK
       #   :parse_needed
       #   :diffs_summary
       #   :initial_update
-      def args_for_create_or_update(parsed_common_module, opts = {})  
-        ArgsForCreateOrUpdate.new([self.project, self.local_params, self.repo, self.module_branch, parsed_common_module, opts])
+      def args_for_create_or_update(opts = {})  
+        ArgsForCreateOrUpdate.new([self.project, self.local_params, self.repo, self.module_branch, self.parsed_common_module, opts])
       end
       class ArgsForCreateOrUpdate < ::Array
         def parsed_common_module

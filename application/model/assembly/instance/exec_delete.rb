@@ -142,8 +142,10 @@ module DTK; class  Assembly
             # fix to add :retry to the cmp_top_task
             task_template_content = get_task_template_content(model_handle(:task_template), component)
             task_template_content.each do |ttc|
-              cmp = ttc[:components].first.gsub('::', '__').gsub(/\.[^\.]+$/, '')
-              component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
+              if ttc[:components]
+                cmp = ttc[:components].first.gsub('::', '__').gsub(/\.[^\.]+$/, '')
+                component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
+              end
             end
 
             begin
@@ -283,8 +285,10 @@ module DTK; class  Assembly
               # fix to add :retry to the cmp_top_task
               task_template_content = get_task_template_content(model_handle(:task_template), component)
               task_template_content.each do |ttc|
-                cmp = ttc[:components].first.gsub('::', '__').gsub(/\.[^\.]+$/, '')
-                component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
+                if ttc[:components]
+                  cmp = ttc[:components].first.gsub('::', '__').gsub(/\.[^\.]+$/, '')
+                  component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
+                end
               end
 
               begin                

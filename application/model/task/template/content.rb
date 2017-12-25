@@ -59,7 +59,7 @@ module DTK; class Task
         all_actions = []
         each_internode_stage do |internode_stage, stage_index|
           task_hash = {
-            display_name: internode_stage.name || DefaultNameProc.call(stage_index, size == 1),
+            display_name: internode_stage.name || DefaultNameProc.call(internode_stage, stage_index, size == 1),
             temporal_order: 'concurrent'
           }
 
@@ -247,9 +247,16 @@ module DTK; class Task
               # TODO: see if any other way there can be loops
               fail ErrorUsage.new('Loop detected in temporal orders')
             end
-            internode_stage = stage_factory.create(stage_action_indexes)
-            self << internode_stage
-            new_stages << internode_stage
+
+            stage_action_indexes.each do |stage_action_index|
+              internode_stage = stage_factory.create([stage_action_index])
+              self << internode_stage
+              new_stages << internode_stage
+            end
+            # TODO: DTK-3382: removing below for above so dont have multi action stages
+            #internode_stage = stage_factory.create(stage_action_indexes)
+            #self << internode_stage
+            #new_stages << internode_stage
           end
         end
         set_internode_stage_names!(new_stages, opts[:internode_stage_name_proc])
@@ -262,7 +269,7 @@ module DTK; class Task
         new_stages.each_with_index do |internode_stage, i|
           unless internode_stage.name
             stage_index = i + 1
-            internode_stage.name = internode_stage_name_proc.call(stage_index, is_single_stage)
+            internode_stage.name = internode_stage_name_proc.call(internode_stage, stage_index, is_single_stage)
           end
         end
       end

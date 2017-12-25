@@ -116,6 +116,10 @@ for type in rsa dsa ecdsa ed25519; do
   fn="ssh_host_${type}_key"
   f="${SSH_HOST_KEY_DIR}/ssh_host_${type}_key"
 
+  # make sure host keys are always symlinked
+  ln -sfT "${f}" "/etc/ssh/${fn}"
+  ln -sfT "${f}".pub "/etc/ssh/${fn}".pub
+
   if [ -s "${f}" ]; then
     echo "SSH2 '$type' key ($f) already exists; not regenerating."
     continue
@@ -124,8 +128,6 @@ for type in rsa dsa ecdsa ed25519; do
   echo "Generating SSH2 '$type' key ($f); this may take some time..."
   yes | ssh-keygen -q -f "$f" -N '' -t "$type"
   yes | ssh-keygen -l -f "${f}.pub"
-  ln -sfT "${f}" "/etc/ssh/${fn}"
-  ln -sfT "${f}".pub "/etc/ssh/${fn}".pub
 done
 
 # generate arbiter ssh keys

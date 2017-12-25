@@ -131,8 +131,9 @@ module DTK; class  Assembly
         if components = node.get_components
           cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
 
+          workflow_delete = Task.get_delete_workflow_order(assembly_instance)
           # order components by 'delete' action inside assembly workflow if exists
-          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
+          ordered_components = order_components_by_workflow(components, workflow_delete)
           ordered_components.uniq.each do |component|
             next if component.get_field?(:component_type).eql?('ec2__node')
             cmp_action = nil
@@ -267,8 +268,9 @@ module DTK; class  Assembly
           if components = assembly_wide_node.get_components
             cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
 
+            workflow_delete = Task.get_delete_workflow_order(assembly_instance)
             # order components by 'delete' action inside assembly workflow if exists
-            ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
+            ordered_components = order_components_by_workflow(components, workflow_delete)
             ordered_components.each do |component|
               cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
 

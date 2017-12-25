@@ -127,7 +127,6 @@ module DTK; class  Assembly
         
         node = node_idh.create_object.update_object!(:display_name)
         opts.merge!(skip_running_check: true)
-
         if components = node.get_components
           cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
           
@@ -141,12 +140,12 @@ module DTK; class  Assembly
 
             # fix to add :retry to the cmp_top_task
             task_template_content = get_task_template_content(model_handle(:task_template), component)
-            task_template_content.each do |ttc|
-              if ttc[:components]
-                cmp = ttc[:components].first.gsub('::', '__').gsub(/\.[^\.]+$/, '')
+              task_template_content.each do |ttc|
+                cmp = ttc[:components] || nil if ttc.is_a?(Hash)
+                next if cmp.nil?
+                cmp.first.gsub('::', '__').gsub(/\.[^\.]+$/, '') 
                 component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
               end
-            end
 
             begin
               create_cmp_action = true
@@ -284,12 +283,12 @@ module DTK; class  Assembly
 
               # fix to add :retry to the cmp_top_task
               task_template_content = get_task_template_content(model_handle(:task_template), component)
-              task_template_content.each do |ttc|
-                if ttc[:components]
-                  cmp = ttc[:components].first.gsub('::', '__').gsub(/\.[^\.]+$/, '')
+                task_template_content.each do |ttc|
+                  cmp = ttc[:components] || nil if ttc.is_a?(Hash)
+                  next if cmp.nil?
+                  cmp.first.gsub('::', '__').gsub(/\.[^\.]+$/, '') 
                   component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
                 end
-              end
 
               begin                
                 # no need to check if admin_op_status is 'running' with nodes as components so commented that out for now
@@ -319,6 +318,17 @@ module DTK; class  Assembly
         unless opts[:donot_delete_assembly_from_database]
           delete_assembly_subtask = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
           task.add_subtask(delete_assembly_subtask)
+        end
+        # maybe add here sorting of tasks // Test with revers nodes..
+        subtasks = task.subtasks
+        subtasks.each_with_index do |sub, index|
+          if sub.is_a?(Hash)
+            if sub[:display_name].include?("ec2::node")
+              ec2_node = sub              
+              subtasks.delete_at(index)
+              subtasks << ec2_node
+            end
+          end
         end
         task
       end

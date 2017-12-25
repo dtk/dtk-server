@@ -83,7 +83,7 @@ module DTK; class Task
       end
       component_order_from_task_template_content(:delete, task_template_content)
     end
-    
+
     private
       
     def component_order_from_task_template_content(type, task_template_content)
@@ -103,7 +103,7 @@ module DTK; class Task
     # TODO: DTK-3010; this is hack for DTK-3010; want to call parsing logic
     COMPONENT_OR_ACTION_KEYS = {
       delete: [:ordered_components, :components, :actions, :component, :action],
-      create: [:ordered_components, :components, :component]
+      create: [:ordered_components, :components, :component, :actions]
     }
     def subtype_component_types(type, subtask)
       keys = COMPONENT_OR_ACTION_KEYS[type]

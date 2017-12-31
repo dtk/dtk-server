@@ -41,6 +41,7 @@ module DTK
           content = generate_config_file_content(repo_name, repo_user_acls)
           admin_repo.add_file(file_asset_hash, content)
           admin_repo.push_changes
+          update_bare_repo_config(repo_name)
           ret
         end
         
@@ -75,10 +76,6 @@ module DTK
           rescue => e
             Log.error(e.inspect)
           end
-        end
-        
-        def bare_repo_dir(repo_name)
-          "#{R8::Config[:git_user_home]}/repositories/#{repo_name}.git"
         end
         
         def add_user(username, rsa_pub_key, opts = {})
@@ -161,6 +158,14 @@ module DTK
         def admin_repo
           @admin_repo ||= @git_class.create(admin_directory, 'master', absolute_path: true)
         end
+
+        def bare_repo(repo_name)
+          @git_class.create(bare_repo_dir(repo_name), 'master', absolute_path: true)
+        end
+
+        def bare_repo_dir(repo_name)
+          "#{R8::Config[:git_user_home]}/repositories/#{repo_name}.git"
+        end
         
         def repo_user_public_key_relative_path(username)
           "#{repo_user_public_key_dir_relative_path}/#{username}.pub"
@@ -231,6 +236,16 @@ module DTK
             end
           end
           ret
+        end
+
+        # update_bare_repo_config is to handle error:
+        #  remote: error: By default, deleting the current branch is denied, because the next
+        #  remote: 'git clone' won't result in any file checked out, causing confusion.
+        #  remote: You can set 'receive.denyDeleteCurrent' configuration variable to
+        #  remote: 'warn' or 'ignore' in the remote repository to allow deleting the
+        def update_bare_repo_config(repo_name)
+          debugger
+          bare_repo(repo_name).set_config_key_value('receive.denyDeleteCurrent', 'ignore')
         end
 
         def validate_repo_module_name!(repo_name)

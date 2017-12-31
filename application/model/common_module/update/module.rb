@@ -52,8 +52,8 @@ module DTK
 
             CommonDSL::Parse.set_dsl_version!(self.module_branch, self.parsed_common_module)
             parse_needed = (opts[:force_parse] == true or top_dsl_file_changed)
-            # debugger
             unless opts[:skip_missing_check]
+              debugger
               missing_dependencies = check_for_missing_dependencies(initial_update: opts[:initial_update])
               if missing_dependencies && missing_dependencies[:missing_dependencies]
                 if existing_diffs = ret[:diffs]

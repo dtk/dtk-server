@@ -44,24 +44,22 @@ module DTK
         return ret if self.module_branch.is_set_to_sha?(self.commit_sha)
         self.module_branch.pull_repo_changes_and_return_diffs_summary(self.commit_sha, force: true) do |repo_diffs_summary|
           if !repo_diffs_summary.empty? || opts[:force_parse] || opts[:initial_update]
-            self.module_branch.set_dsl_parsed!(false)
-
             ret.add_diffs_summary!(repo_diffs_summary)
-            top_dsl_file_changed = repo_diffs_summary.prune!(TOP_DSL_FILE_REGEXP)
-            top_dsl_file_changed = true if opts[:initial_update]
 
+            self.module_branch.set_dsl_parsed!(false)
             CommonDSL::Parse.set_dsl_version!(self.module_branch, self.parsed_common_module)
-            parse_needed = (opts[:force_parse] == true or top_dsl_file_changed)
-            unless opts[:skip_missing_check]
-              debugger
-              missing_dependencies = check_for_missing_dependencies(initial_update: opts[:initial_update])
-              if missing_dependencies && missing_dependencies[:missing_dependencies]
-                if existing_diffs = ret[:diffs]
-                  (missing_dependencies||{}).merge!(existing_diffs: existing_diffs) unless existing_diffs.empty?
-                end
-                return missing_dependencies
-              end
-            end
+
+            parse_needed = (top_dsl_file_changed?(repo_diffs_summary) or opts[:initial_update] or opts[:force_parse])
+
+            # TODO: DTK-2266: Not sure if we need below since later check 
+            #  'The components (base_5::c1, child_3::c2) that are referenced by the assembly are not installed' wil find it. Also
+            # missing_dependencies is wrong param to ModuleDSL::ParsingError::MissingFromModuleRefs
+            #
+            # unless opts[:skip_missing_check]
+            #  if missing_dependencies = missing_dependencies?(initial_update: opts[:initial_update])
+            #    fail ModuleDSL::ParsingError::MissingFromModuleRefs.new(modules: missing_dependencies)
+            #  end
+            # end
 
             create_or_update_opts = {
               parse_needed: parse_needed,
@@ -77,25 +75,47 @@ module DTK
         ret
       end
 
-      TOP_DSL_FILE_REGEXP = CommonDSL::FileType::CommonModule::DSLFile::Top.regexp 
 
-      protected 
-      
-      attr_reader :project, :commit_sha, :local_params, :module_obj, :repo
+      attr_reader :project, :local_params, :repo
 
       def module_branch    
         @module_branch ||= get_module_branch
       end
 
       def parsed_common_module 
-        @parsed_common_module ||= self.dsl_file_obj_from_repo.parse_content(:common_module)
+        @parsed_common_module ||= parsed_dsl_from_repo(:common_module)
       end
 
-      def dsl_file_obj_from_repo
-        @dsl_file_obj_from_repo ||= CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(self.module_branch) || fail(Error, "Unexpected that 'dsl_file_obj' is nil")
+      def parsed_dependent_modules
+        @parsed_dependent_modules ||= parsed_dsl_from_repo(:module_refs_lock, no_file_is_ok: true) || CommonDSL::Parse::FileParser::Output.create(:output_type => :array)
       end
+
+      protected 
+      
+      attr_reader :commit_sha, :module_obj
+
 
       private
+
+      # opts can have keys:
+      #   :parse_needed
+      #   :diffs_summary
+      #   :initial_update
+      def create_or_update_from_parsed_common_module(opts = {})
+        retried = false
+        # Component info must be loaded before service info because assemblies can have dependencies its own componnets
+        begin
+          create_or_update_component_info(opts)
+          create_or_update_service_info(opts) unless retried
+        rescue ModuleDSL::ParsingError::RefComponentTemplates => exception
+          # if trying to delete components from component info that are deleted from assemblies but not processed
+          # it will raise RefComponentTemplates; then we want to first process assemblies and retry component_defs processing
+          raise exception if retried
+          create_or_update_service_info(opts)
+          retried = true
+          retry
+        end
+      end
 
       # returns [module_obj, repo]
       def get_module_obj_and_repo(local_params, project)
@@ -111,58 +131,54 @@ module DTK
         self.class.get_workspace_module_branch(self.project, self.local_params.module_name, self.local_params.version, namespace_obj)
       end
 
-      # opts can have keys:
-      #   :parse_needed
-      #   :diffs_summary
-      #   :initial_update
-      def create_or_update_from_parsed_common_module(opts = {})
-        args    = args_for_create_or_update(opts)
-        retried = false
-        # Component info must be loaded before service info because assemblies can have dependencies its own componnets
-        begin
-          create_or_update_component_info(args, use_new_snapshot: true)
-          create_or_update_service_info(args) unless retried
-        rescue ModuleDSL::ParsingError::RefComponentTemplates => exception
-          # if trying to delete components from component info that are deleted from assemblies but not processed
-          # it will raise RefComponentTemplates; then we want to first process assemblies and retry component_defs processing
-          raise exception if retried
-          create_or_update_service_info(args)
-          retried = true
-          retry
+      TOP_DSL_FILE_REGEXPS = [CommonDSL::FileType::CommonModule::DSLFile::Top.regexp, CommonDSL::FileType::ModuleRefsLock::DSLFile::Top.regexp] 
+
+      # This method checks if a top_dsl_file_changed and also prunes these form repo_diffs_summary
+      def top_dsl_file_changed?(repo_diffs_summary)
+        top_dsl_file_changed = false
+        TOP_DSL_FILE_REGEXPS.each do | top_dsl_file_regexp |
+          top_dsl_file_changed = true if repo_diffs_summary.prune!(top_dsl_file_regexp)
         end
+        top_dsl_file_changed
+      end
+
+      #  opts can be keys:
+      #    :no_file_is_ok
+      def parsed_dsl_from_repo(dsl_type, opts = {})
+        if dsl_file_obj = dsl_file_obj_from_repo(dsl_type, opts)
+          dsl_file_obj.parse_content(dsl_type)
+        end
+      end
+
+      def dsl_file_obj_from_repo(dsl_type, opts = {})
+        ret = CommonDSL::Parse.matching_dsl_file_obj?(dsl_type, self.module_branch)
+        if ret.nil? and ! opts[:no_file_is_ok]
+          fail(Error, "Unexpected that dsl_file_obj '#{dsl_type}' is nil")
+        end
+        ret
       end
 
       # opts can have keys: 
       #   :initial_update
-      def check_for_missing_dependencies(opts = {})
-        info_service_object(args_for_create_or_update(opts)).check_for_missing_dependencies
-      end
-
-      def create_or_update_component_info(args, opts = {})
-        Info::Component.new(*args).create_or_update_from_parsed_common_module?(opts)
-      end
-
-      def create_or_update_service_info(args)
-        info_service_object(args, component_defs_exist: Info::Component.component_defs_exist?(args.parsed_common_module)).create_or_update_from_parsed_common_module?
-      end
-
-      # opts can have keys
-      #   :component_defs_exist
-      def info_service_object(args, opts = {})
-        Info::Service.new(*(args + [{ component_defs_exist: opts[:component_defs_exist]}]))
+      def missing_dependencies?(opts = {})
+        Info::Service.new(self, initial_update: opts[:initial_update]).missing_dependencies?
       end
 
       # opts can have keys:
       #   :parse_needed
       #   :diffs_summary
-      #   :initial_update
-      def args_for_create_or_update(opts = {})  
-        ArgsForCreateOrUpdate.new([self.project, self.local_params, self.repo, self.module_branch, self.parsed_common_module, opts])
+      #   :initial_update  
+      def create_or_update_service_info(opts = {})
+        component_defs_exist = Info::Component.component_defs_exist?(self.parsed_common_module)
+        Info::Service.new(self, opts.merge(component_defs_exist: component_defs_exist)).create_or_update_from_parsed_common_module?
       end
-      class ArgsForCreateOrUpdate < ::Array
-        def parsed_common_module
-          self[4]
-        end
+
+      # opts can have keys:
+      #   :parse_needed
+      #   :diffs_summary
+      #   :initial_update  
+      def create_or_update_component_info(opts = {})
+        Info::Component.new(self, opts).create_or_update_from_parsed_common_module?(opts.merge(use_new_snapshot: true))
       end
       
     end

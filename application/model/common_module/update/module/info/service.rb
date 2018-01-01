@@ -19,11 +19,13 @@ module DTK
   class CommonModule::Update::Module::Info
     class Service < self
       require_relative('service/transform')
-      
-      def initialize(*args)
-        service_instance_opts = args.pop
-        super(*args)
-        @component_defs_exist = service_instance_opts[:component_defs_exist]
+      # opts can have keys:
+      #   :parse_needed
+      #   :diffs_summary
+      #   :initial_update
+      def initialize(parent, opts = {})
+        super
+        @component_defs_exist = opts[:component_defs_exist]
       end
 
       def create_or_update_from_parsed_common_module?
@@ -43,9 +45,9 @@ module DTK
         file_path__content_array = transform.file_path__content_array
       end
 
-      def check_for_missing_dependencies
+      def missing_dependencies?
         CommonDSL::Parse.set_dsl_version!(self.service_module_branch, self.parsed_common_module)
-        check_and_ret_missing_modules
+        ret_missing_dependencies?
       end
 
       protected
@@ -64,23 +66,22 @@ module DTK
 
       private
 
-      def check_and_ret_missing_modules
+      def ret_missing_dependencies?
+        missing_dependencies  =  []
         component_module_refs = ModuleRefs.get_component_module_refs(self.service_module_branch)
         modules_w_namespaces  = ret_cmp_modules_with_namespaces(omit_base_reference: component_defs_exist?)
         diffs                 = component_module_refs.get_module_ref_diffs(modules_w_namespaces)
-        ret                   = {}
 
         if to_add = diffs[:add]
           to_add.each do |cmp_mod|
             unless CommonModule.exists(self.project, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info])
-              (ret[:missing_dependencies] ||= []) << cmp_mod
+              missing_dependencies << cmp_mod 
             end
           end
         end
-
-        ret
+        
+        missing_dependencies.empty? ? nil : missing_dependencies
       end
-
 
     end
   end

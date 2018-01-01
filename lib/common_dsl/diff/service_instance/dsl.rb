@@ -23,9 +23,9 @@ module DTK; module CommonDSL
         def self.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
           # TODO: DTK-2738:  service_instance.get_dsl_locations will have path of any nested dsl file that is in an import
           #  statement from service_instance_top_dsl_file or any nested dsl file that is recursively broght in throgh imports
-          #  This will be used in Parse.matching_service_instance_top_dsl_file_obj?; it will return non nil if top or any nested
+          #  This will be used in Parse.matching_dsl_file_obj?; it will return non nil if top or any nested
           #  dsl files are impacted
-          if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
+          if dsl_file_obj = Parse.matching_dsl_file_obj?(:service_instance, module_branch, impacted_files: impacted_files)
             service_instance_parse = dsl_file_obj.parse_content(:service_instance)
             service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
 
@@ -60,7 +60,7 @@ module DTK; module CommonDSL
         end
         
         def self.update_semantic_diff(diff_result, service_instance, module_branch, impacted_files, service_instance_parse)
-          if dsl_file_obj = Parse.matching_service_instance_top_dsl_file_obj?(module_branch, impacted_files: impacted_files)
+          if dsl_file_obj = Parse.matching_dsl_file_obj?(:service_instance, module_branch, impacted_files: impacted_files)
             service_instance_gen = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
             if new_diffs = compute_base_diffs?(service_instance, service_instance_parse, service_instance_gen, impacted_files: impacted_files)
               update_collated = new_diffs.collate

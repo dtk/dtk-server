@@ -28,18 +28,14 @@ module DTK
         args = Params.add_opts(args_x, error_prefix: ErrorPrefix, caller_info: true)
         super(msg, *args)
       end
-      ErrorPrefix = 'Component dsl parsing error'
+      ErrorPrefix = 'Dsl parsing error'
 
       class MissingFromModuleRefs < self
         def initialize(params = {})
           missing_modules = params[:modules]
-          what = (missing_modules.size == 1 ? 'component module' : 'component modules')
+          what = (missing_modules.size == 1 ? 'module' : 'modules')
           is   = (missing_modules.size == 1 ? 'is' : 'are')
-          does = (missing_modules.size == 1 ? 'does' : 'do')
-          refs = missing_modules.join(',')
-
-          err_msg = "The following #{what} (#{refs}) that #{is} referenced in includes section #{does} not exist in module refs file; this can be rectified by invoking the 'push' command after manually adding appropriate component module(s) to module refs file or by removing references in the DSL file(s)"
-          # err_msg = "Component module(s) (?name) referenced in includes section are not specified in module refs file"
+          err_msg = "The following #{what} #{is} referenced but not installed:"
           err_params = Params.new(modules: params[:modules].join(','))
           super(err_msg, err_params)
         end

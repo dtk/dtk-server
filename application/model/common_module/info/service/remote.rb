@@ -26,7 +26,7 @@ module DTK
           end
 
           repo                 = get_repo_with_branch
-          dsl_file_obj         = CommonDSL::Parse.matching_common_module_top_dsl_file_obj?(common_module_branch)
+          dsl_file_obj         = CommonDSL::Parse.matching_dsl_file_obj?(:common_module, common_module_branch)
           parsed_common_module = dsl_file_obj.parse_content(:common_module)
 
           # this means assemblies part is deleted from module

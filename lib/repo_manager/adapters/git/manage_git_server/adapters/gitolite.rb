@@ -244,7 +244,6 @@ module DTK
         #  remote: You can set 'receive.denyDeleteCurrent' configuration variable to
         #  remote: 'warn' or 'ignore' in the remote repository to allow deleting the
         def update_bare_repo_config(repo_name)
-          debugger
           bare_repo(repo_name).set_config_key_value('receive.denyDeleteCurrent', 'ignore')
         end
 

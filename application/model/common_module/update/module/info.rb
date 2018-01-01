@@ -24,20 +24,22 @@ module DTK
       require_relative('info/component')
 
       attr_reader :module_name, :namespace_name, :version
-
       # opts can have keys:
       #   :parse_needed
       #   :diffs_summary
       #   :initial_update  
-      def initialize(project, common_module__local_params, common_module__repo, common_module__module_branch, parsed_common_module, opts = {})
-        @project                      = project
-        @module_name                  = common_module__local_params.module_name
-        @namespace_name               = common_module__local_params.namespace
+      def initialize(parent, opts = {})
+        local_params                  = parent.local_params
+        common_module__module_branch  = parent.module_branch
+        @parent                       = parent
+        @project                      = parent.project
+        @module_name                  = local_params.module_name
+        @namespace_name               = local_params.namespace
         @common_module__module_branch = common_module__module_branch
         @version                      = common_module__module_branch[:version]
         @local_params                 = self.class.create_local_params(module_type, @module_name, version: @version, namespace: @namespace_name)
-        @parsed_common_module         = parsed_common_module
-        @common_module__repo          = common_module__repo
+        @parsed_common_module         = parent.parsed_common_module
+        @common_module__repo          = parent.repo
         @module_class                 = self.class.get_class_from_module_type(module_type)
         @parse_needed                 = opts[:parse_needed]
         @diffs_summary                = opts[:diffs_summary]
@@ -60,7 +62,7 @@ module DTK
 
       protected
 
-      attr_reader :project, :local_params, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
+      attr_reader :parent, :project, :local_params, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
 
       def parse_needed?
         @parse_needed
@@ -78,9 +80,8 @@ module DTK
         @namespace_obj = Namespace.find_by_name(self.project.model_handle(:namespace), self.namespace_name)
       end
 
-
       def parsed_dependent_modules
-        @parsed_dependent_modules ||= parsed_nested_object(:DependentModules)
+        @parsed_dependent_modules ||= self.parent.parsed_dependent_modules
       end
 
       def parsed_assemblies

@@ -44,18 +44,16 @@ module DTK
     end
 
     def self.get_component_module_refs(branch)
-      common_module_branch = branch.common_module_branch
-
-      content_hash_content = ModuleRef.get_component_module_ref_array(common_module_branch).inject({}) do |h, r|
+      content_hash_content = ModuleRef.get_component_module_ref_array(branch).inject({}) do |h, r|
         h.merge(key(r[:module_name]) => r)
       end
 
-      # TODO: we do not support version to be set to 'master', instead we expect nil
+      # TODO: DTK-3366: we do not support version to be set to 'master', instead we expect nil
       content_hash_content.each do |k,v|
         v[:version_info] = nil if v[:version_info] == 'master'
       end
 
-      new(common_module_branch, content_hash_content)
+      new(branch, content_hash_content)
     end
 
     def self.get_module_refs_by_name_and_version(branch, ref_namespace, ref_name, ref_version = nil)

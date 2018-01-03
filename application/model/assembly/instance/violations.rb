@@ -133,6 +133,7 @@ module DTK
         return ret if cmps.empty?
 
         begin
+          debugger
           module_refs_tree = ModuleRefs::Tree.create(self, components: cmps)
         rescue ErrorUsage => e
           ret << Violation::HasItselfAsDependency.new(e.message)

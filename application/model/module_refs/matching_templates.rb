@@ -97,8 +97,6 @@ module DTK
         # component_template will be null if no match is found
         mappings = get_component_type_to_template_mappings?(cmp_types_to_check.keys, module_local_params: opts[:module_local_params])
 
-        # set the component template ids; raise error if there is a required element that does not have a matching component template
-
         if opts[:set_namespace]
           ret.each do |cmp_ref|
             cmp_type = cmp_ref[:component_type]
@@ -111,6 +109,16 @@ module DTK
           end
         end
 
+        cmp_types_to_check.each do |cmp_type, els|
+          els.each do |el|
+            cmp_template_match_el = mappings[cmp_type]
+            if cmp_template = cmp_template_match_el.component_template
+              el[:pntr][:component_template_id] = cmp_template.id
+              el[:pntr][:component_template] = cmp_template unless opts[:donot_set_component_templates]
+            end
+          end
+        end
+
         # TODO: DTK-2266: think can delete below
         # update_module_refs_dsl?(mappings, raise_if_missing_dependencies: opts[:raise_if_missing_dependencies])
         ret
@@ -119,7 +127,6 @@ module DTK
       # opts can have keys: 
       #  :module_local_params
       def get_component_type_to_template_mappings?(cmp_types, opts = {})
-        debugger
         ret = {}
         return ret if cmp_types.empty?
         # first put in ret info about component type and version

@@ -32,7 +32,7 @@ module DTK; module CommonDSL
           return unless aug_cmp_template
 
           node = parent_node
-          new_component_idh = assembly_instance.add_component(node.id_handle, aug_cmp_template, component_title: component_title?, auto_complete_links: true, update_workflow: true, service_instance: @service_instance)
+          new_component_idh = assembly_instance.add_component(node.id_handle, aug_cmp_template, @service_instance, component_title: component_title?)
 
           result.add_item_to_update(:workflow) # workflow will be updated with spliced in new component
           result.add_item_to_update(:assembly) # this is to account for fact that when component is added, default attributes will also be added

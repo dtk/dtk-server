@@ -68,6 +68,9 @@ module DTK; class AssemblyModule
       base_branch.merge(version: am_version, local_branch: local_branch[:display_name], current_branch_sha: local_branch[:current_sha])
     end
 
+    # opts can have keys:
+    #   :meta_file_changed
+    #   :service_instance_module
     def self.update_impacted_component_instances(assembly, component_module, nested_module_branch, opts = {})
       new(assembly).update_impacted_component_instances(component_module, nested_module_branch, opts)
     end

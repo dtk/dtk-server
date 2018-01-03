@@ -17,7 +17,7 @@
 #
 module DTK; class ModuleBranch
   class Location
-    class Params < Hash
+    class Params < ::Hash
 
       # opts can have keys
       #  :info_type - which could have value service_info or component_info

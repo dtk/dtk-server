@@ -43,15 +43,6 @@ module DTK
           get_field?(:ref)
         end
         
-        def self.update_assemblies_from_parsed_common_module(project, module_branch, parsed_assemblies, module_local_params, opts = {})
-          module_branch.set_dsl_parsed!(false)
-          base_service_module = get_base_service_module(module_branch)
-          import_helper = Import::ServiceModule.new(project, base_service_module, module_branch)
-          import_helper.put_needed_info_into_import_helper!(parsed_assemblies, module_local_params, opts)
-          import_helper.import_into_model
-          module_branch.set_dsl_parsed!(true)
-        end
-
         def self.populate_common_module_repo_from_service_info(service_module_local, common_module_branch, common_module_repo)
           aug_service_module_branch = get_augmented_module_branch_from_local(service_module_local)
           common_module_branch.pull_from_service_module!(aug_service_module_branch)
@@ -66,11 +57,12 @@ module DTK
           end
         end
         
-        private
-        
         def self.get_base_service_module(module_branch)
           copy_as(module_branch.get_module)
         end
+
+        private
+        
         
         # This causes all get_obj(s) class an instance methods to return Info::Service objects, rather than ServiceModule ones
         def self.get_objs(model_handle, sp_hash, opts = {})

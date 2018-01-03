@@ -101,7 +101,9 @@ module DTK
         aug_module_branch
       end
 
-      def get_module_branch_from_local(local)
+      # opts can have keys: 
+      #   :no_error_if_does_not_exist
+      def get_module_branch_from_local(local, opts = {})
         project = local.project()
         project_idh = project.id_handle()
         module_match_filter =
@@ -113,7 +115,7 @@ module DTK
         filter = [:and, module_match_filter, [:eq, :project_project_id, project_idh.get_id()]]
         branch = local.branch_name()
         post_filter = proc { |mb| mb[:branch] == branch }
-        matches = get_matching_module_branches(project_idh, filter, post_filter)
+        matches = get_matching_module_branches(project_idh, filter, post_filter, no_error_if_does_not_exist: opts[:no_error_if_does_not_exist])
         if matches.size == 0
           nil
         elsif matches.size == 1

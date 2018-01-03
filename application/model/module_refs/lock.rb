@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require 'ruby-debug'
 module DTK
   class ModuleRefs
     # This object and its associated table (module.module_ref_lock) captures
@@ -27,7 +26,7 @@ module DTK
     #   MODULE_NAME2 => ModuleRef::Lock,
     #   ....
     # }
-    class Lock < Hash
+    class Lock < ::Hash
       require_relative('lock/missing_information')
 
       attr_reader :assembly_instance
@@ -41,10 +40,10 @@ module DTK
       AllTypes = [:locked_dependencies, :locked_branch_shas]
 
       # opts can have
-      #  :types (equal to or subset of AllTypes
+      #   :types (equal to or subset of AllTypes
       #   :with_module_branches - Boolean
       def self.get_all(assembly_instance, opts = {})
-        get(assembly_instance, opts[:types] || AllTypes, Aux.hash_subset(opts, [:with_module_branches]))
+        get(assembly_instance, opts[:types] || AllTypes, with_module_branches: opts[:with_module_branches])
       end
 
       # opts can have keys
@@ -87,7 +86,8 @@ module DTK
       end
 
       # opts can have keys
-      # :raise_errors - Boolean
+      #   :raise_errors
+      #   :version
       def self.create_or_update(assembly_instance, opts = {})
         compute_elements(assembly_instance, AllTypes, opts).create_or_update
       end
@@ -141,23 +141,23 @@ module DTK
       def self.get(assembly_instance, types, opts = {})
         types = Array(types)
         if persisted = get_module_refs_lock?(assembly_instance)
-          if missing_info = MissingInformation.missing_information?(persisted, types, opts)
+          if missing_info = MissingInformation.missing_information?(persisted, types, with_module_branches: opts[:with_module_branches])
             missing_info.log_error
           end
           persisted
         else
           Log.error_pp(["Unexpected that the ModuleRefs::Lock info must be computed for assembly", assembly_instance]) 
-          compute_elements(assembly_instance, types, opts)
+          compute_elements(assembly_instance, types, with_module_branches: opts[:with_module_branches])
         end
       end
 
       # opts can have keys
-      #   :with_module_branches - Boolean
-      #   :raise_errors - Boolean
+      #   :raise_errors
       #   :version
+      #   :with_module_branches
       def self.compute_elements(assembly_instance, types, opts = {})
         module_refs_tree = ModuleRefs::Tree.create(assembly_instance, opts)
-        collapsed = module_refs_tree.collapse(Aux.hash_subset(opts, [:raise_errors]))
+        collapsed = module_refs_tree.collapse(raise_errors: opts[:raise_errors])
         collapsed.choose_namespaces_and_versions!(assembly_instance: assembly_instance)
         collapsed.add_implementations!(assembly_instance)
 

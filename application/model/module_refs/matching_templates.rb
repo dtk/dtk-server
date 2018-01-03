@@ -20,24 +20,25 @@ module DTK
     module MatchingTemplatesMixin
       # component refs are augmented with :component_template key which points to
       # associated component template or nil
-      # This method can be called when assembly is imported or staged
-      # TODO: any other time this can be called?
+      # opts can have keys
+      #   :raise_if_missing_dependencies
+      #   :module_local_params
+      #   :donot_set_component_templates
+      #   :set_namespace
+      #   :force_compute_template_id
       def set_matching_component_template_info?(aug_cmp_refs, opts = {})
-        ret = aug_cmp_refs
-        if aug_cmp_refs.empty?
-          return ret
+        unless aug_cmp_refs.empty?
+          # determine which elements of aug_cmp_refs need to be matches
+          cmp_types_to_check = determine_component_refs_needing_matches(aug_cmp_refs, force_compute_template_id: opts[:force_compute_template_id])
+          set_matching_component_template_info!(aug_cmp_refs, cmp_types_to_check, opts) unless cmp_types_to_check.empty?
         end
-        # determine which elements of aug_cmp_refs need to be matches
-        cmp_types_to_check = determine_component_refs_needing_matches(aug_cmp_refs, opts)
-        if cmp_types_to_check.empty?
-          return ret
-        end
-        set_matching_component_template_info!(aug_cmp_refs, cmp_types_to_check, opts)
-        ret
+        aug_cmp_refs
       end
 
       private
 
+      # opts can have keys:
+      #   :force_compute_template_id
       def determine_component_refs_needing_matches(aug_cmp_refs, opts = {})
         # for each element in aug_cmp_ref, want to set cmp_template_id using following rules
         # 1) if key 'has_override_version' is set
@@ -84,6 +85,11 @@ module DTK
         cmp_types_to_check
       end
 
+      # opts can have keys:
+      #   :raise_if_missing_dependencies
+      #   :module_local_params
+      #   :set_namespace
+      #   :donot_set_component_templates
       def set_matching_component_template_info!(aug_cmp_refs, cmp_types_to_check, opts = {})
         ret = aug_cmp_refs
         # Lookup up modules mapping
@@ -97,75 +103,50 @@ module DTK
           ret.each do |cmp_ref|
             cmp_type = cmp_ref[:component_type]
             next unless cmp_types_to_check[cmp_type]
-            if cmp_type_info = mappings[cmp_type]
-              if namespace = cmp_type_info[:namespace]
+            if cmp_template_match_el = mappings[cmp_type]
+              if namespace = cmp_template_match_el.namespace
                 cmp_ref[:namespace] = namespace
               end
             end
           end
         end
 
-        reference_errors = []
-        cmp_types_to_check.each do |cmp_type, els|
-          els.each do |el|
-            cmp_type_info = mappings[cmp_type]
-            if cmp_template = cmp_type_info[:component_template]
-              el[:pntr][:component_template_id] = cmp_template[:id]
-              unless opts[:donot_set_component_templates]
-                el[:pntr][:component_template] = cmp_template
-              end
-            elsif el[:required]
-             # TODO: This should not be reached because if error then an error wil be raised by get_component_type_to_template_mappings? call
-             Log.error('TODO: may put back in logic to accrue errors; until then this should not be reached')
-              #              cmp_ref = {
-              #                :component_type => cmp_type,
-              #                :version => cmp_type_info[:version]
-              #              }
-              #              reference_errors << cmp_ref
-            end
-          end
-        end
-        unless reference_errors.empty?
-          fail ServiceModule::ParsingError::DanglingComponentRefs.new(reference_errors)
-        end
-        update_module_refs_dsl?(mappings, opts)
+        # TODO: DTK-2266: think can delete below
+        # update_module_refs_dsl?(mappings, raise_if_missing_dependencies: opts[:raise_if_missing_dependencies])
         ret
       end
 
       # opts can have keys: 
       #  :module_local_params
       def get_component_type_to_template_mappings?(cmp_types, opts = {})
+        debugger
         ret = {}
         return ret if cmp_types.empty?
         # first put in ret info about component type and version
         ret = cmp_types.inject({}) do |h, cmp_type|
           version = version_string?(cmp_type)
-          el = Component::Template::MatchElement.new(
-            component_type: cmp_type,
-            version_field: ModuleBranch.version_field(version)
-          )
-          if version
-            el[:version] = version
-          end
+          match_el = Component::Template::MatchElement.new(cmp_type, ModuleBranch.version_field(version))
           if namespace = namespace?(cmp_type)
-            el[:namespace] = namespace
+            match_el.namespace = namespace
           end
-          h.merge(cmp_type => el)
+          h.merge(cmp_type => match_el)
         end
 
         # get matching component template info and insert matches into ret
         Component::Template.get_matching_elements(project_idh, ret.values, module_local_params: opts[:module_local_params]).each do |cmp_template|
-          ret[cmp_template[:component_type]].merge!(component_template: cmp_template)
+          ret[cmp_template[:component_type]].component_template = cmp_template
         end
         ret
       end
 
+      # opts can have keys:
+      #   :raise_if_missing_dependencies
       def update_module_refs_dsl?(cmp_type_to_template_mappings, opts = {})
         module_name_to_ns = {}
-        cmp_type_to_template_mappings.each do |cmp_type, cmp_info|
+        cmp_type_to_template_mappings.each do |cmp_type, cmp_template_match_el|
           module_name = module_name(cmp_type)
           unless module_name_to_ns[module_name]
-            if namespace = (cmp_info[:component_template] || {})[:namespace]
+            if namespace = (cmp_template_match_el.component_template || {})[:namespace]
               module_name_to_ns[module_name] = namespace
             end
           end

@@ -18,8 +18,11 @@
 module DTK
   class CommonModule::Update
     class Module < self
+      require_relative('module/update_module_refs')
       require_relative('module/info')
       require_relative('module/update_response')
+
+      include UpdateModuleRefs::Mixin
 
       attr_reader :project
       
@@ -33,7 +36,6 @@ module DTK
 
       # opts can have keys
       #   :force_parse - Boolean (default false) 
-      #   :skip_missing_check - Boolean (default false) 
       #   :initial_update - Boolean (default false) 
       def self.update_from_repo(project, commit_sha, local_params, opts = {})
         new(project, commit_sha, local_params).update_from_repo(opts)
@@ -50,16 +52,6 @@ module DTK
             CommonDSL::Parse.set_dsl_version!(self.module_branch, self.parsed_common_module)
 
             parse_needed = (top_dsl_file_changed?(repo_diffs_summary) or opts[:initial_update] or opts[:force_parse])
-
-            # TODO: DTK-2266: Not sure if we need below since later check 
-            #  'The components (base_5::c1, child_3::c2) that are referenced by the assembly are not installed' wil find it. Also
-            # missing_dependencies is wrong param to ModuleDSL::ParsingError::MissingFromModuleRefs
-            #
-            # unless opts[:skip_missing_check]
-            #  if missing_dependencies = missing_dependencies?(initial_update: opts[:initial_update])
-            #    fail ModuleDSL::ParsingError::MissingFromModuleRefs.new(modules: missing_dependencies)
-            #  end
-            # end
 
             create_or_update_opts = {
               parse_needed: parse_needed,
@@ -102,6 +94,8 @@ module DTK
       #   :diffs_summary
       #   :initial_update
       def create_or_update_from_parsed_common_module(opts = {})
+        update_module_refs
+
         retried = false
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
         begin
@@ -156,12 +150,6 @@ module DTK
           fail(Error, "Unexpected that dsl_file_obj '#{dsl_type}' is nil")
         end
         ret
-      end
-
-      # opts can have keys: 
-      #   :initial_update
-      def missing_dependencies?(opts = {})
-        Info::Service.new(self, initial_update: opts[:initial_update]).missing_dependencies?
       end
 
       # opts can have keys:

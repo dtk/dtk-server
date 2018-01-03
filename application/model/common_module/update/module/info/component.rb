@@ -23,9 +23,6 @@ module DTK
       def create_or_update_from_parsed_common_module?(opts = {})
         return unless module_info_exists?
         CommonDSL::Parse.set_dsl_version!(self.component_module_branch, self.parsed_common_module)
-        
-        update_component_module_refs(self.component_module_branch)
-
         update_component_info_in_model_from_dsl(opts) if parse_needed?
       end
 

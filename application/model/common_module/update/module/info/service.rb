@@ -30,12 +30,7 @@ module DTK
 
       def create_or_update_from_parsed_common_module?
         if parsed_assemblies = self.parsed_assemblies
-          CommonDSL::Parse.set_dsl_version!(self.service_module_branch, self.parsed_common_module)
-          update_component_module_refs(self.service_module_branch, omit_base_reference: component_defs_exist?, add_recursive_dependencies: true)
-
-          # update assemblies before updating module refs because we need to check for references in assemblies when updating module refs
-          CommonModule::Info::Service.update_assemblies_from_parsed_common_module(self.project, self.service_module_branch, parsed_assemblies, local_params, raise_if_missing_dependencies: true)
-
+          create_or_update_from_parsed_common_module(parsed_assemblies)
         end
       end
 
@@ -43,11 +38,6 @@ module DTK
         fail 'got here'
         transform = Transform.new(self.parsed_common_module, self).compute_service_module_outputs!
         file_path__content_array = transform.file_path__content_array
-      end
-
-      def missing_dependencies?
-        CommonDSL::Parse.set_dsl_version!(self.service_module_branch, self.parsed_common_module)
-        ret_missing_dependencies?
       end
 
       protected
@@ -64,23 +54,25 @@ module DTK
         :service_module
       end
 
+      def import_helper
+        @import_helper ||= ret_import_helper
+      end
+
       private
 
-      def ret_missing_dependencies?
-        missing_dependencies  =  []
-        component_module_refs = ModuleRefs.get_component_module_refs(self.service_module_branch)
-        modules_w_namespaces  = ret_cmp_modules_with_namespaces(omit_base_reference: component_defs_exist?)
-        diffs                 = component_module_refs.get_module_ref_diffs(modules_w_namespaces)
+      def create_or_update_from_parsed_common_module(parsed_assemblies)
+        CommonDSL::Parse.set_dsl_version!(self.service_module_branch, self.parsed_common_module)
+        self.service_module_branch.set_dsl_parsed!(false)
 
-        if to_add = diffs[:add]
-          to_add.each do |cmp_mod|
-            unless CommonModule.exists(self.project, cmp_mod[:namespace_name], cmp_mod[:display_name], cmp_mod[:version_info])
-              missing_dependencies << cmp_mod 
-            end
-          end
-        end
-        
-        missing_dependencies.empty? ? nil : missing_dependencies
+        self.import_helper.put_needed_info_into_import_helper!(parsed_assemblies, self.local_params, raise_if_missing_dependencies: true)
+        self.import_helper.import_into_model
+
+        self.service_module_branch.set_dsl_parsed!(true)
+      end
+
+      def ret_import_helper
+        service_module = CommonModule::Info::Service.get_base_service_module(self.service_module_branch)
+        Import::ServiceModule.new(self.project, service_module, self.service_module_branch)
       end
 
     end

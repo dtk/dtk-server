@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 
-require 'ruby-debug'
 module DTK
   class CommonModule::Update::Module
     class Info < self
@@ -29,15 +28,15 @@ module DTK
       #   :diffs_summary
       #   :initial_update  
       def initialize(parent, opts = {})
-        local_params                  = parent.local_params
         common_module__module_branch  = parent.module_branch
         @parent                       = parent
         @project                      = parent.project
-        @module_name                  = local_params.module_name
-        @namespace_name               = local_params.namespace
+        @module_name                  = parent.local_params.module_name
+        @namespace_name               = parent.local_params.namespace
         @common_module__module_branch = common_module__module_branch
         @version                      = common_module__module_branch[:version]
         @local_params                 = self.class.create_local_params(module_type, @module_name, version: @version, namespace: @namespace_name)
+        @local                        = @local_params.create_local(@project)
         @parsed_common_module         = parent.parsed_common_module
         @common_module__repo          = parent.repo
         @module_class                 = self.class.get_class_from_module_type(module_type)
@@ -62,7 +61,7 @@ module DTK
 
       protected
 
-      attr_reader :parent, :project, :local_params, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
+      attr_reader :parent, :project, :local_params, :local, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
 
       def parse_needed?
         @parse_needed
@@ -89,66 +88,13 @@ module DTK
       end
 
       private
-
-      # For module_refs processng
-      # opts can have keys
-      #   :omit_base_reference
-      #   :add_recursive_dependencies
-      def update_component_module_refs(module_branch,opts = {})
-        component_module_refs       = ModuleRefs.get_component_module_refs(module_branch)
-        cmp_modules_with_namespaces = ret_cmp_modules_with_namespaces(omit_base_reference: opts[:omit_base_reference])
-
-        if opts[:add_recursive_dependencies]
-          deps_of_deps = add_dependencies_of_dependencies(cmp_modules_with_namespaces)
-          cmp_modules_with_namespaces.concat(deps_of_deps)
-          cmp_modules_with_namespaces.uniq!
-        end
-
-        # The call 'component_module_refs.update_object_if_needed!' updates the object component_module_refs and returns true if changed
-        # The call 'component_module_refs.update' updates the object model
-        component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
-      end
-
-      def add_dependencies_of_dependencies(cmp_modules_with_namespaces)
-        dependencies_of_dependencies = []
-        existing_names = cmp_modules_with_namespaces.map{ |cmp| "#{cmp[:namespace_name]}/#{cmp[:display_name]}" }
-        cmp_modules_with_namespaces.each do |cmp_module|
-          if module_exists = ComponentModule.module_exists(self.project, cmp_module[:namespace_name], cmp_module[:display_name], cmp_module[:version_info], :return_module => true)
-            if module_branch = module_exists[:module_branch]
-              dep_module_refs = module_branch.get_module_refs
-              dep_module_refs.each do |dep_module_ref|
-                unless existing_names.include?("#{dep_module_ref[:namespace_info]}/#{dep_module_ref[:display_name]}")
-                  dependencies_of_dependencies << { :namespace_name => dep_module_ref[:namespace_info], :display_name => dep_module_ref[:display_name], :version_info => dep_module_ref[:version_info] }
-                end
-              end
-            end
-          end
-        end
-        dependencies_of_dependencies
-      end
-
-      def cmp_modules_with_namespaces_hash(module_name_input, namespace_name_input, version_input)
-        { 
-          display_name: module_name_input,
-          namespace_name: namespace_name_input,
-          version_info: version_input
-        }
-      end
       
-      def base_module_in?(cmp_modules_with_namespaces)
-        !!cmp_modules_with_namespaces.find do |hash|
-            hash[:display_name] == self.module_name and  
-            hash[:namespace_name] == self.namespace_name and 
-            hash[:version_info] == self.version
-        end    
-      end
-
       def module_exists?
         self.module_class.find_from_name?(project.model_handle(self.module_type), self.namespace_name, self.module_name)
       end
 
       def module_branch_exists?
-        self.module_class.get_workspace_module_branch(self.project, self.module_name, self.version, self.namespace_obj, no_error_if_does_not_exist: true)
+        self.module_class.get_module_branch_from_local(self.local, no_error_if_does_not_exist: true)
       end
 
       # opts can have keys:
@@ -168,24 +114,6 @@ module DTK
         self.parsed_common_module.val(nested_object_key)
       end
 
-      # opts cna have keys
-      #   :omit_base_reference
-      def ret_cmp_modules_with_namespaces(opts = {})
-        cmp_modules_with_namespaces = (self.parsed_dependent_modules || []).map do |parsed_module_ref|
-          parsed_module_name = parsed_module_ref.req(:ModuleName)
-          # For legacy where dependencies can refer to themselves
-          unless self.module_name == parsed_module_name
-            cmp_modules_with_namespaces_hash(parsed_module_name, parsed_module_ref.req(:Namespace), parsed_module_ref.val(:ModuleVersion))
-          end
-        end.compact
-        
-        # add reference to oneself if not there and there is a corresponding component module ref
-        if opts[:omit_base_reference] and not base_module_in?(cmp_modules_with_namespaces)
-          cmp_modules_with_namespaces << cmp_modules_with_namespaces_hash(self.module_name, self.namespace_name, self.version)
-        end
-        
-        cmp_modules_with_namespaces
-      end
     end
   end
 end

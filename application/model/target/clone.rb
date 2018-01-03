@@ -150,9 +150,7 @@ module DTK
       #   :version
       def self.create_locked_module_refs(assembly, opts = {})
         begin
-          m_ref_opts = {raise_errors: true}
-          m_ref_opts.merge!(version: opts[:version]) if opts[:version]
-          ModuleRefs::Lock.create_or_update(assembly, m_ref_opts)
+          ModuleRefs::Lock.create_or_update(assembly, raise_errors: true, version: opts[:version])
         rescue ModuleRef::Missing::Error => e
           includes = ModuleRefs::Tree.create(assembly).hash_form()
           str_includes = keys_to_string(includes)

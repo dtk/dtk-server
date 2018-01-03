@@ -26,6 +26,9 @@ module DTK
     include BranchNames::Mixin
     extend BranchNames::ClassMixin
     include RepoUpdates::Mixin
+
+    include Location::Mixin
+
     def self.common_columns
       [:id, :group_id, :display_name, :branch, :repo_id, :current_sha, :is_workspace, :type, :version, :ancestor_id, :external_ref, :dsl_parsed, :dsl_version, :frozen]
     end

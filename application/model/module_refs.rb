@@ -27,7 +27,7 @@ module DTK
 
     attr_reader :parent, :component_modules
     def initialize(parent, content_hash_form, opts = {})
-      @parent = parent
+      @parent            = parent
       @component_modules =  opts[:content_hash_form_is_reified] ?
         content_hash_form :
         Parse.reify_content(parent.model_handle(:model_ref), content_hash_form)
@@ -42,17 +42,20 @@ module DTK
         new(ndx_branches[branch_id], content_hash_content)
       end
     end
+
     def self.get_component_module_refs(branch)
-      content_hash_content = ModuleRef.get_component_module_ref_array(branch).inject({}) do |h, r|
+      common_module_branch = branch.common_module_branch
+
+      content_hash_content = ModuleRef.get_component_module_ref_array(common_module_branch).inject({}) do |h, r|
         h.merge(key(r[:module_name]) => r)
       end
 
-      # TODO: for some reason we do not support version to be set to 'master', instead we expect nil
+      # TODO: we do not support version to be set to 'master', instead we expect nil
       content_hash_content.each do |k,v|
         v[:version_info] = nil if v[:version_info] == 'master'
       end
 
-      new(branch, content_hash_content)
+      new(common_module_branch, content_hash_content)
     end
 
     def self.get_module_refs_by_name_and_version(branch, ref_namespace, ref_name, ref_version = nil)
@@ -101,12 +104,12 @@ module DTK
     def serialize_and_save_to_repo?(opts = {})
       dsl_hash_form = dsl_hash_form()
       if !dsl_hash_form.empty? || opts[:ambiguous] || opts[:possibly_missing] || opts[:create_empty_module_refs]
-        @parent.serialize_and_save_to_repo?(meta_filename_path, dsl_hash_form, nil, opts)
+        self.parent.serialize_and_save_to_repo?(meta_filename_path, dsl_hash_form, nil, opts)
       end
     end
 
     def component_module_ref?(cmp_module_name)
-      @component_modules[key(cmp_module_name)]
+      self.component_modules[key(cmp_module_name)]
     end
 
     def matching_component_module_namespace?(cmp_module_name)
@@ -160,20 +163,20 @@ module DTK
 
     def set_module_version(cmp_module_name, version)
       key = key(cmp_module_name)
-      if cmr = @component_modules[key]
+      if cmr = self.component_modules[key]
         cmr.set_module_version(version)
       else
         hash_content = {
           component_module: cmp_module_name,
           version_info: version
         }
-        @component_modules[key] = ModuleRef.reify(@parent.model_handle, hash_content)
+        self.component_modules[key] = ModuleRef.reify(self.parent.model_handle, hash_content)
       end
-      ModuleRef.update(:create_or_update, @parent, @component_modules.values)
+      ModuleRef.update(:create_or_update, self.parent, self.component_modules.values)
     end
 
     def update
-      module_ref_hash_array = @component_modules.map do |(key, hash)|
+      module_ref_hash_array = self.component_modules.map do |(key, hash)|
         el = hash
         unless hash[:module_name]
           el = el.merge(module_name: key.to_s)
@@ -183,7 +186,7 @@ module DTK
         end
         el
       end
-      ModuleRef.create_or_update(@parent, module_ref_hash_array)
+      ModuleRef.create_or_update(self.parent, module_ref_hash_array)
     end
 
     def self.clone_component_module_refs(base_branch, new_branch)
@@ -216,18 +219,25 @@ module DTK
     end
     IgnoreReservedModules = ['aws:ec2']
 
+    protected
+
+    def project_idh
+      @project_idh ||= self.parent.get_module.get_project.id_handle
+    end
+
+
     private
 
-   def self.update(parent, cmp_modules)
+    def self.update(parent, cmp_modules)
       ModuleRef.create_or_update(parent, cmp_modules.values)
     end
 
     def add_or_set_component_module_ref(cmp_module_name, mod_ref_hash)
-      @component_modules[key(cmp_module_name)] = ModuleRef.reify(@parent.model_handle, mod_ref_hash)
+      self.component_modules[key(cmp_module_name)] = ModuleRef.reify(self.parent.model_handle, mod_ref_hash)
     end
 
     def delete_component_module_ref(cmp_module_name)
-      @component_modules.delete(key(cmp_module_name))
+      self.component_modules.delete(key(cmp_module_name))
     end
 
     def self.key(el)
@@ -270,18 +280,6 @@ module DTK
       def mapping_required?
         find { |r| r[:required] }
       end
-    end
-
-    def project_idh
-      return @project_idh if @project_idh
-      unless service_id = @parent.get_field?(:service_id)
-        fail Error.new('Cannot find project from parent object')
-      end
-      service_module = @parent.model_handle(:service_module).createIDH(id: service_id).create_object
-      unless project_id = service_module.get_field?(:project_project_id)
-        fail Error.new('Cannot find project from parent object')
-      end
-      @parent.model_handle(:project).createIDH(id: project_id)
     end
 
     def module_refs_to_modules_with_namespaces

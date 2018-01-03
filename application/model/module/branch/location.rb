@@ -21,15 +21,43 @@
 module DTK
   class ModuleBranch
     class Location
-      r8_nested_require('location', 'params')
+      require_relative('location/params')
       # above needed before below
-      r8_nested_require('location', 'local')
-      r8_nested_require('location', 'remote')
+      require_relative('location/local')
+      require_relative('location/remote')
       # above needed before below
-      r8_nested_require('location', 'server')
-      r8_nested_require('location', 'client')
+      require_relative('location/server')
+      require_relative('location/client')
 
       attr_reader :local, :remote
+
+      module Mixin
+        def common_module_branch
+          if get_field?(:type) == 'common_module'
+            self
+          else
+            local = local_from_module_branch(module_type: :common_module)
+            CommonModule.get_module_branch_from_local(local)
+          end
+        end
+
+        private
+        # opts can have keys
+        #   :module_type
+        def local_from_module_branch(opts = {})
+          module_obj    = get_module
+          namespace_obj = Namespace.get_obj(model_handle(:namespace), filter: [:eq, :id, module_obj.get_field?(:namespace_id)])
+          project       =  module_obj.get_project
+
+          params_hash = {
+            module_type: opts[:module_type] || get_field?(:type),
+            module_name: module_obj.display_name,
+            version: get_field?(:version),
+            namespace: namespace_obj.display_name
+          }
+          LocalParams::Server.new(params_hash).create_local(project)
+        end
+      end
 
       private
 

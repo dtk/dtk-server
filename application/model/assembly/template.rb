@@ -115,6 +115,9 @@ module DTK; class Assembly
       Model.get_objs(service_setting_mh, sp_hash)
     end
 
+    # opts can have keys:
+    #   :component_module_refs
+    #   :force_compute_template_id
     def self.get_augmented_component_refs(mh, opts = {})
       sp_hash = {
         cols: [:id, :display_name, :component_type, :module_branch_id, :augmented_component_refs],
@@ -142,9 +145,8 @@ module DTK; class Assembly
           (pntr[:aug_cmp_refs] ||= []) << aug_cmp_ref
         end
       end
-      set_matching_opts = Aux.hash_subset(opts, [:force_compute_template_id])
       aug_cmp_refs_ndx_by_vc.each_value do |r|
-        r[:component_module_refs].set_matching_component_template_info?(r[:aug_cmp_refs], set_matching_opts)
+        r[:component_module_refs].set_matching_component_template_info?(r[:aug_cmp_refs], force_compute_template_id: opts[:force_compute_template_id])
       end
       aug_cmp_refs_ndx_by_vc.values.map { |r| r[:aug_cmp_refs] }.flatten
     end

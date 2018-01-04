@@ -18,14 +18,14 @@
 module DTK
   class Clone
     module InstanceTemplate
-      r8_nested_require('clone', 'instance_template/link')
-      r8_nested_require('clone', 'instance_template/links')
+      require_relative('clone/instance_template/link')
+      require_relative('clone/instance_template/links')
     end
 
-    r8_nested_require('clone', 'child_context')
-    r8_nested_require('clone', 'copy_processor')
-    r8_nested_require('clone', 'global')
-    r8_nested_require('clone', 'incremental_update')
+    require_relative('clone/child_context')
+    require_relative('clone/copy_processor')
+    require_relative('clone/global')
+    require_relative('clone/incremental_update')
 
     #instance_template_links has type InstanceTemplate::Links
     def self.modify_instances(model_handle, instance_template_links)

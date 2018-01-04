@@ -17,7 +17,7 @@
 #
 module DTK
   class Target
-    module Clone
+    class Clone
       module SpecialNodeAttributes
         def self.process(nodes, assembly)
           NodeComponent.node_components(nodes, assembly).each { |node_component| node_component.set_special_attributes }

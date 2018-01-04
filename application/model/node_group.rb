@@ -18,7 +18,6 @@
 module DTK
   class NodeGroup < Node
     require_relative('node_group/id_name_helper')
-    require_relative('node_group/clone')
     require_relative('node_group/node_group_member')
     require_relative('node_group/cache')
     

@@ -17,23 +17,21 @@
 #
 module DTK
   class Node < Model
-    r8_nested_require('node', 'meta')
+    require_relative('node/meta')
     extend NodeMetaClassMixin
     set_relation_name(:node, :node)
 
-    r8_nested_require('node', 'type')
-    r8_nested_require('node', 'template')
-    r8_nested_require('node', 'instance')
-    r8_nested_require('node', 'target_ref')
-    r8_nested_require('node', 'filter')
-    r8_nested_require('node', 'clone')
-    r8_nested_require('node', 'node_attribute')
-    r8_nested_require('node', 'external_ref')
-    r8_nested_require('node', 'delete')
-    r8_nested_require('node', 'dangling_link_mixin')
+    require_relative('node/type')
+    require_relative('node/template')
+    require_relative('node/instance')
+    require_relative('node/target_ref')
+    require_relative('node/filter')
+    require_relative('node/node_attribute')
+    require_relative('node/external_ref')
+    require_relative('node/delete')
+    require_relative('node/dangling_link_mixin')
 
     include Type::Mixin
-    include Clone::Mixin
     extend NodeAttribute::ClassMixin
     include NodeAttribute::Mixin
     include ExternalRef::Mixin

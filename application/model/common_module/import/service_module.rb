@@ -24,8 +24,8 @@ module DTK
 
         def initialize(project, service_module, module_branch)
           common_module_branch = module_branch.common_module_branch
-          module_refs          = ModuleRefs.get_component_module_refs(common_module_branch)
-          @parent_class = service_module.class
+          module_refs          = LockedModuleRefs::CommonModule.get_module_refs(common_module_branch)
+          @parent_class        = service_module.class
           super(project.id_handle, module_branch, service_module, module_refs)
         end
 

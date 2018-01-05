@@ -16,14 +16,16 @@
 # limitations under the License.
 #
 module DTK
-  require_relative('common_dsl')
-  require_relative('node_component')
-  require_relative('mustache_template')
-  require_relative('doc_generator')
-  require_relative('model')
-  require_relative('parsed_dsl')
-  require_relative('repo_manager')
-  require_relative('config_agent')
-  require_relative('response_info')
-  require_relative('locked_module_refs')
+  class LockedModuleRefs
+    class ServiceInstance < self
+      # require_relative('service_instance/element')
+
+      def self.create_from_common_module_refs(base_module_branch, new_service_instance_module_branch)
+        debugger
+        base_module_refs = CommonModule.get_module_refs(base_module_branch)
+        # TODO: DTK-3366: change below to use ServiceInstance::Element
+        ModuleRef.create_or_update(new_service_instance_module_branch, base_module_refs.module_refs_array)
+      end
+    end
+  end
 end

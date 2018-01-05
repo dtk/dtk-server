@@ -26,7 +26,7 @@ module DTK
     include ModuleMixin
     extend DSLClassMixin
     include DSLMixin
-    include ModuleRefs::Mixin
+#    include ModuleRefs::Mixin
 
     ### standard get methods
     def get_assemblies

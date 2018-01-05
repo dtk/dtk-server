@@ -19,6 +19,14 @@ module DTK
   class Clone
     class CopyProcessor
       class Assembly < self
+        def initialize(target_obj, source_obj, opts = {})
+          super(source_obj, opts)
+          @assembly_template = source_obj # this must go first
+          @project           = (target_obj.respond_to?(:get_project) && target_obj.get_project)
+          @module_refs       = LockedModuleRefs::CommonModule.get_module_refs(self.module_branch)
+        end
+        private :initialize
+
         def cloning_assembly?
           true
         end
@@ -27,23 +35,22 @@ module DTK
           :library_to_target
         end
 
-        attr_reader :project, :component_module_refs
+        attr_reader :project, :module_refs, :assembly_template
+
+        protected
+
+        def module_branch
+          @module_branch ||= self.assembly_template[:module_branch] || get_assembly_template_module_branch
+        end
 
         private
 
-        def initialize(target_obj, source_obj, opts = {})
-          super(source_obj, opts)
-          @project = (target_obj.respond_to?(:get_project) && target_obj.get_project)
-          @component_module_refs = get_component_module_refs(source_obj)
-        end
-
-        def get_component_module_refs(source_obj)
+        def get_assembly_template_module_branch
           sp_hash = {
             cols: [:id, :group_id, :display_name],
-            filter: [:eq, :id, source_obj.get_field?(:module_branch_id)]
+            filter: [:eq, :id, self.assembly_template.get_field?(:module_branch_id)]
           }
-          branch = Model.get_obj(source_obj.model_handle(:module_branch), sp_hash)
-          ModuleRefs.get_component_module_refs(branch)
+          Model.get_obj(self.assembly_template.model_handle(:module_branch), sp_hash)
         end
 
         def get_nested_objects_top_level(model_handle, target_parent_mh, assembly_objs_info, recursive_override_attrs, &block)

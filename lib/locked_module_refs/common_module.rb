@@ -45,7 +45,19 @@ module DTK
         update if update_object_if_needed!(input_module_refs)
         self
       end
-      
+
+      def self.get_dependent_modules(service_instance_branch)
+        ModuleRef.get_component_module_ref_array(service_instance_branch)
+      end
+
+      def self.get_dependent_module_refs(service_instance_branch)      
+        content_hash_content = ModuleRef.get_component_module_ref_array(service_instance_branch).inject({}) do |h, r|
+          h.merge(key(r[:module_name]) => r)
+        end
+        new(service_instance_branch, content_hash_content)
+      end
+
+      # TODO: DTK-3366; integrate get_dependent_module_refs and get_module_refs
       def self.get_module_refs(module_branch)
         common_module_branch = module_branch.common_module_branch
 
@@ -53,7 +65,7 @@ module DTK
           h.merge(key(r[:module_name]) => r)
         end
         
-        # TODO: DTK-3366: see if we stillneed below
+        # TODO: DTK-3366: see if we still need below
         content_hash_content.each do |k, v|
           v[:version_info] = nil if v[:version_info] == 'master'
         end

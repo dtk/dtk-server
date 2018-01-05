@@ -21,10 +21,9 @@ module DTK
       # require_relative('service_instance/element')
 
       def self.create_from_common_module_refs(base_module_branch, new_service_instance_module_branch)
-        debugger
         base_module_refs = CommonModule.get_module_refs(base_module_branch)
-        # TODO: DTK-3366: change below to use ServiceInstance::Element
         ModuleRef.create_or_update(new_service_instance_module_branch, base_module_refs.module_refs_array)
+        # TODO: DTK-3366: also do do Element.create_or_update(new_service_instance_module_branch, base_module_refs.module_refs_array)
       end
     end
   end

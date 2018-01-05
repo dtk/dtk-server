@@ -34,54 +34,6 @@ module DTK; class Component
       cmp && cmp.id_handle.create_object(model_name: :component_template).merge(cmp)
     end
 
-
-    # TODO: looks like only used by old controller
-    # This method returns an augmented_component_template if a unique match is found; this is a component template augmented with keys:
-    #   :module_branch
-    #   :component_module
-    #   :namespace
-    # if no match is found then nil is returned otherwise error raised indicating multiple matches found
-    # opts can have keys:
-    #   :version
-    def self.get_augmented_base_component_template(assembly, user_friendly_cmp_name, namespace, opts = {})
-      ret_cmp = nil
-      component_type, title = ComponentTitle.parse_component_display_name(display_name_from_user_friendly_name(user_friendly_cmp_name))
-      version = opts[:version]
-
-      matching_cmp_templates = Augmented.find_matching_component_templates(assembly, component_type, namespace, version: version, use_just_base_template: true)
-
-      if matching_cmp_templates.size != 1
-        component_ref = "#{namespace}:#{user_friendly_cmp_name}"
-        component_ref << "(#{version})" if version
-        if matching_cmp_templates.empty?
-          fail ErrorUsage, "No component template matching '#{component_ref} exists"
-        else
-          possible_names = matching_cmp_templates.map { |r| r.display_name_print_form(namespace_prefix: true) }.join(', ')
-          fail ErrorUsage, "Multiple components templates matching '#{component_ref} exists: #{possible_names}"
-        end
-      end
-      ret_cmp = matching_cmp_templates.first
-
-      # if component_template with same name exist but have different namespace, return error message that user should
-      # use component_template from module that already exist in service instance
-      assembly_cmp_mods = assembly.list_component_modules(Opts.new(with_namespace: true)) # component_modules already associated with service instance
-      ret_cmp_mod = ret_cmp[:component_module][:display_name]
-      if cmp_mod = assembly_cmp_mods.find { |cmp_mod| cmp_mod[:display_name] == ret_cmp_mod }
-        ret_cmp_ns = ret_cmp[:namespace][:display_name]
-        cmp_mod_ns = cmp_mod[:namespace_name]
-        if ret_cmp_ns != cmp_mod_ns
-          fail ErrorUsage.new("Unable to add component from (#{ret_cmp_ns}:#{ret_cmp_mod}) because you are already using components from following component modules: #{cmp_mod_ns}:#{cmp_mod[:display_name]}")
-        end
-
-        ret_cmp_version = ret_cmp[:version]
-        cmp_mod_version = cmp_mod[:display_version]||cmp_mod[:module_branch][:version]
-        full_ret_cmp_name = (ret_cmp_version && ret_cmp_version!='master') ? "#{ret_cmp_ns}:#{ret_cmp_mod}:#{ret_cmp_version}" : "#{ret_cmp_ns}:#{ret_cmp_mod}"
-        full_cmp_mod_name = (cmp_mod_version && cmp_mod_version!='master') ? "#{cmp_mod_ns}:#{cmp_mod[:display_name]}:#{cmp_mod_version}" : "#{cmp_mod_ns}:#{cmp_mod[:display_name]}"
-        fail ErrorUsage.new("Unable to add component from (#{full_ret_cmp_name}) because you are already using components version: #{full_cmp_mod_name}") if ret_cmp_version != cmp_mod_version
-      end
-      ret_cmp
-    end
-
     def self.get_info_for_clone(cmp_template_idhs)
       ret = []
       return ret if cmp_template_idhs.empty?

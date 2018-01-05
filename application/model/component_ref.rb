@@ -47,24 +47,6 @@ module DTK
       ret
     end
 
-    def self.get_referenced_component_modules(project, component_refs)
-      ret = []
-      return ret if component_refs.empty?
-      sp_hash = {
-        cols: [:id, :display_name, :group_id, :namespace_info],
-        filter: [:oneof, :id, component_refs.map { |r| r[:component_template_id] }.uniq]
-      }
-      aug_cmp_templates = get_objs(project.model_handle(:component), sp_hash)
-      ndx_ret = {}
-      aug_cmp_templates.each do |r|
-        component_module = r[:component_module]
-        ndx = component_module[:id]
-        branch_version = version_print_form(r[:module_branch][:version])
-        ndx_ret[ndx] ||= component_module.merge({ namespace_name: r[:namespace][:display_name], version: branch_version })
-      end
-      ndx_ret.values
-    end
-
     def self.print_form(cmp_ref__obj_or_hash)
       if cmp_ref__obj_or_hash[:component_type]
         Component.component_type_print_form(cmp_ref__obj_or_hash[:component_type])

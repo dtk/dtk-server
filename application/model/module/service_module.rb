@@ -61,31 +61,6 @@ module DTK
 
     private :assembly_ref__add_version
 
-    def list_component_modules(opts = Opts.new)
-      get_referenced_component_modules(opts).sort { |a, b| a[:display_name] <=> b[:display_name] }
-    end
-
-    def get_referenced_component_modules(opts = Opts.new)
-      # TODO: alternative is to get this by getting the module_refs
-      ret = []
-      cmp_refs = get_referenced_component_refs()
-      return ret if cmp_refs.empty?
-      project = get_project()
-      ret = ComponentRef.get_referenced_component_modules(project, cmp_refs)
-
-      if opts.array(:detail_to_include).include?(:versions)
-        ndx_versions = get_component_module_refs().version_objs_indexed_by_modules()
-
-        ret.each do |mod|
-          if version_obj = ndx_versions[mod.module_name()]
-            mod[:version] = version_obj
-          end
-        end
-      end
-
-      ret
-    end
-
     ### end: get methods
 
     def self.model_type

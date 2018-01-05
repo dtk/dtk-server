@@ -96,6 +96,7 @@ module DTK
       end
 
       def aug_component_module_branches(opts = {})
+        debugger
         return reload_aug_component_module_branches if opts[:reload]
         @aug_dependent_module_branches ||= reload_aug_component_module_branches
       end

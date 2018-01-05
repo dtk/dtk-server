@@ -18,9 +18,9 @@
 module DTK
   class Clone
     class CopyProcessor
-      r8_nested_require('copy_processor', 'output')
-      r8_nested_require('copy_processor', 'assembly')
-      r8_nested_require('copy_processor', 'foreign_key_info')
+      require_relative('copy_processor/output')
+      require_relative('copy_processor/assembly')
+      require_relative('copy_processor/foreign_key_info')
 
       def self.create(target_obj, source_obj, opts = {})
         if source_obj.is_assembly?
@@ -30,10 +30,10 @@ module DTK
         end
       end
       def initialize(source_obj, opts = {})
-        @db = source_obj.class.db
-        @fk_info = ForeignKeyInfo.new(@db)
-        @model_name = source_obj.model_name()
-        @ret = Output.new(source_obj, opts)
+        @db           = source_obj.class.db
+        @fk_info      = ForeignKeyInfo.new(@db)
+        @model_name   = source_obj.model_name()
+        @ret          = Output.new(source_obj, opts)
         @include_list = opts[:include_list]
       end
       private :initialize

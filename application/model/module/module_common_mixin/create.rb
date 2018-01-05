@@ -231,7 +231,7 @@ module DTK; module ModuleCommonMixin
       end
 
       new_module_branch = create_new_version__type_specific(new_version_repo, new_version, opts_type_specific_create)
-      ModuleRefs.clone_component_module_refs(aug_base_branch, new_module_branch)
+      LockedModuleRefs::ServiceInstance.create_from_common_module_refs(aug_base_branch, new_module_branch)
       new_module_branch
     end
   end

@@ -22,15 +22,15 @@ module DTK; class Clone
 
       def initialize(clone_proc, hash)
         super
-        find_component_templates_in_assembly!()
+        find_component_templates_in_assembly!
       end
 
       def clone_model_handle
-        model_handle().createMH(:component)
+        model_handle.createMH(:component)
       end
 
       def find_component_templates_in_assembly!
-        merge!(matches: get_aug_matching_component_refs())
+        merge!(matches: get_aug_matching_component_refs)
       end
 
       # gets the component templates that each component ref is pointing to
@@ -41,9 +41,7 @@ module DTK; class Clone
           filter: [:oneof, :node_node_id, node_stub_ids]
         }
         aug_cmp_refs = Model.get_objs(model_handle.createMH(:component_ref), sp_hash, keep_ref_cols: true)
-
-        component_module_refs = @clone_proc.component_module_refs()
-        component_module_refs.set_matching_component_template_info?(aug_cmp_refs)
+        @clone_proc.module_refs.set_matching_component_template_info?(aug_cmp_refs)
       end
 
       def matching_component_refs__virtual_col
@@ -84,7 +82,7 @@ module DTK; class Clone
             component_template_id: component_template_id,
             node_node_id: node_node_id,
             assembly_id: node[:assembly_id],
-            locked_sha: component_template.get_current_sha!(),
+            locked_sha: component_template.get_current_sha!,
             display_name: m[:display_name],
             ref: m[:ref]
           }

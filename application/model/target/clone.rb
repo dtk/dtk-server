@@ -181,7 +181,8 @@ module DTK
       # opts can have keys
       #   :version
       def create_service_instance_module_refs(opts = {})
-        ModuleRefs::ServiceInstance.create(self.assembly_instance)
+        Log.error("TODO: DTK-3366: is analog to 'ModuleRefs::Lock.create_or_update(assembly, raise_errors: true, version: opts[:version])' neede?")
+        # LockedModuleRefs::ServiceInstance.create(self.assembly_instance)
       end
       
       def create_state_changes_for_create_node?(nodes_for_create_sc)

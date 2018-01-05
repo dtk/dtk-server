@@ -22,28 +22,16 @@ module DTK
       module Mixin
 
         def update_module_refs
-          existing_module_refs = ModuleRefs.get_component_module_refs(self.module_branch)
-          update_module_refs_if_needed!(existing_module_refs)
+          LockedModuleRefs::CommonModule.update_module_refs(self.module_branch, self.module_refs_hash)
         end
-
-        private :update_module_refs
-
+        
         protected
-
+      
         def module_refs_hash
           @module_refs_hash ||= ret_module_refs_hash
         end
-
+        
         private
-
-        def update_module_refs_if_needed!(existing_module_refs)
-          # The call 'update_object_if_needed!' updates the object module_refs and returns true if changed
-          if existing_module_refs.update_object_if_needed!(self.module_refs_hash)
-            # The call 'existing_module_refs.update' updates the object model
-            existing_module_refs.update
-          end
-          existing_module_refs
-        end
         
         def ret_module_refs_hash
           (self.parsed_dependent_modules || []).map { |parsed_module_ref| module_ref_hash_form(parsed_module_ref) }
@@ -56,7 +44,6 @@ module DTK
             version_info: parsed_module_ref.val(:ModuleVersion)
           }
         end
-
       end
     end
   end

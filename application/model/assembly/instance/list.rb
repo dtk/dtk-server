@@ -88,8 +88,6 @@ module DTK; class Assembly::Instance
         when :nodes
           opts.merge!(cols: Node.common_columns + [:target])
           list_nodes(opts)
-        when :modules
-          list_component_modules(opts)
         when :tasks
           list_tasks(opts)
         else
@@ -111,14 +109,8 @@ module DTK; class Assembly::Instance
         end
       end
 
-      def list_component_modules(opts = Opts.new)
-        opts_get = {}
-        if get_branch_relationship_info = opts.array(:detail_to_include).include?(:version_info)
-          opts.set_datatype!(:assembly_component_module)
-          opts_get.merge!(get_branch_relationship_info: true)
-        end
-
-        unsorted_ret = get_component_modules(:recursive, opts_get)
+      def list_dependent_modules
+        unsorted_ret = get_dependent_modules
         unsorted_ret.each do |r|
           module_branch = r[:module_branch]
           version       = module_branch[:version] if module_branch

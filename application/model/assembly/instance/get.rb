@@ -17,13 +17,13 @@
 #
 module DTK; class Assembly; class Instance
   module Get
-    r8_nested_require('get', 'attribute')
+    require_relative('get/attribute')
   end
   module GetMixin
     include Get::AttributeMixin
 
     def get_objs(sp_hash, opts = {})
-      super(sp_hash, opts.merge(model_handle: model_handle().createMH(:assembly_instance)))
+      super(sp_hash, opts.merge(model_handle: model_handle.createMH(:assembly_instance)))
     end
 
     # get associated task template
@@ -36,7 +36,7 @@ module DTK; class Assembly; class Instance
     end
 
     def get_target_idh
-      id_handle().get_parent_id_handle_with_auth_info()
+      id_handle.get_parent_id_handle_with_auth_info
     end
 
     #### get methods around attribute mappings
@@ -45,10 +45,10 @@ module DTK; class Assembly; class Instance
       ret = []
       sp_hash = {
         cols: [:id, :group_id],
-        filter: [:eq, :assembly_id, id()]
+        filter: [:eq, :assembly_id, id]
       }
       port_links = Model.get_objs(model_handle(:port_link), sp_hash)
-      filter = [:or, [:oneof, :port_link_id, port_links.map(&:id)], [:eq, :assembly_id, id()]]
+      filter = [:or, [:oneof, :port_link_id, port_links.map(&:id)], [:eq, :assembly_id, id]]
       AttributeLink.get_augmented(model_handle(:attribute_link), filter)
     end
     #### end: get methods around attribute mappings
@@ -71,8 +71,8 @@ module DTK; class Assembly; class Instance
       sp_hash = {
         cols: [:id, :group_id, :display_name, :component_type],
         filter: [:and, [:eq, :ancestor_id, cmp_instance.get_field?(:ancestor_id)],
-                 [:eq, :assembly_id, id()],
-                 [:neq, :id, cmp_instance.id()]]
+                 [:eq, :assembly_id, id],
+                 [:neq, :id, cmp_instance.id]]
       }
       Component::Instance.get_objs(model_handle(:component_instance), sp_hash)
     end
@@ -80,7 +80,7 @@ module DTK; class Assembly; class Instance
     def get_component_instances(opts = {})
       sp_hash = {
         cols: opts[:cols] || [:id, :group_id, :display_name, :component_type],
-        filter: [:eq, :assembly_id, id()]
+        filter: [:eq, :assembly_id, id]
       }
       Component::Instance.get_objs(model_handle(:component_instance), sp_hash)
     end
@@ -127,7 +127,7 @@ module DTK; class Assembly; class Instance
           # we have to use ancestor branch version in list-components
           if ModuleVersion.assembly_module_version?(cmp[:version])
             module_branch   = r[:module_branch]
-            ancestor_branch = module_branch.get_ancestor_branch?()
+            ancestor_branch = module_branch.get_ancestor_branch?
             cmp[:version]   = ancestor_branch[:version] if ancestor_branch[:version]
           end
 
@@ -144,21 +144,15 @@ module DTK; class Assembly; class Instance
 
     #### end: get methods around components
 
-    #### get methods around component modules and component module refs
-    def get_component_module_refs
-      ModuleRefs.get_component_module_refs(get_service_instance_branch)
+    #### get methods around dependent modules and  module refs
+    def get_dependent_module_refs
+      # This returns a LockedModuleRefs::CommonModule object
+      LockedModuleRefs::CommonModule.get_dependent_module_refs(get_service_instance_branch)
     end
 
-    # TODO: unify above and below. Th emethod get_component_module_ref is newer
-
-    # opts can have keys
-    #   :get_branch_relationship_info - Boolean
-    #
-    # mode is one of
-    # :direct - only component modules directly included
-    # :recursive - directly connected and nested component modules
-    def get_component_modules(mode, opts = {})
-      AssemblyModule::Component.get_for_assembly(self, mode, opts)
+    def get_dependent_modules
+      # TODO: DTK-3366: this is not array of Module objects, but instead array of DTK::ModueRefs
+      LockedModuleRefs::CommonModule.get_dependent_modules(get_service_instance_branch)
     end
 
     #### end: get methods around component modules
@@ -173,7 +167,7 @@ module DTK; class Assembly; class Instance
     end
 
     def get_nodes__expand_node_groups(opts = {})
-      cols = opts[:cols] || Node.common_columns()
+      cols = opts[:cols] || Node.common_columns
 
       node_or_ngs = get_nodes(*cols)
       if opts[:remove_assembly_wide_node]
@@ -187,7 +181,7 @@ module DTK; class Assembly; class Instance
     end
 
     def get_node_groups(opts = {})
-      cols = opts[:cols] || Node.common_columns()
+      cols = opts[:cols] || Node.common_columns
       node_or_ngs = get_nodes(*cols)
       NodeGroup.get_node_groups?(node_or_ngs)
     end
@@ -195,7 +189,7 @@ module DTK; class Assembly; class Instance
     def get_node?(filter)
       sp_hash = {
         cols: [:id, :display_name],
-        filter: [:and, [:eq, :assembly_id, id()], filter]
+        filter: [:and, [:eq, :assembly_id, id], filter]
       }
       rows = Model.get_objs(model_handle(:node), sp_hash)
       if rows.size > 1
@@ -222,7 +216,7 @@ module DTK; class Assembly; class Instance
       ndx_ret = {}
       ret = get_objs(cols: [:augmented_ports]).map do |r|
         link_def = r[:link_def]
-        if link_def.nil? || (link_def[:link_type] == r[:port].link_def_name())
+        if link_def.nil? || (link_def[:link_type] == r[:port].link_def_name)
           if get_augmented_ports__matches_on_title?(r[:nested_component], r[:port])
             r[:port].merge(r.slice(:node, :nested_component, :link_def))
           end
@@ -238,7 +232,7 @@ module DTK; class Assembly; class Instance
     def get_augmented_ports__matches_on_title?(component, port)
       ret = true
       if cmp_title = ComponentTitle.title?(component)
-        ret = (cmp_title == port.title?())
+        ret = (cmp_title == port.title?)
       end
       ret
     end
@@ -246,7 +240,7 @@ module DTK; class Assembly; class Instance
 
     # TODO: there is a field on ports :connected, but it is not correctly updated so need to get ports links to find out what is connected
     def get_augmented_ports__mark_unconnected!(aug_ports, _opts = {})
-      port_links = get_port_links()
+      port_links = get_port_links
       connected_ports =  port_links.map { |r| [r[:input_id], r[:output_id]] }.flatten.uniq
       aug_ports.each do |r|
         if r[:direction] == 'input'
@@ -297,7 +291,7 @@ module DTK; class Assembly; class Instance
     end
 
     def get_sub_assemblies
-      self.class.get_sub_assemblies([id_handle()])
+      self.class.get_sub_assemblies([id_handle])
     end
   end
 
@@ -323,7 +317,7 @@ module DTK; class Assembly; class Instance
 
     def get_info__flat_list(assembly_mh, opts = {})
       target_idh = opts[:target_idh]
-      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id()] : [:neq, :datacenter_datacenter_id, nil])
+      target_filter = (target_idh ? [:eq, :datacenter_datacenter_id, target_idh.get_id] : [:neq, :datacenter_datacenter_id, nil])
       filter = [:and, [:eq, :type, 'composite'], target_filter, opts[:filter]].compact
       col, needs_empty_nodes = list_virtual_column?(opts[:detail_level])
       cols = [:id, :ref, :display_name, :group_id, :component_type, :version, :created_at, :specific_type, col].compact
@@ -357,7 +351,7 @@ module DTK; class Assembly; class Instance
       cols = ([:id, :display_name, :group_id, :type] + alt_cols).uniq
       sp_hash = {
         cols: cols,
-        filter: [:and, filter_out_target_refs(),
+        filter: [:and, filter_out_target_refs,
                  [:or, [:oneof, :id, ndx_nodes.keys],
                   #to catch nodes without any components
                   [:oneof, :assembly_id, assembly_idhs.map(&:get_id)]]
@@ -371,7 +365,7 @@ module DTK; class Assembly; class Instance
     # This is equivalent to saying that this does not return target_refs
     def get_nodes_simple(assembly_idhs, opts = {})
       ret = []
-      return ret if assembly_idhs.empty?()
+      return ret if assembly_idhs.empty?
       sp_hash = {
         cols: opts[:cols] || [:id, :display_name, :group_id, :type, :assembly_id],
         filter: [:oneof, :assembly_id, assembly_idhs.map(&:get_id)]
@@ -382,7 +376,7 @@ module DTK; class Assembly; class Instance
         ret
       else
         ret.map do |r|
-          r.is_node_group? ? r.id_handle().create_object(model_name: :node_group).merge(r) : r
+          r.is_node_group? ? r.id_handle.create_object(model_name: :node_group).merge(r) : r
         end
       end
     end
@@ -426,7 +420,7 @@ module DTK; class Assembly; class Instance
         cols: [:id, :group_id, :display_name],
         filter: [:and, [:oneof, :assembly_id, assembly_idhs.map(&:get_id)], [:eq, :type, 'composite']]
       }
-      get_objs(assembly_idhs.first.createMH(), sp_hash).map(&:copy_as_assembly_instance)
+      get_objs(assembly_idhs.first.createMH, sp_hash).map(&:copy_as_assembly_instance)
     end
 
     private

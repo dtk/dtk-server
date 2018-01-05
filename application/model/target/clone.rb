@@ -41,7 +41,6 @@ module DTK
       end
 
       def clone(opts = {})
-        debugger
         #adjust link_def_id on ports
         set_ports_link_def_and_cmp_ids
 

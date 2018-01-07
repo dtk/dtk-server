@@ -49,8 +49,8 @@ module DTK
         process_base_module
         service_instance_repo_info = RepoInfo.new(self.base_module_branch)
         if self.add_nested_modules?
-          self.aug_nested_base_module_branches.each do |aug_nested_base_module_branch|
-            aug_nested_module_branch = process_nested_module(aug_nested_base_module_branch)
+          self.aug_dependent_base_module_branches.each do |aug_base_module_branch|
+            aug_nested_module_branch = process_nested_module(aug_base_module_branch)
             service_instance_repo_info.add_nested_module_info!(aug_nested_module_branch)
           end
         end
@@ -95,16 +95,9 @@ module DTK
         }.merge(module_repo_info)
       end
 
-      def aug_component_module_branches(opts = {})
-        debugger
-        return reload_aug_component_module_branches if opts[:reload]
-        @aug_dependent_module_branches ||= reload_aug_component_module_branches
-      end
-
       def get_dsl_locations
         self.assembly_instance.get_dsl_locations
       end
-
 
       protected
 
@@ -112,8 +105,8 @@ module DTK
         @add_nested_modules
       end
 
-      def aug_nested_base_module_branches
-        @aug_nested_base_module_branches || ret_aug_nested_base_module_branches
+      def aug_dependent_base_module_branches
+        @aug_dependent_base_module_branches ||= LockedModuleRefs::CommonModule.get_aug_base_module_branches(self.assembly_instance)
       end
 
       def service_module_name
@@ -142,13 +135,6 @@ module DTK
         CommonDSL::Generate::DirectoryGenerator.add_files(self.base_module_branch, file_path__content_array, donot_push_changes: true)
       end
 
-      def ret_aug_nested_base_module_branches
-        self.aug_component_module_branches.reject do |aug_module_branch|
-          aug_module_branch[:module_name] == self.service_module_name and
-            aug_module_branch[:namespace] == self.service_module_namespace
-        end
-      end
-
       def process_nested_module(aug_nested_base_module_branch)
         component_module = aug_nested_base_module_branch.component_module
         base_version     = aug_nested_base_module_branch.version
@@ -171,10 +157,6 @@ module DTK
 
       def directory_exists_in_module?(dir)
         RepoManager.file_exists?(dir, self.base_module_branch) 
-      end
-        
-      def reload_aug_component_module_branches
-        ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance, augment_with_component_modules: true)
       end
 
     end

@@ -82,6 +82,7 @@ module DTK
 
         def self.pull_component_module_repos(aug_cmp_template, service_instance)
           if service_instance
+            fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
             existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
             nested_module_name           = aug_cmp_template.component_module.module_name
 

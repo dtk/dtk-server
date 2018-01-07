@@ -21,6 +21,7 @@ module DTK
       require_relative('common_module/parse')
       require_relative('common_module/update')
       require_relative('common_module/matching_templates')
+      require_relative('common_module/get_for_service_instance')
 
       include Update::Mixin
 
@@ -32,7 +33,6 @@ module DTK
         super(ret_indexd_elements(parent, content_hash_form, opts))
         @parent = parent
       end
-      private :initialize
 
       def self.update_module_refs(module_branch, input_module_refs)
         existing_module_refs = get_module_refs(module_branch)
@@ -46,18 +46,22 @@ module DTK
         self
       end
 
-      def self.get_dependent_modules(service_instance_branch)
-        ModuleRef.get_component_module_ref_array(service_instance_branch)
+      def self.get_dependent_module_refs_array(assembly_instance)
+        GetForServiceInstance.new(assembly_instance).dependent_module_refs_array
       end
 
-      def self.get_dependent_module_refs(service_instance_branch)      
-        content_hash_content = ModuleRef.get_component_module_ref_array(service_instance_branch).inject({}) do |h, r|
-          h.merge(key(r[:module_name]) => r)
-        end
-        new(service_instance_branch, content_hash_content)
+      def self.get_dependent_module_refs(assembly_instance)
+        GetForServiceInstance.new(assembly_instance).dependent_module_refs
       end
 
-      # TODO: DTK-3366; integrate get_dependent_module_refs and get_module_refs
+      def self.get_aug_dependent_modules(assembly_instance)
+        GetForServiceInstance.new(assembly_instance).aug_dependent_modules
+      end
+
+      def self.get_aug_base_module_branches(assembly_instance)
+        GetForServiceInstance.new(assembly_instance).aug_base_module_branches
+      end
+
       def self.get_module_refs(module_branch)
         common_module_branch = module_branch.common_module_branch
 
@@ -72,7 +76,7 @@ module DTK
         
         new(common_module_branch, content_hash_content)
       end
-      
+
       # component refs are augmented with :component_template key which points to
       # associated component template or nil
       # opts can have keys

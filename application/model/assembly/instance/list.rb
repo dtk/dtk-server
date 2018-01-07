@@ -110,36 +110,16 @@ module DTK; class Assembly::Instance
       end
 
       def list_dependent_modules
-        unsorted_ret = get_dependent_modules
-        unsorted_ret.each do |r|
-          module_branch = r[:module_branch]
-          version       = module_branch[:version] if module_branch
-          r[:full_name] = "#{r[:namespace_name]}:#{r[:display_name]}"
-
-          if version.eql?('master') || version.match(/\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
-            r[:display_version] = version
-          else
-            if ancestor_version = (module_branch.get_ancestor_branch?||{})[:version]
-              r[:display_version] = ancestor_version
-            end
-          end
-
-          if get_branch_relationship_info
-            if r[:local_copy]
-              if module_branch[:frozen]
-                r[:update_saved] = "n/a"
-              else
-                branch_relationship     = r[:branch_relationship] || ''
-                local_ahead_or_branchpt = branch_relationship.eql?(:local_ahead) || branch_relationship.eql?(:branchpoint)
-                r[:update_saved] = !(r[:local_copy_diff] && local_ahead_or_branchpt)
-              end
-            end
-          end
+        unsorted_ret = get_aug_dependent_modules.map do |aug_mod|
+          namespace, module_name, version = [aug_mod[:namespace_name], aug_mod.display_name, aug_mod[:version]]
+          {
+            id: aug_mod.id,
+            full_name: "#{namespace}:#{module_name}",
+            display_version: version
+          }
         end
-
-        unsorted_ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
+        unsorted_ret.sort { |a, b| a[:full_name] <=> b[:full_name] }
       end
-
 
       def list_components(opts = Opts.new)
         aug_cmps      = get_augmented_components(opts)

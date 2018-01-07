@@ -31,6 +31,7 @@ module DTK; module CommonDSL
 
         # Processes changes to the nested module content and dsl 
         def self.process_nested_module_changes(diff_result, service_instance, service_module_branch, all_impacted_file_paths, opts = {})
+          fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
           ndx_existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
           if nested_modules_info = impacted_nested_modules_info?(service_module_branch, all_impacted_file_paths)
             # Find existing aug_module_branches for service instance nested modules and for each one impacted 

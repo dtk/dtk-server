@@ -28,9 +28,8 @@ module DTK
         end
         
         def generate_content_input!(assembly_instance)
-          # dependent_modules is an array of DTK::ModuleRef objects
-          dependent_modules     = assembly_instance.get_dependent_modules
-          dependency_info_array = dependent_modules.map { |dep| DependencyInfo.new(dep[:namespace_info], dep[:module_name], dep[:version_info]) }
+          module_refs_array     = assembly_instance.get_dependent_module_refs_array
+          dependency_info_array = module_refs_array.map { |ref| DependencyInfo.new(ref[:namespace_info], ref[:module_name], ref[:version_info]) }
           
           set_id_handle(assembly_instance)
           generate_content_input_aux!(dependency_info_array)

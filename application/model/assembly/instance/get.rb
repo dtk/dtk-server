@@ -145,14 +145,20 @@ module DTK; class Assembly; class Instance
     #### end: get methods around components
 
     #### get methods around dependent modules and  module refs
-    def get_dependent_module_refs
-      # This returns a LockedModuleRefs::CommonModule object
-      LockedModuleRefs::CommonModule.get_dependent_module_refs(get_service_instance_branch)
+
+    # augmented with keys :namespace_name and :version
+    def get_aug_dependent_modules
+      LockedModuleRefs::CommonModule.get_aug_dependent_modules(self)
     end
 
-    def get_dependent_modules
-      # TODO: DTK-3366: this is not array of Module objects, but instead array of DTK::ModueRefs
-      LockedModuleRefs::CommonModule.get_dependent_modules(get_service_instance_branch)
+    def get_dependent_module_refs
+      # This returns a LockedModuleRefs::CommonModule object
+      LockedModuleRefs::CommonModule.get_dependent_module_refs(self)
+    end
+
+    def get_dependent_module_refs_array
+      # This returns an array of ModuleRef objects
+      LockedModuleRefs::CommonModule.get_dependent_module_refs_array(self)
     end
 
     #### end: get methods around component modules

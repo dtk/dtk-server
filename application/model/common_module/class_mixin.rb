@@ -27,7 +27,7 @@ module DTK
         }
         get_objs(project.model_handle(model_type), sp_hash).find{ |mod| (mod[:module_branch]||{})[:version] == version }
       end
-      
+
       NS_MOD_DELIM_IN_REF = ':'
       def find_from_name?(model_handle, namespace, module_name)
         ref = "#{namespace}#{NS_MOD_DELIM_IN_REF}#{module_name}"

@@ -21,7 +21,6 @@ module DTK
       require_relative('common_module/parse')
       require_relative('common_module/update')
       require_relative('common_module/matching_templates')
-      require_relative('common_module/get_for_service_instance')
 
       include Update::Mixin
 
@@ -44,22 +43,6 @@ module DTK
         # The call 'existing_module_refs.update' updates the object model
         update if update_object_if_needed!(input_module_refs)
         self
-      end
-
-      def self.get_dependent_module_refs_array(assembly_instance)
-        GetForServiceInstance.new(assembly_instance).dependent_module_refs_array
-      end
-
-      def self.get_dependent_module_refs(assembly_instance)
-        GetForServiceInstance.new(assembly_instance).dependent_module_refs
-      end
-
-      def self.get_aug_dependent_modules(assembly_instance)
-        GetForServiceInstance.new(assembly_instance).aug_dependent_modules
-      end
-
-      def self.get_aug_base_module_branches(assembly_instance)
-        GetForServiceInstance.new(assembly_instance).aug_base_module_branches
       end
 
       def self.get_module_refs(module_branch)

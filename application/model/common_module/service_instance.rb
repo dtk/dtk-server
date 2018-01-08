@@ -106,7 +106,7 @@ module DTK
       end
 
       def aug_dependent_base_module_branches
-        @aug_dependent_base_module_branches ||= LockedModuleRefs::CommonModule.get_aug_base_module_branches(self.assembly_instance)
+        @aug_dependent_base_module_branches ||= DependentModule.get_aug_base_module_branches(self.assembly_instance)
       end
 
       def service_module_name

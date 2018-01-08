@@ -148,17 +148,17 @@ module DTK; class Assembly; class Instance
 
     # augmented with keys :namespace_name and :version
     def get_aug_dependent_modules
-      LockedModuleRefs::CommonModule.get_aug_dependent_modules(self)
+      DependentModule.get_aug_dependent_modules(self)
     end
 
     def get_dependent_module_refs
-      # This returns a LockedModuleRefs::CommonModule object
-      LockedModuleRefs::CommonModule.get_dependent_module_refs(self)
+      # This returns a DependentModule object
+      DependentModule.get_dependent_module_refs(self)
     end
 
     def get_dependent_module_refs_array
       # This returns an array of ModuleRef objects
-      LockedModuleRefs::CommonModule.get_dependent_module_refs_array(self)
+      DependentModule.get_dependent_module_refs_array(self)
     end
 
     #### end: get methods around component modules

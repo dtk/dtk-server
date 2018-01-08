@@ -39,7 +39,7 @@ module DTK
 
     # The version in elements is from the dependencies base branch
     def dependent_module_refs_array
-      @dependent_module_refs_array ||= ModuleRef.get_component_module_ref_array(self.service_instance_branch)
+      @dependent_module_refs_array ||= ModuleRef.get_module_ref_array(self.service_instance_branch)
     end
     
     # TODO: DTK-3366 can we use :common_module rather than :component_module
@@ -66,7 +66,7 @@ module DTK
     attr_reader :assembly_instance, :service_instance_branch
     
     def elements
-      @elements ||= self.dependent_module_refs_array.map { |ref| Element.new(ref[:namespace_info], ref[:module_name], ref[:version_info]) }
+      @elements ||= self.dependent_module_refs_array.map { |ref| Element.new(ref[:namespace_info], ref[:module_name], ref.version) }
     end
     
     def namespace_objects

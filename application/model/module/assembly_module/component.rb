@@ -95,25 +95,6 @@ module DTK; class AssemblyModule
       ModuleRefs::Lock.create_or_update(self.assembly_instance, opts)
     end
 
-    def delete_modules?(opts = {})
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :component_id],
-        filter: [:eq, :version, self.assembly_module_version]
-      }
-      component_module_mh = self.assembly_instance.model_handle(:component_module)
-
-      # iterate over any service or component module branch that has been created for the service instance
-      Model.get_objs(self.assembly_instance.model_handle(:module_branch), sp_hash).each do |module_branch|
-        # if module_branch[:component_id] is nil then this is a service module branch, otherwise it is a component module branch
-        if module_branch[:component_id].nil?
-          Model.delete_instance(module_branch.id_handle) unless opts[:skip_service_module_branch]
-        else
-          component_module = component_module_mh.createIDH(id: module_branch[:component_id]).create_object
-          component_module.delete_version?(self.assembly_module_version)
-        end
-      end
-    end
-
     # opts can have keys
     #  :sha
     #  :version # TODO: change to :base_version

@@ -33,6 +33,13 @@ module DTK
         @parent = parent
       end
 
+      def self.get(assembly_instance)
+        content_hash_content = DependentModule.get_dependent_module_refs_array(assembly_instance).inject({}) do |h, r|
+           h.merge(key(r[:module_name]) => r)
+        end
+        new(assembly_instance.service_instance_branch, content_hash_content)
+      end
+
       def self.update_module_refs(module_branch, input_module_refs)
         existing_module_refs = get_module_refs(module_branch)
         existing_module_refs.update_module_refs_if_needed!(input_module_refs)

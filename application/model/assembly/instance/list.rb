@@ -110,12 +110,11 @@ module DTK; class Assembly::Instance
       end
 
       def list_dependent_modules
-        unsorted_ret = get_aug_dependent_modules.map do |aug_mod|
-          namespace, module_name, version = [aug_mod[:namespace_name], aug_mod.display_name, aug_mod[:version]]
+        unsorted_ret = DependentModule.get_aug_base_module_branches(self).map do |aug_branch|
           {
-            id: aug_mod.id,
-            full_name: "#{namespace}:#{module_name}",
-            display_version: version
+            id: aug_branch[:component_id], # component module id
+            full_name: "#{aug_branch[:namespace]}:#{aug_branch[:module_name]}",
+            display_version: aug_branch[:version]
           }
         end
         unsorted_ret.sort { |a, b| a[:full_name] <=> b[:full_name] }

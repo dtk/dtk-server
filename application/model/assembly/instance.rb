@@ -96,7 +96,7 @@ module DTK; class  Assembly
 
     def component_module_refs
       # TODO: DTK-3366; change @component_module_refs to @dependent_module_refs
-      @component_module_refs ||= get_dependent_module_refs
+      @component_module_refs ||= get_common_module_locked_module_refs
     end
 
     def get_info__flat_list(opts = {})

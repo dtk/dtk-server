@@ -176,9 +176,9 @@ module DTK; class  Assembly
 
         delete(get_sub_assemblies(assembly_idhs).map(&:id_handle))
 
-        assembly_ids     = assembly_idhs.map(&:get_id)
-        idh              = assembly_idhs.first
-        Delete.dependent_module_assocations?(assembly_idhs, do_not_raise: opts[:do_not_raise])
+        assembly_ids = assembly_idhs.map(&:get_id)
+
+        Delete.delete_modules(assembly_idhs, do_not_raise: opts[:do_not_raise])
         Delete.assembly_nodes(idh.createMH(:node), assembly_ids, destroy_nodes: opts[:destroy_nodes])
         Delete.task_templates(idh.createMH(:task_template), assembly_ids)
       end
@@ -200,10 +200,11 @@ module DTK; class  Assembly
 
       # opts can have keys:
       #   :do_not_raise
-      def self.dependent_module_assocations?(assembly_idhs, opts = {})
+      def self.delete_modules(assembly_idhs, opts = {})
         assembly_idhs.each do |assembly_idh|
           assembly = create_from_id_handle(assembly_idh)
-          LockedModuleRefs::DependentModule.delete_modules?(assembly, opts)
+          DependentModule.delete_assembly_module_branch?(assembly)
+          AssemblyModule::Service.new(assembly).delete_module?(do_not_raise: opts[:do_not_raise])
         end
       end
 

@@ -29,39 +29,23 @@ module DTK
       new(assembly_instance).dependent_module_refs_array
     end
     
-    def self.get_dependent_module_refs(assembly_instance)
-      new(assembly_instance).dependent_module_refs
-    end
-    
-    def self.get_aug_dependent_modules(assembly_instance)
-      new(assembly_instance).aug_dependent_modules
-    end
-
     def self.get_aug_base_module_branches(assembly_instance)
       new(assembly_instance).aug_base_module_branches
     end
 
+    def self.delete_assembly_module_branch?(assembly_instance)
+       new(assembly_instance).delete_assembly_module_branch?
+    end
+
+    # The version in elements is from the dependencies base branch
     def dependent_module_refs_array
       @dependent_module_refs_array ||= ModuleRef.get_component_module_ref_array(self.service_instance_branch)
     end
     
-    def dependent_module_refs
-      content_hash_content = ModuleRef.get_component_module_ref_array(self.service_instance_branch).inject({}) do |h, r|
-        h.merge(key(r[:module_name]) => r)
-      end
-      LockedModuleRefs::CommonModule.new(self.service_instance_branch, content_hash_content)
-    end
-    
-    def aug_dependent_modules
-      matching_module_branches_with_elements.map do |r|
-        r.module.merge(namespace_name: r.element.namespace, version: r.element.version)
-      end
-    end
-    
     # TODO: DTK-3366 can we use :common_module rather than :component_module
-    BASE_BRANCH_MODULE_TYPE = :component_module
+    DEP_MODULE_TYPE = :component_module
     def aug_base_module_branches
-      aug_module_branches = matching_module_branches_with_elements(module_type: BASE_BRANCH_MODULE_TYPE).map do |r|
+      aug_module_branches = matching_module_branches_with_elements(module_type: DEP_MODULE_TYPE).map do |r|
         ModuleBranch::Augmented.create(r.module_branch, module_name: r.element.module_name, namespace: r.element.namespace)
       end
       
@@ -69,6 +53,33 @@ module DTK
       ModuleBranch::Augmented.augment_with_component_modules!(aug_module_branches)
       aug_module_branches
     end
+
+    def delete_assembly_module_branch?
+      debugger
+      ModuleVersion.ret(self.assembly_instance)
+
+      aug_module_branches = matching_module_branches_with_elements(module_type: :component_module)
+      fail 'here'
+    end
+=begin
+      sp_hash = {
+        cols: [:id, :group_id, :display_name, :component_id],
+        filter: [:eq, :version, self.assembly_module_version]
+      }
+      component_module_mh = self.assembly_instance.model_handle(:component_module)
+
+      # iterate over any service or component module branch that has been created for the service instance
+      Model.get_objs(self.assembly_instance.model_handle(:module_branch), sp_hash).each do |module_branch|
+        # if module_branch[:component_id] is nil then this is a service module branch, otherwise it is a component module branch
+        if module_branch[:component_id].nil?
+          Model.delete_instance(module_branch.id_handle) unless opts[:skip_service_module_branch]
+        else
+          component_module = component_module_mh.createIDH(id: module_branch[:component_id]).create_object
+          component_module.delete_version?(self.assembly_module_version)
+        end
+      end
+    end
+=end
     
     protected
     

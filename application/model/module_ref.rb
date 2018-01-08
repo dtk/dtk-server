@@ -25,6 +25,11 @@ module DTK
       [:id, :display_name, :group_id, :module_name, :module_type, :version_info, :namespace_info, :external_ref, :branch_id]
     end
 
+    def version
+      @version ||= get_field?(:version_info) || VERSION_WHEN_VERSION_INFO_NIL
+    end
+    VERSION_WHEN_VERSION_INFO_NIL = 'master'
+
     def self.reify(mh, object)
       mr_mh = mh.createMH(:model_ref)
       ret = version_info = nil
@@ -65,27 +70,12 @@ module DTK
       ret
     end
 
-    # this finds for each mocule branch the array of component model ref objects associated with the branch
-    def self.get_ndx_component_module_ref_arrays(branches)
-      ret = {}
-      return ret if branches.empty?
-      sp_hash = {
-        cols: common_columns + [:branch_id],
-        filter: [:oneof, :branch_id, branches.map(&:id)]
-      }
-      mh = branches.first.model_handle(:module_ref)
-      get_objs(mh, sp_hash).each do |r|
-        (ret[r[:branch_id]] ||= []) << r
-      end
-      ret
-    end
-    def self.get_component_module_ref_array(branch)
+    def self.get_module_ref_array(module_branch)
       sp_hash = {
         cols: common_columns,
-        filter: [:eq, :branch_id, branch.id]
+        filter: [:eq, :branch_id, module_branch.id]
       }
-      mh = branch.model_handle(:module_ref)
-      get_objs(mh, sp_hash)
+      get_objs(module_branch.model_handle(:module_ref), sp_hash)
     end
 
     def self.create_or_update(parent, module_ref_hash_array)

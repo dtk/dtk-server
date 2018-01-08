@@ -55,13 +55,8 @@ module DTK
       def self.get_module_refs(module_branch)
         common_module_branch = module_branch.common_module_branch
 
-        content_hash_content = ModuleRef.get_component_module_ref_array(common_module_branch).inject({}) do |h, r|
+        content_hash_content = ModuleRef.get_module_ref_array(common_module_branch).inject({}) do |h, r|
           h.merge(key(r[:module_name]) => r)
-        end
-        
-        # TODO: DTK-3366: see if we still need below
-        content_hash_content.each do |k, v|
-          v[:version_info] = nil if v[:version_info] == 'master'
         end
         
         new(common_module_branch, content_hash_content)

@@ -33,8 +33,8 @@ module DTK
       new(assembly_instance).aug_base_module_branches
     end
 
-    def self.delete_assembly_module_branch?(assembly_instance)
-       new(assembly_instance).delete_assembly_module_branch?
+    def self.delete_dependent_module_repos?(assembly_instance)
+       new(assembly_instance).delete_dependent_module_repos?
     end
 
     # The version in elements is from the dependencies base branch
@@ -54,32 +54,12 @@ module DTK
       aug_module_branches
     end
 
-    def delete_assembly_module_branch?
-      debugger
-      ModuleVersion.ret(self.assembly_instance)
-
-      aug_module_branches = matching_module_branches_with_elements(module_type: :component_module)
-      fail 'here'
-    end
-=begin
-      sp_hash = {
-        cols: [:id, :group_id, :display_name, :component_id],
-        filter: [:eq, :version, self.assembly_module_version]
-      }
-      component_module_mh = self.assembly_instance.model_handle(:component_module)
-
-      # iterate over any service or component module branch that has been created for the service instance
-      Model.get_objs(self.assembly_instance.model_handle(:module_branch), sp_hash).each do |module_branch|
-        # if module_branch[:component_id] is nil then this is a service module branch, otherwise it is a component module branch
-        if module_branch[:component_id].nil?
-          Model.delete_instance(module_branch.id_handle) unless opts[:skip_service_module_branch]
-        else
-          component_module = component_module_mh.createIDH(id: module_branch[:component_id]).create_object
-          component_module.delete_version?(self.assembly_module_version)
-        end
+    def delete_dependent_module_repos?
+      return unless self.service_instance_branch
+      matching_aug_modules(module_type: DEP_MODULE_TYPE).each do |aug_module|
+        aug_module.delete_version?(self.assembly_branch_name)
       end
     end
-=end
     
     protected
     
@@ -92,6 +72,10 @@ module DTK
     def namespace_objects
       @namespace_objects ||= get_namespace_objects
     end
+
+    def assembly_branch_name
+      @assembly_branch_name ||= ModuleVersion.ret(self.assembly_instance)
+    end
     
     private
     
@@ -99,7 +83,21 @@ module DTK
     # returns array where each element is a MatchingBranchInfo element
     # opts can have keys:
     #   :module_type (default is :common_module)
+    #   :is_assembly_branch
     def matching_module_branches_with_elements(opts = {})
+      ret = []
+      matching_aug_modules(module_type: opts[:module_type]).each do |aug_module|
+        if element = matching_element?(aug_module, is_assembly_branch: opts[:is_assembly_branch]) 
+          module_obj = aug_module.hash_subset(:id, :group_id, :display_name, :namespace_id)
+          ret << MatchingBranchInfo.new(aug_module[:module_branch], element,  module_obj)
+        end
+      end
+      ret
+    end
+    
+    # opts can have keys
+    #  :module_type (default is :common_module)
+    def matching_aug_modules(opts = {})
       module_type = opts[:module_type] || :common_module
       filter = 
         [:and, 
@@ -110,21 +108,18 @@ module DTK
         cols: [:id, :group_id, :display_name, :namespace_id, :namespace, :version_info],
         filter: filter
       }
-      ret = []
-      Model.get_objs(model_handle(module_type), sp_hash).each do |aug_module| 
-        if element = matching_element?(aug_module) 
-          module_obj = aug_module.hash_subset(:id, :group_id, :display_name, :namespace_id)
-          ret << MatchingBranchInfo.new(aug_module[:module_branch], element,  module_obj)
-        end
-      end
-      ret
+      Model.get_objs(model_handle(module_type), sp_hash)
     end
-    
-    def matching_element?(aug_module)
+
+    # opts can have keys:
+    #   :is_assembly_branch
+    def matching_element?(aug_module, opts = {})
       self.elements.find do |el|
+        version = (opts[:is_assembly_branch] ? self.assembly_branch_name : el.version)
+
         el.namespace == aug_module[:namespace].display_name and 
           el.module_name == aug_module.display_name and 
-          el.version == aug_module[:module_branch][:version] 
+          version == aug_module[:module_branch][:version] 
       end
     end
     

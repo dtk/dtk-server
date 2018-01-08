@@ -53,7 +53,8 @@ module DTK; class BaseModule
       end
 
       # check if this module is dependency to other component/service module
-      raise_error_if_dependency(module_branch, version) unless opts[:force]
+      # TODO: DTK-3366: need to put back in after fix up
+      # raise_error_if_dependency(module_branch, version) unless opts[:force]
 
       if implementation = module_branch.get_implementation?
         delete_instance(implementation.id_handle)

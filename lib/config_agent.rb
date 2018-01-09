@@ -63,14 +63,14 @@ module DTK
     private
 
     def get_base_and_dependent_modules(assembly_instance)
-      ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance).inject({}) do |h, aug_module_branch|
+      Assembly::Instance::ModuleRefSha.get_for_base_and_nested_modules(assembly_instance).inject({}) do |h, module_ref_sha|
         module_info = {
-          repo: aug_module_branch.repo.repo_name,
-          branch: aug_module_branch.branch_name,
-          sha: aug_module_branch.current_sha,
-          frozen: !is_assembly_module_version?(aug_module_branch)
+          repo: module_ref_sha.get_field(:repo_name),
+          branch: module_ref_sha.get_field(:branch_name),
+          sha: module_ref_sha.get_field(:sha),
+          frozen: true # TODO: DTK-3366: may remove frozen
         }
-        h.merge(aug_module_branch.module_name => module_info)
+        h.merge(module_ref_sha.get_field(:module_name) => module_info)
       end
     end
 

@@ -89,10 +89,7 @@ module DTK
         current_sha = @service_module_branch[:current_sha]
         return ret if initial_sha.eql?(current_sha)
 
-        unless instance_lock = Assembly::Instance::Lock.get(assembly_instance)
-          Log.info('Legacy can have Assembly::Instance::Lock.get(assembly_instance) be nil')
-          return ret
-        end
+        instance_lock = Assembly::Instance::Lock.get(assembly_instance)
 
         service_instance_branch = assembly_instance.get_service_instance_branch
         assembly_instance_latest_change = service_instance_branch ? service_instance_branch.get_field?(:updated_at) : (assembly_instance.get_field?(:updated_at) || assembly_instance.get_field?(:created_at))

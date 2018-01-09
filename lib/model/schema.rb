@@ -16,6 +16,11 @@
 # limitations under the License.
 #
 
+# TODO: move these to admin functions and lose notion of schema/data for the core model
+# Core model should be just everything that is universal to interact with objects including
+# base field defs for id,date_created/modified, created_by user, modified_user, etc
+
+require File.expand_path('schema/migration_methods', File.dirname(__FILE__))
 module DTK
   # class methods
   # TODO: partition into public and private
@@ -122,6 +127,8 @@ module DTK
     end
 
     #------common column defs -----------
+    include MigrationMethods
+
 
       def set_db_for_specfic_models(db, model_names)
         set_db_for_all_models(db, model_names)
@@ -148,6 +155,31 @@ module DTK
         IDInfoTable.create_table?()
 
         db.setup_infrastructure_extras()
+      end
+
+      def migrate_specfic_models(direction, model_names)
+        migrate_all_models(direction, model_names)
+      end
+
+      def migrate_all_models(direction, filter = nil)
+        # order is important
+        user_models = ret_user_models()
+        user_models.each do |model|
+          model.create_column_defs_common_fields?(direction, user_model: true)
+        end
+
+        concrete_models = ret_concrete_models(filter)
+        (concrete_models - user_models).each do |model|
+          model.create_column_defs_common_fields?(direction)
+        end
+        concrete_models.each { |model| model.apply_migration_defs(direction) }
+        concrete_models.each(&:set_global_db_rel_info)
+        concrete_models.each(&:preprocess!)
+
+        concrete_models.each do |model|
+          model.create_column_defs_specific_fields?(direction)
+        end
+        concrete_models.each { |model| model.create_associations?(direction) }
       end
 
       def initialize_all_models(db)

@@ -1,4 +1,4 @@
-#
+
 # Copyright (C) 2010-2016 dtk contributors
 #
 # This file is part of the dtk project.
@@ -58,8 +58,9 @@ module DTK
           assembly_instance = clone_assembly_template
 
           add_context_assembly_instances(assembly_instance)
-          create_and_save_assembly_instance_lock(assembly_instance)
           create_nested_modules(assembly_instance) unless self.donot_create_modules
+          # create_module_ref_shas needs to be done after create_nested_modules
+          create_module_ref_shas(assembly_instance)
 
           add_custom_node_attributes?(assembly_instance)
         end
@@ -99,11 +100,6 @@ module DTK
         @service_module_branch ||= ret_service_module_branch
       end
       
-      def create_lock_opts
-        # TODO: select exactly what needs to be passed in to Assembly::Instance::Lock
-        @create_lock_opts ||= self.opts
-      end
-      
       def override_attrs
         @override_attrs || ret_override_attrs
       end
@@ -139,10 +135,8 @@ module DTK
         assembly_instance = Assembly::Instance.create_subclass_object(new_assembly_obj)
       end
 
-      def create_and_save_assembly_instance_lock(assembly_instance)
-        assembly_instance_lock = Assembly::Instance::Lock.create_from_element(assembly_instance, self.service_module, self.create_lock_opts)
-        assembly_instance_lock.save_to_model
-        assembly_instance_lock
+      def create_module_ref_shas(assembly_instance)
+        assembly_instance.create_module_ref_shas(self.service_module, version: self.version)
       end
 
       def create_nested_modules(assembly_instance)

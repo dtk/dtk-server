@@ -22,13 +22,20 @@ module DTK
     def initialize(assembly_instance)
       @assembly_instance       = assembly_instance
       @service_instance_branch = assembly_instance.get_service_instance_branch
+      debugger
     end
     private :initialize
 
     def self.get_dependent_module_refs_array(assembly_instance)
       new(assembly_instance).dependent_module_refs_array
     end
-    
+
+    # aug_dependent_module_branches reflect branch for service instance if created
+    def self.get_aug_dependent_module_branches(assembly_instance)
+      new(assembly_instance).aug_dependent_module_branches
+    end
+
+    # Just matches the base branch, not branch created for service instance
     def self.get_aug_base_module_branches(assembly_instance)
       new(assembly_instance).aug_base_module_branches
     end
@@ -44,6 +51,13 @@ module DTK
     
     # TODO: DTK-3366 can we use :common_module rather than :component_module
     DEP_MODULE_TYPE = :component_module
+
+    def aug_dependent_module_branches
+      matching_module_branches_with_elements(module_type: DEP_MODULE_TYPE, assembly_branch_if_exists: true).map do |r|
+        ModuleBranch::Augmented.create(r.module_branch, module_name: r.element.module_name, namespace: r.element.namespace)
+      end
+    end
+
     def aug_base_module_branches
       aug_module_branches = matching_module_branches_with_elements(module_type: DEP_MODULE_TYPE).map do |r|
         ModuleBranch::Augmented.create(r.module_branch, module_name: r.element.module_name, namespace: r.element.namespace)
@@ -60,7 +74,7 @@ module DTK
         aug_module.delete_version?(self.assembly_branch_name)
       end
     end
-    
+
     protected
     
     attr_reader :assembly_instance, :service_instance_branch
@@ -83,16 +97,17 @@ module DTK
     # returns array where each element is a MatchingBranchInfo element
     # opts can have keys:
     #   :module_type (default is :common_module)
-    #   :is_assembly_branch
+    #   :assembly_branch_if_exists
     def matching_module_branches_with_elements(opts = {})
-      ret = []
+      branch_info_array = []
       matching_aug_modules(module_type: opts[:module_type]).each do |aug_module|
-        if element = matching_element?(aug_module, is_assembly_branch: opts[:is_assembly_branch]) 
+        if element = matching_element?(aug_module, assembly_branch_if_exists: opts[:assembly_branch_if_exists]) 
           module_obj = aug_module.hash_subset(:id, :group_id, :display_name, :namespace_id)
-          ret << MatchingBranchInfo.new(aug_module[:module_branch], element,  module_obj)
+          branch_info_array << MatchingBranchInfo.new(aug_module[:module_branch], element,  module_obj)
         end
       end
-      ret
+      prune_when_assembly_branch_exists!(branch_info_array) if opts[:assembly_branch_if_exists]
+      branch_info_array
     end
     
     # opts can have keys
@@ -112,17 +127,30 @@ module DTK
     end
 
     # opts can have keys:
-    #   :is_assembly_branch
+    #   :assembly_branch_if_exists
     def matching_element?(aug_module, opts = {})
       self.elements.find do |el|
-        version = (opts[:is_assembly_branch] ? self.assembly_branch_name : el.version)
+        versions =  [el.version]
+        versions << self.assembly_branch_name if opts[:assembly_branch_if_exists]
 
         el.namespace == aug_module[:namespace].display_name and 
           el.module_name == aug_module.display_name and 
-          version == aug_module[:module_branch][:version] 
+          versions.include?(aug_module[:module_branch][:version])
       end
     end
-    
+
+    def prune_when_assembly_branch_exists!(branch_info_array)
+      ndx_by_mod = {}
+      branch_info_array.each { |info| (ndx_by_mod[info.module.id] ||= []) << info }
+      ndx_by_mod.values.map do |info_array|
+        if info_array.size == 1
+          info_array.first
+        else
+          info_array.find { |info| info[:module_branch][:version] == self.assembly_branch_name } || fail(Error, "Unexpected no assembly_branch_name match")
+        end
+      end
+    end
+
     def get_namespace_objects 
       Namespace.matching_namespaces_from_names(model_handle(:namespace), self.elements.map(&:namespace).uniq)
     end

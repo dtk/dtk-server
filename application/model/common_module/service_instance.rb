@@ -28,7 +28,7 @@ module DTK
         super(assembly_instance)
         @base_version       = opts[:version]
         @base_module_branch = get_or_create_module_for_service_instance(delete_existing_branch: opts[:delete_existing_branch], version: opts[:version])
-        @add_nested_modules    = opts[:add_nested_modules]
+        @add_nested_modules = opts[:add_nested_modules]
       end
 
       attr_reader :base_module_branch
@@ -54,6 +54,7 @@ module DTK
             service_instance_repo_info.add_nested_module_info!(aug_nested_module_branch)
           end
         end
+
         service_instance_repo_info
       end
 
@@ -101,6 +102,8 @@ module DTK
 
       protected
 
+      attr_reader :base_version
+
       def add_nested_modules?
         @add_nested_modules
       end
@@ -124,6 +127,7 @@ module DTK
         add_to_base_module_branch__gitignore
         RepoManager.push_changes(self.base_module_branch)
         self.base_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
+        Assembly::Instance::ModuleRefSha.create_for_base_module(self.assembly_instance, self.service_module, version: self.base_version) 
       end
 
       def add_to_base_module_branch__dsl_file
@@ -145,6 +149,7 @@ module DTK
         }
         aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
         CommonDSL::NestedModuleRepo.update_repo_for_stage(aug_nested_module_branch)
+        Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
         aug_nested_module_branch
       end
 

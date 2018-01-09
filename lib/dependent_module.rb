@@ -22,7 +22,6 @@ module DTK
     def initialize(assembly_instance)
       @assembly_instance       = assembly_instance
       @service_instance_branch = assembly_instance.get_service_instance_branch
-      debugger
     end
     private :initialize
 

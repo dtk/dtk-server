@@ -18,21 +18,28 @@
 module DTK
   class Assembly::Instance
     class ModuleRefSha < Model
-      module Mixin
-        # opts can have keys:
-        #   :version
-        def create_module_ref_shas(service_module, opts = {})
-          debugger
-          ModuleRefSha.create_module_ref_shas_for_dependencies(self)
-          Lock.create(self, service_module, version:  opts[:version]) # TODO: DTK-3366; fold in and deprecate
-          fail 'here'
-        end
-      end
-
-      def self.create_module_ref_shas_for_dependencies(assembly_instance)
-        module_branches = DependentModule.get_aug_dependent_module_branches(assembly_instance)
+      def self.create_for_base_module(assembly_instance, service_module, opts = {})
+        Lock.create(assembly_instance, service_module, opts)
       end
       
+      def self.create_for_nested_module(assembly_instance, nested_module_branch)
+        mh = assembly_instance.model_handle.create_childMH(:assembly_instance_module_ref_sha)
+        create_from_row(mh, hash_content(assembly_instance, nested_module_branch), ret_obj:  { model_name: :assembly_instance_module_ref_sha })
+      end
+      
+      private
+      
+      def self.hash_content(assembly_instance, nested_module_branch)
+        key = "#{assembly_instance.display_name}-#{nested_module_branch.id}"
+        {
+          display_name: key,
+          ref: key,
+          component_component_id: assembly_instance.id,
+          module_branch_id: nested_module_branch.id,
+          sha: nested_module_branch.get_field(:current_sha)
+        }
+      end
+    
     end
   end
 end

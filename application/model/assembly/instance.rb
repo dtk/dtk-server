@@ -51,7 +51,6 @@ module DTK; class  Assembly
     extend NodeStatusClassMixin
     include NodeStatusToFixMixin
     include DSLLocation::Mixin
-    include ModuleRefSha::Mixin
 
     ACTION_DELIMITER = '.'
 

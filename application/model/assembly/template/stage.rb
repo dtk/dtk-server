@@ -57,8 +57,6 @@ module DTK
           assembly_instance = clone_assembly_template
 
           add_context_assembly_instances(assembly_instance)
-          create_module_ref_shas(assembly_instance)
-
           add_custom_node_attributes?(assembly_instance)
         end
         
@@ -130,10 +128,6 @@ module DTK
       def clone_assembly_template
         new_assembly_obj  = self.target.clone_into(self.assembly_template, self.override_attrs, self.clone_opts)
         assembly_instance = Assembly::Instance.create_subclass_object(new_assembly_obj)
-      end
-
-      def create_module_ref_shas(assembly_instance)
-        assembly_instance.create_module_ref_shas(self.service_module, version: self.version)
       end
 
       def add_custom_node_attributes?(assembly_instance)

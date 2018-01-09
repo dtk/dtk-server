@@ -30,7 +30,7 @@ module DTK
         #  :os_type
         #  :no_auto_complete - Boolean (default false)
         #  :ret_auto_complete_results:
-        #  :donot_create_modules
+        #  :add_nested_modules
         def stage(service_name, opts = Opts.new)
           Stage.new(self, service_name, opts).stage
         end
@@ -43,7 +43,6 @@ module DTK
         @version                      = opts[:version]
         @context_assembly_instances   = opts[:context_assembly_instances] || []
         @opts                         = opts
-        @donot_create_modules         = opts[:donot_create_modules]
         @no_auto_complete             = opts[:no_auto_complete]
         @ret_auto_complete_results    = opts[:ret_auto_complete_results]
       end
@@ -58,8 +57,6 @@ module DTK
           assembly_instance = clone_assembly_template
 
           add_context_assembly_instances(assembly_instance)
-          create_nested_modules(assembly_instance) unless self.donot_create_modules
-          # create_module_ref_shas needs to be done after create_nested_modules
           create_module_ref_shas(assembly_instance)
 
           add_custom_node_attributes?(assembly_instance)
@@ -86,7 +83,7 @@ module DTK
       
       protected
       
-      attr_reader :assembly_template, :service_name, :project, :version, :context_assembly_instances, :donot_create_modules, :no_auto_complete, :ret_auto_complete_results, :opts
+      attr_reader :assembly_template, :service_name, :project, :version, :context_assembly_instances, :no_auto_complete, :ret_auto_complete_results, :opts
       
       def target
         @target ||= create_target_mock
@@ -137,10 +134,6 @@ module DTK
 
       def create_module_ref_shas(assembly_instance)
         assembly_instance.create_module_ref_shas(self.service_module, version: self.version)
-      end
-
-      def create_nested_modules(assembly_instance)
-        AssemblyModule::Service.get_or_create_module_for_service_instance(assembly_instance, version: self.version) 
       end
 
       def add_custom_node_attributes?(assembly_instance)

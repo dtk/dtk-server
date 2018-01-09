@@ -17,11 +17,15 @@
 #
 {
   schema: :module,
-  table: :module_ref_lock,
+  table: :module_ref_sha,
   columns: {
-    module_name: { type: :varchar, size: 30 },
-    info: { type: :json },
-    locked_branch_sha: { type: :varchar, size: 50 }
+    sha: { type: :varchar, size: 50 },
+    module_branch_id: {
+      type: :bigint,
+      foreign_key_rel_type: :module_branch,
+      on_delete: :cascade,
+      on_update: :cascade
+    },
   },
   many_to_one: [:component], #this is an assembly
 }

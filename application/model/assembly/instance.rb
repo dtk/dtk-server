@@ -31,7 +31,9 @@ module DTK; class  Assembly
     require_relative('instance/exec_delete')
     require_relative('instance/service_setting')
     require_relative('instance/node_status')
-    require_relative('instance/lock')
+    require_relative('instance/module_ref_sha')
+    require_relative('instance/lock') # TODO: DTK-3366; fold into module_ref_sha and deprecate
+
     require_relative('instance/dsl_location')
 
     include ComponentLink::Mixin
@@ -49,6 +51,8 @@ module DTK; class  Assembly
     extend NodeStatusClassMixin
     include NodeStatusToFixMixin
     include DSLLocation::Mixin
+    include ModuleRefSha::Mixin
+
     ACTION_DELIMITER = '.'
 
     # opts can have keys:

@@ -18,7 +18,6 @@
 module DTK
   class ModuleRef < Model
     require_relative('module_ref/version_info')
-    require_relative('module_ref/lock')
     require_relative('module_ref/missing')
 
     def self.common_columns

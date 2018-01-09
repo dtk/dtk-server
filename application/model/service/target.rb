@@ -91,7 +91,7 @@ module DTK
       private
 
       def self.common_stage_opts
-        Opts.new(donot_create_modules: true, ret_auto_complete_results: true)
+        Opts.new(ret_auto_complete_results: true)
       end
 
       def self.isa_target_assembly_instance?(assembly_instance)

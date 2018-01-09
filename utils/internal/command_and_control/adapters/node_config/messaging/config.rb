@@ -232,12 +232,6 @@ arbiter_branch = <%= arbiter_branch %>
 arbiter_update = <%= arbiter_update %>
 EOF
 
-# update systemd script
-if [ -f /etc/systemd/system/dtk-arbiter.service ]; then
-  cp /usr/share/dtk/dtk-arbiter/etc/systemd.dtk-arbiter.service /etc/systemd/system/dtk-arbiter.service
-  systemctl daemon-reload
-fi
-
 mkdir -p /usr/share/dtk/scripts
 cat << EOF > /usr/share/dtk/scripts/stop-apt-daily.sh
 #!/usr/bin/env bash

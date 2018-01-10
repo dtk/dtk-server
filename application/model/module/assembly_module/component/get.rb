@@ -39,26 +39,6 @@ module DTK; class AssemblyModule
         end
       end
 
-      module ClassMixin
-        # returns namespace if module_name exists in assembly
-        def get_namespace?(assembly, module_name)
-          Namespace.namespace?(module_name) || ModuleRefs::Lock.get_namespace?(assembly, module_name)
-        end
-
-        # returns [namespace, locked_branch_sha] if module_name exists in assembly
-        # namespace can at the same time that locked_branch_sha may be nil
-        def get_namespace_and_locked_branch_sha?(assembly, module_name)
-          locked_branch_sha = nil
-          version_branch = nil
-          if namespace = Namespace.namespace?(module_name)
-            locked_branch_sha, version_branch = ModuleRefs::Lock.get_locked_branch_sha?(assembly, module_name)
-          else
-            namespace, locked_branch_sha, version_branch = ModuleRefs::Lock.get_namespace_and_locked_branch_sha?(assembly, module_name)
-          end
-          [namespace, locked_branch_sha, version_branch]
-        end
-      end
-
     end
   end
 end; end

@@ -36,10 +36,13 @@ module DTK
               
               LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
 
+              
+              fail "TODO: DTK-3394: implement when add component"
               # need to update module_refs_lock to add new component which will be used below to pull nested component module into service instance if needed
-              ModuleRefs::Lock.create_or_update(self)
+              
+              # ModuleRefs::Lock.create_or_update(self)
 
-              Component.pull_component_module_repos(aug_cmp_template, service_instance)
+              # Component.pull_component_module_repos(aug_cmp_template, service_instance)
             end
             component.id_handle 
           end

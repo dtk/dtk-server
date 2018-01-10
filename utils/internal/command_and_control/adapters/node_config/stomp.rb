@@ -118,8 +118,8 @@ module DTK
         filter = BlankFilter.merge(filter_x).merge('agent' => [agent])
         context = context_x.merge(callbacks: callbacks)
 
-        Log.debug("Sending STOMP message: '#{msg}'")
-        Log.debug("STOMP message filter: '#{filter}'")
+        # Log.debug("Sending STOMP message: '#{msg}'")
+        # Log.debug("STOMP message filter: '#{filter}'")
         handler.sendreq_with_callback(msg, agent, context, filter)
       end
 

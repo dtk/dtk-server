@@ -65,8 +65,6 @@ module DTK
 
         update_task_templates
 
-        create_service_instance_module_refs(version: opts[:version])
-
         unless self.components_hash_form.empty?
           component_new_items = self.components_hash_form.map do |child_hash|
             { new_item: child_hash[:id_handle], parent: self.target_idh }
@@ -86,6 +84,7 @@ module DTK
       def ports
         @ports ||= self.objects.ports
       end
+
       def port_links
         @port_links ||= self.objects.port_links
       end
@@ -176,14 +175,6 @@ module DTK
         Task::Template.clone_to_assembly(self.assembly_instance, self.task_templates)
       end
 
-
-      # opts can have keys
-      #   :version
-      def create_service_instance_module_refs(opts = {})
-        Log.error("TODO: DTK-3366: is analog to 'ModuleRefs::Lock.create_or_update(assembly, raise_errors: true, version: opts[:version])' neede?")
-        # LockedModuleRefs::ServiceInstance.create(self.assembly_instance)
-      end
-      
       def create_state_changes_for_create_node?(nodes_for_create_sc)
         #Do not create stages for node that are physical
         pruned_nodes = nodes_for_create_sc.reject do |node|

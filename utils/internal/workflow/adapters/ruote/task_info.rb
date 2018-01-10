@@ -23,7 +23,6 @@ module DTK; module WorkflowAdapter
       Lock = Mutex.new
 
       def self.set(task_id, top_task_id, task_info, opts = {})
-        Log.debug("Setting task id: #{task_id}")
         key = task_key(task_id, top_task_id, opts)
         Lock.synchronize { Store[key] = task_info }
       end

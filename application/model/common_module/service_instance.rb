@@ -127,7 +127,7 @@ module DTK
         add_to_base_module_branch__gitignore
         RepoManager.push_changes(self.base_module_branch)
         self.base_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
-        Assembly::Instance::ModuleRefSha.create_for_base_module(self.assembly_instance, self.service_module, version: self.base_version) 
+        Assembly::Instance::ModuleRefSha.create_for_base_module(self.assembly_instance, self.base_module_branch.augmented_module_branch)
       end
 
       def add_to_base_module_branch__dsl_file

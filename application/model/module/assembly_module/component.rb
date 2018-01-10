@@ -21,7 +21,6 @@ module DTK; class AssemblyModule
     require_relative('component/attribute')
     require_relative('component/get')
     include Get::Mixin
-    extend Get::ClassMixin
 
     # opts can have keys
     #  :sha - base sha to create branch from
@@ -92,7 +91,8 @@ module DTK; class AssemblyModule
       end
       # Recompute and persist the module ref locks
       # This must be done after any impacted component instances have been updated
-      ModuleRefs::Lock.create_or_update(self.assembly_instance, opts)
+      fail "TODO: DTK-3394: implement when update_impacted_component_instances"
+      # ModuleRefs::Lock.create_or_update(self.assembly_instance, opts)
     end
 
     # opts can have keys

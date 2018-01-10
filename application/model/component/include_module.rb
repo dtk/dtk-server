@@ -45,9 +45,11 @@ module DTK; class Component
       # are includes using ModuleRefs::Lock
       ndx_ret = ret.inject({}) { |h, impl| h.merge(impl.id => impl) }
       module_names = include_modules.map(&:module_name)
-      included_impls = ModuleRefs::Lock.get_implementations(assembly_instance, module_names) 
+
+      fail "TODO: DTK-3395: this wil be removed as part of DTK-3395"
+      # included_impls = ModuleRefs::Lock.get_implementations(assembly_instance, module_names) 
       # remove dups from included_impls
-      included_impls.inject(ndx_ret) { |h, impl| h.merge(impl.id => impl) }.values
+      # included_impls.inject(ndx_ret) { |h, impl| h.merge(impl.id => impl) }.values
     end
 
     private

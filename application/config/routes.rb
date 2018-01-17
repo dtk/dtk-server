@@ -82,6 +82,7 @@ DTK::ReactorRoute.draw do
   get 'api/v1/modules/remote_module_info'                  => 'v1::module/remote_module_info'
   get 'api/v1/modules/local_module_dependencies'           => 'v1::module/local_module_dependencies'
   get 'api/v1/modules/module_info_with_local_dependencies' => 'v1::module/module_info_with_local_dependencies'
+  get 'api/v1/modules/versions'                            => 'v1::module/versions'
 
   post 'api/v1/modules/create_empty_module'                 => 'v1::module/create_empty_module'
   post 'api/v1/modules/create_repo_from_component_info'     => 'v1::module/create_repo_from_component_info'

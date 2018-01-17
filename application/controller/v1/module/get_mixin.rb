@@ -105,6 +105,11 @@ module DTK
         end
         rest_ok_response response
       end
+
+      def versions
+        namespace, module_name = required_request_params(:namespace, :module_name)
+        rest_ok_response CommonModule.module_versions(get_default_project, namespace, module_name, Opts.new(detail_to_include: [:versions]))
+      end
     end
   end
 end

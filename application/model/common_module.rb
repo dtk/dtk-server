@@ -71,6 +71,16 @@ module DTK
       list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true))
     end
 
+    def self.module_versions(project, namespace, module_name, opts = Opts.new)
+      modules = list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true))
+      matching_module = modules.find { |mod| mod[:display_name].eql?("#{namespace}:#{module_name}") }
+      if versions = matching_module[:versions]
+        versions_array = versions.split(',')
+        matching_module[:versions] = versions_array
+      end
+      matching_module
+    end
+
     def self.list_assembly_templates(project)
       Info::Service.list_assembly_templates(project)
     end

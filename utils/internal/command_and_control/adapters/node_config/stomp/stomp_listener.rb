@@ -79,13 +79,15 @@ module DTK
         is_heartbeat   = original_msg[:heartbeat]
         is_pong        = original_msg[:pong]
 
-        # decode message
         if msg_request_id
           Log.debug "Received STOMP message, message id '#{msg_request_id}' from pbuilderid '#{pbuilder_id}' ..."
         else
           Log.debug "Received STOMP heartbeat message from pbuilderid '#{pbuilder_id}' ..."
         end
-
+        require 'debugger'
+        Debugger.wait_connection = true
+        Debugger.start_remote
+        debugger
         # we map our heartbeat calls to requst IDs
         if is_heartbeat
           msg_request_id = CommandAndControlAdapter::StompMultiplexer.heartbeat_registry_entry(pbuilder_id)
@@ -105,6 +107,12 @@ module DTK
 
         callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
 
+        if callbacks.nil?
+          CommandAndControlAdapter::StompMultiplexer.callback_registry.each_pair do |pair|
+            callbacks = pair[1][:on_test] unless pair[1][:on_test].nil?
+          end
+        end
+
         Log.debug("Current list of callbacks: #{CommandAndControlAdapter::StompMultiplexer.callback_registry}")
         Log.debug("List of callbacks for message id '#{msg_request_id}': \n #{callbacks}")
 
@@ -119,7 +127,7 @@ module DTK
           Log.debug("Stomp message received with ID '#{msg_request_id}' is not for this tenant, and it is being ignored!")
           return
         end
-
+        
         # making sure that timeout threads do not run overtime
         CommandAndControlAdapter::StompMultiplexer.process_response(original_msg, msg_request_id)
       end

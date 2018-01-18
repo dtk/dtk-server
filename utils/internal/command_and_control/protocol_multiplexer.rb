@@ -48,15 +48,23 @@ module XYZ
         callbacks = nil
         begin
           callbacks = get_and_remove_reqid_callbacks?(request_id)
-          if (is_cancel_response(msg))
-            callbacks.process_cancel()
-          elsif callbacks
-            callbacks.process_msg(msg, request_id)
+          if callbacks.nil?
+            CommandAndControlAdapter::StompMultiplexer.callback_registry.each_pair do |pair|
+              callbacks = pair[1] unless pair[1][:on_test].nil?
+              callbacks.process_data(msg) unless callbacks.nil?
+            end
           else
-            Log.error 'max count or timeout reached: dropping msg'
+            if (is_cancel_response(msg))
+              callbacks.process_cancel()          
+            elsif callbacks
+              callbacks.process_msg(msg, request_id)
+            else
+              Log.error 'max count or timeout reached: dropping msg'
+            end
           end
          rescue Exception => e
           # TODO: this is last resort trap; if this is reached the user will have to manually cancel the task
+          Log.error "#{e}"
           Callbacks.process_error(callbacks, e)
         end
       end
@@ -130,6 +138,15 @@ module XYZ
             callback.call(msg)
           else
             Log.error("Could not find process msg callback for request_id #{request_id}")
+          end
+        end
+
+        def process_data(msg)
+          callback = self[:on_test]
+          if callback
+            callback.call(msg)
+          else
+            Log.error("Could not find process msg callback for request_id")
           end
         end
 

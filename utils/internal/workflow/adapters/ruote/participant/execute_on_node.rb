@@ -67,7 +67,17 @@ module DTK
 
             user_object  = CurrentSession.new.user_object()
             callbacks = {
-              on_msg_received: proc do |msg|
+              on_msg_received: proc do |msg|     
+                require 'debugger'
+                      Debugger.wait_connection = true
+                      Debugger.start_remote
+                      debugger           
+                if !msg[:data].nil?
+                  if !msg[:data][:retries].nil?
+                    retries = { info: msg[:data][:retries] }
+                    task.add_event(:info, retries)
+                  end
+                end
                 debug = false # TODO: Move this
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
@@ -113,12 +123,17 @@ module DTK
                     $port_number = nil
                   end
 
-                  process_action_result!(workitem, action, result, task, task_id, task_end, debug)
+                  process_action_result!(workitem, action, result, task, task_id, task_end, debug) unless result.nil?
                   delete_task_info(workitem) unless debug
                   status_array = top_task.subtasks.map {|st| st.get_field?(:status)}
                   $public_dns = nil if status_array.all?
                   reply_to_engine(workitem) unless debug
                 end
+              end,
+              on_test: proc do |msg|
+                Log.info ">>>>>>>>>>>>>>>>>> #{msg[:data][:retries]}" 
+                retries = { info: "Number of retries left: #{msg[:data][:retries]}" }
+                task.add_event(:info, retries)
               end,
               on_timeout: proc do
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do

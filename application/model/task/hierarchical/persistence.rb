@@ -30,7 +30,7 @@ module DTK; class Task
       def save!
         # no op if saved already as detected by whether has an id
         return nil if id()
-        set_positions!()
+        set_positions!()        
         # for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then put in ids
         unrolled_tasks = unroll_tasks()
         rows = unrolled_tasks.map do |hash_row|

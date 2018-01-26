@@ -18,9 +18,9 @@ GIT
 
 GIT
   remote: git://github.com/dtk/dtk-dsl.git
-  revision: 5fe9a580f03e1fadeaccb4138381e9c8720c01bd
+  revision: d88c3e19a823010589fc155129be75f1603f18fc
   specs:
-    dtk-dsl (1.1.1)
+    dtk-dsl (1.1.2)
 
 GEM
   remote: https://rubygems.org/

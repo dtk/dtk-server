@@ -45,6 +45,9 @@ module DTK
           components_with_attributes: cmps_with_attrs,
           node_manifest: puppet_manifests,
           inter_node_stage: config_node.inter_node_stage,
+          # TODO: fix on arbiter side to have puppet use what dynamic and bash are using
+          # modules: nested_module_info; where nested_module_info = get_base_and_dependent_modules(assembly_instance) pruned to have
+          # just relavant info
           version_context: get_version_context(config_node, opts[:assembly]),
           # TODO: agent not doing puppet version per run; it just can be set when node is created
           puppet_version: config_node[:node][:puppet_version],
@@ -117,9 +120,11 @@ module DTK
 
         # want components to be unique
         components = component_actions.inject({}) { |h, r| h.merge(r[:component][:id] => r[:component]) }.values
-ret =        ComponentModule::VersionContextInfo.get_in_hash_form(components, assembly_instance)
-pp ret
-fail Error, "TODO: DTK-3366: Make sure that ComponentModule::VersionContextInfo uses right repo url"
+old_ret =        ComponentModule::VersionContextInfo.get_in_hash_form(components, assembly_instance)
+pp old_ret
+# TODO:  DTK-3395; use logic in ComponentModule::VersionContextInfo.get_in_hash_form to prune what modules are returned
+        nested_module_info = get_base_and_dependent_modules(assembly_instance)
+        nested_module_info.map { |module_name, module_info| module_info.merge(implementation: module_name) }
       end
 
       def assembly_attributes(config_node)

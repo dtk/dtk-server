@@ -79,6 +79,19 @@ module DTK
         create(aug_module_obj[:module_branch], aug_module_params)
       end
 
+      def get_matching_component_template?(component_name)
+        component_type = Component.component_type_from_module_and_component(self.component_module_name, component_name)
+        matches = get_component_templates.select { |component| component[:component_type] == component_type }
+        fail Error "Unexpected that matches.size > 1" if matches.size > 1
+        matches.first
+      end
+
+      def get_component_templates
+        self.component_module.get_objs(cols: [:components]).select { |row| row[:module_branch].id == id }.map do |row|
+          Component::Template.create_from_component(row[:component])
+        end
+      end
+
       def augment_with_component_module!
         self.class.augment_with_component_modules!([self])
       end

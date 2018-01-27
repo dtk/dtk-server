@@ -53,7 +53,7 @@ module DTK
         private  
         
         def ret_provider_bash?
-          if bash_component_template = self.provider_component_module.get_matching_component_template?(Bash::COMPONENT_NAME) 
+          if bash_component_template = self.provider_aug_module_branch.get_matching_component_template?(Bash::COMPONENT_NAME) 
             Component::Domain::Provider::Bash.new(bash_component_template)
           end
         end

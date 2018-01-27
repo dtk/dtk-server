@@ -49,7 +49,7 @@ module DTK
         private  
         
         def ret_provider_container?
-          if container_component_template = self.provider_component_module.get_matching_component_template?(Container::COMPONENT_NAME) 
+          if container_component_template = self.provider_aug_module_branch.get_matching_component_template?(Container::COMPONENT_NAME) 
             Component::Domain::Provider::Container.new(container_component_template)
           end
         end

@@ -66,28 +66,28 @@ module DTK
         @provider_module_name ||= ret_provider_module_name(self.type)
       end
 
-      def provider_component_module
-        @provider_component_module ||= ret_provider_component_module
+      def provider_aug_module_branch
+        @provider_aug_module_branch ||= ret_provider_aug_module_branch
       end        
 
       private
 
-      def ret_provider_component_module
-        unless @provider_component_module = matching_provider_component_module?
+      def ret_provider_aug_module_branch
+        unless @provider_aug_module_branch = matching_provider_aug_module_branch?
           fail ErrorUsage, "Cannot find a dependent module in the service instance for provider '#{self.provider_module_name}'"
         end
-        @provider_component_module
+        @provider_aug_module_branch
       end
 
       PROVIDER_NAMESPACE = 'dtk-provider'
 
-      def matching_provider_component_module?
-        matching_component_modules = self.assembly_instance.get_component_modules(:recursive).select do |component_module|
-          component_module.display_name == self.provider_module_name and
-            component_module[:namespace_name] == PROVIDER_NAMESPACE
+      def matching_provider_aug_module_branch?
+        matching_aug_module_branch = DependentModule.get_aug_base_module_branches(self.assembly_instance).select do |aug_module_branch|
+          aug_module_branch[:module_name] == self.provider_module_name and
+           aug_module_branch[:namespace] == PROVIDER_NAMESPACE
         end
-        fail Error, "Unexpected that there is multiple matching component_modules" if matching_component_modules.size > 1
-        matching_component_modules.first
+        fail Error, "Unexpected that there is multiple matching aug_module_branch" if matching_aug_module_branch.size > 1
+        matching_aug_module_branch.first
       end
       
       def ret_type(provider_attribute_values)

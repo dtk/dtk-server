@@ -71,7 +71,8 @@ module DTK
         @assembly_instance = assembly_instance
         @service_module = service_module
         @service_module_branch = service_module_branch
-        @assembly_component_modules = assembly_instance.get_component_modules(:direct)
+        fail Error, "Deprecated get_component_modules; for all dependent use DependentModule.get_aug_base_module_branches(assembly_instance)"
+#        @assembly_component_modules = assembly_instance.get_component_modules(:direct)
         @component_module_refs = service_module.get_component_module_refs()
         self
       end

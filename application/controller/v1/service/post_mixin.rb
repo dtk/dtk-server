@@ -101,7 +101,7 @@ module DTK
       def uninstall
         recursive = boolean_request_params(:recursive)
         delete    = boolean_request_params(:delete)
-        force    = boolean_request_params(:force)
+        force     = boolean_request_params(:force)
 
         if force || !delete
           assembly_instance.uninstall(recursive: recursive, delete: delete, force: force)
@@ -114,7 +114,7 @@ module DTK
             delete: delete,
             force: force
           }
-          
+
           exec__delete_info = assembly_instance.exec__delete(Opts.new(opts_hash))
         end
 

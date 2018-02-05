@@ -4,6 +4,7 @@
 
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
+require './lib/assembly_and_service_operations_spec'
 
 assembly_name = 'rails_single_node'
 service_name = "rails_single_node_getting_started" + rand(10..1000).to_s

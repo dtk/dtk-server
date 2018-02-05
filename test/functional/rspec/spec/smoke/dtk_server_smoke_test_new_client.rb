@@ -1,5 +1,6 @@
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
+require './lib/assembly_and_service_operations_spec'
 
 initial_module_location = "./spec/smoke/resources/new_client_dtk.module.yaml"
 module_location = '/tmp/dtk_new_client_smoke'

@@ -7,6 +7,7 @@ module AssemblyAndServiceOperationsMixin
     ec2 = Aws::EC2::Client.new(region: 'us-east-1')
     ec2_instance = ec2.describe_instances(filters:[{ name: 'tag:Name', values: ["*" + service_instance_name + "*"] }])
     ec2_instance.reservations.each do |status|
+      puts "Instance details: #{status}"
       if status.instances.first.state.name == "running"
         nodes_terminated = false
         puts "Service instance: #{service_instance_name} nodes have not been terminated"

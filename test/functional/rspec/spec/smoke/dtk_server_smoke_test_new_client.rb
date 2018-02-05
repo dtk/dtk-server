@@ -52,7 +52,7 @@ describe "DTK Server smoke test with new client" do
   end
 
   context "Check that service instance nodes have been terminated on aws" do
-    include_context "Check that service instance nodes have been terminated on aws", service_name
+    include_context "Check that service instance nodes have been terminated on aws", dtk_common, service_name
   end
 
   after(:all) do

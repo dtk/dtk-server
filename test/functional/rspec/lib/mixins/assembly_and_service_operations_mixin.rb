@@ -4,6 +4,7 @@ module AssemblyAndServiceOperationsMixin
     require 'aws-sdk'
     puts "Verify service instance nodes have been terminated", "-----------------------------------------------------"
     nodes_terminated = true
+    ec2 = Aws::EC2::Client.new(region: 'us-east-1')
     ec2_instance = ec2.describe_instances(filters:[{ name: 'tag:Name', values: ["*" + service_instance_name + "*"] }])
     ec2_instance.reservations.each do |status|
       if status.instances.first.state.name == "running"

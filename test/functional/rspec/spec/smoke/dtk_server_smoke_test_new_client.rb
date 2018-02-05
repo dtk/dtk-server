@@ -51,6 +51,10 @@ describe "DTK Server smoke test with new client" do
     include_context "Delete initial module on filesystem", module_location
   end
 
+  context "Check that service instance nodes have been terminated on aws" do
+    include_context "Delete initial module on filesystem", service_name
+  end
+
   after(:all) do
     puts '', ''
   end

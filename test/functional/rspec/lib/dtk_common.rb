@@ -223,3 +223,6 @@ class Common
     return ssh_access_removed
 	end
 end
+
+test = Common.new('','')
+test.verify_service_instance_nodes_terminated('ruby_provider_test_module-test_with_delete_node_bash')

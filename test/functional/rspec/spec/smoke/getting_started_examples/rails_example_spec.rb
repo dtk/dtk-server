@@ -6,7 +6,7 @@ require './lib/dtk_cli_spec'
 require './lib/dtk_common'
 
 assembly_name = 'rails_single_node'
-service_name = 'rails_single_node_getting_started'
+service_name = "rails_single_node_getting_started" + rand(10..1000).to_s
 remote_module = 'dtk-examples/rails'
 remote_module_location = '/tmp/rails'
 remote_module_version = '0.9.5'
@@ -52,7 +52,7 @@ describe "Getting started example: dtk-examples/rails" do
   end
 
   context "Check that service instance nodes have been terminated on aws" do
-    include_context "Delete initial module on filesystem", service_name
+    include_context "Check that service instance nodes have been terminated on aws", service_name
   end
 
   after(:all) do

@@ -5,7 +5,7 @@ initial_module_location = "./spec/smoke/resources/new_client_dtk.module.yaml"
 module_location = '/tmp/dtk_new_client_smoke'
 module_name = 'test/dtk_new_client_smoke'
 assembly_name = 'new_module_assembly'
-service_name = 'dtk_new_client_smoke'
+service_name = "dtk_new_client_smoke" + rand(10..1000).to_s
 service_location = "~/dtk/"
 
 dtk_common = Common.new('', '')
@@ -52,7 +52,7 @@ describe "DTK Server smoke test with new client" do
   end
 
   context "Check that service instance nodes have been terminated on aws" do
-    include_context "Delete initial module on filesystem", service_name
+    include_context "Check that service instance nodes have been terminated on aws", service_name
   end
 
   after(:all) do

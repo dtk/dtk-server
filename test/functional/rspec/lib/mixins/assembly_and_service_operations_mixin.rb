@@ -4,24 +4,12 @@ module AssemblyAndServiceOperationsMixin
     require 'aws-sdk'
     puts "Verify service instance nodes have been terminated", "-----------------------------------------------------"
     nodes_terminated = true
-    nodes_list = send_request("/rest/api/v1/services/#{service_instance_name}/nodes", {}, 'get')
-    ap nodes_list
-    if nodes_list['status'] == 'ok' && !nodes_list['data'].empty?
-      instance_ids = nodes_list['data'].map { |node| node['instance_id']}
-      ec2 = Aws::EC2::Client.new(region: 'us-east-1')
-      ec2_instances = ec2.describe_instance_status({
-        dry_run: false,
-        instance_ids: instance_ids,
-      })
-
-      ec2_instances.instance_statuses.each do |inst|
-        if inst.instance_state.name == "running"
-          nodes_terminated = false
-          puts "Service instance: #{service_instance_name} nodes have not been terminated"
-        end
+    ec2_instance = ec2.describe_instances(filters:[{ name: 'tag:Name', values: ["*" + service_instance_name + "*"] }])
+    ec2_instance.reservations.each do |status|
+      if status.instances.first.state.name == "running"
+        nodes_terminated = false
+        puts "Service instance: #{service_instance_name} nodes have not been terminated"
       end
-    else
-      puts "Service instance: #{service_instance_name} nodes does not exist"
     end
     puts ""
     puts "Service instance: #{service_instance_name} nodes have been terminated" if nodes_terminated

@@ -54,7 +54,15 @@ module DTK; module ModuleCommonMixin
             # or pick right branch
 
             # base_branch just needs to be a random branch on module_obj
-            base_branch = module_obj.get_module_branches.first
+
+            # make sure that base_branch has repo_id
+            # TODO: is this protection needed because testing bad state db or needed in normal cases
+            module_branches    = module_obj.get_module_branches
+            unless base_branch = module_branches.select{ |module_branch| module_branch[:repo_id] }.first
+              base_branch = module_branches.first
+              base_branch[:repo_id] = repo.id
+            end
+
             RepoManager.add_branch_and_push?(local.branch_name, add_branch_opts, base_branch)
             repo.create_subclass_obj(:repo_with_branch)
           else

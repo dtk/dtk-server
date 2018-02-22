@@ -2,7 +2,7 @@
 
 require './lib/dtk_common'
 
-selected_modules = YAML.load(File.open(File.dirname(__FILE__) + "/module_list.yaml"))['modules']
+selected_modules = YAML.load(File.open(File.dirname(__FILE__) + "/repoman_module_list.yaml"))['modules']
 
 ssh_key_location = '~/.ssh/id_rsa.pub'
 output_directory = '/tmp'
@@ -29,10 +29,13 @@ returned_modules.each do |md|
     `mkdir #{output_directory}/#{module_name}`
     md[:versions].each do |vs|
       `mkdir #{output_directory}/#{module_name}/#{vs}`
-      puts "Installing module: #{md[:name]} with version: #{vs}"
-      puts "---------------------------------------------------"
-      puts `dtk module install -d #{output_directory}/#{module_name}/#{vs} -v #{vs} --skip-server #{md[:name]}`
+      puts "Installing module: #{md[:name]} with version: #{vs}..."
+      result = `dtk module install -d #{output_directory}/#{module_name}/#{vs} -v #{vs} --skip-server #{md[:name]}`
+      `rm -rf #{output_directory}/#{module_name}/#{vs}` if result.include? "ERROR"
       puts ""
     end
+    puts "Content installed for module #{module_name}:"
+    puts "--------------------------------------------"
+    puts `tree -L 2 #{output_directory}/#{module_name}`
   end
 end

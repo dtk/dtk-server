@@ -123,6 +123,9 @@ module DTK
 old_ret =        ComponentModule::VersionContextInfo.get_in_hash_form(components, assembly_instance)
 pp old_ret
 # TODO:  DTK-3395; use logic in ComponentModule::VersionContextInfo.get_in_hash_form to prune what modules are returned
+# put filter on compinents in  def get_base_and_dependent_modules(assembly_instance)
+#      Assembly::Instance::ModuleRefSha.get_for_base_and_nested_modules(assembly_instance)
+# or have get_bse and get_dp_with_filter and use logic in ComponentModule::VersionContextInfo.get_in_hash_form to get filter
         nested_module_info = get_base_and_dependent_modules(assembly_instance)
         nested_module_info.map { |module_name, module_info| module_info.merge(implementation: module_name) }
       end

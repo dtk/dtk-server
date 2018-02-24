@@ -145,8 +145,8 @@ module DTK
         return ret if cmp_types.empty?
         # first put in ret info about component type and version
         ret = cmp_types.inject({}) do |h, cmp_type|
-          version = version_string?(cmp_type)
-          match_el = Component::Template::MatchElement.new(cmp_type, ModuleBranch.version_field(version))
+          version_string = version_string(cmp_type, module_local_params: opts[:module_local_params])
+          match_el = Component::Template::MatchElement.new(cmp_type, ModuleBranch.version_field(version_string))
           if namespace = namespace?(cmp_type)
             match_el.namespace = namespace
           end
@@ -172,9 +172,18 @@ module DTK
         end
       end
 
-      def version_string?(component_type)
+      # opts can have keys
+      #   :module_local_params
+      def version_string(component_type, opts = {})
         if cmp_module_ref = component_types_module_ref?(component_type)
           cmp_module_ref.version_string
+        else
+          if module_local_params = opts[:module_local_params]
+            module_local_params.version
+          else
+            Log.error("Unexpected that opts[:module_local_params] is nil")
+            nil
+          end 
         end
       end
 

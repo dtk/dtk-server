@@ -71,7 +71,11 @@ module DTK; class Task
         dyn_attr_val_info = get_dynamic_attributes_with_retry(result, opts)
         return if dyn_attr_val_info.empty?
         attr_mh = self[:node].model_handle_with_auth_info(:attribute)
-        Attribute.update_and_propagate_dynamic_attributes(attr_mh, dyn_attr_val_info)
+        ret = Attribute.update_and_propagate_dynamic_attributes(attr_mh, dyn_attr_val_info)
+        # dynamic_attributes_special_processing_for_node_components? must go after Attribute.update_and_propagate_dynamic_attributes
+        require 'ruby-debug'; debugger
+        dynamic_attributes_special_processing_for_node_components?(dyn_attr_val_info)
+        ret
       end
       
       ###====== end: related to node(s); node can be a node group
@@ -138,6 +142,13 @@ module DTK; class Task
         true
       end
       
+      def dynamic_attributes_special_processing_for_node_components?(dyn_attr_val_info)
+        # check if single component and if so pass to NodeComponent 
+        if component_actions.size == 1
+          NodeComponent.dynamic_attributes_special_processing?(component_actions[0].component, dyn_attr_val_info)
+        end
+      end
+
       # generic; can be overwritten
       def self.node_status(object, opts = {})
         ret = PrettyPrintHash.new

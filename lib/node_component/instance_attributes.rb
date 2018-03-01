@@ -76,7 +76,11 @@ module DTK
       def instance_state?
         value?(:instance_state)
       end
-      
+
+      def attribute?(name)
+        self.node.get_node_attribute?(name)
+      end
+
       private
 
       def self.instance_attributes(node_or_node_group_member)

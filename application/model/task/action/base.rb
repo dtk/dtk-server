@@ -73,8 +73,7 @@ module DTK; class Task
         attr_mh = self[:node].model_handle_with_auth_info(:attribute)
         ret = Attribute.update_and_propagate_dynamic_attributes(attr_mh, dyn_attr_val_info)
         # dynamic_attributes_special_processing_for_node_components? must go after Attribute.update_and_propagate_dynamic_attributes
-        require 'ruby-debug'; debugger
-        dynamic_attributes_special_processing_for_node_components?(dyn_attr_val_info)
+        dynamic_attributes_special_processing_for_node_components?
         ret
       end
       
@@ -142,10 +141,10 @@ module DTK; class Task
         true
       end
       
-      def dynamic_attributes_special_processing_for_node_components?(dyn_attr_val_info)
+      def dynamic_attributes_special_processing_for_node_components?
         # check if single component and if so pass to NodeComponent 
         if component_actions.size == 1
-          NodeComponent.dynamic_attributes_special_processing?(component_actions[0].component, dyn_attr_val_info)
+          NodeComponent.dynamic_attributes_special_processing?(component_actions[0].component)
         end
       end
 

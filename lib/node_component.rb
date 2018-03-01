@@ -56,9 +56,9 @@ module DTK
       node.display_name
     end
 
-    def self.dynamic_attributes_special_processing?(component, dyn_attr_val_info)
+    def self.dynamic_attributes_special_processing?(component)
       if node_component = node_component?(component)
-        node_component.dynamic_attributes_special_processing(dyn_attr_val_info) if node_component.respond_to?(:dynamic_attributes_special_processing)
+        node_component.dynamic_attributes_special_processing if node_component.respond_to?(:dynamic_attributes_special_processing)
       end
     end
 

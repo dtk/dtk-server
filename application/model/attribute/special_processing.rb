@@ -29,8 +29,6 @@ module DTK
         @new_val   = new_val
       end
 
-      protected 
-      
       attr_reader :attribute, :component, :new_val
     end
   end

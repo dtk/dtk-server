@@ -52,15 +52,11 @@ module DTK
         def self.proceess_if_node_group_member_slice?(value, action)
           if value.kind_of?(::Hash) and value.keys.size == 1 and value.keys.first == NODE_GROUP_MEMBER_SLICE_KEY
             processed_value = value.values.first
-            qualify_if_needed?(processed_value, action)
+            qualify_with_node_member_name(processed_value, action)
           end
         end
         
-        def self.qualify_if_needed?(value, action)
-          # TODO: DTK-3461 when qualifyng; mismatching the node group members
-          # so removing this logic for now
-          return value
-          
+        def self.qualify_with_node_member_name(value, action)
           ret = value
           if node = action.node
             ret = { node.display_name => value }

@@ -35,13 +35,12 @@ module DTK
 
         # Returns an array of InstanceAttributes objects
         def instance_attributes_array
-          ret = []
           fail Error, "The method instance_attributes_array should only be called on node group" unless node.is_node_group?
           node_group_helper = NodeGroupHelper.new(self)
-          node.get_node_group_members.each_with_index do |node_group_member, index|
-            ret << self.class::InstanceAttributes.new(node_group_member, node_group_helper.attribute_name_value_hash(index))
+          node.get_node_group_members.map do |node_group_member|
+            index = node_group_member[:index].to_i - 1
+            self.class::InstanceAttributes.new(node_group_member, node_group_helper.attribute_name_value_hash(index))
           end
-          ret
         end
 
         def node_is_running?

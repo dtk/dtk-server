@@ -40,8 +40,6 @@ module DTK
         
         private
         
-        attr_reader :attribute, :component, :new_val
-        
         # returns attribute_info or nil
         def self.needs_special_processing?(attribute, component)
           attribute_info = SPECIAL_PROCESSING_INFO[attribute.display_name.to_sym]

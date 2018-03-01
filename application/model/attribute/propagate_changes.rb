@@ -35,7 +35,7 @@ module DTK; class Attribute
         # The diff modify calling function should then report errors with respect to 
         # the qualified key
         LegalValue.raise_error_if_invalid(existing_attributes, ndx_new_values)
-        SpecialProcessing.handle_special_processing_attributes(existing_attributes, ndx_new_values)
+        SpecialProcessing::Default.handle_special_processing_attributes(existing_attributes, ndx_new_values)
         
         attribute_rows = ndx_new_values.map { | id,  new_value | { id: id, value_derived: new_value } }
         update_and_propagate_attributes(existing_attributes.first.model_handle, attribute_rows)
@@ -99,15 +99,18 @@ module DTK; class Attribute
         
         propagate_and_optionally_add_state_changes(attr_mh, changed_attrs_info, opts)
       end
-      
-      def update_and_propagate_dynamic_attributes(attr_mh, dyn_attr_val_info)
+
+      # opts can have keys:
+      #   :action - action called from
+      def update_and_propagate_dynamic_attributes(attr_mh, dyn_attr_val_info, opts = {})
+        action = opts[:action]
         attribute_rows = dyn_attr_val_info.map { |r| { :id => r[:id], dynamic_attribute_value_field() => r[:attribute_value] } }
-        # TODO: breakinginto individual rows to avoid bug DTK-2946, which manifests if attributes have differenttypes; more
-        #  efficient would be to group by datatype
-        # update_and_propagate_attributes(attr_mh, attribute_rows, add_state_changes: false, partial_value: false)
         attribute_rows.each do |attribute_row|
-          update_and_propagate_attributes(attr_mh, [attribute_row], add_state_changes: false, partial_value: false, dynamic_attributes: true)
+          attribute_row, partial_value = SpecialProcessing::Dynamic.update_attribute_if_node_group_member_component(attribute_row, action)
+          update_and_propagate_attributes(attr_mh, [attribute_row], add_state_changes: false, partial_value: partial_value, dynamic_attributes: true)
         end
+        SpecialProcessing::Dynamic.special_processing_for_node_components?(action)
+        nil
       end
       
       def propagate_and_optionally_add_state_changes(attr_mh, changed_attrs_info, opts = {})

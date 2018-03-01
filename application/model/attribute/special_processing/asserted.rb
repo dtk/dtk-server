@@ -18,20 +18,8 @@
 module DTK
   class Attribute
     class SpecialProcessing
-      require_relative('special_processing/default')
-      # asserted must be after default
-      require_relative('special_processing/asserted')
-      require_relative('special_processing/dynamic')
-
-      def initialize(attribute, component, new_val)
-        @attribute = attribute
-        @component = component
-        @new_val   = new_val
+      class Asserted < Default
       end
-
-      protected 
-      
-      attr_reader :attribute, :component, :new_val
     end
   end
 end

@@ -66,6 +66,14 @@ module DTK; class Task
         new(:execution_blocks, exec_blocks, task_idh, assembly_idh)
       end
 
+      def node
+        self[:node]
+      end
+
+      def node_group_member?
+        self[:node_group_member]
+      end
+
       def create_node_group_member(node)
         self.class.new(:hash, node: node, node_group_member: true)
       end

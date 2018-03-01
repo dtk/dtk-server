@@ -52,10 +52,12 @@ module DTK
         def self.proceess_if_node_group_member_slice?(value, action)
           if value.kind_of?(::Hash) and value.keys.size == 1 and value.keys.first == NODE_GROUP_MEMBER_SLICE_KEY
             processed_value = value.values.first
-            qualify_with_node_member_name(processed_value, action)
+            # TODO: DTK-3464 can put this back in when solve this issues 
+            # qualify_with_node_member_name(processed_value, action)
+            processed_value
           end
         end
-        
+
         def self.qualify_with_node_member_name(value, action)
           ret = value
           if node = action.node

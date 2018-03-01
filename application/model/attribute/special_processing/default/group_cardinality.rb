@@ -29,7 +29,8 @@ module DTK
 
         node_group = NodeComponent.node_component(self.component).node_group
         ng_members = node_group.get_node_group_members
-        
+
+        # TODO: DTK-3464 code is relavant about what is used with indexes to line up with node group ordering
         # existing_val is value of cardinality attributes, and in some cases can be different than node_group_members.size
         # because node_group_members can be marked for deletion (not actually deleted) and will be deleted on converge
         if self.new_val > existing_val

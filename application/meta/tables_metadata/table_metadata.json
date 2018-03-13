@@ -731,5 +731,15 @@
       "provider": "git_provider",
       "url": "url"
     }
+  },
+  "remote_namespaces": {
+    "order": [
+      "name",
+      "module_count"
+    ],
+    "mapping": {
+      "name": "name",
+      "module_count": "module_count"
+    }
   }
 }

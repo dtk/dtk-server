@@ -95,7 +95,7 @@ module DTK; class Task
     def get_reversed_create_workflow_order(assembly)
       if task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly)
         if create_order = component_order_from_task_template_content(:create, task_template_content)
-          create_order.reverse
+          create_order.reverse.uniq
         end
       end
     end

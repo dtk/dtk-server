@@ -622,6 +622,7 @@ module DTK
       cols = (self[:repo] ? [:branch] : [:branch, :repo_id])
       update_object!(*cols)
       unless repo
+        fail Error, "cannot find repo_id for module branch '#{display_name}'" unless self[:repo_id]
         sp_hash = {
           cols: [:id, :display_name, :repo_name],
           filter: [:eq, :id, self[:repo_id]]

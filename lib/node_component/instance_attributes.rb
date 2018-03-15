@@ -43,6 +43,19 @@ module DTK
           end
           ret
         end
+=begin
+   TODO: DTK-3464
+   potential code to use when solve DTK-3464
+        # Returns an array of InstanceAttributes objects
+        def instance_attributes_array
+          fail Error, "The method instance_attributes_array should only be called on node group" unless node.is_node_group?
+          node_group_helper = NodeGroupHelper.new(self)
+          node.get_node_group_members.map do |node_group_member|
+            index = node_group_member[:index].to_i - 1
+            self.class::InstanceAttributes.new(node_group_member, node_group_helper.attribute_name_value_hash(index))
+          end
+        end
+=end
 
         def node_is_running?
           instance_attributes.node_is_running?
@@ -76,7 +89,11 @@ module DTK
       def instance_state?
         value?(:instance_state)
       end
-      
+
+      def attribute?(name)
+        self.node.get_node_attribute?(name)
+      end
+
       private
 
       def self.instance_attributes(node_or_node_group_member)

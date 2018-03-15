@@ -213,7 +213,7 @@ module DTK; class  Assembly
         ret
       end
       # returns nil if there is no task to run
-      def exec__delete(opts = {}) 
+      def exec__delete(opts = {})
         task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
         ret = {
           assembly_instance_id: self.id,
@@ -315,11 +315,6 @@ module DTK; class  Assembly
           end
         end
 
-        unless opts[:donot_delete_assembly_from_database]
-          delete_assembly_subtask = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
-          task.add_subtask(delete_assembly_subtask)
-        end
-        # maybe add here sorting of tasks // Test with revers nodes..
         subtasks = task.subtasks
         subtasks.each_with_index do |sub, index|
           if sub.is_a?(Hash)
@@ -330,6 +325,12 @@ module DTK; class  Assembly
             end
           end
         end
+
+        unless opts[:donot_delete_assembly_from_database]
+          delete_assembly_subtask = Task.create_for_delete_from_database(assembly_instance, nil, nil, opts.merge!(skip_running_check: true))
+          task.add_subtask(delete_assembly_subtask)
+        end
+
         task
       end
   

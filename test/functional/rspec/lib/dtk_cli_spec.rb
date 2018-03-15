@@ -312,7 +312,16 @@ shared_context 'Uninstall service instance' do |service_location, service_instan
     service_location = service_location + service_instance
     value = `dtk service uninstall --purge -d #{service_location} -y`
     puts value
-    pass = false if value.include? 'ERROR'
+
+    check = nil;
+    count = 0;
+    while (check != "") || (count < 10)
+      check = `dtk service task-status | grep executing`
+      count += 1
+      sleep 10
+    end
+
+    pass = false if (value.include? 'ERROR') || (check != "")
     puts ''
     expect(pass).to eq(true)
   end

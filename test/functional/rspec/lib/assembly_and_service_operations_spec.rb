@@ -343,3 +343,10 @@ shared_context 'Delete component with workflow' do |dtk_common, node_name, compo
     expect(delete_successful).to eq(true)
   end
 end
+
+shared_context 'Check that service instance nodes have been terminated on aws' do |dtk_common, service_instance_name|
+  it "verifies that service instances nodes have been terminated already" do
+    nodes_terminated = dtk_common.verify_service_instance_nodes_terminated(service_instance_name)
+    expect(nodes_terminated).to eq(true)
+  end
+end

@@ -71,7 +71,7 @@ module DTK; class Task
         dyn_attr_val_info = get_dynamic_attributes_with_retry(result, opts)
         return if dyn_attr_val_info.empty?
         attr_mh = self[:node].model_handle_with_auth_info(:attribute)
-        Attribute.update_and_propagate_dynamic_attributes(attr_mh, dyn_attr_val_info)
+        Attribute.update_and_propagate_dynamic_attributes(attr_mh, dyn_attr_val_info, action: self)
       end
       
       ###====== end: related to node(s); node can be a node group

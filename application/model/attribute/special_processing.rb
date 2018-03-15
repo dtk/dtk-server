@@ -18,50 +18,18 @@
 module DTK
   class Attribute
     class SpecialProcessing
-      require_relative('special_processing/group_cardinality')
+      require_relative('special_processing/default')
+      # asserted must be after default
+      require_relative('special_processing/asserted')
+      require_relative('special_processing/dynamic')
 
       def initialize(attribute, component, new_val)
         @attribute = attribute
         @component = component
         @new_val   = new_val
       end
-      private :initialize
-      
-      def self.handle_special_processing_attributes(existing_attributes, ndx_new_vals)
-        existing_attributes.each do |attribute|
-          next unless SPECIAL_PROCESSING_ATTRIBUTES.include?(attribute.display_name)
-          # only special_processing on component attributes
-          next unless component = attribute.get_component?
 
-          if attribute_info = needs_special_processing?(attribute, component)
-            new_val = ndx_new_vals[attribute[:id]]
-            attribute_info[:proc].call(attribute, component, new_val)
-          end
-        end
-      end
-
-      def self.process(attribute, component, value)
-        new(attribute, component, value).process
-      end
-
-      private
-      
       attr_reader :attribute, :component, :new_val
-
-      # returns attribute_info or nil
-      def self.needs_special_processing?(attribute, component)
-        attribute_info = SPECIAL_PROCESSING_INFO[attribute.display_name.to_sym]
-        attribute_info if attribute_info[:component_types].include?(component[:component_type])
-      end
-
-      SPECIAL_PROCESSING_INFO = {
-        cardinality: {
-          component_types: ['ec2__node_group'],
-          proc: lambda { |attribute, component, value| GroupCardinality.process(attribute, component, value) }
-        }
-      }
-      SPECIAL_PROCESSING_ATTRIBUTES = SPECIAL_PROCESSING_INFO.keys.map(&:to_s)
-        
     end
   end
 end

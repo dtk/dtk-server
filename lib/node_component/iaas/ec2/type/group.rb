@@ -16,25 +16,43 @@
 # limitations under the License.
 #
 module DTK
-  class NodeComponent::IAAS::Ec2::Type
-    class Group < self
-      def generate_new_client_token?
-        # generate if does not exists or there are new group members to create
-        attribute_value?(:client_token).nil? or new_group_members_to_create?
-      end
+  class NodeComponent
+    class IAAS::Ec2::Type
+      class Group < self
+        require_relative('group/instance')
 
-      private
+        def generate_new_client_token?
+          # generate if does not exists or there are new group members to create
+          attribute_value?(:client_token).nil? or new_group_members_to_create?
+        end
+        
+        HOST_ADDRESSES_IPV4 = 'host_addresses_ipv4'
+        def dynamic_attributes_special_processing
+          instance_attributes_array.each do |instance_attributes|
+            if host_addresses_ipv4_attr = instance_attributes.attribute?(HOST_ADDRESSES_IPV4)
+              host_addresses_ipv4_val = instance_attributes.value?(HOST_ADDRESSES_IPV4)
+              attribute_row = { id: host_addresses_ipv4_attr.id, value_derived: host_addresses_ipv4_val }
+              Attribute.update_and_propagate_attributes(attribute_mh, [attribute_row], dynamic_attributes: true)
+            else
+              Log.error("Unexpected that 'instance_attributes.attribute?(HOST_ADDRESSES_IPV4' is nil")
+            end
+          end
+        end
 
-      INSTANCE_ID_KEY = 'instance_id'
-      def new_group_members_to_create?
-        existing_instances = (attribute_value?(:instances) || []).reject { |instance| instance[INSTANCE_ID_KEY].nil? }
-        existing_instances.size < cardinaility
-      end
-
-      def cardinaility
-        string_value = attribute_value(:cardinality)
-        string_value.to_i
+        private
+        
+        def new_group_members_to_create?
+          existing_instances = (attribute_value?(:instances) || []).reject { |instance| Instance.value(instance, :instance_id).nil? }
+          existing_instances.size < cardinaility
+        end
+    
+        def cardinaility
+          string_value = attribute_value(:cardinality)
+          string_value.to_i
+        end
+        
       end
     end
   end
-end      
+end
+

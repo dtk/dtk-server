@@ -56,6 +56,12 @@ module DTK
       node.display_name
     end
 
+    def self.dynamic_attributes_special_processing?(component)
+      if node_component = node_component?(component)
+        node_component.dynamic_attributes_special_processing if node_component.respond_to?(:dynamic_attributes_special_processing)
+      end
+    end
+
     def self.host_addresses_ipv4(node)
       if node.is_assembly_wide_node? 
         []
@@ -184,6 +190,10 @@ module DTK
     def self.assembly_instance(node_or_component)
       assembly_id = node_or_component.get_field?(:assembly_id) || fail(Error, "Unexpected that the following object does not have an assembly id: #{node_or_component.inspect}")
       node_or_component.model_handle.createIDH(model_name: :assembly_instance, id: assembly_id).create_object
+    end
+
+    def attribute_mh
+      @attribute_mh ||= @assembly.model_handle(:attribute) 
     end
 
   end

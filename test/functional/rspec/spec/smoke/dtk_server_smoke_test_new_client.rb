@@ -1,11 +1,12 @@
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
+require './lib/assembly_and_service_operations_spec'
 
 initial_module_location = "./spec/smoke/resources/new_client_dtk.module.yaml"
 module_location = '/tmp/dtk_new_client_smoke'
 module_name = 'test/dtk_new_client_smoke'
 assembly_name = 'new_module_assembly'
-service_name = 'dtk_new_client_smoke'
+service_name = "dtk_new_client_smoke" + rand(10..1000).to_s
 service_location = "~/dtk/"
 
 dtk_common = Common.new('', '')
@@ -35,10 +36,6 @@ describe "DTK Server smoke test with new client" do
     include_context "Converge service instance", service_location, dtk_common, service_name
   end
 
-  context "Delete service instance" do
-    include_context "Delete service instance", service_location, service_name, dtk_common
-  end
-
   context "Uninstall service instance" do
     include_context "Uninstall service instance", service_location, service_name
   end
@@ -49,6 +46,10 @@ describe "DTK Server smoke test with new client" do
 
   context "Delete initial module on filesystem" do
     include_context "Delete initial module on filesystem", module_location
+  end
+
+  context "Check that service instance nodes have been terminated on aws" do
+    include_context "Check that service instance nodes have been terminated on aws", dtk_common, service_name
   end
 
   after(:all) do

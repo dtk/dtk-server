@@ -16,8 +16,10 @@
 # limitations under the License.
 #
 module DTK
-  module CommonDSL
-    class DirectoryType < ::DTK::DSL::DirectoryType
+  class Attribute
+    class SpecialProcessing
+      class Asserted < Default
+      end
     end
   end
 end

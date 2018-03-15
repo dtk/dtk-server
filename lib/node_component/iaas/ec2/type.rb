@@ -20,7 +20,6 @@ module DTK
     class Type < self
       require_relative('type/instance')
       require_relative('type/group')
-
     end
   end
 end      

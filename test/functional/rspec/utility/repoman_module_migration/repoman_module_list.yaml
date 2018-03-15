@@ -1,0 +1,3 @@
+---
+modules:
+- "aws/ec2"

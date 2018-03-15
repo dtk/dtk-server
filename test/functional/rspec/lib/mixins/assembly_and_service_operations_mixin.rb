@@ -1,5 +1,23 @@
 module AssemblyAndServiceOperationsMixin
   # Commands used from new dtk client
+  def verify_service_instance_nodes_terminated(service_instance_name)
+    require 'aws-sdk'
+    puts "Verify service instance nodes have been terminated", "-----------------------------------------------------"
+    nodes_terminated = true
+    ec2 = Aws::EC2::Client.new(region: 'us-east-1')
+    ec2_instance = ec2.describe_instances(filters:[{ name: 'tag:Name', values: ["*" + service_instance_name + "*"] }])
+    ec2_instance.reservations.each do |status|
+      puts "Instance details: #{status}"
+      if status.instances.first.state.name == "running"
+        nodes_terminated = false
+        puts "Service instance: #{service_instance_name} nodes have not been terminated"
+      end
+    end
+    puts ""
+    puts "Service instance: #{service_instance_name} nodes have been terminated" if nodes_terminated
+    nodes_terminated
+  end
+
   def check_if_service_instance_exists(service_instance_name)
     puts "Check if service instance exists", "-----------------------------------"
     service_instance_exists = false

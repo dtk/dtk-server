@@ -15,20 +15,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-{
-  schema: :module,
-  table: :module_ref_sha,
-  columns: {
-    sha: { type: :varchar, size: 50 },
-    repo_name: { type: :varchar, size: 50 },
-    branch_name: { type: :varchar, size: 50 },
-    module_name: { type: :varchar, size: 50 },
-    module_branch_id: {
-      type: :bigint,
-      foreign_key_rel_type: :module_branch,
-      on_delete: :cascade,
-      on_update: :cascade
-    },
-  },
-  many_to_one: [:component], #this is an assembly
-}
+module DTK
+  class NodeComponent
+    class IAAS::Ec2::Type::Group
+      class Instance
+        MAPPING = {
+          instance_id: 'instance_id',
+          host_addresses_ipv4: 'host_addresses_ipv4'
+        }
+        def initialize(instance_hash)
+          @instance_hash = instance_hash
+        end
+
+        def self.value(instance_hash, key)
+          new(instance_hash).value(key)
+        end
+
+        def value(key)
+          index = (MAPPING[key] || fail("Illegal key '#{key}'"))
+          self.instance_hash[index]
+        end
+
+        protected
+
+        attr_reader :instance_hash
+      end
+    end
+  end
+end      

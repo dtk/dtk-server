@@ -16,35 +16,36 @@
 # limitations under the License.
 #
 module DTK
-  class Attribute::SpecialProcessing
+  class Attribute::SpecialProcessing::Default
     class GroupCardinality < self
       def initialize(attribute, component, new_val)
         super(attribute, component, new_val.to_i)
       end
       
       def process
-        existing_val = (attribute.get_field?(:value_asserted) || 0).to_i
+        existing_val = (self.attribute.get_field?(:value_asserted) || 0).to_i
         # no op if no change
-        return if new_val == existing_val
+        return if self.new_val == existing_val
 
-        node_group = NodeComponent.node_component(component).node_group
+        node_group = NodeComponent.node_component(self.component).node_group
         ng_members = node_group.get_node_group_members
-        
+
+        # TODO: DTK-3464 code is relavant about what is used with indexes to line up with node group ordering
         # existing_val is value of cardinality attributes, and in some cases can be different than node_group_members.size
         # because node_group_members can be marked for deletion (not actually deleted) and will be deleted on converge
-        if new_val > existing_val
-          if new_val == ng_members.size
+        if self.new_val > existing_val
+          if self.new_val == ng_members.size
             ng_members.each{ |ngm| ngm.update(:ng_member_deleted => false) }
-          elsif new_val > ng_members.size
+          elsif self.new_val > ng_members.size
             ng_members.each{ |ngm| ngm.update(:ng_member_deleted => false) }
-            node_group.add_group_members(new_val)
+            node_group.add_group_members(self.new_val)
           else
             sorted = ng_members.sort_by { |ngm| ngm[:index] }
-            ng_members_reuse = sorted.first(new_val)
+            ng_members_reuse = sorted.first(self.new_val)
             ng_members_reuse.each{ |ngm| ngm.update(:ng_member_deleted => false) }
           end
-        elsif new_val < existing_val
-          node_group.delete_group_members(new_val, true)
+        elsif self.new_val < existing_val
+          node_group.delete_group_members(self.new_val, true)
         else
           ng_members.each{ |ngm| ngm.update(:ng_member_deleted => false) }
         end

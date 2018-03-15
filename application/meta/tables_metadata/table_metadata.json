@@ -735,11 +735,13 @@
   "remote_namespaces": {
     "order": [
       "name",
-      "module_count"
+      "module_count",
+      "permissions"
     ],
     "mapping": {
       "name": "name",
-      "module_count": "module_count"
+      "module_count": "module_count",
+      "permissions": "permissions"
     }
   }
 }

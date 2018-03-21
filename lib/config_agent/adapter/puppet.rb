@@ -120,8 +120,10 @@ module DTK
 
         # want components to be unique
         components = component_actions.inject({}) { |h, r| h.merge(r[:component][:id] => r[:component]) }.values
-old_ret =        ComponentModule::VersionContextInfo.get_in_hash_form(components, assembly_instance)
-pp old_ret
+
+# TODO: remove 
+# old_ret =  ComponentModule::VersionContextInfo.get_in_hash_form(components, assembly_instance)
+# pp old_ret
 # TODO:  DTK-3395; use logic in ComponentModule::VersionContextInfo.get_in_hash_form to prune what modules are returned
 # put filter on compinents in  def get_base_and_dependent_modules(assembly_instance)
 #      Assembly::Instance::ModuleRefSha.get_for_base_and_nested_modules(assembly_instance)

@@ -142,10 +142,12 @@ module DTK
       task_template = Model.get_objs(mh, sp_hash)
       rows.each do |row|
         task_template.each do |tt|
-          if tt[:ref].include?("delete")
+          if tt[:ref].include?("delete") || tt[:ref].include?("__create_action")
             breakpoint_found = tt[:content][:subtasks].select {|subt| subt[:breakpoint] == true }
             unless row[:nested_component].nil? || breakpoint_found.nil? || breakpoint_found.empty?
-              display_name = row[:nested_component][:display_name].gsub!("__","::")
+              display_name = row[:nested_component][:display_name]
+              display_name = display_name.gsub!("__","::") if display_name.include? "__"
+
               breakpoint = 
               if breakpoint_found.first[:component].nil? && breakpoint_found.first[:components].nil?
                 breakpoint_found.first[:actions].first
@@ -154,9 +156,12 @@ module DTK
               elsif breakpoint_found.first[:actions].nil? && breakpoint_found.first[:components].nil?
                 breakpoint_found.first[:component].first
               end
+
               breakpoint.gsub!(".delete","")
-              if display_name.include?(breakpoint)
-                row[:breakpoint] = breakpoint_found.first[:breakpoint]
+              unless display_name.nil? 
+                if display_name.include?(breakpoint) 
+                  row[:breakpoint] = breakpoint_found.first[:breakpoint]
+                end
               end
             end
           end

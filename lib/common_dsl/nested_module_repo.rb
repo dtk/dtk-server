@@ -34,7 +34,8 @@ module DTK
       def update_repo_for_stage
         source_path      = FileType::CommonModule::DSLFile::Top.canonical_path
         destination_path = FileType::ServiceInstance::NestedModule::DSLFile::Top.canonical_path
-        RepoManager.move_file(source_path, destination_path, self.aug_nested_module_branch)
+        # RepoManager.move_file(source_path, destination_path, self.aug_nested_module_branch)
+        RepoManager.add_file({ path: '.nested_module' }, '', self.aug_nested_module_branch)
         RepoManager.add_all_files_and_commit({}, self.aug_nested_module_branch)
         RepoManager.push_changes(self.aug_nested_module_branch)
         self.aug_nested_module_branch

@@ -111,6 +111,20 @@ module DTK; class Task; class Status
               end
             end
           end
+
+          #If multinode
+          unless subtasks[0].subtasks.empty?
+          if ndx_info[subtasks[0].subtasks.first[:id]]
+            ndx_info[subtasks[0].subtasks.first[:id]].each do |st|
+              if st[:event].is_a?(Hash)
+                info_msg = {message: st[:event][:info]}
+                el[:info] = format_info(info_msg)
+              end
+            end
+          end 
+          end
+
+
           if subtasks.first[:executable_action_type].include?("ConfigNode")
             if opts[:type]
              # ret = [] if opts[:type].include?("delete")

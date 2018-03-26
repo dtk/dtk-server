@@ -29,24 +29,30 @@ returned_modules = modules['data'].map { |x| { name: x['display_name'], versions
 
 selected_modules.each do |sm|
   mod = returned_modules.select { |hash| hash[:name] == sm }.first
-  
+
   unless mod.nil?
     puts "Found module #{sm} on repoman"
     module_name = sm.gsub(/\//,'_')
 
     puts "Installing it in local machine on: #{output_directory}/#{module_name}"
     puts module_name
-    output = `ls #{output_directory}/#{module_name}`
-    if ((output.include? "No such file or directory") || (!output.include? "\n"))
-      `mkdir #{output_directory}/#{module_name}` 
-      mod[:versions].each do |vs|
+    output_ls = `ls #{output_directory}/#{module_name}`
+    if ((output_ls.include? "No such file or directory") || (!output_ls.include? "\n"))
+      `mkdir #{output_directory}/#{module_name}`
+    end
+
+    mod[:versions].each do |vs|
+      vs_output_ls = `ls #{output_directory}/#{module_name}/#{vs}`
+      if ((vs_output_ls.include? "No such file or directory") || (!vs_output_ls.include? "\n"))
         `mkdir #{output_directory}/#{module_name}/#{vs}`
         puts "Installing module: #{sm} with version: #{vs}..."
         result = `dtk module install -d #{output_directory}/#{module_name}/#{vs} -v #{vs} --skip-server #{sm}`
+        puts "Result of module install: " + result
         `rm -rf #{output_directory}/#{module_name}/#{vs}` if result.include? "ERROR"
         puts ""
       end
     end
+
     puts "Content installed for module #{module_name}:"
     puts "--------------------------------------------"
     puts `tree -L 2 #{output_directory}/#{module_name}`

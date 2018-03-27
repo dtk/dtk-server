@@ -274,3 +274,6 @@ R8::Config[:logstash][:config_file_path] = '/etc/logstash-forwarder/dtk.json'
 R8::Config[:logstash][:tag] = R8.app_user
 
 R8::Config[:breakpoint][:wait_time_for_daemon] = 10
+
+# Hardcoded auth disable for Ruby 2.2 testing
+R8::Config[:development_test_user] = true

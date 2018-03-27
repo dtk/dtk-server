@@ -1,4 +1,5 @@
 source 'https://rubygems.org'
+ruby '2.2.9'
 
 # dtk gems
 gem 'dtk-common', :github => 'dtk/dtk-common'
@@ -13,7 +14,7 @@ gem 'activesupport'
 gem 'i18n'
 gem 'ruote', '2.3.0.1'
 gem 'eventmachine', '1.0.8'
-gem 'pg', '0.14.1'
+gem 'pg', '~> 0.15.0'
 gem 'json', '1.8.3'
 gem 'rspec', '2.99.0'
 gem 'sshkey', '1.6.1'
@@ -37,9 +38,11 @@ group :development do
 case RUBY_VERSION
   when /1.8.7.*/ then
     gem 'ruby-debug', '0.10.4'
-  else
+  when /1.9.3.*/ then
     gem 'debugger'
     gem 'em-ssh', '0.6.5'
+  else
+    gem 'byebug'
   end
 end
 

@@ -117,7 +117,7 @@ module DTK; class Task; class Status
           if ndx_info[subtasks[0].subtasks.first[:id]]
             ndx_info[subtasks[0].subtasks.first[:id]].each do |st|
               if st[:event].is_a?(Hash)
-                info_msg = {message: st[:event][:info]}
+                info_msg = {message: st[:event][:data]}
                 el[:info] = format_info(info_msg)
               end
             end
@@ -184,16 +184,24 @@ module DTK; class Task; class Status
         else
           ret = { message: '' }
         end
-
-        if info.is_a? String
+        require 'debugger'
+        Debugger.wait_connection = true
+        Debugger.start_remote
+        debugger
+        if info.is_a?(String)
           info, temp = {}, info
           info[:message] = temp
         end
-
+        # TODO THIS
         info_msg = ''
-        info_msg << (info[:message] || 'error')
-        ret[:message] << info_msg
-        #ret[:type] = error[:type]    
+        if info[:message].is_a?(Array)
+          info_msg = info[:message]
+          ret[:message] = info_msg
+        else
+          info_msg << (info[:message] || 'error')
+          ret[:message] << info_msg
+        end
+
         ret
        end
 

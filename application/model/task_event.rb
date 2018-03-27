@@ -150,8 +150,11 @@ module DTK
           node_name: action[:node][:display_name],
           components: action.component_actions().map { |cmp_attrs| cmp_attrs[:component][:display_name] }
         }
-        if errors = (result[:data] || {})[:errors]
-          hash.merge!(errors: errors)
+        # temporary hack
+        unless result[:data].is_a?(Array)
+          if errors = (result[:data] || {})[:errors] 
+            hash.merge!(errors: errors)
+          end
         end
         dyn_attrs = dynamic_attributes(status, result)
         hash.merge!(dynamic_attributes: dyn_attrs) unless dyn_attrs.empty?

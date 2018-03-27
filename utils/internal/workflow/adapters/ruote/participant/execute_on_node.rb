@@ -76,13 +76,18 @@ module DTK
                   if has_action_results?(task, result)
                     task.add_action_results(result, action)
                   end
-
+                  $port_msg_hash = {data: []}
+                  $public_dns = []
                   msg_data = (result[:data] || {})[:data]
                   if msg_data.kind_of?(::Hash)
                     dynamic_attributes = msg_data['dynamic_attributes'] || {}
                     if dtk_debug_port = dynamic_attributes['dtk_debug_port']
+                      require 'debugger'
+                      Debugger.wait_connection = true
+                      Debugger.start_remote
+                      debugger
                       if public_dns_name = public_dns_name?(action)
-                        $public_dns = public_dns_name
+                        $public_dns.push(public_dns_name)
                         # Sleep so debug daemon can be ready
                         if wait = R8::Config[:breakpoint][:wait_time_for_daemon]
                           sleep R8::Config[:breakpoint][:wait_time_for_daemon]
@@ -97,10 +102,15 @@ module DTK
                       if $port_number.nil? || !$port_number.eql?(dtk_debug_port)
                         $port_number = dtk_debug_port
                       end
-
-                      byebug_host_port_ref = ($public_dns.nil? ? $port_number : "#{$public_dns}:#{$port_number}")
-                      port_msg_hash = { info: "Please use 'byebug -R #{byebug_host_port_ref}' to debug current action." }
-                      task.add_event(:info, port_msg_hash)
+                      byebug_host_port_ref = ($public_dns.nil? ? $port_number : "#{$public_dns.join(", ")}:#{$port_number}")
+                      if action[:node].node_group_member?
+                        $port_msg_hash[:data].push("To debug #{action[:node][:display_name]} use: 'byebug -R #{byebug_host_port_ref}' to debug ")
+                      else
+                        $port_msg_hash = {}
+                        $port_msg_hash = { info: "Please use 'byebug -R #{byebug_host_port_ref}' to debug current action." }
+                      end
+                      
+                      task.add_event(:info, $port_msg_hash)
                     else
                       $public_dns = nil
                       $port_number = nil

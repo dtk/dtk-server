@@ -143,7 +143,7 @@ module DTK
       rows.each do |row|
         task_template.each do |tt|
           if tt[:ref].include?("delete") || tt[:ref].include?("__create_action")
-            breakpoint_found = tt[:content][:subtasks].select {|subt| subt[:breakpoint] == true }
+            breakpoint_found = tt[:content][:subtasks].select {|subt| subt[:breakpoint] == true } unless tt[:content][:subtasks].nil?
             unless row[:nested_component].nil? || breakpoint_found.nil? || breakpoint_found.empty?
               display_name = row[:nested_component][:display_name]
               display_name = display_name.gsub!("__","::") if display_name.include? "__"

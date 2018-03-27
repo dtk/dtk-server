@@ -54,7 +54,11 @@ module DTK; class ConfigAgent
 
         system_values = {}
         if base_component_repo = base_component_repo?(nested_module_info, assembly_instance)
-          system_values.merge!(base_component_repo: AttributeRequestForm::Info.new(base_component_repo, 'hash', false))
+          system_values_to_add = {
+            base_component_repo: AttributeRequestForm::Info.new(base_component_repo, 'hash', false),
+            base_module_name: AttributeRequestForm::Info.new(base_module_name(assembly_instance), 'string', true)
+          }
+          system_values.merge!(system_values_to_add)
         end
 
         execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, node, breakpoint: breakpoint)
@@ -104,6 +108,15 @@ module DTK; class ConfigAgent
         module_name_with_ns = component_action.component_module_name
         namespace, module_name = module_name_with_ns.split(FULL_MODULE_NAME_DELIM)
         Aux.hash_subset(component_action[:component].print_form_hash, [:type, :version, :title]).merge(namespace: namespace, module_name: module_name)
+      end
+
+      def base_module_name(assembly_instance)
+        if service_module = service_module?(assembly_instance)
+          service_module.display_name
+        else
+          Log.error("Unexpected that service_module?(assembly_instance) is nil")
+          nil
+        end
       end
 
       def base_component_repo?(nested_module_info, assembly_instance)

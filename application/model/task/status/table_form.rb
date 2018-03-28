@@ -184,10 +184,7 @@ module DTK; class Task; class Status
         else
           ret = { message: '' }
         end
-        require 'debugger'
-        Debugger.wait_connection = true
-        Debugger.start_remote
-        debugger
+
         if info.is_a?(String)
           info, temp = {}, info
           info[:message] = temp

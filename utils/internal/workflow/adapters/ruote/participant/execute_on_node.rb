@@ -78,14 +78,11 @@ module DTK
                   end
                   $port_msg_hash = {data: []}
                   $public_dns = []
+                  $port_numbers = []
                   msg_data = (result[:data] || {})[:data]
                   if msg_data.kind_of?(::Hash)
                     dynamic_attributes = msg_data['dynamic_attributes'] || {}
                     if dtk_debug_port = dynamic_attributes['dtk_debug_port']
-                      require 'debugger'
-                      Debugger.wait_connection = true
-                      Debugger.start_remote
-                      debugger
                       if public_dns_name = public_dns_name?(action)
                         $public_dns.push(public_dns_name)
                         # Sleep so debug daemon can be ready
@@ -101,18 +98,25 @@ module DTK
 
                       if $port_number.nil? || !$port_number.eql?(dtk_debug_port)
                         $port_number = dtk_debug_port
+                        $port_numbers.push(dtk_debug_port)
                       end
+
                       byebug_host_port_ref = ($public_dns.nil? ? $port_number : "#{$public_dns.join(", ")}:#{$port_number}")
                       if action[:node].node_group_member?
-                        $port_msg_hash[:data].push("To debug #{action[:node][:display_name]} use: 'byebug -R #{byebug_host_port_ref}' to debug ")
+                        msg = "Please use 'byebug -R' with this information to debug: "
+                        if $port_numbers.length > 1
+                          message_details = Hash[$public_dns.zip($port_numbers)].map {|ip,port|  "#{ip}:#{port}"}.join(", ") unless $public_dns.nil?
+                          $port_msg_hash[:data].push("#{msg}#{message_details}")
+                          Log.info("Adding PORTMSG #{$port_msg_hash}")
+                        end
                       else
                         $port_msg_hash = {}
                         $port_msg_hash = { info: "Please use 'byebug -R #{byebug_host_port_ref}' to debug current action." }
                       end
-                      
-                      task.add_event(:info, $port_msg_hash)
+
+                      task.add_event(:info, $port_msg_hash) unless $port_msg_hash[:data].empty?
                     else
-                      $public_dns = nil
+                    $public_dns = nil
                       $port_number = nil
                     end
                   end

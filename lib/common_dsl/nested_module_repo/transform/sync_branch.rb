@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 module DTK; module CommonDSL
-  class ComponentModuleRepoSync
+  class NestedModuleRepo
     class Transform
       class SyncBranch < self
         require_relative('sync_branch/syntatic_transform')

@@ -17,14 +17,6 @@
 #
 module DTK
   class Namespace < Model
-    # TODO: get rid of this class and fold into paraent after finish conversion
-    # Methods that use this constant are:
-    # - namespace_delimiter
-    # - join_namespace
-    # - full_module_name_parts?
-    # - namespace_from_ref?
-    # - module_ref_field
-
     NAMESPACE_DELIMITER = ':'
 
     def self.namespace_delimiter
@@ -43,13 +35,13 @@ module DTK
 
     # TODO: should these both be replaced by something that doed not rely on format of ref
     def self.namespace_from_ref?(service_module_ref)
-      if service_module_ref.include? namespace_delimiter()
-        service_module_ref.split(namespace_delimiter()).first
+      if service_module_ref.include? namespace_delimiter
+        service_module_ref.split(namespace_delimiter).first
       end
     end
 
     def self.module_ref_field(module_name, namespace)
-      "#{namespace}#{namespace_delimiter()}#{module_name}"
+      "#{namespace}#{namespace_delimiter}#{module_name}"
     end
 
     #
@@ -63,18 +55,18 @@ module DTK
       module_name.include?(NAMESPACE_DELIMITER) ? module_name : "#{default_namespace_name}#{NAMESPACE_DELIMITER}#{module_name}"
     end
 
-    # if user for some reason set R8::Config[:repo][:local][:default_namespace] to '' we will use running_process_user() as namespace
+    # if user for some reason set R8::Config[:repo][:local][:default_namespace] to '' we will use running_process_user as namespace
     def self.default_namespace_name
-      CurrentSession.get_default_namespace() || R8::Config[:repo][:local][:default_namespace] || ::DTK::Common::Aux.running_process_user()
+      CurrentSession.get_default_namespace || R8::Config[:repo][:local][:default_namespace] || ::DTK::Common::Aux.running_process_user
     end
 
     def self.join_namespace(namespace, name)
-      "#{namespace}#{namespace_delimiter()}#{name}"
+      "#{namespace}#{namespace_delimiter}#{name}"
     end
 
     # returns [namespace,name]; namespace can be null if cant determine it
     def self.full_module_name_parts?(name_or_full_module_name)
-      if name_or_full_module_name =~ Regexp.new("(^.+)#{namespace_delimiter()}(.+$)")
+      if name_or_full_module_name =~ Regexp.new("(^.+)#{namespace_delimiter}(.+$)")
         namespace = Regexp.last_match(1)
         name = Regexp.last_match(2)
       else
@@ -93,26 +85,24 @@ module DTK
     end
 
     def self.find_by_name?(namespace_mh, namespace_name)
-      sp_hash = {
-        cols: common_columns(),
-        filter: [:eq, :name, namespace_name.to_s.downcase]
-      }
-
-      results = Model.get_objs(namespace_mh, sp_hash)
+      # TODO: to_s.downcase might not be necssary any longer
+      results = matching_namespaces_from_names(namespace_mh, [namespace_name.to_s.downcase])
       fail Error, "There should not be multiple namespaces with name '#{namespace_name}'" if results.size > 1
       results.first
+    end
+
+    def self.matching_namespaces_from_names(namespace_mh, namespace_names)
+      sp_hash = {
+        cols: common_columns,
+        filter: [:oneof, :name, namespace_names]
+      }
+      Model.get_objs(namespace_mh, sp_hash)
     end
 
     def self.find_or_create(namespace_mh, namespace_name)
       namespace_name = namespace_name.is_a?(Namespace) ? namespace_name.display_name : namespace_name
       fail Error, 'You need to provide namespace name where creating object' if namespace_name.nil? || namespace_name.empty?
-      namespace = self.find_by_name?(namespace_mh, namespace_name)
-
-      unless namespace
-        namespace = create_new(namespace_mh, namespace_name)
-      end
-
-      namespace
+      find_by_name?(namespace_mh, namespace_name) || create_new(namespace_mh, namespace_name)
     end
 
     def self.find_or_create_or_default(namespace_mh, namespace_name)
@@ -139,7 +129,7 @@ module DTK
                              }]
                             ).first
 
-      idh.create_object()
+      idh.create_object
     end
 
     # TODO: would need to enhance if get a legitimate key, but it has nil or false value

@@ -72,8 +72,7 @@ module DTK; module ModuleCommonMixin
             donot_create_master_branch: true,
             delete_if_exists: true
           }
-          repo_user_acls = RepoUser.authorized_users_acls(project.id_handle())
-          repo_with_branch = Repo::WithBranch.create_workspace_repo(project.id_handle(), local, repo_user_acls, create_opts)
+          repo_with_branch = Repo::WithBranch.create_actual_repo(project.id_handle, local, create_opts)
         end
 
         commit_sha = repo_with_branch.initial_sync_with_remote(remote, remote_repo_info)

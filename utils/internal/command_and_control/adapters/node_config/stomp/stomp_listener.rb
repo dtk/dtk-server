@@ -105,13 +105,13 @@ module DTK
 
         callbacks = CommandAndControlAdapter::StompMultiplexer.callback_registry[msg_request_id]
 
-        Log.debug("Current list of callbacks: #{CommandAndControlAdapter::StompMultiplexer.callback_registry}")
-        Log.debug("List of callbacks for message id '#{msg_request_id}': \n #{callbacks}")
+        # Log.debug("Current list of callbacks: #{CommandAndControlAdapter::StompMultiplexer.callback_registry}")
+        # Log.debug("List of callbacks for message id '#{msg_request_id}': \n #{callbacks}")
 
         unless callbacks
           # fix for authorize_node returning response earlier that callback is registered
           retry_callback_retrieve!(msg_request_id, callbacks)
-          Log.debug("List of callbacks for message id '#{msg_request_id}': \n #{callbacks}")
+          # Log.debug("List of callbacks for message id '#{msg_request_id}': \n #{callbacks}")
         end
 
         unless callbacks

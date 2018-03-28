@@ -48,7 +48,7 @@ module DTK
         def self.module_info_with_local_dependencies(project, module_list)
           missing = required = []
           module_list.each do |m|
-            if module_info = CommonModule.exists(get_default_project, module_type, namespace, module_name, version, { ret_remote_info: true })
+            if module_info = CommonModule.exists(get_default_project, namespace, module_name, version, { ret_remote_info: true })
 
             else
               missing << m
@@ -79,7 +79,7 @@ module DTK
         private
 
         def self.transform_class
-          @transform_class ||= CommonDSL::ComponentModuleRepoSync::Transform
+          @transform_class ||= CommonDSL::NestedModuleRepo::Transform
         end
 
         def self.common_module_dsl_file_path

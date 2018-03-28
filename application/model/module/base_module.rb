@@ -173,7 +173,7 @@ module DTK
     end
 
     def get_repos
-      get_objs_helper(:repos, :repo, remove_dups: true)
+      get_objs_helper(:repos, :repo, remove_dups: true).compact
     end
 
     def get_associated_target_instances

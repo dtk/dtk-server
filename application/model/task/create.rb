@@ -226,10 +226,8 @@ module DTK; class Task
       ### TODO: DTK-2974: lines to end: TODO: DTK-2974 should be removed and we will use another mechanism other than check_for_breakpoint to handle breakpoints
       ids = []
       task_template_content.each do |config_node_action|
-        Log.debug("Config node action: #{config_node_action}")
         config_node_action.each {|action| ids << action[1][0][0].id }
       end
-
 
       parent_field_name = DB.parent_field(:component, :attribute)
       sp_hash = {

@@ -16,23 +16,17 @@
 # limitations under the License.
 #
 module DTK
-  module CommonDSL
-    class ComponentModuleRepoSync
-      module Common
-        NestedModuleFileType = FileType::ServiceInstance::NestedModule
-
-        def self.nested_module_dir(nested_module_name)
-          NestedModuleFileType.new(module_name: nested_module_name).base_dir
+  class CommonModule
+    class ServiceInstance
+      class RepoInfo < ::Hash
+        def initialize(base_module_branch)
+          replace(base_module: ModuleRepoInfo.new(base_module_branch), nested_modules: [])
         end
-
-        def self.nested_module_top_dsl_file_type
-          NestedModuleFileType::DSLFile::Top
+        
+        def add_nested_module_info!(nested_module_branch)
+          self[:nested_modules] << ModuleRepoInfo.new(nested_module_branch)
+          self
         end
-
-        def self.nested_module_top_dsl_path(nested_module_name)
-          nested_module_top_dsl_file_type.new(module_name: nested_module_name).canonical_path
-        end
-
       end
     end
   end

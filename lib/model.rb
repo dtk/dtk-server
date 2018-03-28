@@ -739,6 +739,11 @@ module DTK
       self[field] || update_obj!(field)[field]
     end
 
+    def get_field(field)
+      ret = get_field?(field) 
+      ret.nil? ? fail(Error, "Unexpcted that #{field}'s value is nil") : ret
+    end
+
     def self.add_fields!(objects, cols)
       return objects if objects.empty?
       #short cicuit if all objects have all cols

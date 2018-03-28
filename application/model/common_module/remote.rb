@@ -91,7 +91,7 @@ module DTK
         version              = local_params.version
         dtk_dsl_parse_helper = nil
 
-        if CommonModule.exists(project, :common_module, namespace, module_name, version)
+        if CommonModule.exists(project, namespace, module_name, version)
           fail ErrorUsage, "Module '#{local_params.pp_module_ref}' exists already"
         end
 
@@ -153,7 +153,7 @@ module DTK
           if dependencies = dsl_file_content["dependencies"]
             dependencies.each_pair do |dep_name, dep_version|
               cmp_namespace, cmp_name = dep_name.split('/')
-              unless CommonModule.exists(project, :component_module, cmp_namespace, cmp_name, dep_version)
+              unless CommonModule.exists(project, cmp_namespace, cmp_name, dep_version)
                 cmp_module_local =  local_params.merge(module_type: :component_module, module_name: cmp_name, namespace: cmp_namespace, version: dep_version)
                 cmp_module_remote = remote_params.merge(module_type: :component_module, module_name: cmp_name, namespace: cmp_namespace, version: dep_version)
                 CommonModule::Info::Component::Remote.install(project, cmp_module_local, cmp_module_remote, client_rsa_pub_key)

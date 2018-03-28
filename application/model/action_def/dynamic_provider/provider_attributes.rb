@@ -44,10 +44,10 @@ module DTK
         private
 
         def ret_provider_parameters
-          if provider_component_template = provider_component_module.get_matching_component_template?(ProviderAttributes::COMPONENT_NAME) 
+          if provider_component_template = provider_aug_module_branch.get_matching_component_template?(ProviderAttributes::COMPONENT_NAME) 
             Component::Domain::Provider::Parameters.new(provider_component_template)
           else
-            fail(ErrorUsage, "Cannot find component '#{ProviderAttributes::COMPONENT_NAME}' in module '#{provider_component_module.display_name}'")
+            fail ErrorUsage, "Cannot find component '#{ProviderAttributes::COMPONENT_NAME}' in module '#{self.provider_module_name}'"
           end
         end
         

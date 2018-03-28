@@ -115,7 +115,7 @@ module DTK
       end
 
       def dependent_modules
-        rest_ok_response assembly_instance.info_about(:modules, Opts.new(detail_to_include: [:version_info])), datatype: :assembly_component_module
+        rest_ok_response assembly_instance.list_dependent_modules, datatype: :assembly_component_module
       end
 
       def nodes
@@ -123,7 +123,7 @@ module DTK
       end
 
       def repo_info
-        rest_ok_response service_instance.get_repo_info
+        rest_ok_response service_instance.get_base_module_repo_info
       end
 
       def task_status

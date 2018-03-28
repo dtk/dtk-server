@@ -67,7 +67,7 @@ module DTK; class BaseModule; class UpdateModule
     private
 
     def parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts = {})
-      klass()::ParsingError.trap(only_return_error: true) { @base_module.parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts) }
+      ModuleDSL::ParsingError.trap(only_return_error: true) { @base_module.parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts) }
     end
  end
 end; end; end

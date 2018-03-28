@@ -1,4 +1,4 @@
-#
+
 # Copyright (C) 2010-2016 dtk contributors
 #
 # This file is part of the dtk project.
@@ -30,7 +30,7 @@ module DTK
         #  :os_type
         #  :no_auto_complete - Boolean (default false)
         #  :ret_auto_complete_results:
-        #  :donot_create_modules
+        #  :add_nested_modules
         def stage(service_name, opts = Opts.new)
           Stage.new(self, service_name, opts).stage
         end
@@ -43,7 +43,6 @@ module DTK
         @version                      = opts[:version]
         @context_assembly_instances   = opts[:context_assembly_instances] || []
         @opts                         = opts
-        @donot_create_modules         = opts[:donot_create_modules]
         @no_auto_complete             = opts[:no_auto_complete]
         @ret_auto_complete_results    = opts[:ret_auto_complete_results]
       end
@@ -58,9 +57,6 @@ module DTK
           assembly_instance = clone_assembly_template
 
           add_context_assembly_instances(assembly_instance)
-          create_and_save_assembly_instance_lock(assembly_instance)
-          create_nested_modules(assembly_instance) unless self.donot_create_modules
-
           add_custom_node_attributes?(assembly_instance)
         end
         
@@ -85,7 +81,7 @@ module DTK
       
       protected
       
-      attr_reader :assembly_template, :service_name, :project, :version, :context_assembly_instances, :donot_create_modules, :no_auto_complete, :ret_auto_complete_results, :opts
+      attr_reader :assembly_template, :service_name, :project, :version, :context_assembly_instances, :no_auto_complete, :ret_auto_complete_results, :opts
       
       def target
         @target ||= create_target_mock
@@ -97,11 +93,6 @@ module DTK
       
       def service_module_branch
         @service_module_branch ||= ret_service_module_branch
-      end
-      
-      def create_lock_opts
-        # TODO: select exactly what needs to be passed in to Assembly::Instance::Lock
-        @create_lock_opts ||= self.opts
       end
       
       def override_attrs
@@ -137,16 +128,6 @@ module DTK
       def clone_assembly_template
         new_assembly_obj  = self.target.clone_into(self.assembly_template, self.override_attrs, self.clone_opts)
         assembly_instance = Assembly::Instance.create_subclass_object(new_assembly_obj)
-      end
-
-      def create_and_save_assembly_instance_lock(assembly_instance)
-        assembly_instance_lock = Assembly::Instance::Lock.create_from_element(assembly_instance, self.service_module, self.create_lock_opts)
-        assembly_instance_lock.save_to_model
-        assembly_instance_lock
-      end
-
-      def create_nested_modules(assembly_instance)
-        AssemblyModule::Service.get_or_create_module_for_service_instance(assembly_instance, version: self.version) 
       end
 
       def add_custom_node_attributes?(assembly_instance)

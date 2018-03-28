@@ -17,24 +17,23 @@
 #
 module DTK
   class ServiceModule
-    class AssemblyExport < Hash
+    class AssemblyExport < ::Hash
       require_relative('assembly_export/fold_into_existing')
 
       include ServiceDSLCommonMixin
 
       def initialize(factory, container_idh, service_module_branch, integer_version)
         super()
-        @container_idh = container_idh
+        @container_idh         = container_idh
         @service_module_branch = service_module_branch
-        @integer_version = integer_version
-        @factory = factory
-        @serialized_assembly_file = nil
+        @integer_version       = integer_version
+        @factory               = factory
       end
       private :initialize
 
       attr_reader :factory
       def self.create(factory, container_idh, service_module_branch, integer_version = nil)
-        integer_version ||= DSLVersionInfo.default_integer_version()
+        integer_version ||= DSLVersionInfo.default_integer_version
         klass = load_and_return_version_adapter_class(integer_version)
         klass.new(factory, container_idh, service_module_branch, integer_version)
       end
@@ -44,8 +43,8 @@ module DTK
       end
 
       def serialize_and_save_to_repo?(opts = {})
-        assembly_dsl_path = assembly_meta_filename_path()
-        serialized_content = serialize()
+        assembly_dsl_path = assembly_meta_filename_path
+        serialized_content = serialize
 
         # if assembly part has assembly level components and nodes, make sure components are always in the first place
         if assembly = serialized_content[:assembly]
@@ -82,22 +81,19 @@ module DTK
       # if any messages to pass end user, this will return a string with the merge_message
       def merge_conflicts?(assembly_instance)
         ret = nil
-        assembly_dsl_path = assembly_meta_filename_path()
+        assembly_dsl_path = assembly_meta_filename_path
         return ret unless file_exists?(assembly_dsl_path)
 
         initial_sha = assembly_instance.get_field?(:service_module_sha)
         current_sha = @service_module_branch[:current_sha]
         return ret if initial_sha.eql?(current_sha)
 
-        unless instance_lock = Assembly::Instance::Lock.get(assembly_instance)
-          Log.info('Legacy can have Assembly::Instance::Lock.get(assembly_instance) be nil')
-          return ret
-        end
+        module_ref_sha = Assembly::Instance::ModuleRefSha.get_for_base_module(assembly_instance)
 
         service_instance_branch = assembly_instance.get_service_instance_branch
         assembly_instance_latest_change = service_instance_branch ? service_instance_branch.get_field?(:updated_at) : (assembly_instance.get_field?(:updated_at) || assembly_instance.get_field?(:created_at))
 
-        return ret unless file_changed_since_specified_sha(initial_sha, assembly_dsl_path, instance_lock, assembly_instance_latest_change)
+        return ret unless file_changed_since_specified_sha(initial_sha, assembly_dsl_path, module_ref_sha, assembly_instance_latest_change)
 
         # move current assembly.yaml and create new one; also notify user
         destination_name = "#{assembly_dsl_path}.dtk-backup"
@@ -108,12 +104,12 @@ module DTK
 
       private
 
-      def file_changed_since_specified_sha(initial_sha, assembly_dsl_path, instance_lock, assembly_instance_latest_change)
+      def file_changed_since_specified_sha(initial_sha, assembly_dsl_path, module_ref_sha, assembly_instance_latest_change)
         service_module_sha_timestamp = @service_module_branch.get_field?(:updated_at)
-        instance_lock_sha_timestamp  = instance_lock[:created_at]
+        module_ref_sha_sha_timestamp  = module_ref_sha[:created_at]
 
-        if service_module_sha_timestamp && instance_lock_sha_timestamp
-          return if service_module_sha_timestamp.to_i <= instance_lock_sha_timestamp.to_i
+        if service_module_sha_timestamp && module_ref_sha_sha_timestamp
+          return if service_module_sha_timestamp.to_i <= module_ref_sha_sha_timestamp.to_i
         end
 
         RepoManager.file_changed_since_specified_sha(initial_sha, assembly_dsl_path, @service_module_branch)
@@ -164,7 +160,7 @@ module DTK
       CachedAdapterClasses = {}
 
       def assembly_meta_filename_path
-        ServiceModule.assembly_meta_filename_path(assembly_hash()[:display_name], @service_module_branch)
+        ServiceModule.assembly_meta_filename_path(assembly_hash[:display_name], @service_module_branch)
       end
 
       def assembly_hash
@@ -206,7 +202,7 @@ module DTK
           if node_components = node_content[:components]
             node_components = node_components.is_a?(Array) ? node_components : [node_components]
             if index = includes_property_component?(node_components)
-              ec2_properties = node_components.delete_at(index)[CommandAndControl.node_property_component()]
+              ec2_properties = node_components.delete_at(index)[CommandAndControl.node_property_component]
               if ec2_attributes = ec2_attributes.is_a?(Hash) && ec2_properties[:attributes]
                 if node_attributes
                   node_attributes.merge!(ec2_attributes)
@@ -220,7 +216,7 @@ module DTK
       end
 
       def includes_property_component?(components)
-        property_component = CommandAndControl.node_property_component()
+        property_component = CommandAndControl.node_property_component
         components.each do |component|
           if component.is_a?(Hash)
             return components.index(component) if component.keys.first.eql?(property_component)

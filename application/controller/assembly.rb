@@ -208,11 +208,6 @@ module DTK
       rest_ok_response AssemblyModule::Component.list_remote_diffs(model_handle(), module_id, repo, module_branch, workspace_branch, opts)
     end
 
-    def rest__get_component_modules
-      assembly = ret_assembly_object()
-      rest_ok_response assembly.get_component_modules(:recursive, get_branch_relationship_info: true)
-    end
-
     # TODO: may be cleaner if we break into list_nodes, list_components with some shared helper functions
     def rest__info_about
       node_id, component_id, attribute_id, detail_level, detail_to_include = ret_request_params(:node_id, :component_id, :attribute_id, :detail_level, :detail_to_include)

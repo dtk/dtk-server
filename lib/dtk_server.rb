@@ -25,4 +25,6 @@ module DTK
   require_relative('repo_manager')
   require_relative('config_agent')
   require_relative('response_info')
+  require_relative('locked_module_refs')
+  require_relative('dependent_module')
 end

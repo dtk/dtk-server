@@ -20,9 +20,10 @@ module DTK
     # Mixins must go first
     require_relative('common_module/mixin')
     require_relative('common_module/class_mixin')
+    require_relative('common_module/module_repo_info')
+    # module_repo_info must be before service_instance
     require_relative('common_module/remote')
     require_relative('common_module/import') #TODO: should this be removed or have name changed after fully port to new client
-    require_relative('common_module/module_repo_info')
     require_relative('common_module/update')
     require_relative('common_module/info')
     require_relative('common_module/service_instance')
@@ -74,7 +75,7 @@ module DTK
     def self.module_versions(project, namespace, module_name, opts = Opts.new)
       modules = list(opts.merge(project_idh: project.id_handle, remove_assembly_branches: true))
       matching_module = modules.find { |mod| mod[:display_name].eql?("#{namespace}:#{module_name}") }
-      if versions = matching_module[:versions]
+      if versions = matching_module && matching_module[:versions]
         versions_array = versions.split(',')
         matching_module[:versions] = versions_array
       end
@@ -109,11 +110,8 @@ module DTK
 
     # opts can have keys:
     #  :ret_remote_info
-    def self.exists(project, module_type, namespace, module_name, version, opts = {})
-      if matching_module = get_class_from_module_type(module_type).matching_module_with_module_branch?(project, namespace, module_name, version)
-# TODO: DTK-2852: for testing
-# allows ecists to go throw without repo so then the create repo from module called
-#matching_module[:module_branch][:repo_id] = nil
+    def self.exists(project, namespace, module_name, version, opts = {})
+      if matching_module = matching_module_with_module_branch?(project, namespace, module_name, version)
         ModuleRepoInfo.new(matching_module[:module_branch], ret_remote_info: opts[:ret_remote_info])
       end
     end

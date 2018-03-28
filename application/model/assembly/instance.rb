@@ -31,7 +31,8 @@ module DTK; class  Assembly
     require_relative('instance/exec_delete')
     require_relative('instance/service_setting')
     require_relative('instance/node_status')
-    require_relative('instance/lock')
+    require_relative('instance/module_ref_sha')
+
     require_relative('instance/dsl_location')
 
     include ComponentLink::Mixin
@@ -49,6 +50,7 @@ module DTK; class  Assembly
     extend NodeStatusClassMixin
     include NodeStatusToFixMixin
     include DSLLocation::Mixin
+
     ACTION_DELIMITER = '.'
 
     # opts can have keys:
@@ -95,7 +97,8 @@ module DTK; class  Assembly
     end
 
     def component_module_refs
-      @component_module_refs ||= get_component_module_refs
+      # TODO: DTK-3366; change @component_module_refs to @dependent_module_refs
+      @component_module_refs ||= get_common_module_locked_module_refs
     end
 
     def get_info__flat_list(opts = {})
@@ -179,7 +182,7 @@ module DTK; class  Assembly
         if opts[:update_dsl]
           service_instance_branch = AssemblyModule::Service.get_service_instance_branch(self)
           RepoManager::Transaction.reset_on_error(service_instance_branch) do 
-            CommonDSL::Generate::ServiceInstance.generate_dsl(self, service_instance_branch)
+            CommonDSL::Generate::ServiceInstance.generate_dsl_and_push!(self, service_instance_branch)
           end
           return CommonModule::ModuleRepoInfo.new(service_instance_branch)
         end

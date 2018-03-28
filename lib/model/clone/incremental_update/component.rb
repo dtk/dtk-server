@@ -82,18 +82,12 @@ module DTK; class Clone
          !cmp.get_field?(:locked_sha).nil?
       end
 
-      # opts can have keys:
-      #   
       def get_instance_template_links(cmps, opts = {})
         ret = InstanceTemplate::Links.new()
         component_types = cmps.map { |cmp| cmp.get_field?(:component_type) }.uniq
-        version_field = @module_branch.get_field?(:version)
-        match_el_array = component_types.map do |ct|
-          DTK::Component::Template::MatchElement.new(
-           component_type: ct,
-           version_field: version_field
-          )
-        end
+        version_field   = @module_branch.get_field?(:version)
+        match_el_array  = component_types.map { |component_type| DTK::Component::Template::MatchElement.new(component_type, version_field) }
+
         ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(@project_idh, match_el_array, opts).inject({}) do |h, r|
           h.merge(r[:component_type] => r)
         end

@@ -16,12 +16,19 @@
 # limitations under the License.
 #
 {
-  schema: :component,
-  table: :assembly_instance_lock,
+  schema: :module,
+  table: :module_ref_sha,
   columns: {
-    module_name: { type: :varchar, size: 30 },
-    module_namespace: { type: :varchar, size: 30 },
-    service_module_sha: { type: :varchar, size: 50 }
+    sha: { type: :varchar, size: 50 },
+    repo_name: { type: :varchar, size: 50 },
+    branch_name: { type: :varchar, size: 50 },
+    module_name: { type: :varchar, size: 50 },
+    module_branch_id: {
+      type: :bigint,
+      foreign_key_rel_type: :module_branch,
+      on_delete: :cascade,
+      on_update: :cascade
+    },
   },
   many_to_one: [:component], #this is an assembly
 }

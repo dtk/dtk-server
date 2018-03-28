@@ -15,13 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-{
-  schema: :module,
-  table: :module_ref_lock,
-  columns: {
-    module_name: { type: :varchar, size: 30 },
-    info: { type: :json },
-    locked_branch_sha: { type: :varchar, size: 50 }
-  },
-  many_to_one: [:component], #this is an assembly
-}
+module DTK
+  class LockedModuleRefs
+    class ServiceInstance < self
+      # require_relative('service_instance/element')
+
+      def self.create_from_common_module_refs(base_module_branch, new_service_instance_module_branch)
+        base_module_refs = CommonModule.get_module_refs(base_module_branch)
+        ModuleRef.create_or_update(new_service_instance_module_branch, base_module_refs.module_refs_array)
+        # TODO: DTK-3366: also do do Element.create_or_update(new_service_instance_module_branch, base_module_refs.module_refs_array)
+      end
+    end
+  end
+end

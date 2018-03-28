@@ -149,7 +149,8 @@ module DTK
     end
 
     def delete_module_ref_locks
-      ModuleRefs::Lock.create_or_update(self)
+      fail "TODO: DCTK-3366: think this is wrong"
+      # ModuleRefs::Lock.create_or_update(self)
     end
 
     AssemblyFields = {

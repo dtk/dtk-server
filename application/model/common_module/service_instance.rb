@@ -18,22 +18,58 @@
 module DTK
   class CommonModule
     class ServiceInstance < AssemblyModule::Service
+      require_relative('service_instance/repo_info')
+
       # opts can have keys
       #   :add_nested_modules
-      def self.create_service_instance_and_nested_modules(assembly_instance, opts = {})
-        new(assembly_instance).create_service_instance_and_nested_modules(opts)
+      #   :delete_existing_branch
+      #   :version
+      def initialize(assembly_instance, opts = {})
+        super(assembly_instance)
+        @base_version       = opts[:version]
+        @base_module_branch = get_or_create_module_for_service_instance(delete_existing_branch: opts[:delete_existing_branch], version: opts[:version])
+        @add_nested_modules = opts[:add_nested_modules]
       end
-      def create_service_instance_and_nested_modules(opts = {})
-        service_module_branch = get_or_create_module_for_service_instance(opts.merge(delete_existing_branch: true))
-        CommonDSL::Generate::ServiceInstance.generate_dsl(self, service_module_branch) do 
-          create_nested_modules_dsl_and_objects(service_module_branch) if opts[:add_nested_modules]
+
+      attr_reader :base_module_branch
+
+      # Returns CommonModule::ServiceInstance::RepoInfo
+      # opts can have keys
+      #   :add_nested_modules
+      #   :version
+      def self.create_service_instance_and_nested_modules(assembly_instance, opts = {})
+        create_opts = {
+          add_nested_modules: opts[:add_nested_modules], 
+          delete_existing_branch: true,
+          version: opts[:version]
+        }
+        new(assembly_instance, create_opts).create_service_instance_and_nested_modules
+      end
+      def create_service_instance_and_nested_modules
+        process_base_module
+        service_instance_repo_info = RepoInfo.new(self.base_module_branch)
+        if self.add_nested_modules?
+          self.aug_dependent_base_module_branches.each do |aug_base_module_branch|
+            aug_nested_module_branch = process_nested_module(aug_base_module_branch)
+            service_instance_repo_info.add_nested_module_info!(aug_nested_module_branch)
+          end
         end
-        ModuleRepoInfo.new(service_module_branch)
+
+        service_instance_repo_info
       end
 
       # Returns an augmented module branch pointing to module branch for nested mdoule
-      def get_or_create_for_nested_module(component_module, base_version)
-        AssemblyModule::Component.new(assembly_instance).create_module_for_service_instance?(component_module, base_version: base_version, ret_augmented_module_branch: true)
+      # opts can have keys
+      #   :donot_update_model
+      #   :delete_existing_branch
+      def get_or_create_for_nested_module(component_module, base_version, opts = {})
+        create_opts = {
+          donot_update_model: opts[:donot_update_model],
+          delete_existing_branch: opts[:delete_existing_branch],
+          base_version: base_version, 
+          ret_augmented_module_branch: true
+        }
+        AssemblyModule::Component.new(self.assembly_instance).create_module_for_service_instance?(component_module, create_opts) 
       end
 
       def self.delete_from_model_and_repo(assembly_instance)
@@ -50,37 +86,84 @@ module DTK
         Assembly::Instance.delete(assembly_instance.id_handle, delete_opts)
       end
 
-      def get_dsl_locations
-        assembly_instance.get_dsl_locations
-      end
-
-      def get_repo_info
-        module_repo_info = ModuleRepoInfo.new(get_service_instance_branch)
-        # TODO: do we need 'self' in self.assembly_instance
-        assembly_instance = self.assembly_instance
+      def get_base_module_repo_info
+        module_repo_info = ModuleRepoInfo.new(self.base_module_branch)
         {
           service: {
-            name: assembly_instance.display_name_print_form,
-            id: assembly_instance.id
+            name: self.assembly_instance.display_name_print_form,
+            id: self.assembly_instance.id
           }
         }.merge(module_repo_info)
       end
 
-      def aug_component_module_branches(opts = {})
-        return reload_aug_component_module_branches if opts[:reload]
-        @aug_dependent_module_branches ||= reload_aug_component_module_branches
+      def get_dsl_locations
+        self.assembly_instance.get_dsl_locations
+      end
+
+      protected
+
+      attr_reader :base_version
+
+      def add_nested_modules?
+        @add_nested_modules
+      end
+
+      def aug_dependent_base_module_branches
+        @aug_dependent_base_module_branches ||= DependentModule.get_aug_base_module_branches(self.assembly_instance)
+      end
+
+      def service_module_name
+        @service_module_name ||= self.service_module.display_name
+      end
+      
+      def service_module_namespace
+        @service_module_namespace ||= self.service_module[:namespace].display_name
       end
 
       private
 
-      def reload_aug_component_module_branches
-        ModuleRefs::Lock.get_corresponding_aug_module_branches(assembly_instance, augment_with_component_modules: true)
+      def process_base_module
+        add_to_base_module_branch__dsl_file
+        add_to_base_module_branch__gitignore
+        RepoManager.push_changes(self.base_module_branch)
+        self.base_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
+        Assembly::Instance::ModuleRefSha.create_for_base_module(self.assembly_instance, self.base_module_branch.augmented_module_branch)
       end
 
-      def create_nested_modules_dsl_and_objects(service_module_branch)
-        CommonDSL::ComponentModuleRepoSync.pull_from_component_modules(service_module_branch, aug_component_module_branches)
+      def add_to_base_module_branch__dsl_file
+        CommonDSL::Generate::ServiceInstance.add_service_dsl_files(self, self.base_module_branch)
       end
-      
+
+      def add_to_base_module_branch__gitignore
+        file_path__content_array = [ {path: '.gitignore', content: gitignore_content }] 
+        CommonDSL::Generate::DirectoryGenerator.add_files(self.base_module_branch, file_path__content_array, donot_push_changes: true)
+      end
+
+      def process_nested_module(aug_nested_base_module_branch)
+        component_module = aug_nested_base_module_branch.component_module
+        base_version     = aug_nested_base_module_branch.version
+        # creating new branch, but no need to update the model
+        get_or_create_opts = {
+          donot_update_model: true,
+          delete_existing_branch: true
+        }
+        aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
+        CommonDSL::NestedModuleRepo.update_repo_for_stage(aug_nested_module_branch)
+        Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
+        aug_nested_module_branch
+      end
+
+      def gitignore_content
+        CommonDSL::DirectoryType::ServiceInstance::NestedModule.possible_paths.inject('') do |s, possible_module_dir|
+          # only put in git ignore if possible_module_dir is not part of base module
+          directory_exists_in_module?(possible_module_dir)  ? s : s + "#{possible_module_dir.gsub('/','')}/\n"
+        end
+      end
+
+      def directory_exists_in_module?(dir)
+        RepoManager.file_exists?(dir, self.base_module_branch) 
+      end
+
     end
   end
 end

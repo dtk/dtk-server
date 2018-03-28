@@ -26,15 +26,17 @@ module DTK
 
      # opts can have keys
      #  :impacted_files - array
-     def self.matching_common_module_top_dsl_file_obj?(module_branch, opts = {})
-       DirectoryParser.matching_file_obj?(FileType::CommonModule::DSLFile::Top, module_branch, impacted_files: opts[:impacted_files])
+     def self.matching_dsl_file_obj?(type, module_branch, opts = {})
+       unless file_type_klass = MAPPING_TO_CLASS[type]
+         fail Error, "Illegal dsl type '#{type}'"
+       end
+       DirectoryParser.matching_file_obj?(file_type_klass, module_branch, impacted_files: opts[:impacted_files])
      end
-
-     # opts can have keys
-     #  :impacted_files - array
-     def self.matching_service_instance_top_dsl_file_obj?(module_branch, opts = {})
-       DirectoryParser.matching_file_obj?(FileType::ServiceInstance::DSLFile::Top, module_branch, impacted_files: opts[:impacted_files])
-     end
+     MAPPING_TO_CLASS = {
+       common_module: FileType::CommonModule::DSLFile::Top,
+       service_instance: FileType::ServiceInstance::DSLFile::Top,
+       module_refs_lock: FileType::ModuleRefsLock::DSLFile::Top
+     }
 
      def self.set_dsl_version!(module_branch, parsed_common_module)
        module_branch.set_dsl_version!(parsed_common_module.req(:DSLVersion))

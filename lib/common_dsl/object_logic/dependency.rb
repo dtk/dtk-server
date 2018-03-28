@@ -28,9 +28,8 @@ module DTK
         end
         
         def generate_content_input!(assembly_instance)
-          # TODO: use a get method rather than info_about which is a 'list' method
-          dependent_modules     = assembly_instance.info_about(:modules, Opts.new(detail_to_include: [:version_info]))
-          dependency_info_array = dependent_modules.map { |dep| DependencyInfo.new(dep[:namespace_name], dep[:display_name], dep[:display_version]) }
+          module_refs_array     = assembly_instance.get_dependent_module_refs_array
+          dependency_info_array = module_refs_array.map { |ref| DependencyInfo.new(ref[:namespace_info], ref[:module_name], ref[:version_info]) }
           
           set_id_handle(assembly_instance)
           generate_content_input_aux!(dependency_info_array)

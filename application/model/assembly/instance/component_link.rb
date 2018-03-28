@@ -66,7 +66,7 @@ module DTK
           service_instance_branch = AssemblyModule::Service.get_service_instance_branch(self)
           return if service_instance_branch.nil?
           RepoManager::Transaction.reset_on_error(service_instance_branch) do 
-            CommonDSL::Generate::ServiceInstance.generate_dsl(self, service_instance_branch)
+            CommonDSL::Generate::ServiceInstance.generate_dsl_and_push!(self, service_instance_branch)
           end
           CommonModule::ModuleRepoInfo.new(service_instance_branch)
         end

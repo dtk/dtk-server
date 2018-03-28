@@ -22,33 +22,27 @@ module DTK
       module Component
         module Mixin
           # aug_cmp_template is a component template augmented with keys having objects
-          # :module_branch
-          # :component_module
-          # :namespace
+          #   :module_branch
+          #   :component_module
+          #   :namespace
           # opts can have keys
-          #  :update_workflow
-          #  :auto_complete_links
-          #  :component_title
-          # TODO: are these two below still used (i..e, set from calling function)
-          #  :skip_if_not_found
-          #  :splice_in_delete_action
-          def add_component(node_idh, aug_cmp_template, opts = {})
+          #   :component_title
+          def add_component(node_idh, aug_cmp_template, service_instance, opts = {})
             node = Component.check_node(self, node_idh)
             component = nil          
             Transaction do
               component = node.add_component(aug_cmp_template, component_title: opts[:component_title], detail_to_include: [:component_dependencies]).create_object
-              if opts[:update_workflow]
-                Component.update_workflow(self, node, component, Aux.hash_subset(opts, [:component_title, :skip_if_not_found, :splice_in_delete_action]))
-              end
+              Component.update_workflow(self, node, component, component_title: opts[:component_title]) 
               
-              if opts[:auto_complete_links]
-                LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
-              end
+              LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
 
+              
+              fail "TODO: DTK-3394: implement when add component"
               # need to update module_refs_lock to add new component which will be used below to pull nested component module into service instance if needed
-              ModuleRefs::Lock.create_or_update(self, opts)
+              
+              # ModuleRefs::Lock.create_or_update(self)
 
-              Component.pull_component_module_repos(aug_cmp_template, opts[:service_instance])
+              # Component.pull_component_module_repos(aug_cmp_template, service_instance)
             end
             component.id_handle 
           end
@@ -91,6 +85,7 @@ module DTK
 
         def self.pull_component_module_repos(aug_cmp_template, service_instance)
           if service_instance
+            fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
             existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
             nested_module_name           = aug_cmp_template.component_module.module_name
 
@@ -102,7 +97,8 @@ module DTK
                 end
               end
 
-              CommonDSL::ComponentModuleRepoSync.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
+              fail Error, "TODO: DTK-3366; changed CommonDSL::NestedModuleRepo.pull_from_component_modules to update_repo_for_stage"
+              CommonDSL::NestedModuleRepo.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
             end
           end
         end

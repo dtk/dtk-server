@@ -31,6 +31,7 @@ module DTK; module CommonDSL
 
         # Processes changes to the nested module content and dsl 
         def self.process_nested_module_changes(diff_result, service_instance, service_module_branch, all_impacted_file_paths, opts = {})
+          fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
           ndx_existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
           if nested_modules_info = impacted_nested_modules_info?(service_module_branch, all_impacted_file_paths)
             # Find existing aug_module_branches for service instance nested modules and for each one impacted 
@@ -51,7 +52,9 @@ module DTK; module CommonDSL
           aug_service_specific_mb = @service_instance.get_or_create_for_nested_module(nested_component_module, base_version)
 
           # Push changes to impacted component modules repo
-          ComponentModuleRepoSync.push_to_component_module(@service_module_branch, aug_service_specific_mb, @nested_module_info)
+          fail "TODO: DTK-3366: dont think NestedModuleRepo.push_to_nested_module is needed anymore"
+          # NestedModuleRepo.push_to_nested_module(@service_module_branch, aug_service_specific_mb, @nested_module_info)
+
           # TODO: DTK-2708: until use dtk-dsl to parse nested module dsl; need to do push first since'
           # parsing looks at component module not the service isnatnce repo
           dsl_changed = false

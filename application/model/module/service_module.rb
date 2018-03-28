@@ -26,7 +26,7 @@ module DTK
     include ModuleMixin
     extend DSLClassMixin
     include DSLMixin
-    include ModuleRefs::Mixin
+#    include ModuleRefs::Mixin
 
     ### standard get methods
     def get_assemblies
@@ -47,7 +47,7 @@ module DTK
     end
 
     def assembly_ref(assembly_name, version_field = nil)
-      assembly_ref = Namespace.join_namespace(module_namespace(), "#{module_name()}-#{assembly_name}")
+      assembly_ref = Namespace.join_namespace(module_namespace, "#{module_name}-#{assembly_name}")
       if version_field
         assembly_ref = assembly_ref__add_version(assembly_ref, version_field)
       end
@@ -60,31 +60,6 @@ module DTK
     end
 
     private :assembly_ref__add_version
-
-    def list_component_modules(opts = Opts.new)
-      get_referenced_component_modules(opts).sort { |a, b| a[:display_name] <=> b[:display_name] }
-    end
-
-    def get_referenced_component_modules(opts = Opts.new)
-      # TODO: alternative is to get this by getting the module_refs
-      ret = []
-      cmp_refs = get_referenced_component_refs()
-      return ret if cmp_refs.empty?
-      project = get_project()
-      ret = ComponentRef.get_referenced_component_modules(project, cmp_refs)
-
-      if opts.array(:detail_to_include).include?(:versions)
-        ndx_versions = get_component_module_refs().version_objs_indexed_by_modules()
-
-        ret.each do |mod|
-          if version_obj = ndx_versions[mod.module_name()]
-            mod[:version] = version_obj
-          end
-        end
-      end
-
-      ret
-    end
 
     ### end: get methods
 
@@ -100,7 +75,7 @@ module DTK
     # opts can have keys
     #   :from_common_module
     def delete_object(opts = {})
-      assembly_templates = get_assembly_templates()
+      assembly_templates = get_assembly_templates
 
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
       unless assoc_assemblies.empty?
@@ -113,14 +88,14 @@ module DTK
           end
         fail ErrorUsage, error_msg
       end
-      repos = get_repos()
+      repos = get_repos
       repos.each { |repo| RepoManager.delete_repo(repo) }
       delete_instances(repos.map(&:id_handle))
 
       # need to explicitly delete nodes since nodes' parents are not the assembly
       Assembly::Template.delete_assemblies_nodes(assembly_templates.map(&:id_handle))
 
-      delete_instance(id_handle())
+      delete_instance(id_handle)
       { module_name: module_name }
     end
 
@@ -129,7 +104,7 @@ module DTK
     end
 
     def delete_version(version, opts = {})
-      ret = { module_name: module_name() }
+      ret = { module_name: module_name }
       unless module_branch  = get_module_branch_matching_version(version)
         if opts[:no_error_if_does_not_exist]
           return ret
@@ -139,7 +114,7 @@ module DTK
       end
 
       unless opts[:donot_delete_meta]
-        assembly_templates = module_branch.get_assemblies()
+        assembly_templates = module_branch.get_assemblies
         assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
         unless assoc_assemblies.empty?
           assembly_names = assoc_assemblies.map { |a| a[:display_name] }
@@ -148,13 +123,12 @@ module DTK
         Assembly::Template.delete_assemblies_nodes(assembly_templates.map(&:id_handle))
       end
 
-      CommonDSL::ComponentModuleRepoSync.delete_sync_repo_branch?(module_branch) if opts[:delete_sync_repo_branch]
-      module_branch.delete_instance_and_repo_branch()
+      module_branch.delete_instance_and_repo_branch
       ret
     end
 
     def delete_version_or_module(version)
-      module_branches = get_module_branches()
+      module_branches = get_module_branches
 
       if module_branches.size > 1
         delete_version(version)
@@ -163,14 +137,14 @@ module DTK
           fail ErrorUsage.new("Version '#{version}' for specified module does not exist!") if version
           fail ErrorUsage.new("Base version for specified module does not exist. You have to specify version you want to delete!")
         end
-        delete_object()
+        delete_object
       end
     end
 
-    def delete_versions_except_base()
-      ret = { module_name: module_name() }
+    def delete_versions_except_base
+      ret = { module_name: module_name }
 
-      module_branches = get_module_branches()
+      module_branches = get_module_branches
       module_branches.reject!{ |branch| branch[:version].nil? || branch[:version].eql?('master') }
 
       module_branches.each do |branch|
@@ -181,7 +155,7 @@ module DTK
     end
 
     def get_assembly_instances
-      assembly_templates = get_assembly_templates()
+      assembly_templates = get_assembly_templates
       assoc_assemblies = self.class.get_associated_target_instances(assembly_templates)
 
       assoc_assemblies.each do |assoc_assembly|
@@ -195,7 +169,7 @@ module DTK
       ndx_ret = Assembly::Template.get(model_handle.createMH(:component), opts).inject({}) { |h, r| h.merge(r[:id] => r) }
       # add nodes
       Assembly::Template.get_nodes(ndx_ret.values.map(&:id_handle)).each do |node|
-        unless  node.is_assembly_wide_node?()
+        unless  node.is_assembly_wide_node?
           assembly = ndx_ret[node[:assembly_id]]
           (assembly[:nodes] ||= []) << node
         end
@@ -207,10 +181,10 @@ module DTK
       sp_hash = {
         cols: [:module_branches]
       }
-      mb_idhs = get_objs(sp_hash).map { |r| r[:module_branch].id_handle() }
+      mb_idhs = get_objs(sp_hash).map { |r| r[:module_branch].id_handle }
       opts.merge!(filter: [:oneof, :module_branch_id, mb_idhs.map(&:get_id)])
-      if project = get_project()
-        opts.merge!(project_idh: project.id_handle())
+      if project = get_project
+        opts.merge!(project_idh: project.id_handle)
       end
       self.class.get_assembly_templates(model_handle, opts)
     end
@@ -242,14 +216,14 @@ module DTK
     def info_about(about)
       case about
        when 'assembly-templates'.to_sym
-        mb_idhs = get_objs(cols: [:module_branches]).map { |r| r[:module_branch].id_handle() }
+        mb_idhs = get_objs(cols: [:module_branches]).map { |r| r[:module_branch].id_handle }
         opts = {
           filter: [:oneof, :module_branch_id, mb_idhs.map(&:get_id)],
           detail_level: 'nodes',
           no_module_prefix: true
         }
-        if project = get_project()
-          opts.merge!(project_idh: project.id_handle())
+        if project = get_project
+          opts.merge!(project_idh: project.id_handle)
         end
         Assembly::Template.list(model_handle(:component), opts)
       when :components
@@ -265,11 +239,11 @@ module DTK
       }
       sm_branch_info = get_objs(mh, sp_hash)
 
-      ndx_targets = get_ndx_targets(sm_branch_info.map { |r| r[:module_branch].id_handle() })
+      ndx_targets = get_ndx_targets(sm_branch_info.map { |r| r[:module_branch].id_handle })
       mb_idhs = []
       ndx_ret = sm_branch_info.inject({}) do |h, r|
         module_branch = r[:module_branch]
-        mb_idhs << module_branch.id_handle()
+        mb_idhs << module_branch.id_handle
         mb_id = module_branch[:id]
         content = SimpleOrderedHash.new(
          [
@@ -308,7 +282,7 @@ module DTK
       # TODO: right now: putting in all targets for all service modules;
       ret = []
       return ret if sm_branch_idhs.empty?
-      sm_branch_mh = sm_branch_idhs.first.createMH()
+      sm_branch_mh = sm_branch_idhs.first.createMH
       all_targets = Target.list(sm_branch_mh).map do |r|
         SimpleOrderedHash.new([{ name: r[:display_name] }, { id: r[:id] }, { description: r[:description] }])
       end
@@ -319,7 +293,7 @@ module DTK
 
     # TODO DTK-2587: deprecate for Module::Service.find_from_id? and Module::Service.find_from_name?
     def self.find(mh, name_or_id, library_idh = nil)
-      lib_filter = library_idh && [:and, :library_library_id, library_idh.get_id()]
+      lib_filter = library_idh && [:and, :library_library_id, library_idh.get_id]
       sp_hash = {
         cols: [:id, :display_name, :library_library_id]
       }
@@ -378,16 +352,16 @@ module DTK
 
     # returns the new module branch
     def create_new_version__type_specific(repo_for_new_branch, new_version, opts = {})
-      project = get_project()
+      project = get_project
       repo_idh = repo_for_new_branch.id_handle
-      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project, repo_idh, module_name(), new_version, module_namespace_obj, opts)
+      module_and_branch_info = self.class.create_ws_module_and_branch_obj?(project, repo_idh, module_name, new_version, module_namespace_obj, opts)
       module_branch_idh = module_and_branch_info[:module_branch_idh]
       module_branch_idh.create_object
     end
 
     # Returns DTK::ModuleDSLInfo object
     def update_model_from_clone_changes(_commit_sha, diffs_summary, module_branch, version, opts = {})
-      ret = ModuleDSLInfo.new()
+      ret = ModuleDSLInfo.new
       if version.is_a?(ModuleVersion::AssemblyModule)
         assembly = version.get_assembly(model_handle(:component))
         error_or_nil = update_model_from_dsl__assembly_module(assembly,module_branch, diffs_summary, opts)
@@ -421,7 +395,7 @@ module DTK
 
     def publish_preprocess_raise_error?(module_branch_obj)
       # unless get_field?(:dsl_parsed)
-      unless module_branch_obj.dsl_parsed?()
+      unless module_branch_obj.dsl_parsed?
         fail ErrorUsage.new('Unable to publish module that has parsing errors. Please fix errors and try to publish again.')
       end
 
@@ -430,7 +404,7 @@ module DTK
       pp [:debug_publish_preprocess_raise_error, :module_info, module_info]
       # check that all component modules are linked to a remote component module
       #       # TODO: ModuleBranch::Location: removed linked_remote; taking out this check until have replacement
-      #       unlinked_mods = module_info.reject{|r|r[:repo].linked_remote?()}
+      #       unlinked_mods = module_info.reject{|r|r[:repo].linked_remote?}
       #       unless unlinked_mods.empty?
       #         raise ErrorUsage.new("Cannot export a service module that refers to component modules (#{unlinked_mods.map{|r|r[:display_name]}.join(",")}) not already exported")
       #       end

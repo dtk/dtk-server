@@ -88,8 +88,6 @@ module DTK; class Assembly::Instance
         when :nodes
           opts.merge!(cols: Node.common_columns + [:target])
           list_nodes(opts)
-        when :modules
-          list_component_modules(opts)
         when :tasks
           list_tasks(opts)
         else
@@ -111,43 +109,16 @@ module DTK; class Assembly::Instance
         end
       end
 
-      def list_component_modules(opts = Opts.new)
-        opts_get = {}
-        if get_branch_relationship_info = opts.array(:detail_to_include).include?(:version_info)
-          opts.set_datatype!(:assembly_component_module)
-          opts_get.merge!(get_branch_relationship_info: true)
+      def list_dependent_modules
+        unsorted_ret = DependentModule.get_aug_base_module_branches(self).map do |aug_branch|
+          {
+            id: aug_branch[:component_id], # component module id
+            full_name: "#{aug_branch[:namespace]}:#{aug_branch[:module_name]}",
+            display_version: aug_branch[:version]
+          }
         end
-
-        unsorted_ret = get_component_modules(:recursive, opts_get)
-        unsorted_ret.each do |r|
-          module_branch = r[:module_branch]
-          version       = module_branch[:version] if module_branch
-          r[:full_name] = "#{r[:namespace_name]}:#{r[:display_name]}"
-
-          if version.eql?('master') || version.match(/\A\d{1,2}\.\d{1,2}\.\d{1,2}\Z/)
-            r[:display_version] = version
-          else
-            if ancestor_version = (module_branch.get_ancestor_branch?||{})[:version]
-              r[:display_version] = ancestor_version
-            end
-          end
-
-          if get_branch_relationship_info
-            if r[:local_copy]
-              if module_branch[:frozen]
-                r[:update_saved] = "n/a"
-              else
-                branch_relationship     = r[:branch_relationship] || ''
-                local_ahead_or_branchpt = branch_relationship.eql?(:local_ahead) || branch_relationship.eql?(:branchpoint)
-                r[:update_saved] = !(r[:local_copy_diff] && local_ahead_or_branchpt)
-              end
-            end
-          end
-        end
-
-        unsorted_ret.sort { |a, b| a[:display_name] <=> b[:display_name] }
+        unsorted_ret.sort { |a, b| a[:full_name] <=> b[:full_name] }
       end
-
 
       def list_components(opts = Opts.new)
         aug_cmps      = get_augmented_components(opts)

@@ -17,9 +17,6 @@
 #
 module DTK
   class ComponentModule < BaseModule
-    require_relative('component_module/get')
-    include Get::Mixin
-
     def self.model_type
       :component_module
     end

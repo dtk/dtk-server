@@ -27,6 +27,7 @@ module DTK; module ModuleCommonMixin
     #  :add_remote_files_info - subclass of DTK::RepoManager::AddRemoteFilesInfo
     #  :create_implementation - Boolean (default: false)
     #  :has_remote_repo - Boolean (default: false)
+    #  :donot_push_to_repo_manager
     #  :common_module - TODO: see if this is needed and instead use module_type from local_params
     def create_module(project, local_params, opts = {})
       local       = local_params.create_local(project)
@@ -54,16 +55,8 @@ module DTK; module ModuleCommonMixin
             # or pick right branch
 
             # base_branch just needs to be a random branch on module_obj
-
-            # make sure that base_branch has repo_id
-            # TODO: is this protection needed because testing bad state db or needed in normal cases
-            module_branches    = module_obj.get_module_branches
-            unless base_branch = module_branches.select{ |module_branch| module_branch[:repo_id] }.first
-              base_branch = module_branches.first
-              base_branch[:repo_id] = repo.id
-            end
-
-            RepoManager.add_branch_and_push?(local.branch_name, add_branch_opts, base_branch)
+            base_branch = module_obj.get_module_branches.first
+            RepoManager.add_branch_and_push?(local.branch_name, add_branch_opts, base_branch) unless opts[:donot_push_to_repo_manager]
             repo.create_subclass_obj(:repo_with_branch)
           else
             create_module__create_repo(local, opts)
@@ -86,9 +79,14 @@ module DTK; module ModuleCommonMixin
       opts_info = { version: local.version, module_namespace: local.namespace }
       module_and_branch_info.merge(module_repo_info: module_repo_info(local_repo_obj, module_and_branch_info, opts_info))
     end
-
+    
     def create_module__create_repo(local, opts = {})
-      create_repo_opts = Aux.hash_subset(opts, [:no_initial_commit, :add_remote_files_info]).merge(delete_if_exists: true)
+      create_repo_opts = {
+        no_initial_commit:  opts[:no_initial_commit],
+        add_remote_files_info:  opts[:add_remote_files_info],
+        donot_push_to_repo_manager: opts[:donot_push_to_repo_manager],
+        delete_if_exists: true
+      }
       create_repo(local, create_repo_opts)
     end
     private :create_module__create_repo
@@ -97,23 +95,26 @@ module DTK; module ModuleCommonMixin
     #   :no_initial_commit
     #   :add_remote_files_info
     #   :delete_if_exists
+    #   :donot_push_to_repo_manager
     def create_repo(local, opts = {})
       project_idh = local.project.id_handle
-
-      create_opts = {
-        create_branch: local.branch_name,
-        donot_create_master_branch: true,
-        delete_if_exists: opts[:delete_if_exists],
-        # TODO: dont think key 'namespace_name' is used
-        namespace_name: local.namespace
-      }
-      create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
-
-      if add_remote_files_info = opts[:add_remote_files_info]
-        create_opts.merge!(add_remote_files_info: add_remote_files_info)
+      if opts[:donot_push_to_repo_manager]
+        Repo::WithBranch.create_obj?(project_idh.createMH(:repo), local)
+      else
+        create_opts = {
+          create_branch: local.branch_name,
+          donot_create_master_branch: true,
+          delete_if_exists: opts[:delete_if_exists],
+          # TODO: dont think key 'namespace_name' is used
+          namespace_name: local.namespace
+        }
+        create_opts.merge!(push_created_branch: true) unless opts[:no_initial_commit]
+        
+        if add_remote_files_info = opts[:add_remote_files_info]
+          create_opts.merge!(add_remote_files_info: add_remote_files_info)
+        end
+        Repo::WithBranch.create_actual_repo(project_idh, local, create_opts)
       end
-      repo_user_acls = RepoUser.authorized_users_acls(project_idh)
-      Repo::WithBranch.create_workspace_repo(project_idh, local, repo_user_acls, create_opts)
     end
 
     # opts can have keys
@@ -203,6 +204,7 @@ module DTK; module ModuleCommonMixin
     #   :delete_existing_branch (Boolean; default: false)
     #   :frozen
     #   :inherit_frozen_from_base
+    #   :donot_update_model
     def create_new_version(base_version, new_version, opts = {})
       unless aug_base_branch = get_augmented_module_branch_with_version(base_version)
         fail ErrorUsage.new("There is no module (#{pp_module_ref}) in the workspace")
@@ -220,7 +222,8 @@ module DTK; module ModuleCommonMixin
         ancestor_branch_idh: aug_base_branch.id_handle, 
         current_sha: new_version_sha, 
         new_branch_name: new_branch_name,
-        dsl_version: aug_base_branch.dsl_version
+        dsl_version: aug_base_branch.dsl_version,
+        donot_update_model: opts[:donot_update_model]                                             
       )
 
       if opts[:inherit_frozen_from_base]
@@ -228,7 +231,7 @@ module DTK; module ModuleCommonMixin
       end
 
       new_module_branch = create_new_version__type_specific(new_version_repo, new_version, opts_type_specific_create)
-      ModuleRefs.clone_component_module_refs(aug_base_branch, new_module_branch)
+      LockedModuleRefs::ServiceInstance.create_from_common_module_refs(aug_base_branch, new_module_branch)
       new_module_branch
     end
   end

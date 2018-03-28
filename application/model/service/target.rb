@@ -38,6 +38,7 @@ module DTK
       # opts can have keys
       #   :project (required)
       #   :service_module
+      #   :version
       #   :no_auto_complete - Boolean (default: false)
       #   :add_nested_modules - Boolean (default: false)
       def self.stage_base_service(service_name, assembly_template, opts = Opts.new)
@@ -54,6 +55,7 @@ module DTK
       # opts can have keys
       #   :project
       #   :service_module
+      #   :version
       #   :no_auto_complete - Boolean (default: false)
       #   :add_nested_modules - Boolean (default: false)
       def self.stage_service(service_name, assembly_template, context_assembly_instances, opts = Opts.new)
@@ -89,7 +91,7 @@ module DTK
       private
 
       def self.common_stage_opts
-        Opts.new(donot_create_modules: true, ret_auto_complete_results: true)
+        Opts.new(ret_auto_complete_results: true)
       end
 
       def self.isa_target_assembly_instance?(assembly_instance)

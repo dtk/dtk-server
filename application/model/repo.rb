@@ -34,6 +34,11 @@ module DTK
       self[:local_dir].gsub(/\/[^\/]+$/, '')
     end
     ####
+
+    def repo_name
+      @repo_name ||= get_field?(:repo_name) || fail(Error, "Unexpected that field :repo_name is nil")
+    end
+
     def self.get_all_repo_names(model_handle)
       get_objs(model_handle, cols: [:repo_name]).map { |r| r[:repo_name] }
     end

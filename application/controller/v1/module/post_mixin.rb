@@ -96,6 +96,7 @@ module DTK
       end
 
       def install_component_info
+        fail "TODO: DTK-3366: this route should not be called"
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)
 
@@ -107,6 +108,7 @@ module DTK
       end
 
       def install_service_info
+        fail "TODO: DTK-3366: this route should not be called"
         namespace, module_name, rsa_pub_key = required_request_params(:namespace, :module_name, :rsa_pub_key)
         version = request_params(:version)
 
@@ -174,8 +176,7 @@ module DTK
         remote_params = remote_params_dtkn(:component_module, namespace, module_name, version)
         local_params  = local_params(:component_module, module_name, namespace: namespace, version: version)
 
-        # temporary solution where component-module can exist without common_module repo so we need to create it
-        if common_module = CommonModule.exists(get_default_project, :common_module, namespace, module_name, version)
+        if common_module = CommonModule.exists(get_default_project, namespace, module_name, version)
           unless common_module[:repo]
             common_local_params = local_params(:common_module, module_name, namespace: namespace, version: version)
             CommonModule.create_repo_from_component_info(get_default_project, common_local_params, dont_set_dsl_parsed: true)

@@ -101,7 +101,8 @@ module DTK
                         $port_numbers.push(dtk_debug_port)
                       end
 
-                      byebug_host_port_ref = ($public_dns.nil? ? $port_number : "#{$public_dns.join(", ")}:#{$port_number}")
+                      byebug_host_port_ref = ($public_dns.nil? ? $port_number : "#{$public_dns.join(", ")}#{$port_number}")
+
                       if action[:node].node_group_member?
                         msg = "Please use 'byebug -R' with this information to debug: "
                         if $port_numbers.length > 1
@@ -114,7 +115,12 @@ module DTK
                         $port_msg_hash = { info: "Please use 'byebug -R #{byebug_host_port_ref}' to debug current action." }
                       end
 
-                      task.add_event(:info, $port_msg_hash) unless $port_msg_hash[:data].empty?
+                      # In case there is a multinode $port_msg_hash contains :data key
+                      if $port_msg_hash[:data].nil? 
+                        task.add_event(:info, $port_msg_hash)
+                      else
+                        task.add_event(:info, $port_msg_hash) unless $port_msg_hash[:data].empty?
+                      end
                     else
                     $public_dns = nil
                       $port_number = nil

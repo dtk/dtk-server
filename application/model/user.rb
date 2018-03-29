@@ -54,6 +54,7 @@ module XYZ
       password = hash[:password]
       model_handle = ModelHandle.new(hash[:c], :user)
       if user = get_user(model_handle, username)
+        
         user if user.authenticated?(password)
       end
     end
@@ -151,7 +152,8 @@ module XYZ
       return nil if rows.empty?
       # all rows will be same except for on :user_group and :user_group_relation cols
       group_ids = rows.map { |r| (r[:user_group] || {})[:id] }.compact
-      rows.first.reject { |k, _v| [:user_group, :user_group_relation].include?(k) }.merge(group_ids: group_ids)
+      filtered_rows = rows.first.reject! { |k, _v| [:user_group, :user_group_relation].include?(k) }
+      filtered_rows.merge(group_ids: group_ids)
     end
 
     JSON_FIELDS = [:c, :id, :username, :password, :group_ids, :default_namespace]

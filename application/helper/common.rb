@@ -61,7 +61,8 @@ module Ramaze::Helper
     end
 
     def model_handle(model_name_x = model_name())
-      user_obj = user_object()
+      # Ruby 2.2: Hardcode 'dtk1' user and get it straight from the database
+      user_obj = user_object() || XYZ::User.get_user(ModelHandle.new(ret_session_context_id(), :user), 'dtk1')
       ModelHandle.create_from_user(user_obj, model_name_x)
     end
 

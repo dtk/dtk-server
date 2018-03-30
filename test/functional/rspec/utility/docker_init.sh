@@ -27,8 +27,8 @@ if [[ -z $2 ]]; then
     exit 1
 fi
 
-DTK_IMAGE=getdtk/dtk-server
-ARBITER_IMAGE=getdtk/dtk-arbiter
+DTK_IMAGE=DTK_IMAGE=${DTK_IMAGE-getdtk/dtk-server}
+ARBITER_IMAGE=${ARBITER_IMAGE-getdtk/dtk-arbiter}
 REPO_HOST=dtknet.servicecatalog.it
 REPO_PORT=7001
 MCO_PORT=6163

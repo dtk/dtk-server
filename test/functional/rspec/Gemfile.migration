@@ -16,9 +16,9 @@ gem 'parallel_tests', '1.0.9'
 gem 'rspec2db', :github => 'ATLANTBH/rspec'
 gem 'mime-types', '>=1.16'
 gem 'dtk-dsl', :git => 'git@github.com:dtk/dtk-dsl.git'
-gem 'dtk-client', :git => 'git@github.com:dtk/dtk-client.git', :branch => "DTK-3423"
-gem 'dtk-network-client', :git => 'git@github.com:dtk/dtk-network-client.git', :branch => "DTK-3423"
-gem 'dtk-common-core', :git => 'https://github.com/dtk/dtk-common-core.git', :branch => "DTK-3366"
+gem 'dtk-client', :git => 'git@github.com:dtk/dtk-client.git'
+gem 'dtk-network-client', :git => 'git@github.com:dtk/dtk-network-client.git'
+gem 'dtk-common-core', :git => 'https://github.com/dtk/dtk-common-core.git'
 gem 'poltergeist'
 gem 'rack', '1.6.4'
 gem 'json'

@@ -10,13 +10,13 @@ GIT
 
 GIT
   remote: git@github.com:dtk/dtk-client.git
-  revision: 199f4775303f5200b2bc3447d39d8d757d532c50
-  branch: DTK-3423
+  revision: b9d01b3b28696c87ab4031ff4bc13c071d935209
   specs:
-    dtk-client (0.11.6)
+    dtk-client (0.11.8)
       colorize (= 0.7.7)
-      dtk-common-core (= 0.11.0)
+      dtk-common-core (= 0.11.1)
       dtk-dsl (~> 1.1.0)
+      dtk-network-client (~> 1.0.0)
       git (= 1.2.9)
       gli (= 2.13.4)
       highline (= 1.7.8)
@@ -25,17 +25,17 @@ GIT
 
 GIT
   remote: git@github.com:dtk/dtk-dsl.git
-  revision: d88c3e19a823010589fc155129be75f1603f18fc
+  revision: 6ceded68becc6208917fd4299663ca3bec3b6198
   specs:
-    dtk-dsl (1.1.2)
+    dtk-dsl (1.1.3)
 
 GIT
   remote: git@github.com:dtk/dtk-network-client.git
-  revision: 711fa7011287092ff95020f54603ae2b2f2838f6
-  branch: DTK-3423
+  revision: ab59be2f89d7067d24c379cb5395cd9e820aaccd
   specs:
     dtk-network-client (1.0.0)
       aws-sdk (~> 3)
+      dtk-common-core (= 0.11.1)
       dtk-dsl (~> 1.1.0)
       git (= 1.2.9)
       rest-client (= 1.6.7)
@@ -43,10 +43,9 @@ GIT
 
 GIT
   remote: https://github.com/dtk/dtk-common-core.git
-  revision: 8a7cbc2ee96526cffbea00207c3accee79bf1019
-  branch: DTK-3366
+  revision: 7f42766e5ddd768f6888afcd7b465880e8b65cf4
   specs:
-    dtk-common-core (0.11.0)
+    dtk-common-core (0.11.1)
       rest-client (= 1.6.7)
 
 GEM
@@ -68,10 +67,10 @@ GEM
       multi_json (~> 1.0)
     arel (3.0.3)
     awesome_print (1.1.0)
-    aws-partitions (1.70.0)
+    aws-partitions (1.73.0)
     aws-sdk (3.0.1)
       aws-sdk-resources (~> 3)
-    aws-sdk-acm (1.3.0)
+    aws-sdk-acm (1.4.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-alexaforbusiness (1.1.0)
@@ -86,7 +85,7 @@ GEM
     aws-sdk-applicationdiscoveryservice (1.1.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-appstream (1.6.0)
+    aws-sdk-appstream (1.7.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-appsync (1.1.0)
@@ -137,13 +136,13 @@ GEM
     aws-sdk-cloudwatch (1.4.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-cloudwatchevents (1.2.0)
+    aws-sdk-cloudwatchevents (1.3.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-cloudwatchlogs (1.2.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-codebuild (1.6.0)
+    aws-sdk-codebuild (1.7.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-codecommit (1.3.0)
@@ -170,17 +169,17 @@ GEM
     aws-sdk-comprehend (1.0.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-configservice (1.6.0)
+    aws-sdk-configservice (1.7.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-core (3.17.0)
+    aws-sdk-core (3.17.1)
       aws-partitions (~> 1.0)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
     aws-sdk-costandusagereportservice (1.0.1)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-costexplorer (1.1.0)
+    aws-sdk-costexplorer (1.2.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-databasemigrationservice (1.4.0)
@@ -201,7 +200,7 @@ GEM
     aws-sdk-directoryservice (1.1.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-dynamodb (1.4.0)
+    aws-sdk-dynamodb (1.5.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-dynamodbstreams (1.0.1)
@@ -213,7 +212,7 @@ GEM
     aws-sdk-ecr (1.3.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-ecs (1.10.0)
+    aws-sdk-ecs (1.12.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-efs (1.0.1)
@@ -222,7 +221,7 @@ GEM
     aws-sdk-elasticache (1.3.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-elasticbeanstalk (1.4.0)
+    aws-sdk-elasticbeanstalk (1.5.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-elasticloadbalancing (1.2.0)
@@ -249,7 +248,7 @@ GEM
     aws-sdk-glacier (1.6.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-glue (1.5.0)
+    aws-sdk-glue (1.6.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-greengrass (1.2.0)
@@ -327,7 +326,7 @@ GEM
     aws-sdk-mediaconvert (1.1.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-medialive (1.3.0)
+    aws-sdk-medialive (1.4.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-mediapackage (1.0.0)
@@ -369,7 +368,7 @@ GEM
     aws-sdk-pricing (1.0.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-rds (1.14.0)
+    aws-sdk-rds (1.15.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-redshift (1.2.0)
@@ -532,7 +531,7 @@ GEM
     aws-sdk-sagemakerruntime (1.0.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-serverlessapplicationrepository (1.1.0)
+    aws-sdk-serverlessapplicationrepository (1.2.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
     aws-sdk-servicecatalog (1.4.0)
@@ -605,7 +604,7 @@ GEM
     aws-sigv4 (1.0.2)
     bson (1.9.2)
     builder (3.0.4)
-    byebug (10.0.0)
+    byebug (10.0.1)
     capybara (2.1.0)
       mime-types (>= 1.16)
       nokogiri (>= 1.3.3)
@@ -629,7 +628,7 @@ GEM
     elasticsearch-transport (1.0.6)
       faraday
       multi_json
-    excon (0.61.0)
+    excon (0.62.0)
     faraday (0.14.0)
       multipart-post (>= 1.2, < 3)
     ffi (1.9.23)
@@ -790,7 +789,7 @@ GEM
       cliver (~> 0.3.1)
       websocket-driver (>= 0.2.0)
     rack (1.6.4)
-    rack-test (0.8.3)
+    rack-test (1.0.0)
       rack (>= 1.0, < 3)
     rbvmomi (1.11.7)
       builder (~> 3.0)
@@ -821,7 +820,7 @@ GEM
       websocket (~> 1.0.4)
     semverly (1.0.0)
     trollop (2.1.2)
-    tzinfo (0.3.53)
+    tzinfo (0.3.54)
     websocket (1.0.7)
     websocket-driver (0.7.0)
       websocket-extensions (>= 0.1.0)

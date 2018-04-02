@@ -1,5 +1,5 @@
 source 'https://rubygems.org'
-#ruby '2.2.9'
+ruby '2.2.9'
 
 # dtk gems
 gem 'dtk-common', :github => 'dtk/dtk-common', :branch => 'gitlab-grit'

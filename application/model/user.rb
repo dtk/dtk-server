@@ -54,7 +54,6 @@ module XYZ
       password = hash[:password]
       model_handle = ModelHandle.new(hash[:c], :user)
       if user = get_user(model_handle, username)
-
         user if user.authenticated?(password)
       end
     end

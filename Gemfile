@@ -1,8 +1,8 @@
 source 'https://rubygems.org'
-ruby '2.2.9'
+#ruby '2.2.9'
 
 # dtk gems
-gem 'dtk-common', :github => 'dtk/dtk-common'
+gem 'dtk-common', :github => 'dtk/dtk-common', :branch => 'gitlab-grit'
 gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
 gem 'dtk-dsl', :github => 'dtk/dtk-dsl'
 
@@ -49,7 +49,7 @@ end
 gem 'mcollective-client', '~> 2.5.2'
 gem 'puppet', '3.4.0'
 gem 'stomp', '1.1.9'
-gem 'grit'
+#gem 'grit'
 gem 'innate', '2012.03' #version compatible with ramaze','2012.04.14
 
 

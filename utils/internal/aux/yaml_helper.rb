@@ -21,8 +21,9 @@ module DTK
     def self.dump_simple_form(obj)
       simple_form = simple_form_aux(obj)
       # To get around Puppet monkey patch which changes YAML.dump
-      #  ::YAML.dump(simple_form)
-      yaml_dump(simple_form)
+      ## Switch back to builtin YAML dump for Ruby 2.2
+      ::YAML.dump(simple_form)
+      # yaml_dump(simple_form)
     end
 
     # opts can have keys:

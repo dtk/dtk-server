@@ -31,14 +31,22 @@ module DTK
         end
         
         def self.add_service_dsl_files(service_instance, service_module_branch)
+          file_path__content_array = generate_service_dsl_contet(service_instance, service_module_branch)
+          DirectoryGenerator.add_files(service_module_branch, file_path__content_array, donot_push_changes: true)
+        end
+
+        def self.generate_service_dsl_contet(service_instance, service_module_branch)
           # content_input is a dsl version independent canonical form that has all content needed to
-          content_input = generate_canonical_form(service_instance, service_module_branch)
+          # content_input = generate_canonical_form(service_instance, service_module_branch)
+
+          # content_input = ObjectLogic::Assembly::Attribute.generate_content_input?(:assembly, (service_instance.get_assembly_level_attributes || {}))
+          content_input = ObjectLogic::Assembly::Attribute.generate_content_input?(:assembly, service_instance.get_attributes_all_levels)
 
           dsl_version   = service_module_branch.dsl_version
           top_file_path = FileType::ServiceInstance::DSLFile::Top.canonical_path
           check_for_assembly_wide(content_input)
-          file_path__content_array = FileGenerator.generate_yaml_file_path__content_array(:service_instance, top_file_path, content_input, dsl_version)
-          DirectoryGenerator.add_files(service_module_branch, file_path__content_array, donot_push_changes: true)
+          return content_input
+          FileGenerator.generate_yaml_file_path__content_array(:service_instance, top_file_path, content_input, dsl_version)
         end
 
         private

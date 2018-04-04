@@ -160,6 +160,10 @@ module DTK
         rest_ok_response assembly_instance.info
       end
 
+      def describe
+        rest_ok_response assembly_instance.describe
+      end
+
     end
   end
 end

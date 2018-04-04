@@ -41,6 +41,7 @@ DTK::ReactorRoute.draw do
   get  'api/v1/services/:service_id/task_status'       => 'v1::service#task_status'
   get  'api/v1/services/:service_id/violations'        => 'v1::service#violations'
   get  'api/v1/services/:service_id/info'              => 'v1::service#info'
+  get  'api/v1/services/:service_id/describe'          => 'v1::service#describe'
 
   post 'api/v1/services/set_default_target'            => 'v1::service#set_default_target'
 

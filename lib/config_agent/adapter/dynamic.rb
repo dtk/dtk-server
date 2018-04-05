@@ -85,7 +85,8 @@ module DTK; class ConfigAgent
         unless debug_port_request
           msg.merge!(breakpoint: breakpoint, debug_port_received: $port_number)
         end
-        msg
+
+        Aux.convert_keys_to_symbols_recursive(msg)
       end
 
       def type

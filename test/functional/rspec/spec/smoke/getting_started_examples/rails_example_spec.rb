@@ -10,7 +10,7 @@ assembly_name = 'rails_single_node'
 service_name = "rails_single_node_getting_started" + rand(10..1000).to_s
 remote_module = 'dtk-examples/rails'
 remote_module_location = '/tmp/rails'
-remote_module_version = '0.9.5'
+remote_module_version = '1.1.0'
 service_location = '~/dtk/'
 
 dtk_common = Common.new('', '')

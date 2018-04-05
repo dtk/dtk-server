@@ -36,7 +36,11 @@ modules:
 - aws/identity_aws
 - aws/image_aws
 - aws/network_aws
+- aws/aws_route53
+- puppetlabs/ssh
 - maestrodev/wget
+- docker/docker_install
+- dtk/lab_manager
 - internal/stdlib
 - internal/apt
 - internal/common_user

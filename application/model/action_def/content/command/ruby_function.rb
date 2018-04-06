@@ -32,7 +32,7 @@ module DTK; class ActionDef; class Content
         @ruby_function.each_pair do |d_attr, fn|
           begin
             evaluated_fn = proc do
-              $SAFE = 4
+              $SAFE = 1
               eval(fn)
             end.call
 

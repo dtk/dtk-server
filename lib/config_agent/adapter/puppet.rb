@@ -20,11 +20,12 @@ module DTK
     class Puppet < ConfigAgent
       require_relative('puppet/node_manifest')
       # TODO: look at condionally loading parse related files
-      require_relative('puppet/parser')
+      # Ruby 2.2.9: comment out all parser related requires
+      #require_relative('puppet/parser')
       # parse needs to be before parse_structure
-      require_relative('puppet/parse_structure')
+      #require_relative('puppet/parse_structure')
 
-      include ParserMixin
+      #include ParserMixin
 
       def self.provider_folder
         ProviderFolder

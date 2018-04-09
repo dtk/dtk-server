@@ -46,6 +46,11 @@ ARBITER_CONTAINER=${6:-dtk-arbiter}
 NAME=${7:-dtk-docker-${DOCKER_ID}}
 USER=${8:-docker-test}
 PASS=${9:-r8server}
+if [[ $DTK_SERVER_BRANCH == 'master' ]]; then
+  DTK_SERVER_BRANCH_DOCKER='latest'
+else
+  DTK_SERVER_BRANCH_DOCKER=$DTK_SERVER_BRANCH
+fi
 
 if [[ $UPGRADE -eq 0 ]]; then
 	rm -rf /${CONTAINER}

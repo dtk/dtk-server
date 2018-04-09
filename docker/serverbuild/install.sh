@@ -24,6 +24,9 @@ ln -sf $(pwd)/docker/addons /
 chown -R ${tenant_user}:${tenant_user} /home/${tenant_user}
 
 apt-get update
+
+/usr/local/rvm/bin/rvm install 2.2.9
+
 puppet apply --debug --modulepath dtk-provisioning/modules docker/manifests/stage3.pp
 
 apt-get clean && apt-get autoclean && apt-get -y autoremove
@@ -32,3 +35,4 @@ apt-get clean && apt-get autoclean && apt-get -y autoremove
 sed -i '/^#.*log4j.logger.org.apache.activemq=/s/^#//' /opt/activemq/conf/log4j.properties
 
 rm -rf /etc/puppet/modules /tmp/* /var/lib/postgresql/ /var/lib/apt/lists/* /var/tmp/* 
+

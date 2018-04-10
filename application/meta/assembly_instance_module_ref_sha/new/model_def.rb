@@ -21,8 +21,8 @@
   columns: {
     sha: { type: :varchar, size: 50 },
     repo_name: { type: :varchar, size: 50 },
-    branch_name: { type: :varchar, size: 50 },
-    module_name: { type: :varchar, size: 50 },
+    branch_name: { type: :varchar, size: 250 },
+    module_name: { type: :varchar, size: 250 },
     module_branch_id: {
       type: :bigint,
       foreign_key_rel_type: :module_branch,

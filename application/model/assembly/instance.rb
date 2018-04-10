@@ -234,7 +234,7 @@ module DTK; class  Assembly
         return create_task_response
       end
 
-      execute_service_action(create_task_response[:task_id])
+      execute_service_action(create_task_response[:task_id], params)
     end
 
     def create_task(opts)
@@ -266,9 +266,9 @@ module DTK; class  Assembly
       return { task_id: task.id }
     end
 
-    def execute_service_action(task_id)
+    def execute_service_action(task_id, params)
       task_idh = id_handle().createIDH(id: task_id, model_name: :task)
-      task     = Task::Hierarchical.get_and_reify(task_idh)
+      task     = Task::Hierarchical.get_and_reify(task_idh, params)
       workflow = Workflow.create(task)
       workflow.defer_execution()
 

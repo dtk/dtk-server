@@ -33,6 +33,9 @@ module DTK
           ObjectLogic::ServiceInstance.new(service_instance, module_branch).generate_content_input!
         end
 
+        def self.generate_base_content_for_service_instance(service_instance, module_branch)
+          ObjectLogic::ServiceInstance.new(service_instance, module_branch).generate_simple_content_input!
+        end
       end
     end
   end

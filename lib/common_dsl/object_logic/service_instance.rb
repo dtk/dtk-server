@@ -25,6 +25,13 @@ module DTK
           @module_branch    = module_branch
           @dsl_version      = module_branch.dsl_version
         end
+
+        def generate_simple_content_input!
+          assembly_instance = @service_instance.respond_to?(:copy_as_assembly_instance) ? @service_instance.copy_as_assembly_instance : @service_instance.assembly_instance
+          set(:DSLVersion, @dsl_version)
+          set(:Name, assembly_instance.display_name)
+          self
+        end
         
         def generate_content_input!
           assembly_instance = @service_instance.respond_to?(:copy_as_assembly_instance) ? @service_instance.copy_as_assembly_instance : @service_instance.assembly_instance

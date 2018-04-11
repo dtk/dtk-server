@@ -165,7 +165,7 @@ module DTK
       end
 
       def describe
-        rest_ok_response assembly_instance.describe
+        rest_ok_response assembly_instance.describe(request_params(:path))
       end
 
     end

@@ -32,8 +32,8 @@ module DTK; class  Assembly
     require_relative('instance/service_setting')
     require_relative('instance/node_status')
     require_relative('instance/module_ref_sha')
-
     require_relative('instance/dsl_location')
+    require_relative('instance/describe')
 
     include ComponentLink::Mixin
     include ViolationsMixin
@@ -50,6 +50,7 @@ module DTK; class  Assembly
     extend NodeStatusClassMixin
     include NodeStatusToFixMixin
     include DSLLocation::Mixin
+    include Describe
 
     ACTION_DELIMITER = '.'
 

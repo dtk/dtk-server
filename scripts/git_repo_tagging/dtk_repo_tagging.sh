@@ -70,9 +70,9 @@ dtk_repos+=($dtk_client)
 dtk_repos+=($dtk_node_agent)
 dtk_repos+=($dtk_provisioning)
 dtk_repos+=($dtk_arbiter)
-dtk_repos+=($dtk_server)
 dtk_repos+=($dtk_network)
 dtk_repos+=($dtk_network_ui)
+dtk_repos+=($dtk_server)
 
 function increase_version_number() {
   current_tag=$1
@@ -266,7 +266,10 @@ function tag_code() {
       #cd $repo_name
       bundle update dtk-common # updates both dtk-common and dtk-common-core
       bundle update dtk-dsl
-      git add .; git commit -m "bump versions for release.yaml" #; git push origin master
+      changes=`git status`
+      if [[ $changes != *"nothing to commit"* ]]; then
+        git add .; git commit -m "bump of dependency updates" #; git push origin master
+      fi
       git tag $next_tag
       #git push --tags
       export DTK_SERVER_TAG=$next_tag
@@ -352,7 +355,10 @@ function tag_code() {
       #cd $repo_name
       bundle update dtk-common
       bundle update dtk-dsl
-      git add .; git commit -m "bump versions for release.yaml" #; git push origin master
+      changes=`git status`
+      if [[ $changes != *"nothing to commit"* ]]; then
+        git add .; git commit -m "bump of dependency updates" #; git push origin master
+      fi
       git tag $dtk_major_tag
       #git push --tags
       export DTK_SERVER_TAG=$next_tag

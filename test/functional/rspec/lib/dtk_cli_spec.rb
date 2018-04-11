@@ -10,7 +10,7 @@ shared_context 'Install module' do |module_name, module_location|
   it "installs #{module_name} module from local filesystem to server" do
     puts 'Install module:', '----------------------'
     pass = true
-    value = `dtk module install -d #{module_location} --update-deps`
+    value = `dtk module install -d #{module_location} -u --update-deps`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
     puts "Install of module #{module_name} was completed successfully!" if pass == true
@@ -614,7 +614,7 @@ shared_context "Push module changes" do |module_name, module_location|
   it "pushes changes for module #{module_name}" do
     puts 'Push module changes', '-------------------------'
     pass = true
-    value = `dtk module push -d #{module_location}`
+    value = `dtk module push -d #{module_location} -u`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
     puts "Push of module #{module_name} was completed successfully!" if pass == true
@@ -628,7 +628,7 @@ shared_context "NEG - Push module changes" do |module_name, module_location|
   it "does not push changes for module #{module_name}" do
     puts 'NEG - Push module changes', '-----------------------------'
     pass = true
-    value = `dtk module push -d #{module_location}`
+    value = `dtk module push -d #{module_location} -u`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
     puts "Push of module #{module_name} was completed successfully which is not expected!" if pass == true
@@ -642,7 +642,7 @@ shared_context "Push-dtkn module changes" do |module_name, module_location|
   it "pushes changes for module #{module_name} to dtkn" do
     puts 'Push-dtkn module changes', '----------------------------'
     pass = true
-    value = `dtk module push-dtkn -d #{module_location}`
+    value = `dtk module push-dtkn -d #{module_location} -u`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
     puts "Push-dtkn of module #{module_name} was completed successfully!" if pass == true
@@ -656,7 +656,7 @@ shared_context "NEG - Push-dtkn module changes" do |module_name, module_location
   it "does not push changes for module #{module_name} to dtkn" do
     puts 'NEG - Push-dtkn module changes', '-------------------------------'
     pass = true
-    value = `dtk module push-dtkn -d #{module_location}`
+    value = `dtk module push-dtkn -d #{module_location} -u`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
     puts "Push-dtkn of module #{module_name} was completed successfully which is not expected!" if pass == true
@@ -670,7 +670,7 @@ shared_context "Publish module" do |module_name, module_location|
   it "publish module #{module_name} to dtkn" do
     puts 'Publish module changes', '--------------------------'
     pass = true
-    value = `dtk module publish -d #{module_location}`
+    value = `dtk module publish -d #{module_location} -u`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
     puts "Publish of module #{module_name} was completed successfully!" if pass == true
@@ -684,7 +684,7 @@ shared_context "NEG - Publish module" do |module_name, module_location|
   it "does not publish module #{module_name} to dtkn" do
     puts 'NEG - Publish module changes', '-----------------------------'
     pass = true
-    value = `dtk module publish -d #{module_location}`
+    value = `dtk module publish -d #{module_location} -u`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
     puts "Publish of module #{module_name} was completed successfully which is not expected!" if pass == true
@@ -698,7 +698,7 @@ shared_context "NEG - Publish module with incorrect name" do |module_name, modul
   it "does not publish module #{module_name} to dtkn" do
     puts 'NEG - Publish module changes', '-----------------------------'
     pass = true
-    value = `dtk module publish -d #{module_location}`
+    value = `dtk module publish -d #{module_location} -u`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'Cannot find a module DSL'))
     puts "Publish of module #{module_name} was completed successfully which is not expected!" if pass == true

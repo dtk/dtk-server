@@ -27,10 +27,12 @@ module DTK; module CommonDSL
           @workflow = workflow
         end
         
-        def self.generate_content_input(assembly_instance)
+        def self.generate_content_input(assembly_instance, action_name = nil)
           #  Generates a create workflow if one not explicitly given in dsl which causes this to be written to dsl
           Task::Template::ConfigComponents.get_or_generate_template_content(:assembly, assembly_instance, { subtask_order: 'sequential' })
           workflows = assembly_instance.get_task_templates(set_display_names: true)
+          extract_single_action!(workflows, action_name) if action_name
+
           unsorted = workflows.inject({}) do |h, workflow| 
             h.merge(workflow.display_name => new(workflow).generate_content_input!)
           end
@@ -73,6 +75,10 @@ module DTK; module CommonDSL
             ret << name if names.delete(name)
           end
           ret + names.sort
+        end
+
+        def self.extract_single_action!(workflows, action_name)
+          workflows.reject!{ |action| action[:display_name] != action_name }
         end
         
       end

@@ -21,8 +21,8 @@ module DTK; class Assembly::Instance
       def self.describe(service_instance, params)
         assembly_instance = service_instance.copy_as_assembly_instance
         dsl_version       = service_instance.get_service_instance_branch.dsl_version
-        
-        components_content_input = CommonDSL::ObjectLogic::Assembly::Component.generate_content_input(assembly_instance)
+
+        components_content_input = CommonDSL::ObjectLogic::Assembly::Component.generate_content_input(assembly_instance, (params || []).first)
         top_level_content_input  = CommonDSL::ObjectLogic::ContentInputHash.new('components' => components_content_input)
 
         yaml_content = CommonDSL::Generate::FileGenerator.generate_yaml_text(:component, top_level_content_input, dsl_version)

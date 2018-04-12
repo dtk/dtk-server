@@ -23,7 +23,7 @@ module DTK; class Assembly::Instance
     require_relative('describe/dependencies')
 
     def describe(path)
-      describe_adapter, *params = ret_adapter_and_params_from_path(path)
+      describe_adapter, params = ret_adapter_and_params_from_path(path)
       describe_class = load_for(describe_adapter)
 
       raise ErrorUsage, "Unexpected that describe adapter #{describe_class} does not implement describe method!" unless describe_class.respond_to?(:describe)

@@ -22,7 +22,7 @@ module DTK; class Assembly::Instance
         assembly_instance = service_instance.copy_as_assembly_instance
         dsl_version       = service_instance.get_service_instance_branch.dsl_version
         
-        actions_content_input = CommonDSL::ObjectLogic::Assembly::Workflow.generate_content_input(assembly_instance)
+        actions_content_input = CommonDSL::ObjectLogic::Assembly::Workflow.generate_content_input(assembly_instance, (params || []).first )
         top_level_content_input  = CommonDSL::ObjectLogic::ContentInputHash.new('actions' => actions_content_input)
 
         yaml_content = CommonDSL::Generate::FileGenerator.generate_yaml_text(:workflow, top_level_content_input, dsl_version)

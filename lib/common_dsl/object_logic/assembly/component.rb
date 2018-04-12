@@ -30,12 +30,15 @@ module DTK; module CommonDSL
         end
         private :initialize
 
-        def self.generate_content_input(assembly_instance)
+        def self.generate_content_input(assembly_instance, component_name = nil)
           assembly_component_links = assembly_instance.get_augmented_port_links
+
           # get_augmented_nested_components returns components with nested components
+          augmented_components = NodeComponent.get_augmented_nested_components(assembly_instance)
+          extract_single_component!(augmented_components, component_name) if component_name
 
           ret = ContentInputHash.new
-          NodeComponent.get_augmented_nested_components(assembly_instance).each do |aug_component|
+          augmented_components.each do |aug_component|
             next if aug_component[:to_be_deleted] 
             ret.merge!(component_name(aug_component) => new(aug_component, assembly_instance, assembly_component_links).generate_content_input!)
           end
@@ -103,6 +106,10 @@ module DTK; module CommonDSL
         
         def tags?
           nil
+        end
+
+        def self.extract_single_component!(augmented_components, component_name)
+          augmented_components.reject!{ |aug_cmp| aug_cmp[:display_name] != component_name.gsub('::', '__') }
         end
 
       end

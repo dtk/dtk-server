@@ -35,7 +35,7 @@ describe "(Module operations) Test Case 3: Install module version (component par
       value = `cat #{module_2_location}/dtk.module.yaml | grep #{module_2}`
       pass = !value.include?('No such file or directory')
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 
@@ -71,7 +71,7 @@ describe "(Module operations) Test Case 3: Install module version (component par
       value = `ls #{module_2_location}`
       pass = !value.include?('No such file or directory')
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 
@@ -88,7 +88,7 @@ describe "(Module operations) Test Case 3: Install module version (component par
   end
 
   context "Delete module from remote" do
-    include_context "Delete module from remote", dtk_common, module_2, module_2_version
+    include_context "Delete module from remote", module_2
   end
 
   after(:all) do

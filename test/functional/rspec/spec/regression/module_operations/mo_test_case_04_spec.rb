@@ -9,7 +9,7 @@ module_1_version = 'master'
 module_1_location = '/tmp/r8/new_test_service_module'
 
 module_2 = 'test_ns/new_test_service_module'
-module_2_version = '0.0.1'
+module_2_version = 'master'
 module_2_location = '/tmp/test_ns/new_test_service_module'
 
 dtk_common = Common.new('', '')
@@ -35,7 +35,7 @@ describe '(Module operations) Test Case 4: Install module (service part) from on
       value = `cat #{module_2_location}/dtk.module.yaml | grep #{module_2}`
       pass = !value.include?('No such file or directory')
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 
@@ -71,7 +71,7 @@ describe '(Module operations) Test Case 4: Install module (service part) from on
       value = `ls #{module_2_location}`
       pass = !value.include?('No such file or directory')
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 
@@ -88,7 +88,7 @@ describe '(Module operations) Test Case 4: Install module (service part) from on
   end
 
   context "Delete module from remote" do
-    include_context "Delete module from remote", dtk_common, module_2, module_2_version
+    include_context "Delete module from remote", module_2
   end
 
   after(:all) do

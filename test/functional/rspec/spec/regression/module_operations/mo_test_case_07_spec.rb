@@ -38,7 +38,7 @@ describe "(Module operations) Test Case 7: Negative test cases for publishing an
       value = `cat #{module_2_location}/dtk.module.yaml | grep #{module_2}`
       pass = value.include?("module: #{module_2}")
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 
@@ -66,12 +66,12 @@ describe "(Module operations) Test Case 7: Negative test cases for publishing an
     include_context "Delete initial module on filesystem", module_1_location
   end
 
-  context "NEG - Delete module from remote when incorrect module name" do
-    include_context "NEG - Delete module from remote", dtk_common, incorrect_module_2, module_2_version
+  context "NEG - Unpublish module when incorrect module name" do
+    include_context "NEG - Unpublish module", incorrect_module_2, module_2_version
   end
 
-  context "NEG - Delete module from remote when incorrect module version" do
-    include_context "NEG - Delete module from remote", dtk_common, module_2, incorrect_module_2_version
+  context "NEG - Unpublish module when incorrect module version" do
+    include_context "NEG - Unpublish module", module_2, incorrect_module_2_version
   end
 
   context "Uninstall module" do
@@ -83,7 +83,7 @@ describe "(Module operations) Test Case 7: Negative test cases for publishing an
   end
 
   context "Delete module from remote" do
-    include_context "Delete module from remote", dtk_common, module_2, module_2_version
+    include_context "Delete module from remote", module_2
   end
 
   after(:all) do

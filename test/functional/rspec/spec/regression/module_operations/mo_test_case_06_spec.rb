@@ -36,7 +36,7 @@ describe "(Module operations) Test Case 6: Install module (service and component
       value = `cat #{module_2_location}/dtk.module.yaml | grep #{module_2}`
       pass = value.include?("module: #{module_2}")
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 
@@ -72,7 +72,7 @@ describe "(Module operations) Test Case 6: Install module (service and component
       value = `ls #{module_2_location}`
       pass = !value.include?('No such file or directory')
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 
@@ -88,7 +88,7 @@ describe "(Module operations) Test Case 6: Install module (service and component
       value_2 = `cat #{module_2_location}/dtk.module.yaml | grep assemblies`
       pass = (value_1.include?('component_defs')) && (value_2.include?('assemblies'))
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 
@@ -101,7 +101,7 @@ describe "(Module operations) Test Case 6: Install module (service and component
   end
 
   context "Delete module from remote" do
-    include_context "Delete module from remote", dtk_common, module_2, module_2_version
+    include_context "Delete module from remote", module_2
   end
 
   after(:all) do

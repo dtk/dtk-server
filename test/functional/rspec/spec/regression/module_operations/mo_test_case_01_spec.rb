@@ -87,7 +87,7 @@ describe "(Module operations) Test Case 1: Install module (component part) from 
   end
 
   context "Delete module from remote" do
-    include_context "Delete module from remote", dtk_common, module_2, module_2_version
+    include_context "Delete module from remote", module_2
   end
 
   after(:all) do

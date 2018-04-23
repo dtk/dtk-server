@@ -34,7 +34,7 @@ describe "(Module operations) Test Case 1: Install module (component part) from 
       value = `cat #{module_2_location}/dtk.module.yaml | grep #{module_2}`
       pass = !value.include?('No such file or directory')
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 
@@ -70,7 +70,7 @@ describe "(Module operations) Test Case 1: Install module (component part) from 
       value = `ls #{module_2_location}`
       pass = !value.include?('No such file or directory')
       puts ''
-      pass.should eq(true)
+      expect(pass).to eq(true)
     end
   end
 

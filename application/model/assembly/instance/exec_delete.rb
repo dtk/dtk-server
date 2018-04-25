@@ -45,11 +45,11 @@ module DTK; class  Assembly
           end
           
           if component_id && component_id =~ /^[0-9]+$/
-          if cmp_idh = params[:cmp_idh]
-            p_component = cmp_idh.create_object.update_object!(:display_name)
-            component_id = p_component[:display_name]
-            cmp_node = p_component.get_node
-          end
+            if cmp_idh = params[:cmp_idh]
+              p_component = cmp_idh.create_object.update_object!(:display_name)
+              component_id = p_component[:display_name]
+              cmp_node = p_component.get_node
+            end
           end
           
           augmented_cmps = check_if_augmented_component(params, component_id, { include_assembly_cmps: true })
@@ -105,14 +105,14 @@ module DTK; class  Assembly
         end
         
         delete_from_database = Task.create_for_delete_from_database(self, component, node, opts)
-        
+
         task.add_subtask(cmp_action) if cmp_action
         task.add_subtask(delete_from_database) if delete_from_database
         task = task.save_and_add_ids
-        
+
         workflow = Workflow.create(task)
         workflow.defer_execution
-        
+
         ret.merge!(task_id: task.id)
         ret
       end

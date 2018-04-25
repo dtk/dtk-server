@@ -34,6 +34,7 @@ module DTK; class  Assembly
     require_relative('instance/module_ref_sha')
     require_relative('instance/dsl_location')
     require_relative('instance/describe')
+    require_relative('instance/mixin')
 
     include ComponentLink::Mixin
     include ViolationsMixin
@@ -51,6 +52,7 @@ module DTK; class  Assembly
     include NodeStatusToFixMixin
     include DSLLocation::Mixin
     include Describe
+    include Mixin
 
     ACTION_DELIMITER = '.'
 
@@ -276,7 +278,6 @@ module DTK; class  Assembly
     
       return { task_id: task_id }
     end
-
 
     def execute_cmp_action(params, component_id, method_name, augmented_cmps)
       task_params = nil

@@ -31,7 +31,6 @@ module DTK
           diff_result         = Result.new(repo_diffs_summary)
           impacted_files      = repo_diffs_summary.impacted_files
           current_module_refs = service_instance.aug_dependent_base_module_branches
-
           Model.Transaction do
             # Parses and processes any service instance dsl changes; can update diff_result
             DSL.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)

@@ -24,21 +24,12 @@ module DTK; class Assembly::Instance
 
     def describe(path)
       describe_adapter, params = ret_adapter_and_params_from_path(path)
-      describe_class = load_for(describe_adapter)
+      describe_adapter ||= 'service_instance'
+      describe_class = Module.nesting.first.const_get("#{capitalize_adapter_name(describe_adapter)}")
 
       raise ErrorUsage, "Unexpected that describe adapter #{describe_class} does not implement describe method!" unless describe_class.respond_to?(:describe)
 
       describe_class.describe(self, params)
-    end
-
-    def load_for(describe_adapter)
-      self.class.const_get describe_adapter.to_s.split(/ |\_|\-/).map(&:capitalize).join("")
-    end
-
-    def ret_adapter_and_params_from_path(path)
-      return 'service_instance' unless path
-      adapter, *params = path.split(/\//)
-      return adapter, params
     end
 
   end

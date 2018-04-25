@@ -48,15 +48,16 @@ DTK::ReactorRoute.draw do
 
   # TODO: not currently supported
   # post 'api/v1/services/create_workspace'              => 'v1::service#create_workspace'
-  post 'api/v1/services/:service_id/cancel_last_task'  => 'v1::service#cancel_last_task'
+  post 'api/v1/services/:service_id/cancel_last_task' => 'v1::service#cancel_last_task'
   post 'api/v1/services/:service_id/link'             => 'v1::service#link'
-  post 'api/v1/services/:service_id/converge'          => 'v1::service#converge'
-  post 'api/v1/services/:service_id/set_attributes'    => 'v1::service#set_attributes'
-  post 'api/v1/services/:service_id/update_from_repo'  => 'v1::service#update_from_repo'
-  post 'api/v1/services/:service_id/set_attribute'     => 'v1::service#set_attribute'
-  post 'api/v1/services/:service_id/eject'             => 'v1::service#eject'
-  post 'api/v1/services/:service_id/:task_action'      => 'v1::service#exec'
-  post 'api/v1/services/generate_service_name'         => 'v1::service#generate_service_name'
+  post 'api/v1/services/:service_id/converge'         => 'v1::service#converge'
+  post 'api/v1/services/:service_id/set_attributes'   => 'v1::service#set_attributes'
+  post 'api/v1/services/:service_id/update_from_repo' => 'v1::service#update_from_repo'
+  post 'api/v1/services/:service_id/set_attribute'    => 'v1::service#set_attribute'
+  post 'api/v1/services/:service_id/eject'            => 'v1::service#eject'
+  post 'api/v1/services/:service_id/:task_action'     => 'v1::service#exec'
+  post 'api/v1/services/generate_service_name'        => 'v1::service#generate_service_name'
+  post 'api/v1/services/delete_by_path'               => 'v1::service#delete_by_path'
 
   # TODOs associated with following routes
 

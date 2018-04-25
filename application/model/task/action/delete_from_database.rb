@@ -30,7 +30,7 @@ module DTK; class Task
           assembly: assembly,
           delete_action: opts[:delete_action],
           delete_params: opts[:delete_params],
-          opts: opts
+          opts: (opts || {})
         }
         new(:hash, hash)
       end
@@ -50,7 +50,11 @@ module DTK; class Task
 
           if self[:node] || self[:component]
             send_opts = deleting_last_node?(assembly_instance) ? { do_not_update_task_template: true } : {}
-            # send_opts.merge!(delete_node_if_last_cmp: true) if self[:component]
+
+            if delete_node_as_component_node = self[:opts][:delete_node_as_component_node]
+              send_opts.merge!(delete_node_as_component_node: delete_node_as_component_node)
+            end
+
             assembly_instance.send(self[:delete_action], *self[:delete_params], send_opts)
           else
             component_idh = assembly.id_handle.createIDH(id: assembly.id(), model_name: :component)

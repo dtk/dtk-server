@@ -31,7 +31,9 @@ module DTK; module CommonDSL
 
             # process dependencies first
             if cmp_modules_with_namespaces = ret_cmp_modules_with_namespaces(service_instance_parse[:dependent_modules] || {})
-              component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
+              # component_module_refs = service_instance.component_module_refs
+              component_module_refs = service_instance.assembly_instance.get_common_module_locked_module_refs
+              # component_module_refs = ModuleRefs.get_component_module_refs(module_branch)
               component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
             end
 

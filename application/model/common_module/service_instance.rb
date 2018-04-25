@@ -100,6 +100,10 @@ module DTK
         self.assembly_instance.get_dsl_locations
       end
 
+      def aug_dependent_base_module_branches
+        @aug_dependent_base_module_branches ||= DependentModule.get_aug_base_module_branches(self.assembly_instance)
+      end
+
       protected
 
       attr_reader :base_version
@@ -108,9 +112,9 @@ module DTK
         @add_nested_modules
       end
 
-      def aug_dependent_base_module_branches
-        @aug_dependent_base_module_branches ||= DependentModule.get_aug_base_module_branches(self.assembly_instance)
-      end
+      # def aug_dependent_base_module_branches
+      #   @aug_dependent_base_module_branches ||= DependentModule.get_aug_base_module_branches(self.assembly_instance)
+      # end
 
       def service_module_name
         @service_module_name ||= self.service_module.display_name

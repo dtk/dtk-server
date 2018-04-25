@@ -30,7 +30,7 @@ module DTK
           # also look at doing pinpointed violation chaecking leveraging violation code
           diff_result         = Result.new(repo_diffs_summary)
           impacted_files      = repo_diffs_summary.impacted_files
-          current_module_refs = service_instance.aug_component_module_branches
+          current_module_refs = service_instance.aug_dependent_base_module_branches
           
           Model.Transaction do
             # Parses and processes any service instance dsl changes; can update diff_result

@@ -22,6 +22,7 @@ module DTK; class Assembly::Instance
         assembly_instance = service_instance.copy_as_assembly_instance
         dsl_version       = service_instance.get_service_instance_branch.dsl_version
         
+        # using params.first for action name because currently we only have one level for actions
         actions_content_input = CommonDSL::ObjectLogic::Assembly::Workflow.generate_content_input(assembly_instance, (params || []).first )
         top_level_content_input  = CommonDSL::ObjectLogic::ContentInputHash.new('actions' => actions_content_input)
 

@@ -6,13 +6,12 @@ module DTK; class  Assembly::Instance
       return adapter, params
     end
 
-    def load_for(adapter_name)
-      base, *rest = adapter_name.split('::')
-      loaded = self.class.const_get(base)
-
-      rest.each { |part| loaded = loaded.const_get(part.to_s.split(/ |\_|\-/).map(&:capitalize).join("")) }
-
-      loaded
+    def load_adapter_class(base, adapter_name)
+      begin
+        base.const_get("#{capitalize_adapter_name(adapter_name)}")
+      rescue NameError => error
+        fail ErrorUsage, "Unsupported path '#{adapter_name}'"
+      end
     end
 
     def capitalize_adapter_name(adapter_name)

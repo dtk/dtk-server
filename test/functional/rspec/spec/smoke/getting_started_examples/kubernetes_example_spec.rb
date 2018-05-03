@@ -73,7 +73,7 @@ describe "Getting started example: kubernetes/kubernetes and rails/rails_sample_
   end
 
   context "Delete initial rails module on filesystem" do
-    include_context "Delete initial module on filesystem", kubernetes_remote_module_location
+    include_context "Delete initial module on filesystem", rails_remote_module_location
   end
 
   context "Check that rails service instance nodes have been terminated on aws" do

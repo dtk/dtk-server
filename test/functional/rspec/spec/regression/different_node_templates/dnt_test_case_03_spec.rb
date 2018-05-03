@@ -1,3 +1,4 @@
+# Test Case 03: Converge rails single node scenario
 # This test script is used to test deployment of getting started example: dtk-examples/rails
 # Things that are under test are:
 # - ability to stage and converge rails example and have rails application with postgres/nginx up and running

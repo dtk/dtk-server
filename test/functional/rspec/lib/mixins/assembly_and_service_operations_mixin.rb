@@ -177,6 +177,8 @@ module AssemblyAndServiceOperationsMixin
           break
         end
       else
+        ap task_status_response['data']
+        service_converged[:error] = task_status_response['data']
         puts "Service was not converged successfully!"
         break
       end
@@ -212,6 +214,7 @@ module AssemblyAndServiceOperationsMixin
           end
         end
       else
+        ap task_status_response['data']
         puts "Service was not converged successfully! Debug cannot proceed"
         break
       end
@@ -250,6 +253,7 @@ module AssemblyAndServiceOperationsMixin
           service_deleted[:pass] = true
         else
           puts "Service was not deleted successfully!"
+          service_deleted[:error] = task_status_response['data']
         end
         break
       end

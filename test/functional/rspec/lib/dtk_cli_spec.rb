@@ -16,7 +16,7 @@ shared_context 'Install module' do |module_name, module_location|
     puts "Install of module #{module_name} was completed successfully!" if pass == true
     puts "Install of module #{module_name} did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -30,7 +30,7 @@ shared_context 'Install module from dtkn' do |remote_module, remote_module_locat
     puts "Install of module #{remote_module} was completed successfully!" if pass == true
     puts "Install of module #{remote_module} did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -68,7 +68,7 @@ shared_context 'Stage assembly from module' do |module_name, module_location, as
     puts "Assembly #{assembly_name} is staged successfully!" if pass == true
     puts "Assembly #{assembly_name} is not staged successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -82,7 +82,7 @@ shared_context 'Stage assembly from module to specific context' do |module_name,
     puts "Assembly #{assembly_name} is staged to #{context_name} successfully!" if pass == true
     puts "Assembly #{assembly_name} is not staged to #{context_name} successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -96,7 +96,7 @@ shared_context 'Stage context from module' do |context_name, context_location, a
     puts "context #{assembly_name} is staged successfully!" if pass == true
     puts "context #{assembly_name} is not staged successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -110,7 +110,7 @@ shared_context 'Set default context' do |context_service_name|
     puts "context #{context_service_name} is set as default one!" if pass == true
     puts "context #{context_service_name} is not set as default one!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -125,7 +125,7 @@ shared_context 'Set attribute' do |service_location, service_name, attribute_nam
     puts "Attribute #{attribute_name} is set correctly on #{service_name} service instance" if pass == true
     puts "Attribute #{attribute_name} is not set correctly on #{service_name} service instance" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -216,6 +216,7 @@ end
 shared_context 'Get task status details' do |service_instance_location, stage_number, expected_output|
   it 'returns task status output and verifies it' do
     correct_task_action_outputs = false
+    task_action = { details: nil }
     task_action_outputs = `dtk service task-status -m stream -d #{service_instance_location}`
     extracted_stage_output = task_action_outputs.split(stage_number).last.split("-----").first
 
@@ -229,15 +230,17 @@ shared_context 'Get task status details' do |service_instance_location, stage_nu
         else
           puts 'Returned stderr was not matched with expected one!'
           correct_task_action_outputs = false
+          task_action[:details] = "Returned results which are not expected: #{extracted_stage_output}"
           break
         end
       else
         puts 'Returned task action details is not the expected one!'
         correct_task_action_outputs = false
+        task_action[:details] = "Returned results which are not expected: #{extracted_stage_output}"
         break
       end
     end
-    expect(correct_task_action_outputs).to eq(true)
+    expect(correct_task_action_outputs).to eq(true), task_action[:details]
   end
 end
 
@@ -275,7 +278,7 @@ shared_context 'Destroy service instance' do |service_location, service_instance
     puts value
     pass = false if value.include? 'ERROR'
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -323,7 +326,7 @@ shared_context 'Uninstall service instance' do |service_location, service_instan
 
     pass = false if (value.include? 'ERROR') || (check != "")
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -336,7 +339,7 @@ shared_context 'Uninstall service instance with --force' do |service_location, s
     puts value
     pass = false if value.include? 'ERROR'
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -349,7 +352,7 @@ shared_context 'NEG - Uninstall service instance' do |service_location, service_
     puts value
     pass = true if value.include? error_message
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -385,7 +388,7 @@ shared_context 'NEG - Delete service instance' do |service_location, service_ins
     value = `dtk service delete -d #{service_location} -y`
     pass = true if value.include? error_message
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -419,7 +422,7 @@ shared_context 'Delete service instance with breakpoint' do |service_location, d
       end
     end
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), delete_info[:error]
   end
 end
 
@@ -458,7 +461,7 @@ shared_context 'Uninstall module' do |module_name, module_location|
     puts "Uninstall of module #{module_name} was completed successfully!" if pass == true
     puts "Uninstall of module #{module_name} did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -472,7 +475,7 @@ shared_context 'NEG - Uninstall module' do |module_name, module_location, error_
     puts "Uninstall of module #{module_name} was completed successfully which is not expected!" if pass == true
     puts "Uninstall of module #{module_name} did not complete successfully which is expected!" if pass == false
     puts ''
-    expect(pass).to eq(false)
+    expect(pass).to eq(false), value
   end
 end
 
@@ -484,7 +487,7 @@ shared_context 'Add original content of dtk.module.yaml and module content' do |
     value = system("ls #{module_location}/dtk.module.yaml")
     pass = false if value == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -496,7 +499,7 @@ shared_context 'Replace original content of dtk.module.yaml with delta content' 
     value = system("ls #{module_location}/dtk.module.yaml")
     pass = false if value == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -509,7 +512,7 @@ shared_context 'Setup initial module on filesystem' do |initial_module_location,
     value = system("ls #{module_location}/dtk.module.yaml")
     pass = false if value == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -521,7 +524,7 @@ shared_context 'Delete initial module on filesystem' do |module_location|
     value = system("ls #{module_location}")
     pass = true if value == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -534,7 +537,7 @@ shared_context 'Delete module content on filesystem' do |module_location|
     value = system("ls #{module_location}/ | grep dtk.module.yaml")
     pass = true if value == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -548,7 +551,7 @@ shared_context "Clone module on filesystem" do |module_name, module_location|
     puts "Clone of module #{module_name} was completed successfully!" if pass == true
     puts "Clone of module #{module_name} did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -564,7 +567,7 @@ shared_context "Change content of module on local filesystem" do |module_locatio
     puts 'dtk.module.yaml has been updated!' if pass == true
     puts 'dtk.module.yaml has not been updated!' if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -580,7 +583,7 @@ shared_context "Change content of service instance on local filesystem" do |serv
     puts 'dtk.service.yaml has been updated!' if pass == true
     puts 'dtk.service.yaml has not been updated!' if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -596,7 +599,7 @@ shared_context "Change content of dependency module in service instance on local
     puts 'dtk.nested_module.yaml has been updated!' if pass == true
     puts 'dtk.nested_module.yaml has not been updated!' if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -620,7 +623,7 @@ shared_context "Push module changes" do |module_name, module_location|
     puts "Push of module #{module_name} was completed successfully!" if pass == true
     puts "Push of module #{module_name} did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -634,7 +637,7 @@ shared_context "NEG - Push module changes" do |module_name, module_location|
     puts "Push of module #{module_name} was completed successfully which is not expected!" if pass == true
     puts "Push of module #{module_name} did not complete successfully which is expected!" if pass == false
     puts ''
-    expect(pass).to eq(false)
+    expect(pass).to eq(false), value
   end
 end
 
@@ -648,7 +651,7 @@ shared_context "Push-dtkn module changes" do |module_name, module_location|
     puts "Push-dtkn of module #{module_name} was completed successfully!" if pass == true
     puts "Push-dtkn of module #{module_name} did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -662,7 +665,7 @@ shared_context "NEG - Push-dtkn module changes" do |module_name, module_location
     puts "Push-dtkn of module #{module_name} was completed successfully which is not expected!" if pass == true
     puts "Push-dtkn of module #{module_name} did not complete successfully which is expected!" if pass == false
     puts ''
-    expect(pass).to eq(false)
+    expect(pass).to eq(false), value
   end
 end
 
@@ -676,7 +679,7 @@ shared_context "Publish module" do |module_name, module_location|
     puts "Publish of module #{module_name} was completed successfully!" if pass == true
     puts "Publish of module #{module_name} did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -690,7 +693,7 @@ shared_context "NEG - Publish module" do |module_name, module_location|
     puts "Publish of module #{module_name} was completed successfully which is not expected!" if pass == true
     puts "Publish of module #{module_name} did not complete successfully which is expected!" if pass == false
     puts ''
-    expect(pass).to eq(false)
+    expect(pass).to eq(false), value
   end
 end
 
@@ -704,7 +707,7 @@ shared_context "NEG - Publish module with incorrect name" do |module_name, modul
     puts "Publish of module #{module_name} was completed successfully which is not expected!" if pass == true
     puts "Publish of module #{module_name} did not complete successfully which is expected!" if pass == false
     puts ''
-    expect(pass).to eq(false)
+    expect(pass).to eq(false), value
   end
 end
 
@@ -718,7 +721,7 @@ shared_context "Delete module from remote" do |module_name|
     puts "Delete of module #{module_name} from remote was completed successfully!" if pass == true
     puts "Delete of module #{module_name} from remote did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -732,7 +735,7 @@ shared_context "NEG - Delete module from remote" do |module_name|
     puts "Delete of module #{module_name} from remote was completed successfully which is not expected!" if pass == true
     puts "Delete of module #{module_name} from remote did not complete successfully which is expected!" if pass == false
     puts ''
-    expect(pass).to eq(false)
+    expect(pass).to eq(false), value
   end
 end
 
@@ -746,7 +749,7 @@ shared_context "Unpublish module" do |module_name, module_version|
     puts "Delete of module #{module_name} from remote was completed successfully!" if pass == true
     puts "Delete of module #{module_name} from remote did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -760,7 +763,7 @@ shared_context "NEG - Unpublish module" do |module_name, module_version|
     puts "Delete of module #{module_name} from remote was completed successfully which is not expected!" if pass == true
     puts "Delete of module #{module_name} from remote did not complete successfully which is expected!" if pass == false
     puts ''
-    expect(pass).to eq(false)
+    expect(pass).to eq(false), value
   end
 end
 
@@ -774,7 +777,7 @@ shared_context "Push service instance changes" do |service_name, service_locatio
     puts "Push of service instance #{service_name} was completed successfully!" if pass == true
     puts "Push of service instance #{service_name} did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(true)
+    expect(pass).to eq(true), value
   end
 end
 
@@ -788,7 +791,7 @@ shared_context "NEG - Push service instance changes" do |service_name, service_l
     puts "Push of service instance #{service_name} was completed successfully which is not expected!" if pass == true
     puts "Push of service instance #{service_name} did not complete successfully!" if pass == false
     puts ''
-    expect(pass).to eq(false)
+    expect(pass).to eq(false), value
   end
 end
 

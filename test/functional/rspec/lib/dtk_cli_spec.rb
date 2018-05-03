@@ -487,7 +487,7 @@ shared_context 'Add original content of dtk.module.yaml and module content' do |
     value = system("ls #{module_location}/dtk.module.yaml")
     pass = false if value == false
     puts ''
-    expect(pass).to eq(true), value
+    expect(pass).to eq(true)
   end
 end
 
@@ -499,7 +499,7 @@ shared_context 'Replace original content of dtk.module.yaml with delta content' 
     value = system("ls #{module_location}/dtk.module.yaml")
     pass = false if value == false
     puts ''
-    expect(pass).to eq(true), value
+    expect(pass).to eq(true)
   end
 end
 
@@ -512,7 +512,7 @@ shared_context 'Setup initial module on filesystem' do |initial_module_location,
     value = system("ls #{module_location}/dtk.module.yaml")
     pass = false if value == false
     puts ''
-    expect(pass).to eq(true), value
+    expect(pass).to eq(true)
   end
 end
 
@@ -524,7 +524,7 @@ shared_context 'Delete initial module on filesystem' do |module_location|
     value = system("ls #{module_location}")
     pass = true if value == false
     puts ''
-    expect(pass).to eq(true), value
+    expect(pass).to eq(true)
   end
 end
 
@@ -537,7 +537,7 @@ shared_context 'Delete module content on filesystem' do |module_location|
     value = system("ls #{module_location}/ | grep dtk.module.yaml")
     pass = true if value == false
     puts ''
-    expect(pass).to eq(true), value
+    expect(pass).to eq(true)
   end
 end
 

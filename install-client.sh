@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
+
+set -e
  
 usage_config() {
   echo $1
-  echo -e "\nUsage:\n$0 [-p port] configuration_path\n"
+  echo -e "\nUsage:\n$0 [-p port] [-v version] configuration_path\n"
   echo    "configuration_path   - location of dtk.config file"
-  echo    "port                 - port where DTK server is listening"
+  echo    "port                 - port where Dtk server is listening"
+  echo    "version              - version of dtk-client to be installed."
   echo -e "                       defaults to 8080\n"
 } 
 
@@ -13,13 +16,16 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi 
 
-while getopts ":u:p:s:" o; do
+while getopts ":p:s:v:" o; do
     case "${o}" in
         p)
             p=${OPTARG}
             ;;
         s)
             s=true
+            ;;
+        v)
+            v=${OPTARG}
             ;;
         *)
             usage
@@ -46,6 +52,11 @@ get_home $user
 config_path=$1
 confdir=${homedir}/dtk
 port=${p-8080}
+if [[ -z "$v" ]]; then
+  dtk_client_version_arg=''
+else
+  dtk_client_version_arg="-v ${v}"
+fi
 
 if [[ "${user}" != "$(whoami)" ]] && [[ "$(whoami)" != "root" ]]; then
   usage_config "This script requires super-user privileges."
@@ -102,7 +113,7 @@ fi
 
 # install dtk-client gem
 echo "Installing dtk-client gem"
-$sudo $gem_path install dtk-client --no-rdoc --no-ri $binpath_arg
+$sudo $gem_path install dtk-client --no-rdoc --no-ri $dtk_client_version_arg $binpath_arg
 
 if [[ "$s" != true ]]; then
 mkdir -p ${homedir}/dtk

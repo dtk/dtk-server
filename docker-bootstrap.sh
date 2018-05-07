@@ -2,10 +2,10 @@
 
 usage_config() {
   echo $1
-  echo -e "\nUsage:\n$0 [-p pbuilderid] [-t tag] host_volume\n"
+  echo -e "\nUsage:\n$0 [-p pbuilderid] [-v version] host_volume\n"
   echo    "host_volume          - location of dtk.config file"
   echo    "pbuilderid           - optionally set pbuilderid for dtk-arbiter container"
-  echo -e "tag                  - optionally set docker image tag for dtk =-server container\n"
+  echo -e "version              - optionally set the version of Dtk to be installed\n"
 }
 
 if [[ $# -lt 1 ]]; then
@@ -13,13 +13,13 @@ if [[ $# -lt 1 ]]; then
   exit 1
 fi
 
-while getopts ":p:t:" o; do
+while getopts ":p:v:" o; do
   case "${o}" in
     p)
       p=${OPTARG}
       ;;
-    t)
-      t=${OPTARG}
+    v)
+      v=${OPTARG}
       ;;
     *)
       usage_config
@@ -115,10 +115,10 @@ PBUILDERID=$p
 GIT_PORT=${GIT_PORT-2222}
 WEB_PORT=${WEB_PORT-8080}
 STOMP_PORT=${STOMP_PORT-6163}
-if [[ -z "$t" ]]; then
+if [[ -z "$v" ]]; then
   DTK_SERVER_TAG=$(fetch_version sources[@] "")
 else
-  DTK_SERVER_TAG=$t
+  DTK_SERVER_TAG=$v
 fi
 
 server_image="getdtk/dtk-server:${DTK_SERVER_TAG}"

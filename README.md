@@ -27,7 +27,7 @@ PUBLIC_ADDRESS=<public address of the docker host>
 More information about the dtk.config file can be found in [dtk.config.example](dtk.config.example)
 
 ### Bootstrap Method
-Run this command to spin up a Dtk Server instance, along with dtk-arbiter:    
+Run this command to spin up the latest release of Dtk Server, along with dtk-arbiter:
 ```
 \curl -sSL https://getserver.dtk.io | bash -s /usr/share/docker/dtk
 ```
@@ -55,9 +55,13 @@ After the container is up and running (will take a minute on the first start), y
 
 #### Installing Dtk Client
 ##### Bootstrap method
-Run this command to automatically install and configure Dtk Client.  
+Run this command to automatically install and configure latest release of Dtk Client.
 ```
 \curl -sSL https://getclient.dtk.io | bash -s /usr/share/docker/dtk
+```
+To install a specific release (e.g. `0.11.8`):
+```
+\curl -sSL https://getclient.dtk.io | bash -s -- -v 0.11.8 /usr/share/docker/dtk
 ```
 ##### Manual method
 Assuming the docker container was started as described above, Dtk Client can be installed and configured automatically running the [install-client.sh](https://raw.githubusercontent.com/dtk/dtk-server/master/install-client.sh) script:
@@ -82,10 +86,15 @@ To upgrade Dtk container to a newer release, simply rerun the bootstrap script:
 ```
 \curl -sSL https://getserver.dtk.io | bash -s /usr/share/docker/dtk
 ```
-To get the latest docker image which is built from master branch:  
+To use the latest docker image which is built from master branch:
 
 ```
-\curl -sSL https://getserver.dtk.io | bash -s -- -t latest /usr/share/docker/dtk
+\curl -sSL https://getserver.dtk.io | bash -s -- -v latest /usr/share/docker/dtk
+```
+To install a specific release (e.g. `v0.11.11`):
+
+```
+\curl -sSL https://getserver.dtk.io | bash -s -- -v v0.11.11 /usr/share/docker/dtk
 ```
 
 ___

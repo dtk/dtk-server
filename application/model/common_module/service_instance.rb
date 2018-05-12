@@ -100,16 +100,18 @@ module DTK
         self.assembly_instance.get_dsl_locations
       end
 
+      def aug_dependent_base_module_branches
+        @aug_dependent_base_module_branches ||= DependentModule.get_aug_base_module_branches(self.assembly_instance)
+      end
+      # TODO: scoped under protected so need to add public
+      public :aug_dependent_base_module_branches
+
       protected
 
       attr_reader :base_version
 
       def add_nested_modules?
         @add_nested_modules
-      end
-
-      def aug_dependent_base_module_branches
-        @aug_dependent_base_module_branches ||= DependentModule.get_aug_base_module_branches(self.assembly_instance)
       end
 
       def service_module_name

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
- 
 usage_config() {
   echo $1
   echo -e "\nUsage:\n$0 [-p port] [-v version] configuration_path\n"

@@ -1,5 +1,5 @@
 module DTK; class Assembly::Instance
-  module DeleteMixin
+  module DeleteByPath
     module Components
       def self.delete(service_instance, params, opts = {})
         component_name    = params.last

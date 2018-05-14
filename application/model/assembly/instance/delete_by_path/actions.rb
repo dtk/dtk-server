@@ -1,5 +1,5 @@
 module DTK; class Assembly::Instance
-  module DeleteMixin
+  module DeleteByPath
     module Actions
       def self.delete(service_instance, params, opts = {})
         task_action          = params.last

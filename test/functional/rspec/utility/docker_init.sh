@@ -43,9 +43,10 @@ DTK_SERVER_BRANCH=${3-master}
 DTK_ARBITER_BRANCH=${4:-master}
 CONTAINER=${5:-dtk}
 ARBITER_CONTAINER=${6:-dtk-arbiter}
-NAME=${7:-dtk-docker-${DOCKER_ID}}
-USER=${8:-docker-test}
-PASS=${9:-r8server}
+HOST_VOLUME=${7:-/dtk}
+NAME=${8:-dtk-docker-${DOCKER_ID}}
+USER=${9:-docker-test}
+PASS=${10:-r8server}
 if [[ $DTK_SERVER_BRANCH == 'master' ]]; then
   DTK_SERVER_BRANCH_DOCKER='latest'
 else
@@ -53,9 +54,9 @@ else
 fi
 
 if [[ $UPGRADE -eq 0 ]]; then
-	rm -rf /${CONTAINER}
-	mkdir /${CONTAINER}
-	echo -e "Root Container directory /${CONTAINER} removed."
+	rm -rf ${HOST_VOLUME}
+	mkdir -p ${HOST_VOLUME}
+	echo -e "Container directory ${HOST_VOLUME} removed."
 fi
 
 echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nGIT_PORT=${SSH_PORT}\nLOG_LEVEL=debug\n" > "/${CONTAINER}/dtk.config"

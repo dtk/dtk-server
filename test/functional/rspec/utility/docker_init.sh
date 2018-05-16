@@ -23,7 +23,7 @@ if [[ -z $1 ]]; then
 fi
 
 if [[ -z $2 ]]; then
-	echo "Upgrade status not specified."
+  echo "Upgrade status not specified."
     exit 1
 fi
 
@@ -39,11 +39,11 @@ DOCKER_ID=$(date +%Y%m%d%H%M%S)
 
 ADDRESS=${1}
 UPGRADE=${2}
-DTK_SERVER_BRANCH=${3-master}
-DTK_ARBITER_BRANCH=${4:-master}
-CONTAINER=${5:-dtk}
-ARBITER_CONTAINER=${6:-dtk-arbiter}
-HOST_VOLUME=${7:-/dtk}
+HOST_VOLUME=${3}
+DTK_SERVER_BRANCH=${4:-master}
+DTK_ARBITER_BRANCH=${5:-master}
+CONTAINER=${6:-dtk}
+ARBITER_CONTAINER=${7:-dtk-arbiter}
 NAME=${8:-dtk-docker-${DOCKER_ID}}
 USER=${9:-docker-test}
 PASS=${10:-r8server}
@@ -54,12 +54,12 @@ else
 fi
 
 if [[ $UPGRADE -eq 0 ]]; then
-	rm -rf ${HOST_VOLUME}
-	mkdir -p ${HOST_VOLUME}
-	echo -e "Container directory ${HOST_VOLUME} removed."
+  rm -rf ${HOST_VOLUME}
+  mkdir -p ${HOST_VOLUME}
+  echo -e "Container directory ${HOST_VOLUME} removed."
 fi
 
-echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nGIT_PORT=${SSH_PORT}\nLOG_LEVEL=debug\n" > "/${CONTAINER}/dtk.config"
+echo -e "USERNAME=${USER}\nPASSWORD=${PASS}\nPUBLIC_ADDRESS=${ADDRESS}\nGIT_PORT=${SSH_PORT}\nLOG_LEVEL=debug\n" > "${HOST_VOLUME}/dtk.config"
 
 docker ps | grep dtk > /dev/null
 RUNNING=$?
@@ -93,8 +93,8 @@ echo -e "Pulling the latest DTK - Server image. \n"
 docker pull ${DTK_IMAGE} > /dev/null
 PULLED=$?
 if [[ $PULLED -eq 1 ]]; then
-	echo -e "Error while pulling dtk server image. \n"
-	exit 1
+  echo -e "Error while pulling dtk server image. \n"
+  exit 1
 fi
 
 echo -e "Pulling the latest DTK - Arbiter image. \n"
@@ -107,8 +107,6 @@ fi
 
 echo -e "\nStarting a new Docker Container: ${CONTAINER}"
 echo -e "\nStarting a new Docker Container: ${ARBITER_CONTAINER}"
-
-HOST_VOLUME="/${CONTAINER}"
 
 # start the dtk-server container
 if [[ $DTK_SERVER_BRANCH == 'master' ]]; then

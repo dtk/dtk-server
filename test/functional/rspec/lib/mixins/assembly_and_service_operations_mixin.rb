@@ -1,7 +1,7 @@
 module AssemblyAndServiceOperationsMixin
   # Commands used from new dtk client
   def verify_service_instance_nodes_terminated(service_instance_name)
-    require 'aws-sdk'
+    require 'aws-sdk-ec2'
     puts "Verify service instance nodes have been terminated", "-----------------------------------------------------"
     nodes_terminated = true
     ec2 = Aws::EC2::Client.new(region: 'us-east-1')

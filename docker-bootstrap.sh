@@ -160,8 +160,11 @@ if ! docker inspect '--format={{ .Image }}' $server_container_name >/dev/null 2>
 fi
 
 # wait for dtk-arbiter ssh keypair to be generated
-while [[ ! -f $HOST_VOLUME/arbiter/arbiter_remote ]]; do
+echo "Waiting for dtk container to start"
+until nc -z $(docker inspect --format='{{.NetworkSettings.IPAddress}}' ${server_container_name}) 80
+do
   sleep 2
+  printf '.'
 done
 
 # check if docker daemon socket is available

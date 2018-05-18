@@ -173,7 +173,8 @@ module DTK
 
       def update_from_repo
         commit_sha = required_request_params(:commit_sha)
-        diff_result = CommonModule::Update::ServiceInstance.update_from_repo(get_default_project, commit_sha, service_instance)
+        updated_nested_modules = ret_request_params(:updated_nested_modules)
+        diff_result = CommonModule::Update::ServiceInstance.update_from_repo(get_default_project, commit_sha, service_instance, { :updated_nested_modules => updated_nested_modules})
         rest_ok_response diff_result.hash_for_response
       end
 

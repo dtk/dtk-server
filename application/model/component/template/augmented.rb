@@ -105,7 +105,8 @@ module DTK
       #   :dependent_modules
       # returns [namespace, version] can be nil
       def self.find_namespace_and_version?(module_name, component_module_refs, opts = {})
-        if matching_module_ref = component_module_refs.component_module_ref?(module_name)
+        # if matching_module_ref = component_module_refs.component_module_ref?(module_name)
+        if matching_module_ref = component_module_refs.matching_module_ref?(module_name)
           [matching_module_ref.namespace, matching_module_ref.version_string]
         else
           # TODO: this is temporary solution until we implement dependency diffs functionality

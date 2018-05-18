@@ -37,7 +37,7 @@ module DTK
         content_hash_content = DependentModule.get_dependent_module_refs_array(assembly_instance).inject({}) do |h, r|
            h.merge(key(r[:module_name]) => r)
         end
-        new(assembly_instance.service_instance_branch, content_hash_content)
+        new(assembly_instance.get_service_instance_branch, content_hash_content)
       end
 
       def self.update_module_refs(module_branch, input_module_refs)

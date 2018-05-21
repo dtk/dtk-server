@@ -30,17 +30,18 @@ DTK::ReactorRoute.draw do
 
   ########## Services
   # Routes for new dtk client
-  get  'api/v1/services/list'                          => 'v1::service#list'
-  get  'api/v1/services/:service_id/actions'           => 'v1::service#actions'
-  get  'api/v1/services/:service_id/attributes'        => 'v1::service#attributes'
-  get  'api/v1/services/:service_id/components'        => 'v1::service#components'
-  get  'api/v1/services/:service_id/component_links'   => 'v1::service#component_links'
-  get  'api/v1/services/:service_id/dependent_modules' => 'v1::service#dependent_modules'
-  get  'api/v1/services/:service_id/nodes'             => 'v1::service#nodes'
-  get  'api/v1/services/:service_id/repo_info'         => 'v1::service#repo_info'
-  get  'api/v1/services/:service_id/task_status'       => 'v1::service#task_status'
-  get  'api/v1/services/:service_id/violations'        => 'v1::service#violations'
-  get  'api/v1/services/:service_id/info'              => 'v1::service#info'
+  get  'api/v1/services/list'                                  => 'v1::service#list'
+  get  'api/v1/services/:service_id/actions'                   => 'v1::service#actions'
+  get  'api/v1/services/:service_id/attributes'                => 'v1::service#attributes'
+  get  'api/v1/services/:service_id/components'                => 'v1::service#components'
+  get  'api/v1/services/:service_id/component_links'           => 'v1::service#component_links'
+  get  'api/v1/services/:service_id/dependent_modules'         => 'v1::service#dependent_modules'
+  get  'api/v1/services/:service_id/nodes'                     => 'v1::service#nodes'
+  get  'api/v1/services/:service_id/repo_info'                 => 'v1::service#repo_info'
+  get  'api/v1/services/:service_id/task_status'               => 'v1::service#task_status'
+  get  'api/v1/services/:service_id/violations'                => 'v1::service#violations'
+  get  'api/v1/services/:service_id/info'                      => 'v1::service#info'
+  get  'api/v1/services/:service_id/base_and_nested_repo_info' => 'v1::service#base_and_nested_repo_info'
 
   post 'api/v1/services/set_default_target'            => 'v1::service#set_default_target'
 

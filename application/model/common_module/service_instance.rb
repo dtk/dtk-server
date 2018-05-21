@@ -96,6 +96,22 @@ module DTK
         }.merge(module_repo_info)
       end
 
+      def get_base_and_nested_module_repo_info
+        service_instance_repo_info = RepoInfo.new(self.base_module_branch)
+
+        self.aug_dependent_base_module_branches.each do |aug_base_module_branch|
+          aug_nested_module_branch = get_nested_module_info(aug_base_module_branch)
+          service_instance_repo_info.add_nested_module_info!(aug_nested_module_branch)
+        end
+
+        {
+          service: {
+            name: self.assembly_instance.display_name_print_form,
+            id: self.assembly_instance.id
+          }
+        }.merge(service_instance_repo_info)
+      end
+
       def get_dsl_locations
         self.assembly_instance.get_dsl_locations
       end
@@ -153,6 +169,17 @@ module DTK
         CommonDSL::NestedModuleRepo.update_repo_for_stage(aug_nested_module_branch)
         Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
         aug_nested_module_branch
+      end
+
+      def get_nested_module_info(aug_nested_base_module_branch)
+        component_module = aug_nested_base_module_branch.component_module
+        base_version     = aug_nested_base_module_branch.version
+
+        get_or_create_opts = {
+          donot_update_model: true,
+          delete_existing_branch: false
+        }
+        get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
       end
 
       def gitignore_content

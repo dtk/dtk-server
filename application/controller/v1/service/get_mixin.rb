@@ -126,6 +126,10 @@ module DTK
         rest_ok_response service_instance.get_base_module_repo_info
       end
 
+      def base_and_nested_repo_info
+        rest_ok_response service_instance.get_base_and_nested_module_repo_info
+      end
+
       def task_status
         assembly_instance = assembly_instance()
         response =

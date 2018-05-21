@@ -29,10 +29,30 @@ module DTK; module CommonDSL
         end
         private :initialize
 
+        def self.process_partial_nested_module_changes(service_instance)
+          module_ref_shas     = Assembly::Instance::ModuleRefSha.get_for_base_and_nested_modules(service_instance.assembly_instance)
+          aug_module_branches = DependentModule.get_aug_dependent_module_branches(service_instance.assembly_instance)
+
+          module_ref_sha_branch_ids = module_ref_shas.map { |mr_sha| mr_sha[:module_branch_id] }
+          matching_aug_module_branches = aug_module_branches.select { |dep| module_ref_sha_branch_ids.include?(dep[:id]) }
+
+          matching_aug_module_branches.each do |module_ref_branch|
+            module_ref_branch.pull_repo_changes_and_return_diffs_summary(nil, {}) do |repo_diffs_summary|
+              module_ref_branch.update_current_sha_from_repo!
+              new_sha = module_ref_branch.get_field(:current_sha)
+              if  mod_ref_sha = module_ref_shas.find{ |mr_sha| mr_sha[:module_branch_id] == module_ref_branch[:id] }
+                mod_ref_sha.update(sha: new_sha)
+              end
+            end
+          end
+        end
+
         # Processes changes to the nested module content and dsl 
         def self.process_nested_module_changes(diff_result, service_instance, service_module_branch, all_impacted_file_paths, opts = {})
           fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
-          ndx_existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
+
+          # ndx_existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
+          ndx_existing_aug_module_branches = service_instance.aug_dependent_base_module_branches.inject({}) { |h, r| h.merge(r[:module_name] => r) }
           if nested_modules_info = impacted_nested_modules_info?(service_module_branch, all_impacted_file_paths)
             # Find existing aug_module_branches for service instance nested modules and for each one impacted 
             # create a service instance specfic branch if needed; ndx_existing_aug_module_branches is indexed by nested module name

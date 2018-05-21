@@ -42,7 +42,9 @@ module DTK
         def component_module_refs(opts = {})
           unless @component_module_refs ||= opts[:component_module_refs]
             service_instance_branch = opts[:service_instance_branch] || fail(Error, "Unexpected that opts[:service_instance_branch] is nil")
-            @component_module_refs ||= ModuleRefs.get_component_module_refs(service_instance_branch)
+            # @component_module_refs ||= ModuleRefs.get_component_module_refs(service_instance_branch)
+            service_instance = opts[:service_instance]
+            @component_module_refs ||= service_instance.assembly_instance.component_module_refs
           end
           @component_module_refs
         end        

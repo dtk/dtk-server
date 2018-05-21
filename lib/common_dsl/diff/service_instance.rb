@@ -30,16 +30,16 @@ module DTK
           # also look at doing pinpointed violation chaecking leveraging violation code
           diff_result         = Result.new(repo_diffs_summary)
           impacted_files      = repo_diffs_summary.impacted_files
-          current_module_refs = service_instance.aug_component_module_branches
-          
+          current_module_refs = service_instance.aug_dependent_base_module_branches
+
           Model.Transaction do
             # Parses and processes any service instance dsl changes; can update diff_result
             DSL.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
             unless diff_result.any_errors?
               # Processes the changes to the nested module content and dsl 
               Log.error("TODO: DTK-3366: update NestedModule.process_nested_module_changes")
-              
-              #   NestedModule.process_nested_module_changes(diff_result, service_instance, module_branch, impacted_files, current_module_refs: current_module_refs)
+              NestedModule.process_partial_nested_module_changes(service_instance)
+              # NestedModule.process_nested_module_changes(diff_result, service_instance, module_branch, impacted_files, current_module_refs: current_module_refs)
             end
           end
           diff_result

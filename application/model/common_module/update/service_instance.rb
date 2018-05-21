@@ -33,6 +33,12 @@ module DTK
               end
               # This sets sha on branch only after all processing goes through
               module_branch.update_current_sha_from_repo!
+
+              # update module_ref_sha for base service instance branch
+              module_ref_shas = Assembly::Instance::ModuleRefSha.get_for_base_and_nested_modules(service_instance.assembly_instance)
+              if base_module_ref_sha = module_ref_shas.find{ |mr_sha| mr_sha[:module_branch_id] == module_branch[:id] }
+                base_module_ref_sha.update(sha: module_branch.get_field(:current_sha))
+              end
             end
           end
           diff_result

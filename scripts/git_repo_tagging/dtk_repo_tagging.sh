@@ -138,7 +138,7 @@ function tag_code_custom() {
       sed -i -e "s/'dtk-dsl', '.*'/'dtk-dsl', '~> ${dtk_client_gemspec_tag}'/" dtk-network-client.gemspec
 
       cd lib/client
-    fi 
+    fi
 
     sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
     cd ../..
@@ -168,7 +168,7 @@ function tag_code_custom() {
       sed -i -e "s/'dtk-dsl', '.*'/'dtk-dsl', '~> ${dtk_client_gemspec_tag}'/" dtk-network-client.gemspec
 
       cd lib/client
-    fi 
+    fi
 
     sed -i -e 's/VERSION=".*"/VERSION="'${tag}'"/' version.rb
     cd ../..

@@ -24,7 +24,7 @@ module DTK
             begin
               # using $SAFE = 4 to stop users from executing malicious code in lambda scripts
               evaluated_fn = proc do
-                $SAFE = 4
+                $SAFE = 1
                 eval(constraint)
               end.call
               

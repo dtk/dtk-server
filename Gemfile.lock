@@ -7,13 +7,14 @@ GIT
 
 GIT
   remote: git://github.com/dtk/dtk-common.git
-  revision: b9dc8e1be7f3d74b46efa9f96790afaa34a04ef2
+  revision: 03efbef840826bb7b8b4e0f3686c7cba2da80b53
+  branch: gitlab-grit
   specs:
     dtk-common (0.11.1)
       colorize (~> 0.5.8)
       dtk-common-core (= 0.11.1)
       erubis (~> 2.7)
-      grit (~> 2.5)
+      gitlab-grit (~> 2.8)
       rugged (~> 0.17.0.b7)
 
 GIT
@@ -42,33 +43,26 @@ GEM
       aws-sdk-core (= 2.9.16)
     aws-sigv4 (1.0.0)
     blankslate (2.1.2.4)
+    byebug (10.0.1)
     celluloid (0.16.0)
       timers (~> 4.0.0)
+    charlock_holmes (0.7.6)
     colorize (0.5.8)
-    columnize (0.8.9)
     concurrent-ruby (1.0.5)
     daemons (1.1.9)
-    debugger (1.6.8)
-      columnize (>= 0.3.1)
-      debugger-linecache (~> 1.2.0)
-      debugger-ruby_core_source (~> 1.3.5)
-    debugger-linecache (1.2.0)
-    debugger-ruby_core_source (1.3.8)
     diff-lcs (1.3)
     docile (1.1.3)
-    em-ssh (0.6.5)
-      eventmachine
-      net-ssh
     erubis (2.7.0)
     eventmachine (1.0.8)
     excon (0.54.0)
     facter (1.7.6)
     file-tail (1.0.12)
       tins (~> 0.5)
-    grit (2.5.0)
+    gitlab-grit (2.8.2)
+      charlock_holmes (~> 0.6)
       diff-lcs (~> 1.1)
-      mime-types (~> 1.15)
-      posix-spawn (~> 0.3.6)
+      mime-types (>= 1.16)
+      posix-spawn (~> 0.3)
     hiera (1.3.4)
       json_pure
     hitimes (1.2.2)
@@ -80,13 +74,15 @@ GEM
     jmespath (1.3.1)
     json (1.8.3)
     json_pure (1.8.1)
-    looksee (2.1.1)
+    looksee (4.0.0)
     mcollective-client (2.5.3)
       json
       stomp
       systemu
     mime (0.4.3)
-    mime-types (1.25.1)
+    mime-types (3.1)
+      mime-types-data (~> 3.2015)
+    mime-types-data (3.2016.0521)
     minitest (5.10.3)
     mustache (0.99.8)
     net-scp (1.2.1)
@@ -94,7 +90,7 @@ GEM
     net-ssh (2.9.4)
     parslet (1.5.0)
       blankslate (~> 2.0)
-    pg (0.14.1)
+    pg (0.15.1)
     posix-spawn (0.3.13)
     puppet (3.4.0)
       facter (~> 1.6)
@@ -171,17 +167,15 @@ DEPENDENCIES
   addressable
   awesome_print (= 1.1.0)
   aws-sdk
+  byebug
   celluloid
   colorize (~> 0.5.8)
-  debugger
   docile
   dtk-common!
   dtk-common-core!
   dtk-dsl!
-  em-ssh (= 0.6.5)
   eventmachine (= 1.0.8)
   excon
-  grit
   i18n
   iconv
   innate (= 2012.03)
@@ -191,7 +185,7 @@ DEPENDENCIES
   mime
   mustache (~> 0.99.8)
   net-scp
-  pg (= 0.14.1)
+  pg (~> 0.15.0)
   puppet (= 3.4.0)
   ramaze (= 2012.04.14)
   redis
@@ -206,4 +200,4 @@ DEPENDENCIES
   thin
 
 BUNDLED WITH
-   1.16.0
+   1.16.1

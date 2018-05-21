@@ -19,12 +19,13 @@ module Puppet
 end
 require 'puppet/resource'
 require 'puppet/type'
-require 'puppet/parser'
+# Ruby 2.2.9: comment out all parser related requires
+#require 'puppet/parser'
 
 module DTK; class ConfigAgent; class Adapter::Puppet
-  r8_nested_require('parser', 'external_dependency')
-  r8_nested_require('parser', 'modulefile')
-  r8_nested_require('parser', 'metadata_file')
+  #r8_nested_require('parser', 'external_dependency')
+  #r8_nested_require('parser', 'modulefile')
+  #r8_nested_require('parser', 'metadata_file')
 
   module ParserMixin
     def parse_provider_specific_dependencies?(impl_obj)

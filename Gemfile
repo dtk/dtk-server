@@ -1,7 +1,8 @@
 source 'https://rubygems.org'
+ruby '2.2.9'
 
 # dtk gems
-gem 'dtk-common', :github => 'dtk/dtk-common'
+gem 'dtk-common', :github => 'dtk/dtk-common', :branch => 'gitlab-grit'
 gem 'dtk-common-core', :github => 'dtk/dtk-common-core'
 gem 'dtk-dsl', :github => 'dtk/dtk-dsl'
 
@@ -13,7 +14,7 @@ gem 'activesupport'
 gem 'i18n'
 gem 'ruote', '2.3.0.1'
 gem 'eventmachine', '1.0.8'
-gem 'pg', '0.14.1'
+gem 'pg', '~> 0.15.0'
 gem 'json', '1.8.3'
 gem 'rspec', '2.99.0'
 gem 'sshkey', '1.6.1'
@@ -37,16 +38,18 @@ group :development do
 case RUBY_VERSION
   when /1.8.7.*/ then
     gem 'ruby-debug', '0.10.4'
-  else
+  when /1.9.3.*/ then
     gem 'debugger'
     gem 'em-ssh', '0.6.5'
+  else
+    gem 'byebug'
   end
 end
 
 gem 'mcollective-client', '~> 2.5.2'
 gem 'puppet', '3.4.0'
 gem 'stomp', '1.1.9'
-gem 'grit'
+#gem 'grit'
 gem 'innate', '2012.03' #version compatible with ramaze','2012.04.14
 
 

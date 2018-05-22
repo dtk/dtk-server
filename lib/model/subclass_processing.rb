@@ -143,7 +143,6 @@ module DTK
         assembly_workspace: :component,
         component_template: :component,
         component_instance: :component,
-        node_group: :node,
         node_group: :node
       }
 

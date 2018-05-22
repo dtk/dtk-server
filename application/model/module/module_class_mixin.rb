@@ -84,7 +84,7 @@ module DTK
       list(opts).first
     end
 
-    def list(opts = opts.new)
+    def list(opts = Opts.new)
       diff               = opts[:diff]
       namespace          = opts[:namespace]
       filter             = opts[:filter]

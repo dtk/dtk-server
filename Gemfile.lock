@@ -1,13 +1,13 @@
 GIT
   remote: git://github.com/dtk/dtk-common-core.git
-  revision: 7f42766e5ddd768f6888afcd7b465880e8b65cf4
+  revision: eb1ce1e5b5210616ae96cfa479fca501b8161a98
   specs:
     dtk-common-core (0.11.1)
-      rest-client (= 1.6.7)
+      rest-client (~> 1.7.3)
 
 GIT
   remote: git://github.com/dtk/dtk-common.git
-  revision: 32c0ffc7ab7fd03a4be0da322fda7b9d2349059e
+  revision: 59a699d5e704835dea2d16201082f45c7a20ff7b
   specs:
     dtk-common (0.11.1)
       colorize (~> 0.5.8)
@@ -79,14 +79,13 @@ GEM
       stomp
       systemu
     mime (0.4.3)
-    mime-types (3.1)
-      mime-types-data (~> 3.2015)
-    mime-types-data (3.2016.0521)
+    mime-types (2.99.3)
     minitest (5.10.3)
     mustache (0.99.8)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (2.9.4)
+    netrc (0.11.0)
     parslet (1.5.0)
       blankslate (~> 2.0)
     pg (0.15.1)
@@ -99,8 +98,9 @@ GEM
     ramaze (2012.04.14)
       innate (>= 2012.03)
     redis (3.2.0)
-    rest-client (1.6.7)
-      mime-types (>= 1.16)
+    rest-client (1.7.3)
+      mime-types (>= 1.16, < 3.0)
+      netrc (~> 0.7)
     rgen (0.6.6)
     rspec (2.99.0)
       rspec-core (~> 2.99.0)

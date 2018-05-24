@@ -566,6 +566,11 @@ module DTK; class  Assembly
     end
 
     def order_components_by_workflow(components, workflow_delete_order)
+      require 'byebug'; 
+      require "byebug/core"
+      Byebug.wait_connection = true
+      Byebug.start_server("localhost", 3333)
+      debugger
       return components unless workflow_delete_order
 
       ordered_components = []
@@ -576,7 +581,12 @@ module DTK; class  Assembly
       end
 
       remaining_components = components - ordered_components
-      ordered_components + remaining_components
+      # ordered_components + remaining_components
+      if ordered_components.nil? || ordered_components.empty?
+        components
+      else
+        ordered_components 
+      end
     end
 
     def delete_recursive(service, parent_task, opts = {})

@@ -129,9 +129,13 @@ module DTK; class  Assembly
         opts.merge!(skip_running_check: true)
         if components = node.get_components
           cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
-          
+          require 'byebug'; 
+          require "byebug/core"
+          Byebug.wait_connection = true
+          Byebug.start_server("localhost", 3333)
+          debugger
           # order components by 'delete' action inside assembly workflow if exists
-          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
+          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance, opts = {serialized_form: true}))
           ordered_components.uniq.each do |component|
             next if component.get_field?(:component_type).eql?('ec2__node')
             cmp_action = nil
@@ -267,6 +271,7 @@ module DTK; class  Assembly
             cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
 
             # order components by 'delete' action inside assembly workflow if exists
+            # DEBUG THIS 
             ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
             ordered_components.each do |component|
               cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")

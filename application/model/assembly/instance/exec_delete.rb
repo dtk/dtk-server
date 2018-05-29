@@ -124,16 +124,11 @@ module DTK; class  Assembly
           assembly_instance_id: assembly_instance.id,
           assembly_instance_name: assembly_instance.display_name_print_form
         }
-        
+
         node = node_idh.create_object.update_object!(:display_name)
         opts.merge!(skip_running_check: true)
         if components = node.get_components
           cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
-          require 'byebug'; 
-          require "byebug/core"
-          Byebug.wait_connection = true
-          Byebug.start_server("localhost", 3333)
-          debugger
           # order components by 'delete' action inside assembly workflow if exists
           ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance, opts = {serialized_form: true}))
           ordered_components.uniq.each do |component|

@@ -88,7 +88,22 @@ module DTK; class Task
       
     def component_order_from_task_template_content(type, task_template_content)
       if serialization_form = task_template_content && task_template_content.serialization_form
-        (serialization_form[:subtasks] || []).inject([]) { |a, subtask| a + subtype_component_types(type, subtask) }
+        if !serialization_form[:subtasks].nil? && serialization_form[:subtasks].length > 1
+          (serialization_form[:subtasks] || []).inject([]) { |a, subtask| a + subtype_component_types(type, subtask) }
+        else
+          subtasks_from_serialization_form(serialization_form).inject([]) { |a, subtask| a + subtype_component_types(type, subtask) }
+        end
+      end
+    end
+  
+    def subtasks_from_serialization_form(serialization_form)
+      if serialization_form[:subtasks]
+        serialization_form[:subtasks]
+      elsif COMPONENT_OR_ACTION_KEYS[:delete].find { | key| serialization_form.has_key?(key) }
+        # serialization_form has a single action or component
+        [serialization_form]
+      else
+        []
       end
     end
 

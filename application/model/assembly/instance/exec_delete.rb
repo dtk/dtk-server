@@ -131,6 +131,7 @@ module DTK; class  Assembly
           cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
           # order components by 'delete' action inside assembly workflow if exists
           ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance, opts = {serialized_form: true}))
+          opts[:return_task] = true if ordered_components.size > 1
           ordered_components.uniq.each do |component|
             next if component.get_field?(:component_type).eql?('ec2__node')
             cmp_action = nil
@@ -225,7 +226,7 @@ module DTK; class  Assembly
         staged_instances.each do |v|
           service_instances << v[:display_name]
         end
-        
+
         if !opts[:recursive] && is_target_service_instance?
           fail ErrorUsage, "The context service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-r' to remove all." unless staged_instances.empty?
         end

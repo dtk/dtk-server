@@ -41,7 +41,11 @@ Start the Dtk Server docker container with the directory from above used as a vo
 docker run --name dtk -v /usr/share/docker/dtk:/host_volume -p 8080:80 -p 6163:6163 -p 2222:22 -d getdtk/dtk-server
 ```
 
-This will pull the latest available Dtk Server Docker image (`getdtk/dtk-server`).
+This will pull the latest available Dtk Server Docker image (`getdtk/dtk-server`).  
+Next step is to start the `dtk-arbiter` container:  
+```
+docker run --name dtk-arbiter -v /usr/share/docker/dtk:/host_volume -v /var/run/docker.sock:/var/run/docker.sock -e HOST_VOLUME=/usr/share/docker/dtk $additional_args --restart=on-failure -td getdtk/dtk-arbiter
+```  
 
 Example of starting a Dtk Server Docker container from a tagged Docker image.
 

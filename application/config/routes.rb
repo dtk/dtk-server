@@ -58,6 +58,7 @@ DTK::ReactorRoute.draw do
   post 'api/v1/services/:service_id/:task_action'     => 'v1::service#exec'
   post 'api/v1/services/generate_service_name'        => 'v1::service#generate_service_name'
   post 'api/v1/services/delete_by_path'               => 'v1::service#delete_by_path'
+  post 'api/v1/services/add_by_path'                  => 'v1::service#add_by_path'
 
   # TODOs associated with following routes
 

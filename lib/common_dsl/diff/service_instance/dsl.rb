@@ -21,10 +21,6 @@ module DTK; module CommonDSL
       module DSL
         # Parses and processes any service instance dsl changes; if dsl updated then updates diff_result or raises error
         def self.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
-          require 'debugger'
-          Debugger.wait_connection = true
-          Debugger.start_remote(nil,7080)
-          debugger
           # TODO: DTK-2738:  service_instance.get_dsl_locations will have path of any nested dsl file that is in an import
           #  statement from service_instance_top_dsl_file or any nested dsl file that is recursively broght in throgh imports
           #  This will be used in Parse.matching_dsl_file_obj?; it will return non nil if top or any nested
@@ -119,19 +115,19 @@ module DTK; module CommonDSL
         end
 
         def self.cmp_modules_with_namespaces_hash(module_name_input, namespace_name_input, version_input)
-        {
-          display_name: module_name_input,
-          namespace_name: namespace_name_input,
-          version_info: version_input
-        }
-      end
+          {
+            display_name: module_name_input,
+            namespace_name: namespace_name_input,
+            version_info: version_input
+          }
+        end
 
-      def self.ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts = {})
-        cmp_modules_with_namespaces = (parsed_dependent_modules || {}).map do |namespace_name, version|
-          module_namespace, module_name = namespace_name.split('/')
-          cmp_modules_with_namespaces_hash(module_name, module_namespace, version)
-        end.compact
-      end
+        def self.ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts = {})
+          cmp_modules_with_namespaces = (parsed_dependent_modules || {}).map do |namespace_name, version|
+            module_namespace, module_name = namespace_name.split('/')
+            cmp_modules_with_namespaces_hash(module_name, module_namespace, version)
+          end.compact
+        end
 
       end
     end

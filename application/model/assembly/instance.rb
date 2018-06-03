@@ -36,6 +36,7 @@ module DTK; class  Assembly
     require_relative('instance/describe')
     require_relative('instance/mixin')
     require_relative('instance/delete_by_path')
+    require_relative('instance/add_by_path')
 
     include ComponentLink::Mixin
     include ViolationsMixin
@@ -55,6 +56,7 @@ module DTK; class  Assembly
     include Describe
     include Mixin
     include DeleteByPath
+    include AddByPath
 
     ACTION_DELIMITER = '.'
 

@@ -126,12 +126,16 @@ module DTK; class  Assembly
         }
 
         node = node_idh.create_object.update_object!(:display_name)
-        opts.merge!(skip_running_check: true)
+        opts.merge!(skip_running_check: true, uninstall: opts[:uninstall])
         if components = node.get_components
           cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
           # order components by 'delete' action inside assembly workflow if exists
-          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance, opts = {serialized_form: true}))
-          opts[:return_task] = true if ordered_components.size > 1
+          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance, opts.merge!(serialized_form: true)))
+          if opts[:uninstall]
+            opts[:return_task] = true
+          else
+            opts[:return_task] = false
+          end
           ordered_components.uniq.each do |component|
             next if component.get_field?(:component_type).eql?('ec2__node')
             cmp_action = nil
@@ -275,7 +279,7 @@ module DTK; class  Assembly
               if component.is_node_component?
                 node_component = NodeComponent.node_component(component)
                 if node = node_component.node
-                  node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task, node_component: node_component))
+                  node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task, node_component: node_component, uninstall: opts[:uninstall]))
                 end
               end
 

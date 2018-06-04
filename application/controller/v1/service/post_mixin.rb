@@ -119,7 +119,9 @@ module DTK
         end
 
         response = 
-          unless exec__delete_info.nil? 
+          if !exec__delete_info.nil? && exec__delete_info[:has_ec2]
+            { message: "Uninstall started. For more information use 'dtk task-status'."}
+          else
             { message: "Delete procedure started. For more information use 'dtk task-status'."}
           end
         

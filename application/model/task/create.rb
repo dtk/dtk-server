@@ -79,6 +79,7 @@ module DTK; class Task
       rescue Task::Template::ParsingError => e
         return nil
       rescue Task::Template::TaskActionNotFoundError => e
+        opts.merge!(uninstall: true)
         return get_reversed_create_workflow_order(assembly)
       end
       component_order_from_task_template_content(:delete, task_template_content)

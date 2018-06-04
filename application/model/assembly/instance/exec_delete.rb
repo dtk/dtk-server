@@ -131,6 +131,7 @@ module DTK; class  Assembly
           cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
           # order components by 'delete' action inside assembly workflow if exists
           ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance, opts.merge!(serialized_form: true)))
+
           if opts[:uninstall]
             opts[:return_task] = true
           else
@@ -249,6 +250,12 @@ module DTK; class  Assembly
         end
 
         task = task.save_and_add_ids
+
+        task.subtasks.each  do |st|
+          if st[:display_name].include?("ec2")
+            ret.merge!(has_ec2: true)
+          end
+        end
         
         Workflow.create(task).defer_execution
         

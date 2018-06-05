@@ -276,11 +276,27 @@ module DTK; class  Assembly
 
         if assembly_wide_node = assembly_instance.has_assembly_wide_node?
           if components = assembly_wide_node.get_components
+            require 'debugger'
+            Debugger.wait_connection = true
+            Debugger.start_remote(nil,7779)
+            debugger
             cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
+            has_delete_task = !Task::Template::ConfigComponents.get_serialized_template_content(self, "delete").empty?
 
             # order components by 'delete' action inside assembly workflow if exists
-            # DEBUG THIS 
-            ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}) 
+            # DEBUG THIS
+            ordered_components = []
+            if has_delete_task
+              all_components = []
+              all_nested_components!(all_components, components)
+              ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance))
+            else
+              ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}) 
+            end
+
+            # ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}) 
+            # ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance))
+
             ordered_components.each do |component|
               cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
 
@@ -353,6 +369,17 @@ module DTK; class  Assembly
         end
 
         task
+      end
+
+      def all_nested_components!(all_components, components)
+        components.each do |component|
+          if component.is_node_component?
+            node_component_components = component.get_components
+            all_nested_components!(all_components, node_component_components)
+          else
+            all_components << component
+          end
+        end
       end
   
     end

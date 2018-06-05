@@ -89,13 +89,18 @@ module DTK
           delete_action: 'delete',
           delete_params: [assembly_instance.id_handle],
           recursive: recursive,
-          donot_delete_assembly_from_database: true
-        }
+          donot_delete_assembly_from_database: true,
+          delete_only: true
+        }        
 
         nodes = assembly_instance.info_about(:nodes, datatype: :node)
-        assembly_instance.exec__delete(Opts.new(opts_hash))
+        exec__delete_info = assembly_instance.exec__delete(Opts.new(opts_hash))
 
-        rest_ok_response nodes
+        if exec__delete_info[:has_ec2]
+          rest_ok_response nodes
+        else
+          rest_ok_response
+        end
       end
 
       def uninstall
@@ -119,7 +124,7 @@ module DTK
         end
 
         response = 
-          if !exec__delete_info.nil? && exec__delete_info[:has_ec2]
+          if !exec__delete_info.nil? && exec__delete_info[:has_ec2] || opts_hash[:uninstall]
             { message: "Uninstall started. For more information use 'dtk task-status'."}
           else
             { message: "Delete procedure started. For more information use 'dtk task-status'."}

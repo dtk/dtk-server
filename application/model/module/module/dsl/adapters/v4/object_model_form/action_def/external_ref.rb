@@ -21,7 +21,7 @@ module DTK; class ModuleDSL; class V4
       # can update ret['action_def']
       def self.external_ref?(ret, component_name, input_hash, action_defs_info)
         if input_hash['external_ref'] 
-          external_ref_aux(input_hash['external_ref']) # this is for legacy
+          external_ref_aux(input_hash['external_ref'], component_name) # this is for legacy
         else
           create_action?(ret, component_name, action_defs_info) || function?(action_defs_info) ||  docker?(action_defs_info)
         end

@@ -33,7 +33,7 @@ module DTK
             Transaction do
               component = node.add_component(aug_cmp_template, component_title: opts[:component_title], detail_to_include: [:component_dependencies]).create_object
               Component.update_workflow(self, node, component, component_title: opts[:component_title]) 
-              
+
               LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
 
               

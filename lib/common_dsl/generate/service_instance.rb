@@ -22,6 +22,10 @@ module DTK
         def self.generate_canonical_form(service_instance, service_module_branch)
           ContentInput.generate_for_service_instance(service_instance, service_module_branch)
         end
+
+        def self.generate_base_canonical_form(service_instance, service_module_branch)
+          ContentInput.generate_base_content_for_service_instance(service_instance, service_module_branch)
+        end
         
         def self.generate_dsl_and_push!(service_instance, service_module_branch)
           add_service_dsl_files(service_instance, service_module_branch)
@@ -29,16 +33,25 @@ module DTK
           service_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
           service_module_branch
         end
-        
+
         def self.add_service_dsl_files(service_instance, service_module_branch)
           # content_input is a dsl version independent canonical form that has all content needed to
+          # content_input = generate_base_canonical_form(service_instance, service_module_branch)
           content_input = generate_canonical_form(service_instance, service_module_branch)
 
           dsl_version   = service_module_branch.dsl_version
+          # top_file_path = FileType::ServiceInstance::DSLFile::Top::Hidden.canonical_path
           top_file_path = FileType::ServiceInstance::DSLFile::Top.canonical_path
-          check_for_assembly_wide(content_input)
           file_path__content_array = FileGenerator.generate_yaml_file_path__content_array(:service_instance, top_file_path, content_input, dsl_version)
           DirectoryGenerator.add_files(service_module_branch, file_path__content_array, donot_push_changes: true)
+        end
+
+        def self.generate_service_dsl_content(service_instance, service_module_branch)
+          content_input = generate_canonical_form(service_instance, service_module_branch)
+          dsl_version   = service_module_branch.dsl_version
+          top_file_path = FileType::ServiceInstance::DSLFile::Top.canonical_path
+          check_for_assembly_wide(content_input)
+          FileGenerator.generate_yaml_file_path__content_array(:service_instance, top_file_path, content_input, dsl_version)
         end
 
         private

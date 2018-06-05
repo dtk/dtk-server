@@ -60,7 +60,13 @@ module DTK
       end
 
       def assembly_instance
-        @assembly_instance ||= (@service_instance && @service_instance.assembly_instance) || fail(Error, "Unexpected that @service_instance is nil") 
+        @assembly_instance ||=
+          if @service_instance
+            @service_instance.respond_to?(:assembly_instance) ? @service_instance.assembly_instance : @service_instance.copy_as_assembly_instance
+          end
+
+        fail(Error, "Unexpected that @service_instance is nil") unless @assembly_instance
+        @assembly_instance
       end
 
       def project

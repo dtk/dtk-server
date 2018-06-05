@@ -115,19 +115,19 @@ module DTK; module CommonDSL
         end
 
         def self.cmp_modules_with_namespaces_hash(module_name_input, namespace_name_input, version_input)
-        {
-          display_name: module_name_input,
-          namespace_name: namespace_name_input,
-          version_info: version_input
-        }
-      end
+          {
+            display_name: module_name_input,
+            namespace_name: namespace_name_input,
+            version_info: version_input
+          }
+        end
 
-      def self.ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts = {})
-        cmp_modules_with_namespaces = (parsed_dependent_modules || {}).map do |namespace_name, version|
-          module_namespace, module_name = namespace_name.split('/')
-          cmp_modules_with_namespaces_hash(module_name, module_namespace, version)
-        end.compact
-      end
+        def self.ret_cmp_modules_with_namespaces(parsed_dependent_modules, opts = {})
+          cmp_modules_with_namespaces = (parsed_dependent_modules || {}).map do |namespace_name, version|
+            module_namespace, module_name = namespace_name.split('/')
+            cmp_modules_with_namespaces_hash(module_name, module_namespace, version)
+          end.compact
+        end
 
       end
     end

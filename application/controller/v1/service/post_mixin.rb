@@ -246,6 +246,14 @@ module DTK
         rest_ok_response response
       end
 
+      def delete_by_path
+        rest_ok_response assembly_instance.delete_by_path(required_request_params(:path))
+      end
+
+      def add_by_path
+        rest_ok_response assembly_instance.add_by_path(required_request_params(:path), required_request_params(:content))
+      end
+
       private
 
       def execute_task(task)

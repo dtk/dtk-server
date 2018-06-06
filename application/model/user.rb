@@ -105,10 +105,16 @@ module XYZ
       (self[:settings] || {})[key]
     end
 
-    def public_keys()
+    def public_keys(opts = {})
+      filter = [:eq, :owner_id, self.id]
+
+      if additional_filter = opts[:filter]
+        filter = [:and, additional_filter, filter]
+      end
+
       sp_hash = {
-        cols: [:id, :display_name, :ssh_rsa_pub_key, :repo_manager_direct_access],
-        filter: [:eq, :owner_id, self.id]
+        cols: [:id, :display_name, :ssh_rsa_pub_key, :repo_manager_direct_access, :type],
+        filter: filter
       }
       RepoUser.get_objs(model_handle(:repo_user), sp_hash)
     end

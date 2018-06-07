@@ -172,15 +172,11 @@
   "account_ssh_keys": {
     "order": [
       "id",
-      "keypair_name",
-      "catalog_access?",
-      "catalog_user"
+      "keypair_name"
     ],
     "mapping": {
       "id": "dtk_id",
-      "keypair_name": "display_name",
-      "catalog_access?": "repo_manager_direct_access",
-      "catalog_user": "current_catalog_username"
+      "keypair_name": "display_name"
     }
   },
   "module": {

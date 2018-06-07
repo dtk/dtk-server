@@ -281,14 +281,14 @@ module DTK; class  Assembly
             has_delete_task = delete_task && !delete_task.empty?
               
             # order components by 'delete' action inside assembly workflow if exists
-            # DEBUG THIS
             ordered_components = []
-            if has_delete_task && !opts[:uninstall]
-             all_components = []
-              all_nested_components!(all_components, components)
+            all_components = []
+            all_nested_components!(all_components, components)
+            
+            if has_delete_task && !opts[:uninstall]             
               ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance)).uniq
             else
-              ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}).uniq
+              ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance, opts), {return_all_nodes: true}).uniq
             end
 
             # ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}) 
@@ -298,9 +298,11 @@ module DTK; class  Assembly
               cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
 
               if component.is_node_component?
-                node_component = NodeComponent.node_component(component)
-                if node = node_component.node
-                  node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task, node_component: node_component, uninstall: opts[:uninstall], delete_only: opts[:delete_only]))
+                unless opts[:uninstall]
+                  node_component = NodeComponent.node_component(component)
+                  if node = node_component.node
+                    node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task, node_component: node_component, uninstall: opts[:uninstall], delete_only: opts[:delete_only]))
+                  end
                 end
               end
 

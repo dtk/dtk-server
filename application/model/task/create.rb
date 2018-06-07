@@ -73,6 +73,9 @@ module DTK; class Task
       target_idh = target_idh_from_assembly(assembly)
       task_mh    = target_idh.create_childMH(:task)
 
+      if opts[:uninstall]
+        return get_reversed_create_workflow_order(assembly)
+      end
       task_template_content = nil
       begin
         task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'delete', serialized_form: opts[:serialized_form] })

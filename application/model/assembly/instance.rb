@@ -583,9 +583,9 @@ module DTK; class  Assembly
       end
 
       #ordered_components + remaining_components
-      if opts[:uninstall]
-        return components
-      end
+      # if opts[:uninstall]
+      #   return components
+      # end
 
       if delete_template_content && !opts[:return_all_nodes]
         ordered_components

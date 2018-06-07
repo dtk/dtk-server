@@ -276,22 +276,19 @@ module DTK; class  Assembly
 
         if assembly_wide_node = assembly_instance.has_assembly_wide_node?
           if components = assembly_wide_node.get_components
-            require 'debugger'
-            Debugger.wait_connection = true
-            Debugger.start_remote(nil,7779)
-            debugger
             cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
-            has_delete_task = !Task::Template::ConfigComponents.get_serialized_template_content(self, "delete").empty?
-
+            delete_task = Task::Template::ConfigComponents.get_serialized_template_content(self, "delete")
+            has_delete_task = delete_task && !delete_task.empty?
+              
             # order components by 'delete' action inside assembly workflow if exists
             # DEBUG THIS
             ordered_components = []
-            if has_delete_task
-              all_components = []
+            if has_delete_task && !opts[:uninstall]
+             all_components = []
               all_nested_components!(all_components, components)
-              ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance))
+              ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance)).uniq
             else
-              ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}) 
+              ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}).uniq
             end
 
             # ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}) 
@@ -311,7 +308,15 @@ module DTK; class  Assembly
               nodes_in_delete_workflow = delete_workflow ? order_components_by_workflow([component], delete_workflow) : []
               if !component.is_node_component? || !opts[:delete_only] || !nodes_in_delete_workflow.empty?
                 cmp_action   = nil
-                cmp_opts.merge!(delete_params: [component.id_handle, assembly_wide_node.id])
+                delete_from_db_node = assembly_wide_node
+                if node_cmp = component.get_node#.node_component
+                  if node_as_component = !node_cmp.is_assembly_wide_node? && node_cmp.node_component
+                    node_component = NodeComponent.node_component(node_as_component.component)
+                    delete_from_db_node = node_component.node
+                  end
+                end
+
+                cmp_opts.merge!(delete_params: [component.id_handle, delete_from_db_node.id])
 
                 # fix to add :retry to the cmp_top_task
                 task_template_content = get_task_template_content(model_handle(:task_template), component)
@@ -329,7 +334,7 @@ module DTK; class  Assembly
                   Log.info("Ignoring component 'delete' action does not exist.")
                 end
 
-                delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, assembly_wide_node, cmp_opts)
+                delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, delete_from_db_node, cmp_opts)
                 has_steps = true
                 cmp_top_task.add_subtask(cmp_action) if cmp_action
                 cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
@@ -374,8 +379,11 @@ module DTK; class  Assembly
       def all_nested_components!(all_components, components)
         components.each do |component|
           if component.is_node_component?
-            node_component_components = component.get_components
+            node_component = NodeComponent.node_component(component)
+            node = node_component.node
+            node_component_components = node.get_components
             all_nested_components!(all_components, node_component_components)
+            all_components << component
           else
             all_components << component
           end

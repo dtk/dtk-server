@@ -124,7 +124,7 @@ module DTK
         end
 
         response = 
-          if !exec__delete_info.nil? && exec__delete_info[:has_ec2] || opts_hash[:uninstall]
+          if !exec__delete_info.nil? && (exec__delete_info[:has_ec2] || opts_hash[:uninstall])
             { message: "Uninstall started. For more information use 'dtk task-status'."}
           else
             { message: "Delete procedure started. For more information use 'dtk task-status'."}

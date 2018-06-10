@@ -127,7 +127,7 @@ module DTK
           if !exec__delete_info.nil? && (exec__delete_info[:has_ec2] || opts_hash[:uninstall])
             { message: "Uninstall started. For more information use 'dtk task-status'."}
           elsif force
-            { message: "The service instance is being uninstalled with '--force' flag, please manually delete nodes."}
+            { message: "The service instance is uninstalled with '--force' flag. If you want to delete nodes, you will need to do it manually"}
           else
             { message: "Delete procedure started. For more information use 'dtk task-status'."}
           end

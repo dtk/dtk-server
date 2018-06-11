@@ -69,16 +69,20 @@ module DTK; class Task
       NodeGroupProcessing.decompose_node_groups!(task, opts)
     end
 
-    def get_delete_workflow_order(assembly)
+    def get_delete_workflow_order(assembly, opts = {})
       target_idh = target_idh_from_assembly(assembly)
       task_mh    = target_idh.create_childMH(:task)
 
+      if opts[:uninstall]
+        return get_reversed_create_workflow_order(assembly)
+      end
       task_template_content = nil
       begin
-        task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'delete' })
+        task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'delete', serialized_form: opts[:serialized_form] })
       rescue Task::Template::ParsingError => e
         return nil
       rescue Task::Template::TaskActionNotFoundError => e
+        opts.merge!(uninstall: true)
         return get_reversed_create_workflow_order(assembly)
       end
       component_order_from_task_template_content(:delete, task_template_content)
@@ -88,7 +92,22 @@ module DTK; class Task
       
     def component_order_from_task_template_content(type, task_template_content)
       if serialization_form = task_template_content && task_template_content.serialization_form
-        (serialization_form[:subtasks] || []).inject([]) { |a, subtask| a + subtype_component_types(type, subtask) }
+        if !serialization_form[:subtasks].nil? && serialization_form[:subtasks].length > 1
+          (serialization_form[:subtasks] || []).inject([]) { |a, subtask| a + subtype_component_types(type, subtask) }
+        else
+          subtasks_from_serialization_form(serialization_form).inject([]) { |a, subtask| a + subtype_component_types(type, subtask) }
+        end
+      end
+    end
+  
+    def subtasks_from_serialization_form(serialization_form)
+      if serialization_form[:subtasks]
+        serialization_form[:subtasks]
+      elsif COMPONENT_OR_ACTION_KEYS[:delete].find { | key| serialization_form.has_key?(key) }
+        # serialization_form has a single action or component
+        [serialization_form]
+      else
+        []
       end
     end
 

@@ -124,14 +124,20 @@ module DTK; class  Assembly
           assembly_instance_id: assembly_instance.id,
           assembly_instance_name: assembly_instance.display_name_print_form
         }
-        
+
         node = node_idh.create_object.update_object!(:display_name)
-        opts.merge!(skip_running_check: true)
+        opts.merge!(skip_running_check: true, uninstall: opts[:uninstall])
         if components = node.get_components
           cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
-          
           # order components by 'delete' action inside assembly workflow if exists
-          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
+          ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance, opts.merge!(serialized_form: true)), opts.merge!(uninstall: opts[:uninstall]))
+
+          if opts[:uninstall]
+            opts[:return_task] = true
+          else
+            opts[:return_task] = false
+          end
+          
           ordered_components.uniq.each do |component|
             next if component.get_field?(:component_type).eql?('ec2__node')
             cmp_action = nil
@@ -177,7 +183,7 @@ module DTK; class  Assembly
         
         # task.add_subtask(command_and_control_action) if command_and_control_action
         # task.add_subtask(delete_from_database) if delete_from_database
-        return task if opts[:return_task]
+        return task if opts[:return_task] || opts[:delete_only]
         
         task = task.save_and_add_ids
 
@@ -226,7 +232,7 @@ module DTK; class  Assembly
         staged_instances.each do |v|
           service_instances << v[:display_name]
         end
-        
+
         if !opts[:recursive] && is_target_service_instance?
           fail ErrorUsage, "The context service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-r' to remove all." unless staged_instances.empty?
         end
@@ -245,6 +251,12 @@ module DTK; class  Assembly
         end
 
         task = task.save_and_add_ids
+
+        task.subtasks.each  do |st|
+          if st[:display_name].include?("ec2")
+            ret.merge!(has_ec2: true)
+          end
+        end
         
         Workflow.create(task).defer_execution
         
@@ -265,43 +277,75 @@ module DTK; class  Assembly
         if assembly_wide_node = assembly_instance.has_assembly_wide_node?
           if components = assembly_wide_node.get_components
             cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
-
+            delete_task = Task::Template::ConfigComponents.get_serialized_template_content(self, "delete")
+            has_delete_task = delete_task && !delete_task.empty?
+              
             # order components by 'delete' action inside assembly workflow if exists
-            ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance))
+            ordered_components = []
+            all_components = []
+            all_nested_components!(all_components, components)
+            
+            if has_delete_task && !opts[:uninstall]             
+              ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance)).uniq
+            else
+              ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance, opts), {return_all_nodes: true}).uniq
+            end
+
+            # ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}) 
+            # ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance))
+
             ordered_components.each do |component|
               cmp_top_task = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete component '#{component.display_name_print_form}'")
 
               if component.is_node_component?
-                node_component = NodeComponent.node_component(component)
-                if node = node_component.node
-                  node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task, node_component: node_component))
+                unless opts[:uninstall]
+                  node_component = NodeComponent.node_component(component)
+                  if node = node_component.node
+                    node_top_task = exec__delete_node(node.id_handle, opts.merge(return_task: true, assembly_instance: assembly_instance, delete_action: 'delete_node', delete_params: [node.id_handle], top_task: task, node_component: node_component, uninstall: opts[:uninstall], delete_only: opts[:delete_only]))
+                  end
                 end
               end
 
-              cmp_action   = nil
-              cmp_opts.merge!(delete_params: [component.id_handle, assembly_wide_node.id])
-
-              # fix to add :retry to the cmp_top_task
-              task_template_content = get_task_template_content(model_handle(:task_template), component)
-                task_template_content.each do |ttc|
-                  cmp = ttc[:components] || nil if ttc.is_a?(Hash)
-                  next if cmp.nil?
-                  cmp.first.gsub('::', '__').gsub(/\.[^\.]+$/, '') 
-                  component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
+              delete_workflow = Task.get_delete_workflow_order(assembly_instance)
+              nodes_in_delete_workflow = delete_workflow ? order_components_by_workflow([component], delete_workflow) : []
+              if !component.is_node_component? || !opts[:delete_only] || !nodes_in_delete_workflow.empty?
+                cmp_action   = nil
+                delete_from_db_node = assembly_wide_node
+                if node_cmp = component.get_node#.node_component
+                  if node_as_component = !node_cmp.is_assembly_wide_node? && node_cmp.node_component
+                    node_component = NodeComponent.node_component(node_as_component.component)
+                    delete_from_db_node = node_component.node
+                  end
                 end
 
-              begin                
-                # no need to check if admin_op_status is 'running' with nodes as components so commented that out for now
-                cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts)# if assembly_wide_node.get_admin_op_status.eql?('running')
-              rescue Task::Template::ParsingError => e
-                Log.info("Ignoring component 'delete' action does not exist.")
+                cmp_opts.merge!(delete_params: [component.id_handle, delete_from_db_node.id])
+
+                # fix to add :retry to the cmp_top_task
+                task_template_content = get_task_template_content(model_handle(:task_template), component)
+                  task_template_content.each do |ttc|
+                    cmp = ttc[:components] || nil if ttc.is_a?(Hash)
+                    next if cmp.nil?
+                    cmp.first.gsub('::', '__').gsub(/\.[^\.]+$/, '') 
+                    component[:retry] = ttc[:retry] if cmp.include?(component[:display_name])
+                  end
+
+                begin                
+                  # no need to check if admin_op_status is 'running' with nodes as components so commented that out for now
+                  cmp_action = Task.create_for_ad_hoc_action(assembly_instance, component, cmp_opts)# if assembly_wide_node.get_admin_op_status.eql?('running')
+                rescue Task::Template::ParsingError => e
+                  Log.info("Ignoring component 'delete' action does not exist.")
+                end
+
+                delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, delete_from_db_node, cmp_opts)
+                has_steps = true
+                cmp_top_task.add_subtask(cmp_action) if cmp_action
+                cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
+                task.add_subtask(cmp_top_task)
               end
 
-              delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, assembly_wide_node, cmp_opts)
-              has_steps = true
-              cmp_top_task.add_subtask(cmp_action) if cmp_action
-              cmp_top_task.add_subtask(delete_cmp_from_database) if delete_cmp_from_database
-              task.add_subtask(cmp_top_task)
+              
+              has_steps = true unless task.subtasks.empty?
+              task
             end
           end
         end
@@ -332,6 +376,20 @@ module DTK; class  Assembly
         end
 
         task
+      end
+
+      def all_nested_components!(all_components, components)
+        components.each do |component|
+          if component.is_node_component?
+            node_component = NodeComponent.node_component(component)
+            node = node_component.node
+            node_component_components = node.get_components
+            all_nested_components!(all_components, node_component_components)
+            all_components << component
+          else
+            all_components << component
+          end
+        end
       end
   
     end

@@ -571,8 +571,9 @@ module DTK; class  Assembly
       get_obj(target.model_handle(:assembly_instance), sp_hash)
     end
 
-    def order_components_by_workflow(components, workflow_delete_order)
+    def order_components_by_workflow(components, workflow_delete_order, opts={})
       return components unless workflow_delete_order
+      delete_template_content = Task::Template::ConfigComponents.get_serialized_template_content(self, "delete")
 
       ordered_components = []
       workflow_delete_order.each do |o_cmp|
@@ -582,7 +583,21 @@ module DTK; class  Assembly
       end
 
       remaining_components = components - ordered_components
-      ordered_components + remaining_components
+
+      if opts[:return_all_nodes]
+        remaining_components.reject! {|cmp| !cmp.is_node_component? }
+      end
+
+      #ordered_components + remaining_components
+      # if opts[:uninstall]
+      #   return components
+      # end
+
+      if delete_template_content && !opts[:return_all_nodes]
+        ordered_components
+      else
+        ordered_components + remaining_components
+      end
     end
 
     def delete_recursive(service, parent_task, opts = {})

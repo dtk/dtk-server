@@ -142,7 +142,9 @@ module DTK
             end
           end
 
-        subtasks.each(&:set_and_return_types!)
+        subtasks.each do |st|
+          st.set_and_return_types! if st
+        end
         self[:type] = type
       end
 

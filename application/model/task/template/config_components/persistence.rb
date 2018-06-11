@@ -32,8 +32,8 @@ module DTK; class Task; class Template; class ConfigComponents
             return ret
           end
         end
-
         if serialized_content = get_serialized_content_from_assembly(assembly, task_action, task_params: opts[:task_params])
+          serialized_result = Content.reify(serialized_content)
           if opts[:serialized_form]
             Content.reify(serialized_content)
           else

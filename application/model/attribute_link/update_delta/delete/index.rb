@@ -33,7 +33,9 @@ module DTK; class AttributeLink::UpdateDelta
         # null - (empty)
         # integers, or
         # keys
-        index_class(link_info).process!(attr_mh, link_info)
+        if index_class = index_class?(link_info)
+          index_class.process!(attr_mh, link_info)
+        end
       end
 
       private
@@ -42,7 +44,7 @@ module DTK; class AttributeLink::UpdateDelta
         new(attr_mh, link_info).process!
       end
 
-      def self.index_class(link_info)
+      def self.index_class?(link_info)
         if link_info.other_links.empty?
           Null
         else
@@ -54,9 +56,8 @@ module DTK; class AttributeLink::UpdateDelta
           elsif index_has_type?(:key, input_index)
             Key
           else
-            # TODO: check; this may not be an error; saw it happend on delete assembly
             Log.error(error_msg_link_def_index(input_index))
-            Null
+            nil
           end
         end
       end

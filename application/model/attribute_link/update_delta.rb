@@ -41,7 +41,7 @@ module DTK; class AttributeLink
       return ret if links_delete_info.empty?
       
       # find updated attributes
-      updated_attrs = critical_section { links_delete_info.map { |link_info| Delete.update_attribute(attr_mh, link_info) } } 
+      updated_attrs = critical_section { links_delete_info.map { |link_info| Delete.update_attribute(attr_mh, link_info) }.compact } 
       
       # propagate these changes; if opts[::add_state_changes] then produce state changes
       Attribute.propagate_and_optionally_add_state_changes(attr_mh, updated_attrs, opts)

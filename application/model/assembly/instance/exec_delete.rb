@@ -269,7 +269,7 @@ module DTK; class  Assembly
         delete_instance_task?(assembly_instance, opts) || fail(Error, "Unexpectd that delete_instance_task?(assembly_instance, opts) is nil")
       end
 
-      def delete_instance_task?(assembly_instance, opts = {}) 
+      def delete_instance_task?(assembly_instance, opts = {})
         task  = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
         has_steps = false
         nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
@@ -336,6 +336,7 @@ module DTK; class  Assembly
                   Log.info("Ignoring component 'delete' action does not exist.")
                 end
 
+                cmp_opts.merge!(delete_node_as_component_node: true)
                 delete_cmp_from_database = Task.create_for_delete_from_database(assembly_instance, component, delete_from_db_node, cmp_opts)
                 has_steps = true
                 cmp_top_task.add_subtask(cmp_action) if cmp_action

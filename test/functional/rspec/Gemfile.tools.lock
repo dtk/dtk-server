@@ -1,24 +1,24 @@
 GIT
   remote: git://github.com/ATLANTBH/rspec.git
-  revision: 55dd3ec4331d1ad922f933abf1d9623fc579c2e3
-  tag: v1.1.3
+  revision: 2361f279bbbffc2f0bfc8f8d8ef64c7485cabb1d
+  tag: v1.2.0
   specs:
-    rspec2db (1.1.3)
-      activerecord (~> 3.2.12)
+    rspec2db (1.2.0)
+      activerecord (~> 5.1)
       activerecord-postgresql-adapter
-      pg (~> 0.18.4)
-      rspec (>= 3.0.0)
+      pg (~> 0.21)
+      rspec (>= 3.0)
 
 GIT
   remote: git@github.com:dtk/dtk-client.git
-  revision: 264438c6d811f9e834230858501abe9a3a837deb
+  revision: d0cfd37e80459946e48c5f6100b1a28a8ce2b6d5
   specs:
-    dtk-client (0.11.8.1)
+    dtk-client (0.12.0.1)
       colorize (= 0.7.7)
-      dtk-common-core (= 0.11.1.1)
-      dtk-dsl (= 1.1.3)
-      dtk-network-client (= 1.0.1.1)
-      git (= 1.2.9)
+      dtk-common-core (= 0.12.0)
+      dtk-dsl (= 1.1.4)
+      dtk-network-client (= 1.0.2.1)
+      git (~> 1.4.0)
       gli (= 2.13.4)
       highline (= 1.7.8)
       hirb (= 0.7.3)
@@ -26,68 +26,68 @@ GIT
 
 GIT
   remote: git@github.com:dtk/dtk-dsl.git
-  revision: 6ceded68becc6208917fd4299663ca3bec3b6198
+  revision: e43ced514b288369ee1dacc067c1ac4b0a7f2049
   specs:
-    dtk-dsl (1.1.3)
+    dtk-dsl (1.1.4)
 
 GIT
   remote: git@github.com:dtk/dtk-network-client.git
-  revision: a8a2afa10aebe60a95d2231c4af46da6406a82f1
+  revision: 7e7a12129955ed85df363be608212167f45a7aa7
   specs:
-    dtk-network-client (1.0.1.1)
+    dtk-network-client (1.0.2.1)
       aws-sdk-s3 (~> 1.8)
-      dtk-common-core (= 0.11.1.1)
+      dtk-common-core (= 0.12.0)
       dtk-dsl (~> 1.1.0)
-      git (= 1.2.9)
+      git (~> 1.4.0)
       rest-client (~> 1.7.3)
       semverly (~> 1.0)
 
 GIT
   remote: https://github.com/dtk/dtk-common-core.git
-  revision: 87ddbeab9e2c689e487c16883811de58b17a44f2
+  revision: 434e0ee4a060b70bfe86b2f116765d61b023bbb7
   specs:
-    dtk-common-core (0.11.1.1)
+    dtk-common-core (0.12.0)
       rest-client (~> 1.7.3)
 
 GEM
   remote: https://rubygems.org/
   specs:
     CFPropertyList (2.3.6)
-    activemodel (3.2.12)
-      activesupport (= 3.2.12)
-      builder (~> 3.0.0)
-    activerecord (3.2.12)
-      activemodel (= 3.2.12)
-      activesupport (= 3.2.12)
-      arel (~> 3.0.2)
-      tzinfo (~> 0.3.29)
+    activemodel (5.2.0)
+      activesupport (= 5.2.0)
+    activerecord (5.2.0)
+      activemodel (= 5.2.0)
+      activesupport (= 5.2.0)
+      arel (>= 9.0)
     activerecord-postgresql-adapter (0.0.1)
       pg
-    activesupport (3.2.12)
-      i18n (~> 0.6)
-      multi_json (~> 1.0)
-    arel (3.0.3)
+    activesupport (5.2.0)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+    arel (9.0.0)
     awesome_print (1.1.0)
-    aws-eventstream (1.0.0)
-    aws-partitions (1.87.0)
-    aws-sdk-core (3.21.2)
+    aws-eventstream (1.0.1)
+    aws-partitions (1.94.0)
+    aws-sdk-core (3.22.1)
       aws-eventstream (~> 1.0)
       aws-partitions (~> 1.0)
       aws-sigv4 (~> 1.0)
       jmespath (~> 1.0)
-    aws-sdk-ec2 (1.34.0)
+    aws-sdk-ec2 (1.36.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-kms (1.5.0)
+    aws-sdk-kms (1.6.0)
       aws-sdk-core (~> 3)
       aws-sigv4 (~> 1.0)
-    aws-sdk-s3 (1.13.0)
+    aws-sdk-s3 (1.16.0)
       aws-sdk-core (~> 3, >= 3.21.2)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.0)
-    aws-sigv4 (1.0.2)
+    aws-sigv4 (1.0.3)
     bson (1.9.2)
-    builder (3.0.4)
+    builder (3.2.3)
     byebug (10.0.2)
     capybara (2.1.0)
       mime-types (>= 1.16)
@@ -113,9 +113,9 @@ GEM
       faraday
       multi_json
     excon (0.62.0)
-    faraday (0.14.0)
+    faraday (0.15.2)
       multipart-post (>= 1.2, < 3)
-    ffi (1.9.23)
+    ffi (1.9.25)
     fission (0.5.0)
       CFPropertyList (~> 2.2)
     fog (1.38.0)
@@ -147,9 +147,9 @@ GEM
       fog-xenserver
       fog-xml (~> 0.1.1)
       ipaddress (~> 0.5)
-    fog-aliyun (0.2.0)
-      fog-core (~> 1.27)
-      fog-json (~> 1.0)
+    fog-aliyun (0.3.2)
+      fog-core
+      fog-json
       ipaddress (~> 0.8)
       xml-simple (~> 1.1)
     fog-atmos (0.1.0)
@@ -160,10 +160,11 @@ GEM
       fog-json (~> 1.0)
       fog-xml (~> 0.1)
       ipaddress (~> 0.8)
-    fog-brightbox (0.14.0)
+    fog-brightbox (0.15.0)
       fog-core (~> 1.22)
       fog-json
       inflecto (~> 0.0.2)
+      mime-types
     fog-cloudatcost (0.1.2)
       fog-core (~> 1.36)
       fog-json (~> 1.0)
@@ -184,19 +185,19 @@ GEM
       fog-core
       fog-json
       fog-xml
-    fog-json (1.0.2)
-      fog-core (~> 1.0)
+    fog-json (1.2.0)
+      fog-core
       multi_json (~> 1.10)
     fog-local (0.5.0)
       fog-core (>= 1.27, < 3.0)
-    fog-openstack (0.1.25)
-      fog-core (~> 1.40)
+    fog-openstack (0.1.26)
+      fog-core (~> 1.45.0)
       fog-json (>= 1.0)
       ipaddress (>= 0.8)
-    fog-powerdns (0.1.1)
-      fog-core (~> 1.27)
-      fog-json (~> 1.0)
-      fog-xml (~> 0.1)
+    fog-powerdns (0.2.0)
+      fog-core
+      fog-json
+      fog-xml
     fog-profitbricks (0.0.5)
       fog-core
       fog-xml
@@ -235,7 +236,7 @@ GEM
     fog-voxel (0.1.0)
       fog-core
       fog-xml
-    fog-vsphere (2.0.1)
+    fog-vsphere (2.2.0)
       fog-core
       rbvmomi (~> 1.9)
     fog-xenserver (0.3.0)
@@ -245,12 +246,12 @@ GEM
       fog-core
       nokogiri (>= 1.5.11, < 2.0.0)
     formatador (0.2.5)
-    git (1.2.9)
+    git (1.4.0)
     gli (2.13.4)
     headless (1.0.1)
     highline (1.7.8)
     hirb (0.7.3)
-    i18n (0.9.5)
+    i18n (1.0.1)
       concurrent-ruby (~> 1.0)
     inflecto (0.0.2)
     ipaddress (0.8.3)
@@ -258,25 +259,26 @@ GEM
     json (2.1.0)
     mime-types (2.99.3)
     mini_portile2 (2.3.0)
+    minitest (5.11.3)
     mongo (1.9.2)
       bson (~> 1.9.2)
     multi_json (1.13.1)
     multipart-post (2.0.0)
     netrc (0.11.0)
-    nokogiri (1.8.2)
+    nokogiri (1.8.3)
       mini_portile2 (~> 2.3.0)
     parallel (1.12.1)
     parallel_tests (1.0.9)
       parallel
-    pg (0.18.4)
-    poltergeist (1.17.0)
-      capybara (~> 2.1)
+    pg (0.21.0)
+    poltergeist (1.18.1)
+      capybara (>= 2.1, < 4)
       cliver (~> 0.3.1)
       websocket-driver (>= 0.2.0)
     rack (1.6.4)
     rack-test (1.0.0)
       rack (>= 1.0, < 3)
-    rbvmomi (1.11.7)
+    rbvmomi (1.13.0)
       builder (~> 3.0)
       json (>= 1.8)
       nokogiri (~> 1.5)
@@ -305,8 +307,10 @@ GEM
       rubyzip (~> 1.0)
       websocket (~> 1.0.4)
     semverly (1.0.0)
+    thread_safe (0.3.6)
     trollop (2.1.2)
-    tzinfo (0.3.54)
+    tzinfo (1.2.5)
+      thread_safe (~> 0.1)
     websocket (1.0.7)
     websocket-driver (0.7.0)
       websocket-extensions (>= 0.1.0)
@@ -319,8 +323,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activerecord (= 3.2.12)
-  activerecord-postgresql-adapter (= 0.0.1)
   awesome_print (= 1.1.0)
   aws-sdk-ec2
   byebug

@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/ATLANTBH/rspec.git
-  revision: 2361f279bbbffc2f0bfc8f8d8ef64c7485cabb1d
+  revision: 926427e79b92aed3f27431130e91979d0e9475e7
   tag: v1.2.0
   specs:
     rspec2db (1.2.0)

@@ -36,13 +36,18 @@ module DTK
 
               LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
 
-              
-              fail "TODO: DTK-3394: implement when add component"
+              # fail "TODO: DTK-3394: implement when add component"
               # need to update module_refs_lock to add new component which will be used below to pull nested component module into service instance if needed
-              
-              # ModuleRefs::Lock.create_or_update(self)
 
-              # Component.pull_component_module_repos(aug_cmp_template, service_instance)
+              # ModuleRefs::Lock.create_or_update(self) - substitute with below
+              get_or_create_opts = {
+                donot_update_model: true,
+                delete_existing_branch: true
+              }
+              aug_nested_module_branch = service_instance.get_or_create_for_nested_module(aug_cmp_template.component_module, aug_cmp_template.version, get_or_create_opts)
+              ModuleRefSha.create_or_update_for_nested_module(service_instance.assembly_instance, aug_nested_module_branch)
+
+              Component.pull_component_module_repos(aug_cmp_template, service_instance)
             end
             component.id_handle 
           end
@@ -85,8 +90,9 @@ module DTK
 
         def self.pull_component_module_repos(aug_cmp_template, service_instance)
           if service_instance
-            fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
-            existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
+            # fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
+            # existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
+            existing_aug_module_branches = service_instance.aug_dependent_base_module_branches.inject({}) { |h, r| h.merge(r[:module_name] => r) }
             nested_module_name           = aug_cmp_template.component_module.module_name
 
             if matching_module_branch = existing_aug_module_branches[nested_module_name]
@@ -97,8 +103,11 @@ module DTK
                 end
               end
 
-              fail Error, "TODO: DTK-3366; changed CommonDSL::NestedModuleRepo.pull_from_component_modules to update_repo_for_stage"
-              CommonDSL::NestedModuleRepo.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
+              # fail Error, "TODO: DTK-3366; changed CommonDSL::NestedModuleRepo.pull_from_component_modules to update_repo_for_stage"
+              # CommonDSL::NestedModuleRepo.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
+              matching_module_branches.each do |aug_nested_module_branch|
+                CommonDSL::NestedModuleRepo.update_repo_for_stage(aug_nested_module_branch)
+              end
             end
           end
         end

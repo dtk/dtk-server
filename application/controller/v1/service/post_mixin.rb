@@ -252,6 +252,10 @@ module DTK
         rest_ok_response response
       end
 
+      def add_component
+          # TODO: implement this
+      end
+
       private
 
       def execute_task(task)

@@ -390,6 +390,10 @@ module DTK
 
       override_attrs = { locked_sha: component_template.get_current_sha!() }
 
+      if assembly_id = self.assembly.id
+        override_attrs.merge!(assembly_id: assembly_id)
+      end
+
       component_type = component_template.get_field?(:component_type)
       if matching_cmp = Component::Instance.get_matching?(id_handle(), component_type, component_title)
         if opts[:idempotent]
@@ -404,10 +408,14 @@ module DTK
       end
 
       if title_attr_name = check_and_ret_title_attribute_name?(component_template, component_title)
-        override_attrs = {
+        override_attrs.merge!({
           ref: SQL::ColRef.cast(ComponentTitle.ref_with_title(component_type, component_title), :text),
           display_name: SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type, component_title), :text)
-        }
+        })
+        # override_attrs = {
+        #   ref: SQL::ColRef.cast(ComponentTitle.ref_with_title(component_type, component_title), :text),
+        #   display_name: SQL::ColRef.cast(ComponentTitle.display_name_with_title(component_type, component_title), :text)
+        # }
       end
       clone_opts = { no_post_copy_hook: true, ret_new_obj_with_cols: [:id, :display_name], namespace: namespace }
       new_cmp = clone_into(component_template, override_attrs, clone_opts)

@@ -20,35 +20,36 @@
 module DTK; class ModuleDSL; class V2
   class ObjectModelForm::Choice
     class LinkAttributeRef
-      def initialize(attr_ref)
+      def initialize(attr_ref, cmp_ref)
         @attr_ref = attr_ref
+        @cmp_ref  = cmp_ref
       end
       private :initialize
 
-      def self.convert_simple(attr_ref, dep_or_base, cmp, input_or_output)
-        new(attr_ref).convert_simple(dep_or_base, cmp, input_or_output)
+      def self.convert_simple(attr_ref, dep_or_base, cmp_ref, input_or_output)
+        new(attr_ref, cmp_ref).convert_simple(dep_or_base, input_or_output)
       end
-      def convert_simple(dep_or_base, cmp, input_or_output)
+      def convert_simple(dep_or_base, input_or_output)
         # Index processing first
         index = nil 
         if self.attr_ref =~ /(^[^\[]+)\[([^\]]+)\]$/
           @attr_ref = Regexp.last_match(1)
           index = Regexp.last_match(2)
         end
-        ret = convert_simple_aux(dep_or_base, cmp, input_or_output)
+        ret = convert_simple_aux(dep_or_base, input_or_output)
         ret << ".#{index}" if index
         ret
       end
       
-      def self.convert_base(attr_ref, base_cmp, dep_attr_ref, dep_cmp, input_or_output, opts = {})
-        is_constant?(attr_ref, base_cmp, dep_attr_ref, dep_cmp, opts) || convert_simple(attr_ref, :base, base_cmp, input_or_output)
+      def self.convert_base(attr_ref, base_cmp_ref, dep_attr_ref, dep_cmp, input_or_output, opts = {})
+        is_constant?(attr_ref, base_cmp_ref, dep_attr_ref, dep_cmp, opts) || convert_simple(attr_ref, :base, base_cmp, input_or_output)
       end
 
-      def self.is_constant?(attr_ref, base_cmp, dep_attr_ref, dep_cmp, opts = {})
-        new(attr_ref).is_constant?(base_cmp, dep_attr_ref, dep_cmp, opts)
+      def self.is_constant?(attr_ref, base_cmp_ref, dep_attr_ref, dep_cmp, opts = {})
+        new(attr_ref, base_cmp_ref).is_constant?(dep_attr_ref, dep_cmp, opts)
       end
-      def is_constant?(base_cmp, dep_attr_ref, dep_cmp, opts = {})
-        return nil if has_variable?
+      def is_constant?(dep_attr_ref, dep_cmp, opts = {})
+        return nil if has_dollar_sign?
 
         datatype = :string
         const = nil
@@ -71,16 +72,25 @@ module DTK; class ModuleDSL; class V2
         unless constant_assign.is_in?(constants)
           constants << constant_assign
         end
-        "#{ObjectModelForm.convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name}"
+        "#{self.converted_component_ref}.#{constant_assign.attribute_name}"
       end
 
       protected
 
-      attr_reader :attr_ref
+      attr_reader :attr_ref, :cmp_ref
+
+      def converted_component_ref
+        ObjectModelForm.convert_to_internal_cmp_form(self.cmp_ref)
+      end
+
+      def attr_ref_without_leading_dollar_sign
+        # if dollar sign is first character and not embedded string than strip of dollar sign
+        self.attr_ref =~ /^\$[^\{]/ ? self.attr_ref.sub(/^\$/, '') : self.attr_ref
+      end
 
       private
 
-      def convert_simple_aux(dep_or_base, cmp, input_or_output)
+      def convert_simple_aux(dep_or_base, input_or_output)
         if self.attr_ref =~ /(^[^.]+)\.([^.]+$)/ 
           if input_or_output == :input
             raise_bad_attribute_ref_in_link_def
@@ -92,26 +102,30 @@ module DTK; class ModuleDSL; class V2
           else raise_bad_attribute_ref_in_link_def
           end + ".#{attr.gsub(/host_address$/, 'host_addresses_ipv4.0')}"
         else
-          has_dollar_sign = has_variable?
-          if (input_or_output == :input && has_dollar_sign) ||
-              (input_or_output == :output && !has_dollar_sign)
-            raise_bad_attribute_ref_in_link_def
+          if input_or_output == :output
+            if is_all_attributes_ref?
+              "#{self.converted_component_ref}.#{LinkDef::Link::AttributeMapping::ALL_ATTRIBUTES_REF_INTERNAL_FORM}"
+            else
+              raise_bad_attribute_ref_in_link_def unless has_dollar_sign?
+              "#{self.converted_component_ref}.#{self.attr_ref_without_leading_dollar_sign}"
+            end
+          else # input_or_output == :input
+            raise_bad_attribute_ref_in_link_def if has_dollar_sign?
+            "#{self.converted_component_ref}.#{self.attr_ref_without_leading_dollar_sign}"
           end
-          var_name = attr_ref
-          # if dollar sign is first character and not embedded string than strip of dollar sign
-          if var_name =~ /^\$[^\{]/
-            var_name = var_name.gsub(/^\$/, '')
-          end
-          "#{ObjectModelForm.convert_to_internal_cmp_form(cmp)}.#{var_name}"
         end
       end
       
-      def has_variable?
+      def has_dollar_sign?
         self.attr_ref =~ /\$/
       end
 
+      ALL_ATTRIBUTES_REF = 'all_attributes'
+      def is_all_attributes_ref?
+        !has_dollar_sign? and self.attr_ref == ALL_ATTRIBUTES_REF
+      end
+
       def raise_bad_attribute_ref_in_link_def
-        require 'byebug'; byebug
         fail ParsingError.new("Attribute reference '?1' in link_def is ill-formed", self.attr_ref)
       end
 

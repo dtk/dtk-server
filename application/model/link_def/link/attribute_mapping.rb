@@ -18,6 +18,9 @@
 module DTK
   class LinkDef::Link
     class AttributeMapping < HashObject
+      
+      ALL_ATTRIBUTES_REF_INTERNAL_FORM = '__ALL_ATTRIBUTES__'
+
       require_relative('attribute_mapping/node_group_processor')
       require_relative('attribute_mapping/augmented')
       require_relative('attribute_mapping/parse_helper')

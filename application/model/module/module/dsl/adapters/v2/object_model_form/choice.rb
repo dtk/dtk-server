@@ -20,6 +20,8 @@
 module DTK; class ModuleDSL; class V2
   class ObjectModelForm
     class Choice < self
+      require_relative('choice/link_attribute_ref')
+
       extend ComponentChoiceMixin
 
       def initialize
@@ -59,7 +61,7 @@ module DTK; class ModuleDSL; class V2
       end
       
       def dependent_component
-        @possible_link.keys.first
+        self.possible_link.keys.first
       end
       
       def convert(dep_cmp_info, base_cmp, parent_info = {}, opts = {})
@@ -75,10 +77,28 @@ module DTK; class ModuleDSL; class V2
         unless in_attr_mappings.empty?
           ret_info['attribute_mappings'] = in_attr_mappings.map { |in_am| convert_attribute_mapping(in_am, base_cmp, dep_cmp, opts) }
         end
-        @possible_link.merge!(convert_to_internal_cmp_form(dep_cmp) => ret_info)
+        self.possible_link.merge!(convert_to_internal_cmp_form(dep_cmp) => ret_info)
         self
       end
-      
+
+      def convert_attribute_mapping(input_am, base_cmp, dep_cmp, opts = {})
+        # TODO: right now only treating constant on right hand side meaning only for <- case
+        if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ].*$)/
+          dep_attr = Regexp.last_match(1)
+          base_attr = Regexp.last_match(2)
+          left = LinkAttributeRef.convert_simple(dep_attr, :dep, dep_cmp, :output)
+          right = LinkAttributeRef.convert_simple(base_attr, :base, base_cmp, :input)
+        elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ].*$)/
+          dep_attr = Regexp.last_match(1)
+          base_attr = Regexp.last_match(2)
+          left = LinkAttributeRef.convert_base(base_attr, base_cmp, dep_attr, dep_cmp, :output, opts)
+          right = LinkAttributeRef.convert_simple(dep_attr, :dep, dep_cmp, :input)
+        else
+          fail ParsingError.new('Attribute mapping (?1) is ill-formed', input_am)
+        end
+        { left => right }
+      end
+
       private
       
       def order(dep_cmp_info)
@@ -96,7 +116,7 @@ module DTK; class ModuleDSL; class V2
       end
 
       def dep_component_info
-        @possible_link.values.first
+        self.possible_link.values.first
       end
       
       DefaultLinkType = 'local'
@@ -114,109 +134,6 @@ module DTK; class ModuleDSL; class V2
         end
       end
       
-      def convert_attribute_mapping(input_am, base_cmp, dep_cmp, opts = {})
-        # TODO: right now only treating constant on right hand side meaning only for <- case
-        if input_am =~ /(^[^ ]+)[ ]*->[ ]*([^ ].*$)/
-          dep_attr = Regexp.last_match(1)
-          base_attr = Regexp.last_match(2)
-          left = convert_attr_ref_simple(dep_attr, :dep, dep_cmp, :output)
-          right = convert_attr_ref_simple(base_attr, :base, base_cmp, :input)
-        elsif input_am =~ /(^[^ ]+)[ ]*<-[ ]*([^ ].*$)/
-          dep_attr = Regexp.last_match(1)
-          base_attr = Regexp.last_match(2)
-          left = convert_attr_ref_base(base_attr, base_cmp, dep_attr, dep_cmp, :output, opts)
-          right = convert_attr_ref_simple(dep_attr, :dep, dep_cmp, :input)
-        else
-          fail ParsingError.new('Attribute mapping (?1) is ill-formed', input_am)
-        end
-        { left => right }
-      end
-      public :convert_attribute_mapping
-      
-      def convert_attr_ref_simple(attr_ref, dep_or_base, cmp, input_or_output)
-        # Index processing first
-        index = nil 
-        if attr_ref =~ /(^[^\[]+)\[([^\]]+)\]$/
-          attr_ref = Regexp.last_match(1)
-          index = Regexp.last_match(2)
-        end
-        ret = convert_attr_ref_simple_aux(attr_ref, dep_or_base, cmp, input_or_output)
-        ret << ".#{index}" if index
-        ret
-      end
-
-      def convert_attr_ref_simple_aux(attr_ref, dep_or_base, cmp, input_or_output)
-        if attr_ref =~ /(^[^.]+)\.([^.]+$)/ 
-          if input_or_output == :input
-           raise_bad_attribute_ref_in_link_def(attr_ref)
-          end
-          prefix = Regexp.last_match(1)
-          attr = Regexp.last_match(2)
-          case prefix
-            when '$node' then (dep_or_base == :dep) ? 'remote_node' : 'local_node'
-            else raise_bad_attribute_ref_in_link_def(attr_ref)
-          end + ".#{attr.gsub(/host_address$/, 'host_addresses_ipv4.0')}"
-        else
-          has_dollar_sign = has_variable?(attr_ref)
-          if (input_or_output == :input && has_dollar_sign) ||
-              (input_or_output == :output && !has_dollar_sign)
-           raise_bad_attribute_ref_in_link_def(attr_ref)
-          end
-          var_name = attr_ref
-          # if dollar sign is first character and not embedded string than strip of dollar sign
-          if var_name =~ /^\$[^\{]/
-            var_name = var_name.gsub(/^\$/, '')
-          end
-          "#{convert_to_internal_cmp_form(cmp)}.#{var_name}"
-        end
-      end
-
-      def convert_attr_ref_base(attr_ref, base_cmp, dep_attr_ref, dep_cmp, input_or_output, opts = {})
-        is_constant?(attr_ref, base_cmp, dep_attr_ref, dep_cmp, opts) || convert_attr_ref_simple(attr_ref, :base, base_cmp, input_or_output)
-      end
-
-      def has_variable?(attr_ref)
-        attr_ref =~ /\$/
-      end
-
-      def is_constant?(attr_ref, base_cmp, dep_attr_ref, dep_cmp, opts = {})
-        return nil if has_variable?(attr_ref)
-
-        datatype = :string
-        const = nil
-        if attr_ref =~ /^'(.+)'$/
-          const = Regexp.last_match(1)
-        elsif ['true', 'false'].include?(attr_ref)
-          const = attr_ref
-          datatype = :boolean
-        elsif attr_ref =~ /^[0-9]+$/
-          const = attr_ref
-          datatype = :integer
-        elsif sanitized_attr_ref = is_json_constant?(attr_ref)
-          const = sanitized_attr_ref
-          datatype = :json
-        end
-        unless constant_assign = (const && Attribute::Constant.create?(const, dep_attr_ref, dep_cmp, datatype))
-         raise_bad_attribute_ref_in_link_def(attr_ref)
-        end
-        constants = opts[:constants] ||= []
-        unless constant_assign.is_in?(constants)
-          constants << constant_assign
-        end
-        "#{convert_to_internal_cmp_form(base_cmp)}.#{constant_assign.attribute_name}"
-      end
-
-      def raise_bad_attribute_ref_in_link_def(attr_ref)
-        fail ParsingError.new("Attribute reference '?1' in link_def is ill-formed", attr_ref)
-      end
-
-      # returns sanitized_attr_ref
-      def is_json_constant?(attr_ref)
-        # TODO: this is just temp hack in how whether it is detected; providing fro using ' rather than " in constant
-        if attr_ref =~ /[{]/
-          attr_ref.gsub(/'/, "\"")
-        end
-      end
     end
   end
 end; end; end

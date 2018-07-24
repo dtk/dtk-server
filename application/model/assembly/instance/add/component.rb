@@ -54,28 +54,30 @@ module DTK
         end
 
         def self.add_component(service_instance, component_ref, version, namespace, parent_node)
-          assembly_instance       = service_instance.assembly_instance
-          component_type, title   = ComponentTitle.parse_component_display_name(component_ref)
-          component_type          = ::DTK::Component.component_type_from_user_friendly_name(component_type)
-          component_module_refs   = assembly_instance.component_module_refs
-          dependent_modules       = {}
+          assembly_instance     = service_instance.assembly_instance
+          component_type, title = ComponentTitle.parse_component_display_name(component_ref)
+          component_type        = ::DTK::Component.component_type_from_user_friendly_name(component_type)
+          component_module_refs = assembly_instance.component_module_refs
+          service_repo_info     = CommonModule::ServiceInstance::RepoInfo.new(service_instance.base_module_branch)
+          dependent_modules     = {}
 
           component_module_refs.module_refs_array.each { |dep| dependent_modules.merge!("#{dep[:namespace_info]}/#{dep[:display_name]}" => extract_version(dep[:version_info])) }
 
           aug_cmp_template = nil
           retries = 0
+          add_nested_module = false
 
           begin
             aug_cmp_template = assembly_instance.find_matching_aug_component_template(component_type, component_module_refs, dependent_modules: dependent_modules)# dependent_modules: opts[:dependent_modules])
           rescue ErrorUsage => e
             fail ErrorUsage, "#{e.message}. Please provide 'namespace' and 'version' to add module to dependencies." if version.empty? || namespace.empty?
 
-            new_dependency_info = { display_name: component_ref.split('::').first, namespace_name: namespace, version_info: version }
-            add_dependency_to_module_refs(component_module_refs, new_dependency_info)
-
             if retries > 1
               fail e
             else
+              new_dependency_info = { display_name: component_ref.split('::').first, namespace_name: namespace, version_info: version }
+              add_dependency_to_module_refs(component_module_refs, new_dependency_info)
+              add_nested_module = true
               retries += 1
               retry
             end
@@ -89,6 +91,9 @@ module DTK
             end
 
           assembly_instance.add_component(node.id_handle, aug_cmp_template, service_instance, component_title: title)
+          add_nested_module_info(service_repo_info, aug_cmp_template, service_instance) if add_nested_module
+
+          service_repo_info
         end
 
         def self.check_node(assembly_instance, node_idh)
@@ -160,6 +165,15 @@ module DTK
           modules_with_namespaces = component_module_refs.module_refs_array.map { |dep| { display_name: dep[:display_name], namespace_name: dep[:namespace_info], version_info: dep[:version_info].version_string } }
           modules_with_namespaces << new_dependency_info
           component_module_refs.update_module_refs_if_needed!(modules_with_namespaces)
+        end
+
+        def self.add_nested_module_info(service_repo_info, aug_cmp_template, service_instance)
+          get_or_create_opts = {
+            donot_update_model: true,
+            delete_existing_branch: false
+          }
+          aug_nested_module_branch = service_instance.get_or_create_for_nested_module(aug_cmp_template.component_module, aug_cmp_template.version, get_or_create_opts)
+          service_repo_info.add_nested_module_info!(aug_nested_module_branch)
         end
 
       end

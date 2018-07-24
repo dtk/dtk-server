@@ -29,10 +29,10 @@ module DTK
           #   :component_title
           def add_component(node_idh, aug_cmp_template, service_instance, opts = {})
             node = Component.check_node(self, node_idh)
-            component = nil          
+            component = nil
             Transaction do
               component = node.add_component(aug_cmp_template, component_title: opts[:component_title], detail_to_include: [:component_dependencies]).create_object
-              Component.update_workflow(self, node, component, component_title: opts[:component_title]) 
+              Component.update_workflow(self, node, component, component_title: opts[:component_title])
 
               LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
 
@@ -51,6 +51,44 @@ module DTK
             end
             component.id_handle 
           end
+        end
+
+        def self.add_component(service_instance, component_ref, version, namespace, parent_node)
+          assembly_instance       = service_instance.assembly_instance
+          component_type, title   = ComponentTitle.parse_component_display_name(component_ref)
+          component_type          = ::DTK::Component.component_type_from_user_friendly_name(component_type)
+          component_module_refs   = assembly_instance.component_module_refs
+          dependent_modules       = {}
+
+          component_module_refs.module_refs_array.each { |dep| dependent_modules.merge!("#{dep[:namespace_info]}/#{dep[:display_name]}" => extract_version(dep[:version_info])) }
+
+          aug_cmp_template = nil
+          retries = 0
+
+          begin
+            aug_cmp_template = assembly_instance.find_matching_aug_component_template(component_type, component_module_refs, dependent_modules: dependent_modules)# dependent_modules: opts[:dependent_modules])
+          rescue ErrorUsage => e
+            fail ErrorUsage, "#{e.message}. Please provide 'namespace' and 'version' to add module to dependencies." if version.empty? || namespace.empty?
+
+            new_dependency_info = { display_name: component_ref.split('::').first, namespace_name: namespace, version_info: version }
+            add_dependency_to_module_refs(component_module_refs, new_dependency_info)
+
+            if retries > 1
+              fail e
+            else
+              retries += 1
+              retry
+            end
+          end
+
+          node =
+            if parent_node
+              assembly_instance.get_node?([:eq, :display_name, parent_node])
+            else
+              assembly_instance.assembly_wide_node
+            end
+
+          assembly_instance.add_component(node.id_handle, aug_cmp_template, service_instance, component_title: title)
         end
 
         def self.check_node(assembly_instance, node_idh)
@@ -110,6 +148,18 @@ module DTK
               end
             end
           end
+        end
+
+        private
+
+        def self.extract_version(version_obj)
+          version_obj.is_a?(String) ? version_obj : version_obj.version_string
+        end
+
+        def self.add_dependency_to_module_refs(component_module_refs, new_dependency_info)
+          modules_with_namespaces = component_module_refs.module_refs_array.map { |dep| { display_name: dep[:display_name], namespace_name: dep[:namespace_info], version_info: dep[:version_info].version_string } }
+          modules_with_namespaces << new_dependency_info
+          component_module_refs.update_module_refs_if_needed!(modules_with_namespaces)
         end
 
       end

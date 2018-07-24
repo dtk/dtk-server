@@ -253,7 +253,8 @@ module DTK
       end
 
       def add_component
-          # TODO: implement this
+        Assembly::Instance::Add::Component.add_component(service_instance, required_request_params(:component_ref), request_params(:version), request_params(:namespace), request_params(:parent_node))
+        rest_ok_response service_instance.get_base_module_repo_info
       end
 
       private

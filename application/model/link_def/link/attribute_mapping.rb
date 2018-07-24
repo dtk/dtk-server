@@ -18,12 +18,13 @@
 module DTK
   class LinkDef::Link
     class AttributeMapping < HashObject
-      
-      ALL_ATTRIBUTES_REF_INTERNAL_FORM = '__ALL_ATTRIBUTES__'
-
       require_relative('attribute_mapping/node_group_processor')
       require_relative('attribute_mapping/augmented')
       require_relative('attribute_mapping/parse_helper')
+      require_relative('attribute_mapping/all_attributes')
+      require_relative('attribute_mapping/error_check')
+
+      include AllAttributes::Mixin
 
       def self.reify(object)
         if object.is_a?(AttributeMapping)
@@ -38,20 +39,16 @@ module DTK
       # opts can have keys:
       #   :raise_error
       def aug_attr_mappings__clone_if_needed(link_def_context, opts = {})
-        ret = []
-        err_msgs = []
-        input_attr_obj, input_path = get_context_attr_obj_with_path(err_msgs, :input, link_def_context)
-        output_attr_obj, output_path = get_context_attr_obj_with_path(err_msgs, :output, link_def_context)
- 
-        unless err_msgs.empty?
-          aggregated_err_msg = aggregated_error_message(err_msgs, link_def_context)
-          if opts[:raise_error]
-            fail LinkDef::AutoComplete::FatalError.new(aggregated_err_msg)
-          else
-            Log.error(aggregated_err_msg)
-            return ret
-          end
+        @link_def_context = link_def_context
+
+        if all_attributes_ret = all_attributes_aug_attr_mappings__clone_if_needed?(raise_error: opts[:raise_error])
+          return all_attributes_ret
         end
+
+        err_msgs = []
+        input_attr_obj, input_path = get_context_attr_obj_with_path(err_msgs, :input)
+        output_attr_obj, output_path = get_context_attr_obj_with_path(err_msgs, :output)
+        return [] if ErrorCheck.check_for_errors?(err_msgs, self.link_def_context, raise_error: opts[:raise_error])
 
         attr_and_path_info = {
           input_attr_obj: input_attr_obj,
@@ -59,7 +56,7 @@ module DTK
           output_attr_obj: output_attr_obj,
           output_path: output_path
         }
-        NodeGroupProcessor.aug_attr_mappings__clone_if_needed(self, link_def_context, attr_and_path_info, opts)
+        NodeGroupProcessor.aug_attr_mappings__clone_if_needed(self, self.link_def_context, attr_and_path_info, opts)
       end
 
       # returns a hash with args if this is a function that takes args
@@ -76,53 +73,28 @@ module DTK
         end
       end
 
+      protected
+
+      attr_reader :link_def_context
+
       private
 
-      def aggregated_error_message(err_msgs, link_def_context)
-        local_component = link_def_context.local_component_template.display_name_print_form
-        remote_component = link_def_context.remote_component_template.display_name_print_form
-
-        error_or_errors = (err_msgs.size == 1 ? 'There is an error' : 'There  are errors')
-        ret_err_msg = "#{error_or_errors} on componenent '#{local_component} link def to '#{remote_component}':\n"
-        err_msgs.inject(ret_err_msg) { |s, err_msg| s + "  #{err_msg}\n"  }
-      end
-
       # returns [attribute_object,unravel_path] and updates error if any error
-      def get_context_attr_obj_with_path(err_msgs, dir, context)
-        attr_object = context.find_attribute_object?(self[dir][:term_index])
-        unless attr_object && attr_object.value
-          err_msgs << attribute_error_message(dir)
+      def get_context_attr_obj_with_path(err_msgs, dir)
+        attr = self[dir]
+        context_attr_object = find_context_attr_object(attr)
+        # TODO: context_attr_object && .. may not be needed because find_context_attr_object(attr) may always be non nil
+        unless context_attr_object && context_attr_object.value
+          err_msgs << ErrorCheck.attribute_error_message(attr)
         end
-        index_map_path = self[dir][:path]
+        index_map_path = attr[:path]
         # TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
-        [attr_object, index_map_path && AttributeLink::IndexMap::Path.create_from_array(index_map_path)]
+        [context_attr_object, index_map_path && AttributeLink::IndexMap::Path.create_from_array(index_map_path)]
       end
 
-      def attribute_error_message(direction)
-        err_msg = 
-          if attr = self[direction]
-            if attr_name = attr[:attribute_name]
-              component_ref = attribute_error_message_component_ref(attr)
-              "Attribute '#{attr_name}' referenced in attribute mapping is not defined on '#{component_ref}'"
-            end
-          end
-
-        err_msg || attribute_error_message_unknown
+      def find_context_attr_object(attr)
+        self.link_def_context.find_attribute_object?(attr[:term_index])
       end
-
-      def attribute_error_message_component_ref(attr)
-        if cmp_type = attr[:component_type]
-          # meaning that it is a component attribute ref
-          Component.component_type_print_form(cmp_type)
-        elsif attr[:node_name]
-          'node'
-        end
-      end
-
-     def attribute_error_message_unknown
-       Log.error("unexpected that have no pp form for: #{inspect}")
-       'Attribute matching link def term does not exist'
-     end
 
     end
   end

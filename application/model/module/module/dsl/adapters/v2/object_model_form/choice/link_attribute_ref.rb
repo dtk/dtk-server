@@ -104,7 +104,7 @@ module DTK; class ModuleDSL; class V2
         else
           if input_or_output == :output
             if is_all_attributes_ref?
-              "#{self.converted_component_ref}.#{LinkDef::Link::AttributeMapping::ALL_ATTRIBUTES_REF_INTERNAL_FORM}"
+              "#{self.converted_component_ref}.#{LinkDef::Link::AttributeMapping::AllAttributes::INTERNAL_NAME}"
             else
               raise_bad_attribute_ref_in_link_def unless has_dollar_sign?
               "#{self.converted_component_ref}.#{self.attr_ref_without_leading_dollar_sign}"

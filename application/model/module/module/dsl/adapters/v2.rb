@@ -18,10 +18,10 @@
 module DTK
   class ModuleDSL
     class V2 < self
-      r8_nested_require('v2', 'parser')
-      r8_nested_require('v2', 'dsl_object')
-      r8_nested_require('v2', 'object_model_form')
-      r8_nested_require('v2', 'incremental_generator')
+      require_relative('v2/parser')
+      require_relative('v2/dsl_object')
+      require_relative('v2/object_model_form')
+      require_relative('v2/incremental_generator')
       def self.normalize(input_hash, opts = {})
         object_model_form.convert(object_model_form::InputHash.new(input_hash), opts)
       end

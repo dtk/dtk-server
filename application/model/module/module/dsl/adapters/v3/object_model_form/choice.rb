@@ -18,34 +18,34 @@
 module DTK; class ModuleDSL; class V3
   class ObjectModelForm
     class Choice < OMFBase::Choice
-      r8_nested_require('choice', 'dependency')
-      r8_nested_require('choice', 'link_def_link')
+      require_relative('choice/dependency')
+      require_relative('choice/link_def_link')
 
       def initialize(raw, dep_cmp_name, base_cmp)
         super()
-        @raw = raw
+        @raw          = raw
         @dep_cmp_name = dep_cmp_name
-        @base_cmp  = base_cmp
+        @base_cmp     = base_cmp
       end
 
       def print_form
-        @raw || @possible_link.inject()
+        self.raw || self.possible_link.inspect
       end
 
       def base_cmp_print_form
-        component_print_form(base_cmp())
+        component_print_form(base_cmp)
       end
 
       def dep_cmp_print_form
-        component_print_form(dep_cmp())
+        component_print_form(dep_cmp)
       end
 
       def remote_location?
-        ret_single_possible_link_value()['type'] == 'external'
+        ret_single_possible_link_value['type'] == 'external'
       end
 
       def set_to_local_location_as_default
-        if ret_single_possible_link_value()['type'].nil?
+        if ret_single_possible_link_value['type'].nil?
           update_single_possible_link_value('type' => 'internal')
         end
       end
@@ -75,10 +75,10 @@ module DTK; class ModuleDSL; class V3
       private
 
       def set_single_possible_link!(ndx, hash_value)
-        unless @possible_link.empty?
-          fail Error.new('Unexpected that @possible_link is not empty when adding an element')
+        unless self.possible_link.empty?
+          fail Error.new('Unexpected that self.possible_link is not empty when adding an element')
         end
-        @possible_link.merge!(ndx => hash_value)
+        self.possible_link.merge!(ndx => hash_value)
       end
 
       def update_single_possible_link_value(hash_value)
@@ -86,28 +86,27 @@ module DTK; class ModuleDSL; class V3
       end
 
       def ret_single_possible_link_value
-        ret_single_possible_link().values.first || {}
+        ret_single_possible_link.values.first || {}
       end
 
       def ret_single_possible_link(sizes = nil)
         sizes = Array(sizes || [0, 1])
-        unless sizes.include?(@possible_link.size)
-          fail Error.new("Unexpected that @possible_link does not have size in (#{sizes.join(',')})")
+        unless sizes.include?(self.possible_link.size)
+          fail Error.new("Unexpected that self.possible_link does not have size in (#{sizes.join(',')})")
         end
-        @possible_link
+        self.possible_link
       end
 
-      attr_reader :dep_cmp_name, :base_cmp
       def dep_cmp
         convert_to_internal_cmp_form(@dep_cmp_name)
       end
 
       def dup
-        self.class.new(@raw, @dep_cmp_name, @base_cmp)
+        self.class.new(self.raw, @dep_cmp_name, self.base_cmp)
       end
 
       def matches_on_key?(choice_with_single_pl)
-        @possible_link[choice_with_single_pl.ret_single_possible_link_key()]
+        self.possible_link[choice_with_single_pl.ret_single_possible_link_key]
       end
 
       def matches_on_type?(hash_val1, hash_val2)
@@ -153,8 +152,8 @@ module DTK; class ModuleDSL; class V3
             dep_name = ldl_choice.dependency_name
             if dep_name && !dep_name_match
               if ldl_choice.explicit_dependency_ref
-                base_cmp_name = ldl_choice.base_cmp_print_form()
-                dep_cmp_name = ldl_choice.dep_cmp_print_form()
+                base_cmp_name = ldl_choice.base_cmp_print_form
+                dep_cmp_name = ldl_choice.dep_cmp_print_form
                 error_msg = "The link def segment on ?1: ?2\nreferences a dependency name (?3) that does not exist.\n"
                 fail ParsingError.new(error_msg, base_cmp_name, { dep_cmp_name => ldl_choice.print_form }, dep_name)
               end
@@ -163,7 +162,7 @@ module DTK; class ModuleDSL; class V3
             else
               unless ndx = matching_dep_index?(ldl_choice, pruned_ndx_dep_choices)
                 ldl_choice.required = false
-                ndx = ldl_choice.dep_cmp_ndx()
+                ndx = ldl_choice.dep_cmp_ndx
               end
             end
             (ret[ndx] ||= []) << ldl_choice
@@ -183,6 +182,12 @@ module DTK; class ModuleDSL; class V3
         end
         ret
       end
+
+      protected
+
+      attr_reader :raw, :dep_cmp_name, :base_cmp
+
+
     end
   end
 end; end; end

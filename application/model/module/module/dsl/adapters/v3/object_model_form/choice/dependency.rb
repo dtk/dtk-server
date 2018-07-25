@@ -33,11 +33,11 @@ module DTK; class ModuleDSL; class V3
         ret = nil
         choices_array.each do |choices|
           # can only express necessarily need component on same node; so if multipe choices only doing so iff all are internal
-          unless choices.find { |choice| not choice.is_internal?() }
+          unless choices.find { |choice| not choice.is_internal? }
             # TODO: make sure it is ok to just pick one of these
             choice = choices.first
             ret ||= OutputHash.new
-            add_dependency!(ret, choice.dependent_component(), base_cmp)
+            add_dependency!(ret, choice.dependent_component, base_cmp)
           end
         end
         ret

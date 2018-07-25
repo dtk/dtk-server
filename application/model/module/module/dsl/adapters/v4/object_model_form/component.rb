@@ -35,7 +35,7 @@ module DTK; class ModuleDSL; class V4
         end
         component_type = ret['display_name'] = ret['component_type'] = qualified_component(component_name)
         # version below refers to component brranch version not metafile version
-        ret['version'] = ::DTK::Component.default_version
+        ret['version']    = ::DTK::Component.default_version
         ret['basic_type'] = 'service'
         ret.set_if_not_nil('description', input_hash['description'])
         add_attributes!(ret, component_type, input_hash)

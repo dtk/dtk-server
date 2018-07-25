@@ -18,15 +18,19 @@
 module DTK
   class LinkDef::Context
     class Value
-      r8_nested_require('value', 'component')
-      r8_nested_require('value', 'attribute_mixin') # must be before component_attribute and node_attribute
-      r8_nested_require('value', 'component_attribute')
-      r8_nested_require('value', 'node_attribute')
-      attr_reader :component
-      def initialize(component_ref)
+      require_relative('value/component')
+      require_relative('value/attribute_mixin') # must be before component_attribute and node_attribute
+      require_relative('value/component_attribute')
+      require_relative('value/node_attribute')
+
+      # opts can have keys
+      #  :component
+      def initialize(component_ref, opts = {})
         @component_ref = component_ref
-        @component = nil
+        @component     = opts[:component]
       end
+
+      attr_reader :component
 
       def self.create(term, opts = {})
         case term[:type].to_sym
@@ -53,10 +57,10 @@ module DTK
       end
 
       def set_component_remote_and_local_value!(link, cmp_mappings)
-        return if @component_ref.nil? #would fire if this is a NodeAttribute
-        if @component_ref == link[:local_component_type]
+        return if self.component_ref.nil? #would fire if this is a NodeAttribute
+        if self.component_ref == link[:local_component_type]
           @component = cmp_mappings[:local]
-        elsif @component_ref == link[:remote_component_type]
+        elsif self.component_ref == link[:remote_component_type]
           @component = cmp_mappings[:remote]
         end
       end
@@ -71,6 +75,11 @@ module DTK
       # overwritten
       def value
       end
+
+      protected
+
+      attr_reader :component_ref
+
     end
   end
 end

@@ -77,7 +77,8 @@ module DTK
               rescue FatalError => e
                 fail e
               rescue => e
-                Log.error_pp(["TODO: Trapped error after auto link", e])
+                Log.error_pp(["TODO: Trapped error after auto link", e, e.backtrace[0..5]])
+                fail 'debug'
                 nil
               end
               results << Result::UniqueMatch.new(base_aug_component, link_def, matching_cmps.first)

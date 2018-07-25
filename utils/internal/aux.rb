@@ -16,6 +16,14 @@
 # limitations under the License.
 #
 require 'set'
+require 'pp'
+
+# handy for use in debugger
+def dtk_pp(obj)
+  pp obj
+  nil
+end
+
 module DTK
   class Aux
     require_relative('aux/yaml_helper')

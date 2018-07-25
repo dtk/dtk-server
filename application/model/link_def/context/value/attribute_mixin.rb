@@ -18,29 +18,33 @@
 module DTK; class LinkDef::Context
   class Value
     module AttributeMixin
+
+      attr_reader :attribute
+
       def set_attribute_value!(attribute)
         @attribute = attribute
+        self
       end
 
       def value
-        @attribute
+        self.attribute
       end
 
       def is_array?
-        @attribute[:semantic_type_object].is_array?()
+        self.attribute[:semantic_type_object].is_array?
       end
 
       def node
-        @node ||= ret_node()
+        @node ||= ret_node
       end
 
       def on_node_group?
-        node().is_node_group?()
+        self.node.is_node_group?
       end
 
       def node_group_cache
-        ret = node()
-        unless ret.is_node_group?()
+        ret = self.node
+        unless ret.is_node_group?
           fail Error.new('Shoud not be called if not node group')
         end
         ret

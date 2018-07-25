@@ -49,7 +49,10 @@ module DTK
         input_attr_obj, input_path = get_context_attr_obj_with_path(err_msgs, :input)
         output_attr_obj, output_path = get_context_attr_obj_with_path(err_msgs, :output)
         return [] if ErrorCheck.check_for_errors?(err_msgs, self.link_def_context, raise_error: opts[:raise_error])
+        aug_attr_mappings_helper(input_attr_obj, input_path, output_attr_obj, output_path)
+      end
 
+      def aug_attr_mappings_helper(input_attr_obj, input_path, output_attr_obj, output_path, opts = {})
         attr_and_path_info = {
           input_attr_obj: input_attr_obj,
           input_path: input_path,
@@ -91,6 +94,7 @@ module DTK
         # TODO: if treat :create_component_index need to put in here process_unravel_path and process_create_component_index (from link_defs.rb)
         [context_attr_object, index_map_path && AttributeLink::IndexMap::Path.create_from_array(index_map_path)]
       end
+
 
       def find_context_attr_object(attr)
         self.link_def_context.find_attribute_object?(attr[:term_index])

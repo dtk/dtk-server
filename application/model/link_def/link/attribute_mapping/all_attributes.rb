@@ -19,16 +19,25 @@ module DTK
   class LinkDef::Link::AttributeMapping
     class AllAttributes
       INTERNAL_NAME = '__ALL_ATTRIBUTES__'
-      def initialize(input_attr_obj, input_path, output_attr_obj)
-        @input_attr_obj  = input_attr_obj
-        @input_path      = input_path 
-        @output_attr_obj = output_attr_obj
+      # opts can have keys:
+      #  :raise_error
+      def initialize(attribute_mapping, input_attr_obj, input_path, output_attr_obj, opts = {})
+        @attribute_mapping = attribute_mapping
+        @input_attr_obj    = input_attr_obj
+        @input_path        = input_path 
+        @output_attr_obj   = output_attr_obj
       end
-
-      def process
-        require 'byebug'; byebug
-        # TODO: stub 
-        fail LinkDef::AutoComplete::FatalError.new("debugging")
+      
+      # opts can have keys:
+      #  :raise_error
+      def process(opts = {})
+        base_output_path = nil
+        self.output_attr_obj.expanded_all_attribute_array.inject([]) do |a, base_output_attr_obj|
+          # base_input_path is set so that attribute named foo is stuffed under foo key
+          # self.input_path i sincluded in case it has offset
+          base_input_path  = (self.input_path || []) + [base_output_attr_obj.attribute_ref]
+          a + self.attribute_mapping.aug_attr_mappings_helper(input_attr_obj, base_input_path, base_output_attr_obj, base_output_path, opts)
+        end
       end
 
       module Mixin
@@ -39,7 +48,7 @@ module DTK
           input_attr_obj, input_path = get_context_attr_obj_with_path(err_msgs, :input)
           return [] if ErrorCheck.check_for_errors?(err_msgs, self.link_def_context, raise_error: opts[:raise_error])
           if output_attr_obj =  output_is_all_attributes_ref?
-            AllAttributes.new(input_attr_obj, input_path, output_attr_obj).process
+            AllAttributes.new(self, input_attr_obj, input_path, output_attr_obj).process(opts)
           end
         end
 
@@ -57,8 +66,8 @@ module DTK
 
       protected
 
-      attr_reader :input_attr_obj, :input_path, :output_attr_ob
-      
+      attr_reader :attribute_mapping, :input_attr_obj, :input_path, :output_attr_obj
+
     end
   end
 end

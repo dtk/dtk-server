@@ -18,10 +18,6 @@
 module DTK; class ModuleDSL; class V3
   OMFBase = ModuleDSL::V2::ObjectModelForm
   class ObjectModelForm < OMFBase
-    r8_nested_require('object_model_form', 'component')
-    r8_nested_require('object_model_form', 'link_def')
-    r8_nested_require('object_model_form', 'choice')
-
     private
 
     # opts can have keys

@@ -39,12 +39,16 @@ module DTK; class ModuleDSL; class V4
         ret['basic_type'] = 'service'
         ret.set_if_not_nil('description', input_hash['description'])
         add_attributes!(ret, component_type, input_hash)
-        opts = {}
-        add_dependent_components!(ret, input_hash, component_type, opts)
+
+        dependencies, link_defs = Choice.deps_and_link_defs(input_hash, component_type)
+        ret.set_if_not_nil('dependency', dependencies)
+        ret.set_if_not_nil('link_defs', link_defs)
+        ret.set_if_not_nil('component_order', component_order(input_hash))
+
         ret.set_if_not_nil('component_include_module', include_modules?(input_hash, component_type, context))
-        if opts[:constants]
-          add_attributes!(ret, component_type, ret_input_hash_with_constants(opts[:constants]), constant_attribute: true)
-        end
+
+        # TODO: check if we want top put this back in. we not being used because had opts = {}
+        # add_attributes!(ret, component_type, ret_input_hash_with_constants(opts[:constants]), constant_attribute: true) if opts[:constants]
 
         ActionDef.set_action_info!(ret, input_hash, component_name, providers_input_hash: Constant.matches?(input_hash, :Providers))
 
@@ -60,6 +64,24 @@ module DTK; class ModuleDSL; class V4
         
         # otherwise default is to make only_one_per_node true unless external_ref['type'] is set to 'puppet_definition'
         (external_ref || {})['type'] != 'puppet_definition'
+      end
+
+
+      def include_modules?(input_hash, cmp_type, context = {})
+        section_name = 'includes'
+        cmp_level_includes = input_hash[section_name]
+        module_level_includes = context[:module_level_includes]
+        if cmp_level_includes || module_level_includes
+          module_context = context.merge(section_name: section_name)
+          component_context = module_context.merge(component_type: cmp_type)
+          if module_level_includes
+            more_specific_incls = super(cmp_level_includes, component_context)
+            less_specific_incls = super(module_level_includes, module_context)
+            combine_includes(more_specific_incls, less_specific_incls)
+          else
+            super(cmp_level_includes, component_context)
+          end
+        end
       end
 
     end

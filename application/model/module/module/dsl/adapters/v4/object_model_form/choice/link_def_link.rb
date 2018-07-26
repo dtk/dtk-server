@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class ModuleDSL; class V3
+module DTK; class ModuleDSL; class V4
   class ObjectModelForm; class Choice
     class LinkDefLink < self
       attr_reader :dependency_name, :explicit_dependency_ref

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class ModuleDSL; class V3
+module DTK; class ModuleDSL; class V4
   class ObjectModelForm; class Choice
     class Dependency < self
       def self.ndx_dep_choices(in_dep_cmps, base_cmp, opts = {})

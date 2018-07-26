@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-module DTK; class ModuleDSL; class V3
+module DTK; class ModuleDSL; class V4
   class ObjectModelForm
     class Choice < OMFBase::Choice
       require_relative('choice/dependency')
@@ -27,6 +27,17 @@ module DTK; class ModuleDSL; class V3
         @dep_cmp_name = dep_cmp_name
         @base_cmp     = base_cmp
       end
+
+      # returns [dependencies, link_defs]
+      def self.deps_and_link_defs(input_hash, base_cmp)
+        ndx_dep_choices = Dependency.ndx_dep_choices(input_hash['dependencies'], base_cmp)
+        ndx_link_def_links = LinkDef.ndx_link_def_links(input_hash['link_defs'], base_cmp, parent_input_hash: input_hash)
+        spliced_ndx_link_def_links = integrate_deps_and_link_defs!(ndx_dep_choices, ndx_link_def_links)
+        dependencies = Dependency.dependencies?(ndx_dep_choices.values, base_cmp)
+        link_defs = LinkDef.link_defs?(spliced_ndx_link_def_links)
+        [dependencies, link_defs]
+      end
+
 
       def print_form
         self.raw || self.possible_link.inspect
@@ -48,16 +59,6 @@ module DTK; class ModuleDSL; class V3
         if ret_single_possible_link_value['type'].nil?
           update_single_possible_link_value('type' => 'internal')
         end
-      end
-
-      # returns [dependencies,link_defs]
-      def self.deps_and_link_defs(input_hash, base_cmp, opts = {})
-        ndx_dep_choices = Dependency.ndx_dep_choices(input_hash['dependencies'], base_cmp, opts)
-        ndx_link_def_links = LinkDef.ndx_link_def_links(input_hash['link_defs'], base_cmp, opts)
-        spliced_ndx_link_def_links = integrate_deps_and_link_defs!(ndx_dep_choices, ndx_link_def_links)
-        dependencies = Dependency.dependencies?(ndx_dep_choices.values, base_cmp, opts)
-        link_defs = LinkDef.link_defs?(spliced_ndx_link_def_links)
-        [dependencies, link_defs]
       end
 
       def matches?(choice_with_single_pl)

@@ -24,13 +24,14 @@ module DTK; class Task; class Template
       require_relative('inter_node/multi_node')
       require_relative('inter_node/nested_subtask')
 
-      def initialize(name = nil, breakpoint = nil, serialized_retry = nil)
+      def initialize(name = nil, breakpoint = nil, serialized_retry = nil, attempts = nil)
         super()
         @name = name
         @breakpoint = breakpoint
         @retry = serialized_retry
+        @attempts = attempts
       end
-      attr_accessor :name, :breakpoint, :retry 
+      attr_accessor :name, :breakpoint, :retry, :attempts
 
       def self.create_from_single_action(action, opts = {})
         new(stage_name(action, opts)).add_new_execution_block_for_action!(action, opts)

@@ -140,7 +140,7 @@ module DTK
         sleep      = request_params(:sleep)
         attempts    = request_params(:attempts)
 
-        params_hash.merge!(:sleep => sleep.to_i) if sleep.to_i > 0
+        params_hash.merge!(:retry => sleep.to_i) if sleep.to_i > 0
         params_hash.merge!(:attempts => attempts.to_i) if attempts.to_i >0
         params_hash.merge!(:breakpoint => breakpoint)
         response = assembly_instance.exec(params_hash)

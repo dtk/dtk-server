@@ -162,7 +162,7 @@ module DTK
         end
         task = Task::Hierarchical.get_and_reify(task_idh)
         task_id     = task_idh.get_id()
-        top_task_id = top_task_idh.get_id()
+        top_task_id = top_task_idh.get_id() 
         # TODO: DTK-2974: Almin code is updated so if task_action is an action that is flagged as a breakpoint, task_action[:breakpoint] wil be true
         # The code config_agent.ret_msg_content will call ret_msg_content on config_agent, which is associated with type of object. Right now we are only hanlding case where config_agent is of type ConfigAgent::Adapter::Dynamic
         # So for ConfigAgent::Adapter::Dynamic.ret_msg_content that looks if the passed in first object has  key :breakpoint set to true and tehn do breakpoint processing. for all other ConfigAgent::Adapter types we can just for time being ignote a breakpoint. Later we can warn user or through a parsing error when workflow is updated

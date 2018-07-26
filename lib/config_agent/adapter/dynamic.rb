@@ -43,7 +43,12 @@ module DTK; class ConfigAgent
           task_info_retry = task_info[:retry] || {}
           if task_info_retry.is_a?(Hash)
             failure_attempts      = task_info_retry[:attempts]
-            failure_sleep         = task_info_retry[:sleep]
+            failure_sleep         = task_info_retry[:retry]
+          else
+            task_info[:attempts]  = task_info[:attempts].to_i
+            task_info[:retry]     = task_info[:retry].to_i
+            failure_attempts      = task_info[:attempts] if task_info[:attempts]!= 0
+            failure_sleep         = task_info[:retry] if task_info[:retry] != 0
           end
         end
 

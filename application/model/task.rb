@@ -51,6 +51,7 @@ module DTK
        :temporal_order,
        :breakpoint,
        :retry,
+       :attempts,
        :position,
        :executable_action_type,
        :executable_action,

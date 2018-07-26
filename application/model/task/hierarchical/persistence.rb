@@ -42,16 +42,18 @@ module DTK; class Task
             executable_action: executable_action
           }
 
-          cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message, :retry]
+          cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message, :retry, :attempts]
           cols.each { |col| row.merge!(col => hash_row[col]) }
           [:assembly_id, :node_id, :target_id].each do |col|
             row[col] = hash_row[col] || SQL::ColRef.null_id
           end
           row[:breakpoint] = (hash_row[:breakpoint].nil? ? false : hash_row[:breakpoint]) 
-          row[:retry] = (hash_row[:retry].nil? ? '' : hash_row[:retry]) 
+          row[:retry] = (hash_row[:retry].nil? ? 0 : hash_row[:retry]) 
+          row[:attempts] = (hash_row[:attempts].nil? ? 0 : hash_row[:attempts]) 
 
           row
         end
+
         new_idhs = Model.create_from_rows(model_handle, rows, convert: true, do_not_update_info_table: true)
         unrolled_tasks.each_with_index { |task, i| task.set_id_handle(new_idhs[i]) }
         

@@ -27,7 +27,8 @@ module DTK
           task.update_input_attributes!() if task_start
           breakpoint = task[:breakpoint]
           # DTK-3265 - Almin: refactor this
-          task[:retry] = top_task[:retry] unless top_task[:retry].empty? || top_task[:retry].nil?
+          task[:retry] = top_task[:retry].to_i unless top_task[:retry].empty? || top_task[:retry].nil?
+          task[:attempts] = top_task[:attempts].to_i unless top_task[:attempts].empty? || top_task[:attempts].nil?
           # Almin, HACK: Consider Changing this.. 
           # Added because delete is making problems with :retry key, need to find where top_task is created and add key on subtasks objects instead of this fix
           top_task[:subtasks].each do |sub|
@@ -41,7 +42,7 @@ module DTK
                   end
                 end
               end
-              if st[:id] == task[:id]
+              if st[:id] == task[:id] && task[:retry] != 0
                 task[:retry] = sub[:retry] unless sub[:retry].empty? || sub[:retry].nil?
               end
             end

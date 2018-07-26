@@ -64,7 +64,7 @@ module DTK; class Task
           }
 
           internode_stage.has_breakpoint?
-          task_hash.merge!(breakpoint: internode_stage.breakpoint, retry: internode_stage.retry)          
+          task_hash.merge!(breakpoint: internode_stage.breakpoint, retry: internode_stage.retry, attempts: internode_stage.attempts) 
           # if internode_stage.respond_to?(:has_breakpoint?) and internode_stage.first[1].first.first[:breakpoint]
           #   task_hash.merge!(breakpoint: true)
           #   Log.info("Found breakpoint")
@@ -208,6 +208,8 @@ module DTK; class Task
       def create_stages_from_serialized_content!(serialized_content_array, actions, opts = {})
         serialized_content_array.each do |serialized_content|
           if stage = Stage::InterNode.parse_and_reify?(serialized_content, actions, opts)
+            stage.attempts = opts[:attempts]
+            stage.retry = opts[:retry]
             stage.add_to_template_content!(self, serialized_content, just_parse: opts[:just_parse])
           end
         end

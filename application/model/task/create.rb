@@ -205,12 +205,12 @@ module DTK; class Task
     #   :start_nodes
     #   :ret_nodes_to_start
     #   TODO: ....
-    def self.create_from_assembly_instance?(assembly, opts = {})
+    def self.create_from_assembly_instance?(assembly, opts = {})      
       component_type = opts[:component_type] || :service
       target_idh     = target_idh_from_assembly(assembly)
       task_mh        = target_idh.create_childMH(:task)
 
-      ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action]))
+      ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action, :retry, :attempts]))
 
       nodes_to_create, nodes_wait_for_start = nodes_to_process_in_task(assembly, Aux.hash_subset(opts, [:start_nodes, :ret_nodes_to_start]))
       case component_type
@@ -261,6 +261,7 @@ module DTK; class Task
       ret.add_subtask(start_nodes_task) if start_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret[:retry] = serialized_content[:retry] unless serialized_content[:retry].nil? || serialized_content[:retry].empty?
+      ret[:attempts] = serialized_content[:attempts] unless serialized_content[:attempts].nil?
       ret
     end
 
@@ -318,7 +319,8 @@ module DTK; class Task
         assembly_id: assembly.id,
         display_name: opts[:task_action] || 'assembly_converge',
         temporal_order: opts[:temporal_order] || 'sequential',
-        retry: opts[:retry]
+        retry: opts[:retry],
+        attempts: opts[:attempts]
       }
       if commit_msg = opts[:commit_msg]
         task_info_hash.merge!(commit_message: commit_msg)

@@ -18,6 +18,8 @@
 module DTK; class ModuleDSL; class V4
   class ObjectModelForm; class Choice
     class LinkDefLink < self
+      require_relative('link_def_link/attribute_links_from')
+
       attr_reader :dependency_name, :explicit_dependency_ref
       attr_accessor :required
       def dep_cmp_ndx
@@ -31,6 +33,8 @@ module DTK; class ModuleDSL; class V4
         @required                = true
       end
 
+      # opts can have keys
+      #  :link_type
       def convert(link_def_link, opts = {})
         in_attr_mappings = link_def_link['attribute_mappings'] || []
         constraints = link_def_link['constraints']

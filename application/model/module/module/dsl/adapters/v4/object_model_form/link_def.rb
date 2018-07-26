@@ -18,12 +18,13 @@
 module DTK; class ModuleDSL; class V4
   class ObjectModelForm
     class LinkDef < OMFBase
+      require_relative('link_def/attribute_link_def')
+
       # opts can have keys
       #  :parent_input_hash
       def self.ndx_link_def_links(in_link_defs, base_cmp, opts = {})
         ret = {}
-        return ret unless in_link_defs
-        convert_to_hash_form(in_link_defs) do |dep_cmp_name, link_def_links|
+        convert_to_hash_form(in_link_defs || {}) do |dep_cmp_name, link_def_links|
           link_def_links = [link_def_links] unless link_def_links.is_a?(Array)
           link_def_links = convert_link_def_links(dep_cmp_name, link_def_links, base_cmp)
           link_def_links.each do |ldl|
@@ -31,7 +32,8 @@ module DTK; class ModuleDSL; class V4
             (ret[ndx] ||= []) << ldl
           end
         end
-        ret
+        # add any link defs defined in attributes
+        add_attribute_link_defs!(ret, base_cmp, parent_input_hash: opts[:parent_input_hash])
       end
 
       def self.link_defs?(spliced_ndx_link_def_links)
@@ -43,6 +45,26 @@ module DTK; class ModuleDSL; class V4
       end
 
       private
+
+      def self.convert_link_def_links(dep_cmp_name, link_def_links, base_cmp)
+        link_def_links.inject([]) do |a, link|
+          unless link.is_a?(Hash)
+            err_msg = "The following link defs section on component '?1' is ill-formed: ?2"
+            fail ParsingError.new(err_msg, component_print_form(base_cmp), dep_cmp_name => link_def_links)
+          end
+          a + convert_link_def_link(link, dep_cmp_name, base_cmp)
+        end
+      end
+      
+      # opts can have keys
+      #   :parent_input_hash
+      def self.add_attribute_link_defs!(ret,  base_cmp, opts = {})
+        if attributes = (opts[:parent_input_hash] || {})['attributes']
+          link_def_links = AttributeLinkDef.convert_link_def_links(attributes, base_cmp)
+          link_def_links.each { |ldl| (ret[ldl.dependency_name] ||= []) << ldl }
+        end
+        ret
+      end
 
       def self.link_def(link_def_type, link_def_links)
         OutputHash.new(
@@ -67,18 +89,6 @@ module DTK; class ModuleDSL; class V4
           end
         end
         ret
-      end
-
-      private
-
-      def self.convert_link_def_links(dep_cmp_name, link_def_links, base_cmp)
-        link_def_links.inject([]) do |a, link|
-          unless link.is_a?(Hash)
-            err_msg = "The following link defs section on component '?1' is ill-formed: ?2"
-            fail ParsingError.new(err_msg, component_print_form(base_cmp), dep_cmp_name => link_def_links)
-          end
-          a + convert_link_def_link(link, dep_cmp_name, base_cmp)
-        end
       end
 
       def self.convert_link_def_link(link_def_link, dep_cmp_name, base_cmp)

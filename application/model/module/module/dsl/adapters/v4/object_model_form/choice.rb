@@ -30,14 +30,13 @@ module DTK; class ModuleDSL; class V4
 
       # returns [dependencies, link_defs]
       def self.deps_and_link_defs(input_hash, base_cmp)
-        ndx_dep_choices = Dependency.ndx_dep_choices(input_hash['dependencies'], base_cmp)
-        ndx_link_def_links = LinkDef.ndx_link_def_links(input_hash['link_defs'], base_cmp, parent_input_hash: input_hash)
+        ndx_dep_choices            = Dependency.ndx_dep_choices(input_hash['dependencies'], base_cmp)
+        ndx_link_def_links         = LinkDef.ndx_link_def_links(input_hash['link_defs'], base_cmp, parent_input_hash: input_hash)
         spliced_ndx_link_def_links = integrate_deps_and_link_defs!(ndx_dep_choices, ndx_link_def_links)
-        dependencies = Dependency.dependencies?(ndx_dep_choices.values, base_cmp)
-        link_defs = LinkDef.link_defs?(spliced_ndx_link_def_links)
+        dependencies               = Dependency.dependencies?(ndx_dep_choices.values, base_cmp)
+        link_defs                  = LinkDef.link_defs?(spliced_ndx_link_def_links)
         [dependencies, link_defs]
       end
-
 
       def print_form
         self.raw || self.possible_link.inspect
@@ -75,10 +74,10 @@ module DTK; class ModuleDSL; class V4
 
       private
 
+
       def set_single_possible_link!(ndx, hash_value)
-        unless self.possible_link.empty?
-          fail Error.new('Unexpected that self.possible_link is not empty when adding an element')
-        end
+        self.possible_link ||= OutputHash.new
+        fail Error.new('Unexpected that self.possible_link is not empty when adding an element') unless self.possible_link.empty?
         self.possible_link.merge!(ndx => hash_value)
       end
 
@@ -187,7 +186,6 @@ module DTK; class ModuleDSL; class V4
       protected
 
       attr_reader :raw, :dep_cmp_name, :base_cmp
-
 
     end
   end

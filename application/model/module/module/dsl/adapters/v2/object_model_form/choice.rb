@@ -49,7 +49,7 @@ module DTK; class ModuleDSL; class V2
         end
       end
 
-      attr_reader :possible_link
+      attr_accessor :possible_link
       
       def has_attribute_mappings?
         ams = dep_component_info['attribute_mappings']

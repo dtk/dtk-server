@@ -58,7 +58,8 @@ module DTK
           component_type, title = ComponentTitle.parse_component_display_name(component_ref)
           component_type        = ::DTK::Component.component_type_from_user_friendly_name(component_type)
           component_module_refs = assembly_instance.component_module_refs
-          service_repo_info     = CommonModule::ServiceInstance::RepoInfo.new(service_instance.base_module_branch)
+          service_instance_base_branch = service_instance.base_module_branch
+          service_repo_info     = CommonModule::ServiceInstance::RepoInfo.new(service_instance_base_branch)
           dependent_modules     = {}
 
           component_module_refs.module_refs_array.each { |dep| dependent_modules.merge!("#{dep[:namespace_info]}/#{dep[:display_name]}" => extract_version(dep[:version_info])) }
@@ -91,6 +92,7 @@ module DTK
             end
 
           assembly_instance.add_component(node.id_handle, aug_cmp_template, service_instance, component_title: title)
+          CommonDSL::Generate::ServiceInstance.generate_dsl_and_push!(service_instance, service_instance_base_branch)
           add_nested_module_info(service_repo_info, aug_cmp_template, service_instance) if add_nested_module
 
           service_repo_info

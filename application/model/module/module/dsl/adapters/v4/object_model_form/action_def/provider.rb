@@ -23,6 +23,7 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       # TODO: DTK-2805:  cleanup provider/dtk since artifical catchall 
       require_relative('provider/dtk')
       require_relative('provider/puppet')
+      require_relative('provider/component')
 
 
       # opts can have:
@@ -51,15 +52,20 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       end
 
       # Dynamic must be last because it is catchall
-      PROVIDER_CLASSES = [Dtk, Puppet, BashCommands] + [Dynamic]
+      PROVIDER_CLASSES       = [Dtk, Puppet, BashCommands, Component] + [Dynamic]
       PROVIDER_TYPE_TO_CLASS = PROVIDER_CLASSES.inject({}) { |h, klass| h.merge(klass.send(:type) => klass) }
-
+      
       def self.provider_type_to_class?(provider_type)
         PROVIDER_TYPE_TO_CLASS[provider_type.to_sym]
       end
 
       def self.provider_type(input_hash, opts = {})
         Constant.matches?(input_hash, :Provider) || compute_provider_type(input_hash, opts)
+      end
+
+      # This can be over-written
+      def self.possible_type_keys
+        type
       end
 
       def self.compute_provider_type(input_hash, opts = {})

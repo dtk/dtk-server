@@ -48,6 +48,10 @@ module DTK
       
       private
 
+      def self.possible_type_keys
+        [:ruby]
+      end
+
       # TODO: DTK-2805: here treating provider attributes by preprocessing them and putting them in action def
       # To best handle incremental diffs might be easier to put provider attributes in object model and normalize dynamicaly
       def provider_specific_fields

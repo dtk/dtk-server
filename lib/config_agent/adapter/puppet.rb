@@ -37,7 +37,7 @@ module DTK
         cmps_with_attrs   = components_with_attributes(config_node)
         assembly_attrs    = assembly_attributes(config_node)
         puppet_manifests  = NodeManifest.new(config_node, assembly: assembly).generate(cmps_with_attrs, assembly_attrs)
-        unless config_node[:retry].nil? || config_node[:retry].empty?
+        if config_node[:retry].kind_of?(::Hash) 
           failure_attempts = config_node[:retry][:attempts] || nil
           failure_sleep    = config_node[:retry][:sleep] || nil
         end

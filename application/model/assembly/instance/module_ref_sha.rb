@@ -35,6 +35,23 @@ module DTK
         fail "TODO: DCTK-3366: need to write; it can call matching_module_refs_shas but needs to pick out base module branch"
       end
 
+      def self.create_or_update_for_nested_module(assembly_instance, aug_nested_module_branch)
+        opts = { filter: [:and, [:eq, :component_component_id, assembly_instance.id], [:eq, :module_branch_id, aug_nested_module_branch.id]] }
+        matching = matching_module_refs_shas(assembly_instance, opts)
+        if matching.empty?
+          create(assembly_instance, aug_nested_module_branch)
+        else
+          fail(Error, "Unexpected to get multiple module_ref_shas for single nested module branch: #{aug_nested_module_branch.id}") if matching.size > 1
+          matching.first.update_from_hash(assembly_instance, aug_nested_module_branch)
+        end
+      end
+
+      def update_from_hash(assembly_instance, aug_module_branch)
+        aug_module_branch.update_current_sha_from_repo!
+        sha = aug_module_branch.get_field(:current_sha)
+        update_from_hash_assignments(sha: sha)
+      end
+
       private
       
       def self.create(assembly_instance, aug_module_branch)
@@ -55,11 +72,13 @@ module DTK
           module_name: aug_nested_module_branch.get_field(:module_name)
         }
       end
-      
-      def self.matching_module_refs_shas(assembly_instance)
+
+      def self.matching_module_refs_shas(assembly_instance, opts = {})
+        filter = opts[:filter] || [:eq, :component_component_id, assembly_instance.id]
         sp_hash = {
           cols: common_columns,
-          filter: [:eq, :component_component_id, assembly_instance.id]
+          # filter: [:eq, :component_component_id, assembly_instance.id]
+          filter: filter
         }
         get_objs(model_handle(assembly_instance), sp_hash)
       end

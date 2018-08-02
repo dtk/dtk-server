@@ -29,23 +29,73 @@ module DTK
           #   :component_title
           def add_component(node_idh, aug_cmp_template, service_instance, opts = {})
             node = Component.check_node(self, node_idh)
-            component = nil          
+            component = nil
             Transaction do
               component = node.add_component(aug_cmp_template, component_title: opts[:component_title], detail_to_include: [:component_dependencies]).create_object
-              Component.update_workflow(self, node, component, component_title: opts[:component_title]) 
+              Component.update_workflow(self, node, component, component_title: opts[:component_title])
 
               LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
 
-              
-              fail "TODO: DTK-3394: implement when add component"
+              # fail "TODO: DTK-3394: implement when add component"
               # need to update module_refs_lock to add new component which will be used below to pull nested component module into service instance if needed
-              
-              # ModuleRefs::Lock.create_or_update(self)
 
-              # Component.pull_component_module_repos(aug_cmp_template, service_instance)
+              # ModuleRefs::Lock.create_or_update(self) - substitute with below
+              get_or_create_opts = {
+                donot_update_model: true,
+                delete_existing_branch: true
+              }
+              aug_nested_module_branch = service_instance.get_or_create_for_nested_module(aug_cmp_template.component_module, aug_cmp_template.version, get_or_create_opts)
+              ModuleRefSha.create_or_update_for_nested_module(service_instance.assembly_instance, aug_nested_module_branch)
+
+              Component.pull_component_module_repos(aug_cmp_template, service_instance)
             end
             component.id_handle 
           end
+        end
+
+        def self.add_component(service_instance, component_ref, version, namespace, parent_node)
+          assembly_instance     = service_instance.assembly_instance
+          component_type, title = ComponentTitle.parse_component_display_name(component_ref)
+          component_type        = ::DTK::Component.component_type_from_user_friendly_name(component_type)
+          component_module_refs = assembly_instance.component_module_refs
+          service_instance_base_branch = service_instance.base_module_branch
+          service_repo_info     = CommonModule::ServiceInstance::RepoInfo.new(service_instance_base_branch)
+          dependent_modules     = {}
+
+          component_module_refs.module_refs_array.each { |dep| dependent_modules.merge!("#{dep[:namespace_info]}/#{dep[:display_name]}" => extract_version(dep[:version_info])) }
+
+          aug_cmp_template = nil
+          retries = 0
+          add_nested_module = false
+
+          begin
+            aug_cmp_template = assembly_instance.find_matching_aug_component_template(component_type, component_module_refs, dependent_modules: dependent_modules)# dependent_modules: opts[:dependent_modules])
+          rescue ErrorUsage => e
+            fail ErrorUsage, "#{e.message}. Please provide 'namespace' and 'version' to add module to dependencies." if version.empty? || namespace.empty?
+
+            if retries > 1
+              fail e
+            else
+              new_dependency_info = { display_name: component_ref.split('::').first, namespace_name: namespace, version_info: version }
+              add_dependency_to_module_refs(component_module_refs, new_dependency_info)
+              add_nested_module = true
+              retries += 1
+              retry
+            end
+          end
+
+          node =
+            if parent_node
+              assembly_instance.get_node?([:eq, :display_name, parent_node])
+            else
+              assembly_instance.assembly_wide_node
+            end
+
+          assembly_instance.add_component(node.id_handle, aug_cmp_template, service_instance, component_title: title)
+          CommonDSL::Generate::ServiceInstance.generate_dsl_and_push!(service_instance, service_instance_base_branch)
+          add_nested_module_info(service_repo_info, aug_cmp_template, service_instance) if add_nested_module
+
+          service_repo_info
         end
 
         def self.check_node(assembly_instance, node_idh)
@@ -85,8 +135,9 @@ module DTK
 
         def self.pull_component_module_repos(aug_cmp_template, service_instance)
           if service_instance
-            fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
-            existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
+            # fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
+            # existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
+            existing_aug_module_branches = service_instance.aug_dependent_base_module_branches.inject({}) { |h, r| h.merge(r[:module_name] => r) }
             nested_module_name           = aug_cmp_template.component_module.module_name
 
             if matching_module_branch = existing_aug_module_branches[nested_module_name]
@@ -97,10 +148,34 @@ module DTK
                 end
               end
 
-              fail Error, "TODO: DTK-3366; changed CommonDSL::NestedModuleRepo.pull_from_component_modules to update_repo_for_stage"
-              CommonDSL::NestedModuleRepo.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
+              # fail Error, "TODO: DTK-3366; changed CommonDSL::NestedModuleRepo.pull_from_component_modules to update_repo_for_stage"
+              # CommonDSL::NestedModuleRepo.pull_from_component_modules(service_instance.get_service_instance_branch, matching_module_branches)
+              matching_module_branches.each do |aug_nested_module_branch|
+                CommonDSL::NestedModuleRepo.update_repo_for_stage(aug_nested_module_branch)
+              end
             end
           end
+        end
+
+        private
+
+        def self.extract_version(version_obj)
+          version_obj.is_a?(String) ? version_obj : version_obj.version_string
+        end
+
+        def self.add_dependency_to_module_refs(component_module_refs, new_dependency_info)
+          modules_with_namespaces = component_module_refs.module_refs_array.map { |dep| { display_name: dep[:display_name], namespace_name: dep[:namespace_info], version_info: dep[:version_info].version_string } }
+          modules_with_namespaces << new_dependency_info
+          component_module_refs.update_module_refs_if_needed!(modules_with_namespaces)
+        end
+
+        def self.add_nested_module_info(service_repo_info, aug_cmp_template, service_instance)
+          get_or_create_opts = {
+            donot_update_model: true,
+            delete_existing_branch: false
+          }
+          aug_nested_module_branch = service_instance.get_or_create_for_nested_module(aug_cmp_template.component_module, aug_cmp_template.version, get_or_create_opts)
+          service_repo_info.add_nested_module_info!(aug_nested_module_branch)
         end
 
       end

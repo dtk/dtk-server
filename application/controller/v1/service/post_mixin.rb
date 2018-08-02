@@ -252,6 +252,10 @@ module DTK
         rest_ok_response response
       end
 
+      def add_component
+        rest_ok_response Assembly::Instance::Add::Component.add_component(service_instance, required_request_params(:component_ref), request_params(:version), request_params(:namespace), request_params(:parent_node))
+      end
+
       private
 
       def execute_task(task)

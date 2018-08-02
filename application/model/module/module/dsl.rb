@@ -328,7 +328,8 @@ module DTK
       1 => /^r8meta\.[a-z]+\.([a-z]+$)/,
       2 => /^dtk\.model\.([a-z]+$)/,
       3 => /^dtk\.model\.([a-z]+$)/,
-      4 => /^dtk\.model\.([a-z]+$)/
+      4 => /^dtk\.model\.([a-z]+$)/,
+      4 => /^dtk\.module\.(yaml)/
     }
 
     VersionsTreated = DSLFilenameRegexp.keys

@@ -106,6 +106,13 @@ module DTK; class AssemblyModule
       new(assembly).update_impacted_component_instances(component_module, module_branch, opts)
     end
 
+    def self.promote_module_updates_from_nested_branch(service_instance, component_module_name, opts = {})
+      base_cmp_branch = service_instance.aug_dependent_base_module_branches.find { |bmb| component_module_name.eql?("#{bmb[:namespace]}/#{bmb[:module_name]}") || component_module_name.eql?("#{bmb[:namespace]}:#{bmb[:module_name]}") }
+
+      fail ErrorUsage.new("Unable to find base module branch for '#{component_module_name}'!") unless base_cmp_branch
+
+      new(service_instance.assembly_instance).promote_module_updates(base_cmp_branch.component_module, opts)
+    end
 
     def self.promote_module_updates(assembly, component_module, opts = {})
       new(assembly).promote_module_updates(component_module, opts)

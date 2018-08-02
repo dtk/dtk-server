@@ -60,6 +60,7 @@ DTK::ReactorRoute.draw do
   post 'api/v1/services/delete_by_path'               => 'v1::service#delete_by_path'
   post 'api/v1/services/add_by_path'                  => 'v1::service#add_by_path'
   post 'api/v1/services/add_component'                => 'v1::service#add_component'
+  post 'api/v1/services/promote_module_updates'       => 'v1::service#promote_module_updates'
 
   # TODOs associated with following routes
 

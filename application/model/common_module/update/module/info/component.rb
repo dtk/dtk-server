@@ -79,11 +79,12 @@ module DTK
       end
 
       COMPONENT_YAML_FILENAME = 'dtk.model.yaml'
+      COMMON_YAML_FILENAME = 'dtk.module.yaml'
       def dsl_created_info
         transform = Transform.new(self.parsed_common_module, self).compute_component_module_outputs!
         content = transform.output_path_hash_pairs[COMPONENT_YAML_FILENAME] || fail(Error, "Unexpected that '#{COMPONENT_YAML_FILENAME}' not found")
         {
-          path: COMPONENT_YAML_FILENAME,
+          path: COMMON_YAML_FILENAME,
           content: content
         }
       end

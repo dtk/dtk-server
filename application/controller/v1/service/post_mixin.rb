@@ -256,6 +256,10 @@ module DTK
         rest_ok_response Assembly::Instance::Add::Component.add_component(service_instance, required_request_params(:component_ref), request_params(:version), request_params(:namespace), request_params(:parent_node))
       end
 
+      def promote_module_updates
+        rest_ok_response AssemblyModule::Component.promote_module_updates_from_nested_branch(service_instance, required_request_params(:module_name), { project: get_default_project })
+      end
+
       private
 
       def execute_task(task)

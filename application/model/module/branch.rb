@@ -161,15 +161,17 @@ module DTK
         fail Error.new('Unexpected result from fast_foward_merge_from_branch')
       end
 
-      self[:current_sha] =  diffs.b_sha
-      update(current_sha: self[:current_sha])
-
-      impl_obj = get_implementation()
-      impl_obj.modify_file_assets(diffs_summary)
-
-      if diffs_summary.meta_file_changed?()
+      if diffs_summary.meta_file_changed?({type: :module_dsl})
         errors = ErrorUsage::Parsing.trap(only_return_error: true) do
-          component_module.parse_dsl_and_update_model(impl_obj, id_handle(), version(), update_module_refs_from_file: true)
+          local_params = ModuleBranch::Location::LocalParams::Server.new(
+            module_type: :common_module,
+            module_name: component_module.display_name,
+            version: component_module.get_field?(:version),
+            namespace: component_module.get_field?(:namespace).display_name,
+            source_name: nil
+          )
+          opts[:force_parse] = true
+          CommonModule::Update::Module.update_from_repo(opts[:project], diffs.b_sha, local_params, opts)
         end
 
         if errors
@@ -182,6 +184,7 @@ module DTK
           ret.merge!(dsl_parsing_errors: errors)
         end
       end
+
       ret
     end
 

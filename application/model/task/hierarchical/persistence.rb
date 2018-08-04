@@ -20,19 +20,19 @@ module DTK; class Task
     module PersistenceMixin
       # saves hirerachical structure to db and returns task with top level and subtask ids filled out
       def save_and_add_ids
-        save!()
+        save!
         # TODO: this is simple but expensive way to get all teh embedded task ids filled out
         # can replace with targeted method that does just this
-        Hierarchical.get_and_reify(id_handle())
+        Hierarchical.get_and_reify(id_handle)
       end
       
         # persists to db this and its sub tasks
       def save!
         # no op if saved already as detected by whether has an id
-        return nil if id()
-        set_positions!()        
+        return nil if id
+        set_positions!        
         # for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then put in ids
-        unrolled_tasks = unroll_tasks()
+        unrolled_tasks = unroll_tasks
         rows = unrolled_tasks.map do |hash_row|
           executable_action = hash_row[:executable_action]
           row = {
@@ -58,9 +58,12 @@ module DTK; class Task
         unrolled_tasks.each_with_index { |task, i| task.set_id_handle(new_idhs[i]) }
         
         # set parent relationship and use to set task_id (subtask parent) and children_status
-        par_rel_rows_for_id_info = set_and_ret_parents_and_children_status!()
-        par_rel_rows_for_task = par_rel_rows_for_id_info.map { |r| { id: r[:id], task_id: r[:parent_id], children_status: r[:children_status] } }
-        
+        par_rel_rows_for_id_info = set_and_ret_parents_and_children_status!
+        par_rel_rows_for_task = par_rel_rows_for_id_info.map do |r| 
+          { id: r[:id], 
+            task_id: r[:parent_id] || SQL::ColRef.null_id, 
+            children_status: r[:children_status] } 
+        end
         Model.update_from_rows(model_handle, par_rel_rows_for_task) unless par_rel_rows_for_task.empty?
         IDInfoTable.update_instances(model_handle, par_rel_rows_for_id_info)
       end

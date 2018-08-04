@@ -52,7 +52,7 @@ module DTK; class Task
 
       unless opts[:skip_running_check]
         # raise error if any its nodes are not running
-        not_running_nodes = task.get_associated_nodes().select { |n| n.get_and_update_operational_status!() != 'running' }
+        not_running_nodes = task.get_associated_nodes.select { |n| n.get_and_update_operational_status! != 'running' }
         unless not_running_nodes.empty?
           node_is = (not_running_nodes.size == 1 ? 'node is' : 'nodes are')
           node_names = not_running_nodes.map(&:display_name).join(', ')
@@ -140,16 +140,16 @@ module DTK; class Task
   end
 
   class Create
-    r8_nested_require('create', 'nodes_task')
+    require_relative('create/nodes_task')
 
     def self.create_for_ad_hoc_action(assembly, component, opts = {})
       ad_hoc_action = Template::Action::AdHoc.new(assembly, component, opts)
-      task_action_name = ad_hoc_action.task_action_name()
+      task_action_name = ad_hoc_action.task_action_name
       task_template_content = ad_hoc_action.task_template_content
 
       # TODO: below needs to use action params if they exist
       task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
-      subtasks = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
+      subtasks = task_template_content.create_subtask_instances(task_mh, assembly.id_handle)
       #create_top_level_task(task_mh, assembly, task_action: task_action_name).add_subtasks(subtasks)
       create_top_level_task(task_mh, assembly, task_action: task_action_name, retry: component[:retry]).add_subtasks(subtasks)
     end
@@ -159,7 +159,7 @@ module DTK; class Task
         if node.eql?('assembly_wide')
           node = assembly.has_assembly_wide_node?
         else
-          leaf_nodes = assembly.get_leaf_nodes()
+          leaf_nodes = assembly.get_leaf_nodes
           node = leaf_nodes.find{|n| n[:display_name].eql?(node)}
         end
       end
@@ -235,7 +235,7 @@ module DTK; class Task
 
       opts_tt = opts.merge(component_type_filter: component_type)
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, opts_tt)
-      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
+      stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh, assembly.id_handle)
 
       if start_nodes_task.nil? && create_nodes_task.nil? && stages_config_nodes_task.empty?
         # means that no steps to execute
@@ -308,7 +308,7 @@ module DTK; class Task
 
     #TODO: below will be private when finish refactoring this file
     def self.target_idh_from_assembly(assembly)
-      assembly.get_target().id_handle()
+      assembly.get_target.id_handle
     end
     def self.create_new_task(task_mh, hash)
       Task.create_stub(task_mh, hash)
@@ -334,11 +334,11 @@ module DTK; class Task
   #TODO: move from below when decide whether needed; looking to generalize above so can subsume below
   module CreateClassMixin
     def task_when_nodes_ready_from_assembly(assembly, component_type, opts)
-      assembly_idh = assembly.id_handle()
+      assembly_idh = assembly.id_handle
       target_idh = target_idh_from_assembly(assembly)
       task_mh = target_idh.create_childMH(:task)
 
-      main_task = create_new_task(task_mh, assembly_id: assembly_idh.get_id(), display_name: 'power_on_nodes', temporal_order: 'concurrent', commit_message: nil)
+      main_task = create_new_task(task_mh, assembly_id: assembly_idh.get_id, display_name: 'power_on_nodes', temporal_order: 'concurrent', commit_message: nil)
       opts.merge!(main_task: main_task)
 
       assembly_config_changes = StateChange::Assembly.component_state_changes(assembly, component_type)
@@ -457,7 +457,7 @@ module DTK; class Task
         all_actions << executable_action
         ret = create_new_task(task_mh, executable_action: executable_action)
       else
-        # TODO: is create_new_task__create_node_stage() right?
+        # TODO: is create_new_task__create_node_stage right?
         ret = create_new_task(task_mh, display_name: 'create_node_stage', temporal_order: 'concurrent')
         state_change_list.each do |sc|
           executable_action = Action::PowerOnNode.create_from_state_change(sc.first)

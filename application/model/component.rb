@@ -156,13 +156,12 @@ module DTK
     def config_agent_type
       external_ref = self[:external_ref] || {}
       return 'dynamic' if external_ref[:provider] == 'dynamic'
+      return 'component' if external_ref[:provider] ==  'component'
       case external_ref[:type]
-       when 'chef_recipe' then 'chef'
-       when 'puppet_class', 'puppet_definition' then 'puppet'
-       when 'bash_commands' then 'bash_commands'
-       when 'ruby_function' then 'ruby_function'
-       when 'docker' then 'docker'
-       else 'no_op'
+      when 'puppet_class', 'puppet_definition' then 'puppet'
+      when 'bash_commands' then 'bash_commands'
+      when 'ruby_function' then 'ruby_function'
+      else 'no_op'
       end
     end
 

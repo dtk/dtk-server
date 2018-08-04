@@ -17,21 +17,10 @@
 #
 module DTK
   class ConfigAgent
-    module Adapter
-      def self.load(type)
-        return nil unless type
-        return Agents[type] if Agents[type]
-        klass = self
-        begin
-          Lock.synchronize { require_relative("adapter/#{type}") }
-          klass = const_get Aux.camelize(type.to_s)
-        rescue LoadError => e
-          fail Error, "Error dyanmically loading config agent adapter '#{type}': #{e.message}"
-        end
-        Agents[type] = klass.new()
+    class Adapter::Component::DelegatedConfigAgent
+      class Dynamic < self
+        
       end
-      Lock = Mutex.new
-      Agents = {}
     end
   end
 end

@@ -16,22 +16,27 @@
 # limitations under the License.
 #
 module DTK
-  class ConfigAgent
-    module Adapter
-      def self.load(type)
-        return nil unless type
-        return Agents[type] if Agents[type]
-        klass = self
-        begin
-          Lock.synchronize { require_relative("adapter/#{type}") }
-          klass = const_get Aux.camelize(type.to_s)
-        rescue LoadError => e
-          fail Error, "Error dyanmically loading config agent adapter '#{type}': #{e.message}"
-        end
-        Agents[type] = klass.new()
+  class ConfigAgent::Adapter::Component
+    class DelegationAction
+      def initialize(task_info)
+        @task_info = task_info
       end
-      Lock = Mutex.new
-      Agents = {}
+
+      def config_agent_type 
+        @config_agent_type ||= ret_config_agent_type
+      end
+
+      protected
+      
+      attr_reader :task_info
+
+      private
+
+      def ret_config_agent_type
+        # TODO: stub
+        :dynamic
+      end
+
     end
   end
 end

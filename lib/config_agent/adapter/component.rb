@@ -18,20 +18,16 @@
 module DTK
   class ConfigAgent
     module Adapter
-      def self.load(type)
-        return nil unless type
-        return Agents[type] if Agents[type]
-        klass = self
-        begin
-          Lock.synchronize { require_relative("adapter/#{type}") }
-          klass = const_get Aux.camelize(type.to_s)
-        rescue LoadError => e
-          fail Error, "Error dyanmically loading config agent adapter '#{type}': #{e.message}"
+      class Component < ConfigAgent
+        require_relative('component/delegation_action')
+        require_relative('component/delegated_config_agent')
+        
+        def ret_msg_content(task_info, opts = {})
+          delegation_action = DelegationAction.new(task_info)
+          DelegatedConfigAgent.ret_msg_content(delegation_action, task_info, opts)
         end
-        Agents[type] = klass.new()
+        
       end
-      Lock = Mutex.new
-      Agents = {}
     end
   end
 end

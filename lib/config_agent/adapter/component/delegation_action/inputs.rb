@@ -16,19 +16,25 @@
 # limitations under the License.
 #
 module DTK
-  class ConfigAgent
-    module Adapter
-      class Component < ConfigAgent
-        require_relative('component/delegation_action')
-        require_relative('component/delegated_config_agent')
-        
-        def ret_msg_content(task_info, opts = {})
-          assembly_instance = opts[:assembly] || fail("Unexpected that opts[:assembly] i snil")
-          delegation_action = DelegationAction.parse(task_info, assembly_instance)
-          DelegatedConfigAgent.ret_msg_content(delegation_action, task_info, opts)
-        end
-        
+  class ConfigAgent::Adapter::Component::DelegationAction
+    class Inputs
+      def initialize(input_spec, base_input_values)
+        @input_spec        = input_spec
+        @base_input_values = base_input_values
       end
+      private :initialize
+
+      def self.bind(input_spec, base_input_values)
+        new(input_spec, base_input_values).bind
+      end
+   
+      def bind
+      end
+
+      protected
+      
+      attr_reader :input_spec, :base_input_values
+      
     end
   end
 end

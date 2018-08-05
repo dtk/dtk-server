@@ -253,7 +253,8 @@ module DTK
       end
 
       def add_component
-        rest_ok_response Assembly::Instance::Add::Component.add_component(service_instance, required_request_params(:component_ref), request_params(:version), request_params(:namespace), request_params(:parent_node))
+        parent_node = request_params(:parent_node)
+        rest_ok_response Assembly::Instance::Add::Component.add_component(service_instance, required_request_params(:component_ref), request_params(:version), request_params(:namespace), parent_node.empty? ? nil :  parent_node)
       end
 
       private

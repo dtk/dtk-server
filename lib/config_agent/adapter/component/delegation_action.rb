@@ -23,16 +23,14 @@ module DTK
       def initialize(task_info, assembly_instance)
         @task_info         = task_info
         @assembly_instance = assembly_instance
+        # above must go first
+        @config_agent_type = ret_config_agent_type
+        @inputs            = Inputs.bind(self.input_spec, self.base_component_attributes) 
       end
       private :initialize
 
       def self.parse(task_info, assembly_instance)
-        new(task_info, assembly_instance).parse
-      end
-      def parse
-        @config_agent_type = ret_config_agent_type
-        @inputs            = Inputs.bind(self.input_spec, self.base_input_values) 
-        self
+        new(task_info, assembly_instance)
       end
       
       attr_reader :config_agent_type, :inputs
@@ -41,9 +39,8 @@ module DTK
       
       attr_reader :task_info, :assembly_instance
       
-      def base_input_values
-        require 'byebug'; byebug
-        @base_input_values ||= self.action_properties[:type] || raise_parsing_error("Cannot find the :component_type property")
+      def base_component_attributes
+        @base_component_attributes ||= self.component_action[:attributes] || []
       end
 
       def input_spec
@@ -74,7 +71,6 @@ module DTK
       private
 
       def ret_config_agent_type
-        require 'byebug'; byebug
         config_agent_type = 
           if self.action_method == 'create'
             external_ref = self.action_component_template.get_field?(:external_ref) || fail(Error, "Unexpected that external_ref not defined on action component with create method")

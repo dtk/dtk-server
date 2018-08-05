@@ -23,7 +23,7 @@ module DTK
         require_relative('component/delegated_config_agent')
         
         def ret_msg_content(task_info, opts = {})
-          assembly_instance = opts[:assembly] || fail("Unexpected that opts[:assembly] i snil")
+          assembly_instance = opts[:assembly] || fail("Unexpected that opts[:assembly] is nil")
           delegation_action = DelegationAction.parse(task_info, assembly_instance)
           DelegatedConfigAgent.ret_msg_content(delegation_action, task_info, opts)
         end

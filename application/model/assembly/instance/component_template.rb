@@ -22,11 +22,42 @@ module DTK
         Component::Template::Augmented.find_matching_component_template(self, component_type, component_module_refs, donot_raise_error: true)
       end
 
+
+      # opts can have keys:
+      #   :donot_raise_error
+      def simple_find_matching_aug_component_template(component_type, opts = {})
+        find_matching_aug_component_template(component_type, self.component_module_refs, donot_raise_error: opts[:donot_raise_error], dependent_modules: dependent_modules)
+      end
+
       # opts can have keys:
       #   :donot_raise_error
       #   :dependent_modules
       def find_matching_aug_component_template(component_type, component_module_refs, opts = {})
         Component::Template::Augmented.find_matching_component_template(self, component_type, component_module_refs, opts)
+      end
+
+      private
+      
+      def dependent_modules
+        # put in info for base module
+        base_module = base_module_info
+        dependent_modules = { "#{base_module.namespace}/#{base_module.module_name}" => base_module.version }
+        
+        # put in info for nested module
+        self.component_module_refs.module_refs_array.each { |dep| dependent_modules.merge!("#{dep[:namespace_info]}/#{dep[:display_name]}" => extract_version(dep[:version_info])) }
+        
+        dependent_modules
+      end
+      
+
+      BaseModuleInfo = Struct.new(:namespace, :module_name, :version)
+      def base_module_info
+        augmented_module_branch = get_service_module.get_augmented_module_branch
+        BaseModuleInfo.new(augmented_module_branch[:namespace], augmented_module_branch[:module_name], augmented_module_branch[:version])
+      end
+      
+      def extract_version(version_obj)
+        version_obj.is_a?(String) ? version_obj : version_obj.version_string
       end
 
     end

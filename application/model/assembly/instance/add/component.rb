@@ -60,14 +60,12 @@ module DTK
           component_module_refs = assembly_instance.component_module_refs
           service_instance_base_branch = service_instance.base_module_branch
           service_repo_info     = CommonModule::ServiceInstance::RepoInfo.new(service_instance_base_branch)
-          dependent_modules     = dependent_modules(assembly_instance, component_module_refs)
-
           aug_cmp_template = nil
           retries = 0
           add_nested_module = false
 
           begin
-            aug_cmp_template = assembly_instance.find_matching_aug_component_template(component_type, component_module_refs, dependent_modules: dependent_modules)# dependent_modules: opts[:dependent_modules])
+            aug_cmp_template = assembly_instance.simple_find_matching_aug_component_template(component_type)
           rescue ErrorUsage => e
             fail ErrorUsage, "#{e.message}. Please provide 'namespace' and 'version' to add module to dependencies." if version.empty? || namespace.empty?
 
@@ -156,27 +154,6 @@ module DTK
         end
 
         private
-
-        def self.dependent_modules(assembly_instance, component_module_refs)
-          # put in info for base module
-          base_module = base_module_info(assembly_instance)
-          dependent_modules = { "#{base_module.namespace}/#{base_module.module_name}" => base_module.version }
-
-          # put in info for nested module
-          component_module_refs.module_refs_array.each { |dep| dependent_modules.merge!("#{dep[:namespace_info]}/#{dep[:display_name]}" => extract_version(dep[:version_info])) }
-
-          dependent_modules
-        end
-
-        BaseModuleInfo = Struct.new(:namespace, :module_name, :version)
-        def self.base_module_info(assembly_instance)
-          augmented_module_branch = assembly_instance.get_service_module.get_augmented_module_branch
-          BaseModuleInfo.new(augmented_module_branch[:namespace], augmented_module_branch[:module_name], augmented_module_branch[:version])
-        end
-
-        def self.extract_version(version_obj)
-          version_obj.is_a?(String) ? version_obj : version_obj.version_string
-        end
 
         def self.add_dependency_to_module_refs(component_module_refs, new_dependency_info)
           modules_with_namespaces = component_module_refs.module_refs_array.map { |dep| { display_name: dep[:display_name], namespace_name: dep[:namespace_info], version_info: dep[:version_info].version_string } }

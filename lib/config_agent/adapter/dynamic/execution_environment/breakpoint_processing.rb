@@ -31,7 +31,7 @@ module DTK
         end
 
         def process!
-          fail Error, "This method should be overwritten by concrete class"
+          Aux.fail_if_not_concrete(self)
         end
 
         protected

@@ -39,6 +39,16 @@ module DTK
     end
 
     class << self
+      def fail_if_not_concrete(parent)
+        klass = (parent.kind_of?(::Module) ? parent : parent.class).to_s.sub('XYZ', 'DTK')
+        the_method = "The method"
+        if caller.first =~ /in `(.+)'/
+          method_name = $1
+          the_method << " '#{method_name}'"
+        end
+        fail "#{the_method} should be defined in the concrete class #{klass}"
+      end
+
       def benchmark(name, &block)
         require 'benchmark'
         puts "------------- #{name} ----------------"

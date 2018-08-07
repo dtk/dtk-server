@@ -44,6 +44,10 @@ module DTK
       Adapter.load(type)
     end
 
+    def type
+      Aux.fail_if_not_concrete(self)
+    end
+
     def node_name(node)
       (node[:external_ref] || {})[:instance_id]
     end

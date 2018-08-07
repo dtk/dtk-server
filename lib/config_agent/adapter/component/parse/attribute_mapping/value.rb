@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 module DTK
-  class ConfigAgent::Adapter::Component::DelegationAction::Inputs
-    class Attribute
+  class ConfigAgent::Adapter::Component::Parse::AttributeMapping
+    class Value
       def initialize(value_term, ndx_base_attributes)
         @value_term          = value_term
         @ndx_base_attributes = ndx_base_attributes

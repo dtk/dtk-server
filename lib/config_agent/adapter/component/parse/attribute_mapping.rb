@@ -16,22 +16,25 @@
 # limitations under the License.
 #
 module DTK
-  class ConfigAgent::Adapter::Component::DelegationAction
-    class Inputs
-      require_relative('inputs/attribute')
+  class ConfigAgent::Adapter::Component::Parse
+    class AttributeMapping
+      require_relative('attribute_mapping/value')
       def initialize(input_spec, base_component_attributes)
         @input_spec                = input_spec
         @base_component_attributes = base_component_attributes
-        # above must go first
-        @attributes                =  attribute_objects(self.attribute_value_pairs)
       end
       private :initialize
 
-      def self.bind(input_spec, base_component_attributes)
-        new(input_spec, base_component_attributes)
+      def self.attribute_mapping(input_spec, base_component_attributes)
+        new(input_spec, base_component_attributes).attribute_mapping
       end
-   
-      attr_reader :attributes
+
+      def attribute_mapping
+        self.input_spec.inject({}) do |h, (attribute_name, attribute_value_term)|
+          value = Value.value(attribute_value_term, self.ndx_base_attributes)
+          h.merge(attribute_name.to_s => value)
+        end
+      end
 
       protected
 
@@ -41,18 +44,6 @@ module DTK
         @ndx_base_attributes ||= self.base_component_attributes.inject({}) { |h, attribute| h.merge(attribute.display_name => attribute) }
       end
 
-      def attribute_value_pairs
-        @attribute_value_pairs ||= self.input_spec.inject({}) do |h, (attribute_name, attribute_value_term)|
-          value = Attribute.value(attribute_value_term, self.ndx_base_attributes)
-          h.merge(attribute_name => value)
-        end
-      end
-
-      private
-
-      def attribute_objects(attribute_value_pairs)
-        require 'byebug'; byebug
-      end
     end
   end
 end

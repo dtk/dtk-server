@@ -19,15 +19,30 @@ module DTK
   class ConfigAgent
     module Adapter
       class Component < ConfigAgent
-        require_relative('component/delegation_action')
         require_relative('component/delegated_config_agent')
+        require_relative('component/parse')
         
-        def ret_msg_content(task_info, opts = {})
-          assembly_instance = opts[:assembly] || fail("Unexpected that opts[:assembly] is nil")
-          delegation_action = DelegationAction.parse(task_info, assembly_instance)
-          DelegatedConfigAgent.ret_msg_content(delegation_action, task_info, opts)
+        def ret_msg_content(task_action, opts = {})
+          assembly_instance = opts[:assembly] || fail("Unexpected that opts[:assembly] is nil")          
+          task_id           = opts[:task_id] || fail("Unexpected that opts[:task_id] is nil")          
+          task_idh          = assembly_instance.id_handle.createIDH(model_name: :task, id: task_id)
+
+          delegated_task_action_info   = Parse.delegated_task_action_info(task_action, assembly_instance, task_idh)
+          @delegated_config_agent_type = delegated_task_action_info.config_agent_type
+
+          DelegatedConfigAgent.ret_msg_content(delegated_task_action_info, opts)
         end
-        
+
+        def type
+          self.delegated_config_agent_type
+        end
+
+        protected
+
+        def delegated_config_agent_type
+          @delegated_config_agent_type || fail("Unexpected that @delegated_config_agent_type is not set")
+        end
+
       end
     end
   end

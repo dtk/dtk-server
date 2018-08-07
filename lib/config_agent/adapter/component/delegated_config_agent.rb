@@ -19,44 +19,41 @@ module DTK
   class ConfigAgent::Adapter::Component
     class DelegatedConfigAgent
       SUPPORTED_DELEGATE_TO_TYPES = [:dynamic]
-
-      SUPPORTED_DELEGATE_TO_TYPES.each { |type| require_relative("delegated_config_agent/#{type}") }
-
-      def initialize(delegation_action, task_info)
-        @delegation_action = delegation_action
-        @task_info         = task_info
+      def initialize(delegated_task_action_info, base_ret_msg_content_opts)
+        @delegated_task_action_info    = delegated_task_action_info
+        @base_ret_msg_content_opts     = base_ret_msg_content_opts
       end
 
-      def self.ret_msg_content(delegation_action, task_info, opts = {})
-        helper_klass(delegation_action.config_agent_type).new(delegation_action, task_info).ret_msg_content(opts)
+      def self.ret_msg_content(delegated_task_action_info, opts = {})
+        new(delegated_task_action_info, opts).ret_msg_content
       end
 
-      def ret_msg_content(opts = {})
-        self.config_agent.ret_msg_content(self.transformed_task_info, opts)
+      def ret_msg_content
+        self.config_agent.ret_msg_content(self.delegated_task_action_info.task_action, self.delegated_ret_msg_content_opts)
       end
 
       protected
       
-      attr_reader :task_info, :delegation_action
+      attr_reader :delegated_task_action_info, :base_ret_msg_content_opts
 
       def config_agent_type
-        @config_agent_type ||= self.delegation_action.config_agent_type
+        @config_agent_type ||= ret_config_agent_type
       end
 
       def config_agent
         @config_agent ||= ConfigAgent.load(self.config_agent_type)
       end
 
-      def transformed_task_info
-        dtk_pp self
-        fail "The method 'transform_task_info' should be overwritten by instance method on concrete class '#{self.class}'"
+      def delegated_ret_msg_content_opts
+        self.base_ret_msg_content_opts
       end
 
       private
 
-      def self.helper_klass(config_agent_type)
+      def ret_config_agent_type
+        config_agent_type = self.delegated_task_action_info.config_agent_type
         fail "Delegation to component of type '#{config_agent_type}' not supported" unless SUPPORTED_DELEGATE_TO_TYPES.include?(config_agent_type)
-        const_get Aux.camelize(config_agent_type.to_s)
+        config_agent_type
       end
 
     end

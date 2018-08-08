@@ -69,8 +69,7 @@ module DTK; class ConfigAgent
         execution_environment = ExecutionEnvironment.execution_environment(dynamic_provider, node, breakpoint: breakpoint)
 
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
-        instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance, system_values)
-
+        instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance, system_values, delegated: opts[:delegated])
 
         msg = {
           protocol_version: ArbiterInfo::PROTOCOL_VERSION,

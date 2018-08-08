@@ -136,7 +136,6 @@ module DTK; class Task
 
         # this means there is no dynamic attributes
         return ret if result.is_a?(Array)
-
         if config_agent_object.respond_to?(:get_dynamic_attributes)
           if payload = result[:data]
             return config_agent_object.get_dynamic_attributes(payload, self)

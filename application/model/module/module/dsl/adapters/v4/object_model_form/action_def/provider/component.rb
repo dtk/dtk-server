@@ -23,9 +23,10 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         end
         extend Aux::ParsingingHelper::ClassMixin
 
-        Method = 'method'
-        Inputs = 'inputs'
-        Type   = 'type'
+        Method  = 'method'
+        Inputs  = 'inputs'
+        Outputs = 'outputs'
+        Type    = 'type'
       end
 
       def initialize(input_hash, _opts = {})
@@ -37,7 +38,7 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         :component
       end
       
-      KEYS_INDICATING_TYPE = [:Method, :Inputs]
+      KEYS_INDICATING_TYPE = [:Method, :Inputs, :Outputs]
       
       def self.matches_input_hash?(input_hash)
         if type_term = input_hash_type?(input_hash)
@@ -64,7 +65,8 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
         { provider: 'component',
           type: self.component_type,
           method: self.method,
-          inputs: self.inputs?
+          inputs: self.inputs?,
+          outputs: self.outputs?
         }
       end
 
@@ -79,6 +81,10 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
 
       def inputs?
         Constant.matches?(self.input_hash, :Inputs)
+      end
+
+      def outputs?
+        Constant.matches?(self.input_hash, :Outputs)
       end
 
       def self.other_types

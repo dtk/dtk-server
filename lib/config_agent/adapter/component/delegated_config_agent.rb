@@ -45,7 +45,7 @@ module DTK
       end
 
       def delegated_ret_msg_content_opts
-        self.base_ret_msg_content_opts
+        self.base_ret_msg_content_opts.merge(delegated: true)
       end
 
       private

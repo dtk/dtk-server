@@ -25,17 +25,15 @@ module DTK
         @assembly_instance = assembly_instance
         @task_idh          = task_idh
       end
-      private :initialize
 
-      DelegatedTaskActinInfo = Struct.new(:config_agent_type, :task_action)
-      def self.delegated_task_action_info(task_action, assembly_instance, task_idh)
-        new(task_action, assembly_instance, task_idh).delegated_task_action_info
-      end
+      DelegatedTaskActinInfo = Struct.new(:config_agent_type, :task_action, :output_spec)
       def delegated_task_action_info
-        DelegatedTaskActinInfo.new(self.delegated_config_agent_type, self.delegated_task_action) 
+        DelegatedTaskActinInfo.new(self.delegated_config_agent_type, self.delegated_task_action, self.output_spec) 
       end
-      
-      attr_reader :delegated
+
+      def base_component_attributes
+        @base_component_attributes ||= self.component_action[:attributes] || []
+      end
       
       protected
       
@@ -62,7 +60,7 @@ module DTK
           end
         create_hash_params = {
           component_actions: [self.delegated_component_action],
-          node: self.task_action[:node], # TODO: using same node as what is on base action; see if this should be more fleable
+          node: self.task_action[:node], # TODO: using same node as what is on base action; see if this should be more flexable such as using link defs from delegated component
           breakpoint: self.task_action[:breakpoint],
           retry: self.task_action[:retry],
           attempts: self.task_action[:attempts]
@@ -98,12 +96,12 @@ module DTK
         @attribute_mapping ||= AttributeMapping.attribute_mapping(self.input_spec, self.base_component_attributes) 
       end
 
-      def base_component_attributes
-        @base_component_attributes ||= self.component_action[:attributes] || []
-      end
-
       def input_spec
         @input_spec ||= self.action_properties[:inputs] || raise_parsing_error("Cannot find the :inputs property")
+      end
+
+      def output_spec
+        @output_spec ||= self.action_properties[:outputs] || {}
       end
 
       def component_type
@@ -128,7 +126,7 @@ module DTK
       def fold_in_values(delegated_attributes_wo_values, attribute_mapping)
         delegated_attributes_wo_values.map do |attribute|
           attribute_name = attribute.display_name
-          attribute_mapping.has_key?(attribute_name) ? attribute.merge(:asserted_value => attribute_mapping[attribute_name]) : attribute
+          attribute_mapping.has_key?(attribute_name) ? attribute.merge(:value_asserted => attribute_mapping[attribute_name]) : attribute
         end
       end
 

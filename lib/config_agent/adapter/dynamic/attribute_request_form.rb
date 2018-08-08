@@ -35,13 +35,15 @@ module DTK
         { attribute.display_name => attribute_info(attribute, opts) }
       end
       
-      def self.component_attribute_values(component_action, assembly_instance, extra_system_values = {})
+      # opts can have keys:
+      #   :delegated
+      def self.component_attribute_values(component_action, assembly_instance, extra_system_values, opts = {})
         attributes = SystemAttribute.system_attributes(assembly_instance, extra_system_values)
         attributes.merge!(assembly_level_attributes(assembly_instance))
         node_component = NodeComponent.node_component?(component_action.component)
         component_action.attributes.inject(attributes) do |h, attr|
           # prune dynamic attributes that are not also inputs
-          (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(transform_attribute(attr, node_component:  node_component))
+          (attr[:dynamic] and !attr[:dynamic_input]) ? h : h.merge(transform_attribute(attr, node_component:  node_component, delegated: opts[:delegated]))
         end
       end
 
@@ -49,13 +51,17 @@ module DTK
 
       # opts can have keys:
       #   :node_component
+      #   :delegated
       def self.attribute_info(attribute, opts = {})
         value = factor_in_node_component_special_value(attribute, opts)
         Info.new(value, attribute[:data_type], attribute[:hidden])
       end
     
+      # opts can have keys:
+      #   :node_component
+      #   :delegated
       def self.factor_in_node_component_special_value(attribute, opts = {})
-        ConfigAgent.update_attribute_value!(attribute)
+        ConfigAgent.update_attribute_value!(attribute) unless opts[:delegated] # 'unless opts[:delegated] because delegated attribute will be aan attribute on a component template with attribute value explictly set
         value = attribute[:attribute_value]
         return value unless node_component = opts[:node_component]
         is_special_value, special_value = node_component.update_if_dynamic_special_attribute!(attribute)

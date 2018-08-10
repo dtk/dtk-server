@@ -19,6 +19,7 @@ module DTK
   class ConfigAgent::Adapter::Component
     class Parse
       require_relative('parse/attribute_mapping')
+      require_relative('parse/attribute_value')
 
       def initialize(task_action, assembly_instance, task_idh)
         @task_action       = task_action
@@ -26,9 +27,9 @@ module DTK
         @task_idh          = task_idh
       end
 
-      DelegatedTaskActinInfo = Struct.new(:config_agent_type, :task_action, :output_spec)
+      DelegatedTaskActinInfo = Struct.new(:config_agent_type, :task_action, :component_attributes, :output_spec)
       def delegated_task_action_info
-        DelegatedTaskActinInfo.new(self.delegated_config_agent_type, self.delegated_task_action, self.output_spec) 
+        DelegatedTaskActinInfo.new(self.delegated_config_agent_type, self.delegated_task_action, self.delegated_attributes, self.output_spec) 
       end
 
       def base_component_attributes
@@ -77,7 +78,7 @@ module DTK
       end
 
       def delegated_attributes
-        fold_in_values(self.delegated_attributes_wo_values, self.attribute_mapping)
+        @delegated_attributes ||= fold_in_values(self.delegated_attributes_wo_values, self.attribute_mapping)
       end
 
       def delegated_component

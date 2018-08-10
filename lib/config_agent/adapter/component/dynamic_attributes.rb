@@ -18,20 +18,48 @@
 module DTK
   class ConfigAgent::Adapter::Component
     class DynamicAttributes
-      # require_relative('dynamic_attributes/transform')
-      
-      def self.transform(delegated_dynamic_attributes, delegated_task_action_info, base_attributes)
-        require 'byebug'; byebug
-        output_spec = delegated_task_action_info.output_spec
-        ndx_base_attributes = base_attributes.inject({}) { |h, attribute| h.merge(attribute.display_name => attribute) }
-        delegated_dynamic_attributes.map do |delegated_attribute_info|
-          # Transform.transform(delegated_attribute_info, output_spec, ndx_base_attributes)
-        end
-        # TODO: stub
+      def initialize(delegated_dynamic_attributes, delegated_task_action_info, base_attributes)
+        @delegated_dynamic_attributes = delegated_dynamic_attributes
+        @delegated_task_action_info   = delegated_task_action_info
+        @base_attributes              = base_attributes
+      end
+      private :initialize
 
-        delegated_dynamic_attributes
+      def self.transform(delegated_dynamic_attributes, delegated_task_action_info, base_attributes)
+        new(delegated_dynamic_attributes, delegated_task_action_info, base_attributes).transform
+      end
+      def transform
+        self.delegated_task_action_info.output_spec.inject([]) do |a, (attribute_name, attribute_value_term)|
+          value = Parse::AttributeValue.value?(attribute_value_term, self.delegated_attributes_name_ndx_values)
+          value ? a + [{ id: base_attribute_id(attribute_name), attribute_value: value }] : a
+        end
+      end
+      
+      protected
+      
+      attr_reader :delegated_dynamic_attributes, :delegated_task_action_info, :base_attributes
+
+      def delegated_attributes_name_ndx_values
+        @delegated_attributes_name_ndx_values ||= self.delegated_dynamic_attributes.inject({}) do |h, delegated_attribute_info|
+          delegated_attribute = self.id_ndx_delegated_attributes[delegated_attribute_info[:id]]
+          delegated_attribute ? h.merge(delegated_attribute.display_name => delegated_attribute_info[:attribute_value]) : h
+        end
+      end
+      
+      def id_ndx_delegated_attributes
+        @id_ndx_delegated_attributes ||= self.delegated_task_action_info.component_attributes.inject({}) { |h, attribute| h.merge(attribute.id => attribute) }
       end
 
+      def name_ndx_base_attributes
+        @name_ndx_base_attributes ||= self.base_attributes.inject({}) { |h, attribute| h.merge(attribute.display_name => attribute) }
+      end
+
+      private
+      
+      def base_attribute_id(attribute_name)
+        (self.name_ndx_base_attributes[attribute_name.to_s] || fail(ErrorUsage, "Undefined attribute '#{attribute_name}' in component action output spec")).id
+      end
+      
     end
   end
 end

@@ -18,10 +18,9 @@
 module DTK
   class ConfigAgent::Adapter::Component::Parse
     class AttributeMapping
-      require_relative('attribute_mapping/value')
       def initialize(input_spec, base_component_attributes)
-        @input_spec                = input_spec
-        @base_component_attributes = base_component_attributes
+        @input_spec      = input_spec
+        @base_attributes = base_component_attributes
       end
       private :initialize
 
@@ -31,17 +30,17 @@ module DTK
 
       def attribute_mapping
         self.input_spec.inject({}) do |h, (attribute_name, attribute_value_term)|
-          value = Value.value(attribute_value_term, self.ndx_base_attributes)
+          value = AttributeValue.value(attribute_value_term, base_attributes_name_ndx_values)
           h.merge(attribute_name.to_s => value)
         end
       end
 
       protected
 
-      attr_reader :input_spec, :base_component_attributes
+      attr_reader :input_spec, :base_attributes
 
-      def ndx_base_attributes
-        @ndx_base_attributes ||= self.base_component_attributes.inject({}) { |h, attribute| h.merge(attribute.display_name => attribute) }
+      def base_attributes_name_ndx_values
+        @base_attributes_name_ndx_values ||= self.base_attributes.inject({}) { |h, attribute| h.merge(attribute.display_name => attribute.attribute_value) }
       end
 
     end

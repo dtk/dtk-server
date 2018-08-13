@@ -354,6 +354,8 @@ module DTK; class  Assembly
         end
 
         task[:retry] = {:attempts => params[:attempts], :sleep => params[:sleep]} unless params[:attempts].nil? || params[:sleep].nil?
+        task[:attempts] = params[:attempts] unless params[:attempts].nil?
+        task[:retry] = params[:sleep] unless params[:sleep].nil?
         task = task.save_and_add_ids()
       rescue Task::Template::ParsingError => e
         return ret if params[:noop_if_no_action]

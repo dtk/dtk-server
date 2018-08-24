@@ -559,6 +559,16 @@
       "errors": "errors.message"
     }
   },
+  "describe_action_show_steps": {
+    "order": [
+      "task_type",
+      "node"
+    ],
+    "mapping": {
+      "task_type": "dtk_type",
+      "node": "node.name"
+    }
+  },
   "assembly_task_status": {
     "order": [
       "task_id",

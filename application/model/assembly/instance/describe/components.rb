@@ -18,7 +18,7 @@
 module DTK; class Assembly::Instance
   module Describe
     module Components
-      def self.describe(service_instance, params)
+      def self.describe(service_instance, params, opts = {})
         assembly_instance = service_instance.copy_as_assembly_instance
         dsl_version       = service_instance.get_service_instance_branch.dsl_version
 

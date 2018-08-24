@@ -165,7 +165,12 @@ module DTK
       end
 
       def describe
-        rest_ok_response assembly_instance.describe(request_params(:path))
+        response = assembly_instance.describe(request_params(:path), request_params)
+        if request_params(:show_steps)
+          rest_ok_response response, datatype: :describe_action_show_steps
+        else
+          rest_ok_response response
+        end
       end
 
     end

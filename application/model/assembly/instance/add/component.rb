@@ -34,6 +34,8 @@ module DTK
               component = node.add_component(aug_cmp_template, component_title: opts[:component_title], detail_to_include: [:component_dependencies]).create_object
               Component.update_workflow(self, node, component, component_title: opts[:component_title]) unless opts[:do_not_update_workflow]
 
+              Assembly::Instance::Add::Component.create_node_component_node(component, service_instance.assembly_instance, opts[:component_title])
+
               LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
 
               # fail "TODO: DTK-3394: implement when add component"
@@ -69,7 +71,7 @@ module DTK
           rescue ErrorUsage => e
             fail ErrorUsage, "#{e.message}. Please provide 'namespace' and 'version' to add module to dependencies." if version.empty? || namespace.empty?
 
-            if retries > 1
+            if retries > 0
               fail e
             else
               new_dependency_info = { display_name: component_ref.split('::').first, namespace_name: namespace, version_info: version }
@@ -80,13 +82,9 @@ module DTK
             end
           end
 
-          node =
-            if parent_node
-              assembly_instance.get_node?([:eq, :display_name, parent_node])
-            else
-              assembly_instance.assembly_wide_node
-            end
+          verify_namespace_and_version!(namespace, version, aug_cmp_template) if namespace || version
 
+          node = get_parent_node(parent_node, assembly_instance)
           assembly_instance.add_component(node.id_handle, aug_cmp_template, service_instance, component_title: title, do_not_update_workflow: true)
           CommonDSL::Generate::ServiceInstance.generate_dsl_and_push!(service_instance, service_instance_base_branch)
           add_nested_module_info(service_repo_info, aug_cmp_template, service_instance) if add_nested_module
@@ -172,6 +170,44 @@ module DTK
 
         def self.ret_version(version_obj)
           version_obj.respond_to?(:version_string) ? version_obj.version_string : version_obj
+        end
+
+        def self.create_node_component_node(component, assembly_instance, node_name)
+          if NodeComponent.is_node_component?(component)
+            if component[:component_type].eql?("ec2__node")
+              assembly_instance.add_node_from_diff(node_name)
+            else
+              assembly_instance.add_node_group_diff(node_name, 2)
+            end
+          end
+        end
+
+        def self.verify_namespace_and_version!(namespace, version, cmp_template)
+          if namespace && !namespace.empty?
+            existing_namespace = cmp_template.namespace_name
+            fail ErrorUsage, "Provided namespace '#{namespace}' does not match namespace of existing dependency '#{existing_namespace}/#{cmp_template.display_name_print_form}'" unless existing_namespace == namespace
+          end
+
+          if version && !version.empty?
+            existing_version = cmp_template.version
+            fail ErrorUsage, "Provided version '#{version}' does not match version of existing dependency '#{cmp_template.namespace_name}/#{cmp_template.display_name_print_form}(#{existing_version})'" unless existing_version == version
+          end
+        end
+
+        def self.get_parent_node(node_name, assembly_instance)
+          ret_node =
+            if node_name
+              if node_name.match(/[^:]+:{1}\d+/)
+                ret_node = assembly_instance.get_leaf_nodes.find{ |ln| ln[:display_name] == node_name }
+              else
+                assembly_instance.get_node?([:eq, :display_name, node_name])
+              end
+            else
+              assembly_instance.assembly_wide_node
+            end
+
+          fail ErrorUsage, "Unable to find parent node with name '#{node_name}'!" unless ret_node
+          ret_node
         end
 
       end

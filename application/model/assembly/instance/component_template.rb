@@ -52,7 +52,8 @@ module DTK
 
       BaseModuleInfo = Struct.new(:namespace, :module_name, :version)
       def base_module_info
-        augmented_module_branch = get_service_module.get_augmented_module_branch
+        ancestor_branch = get_service_instance_branch.get_ancestor_branch?
+        augmented_module_branch = ancestor_branch.augmented_module_branch || get_service_module.get_augmented_module_branch
         BaseModuleInfo.new(augmented_module_branch[:namespace], augmented_module_branch[:module_name], augmented_module_branch[:version])
       end
       

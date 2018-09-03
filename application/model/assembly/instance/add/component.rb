@@ -32,7 +32,7 @@ module DTK
             component = nil
             Transaction do
               component = node.add_component(aug_cmp_template, component_title: opts[:component_title], detail_to_include: [:component_dependencies]).create_object
-              Component.update_workflow(self, node, component, component_title: opts[:component_title])
+              Component.update_workflow(self, node, component, component_title: opts[:component_title]) unless opts[:do_not_update_workflow]
 
               LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
 
@@ -54,12 +54,12 @@ module DTK
         end
 
         def self.add_component(service_instance, component_ref, version, namespace, parent_node)
-          assembly_instance     = service_instance.assembly_instance
+          assembly_instance = service_instance.assembly_instance
           component_type, title = ComponentTitle.parse_component_display_name(component_ref)
-          component_type        = ::DTK::Component.component_type_from_user_friendly_name(component_type)
+          component_type = ::DTK::Component.component_type_from_user_friendly_name(component_type)
           component_module_refs = assembly_instance.component_module_refs
           service_instance_base_branch = service_instance.base_module_branch
-          service_repo_info     = CommonModule::ServiceInstance::RepoInfo.new(service_instance_base_branch)
+          service_repo_info = CommonModule::ServiceInstance::RepoInfo.new(service_instance_base_branch)
           aug_cmp_template = nil
           retries = 0
           add_nested_module = false
@@ -87,7 +87,7 @@ module DTK
               assembly_instance.assembly_wide_node
             end
 
-          assembly_instance.add_component(node.id_handle, aug_cmp_template, service_instance, component_title: title)
+          assembly_instance.add_component(node.id_handle, aug_cmp_template, service_instance, component_title: title, do_not_update_workflow: true)
           CommonDSL::Generate::ServiceInstance.generate_dsl_and_push!(service_instance, service_instance_base_branch)
           add_nested_module_info(service_repo_info, aug_cmp_template, service_instance) if add_nested_module
 
@@ -156,7 +156,7 @@ module DTK
         private
 
         def self.add_dependency_to_module_refs(component_module_refs, new_dependency_info)
-          modules_with_namespaces = component_module_refs.module_refs_array.map { |dep| { display_name: dep[:display_name], namespace_name: dep[:namespace_info], version_info: dep[:version_info].version_string } }
+          modules_with_namespaces = component_module_refs.module_refs_array.map { |dep| { display_name: dep[:display_name], namespace_name: dep[:namespace_info], version_info: ret_version(dep[:version_info]) } }
           modules_with_namespaces << new_dependency_info
           component_module_refs.update_module_refs_if_needed!(modules_with_namespaces)
         end
@@ -168,6 +168,10 @@ module DTK
           }
           aug_nested_module_branch = service_instance.get_or_create_for_nested_module(aug_cmp_template.component_module, aug_cmp_template.version, get_or_create_opts)
           service_repo_info.add_nested_module_info!(aug_nested_module_branch)
+        end
+
+        def self.ret_version(version_obj)
+          version_obj.respond_to?(:version_string) ? version_obj.version_string : version_obj
         end
 
       end

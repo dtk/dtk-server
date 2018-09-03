@@ -260,8 +260,8 @@ module DTK; class Task
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtask(start_nodes_task) if start_nodes_task
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
-      ret[:retry] = serialized_content[:retry] unless serialized_content[:retry].nil? || serialized_content[:retry].empty?
-      ret[:attempts] = serialized_content[:attempts] unless serialized_content[:attempts].nil?
+      ret[:retry] = serialized_content[:retry] unless serialized_content[:retry].nil? || serialized_content[:retry] != 0
+      ret[:attempts] = serialized_content[:attempts] unless serialized_content[:attempts] != 0
       ret
     end
 

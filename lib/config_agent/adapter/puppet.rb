@@ -40,6 +40,9 @@ module DTK
         if config_node[:retry].kind_of?(::Hash) 
           failure_attempts = config_node[:retry][:attempts] || nil
           failure_sleep    = config_node[:retry][:sleep] || nil
+        elsif config_node[:retry] != 0 || config_node[:attempts] != 0
+          failure_attempts = config_node[:retry]
+          failure_sleep = config_node[:attempts]
         end
 
         ret = {

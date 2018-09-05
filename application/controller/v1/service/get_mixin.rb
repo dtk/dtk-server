@@ -115,7 +115,13 @@ module DTK
       end
 
       def dependent_modules
-        rest_ok_response assembly_instance.list_dependent_modules, datatype: :assembly_component_module
+        diffs = request_params['diffs']
+
+        if diffs && !diffs.empty?
+          rest_ok_response AssemblyModule::Component.dependent_modules_relationship(service_instance, project: get_default_project), datatype: :assembly_component_module_diffs
+        else
+          rest_ok_response assembly_instance.list_dependent_modules, datatype: :assembly_component_module
+        end
       end
 
       def nodes

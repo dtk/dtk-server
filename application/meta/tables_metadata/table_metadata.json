@@ -221,6 +221,20 @@
       "version": "display_version"
     }
   },
+  "assembly_component_module_diffs": {
+    "order": [
+      "id",
+      "name",
+      "version",
+      "diff"
+    ],
+    "mapping": {
+      "id": "dtk_id",
+      "name": "full_name",
+      "version": "display_version",
+      "diff": "diff"
+    }
+  },
   "component_module": {
     "order": [
       "id",

@@ -165,6 +165,39 @@ module DTK; class AssemblyModule
       diffs
     end
 
+    def self.dependent_modules_relationship(service_instance, opts = {})
+      base_cmp_branches = service_instance.aug_dependent_base_module_branches
+      new(service_instance.assembly_instance).dependent_modules_relationship(base_cmp_branches, opts)
+    end
+
+    def dependent_modules_relationship(base_cmp_branches, opts = {})
+      ret = []
+
+      base_cmp_branches.each do |base_cmp_branch|
+        cmp_ret = {
+          id: base_cmp_branch[:component_id], # component module id
+          full_name: "#{base_cmp_branch[:namespace]}:#{base_cmp_branch[:module_name]}",
+          display_version: base_cmp_branch[:version]
+        }
+
+        component_module = base_cmp_branch.component_module
+        unless branch = component_module.get_workspace_module_branch(self.assembly_module_version)
+          fail ErrorNoChangesToModule.new(self.assembly_instance, component_module)
+        end
+
+        unless ancestor_branch = branch.get_ancestor_branch?
+          fail Error.new('Cannot find ancestor branch')
+        end
+
+        relationship = RepoManager.ret_merge_relationship(:local_branch, ancestor_branch.display_name, branch)
+        cmp_ret.merge!(diff: relationship)
+
+        ret << cmp_ret
+      end
+
+      ret
+    end
+
     private
 
     class ErrorComponentModule < ErrorUsage

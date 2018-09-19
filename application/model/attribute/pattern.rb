@@ -77,6 +77,7 @@ module DTK; class Attribute
         # do not need to check value validity if opts[:create] (since checked already)
         unless opts[:create]
           if semantic_data_type = attribute_semantic_data_type?(pattern, attr_idhs)
+            value = convert_hash_attributes_to_new_form(value) if semantic_data_type.eql?('hash')
             value = SemanticDatatype.raise_error_if_invalid_and_transform_if_needed(value, semantic_data_type, attribute_path)
           end
         end
@@ -171,6 +172,10 @@ module DTK; class Attribute
         end.flatten(1)
         attributes.find { |attribute| attribute.display_name == attribute_name }
       end
+    end
+
+    def self.convert_hash_attributes_to_new_form(hash_attribute)
+      hash_attribute.gsub('=>', ': ')
     end
 
     private

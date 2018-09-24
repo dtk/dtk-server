@@ -2,6 +2,7 @@ module DTK; class  Assembly
   class Instance
     module AddByPath
       require_relative('add_by_path/components')
+      require_relative('add_by_path/actions')
 
       def add_by_path(path, content)
         delete_adapter, path_params = ret_adapter_and_params_from_path(path)

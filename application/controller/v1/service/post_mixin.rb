@@ -252,6 +252,14 @@ module DTK
         rest_ok_response response
       end
 
+      def delete_by_path
+        rest_ok_response assembly_instance.delete_by_path(required_request_params(:path))
+      end
+
+      def add_by_path
+        rest_ok_response assembly_instance.add_by_path(required_request_params(:path), required_request_params(:content))
+      end
+
       def add_component
         parent_node = request_params(:parent_node)
         rest_ok_response Assembly::Instance::Add::Component.add_component(service_instance, required_request_params(:component_ref), request_params(:version), request_params(:namespace), parent_node.empty? ? nil :  parent_node)

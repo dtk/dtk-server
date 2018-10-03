@@ -29,9 +29,7 @@ module DTK
       end
 
       def create_or_update_from_parsed_common_module?
-        if parsed_assemblies = self.parsed_assemblies
-          create_or_update_from_parsed_common_module(parsed_assemblies)
-        end
+        create_or_update_from_parsed_common_module(parsed_assemblies || [])
       end
 
       def transform_from_common_module?

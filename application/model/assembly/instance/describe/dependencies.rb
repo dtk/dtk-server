@@ -18,7 +18,7 @@
 module DTK; class Assembly::Instance
   module Describe
     module Dependencies
-      def self.describe(service_instance, params)
+      def self.describe(service_instance, params, opts = {})
         CommonDSL::ObjectLogic::Dependency.generate_content_input(service_instance.copy_as_assembly_instance)
       end
     end

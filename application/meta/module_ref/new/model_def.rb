@@ -81,6 +81,34 @@
           cols: [:id, :display_name]
         }
       ]
+    },
+    is_dependency_to_common_modules: {
+      type: :json,
+      hidden: true,
+      remote_dependencies:
+      [
+        {
+          model_name: :module_branch,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :module_ref__branch_id },
+          cols: [:id, :display_name, :branch, :version, :common_id]
+         },
+        {
+          model_name: :common_module,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :module_branch__common_id },
+          cols: [:id, :display_name, :namespace_id]
+        },
+        {
+          model_name: :namespace,
+          convert: true,
+          join_type: :inner,
+          join_cond: { id: :common_module__namespace_id },
+          cols: [:id, :display_name]
+        }
+      ]
     }
   },
   many_to_one: [:module_branch]

@@ -69,6 +69,14 @@ module DTK
       ret
     end
 
+    def self.get_module_refs_by_name_and_version(branch, module_namespace, module_name, version)
+      sp_hash = {
+        cols: [:id, :module_name, :version_info, :namespace_info, :branch_id, :is_dependency_to_common_modules],
+        filter: [:and, [:eq, :module_name, module_name], [:eq, :version_info, version], [:eq, :namespace_info, module_namespace]]
+      }
+      get_objs(branch.model_handle(:module_ref), sp_hash)
+    end
+
     def self.get_module_ref_array(module_branch)
       sp_hash = {
         cols: common_columns,

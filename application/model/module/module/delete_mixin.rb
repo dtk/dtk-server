@@ -84,7 +84,7 @@ module DTK; class BaseModule
     end
 
     def delete_common_module_version_or_module(version, opts = {})
-      unless get_module_branch_matching_version(version)
+      unless module_branch = get_module_branch_matching_version(version)
         if version
           fail ErrorUsage, "Version '#{version}' for specified component module does not exist!" 
         else
@@ -93,6 +93,7 @@ module DTK; class BaseModule
         end
       end
 
+      raise_error_if_dependency(module_branch, version)
       delete_associated_service_and_component_module_objects(self, version, opts)
 
       if get_module_branches.size > 1
@@ -165,33 +166,20 @@ module DTK; class BaseModule
     end
 
     def raise_error_if_dependency(branch, version)
-      components, services = ModuleRefs.get_module_refs_by_name_and_version(branch, module_namespace, module_name, version)
+      results = ModuleRef.get_module_refs_by_name_and_version(branch, module_namespace, module_name, version)
+      # components, services = ModuleRef.get_module_refs_by_name_and_version(branch, module_namespace, module_name, version)
 
       # remove self from dependencies (component modules can have self set as dependency)
-      components.reject!{ |cmp| cmp[:module_branch][:id] == branch[:id] }
+      results.reject!{ |cmp| cmp[:branch_id] == branch[:id] }
 
-      return if components.empty? && services.empty?
-
-
+      return if results.empty?
       refs       = []
       refs_names = []
 
-      unless components.empty?
-        components.each do |cmp|
+      unless results.empty?
+        results.each do |cmp|
           version = cmp[:module_branch][:version]
-          full_name = "#{cmp[:namespace][:display_name]}:#{cmp[:component_module][:display_name]}"
-          full_name << "(#{version})" if version && !version.eql?('master')
-          unless refs_names.include?(full_name)
-            refs_names << full_name
-            refs << "Reference to module '#{full_name}'"
-          end
-        end
-      end
-
-      unless services.empty?
-        services.each do |srv|
-          version = srv[:module_branch][:version]
-          full_name = "#{srv[:namespace][:display_name]}:#{srv[:service_module][:display_name]}"
+          full_name = "#{cmp[:namespace][:display_name]}:#{cmp[:common_module][:display_name]}"
           full_name << "(#{version})" if version && !version.eql?('master')
           unless refs_names.include?(full_name)
             refs_names << full_name

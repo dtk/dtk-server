@@ -25,6 +25,7 @@ module DTK; module CommonDSL
           #  statement from service_instance_top_dsl_file or any nested dsl file that is recursively broght in throgh imports
           #  This will be used in Parse.matching_dsl_file_obj?; it will return non nil if top or any nested
           #  dsl files are impacted
+          module_refs_to_delete = nil
           if dsl_file_obj = Parse.matching_dsl_file_obj?(:service_instance, module_branch, impacted_files: impacted_files)
             service_instance_parse = dsl_file_obj.parse_content(:service_instance)
             service_instance_gen   = Generate::ServiceInstance.generate_canonical_form(service_instance, module_branch)
@@ -35,7 +36,7 @@ module DTK; module CommonDSL
               component_module_refs = service_instance.assembly_instance.component_module_refs
 
               # component_module_refs.update if component_module_refs.update_object_if_needed!(cmp_modules_with_namespaces)
-              component_module_refs.update_module_refs_if_needed!(cmp_modules_with_namespaces)
+              module_refs_to_delete = component_module_refs.update_module_refs_if_needed!(cmp_modules_with_namespaces, {:return_to_delete => true})
             end
 
             # compute base diffs
@@ -50,6 +51,7 @@ module DTK; module CommonDSL
               end
             end
           end
+          module_refs_to_delete
         end
 
         private

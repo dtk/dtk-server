@@ -38,7 +38,7 @@ module DTK
             ret = true
           end
           
-          ret
+          {:changes => ret, :to_delete => to_delete, :to_add => to_add}
         end
 
         protected

@@ -45,11 +45,12 @@ module DTK
         existing_module_refs.update_module_refs_if_needed!(input_module_refs)
       end
 
-      def update_module_refs_if_needed!(input_module_refs)
+      def update_module_refs_if_needed!(input_module_refs, opts = {})
         # The call 'update_object_if_needed!' updates the object module_refs and returns true if changed
         # The call 'existing_module_refs.update' updates the object model
-        update if update_object_if_needed!(input_module_refs)
-        self
+        module_ref_results = update_object_if_needed!(input_module_refs)
+        update if module_ref_results[:changes]
+        opts[:return_to_delete] ? module_ref_results[:to_delete] : self
       end
 
       def self.get_module_refs(module_branch)

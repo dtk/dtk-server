@@ -18,8 +18,8 @@
 module DTK
   class CommonDSL::Diff
     class Result
-      attr_writer :repo_updated, :semantic_diffs
-      attr_reader :items_to_update, :error_msgs, :semantic_diffs
+      attr_writer :repo_updated, :semantic_diffs, :module_refs_to_delete
+      attr_reader :items_to_update, :error_msgs, :semantic_diffs, :module_refs_to_delete
       def initialize(repo_diffs_summary = nil)
         @repo_diffs_summary = repo_diffs_summary
         @repo_updated       = false # if true, means repo updated by server
@@ -29,6 +29,7 @@ module DTK
         @error_msgs         = []
         @backup_files       = {}
         @semantic_diffs     = {}
+        @module_refs_to_delete = {}
       end
 
       def add_info_msg(msg)
@@ -67,7 +68,8 @@ module DTK
           warning_msgs: @warning_msgs,
           error_msgs: @error_msgs,
           backup_files: @backup_files,
-          semantic_diffs: @semantic_diffs
+          semantic_diffs: @semantic_diffs,
+          module_refs_to_delete: @module_refs_to_delete
         }
       end
 

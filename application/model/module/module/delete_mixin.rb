@@ -78,7 +78,7 @@ module DTK; class BaseModule
           end
         end
         # check if this module is dependency to other component/service module
-        raise_error_if_dependency(module_branch, version)
+        raise_error_if_dependency(module_branch, version) if !opts[:force]
         delete_object
       end
     end
@@ -92,8 +92,7 @@ module DTK; class BaseModule
           fail ErrorUsage, "Base version for specified component module does not exist. You have to specify version you want to delete!"
         end
       end
-
-      raise_error_if_dependency(module_branch, version)
+      raise_error_if_dependency(module_branch, version) if !opts[:force]
       delete_associated_service_and_component_module_objects(self, version, opts)
 
       if get_module_branches.size > 1

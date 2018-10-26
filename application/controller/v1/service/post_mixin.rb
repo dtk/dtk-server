@@ -107,8 +107,12 @@ module DTK
         recursive = boolean_request_params(:recursive)
         delete    = boolean_request_params(:delete)
         force     = boolean_request_params(:force)
+        task_id = nil
 
         if force || !delete
+          if latest_task = Task.get_top_level_most_recent_task(assembly_instance.id_handle.createMH(:task), [:eq, :assembly_id, assembly_instance.id])
+            task_id = latest_task.id
+          end
           assembly_instance.uninstall(recursive: recursive, delete: delete, force: force)
         else
           opts_hash = {
@@ -121,6 +125,7 @@ module DTK
           }
 
           exec__delete_info = assembly_instance.exec__delete(Opts.new(opts_hash))
+          task_id = exec__delete_info[:task_id]
         end
 
         response = 
@@ -130,6 +135,7 @@ module DTK
             { message: "Uninstall started. For more information use 'dtk task-status'."}
           end
         
+        response[:task_id] = task_id if task_id
         rest_ok_response response
       end
 

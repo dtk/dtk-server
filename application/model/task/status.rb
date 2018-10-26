@@ -79,6 +79,13 @@ module DTK
         end
       end
 
+      class SnapshotTask < self
+        def self.get_status(project_idh, opts = {})
+          filter = [:eq, :id, opts[:task_id]]
+          get_status_aux(project_idh, :task, filter, opts)
+        end
+      end
+
       class Target < self
         def self.get_status(target_idh, opts = {})
           filter = [:eq, :target_id, target_idh.get_id]

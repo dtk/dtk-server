@@ -131,7 +131,14 @@ module DTK
       end
 
       def task_status
-        assembly_instance = assembly_instance()
+        begin
+          assembly_instance = assembly_instance()
+        rescue ErrorNameDoesNotExist => e
+          task_id = request_params(:task_id)
+          raise ErrorUsage.new("No tasks found for this assembly") unless task_id
+          opts = { format: :table, task_id: task_id }
+          return rest_ok_response Task::Status::SnapshotTask.get_status(get_default_project.id_handle, opts), datatype: :task_status
+        end
         response =
           if request_params(:form) == 'stream_form'
             element_detail = request_params(:element_detail)||{}

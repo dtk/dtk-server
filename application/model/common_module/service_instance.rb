@@ -153,7 +153,7 @@ module DTK
       end
 
       def add_to_base_module_branch__gitignore
-        file_path__content_array = [ {path: '.gitignore', content: gitignore_content }] 
+        file_path__content_array = [ {path: '.gitignore', content: gitignore_content << ".task_id_*\n" }]
         CommonDSL::Generate::DirectoryGenerator.add_files(self.base_module_branch, file_path__content_array, donot_push_changes: true)
       end
 

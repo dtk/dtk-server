@@ -125,7 +125,7 @@ module DTK
           }
 
           exec__delete_info = assembly_instance.exec__delete(Opts.new(opts_hash))
-          task_id = exec__delete_info[:task_id]
+          task_id = exec__delete_info[:task_id] if exec__delete_info
         end
 
         response = 

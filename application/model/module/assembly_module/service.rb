@@ -39,6 +39,28 @@ module DTK; class AssemblyModule
       module_branches.find { |mb| mb.matches_version?(self.assembly_module_version) }
     end
 
+    def self.promote_module_updates_from_instance_branch(service_instance, opts = {})
+      new(service_instance.assembly_instance).promote_module_updates(opts)
+    end
+
+    def promote_module_updates(opts = {})
+      unless branch = self.get_service_instance_branch
+        fail ErrorNoChangesToModule.new(self.assembly_instance, self.service_module)
+      end
+
+      unless ancestor_branch = branch.get_ancestor_branch?
+        fail Error.new('Cannot find ancestor branch')
+      end
+      branch_name = branch[:branch]
+
+      fail ErrorUsage.new("You are not allowed to update specific component module version!") if branch[:frozen] || ancestor_branch[:frozen]
+
+      ancestor_branch.merge_changes_and_update_model?(self.service_module, branch_name, opts)
+
+      # need to delete dtk.service.yaml on propagating changes
+      RepoManager.delete_file?(::DTK::DSL::FileType::ServiceInstance::DSLFile::Top.canonical_path, {}, ancestor_branch)
+    end
+
     # opts can have keys:
     #   :version - version of base branch otherwise base is base_version
     def self.get_service_instance_or_base_branch(assembly, opts = {})

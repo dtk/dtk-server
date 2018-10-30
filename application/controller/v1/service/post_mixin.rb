@@ -257,7 +257,14 @@ module DTK
       end
 
       def promote_module_updates
-        rest_ok_response AssemblyModule::Component.promote_module_updates_from_nested_branch(service_instance, required_request_params(:module_name), { project: get_default_project })
+        force = request_params(:force)
+        response =
+          if module_name = request_params(:module_name)
+            AssemblyModule::Component.promote_module_updates_from_nested_branch(service_instance, module_name, { project: get_default_project, force: force })
+          else
+            AssemblyModule::Service.promote_module_updates_from_instance_branch(service_instance, { project: get_default_project, force: force })
+          end
+        rest_ok_response response
       end
 
       private

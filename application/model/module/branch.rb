@@ -155,7 +155,7 @@ module DTK
           RepoManager.hard_reset_to_branch(branch_name_to_merge_from, self)
           ret.merge!(fast_forward_change: false)
         else
-          fail ErrorUsage.new('There is a merge conflict! Cannot push changes without using the --force option; THIS OPTION WILL WIPE OUT CHANGES IN THE BASE COMPONENT MODULE')
+          fail ErrorUsage.new('There is a merge conflict! Cannot push changes without using the --force option; THIS OPTION WILL WIPE OUT CHANGES IN THE BASE MODULE')
         end
       elsif result != :changed
         fail Error.new('Unexpected result from fast_foward_merge_from_branch')

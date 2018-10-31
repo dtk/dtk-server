@@ -381,6 +381,7 @@
       "id",
       "service_instance",
       "last_run",
+      "last_action",
       "assembly_template",
       "context",
       "# nodes",
@@ -393,6 +394,7 @@
       "id": "dtk_id",
       "assembly_template": "assembly_template",
       "last_run": "last_task_run_status",
+      "last_action": "last_action",
       "context": "service_context"
     }
   },

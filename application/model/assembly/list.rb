@@ -113,6 +113,7 @@ module DTK
         end
         assembly_rows.each do |r|
           last_task_run_status = r[:last_task_run_status]
+          last_action = r[:last_action]
           service_contexts = ServiceAssociations.get_parents(r)
           # using join(',') rather than join(', ') so can cut and paste to put in stage command line -c option"
           service_context = (service_contexts.empty? ? nil : service_contexts.map(&:display_name).join(','))
@@ -120,6 +121,7 @@ module DTK
               display_name: r.pretty_print_name(pp_opts),
               service_context: service_context,
               last_task_run_status: last_task_run_status,
+              last_action: last_action,
               # TODO: will deprecate :execution_status after removing it from smoketests
               execution_status: last_task_run_status || 'staged',
               ndx_nodes: {}
@@ -180,7 +182,7 @@ module DTK
 
         target_model_handle = ndx_ret.values.first && ndx_ret.values.first[:target_model_handle]
         default_target = target_model_handle && Target::Instance.get_default_target(target_model_handle, ret_singleton_target: true, prune_builtin_target: true)
-          
+
         unsorted = ndx_ret.values.map do |r|
           r[:display_name] = r[:display_name] + "*" if default_target and default_target.display_name == r.display_name
 
@@ -188,7 +190,7 @@ module DTK
           nodes.reject! { |n| Node.is_assembly_wide_node?(n) } if opts[:remove_assembly_wide_node]
           # TODO: this is misleading since admin not op status returned
           summary_node_status = (summary_node_status(:admin, nodes, r[:last_task_run_status]) if respond_to?(:summary_node_status))
-          r.merge(op_status: summary_node_status, nodes: nodes).slice(:id, :display_name, :op_status, :last_task_run_status, :service_context, :execution_status, :module_branch_id, :version, :assembly_template, :target, :nodes, :created_at, :keypair, :security_groups)
+          r.merge(op_status: summary_node_status, nodes: nodes).slice(:id, :display_name, :op_status, :last_task_run_status, :last_action, :service_context, :execution_status, :module_branch_id, :version, :assembly_template, :target, :nodes, :created_at, :keypair, :security_groups)
         end
 
         sanitize!(unsorted) if opts[:sanitize]

@@ -122,7 +122,7 @@ module DTK
       entry_values = entry_values.collect do |ev|
         if ev.start_with?(':')
           params_values << ev.gsub(':', '')
-          VALUE_PLACEHOLDER
+          ev.eql?(':task_action') ? '(.*)' : VALUE_PLACEHOLDER
         else
           ev
         end

@@ -121,7 +121,7 @@ module DTK
       def is_converged?(assembly_instance)
         status = assembly_instance.get_last_task_run_status?
         # The condition status.nil? means that no workflow which it implies that it is params only assembly_instance
-        status.nil? or status == 'succeeded'
+        status.nil? || status[:last_task_run_status] == 'succeeded'
       end
 
       # Returns the newly created assembly_instance 

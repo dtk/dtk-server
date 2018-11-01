@@ -399,11 +399,11 @@ module DTK
         if opts[:idempotent]
           return matching_cmp.id_handle()
         else
-          if component_title
+          # if component_title
             # Just doing check here when there is a title, and not treating singletones
             # because there is later constraint that picks up the singleton components
             fail ErrorUsage.new("Component (#{matching_cmp.print_form()}) already exists")
-          end
+          # end
         end
       end
 

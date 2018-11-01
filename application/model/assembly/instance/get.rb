@@ -389,7 +389,7 @@ module DTK; class Assembly; class Instance
     def get_ndx_last_task_run_status(assembly_rows, assembly_mh)
       ret = {}
       sp_hash = {
-        cols: [:id, :started_at, :assembly_id, :status],
+        cols: [:id, :started_at, :assembly_id, :status, :display_name],
         filter: [:oneof, :assembly_id, assembly_rows.map { |r| r[:id] }]
       }
       ndx_task_rows = {}
@@ -398,15 +398,15 @@ module DTK; class Assembly; class Instance
         assembly_id = task[:assembly_id]
         if pntr = ndx_task_rows[assembly_id]
           if task[:started_at] > pntr[:started_at]
-            ndx_task_rows[assembly_id] =  task.slice(:status, :started_at)
+            ndx_task_rows[assembly_id] =  task.slice(:status, :started_at, :display_name)
           end
         else
-          ndx_task_rows[assembly_id] = task.slice(:status, :started_at)
+          ndx_task_rows[assembly_id] = task.slice(:status, :started_at, :display_name)
         end
       end
       assembly_rows.each do |r|
-        if last_task_run_status = ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:status]
-          ret[r.id] = last_task_run_status
+        if last_task_run_status = ndx_task_rows[r[:id]] && ndx_task_rows[r[:id]][:display_name] && ndx_task_rows[r[:id]][:status]
+          ret[r.id] = { last_task_run_status: last_task_run_status, last_action: ndx_task_rows[r[:id]][:display_name] }
         end
       end
       ret

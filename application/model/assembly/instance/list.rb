@@ -32,7 +32,7 @@ module DTK; class Assembly::Instance
         # TODO: fix so dont put workspace in first place
         assembly_rows.reject! { |assembly_instance| Workspace.is_workspace?(assembly_instance) }
 
-          if opts[:detail_level].nil?
+        if opts[:detail_level].nil?
           if opts[:include_namespaces]
             Log.error('Unexpected that opts[:include_namespaces] is true')
           end
@@ -57,8 +57,9 @@ module DTK; class Assembly::Instance
       def add_last_task_run_status!(assembly_rows, assembly_mh)
         ndx_status = get_ndx_last_task_run_status(assembly_rows, assembly_mh)
         assembly_rows.each do |r| 
-          if last_task_run_status = ndx_status[r.id]
+          if ndx_status[r.id] && last_task_run_status = ndx_status[r.id][:last_task_run_status]
             r[:last_task_run_status] = last_task_run_status
+            r[:last_action] = ndx_status[r.id][:last_action]
           end
         end
         assembly_rows

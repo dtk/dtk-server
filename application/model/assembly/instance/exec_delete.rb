@@ -275,7 +275,8 @@ module DTK; class  Assembly
         nodes = assembly_instance.get_leaf_nodes(remove_assembly_wide_node: true)
 
         if assembly_wide_node = assembly_instance.has_assembly_wide_node?
-          if components = assembly_wide_node.get_components
+          components = assembly_wide_node.get_components
+          if components && !components.empty?
             cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
             delete_task = Task::Template::ConfigComponents.get_serialized_template_content(self, "delete")
             has_delete_task = delete_task && !delete_task.empty?

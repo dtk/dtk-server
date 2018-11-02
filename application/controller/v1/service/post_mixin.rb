@@ -109,10 +109,10 @@ module DTK
         force     = boolean_request_params(:force)
         task_id = nil
 
+        if latest_task = Task.get_top_level_most_recent_task(assembly_instance.id_handle.createMH(:task), [:eq, :assembly_id, assembly_instance.id])
+          task_id = latest_task.id
+        end
         if force || !delete
-          if latest_task = Task.get_top_level_most_recent_task(assembly_instance.id_handle.createMH(:task), [:eq, :assembly_id, assembly_instance.id])
-            task_id = latest_task.id
-          end
           assembly_instance.uninstall(recursive: recursive, delete: delete, force: force)
         else
           opts_hash = {

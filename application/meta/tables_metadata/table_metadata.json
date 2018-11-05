@@ -77,11 +77,15 @@
     "order": [
       "id",
       "name",
+      "node",
+      "module_namespace",
       "version"
     ],
     "mapping": {
       "id": "dtk_id",
       "name": "display_name",
+      "node": "node",
+      "module_namespace": "module_namespace",
       "version": "version"
     }
   },

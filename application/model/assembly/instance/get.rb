@@ -122,6 +122,7 @@ module DTK; class Assembly; class Instance
       rows.each do |r|
         if cmp = r[:nested_component]
           cmp.merge!(r.hash_subset(:node))
+          cmp[:module_namespace] = r[:namespace][:display_name]
 
           # if component in service instance is edited it will have assembly branch version
           # we have to use ancestor branch version in list-components

@@ -86,6 +86,14 @@ module DTK
         end
       end
 
+      class SnapshotTaskStreamForm < self
+        def self.get_status(assembly_idh, opts = {})
+          filter = [:eq, :id, opts[:task_id]]
+          top_level_task = Status.get_top_level_most_recent_task(assembly_idh, :service_instance, filter)
+          Status::StreamForm.status(top_level_task, opts)
+        end
+      end
+
       class Target < self
         def self.get_status(target_idh, opts = {})
           filter = [:eq, :target_id, target_idh.get_id]

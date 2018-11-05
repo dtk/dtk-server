@@ -131,26 +131,31 @@ module DTK
       end
 
       def task_status
+        form = request_params(:form)
+        opts = {}
+        if form == 'stream_form'
+          element_detail = request_params(:element_detail)||{}
+          element_detail[:action_results] ||= true
+          element_detail[:errors] ||= true
+
+          opts = {
+            end_index:      request_params(:end_index),
+            start_index:    request_params(:start_index),
+            element_detail: element_detail
+          }
+        end
+
         begin
           assembly_instance = assembly_instance()
         rescue ErrorNameDoesNotExist => e
-          task_id = request_params(:task_id)
-          raise ErrorUsage.new("No tasks found for this assembly") unless task_id
-          opts = { format: :table, task_id: task_id }
+          raise ErrorUsage.new("No tasks found for this assembly") unless task_id = request_params(:task_id)
+          opts.merge!({ format: :table, task_id: task_id })
+          return rest_ok_response Task::Status::SnapshotTaskStreamForm.get_status(get_default_project.id_handle, opts) if form == 'stream_form'
           return rest_ok_response Task::Status::SnapshotTask.get_status(get_default_project.id_handle, opts), datatype: :task_status
         end
+        
         response =
-          if request_params(:form) == 'stream_form'
-            element_detail = request_params(:element_detail)||{}
-            element_detail[:action_results] ||= true
-            element_detail[:errors] ||= true
-
-            opts = {
-              end_index:      request_params(:end_index),
-              start_index:    request_params(:start_index),
-              element_detail: element_detail
-            }
-
+          if form == 'stream_form'
             if wait_for = request_params(:wait_for)
               opts.merge!(wait_for: wait_for.to_sym)
             end

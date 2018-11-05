@@ -18,8 +18,8 @@
 module DTK; class Task
   class Hierarchical
     module GetClassMixin
-      def get_and_reify(top_task_idh)
-        get(top_task_idh, reify: true)
+      def get_and_reify(top_task_idh, params = {})
+        get(top_task_idh, reify: true, params: params)
       end
 
       def get(top_task_idh, opts = {})
@@ -35,6 +35,10 @@ module DTK; class Task
         subtask_indexes = Hash.new
         flat_subtask_list.each do |t|
           ndx_task_list[t.id] = t
+          unless opts[:params].nil?
+            t[:retry] = {:attempts => (opts[:params][:attempts] unless opts[:params][:attempts].nil?),
+                         :sleep => (opts[:params][:sleep] unless opts[:params][:sleep].nil?)}
+          end
           parent_id = t[:task_id]
           subtask_count[parent_id] = (subtask_count[parent_id]||0) +1
           subtask_indexes[t.id] = {:parent_id => parent_id,:index => t[:position]}

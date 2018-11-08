@@ -65,6 +65,10 @@ module DTK; class ModuleDSL; class V4
         ret
       end
 
+      def cmp_print_form
+        component_print_form(@component_name)
+      end
+
       private
 
       # TODO: cleanup so dont need to partition into :non_create_actions, :create_action, :docker, :function
@@ -117,10 +121,6 @@ module DTK; class ModuleDSL; class V4
           create = kv.values.first
           create[:content] && create[:content].key?(type)
         end
-      end
-
-      def cmp_print_form
-        component_print_form(@component_name)
       end
 
       def raise_error_if_illegal_action_name(action_name)

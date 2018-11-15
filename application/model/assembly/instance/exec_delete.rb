@@ -285,8 +285,10 @@ module DTK; class  Assembly
             ordered_components = []
             all_components = []
             all_nested_components!(all_components, components)
-            
-            if has_delete_task && !opts[:uninstall]             
+
+            # TODO: DTK-3621 check change below is fine
+            # if has_delete_task && !opts[:uninstall]             
+            if has_delete_task 
               ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance)).uniq
             else
               ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance, opts), {return_all_nodes: true}).uniq

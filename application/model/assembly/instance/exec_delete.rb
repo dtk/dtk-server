@@ -269,6 +269,7 @@ module DTK; class  Assembly
         delete_instance_task?(assembly_instance, opts) || fail(Error, "Unexpectd that delete_instance_task?(assembly_instance, opts) is nil")
       end
 
+      UNINSTALL_TASK_ACTION = 'uninstall'
       def delete_instance_task?(assembly_instance, opts = {})
         task  = Task.create_top_level(model_handle(:task), assembly_instance, task_action: "delete and destroy '#{assembly_instance[:display_name]}'")
         has_steps = false
@@ -278,21 +279,21 @@ module DTK; class  Assembly
           components = assembly_wide_node.get_components
           if components && !components.empty?
             cmp_opts = { method_name: 'delete', skip_running_check: true, delete_action: 'delete_component' }
-            delete_task = Task::Template::ConfigComponents.get_serialized_template_content(self, "delete")
-            has_delete_task = delete_task && !delete_task.empty?
-              
+            delete_task = Task::Template::ConfigComponents.get_serialized_template_content(self, UNINSTALL_TASK_ACTION)
+            delete_task = nil if (delete_task || {}).empty?
+
             # order components by 'delete' action inside assembly workflow if exists
-            ordered_components = []
             all_components = []
             all_nested_components!(all_components, components)
 
-            # TODO: DTK-3621 check change below is fine
-            # if has_delete_task && !opts[:uninstall]             
-            if has_delete_task 
-              ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance)).uniq
-            else
-              ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance, opts), {return_all_nodes: true}).uniq
-            end
+            ordered_components = 
+              # TODO: DTK-3621 check change below is fine
+              # if has_delete_task && !opts[:uninstall]             
+              if delete_task
+                order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance, delete_task: delete_task, uninstall: opts[:uninstall])).uniq
+              else
+                order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance, opts), {return_all_nodes: true}).uniq
+              end
 
             # ordered_components = order_components_by_workflow(components, Task.get_delete_workflow_order(assembly_instance), {return_all_nodes: true}) 
             # ordered_components = order_components_by_workflow(all_components, Task.get_delete_workflow_order(assembly_instance))

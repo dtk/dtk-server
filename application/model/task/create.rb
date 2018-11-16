@@ -69,16 +69,18 @@ module DTK; class Task
       NodeGroupProcessing.decompose_node_groups!(task, opts)
     end
 
+
     def get_delete_workflow_order(assembly, opts = {})
+      ret = nil
       target_idh = target_idh_from_assembly(assembly)
       task_mh    = target_idh.create_childMH(:task)
 
-      if opts[:uninstall]
+      if opts[:uninstall] and ! opts[:delete_task]
         return get_reversed_create_workflow_order(assembly)
       end
       task_template_content = nil
       begin
-        task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'delete', serialized_form: opts[:serialized_form] })
+        task_template_content = opts[:delete_task] || Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, { task_action: 'delete', serialized_form: opts[:serialized_form] })
       rescue Task::Template::ParsingError => e
         return nil
       rescue Task::Template::TaskActionNotFoundError => e

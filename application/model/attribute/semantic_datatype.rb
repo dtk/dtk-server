@@ -59,7 +59,7 @@ module DTK
         if value.kind_of?(::String)
           value = ConvertFromString.convert_if_non_scalar_type(value, semantic_data_type, attribute_path)
           unless is_valid?(semantic_data_type, value)
-            fail ErrorUsage, "The value of #{attribute_path} is not of type #{semantic_data_type}" 
+            fail ErrorUsage, "The provided value '#{value}' of #{attribute_path} is not of type #{semantic_data_type}" 
           end
         end
         value

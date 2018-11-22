@@ -54,6 +54,11 @@ module DTK; class Attribute
       av_pairs.each do |av_pair|
         value          = av_pair[:value]
         attribute_path = av_pair[:pattern]
+      
+        if attribute_path =~ /^[0-9]+$/
+          attribute = attributes.find {|attr| attr[:id] == attribute_path.to_i}
+          attribute_path = attribute[:display_name]
+        end
         # if service instance has components check if there is a node with same name as component
         # if true then it is ambiguous whether using node or component attribute
         check_ambiguity(attributes, av_pair, ambiguous, opts) if base_object.has_assembly_wide_node?

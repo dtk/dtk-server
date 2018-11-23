@@ -33,10 +33,11 @@ module DTK
         ret = []
         add_service_level_actions!(ret) if type.nil? || type.eql?('service')
         if type.nil? || type.eql?('component')
-          add_component_create_actions!(ret) 
-          add_component_actions_with_methods!(ret)
+           add_component_create_actions!(ret) 
+           add_component_actions_with_methods!(ret)
         end
         ret
+        
       end
 
       private
@@ -44,6 +45,7 @@ module DTK
       attr_reader :assembly_instance
 
       def add_service_level_actions!(ret)
+       
         service_actions = assembly_instance.get_task_templates(set_display_names: true)
         create_action = service_actions.find{ |action| action[:display_name].eql?('create')}
         if service_actions.empty? || create_action.nil?
@@ -53,10 +55,11 @@ module DTK
           Task::Template.get_serialized_content(assembly_instance, nil)
           service_actions = assembly_instance.get_task_templates(set_display_names: true)
         end
-        
+
         service_actions.each do |service_action|
           ret << { display_name: service_action[:display_name], action_type: "service" }
         end
+    
       end
 
       def add_component_create_actions!(ret)
@@ -65,12 +68,15 @@ module DTK
           node            = component[:node]
           component_type  = component[:component_type].gsub('__', '::')
           component_title = ((match = component[:display_name].match(/.*\[(.*)\]/)) && match[1])
-
-          action_info = Info.new(component_type, component_title, Info::CREATE_METHOD, node: node)
-          if node.is_node_group?
-            action_info_array += expand_node_group_members(node, action_info)
-          else
-            action_info_array << action_info
+          component.update_object!(:external_ref)
+          unless component[:external_ref].nil? || component[:external_ref].empty?
+            action_info_array
+            action_info = Info.new(component_type, component_title, Info::CREATE_METHOD, node: node)
+            if node.is_node_group?
+              action_info_array += expand_node_group_members(node, action_info)
+            else
+              action_info_array << action_info
+            end
           end
         end
 
@@ -79,14 +85,13 @@ module DTK
 
       def add_component_actions_with_methods!(ret)
         action_info_array = []
-        Task::Template::Action::AdHoc.list(assembly_instance, :component_instance, {return_nodes: true}).each do |component_action|
+        Task::Template::Action::AdHoc.list(assembly_instance, :component_instance, {return_nodes: true}).each do |component_action|  
           method_name = component_action[:method_name]
           next if method_name == Info::CREATE_METHOD
 
           node            = component_action[:node]
           component_type  = component_action[:component_type]
           component_title = ((match = component_action[:display_name].match(/.*\[(.*)\]/)) && match[1])
-
           action_info = Info.new(component_type, component_title, method_name, node: node)
           if node.is_node_group?
             action_info_array += expand_node_group_members(node, action_info)
@@ -117,6 +122,7 @@ module DTK
           node_group_range = [members.first[:index], members.last[:index]]
           action_info_array << Info.new(component_type, component_title, method_name, node_name: node.display_name, node_group_range: node_group_range)
         end
+        
 
         action_info_array
       end

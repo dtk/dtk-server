@@ -220,20 +220,19 @@ module DTK; class  Assembly
       end
       # returns nil if there is no task to run
       def exec__delete(opts = {})
-    
-  
         task = Task.create_top_level(model_handle(:task), self, task_action: 'delete and destroy')
         ret = {
           assembly_instance_id: self.id,
           assembly_instance_name: self.display_name_print_form
         }
         opts.merge!(skip_running_check: true)
-        staged_instances = get_children_instances(self)
-        service_instances = []
-        staged_instances.each do |v|
-          service_instances << v[:ref]
-        end
+        
         if !opts[:recursive] && is_target_service_instance?
+          staged_instances = get_children_instances(self)
+          service_instances = []
+          staged_instances.each do |v|
+            service_instances << v[:display_name]
+          end
           fail ErrorUsage, "The context service cannot be deleted because there are service instances dependent on it (#{service_instances.join(', ')}). Please use flag '-r' to remove all." unless staged_instances.empty?
         end
         

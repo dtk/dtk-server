@@ -66,7 +66,7 @@ module DTK
     end
 
     def self.antecendent_assembly_instance(assembly_instance_mh, service_association)
-      assembly_instance_mh.createIDH(id: service_association[:service_antecendent_id]).create_object
+      assembly_instance_mh.createIDH(id: service_association[:service_antecendent_id]).create_object(cols: [:display_name])
     end
   end
 end

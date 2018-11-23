@@ -617,6 +617,13 @@ module DTK; class  Assembly
       staged_instances.reject!{ |si| si[:id] == service[:id] }
       staged_instances 
     end
+    def get_children_instances(service)
+      children_instances = ServiceAssociations.get_children(service)
+      children_instances.reject!{ |si| Workspace.is_workspace?(si) } # TODO: temp until remove workspace
+      children_instances.reject!{ |si| si[:id] == service[:id] }
+      children_instances 
+    end
+
      
   end
 end

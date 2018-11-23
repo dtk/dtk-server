@@ -49,11 +49,24 @@ module DTK
       end
     end
 
+    def self.get_children(assembly_instance)
+      sp_hash = {
+        cols: [:id, :group_id, :display_name, :service_antecendent_id],
+        filter: [:eq, :service_dependent_id, assembly_instance.id]
+      }
+      assembly_instance_mh = assembly_instance.model_handle(:assembly_instance)
+      get_objs(assembly_instance.model_handle(:service_associations), sp_hash).map do |association|
+        antecendent_assembly_instance(assembly_instance_mh, association) 
+      end
+    end
     private
 
     def self.dependent_assembly_instance(assembly_instance_mh, service_association)
       assembly_instance_mh.createIDH(id: service_association[:service_dependent_id]).create_object
     end
 
+    def self.antecendent_assembly_instance(assembly_instance_mh, service_association)
+      assembly_instance_mh.createIDH(id: service_association[:service_antecendent_id]).create_object(cols: [:display_name])
+    end
   end
 end

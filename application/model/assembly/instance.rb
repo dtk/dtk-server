@@ -603,7 +603,7 @@ module DTK; class  Assembly
     end
 
     def delete_recursive(service, parent_task, opts = {})
-      staged_instances = get_staged_service_instances(service)
+      staged_instances = get_children_instances(service)
 
       staged_instances.each do |staged_instance|
         instance_subtask = delete_instance_task(staged_instance, opts)

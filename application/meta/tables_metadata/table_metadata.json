@@ -568,11 +568,13 @@
   "describe_action_show_steps": {
     "order": [
       "task_type",
-      "node"
+      "node",
+      "component"
     ],
     "mapping": {
       "task_type": "dtk_type",
-      "node": "node.name"
+      "node": "node.name",
+      "component": "components.first"
     }
   },
   "assembly_task_status": {

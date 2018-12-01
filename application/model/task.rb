@@ -57,7 +57,8 @@ module DTK
        :executable_action,
        :commit_message,
        :assembly_id,
-       :target_id
+       :target_id,
+       :task_params
       ]
     end
 

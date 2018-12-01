@@ -19,6 +19,8 @@ module DTK
   class ActionDef < Model
     require_relative('action_def/content')
     require_relative('action_def/dynamic_provider')
+    require_relative('action_def/parameter_defs')
+
     def self.common_columns
       core_columns + [:method_name, :content, :component_component_id]
     end

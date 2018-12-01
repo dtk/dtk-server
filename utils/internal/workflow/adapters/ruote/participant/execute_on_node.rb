@@ -29,6 +29,7 @@ module DTK
           # DTK-3265 - Almin: refactor this
           task[:retry] = top_task[:retry].to_i unless top_task[:retry].empty? || top_task[:retry].nil?
           task[:attempts] = top_task[:attempts].to_i unless top_task[:attempts].empty? || top_task[:attempts].nil?
+          task[:task_params] = top_task[:task_params] unless top_task[:task_params].nil? || top_task[:task_params].empty?
           # Almin, HACK: Consider Changing this.. 
           # Added because delete is making problems with :retry key, need to find where top_task is created and add key on subtasks objects instead of this fix
           top_task[:subtasks].each do |sub|
@@ -57,6 +58,9 @@ module DTK
             return reply_to_engine(workitem)
           end
 
+          action_params = get_action_params(action[:component_actions].first) if action[:component_actions] && action[:component_actions].first
+          parameter_defs = action_params[:parameter_defs] if action_params[:parameter_defs]
+
           task.add_internal_guards!(workflow.guards[:internal])
           execution_context(task, workitem, task_start) do
             if action.execute_on_server?
@@ -74,9 +78,11 @@ module DTK
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
                   result = msg[:body].merge('task_id' => task_id)
-                  if has_action_results?(task, result)
-                    task.add_action_results(result, action)
+                  if config_agent_type = action[:config_agent_type]
+                    output_matched_dynamic_attr = match_dynamic_attributes(Marshal.load(Marshal.dump(result)), config_agent_type.to_sym, parameter_defs)
                   end
+
+                  task.add_action_results(output_matched_dynamic_attr, action)
 
                   msg_data = (result[:data] || {})[:data]
                   if msg_data.kind_of?(::Hash)
@@ -179,10 +185,6 @@ module DTK
 
         private
 
-        def has_action_results?(task, _results)
-          task[:executable_action].config_agent_type.to_sym == ConfigAgent::Type::Symbol.bash_commands
-        end
-
         def add_start_task_event?(task)
           task.add_event(:start)
         end
@@ -235,6 +237,53 @@ module DTK
           end
         end
 
+        def get_result_data(result)
+          (result[:data] || {})[:data] || result[:data] || {}
+        end
+
+        def match_dynamic_attributes(result, config_agent_type, parameter_defs)
+          return result if config_agent_type.eql? :bash_commands
+
+          dynamic_attr_key = config_agent_type.eql?(:dynamic) ? 'dynamic_attributes' : :dynamic_attributes
+          dynamic_attributes = get_result_data(result)[dynamic_attr_key]
+          return result unless dynamic_attributes
+
+          get_result_data(result)[dynamic_attr_key] =
+            if !parameter_defs || !(parameters = (parameter_defs[:parameters] || parameter_defs[:parameter]))
+              config_agent_type.eql?(:dynamic) ? {} : []
+            else
+              match_attributes(config_agent_type, dynamic_attributes, parameters)
+            end
+          result
+        end
+
+        def match_attributes(config_agent_type, dynamic_attributes, parameters)
+          dynamic_attrs_output = {}
+          parameters.each do |k, v|
+            if v.key?(:dynamic) && v[:dynamic] == true
+              type = v[:type] if v[:type]
+              display_format = v[:display_format] if v[:display_format]
+
+              dynamic_attrs_output[k.to_s] =
+              if config_agent_type.eql? :dynamic
+                { value: dynamic_attributes[k.to_s], type: type, display_format: display_format } if dynamic_attributes[k.to_s]
+              elsif config_agent_type.eql? :puppet
+                dyn_attr = dynamic_attributes.find{|a| a[:attribute_name] == k.to_s}
+                { value: dyn_attr[:attribute_val], type: type, display_format: display_format } if dyn_attr && dyn_attr[:attribute_val]
+              end
+
+            end
+          end
+          dynamic_attrs_output.compact
+        end
+
+        def get_action_params(component_action)
+          component = component_action.component
+          component_template = component.id_handle(id: component[:ancestor_id]).create_object
+          method_name = component_action.method_name? || 'create'
+
+          ActionDef.get_matching_action_def_params?(component_template, method_name)
+        end
         # TODO: need to turn threading off for now because if dont can have two threads
         # eat ech others messages; may solve with existing mechism or go straight to
         # using stomp event machine

@@ -46,7 +46,7 @@ module DTK; class Task::Status
           ret.empty? ? nil : ret
         end
       end
-      ActionResultFields = [:status, :stdout, :stderr, :description]
+      ActionResultFields = [:status, :stdout, :stderr, :description, :success, :dynamic_attributes]
 
       ErrorFields = [:message, :type]
       def errors?

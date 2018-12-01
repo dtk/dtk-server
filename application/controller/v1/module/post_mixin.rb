@@ -25,7 +25,7 @@ module DTK
         if version = request_params(:version)
           version = nil if BASE_VERSION_STRING.include?(version)
         else
-           version = compute_latest_version(service_module)
+          version = compute_latest_version(service_module)
         end
         assembly_template = service_module.assembly_template(assembly_name: assembly_name, version: version)
 

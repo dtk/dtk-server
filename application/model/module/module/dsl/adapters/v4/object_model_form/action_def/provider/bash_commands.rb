@@ -28,7 +28,8 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       end
 
       def initialize(input_hash, _opts = {})
-        super(provider: type.to_s).merge!(provider_specific_fields(input_hash))
+        ret = super(provider: type.to_s).merge!(provider_specific_fields(input_hash))
+        ret.merge!('parameter_defs' => input_hash['parameter_defs']) if input_hash['parameter_defs']
       end
 
       def self.type

@@ -40,6 +40,12 @@ module DTK
       end
     end
 
+    def self.raise_error_on_illegal_task_params(component_attributes, action_def, task_params)
+      if param_defs = action_def[:parameter_defs]
+        ActionDef::ParameterDefs.parse(component_attributes, param_defs, task_params)
+      end
+    end
+
     def self.load(type)
       Adapter.load(type)
     end

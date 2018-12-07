@@ -32,6 +32,7 @@
     breakpoint: { type: :boolean },
     retry: { type: :json },
     attempts: { type: :json },
+    task_params: {type: :json},
     assembly_id: { #points to assembly when assembly task
       type: :bigint,
       foreign_key_rel_type: :component,

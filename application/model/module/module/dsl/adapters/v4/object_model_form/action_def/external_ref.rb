@@ -21,7 +21,7 @@ module DTK; class ModuleDSL; class V4
       # can update ret['action_def']
       def self.external_ref?(ret, component_name, input_hash, action_defs_info)
         if input_hash['external_ref'] 
-          external_ref_aux(input_hash['external_ref'], component_name) # this is for legacy
+          external_ref_aux(input_hash['external_ref'], component_name, input_hash['parameter_defs']) # this is for legacy
         else
           create_action?(ret, component_name, action_defs_info) || function?(action_defs_info) ||  docker?(action_defs_info)
         end
@@ -36,7 +36,7 @@ module DTK; class ModuleDSL; class V4
             if action_content.kind_of?(Provider::Dynamic)
               action_content
             elsif action_content.respond_to?(:external_ref_from_create_action)
-              external_ref_aux(action_content.external_ref_from_create_action, component_name)
+              external_ref_aux(action_content.external_ref_from_create_action, component_name, action_content['parameter_defs'])
             elsif action_content.respond_to?(:external_ref_from_bash_commands)
               (ret['action_def'] ||= {}).merge!('create' => create_action)
               action_content.external_ref_from_bash_commands
@@ -69,7 +69,7 @@ module DTK; class ModuleDSL; class V4
         ::DTK::ActionDef::Constant.matches?(string, :CreateActionName)
       end
       
-      def self.external_ref_aux(external_ref, component_name)
+      def self.external_ref_aux(external_ref, component_name, parameter_defs = {})
         unless external_ref.is_a?(Hash) and external_ref.size == 1
           fail ParsingError.new('Component (?1) external_ref is ill-formed (?2)', component_name, external_ref) 
         end
@@ -82,6 +82,7 @@ module DTK; class ModuleDSL; class V4
           when 'serverspec_test' then 'test_name'
           else fail ParsingError.new('Component (?1) external_ref has illegal type (?2)', component_name, type)
           end
+        return ObjectModelForm::OutputHash.new('type' => type, name_key => external_ref.values.first, 'parameter_defs' => parameter_defs) unless parameter_defs && parameter_defs.empty?
         ObjectModelForm::OutputHash.new('type' => type, name_key => external_ref.values.first)
       end
       

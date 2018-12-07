@@ -22,9 +22,11 @@ module DTK; class ConfigAgent
       require_relative('dynamic/error_results')
       require_relative('dynamic/attribute_request_form')
       require_relative('dynamic/execution_environment')
+      require_relative('dynamic/interpret_results')
 
       include DynamicAttributes::Mixin
       include ErrorResults::Mixin
+      include InterpretResults::Mixin
 
       def ret_msg_content(task_info, opts = {})
         breakpoint            = task_info[:breakpoint]
@@ -35,9 +37,13 @@ module DTK; class ConfigAgent
         component             = component_action.component
         node                  = task_info[:node]
         component_template    = component_template(component)
+        action_def            = ActionDef.get_matching_action_def_params?(component_template, method_name)
         service_instance_name = assembly_instance.display_name
         failure_attempts      = nil
         failure_sleep         = nil
+        task_params           = task_info[:task_params]
+
+        ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params) if task_params && action_def.key?(:parameter_defs)
 
         if task_info.is_a?(Hash)
           task_info_retry = task_info[:retry] || {}
@@ -71,6 +77,11 @@ module DTK; class ConfigAgent
         provider_attributes = AttributeRequestForm.transform_attribute(dynamic_provider.entrypoint_attribute)
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance, system_values)
 
+        #format parameters sent from command line
+        if task_params && !task_params.empty?
+          task_params = task_params.inject({}) { |h, (k, v)| h[k] = {:value => v, :datatype => 'string', :hidden => 'false'}; h }
+          instance_attributes = instance_attributes.merge(task_params) if task_params
+        end
 
         msg = {
           protocol_version: ArbiterInfo::PROTOCOL_VERSION,

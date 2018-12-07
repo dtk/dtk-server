@@ -815,7 +815,7 @@ module DTK
     end
 
     def self.get_objs_in_set(id_handles, sp_hash_x, opts = {})
-      return [] if id_handles.empty?
+      return [] if id_handles.empty? || id_handles.first.nil?
       sample_idh = id_handles.first
       model_handle = sample_idh.createMH()
       sp_hash = HashSearchPattern.add_to_filter(sp_hash_x, [:oneof, :id, id_handles.map(&:get_id)])

@@ -42,7 +42,7 @@ module DTK; class Task
             executable_action: executable_action
           }
 
-          cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message, :retry, :attempts]
+          cols = [:status, :result, :action_on_failure, :position, :temporal_order, :commit_message, :retry, :attempts, :task_params]
           cols.each { |col| row.merge!(col => hash_row[col]) }
           [:assembly_id, :node_id, :target_id].each do |col|
             row[col] = hash_row[col] || SQL::ColRef.null_id

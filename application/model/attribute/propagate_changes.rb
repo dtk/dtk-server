@@ -50,8 +50,7 @@ module DTK; class Attribute
         sample = attribute_rows.first
         val_field = (sample.key?(:value_asserted) ? :value_asserted : :value_derived)
         old_val_field = "old_#{val_field}".to_sym
-        
-        attr_idhs = attribute_rows.map { |r| attr_mh.createIDH(id: r[:id]) }
+        attr_idhs = attribute_rows.map { |r| attr_mh.createIDH(id: r[:id]) if r[:id] }
         ndx_existing_values = get_objs_in_set(attr_idhs, columns: [:id, val_field]).inject({}) do |h, r|
           h.merge(r[:id] => r)
         end
@@ -95,6 +94,8 @@ module DTK; class Attribute
 
         # make actual changes in database
         opts_update = { partial_value: true }.merge(Aux.hash_subset(opts, :partial_value))
+        # ret if attr is defined in param defs (doesn't have model handle)
+        return ret if attr_idhs.first.nil?
         update_from_rows(attr_mh, update_rows, opts_update)
         
         propagate_and_optionally_add_state_changes(attr_mh, changed_attrs_info, opts)

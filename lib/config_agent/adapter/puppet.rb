@@ -19,6 +19,7 @@ module DTK
   class ConfigAgent; module Adapter
     class Puppet < ConfigAgent
       require_relative('puppet/node_manifest')
+      require_relative('puppet/interpret_results')
       # TODO: look at condionally loading parse related files
       # Ruby 2.2.9: comment out all parser related requires
       #require_relative('puppet/parser')
@@ -26,6 +27,7 @@ module DTK
       #require_relative('puppet/parse_structure')
 
       #include ParserMixin
+      include InterpretResults::Mixin
 
       def self.provider_folder
         ProviderFolder
@@ -33,10 +35,19 @@ module DTK
       ProviderFolder = 'puppet'
 
       def ret_msg_content(config_node, opts = {})
-        assembly          = opts[:assembly]
-        cmps_with_attrs   = components_with_attributes(config_node)
-        assembly_attrs    = assembly_attributes(config_node)
-        puppet_manifests  = NodeManifest.new(config_node, assembly: assembly).generate(cmps_with_attrs, assembly_attrs)
+        assembly            = opts[:assembly]
+        component_action    = config_node[:component_actions].first
+        component           = component_action.component
+        component_template  = component_template(component)
+        method_name         = component_action.method_name? || 'create'
+        action_def          = ActionDef.get_matching_action_def_params?(component_template, method_name)
+        task_params         = config_node[:task_params]
+        cmps_with_attrs     = components_with_attributes(config_node, action_def: action_def, task_params: task_params)
+        assembly_attrs      = assembly_attributes(config_node)
+        puppet_manifests    = NodeManifest.new(config_node, assembly: assembly).generate(cmps_with_attrs, assembly_attrs)
+
+        ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params) if task_params && action_def.key?(:parameter_defs)
+
         if config_node[:retry].kind_of?(::Hash) 
           failure_attempts = config_node[:retry][:attempts] || nil
           failure_sleep    = config_node[:retry][:sleep] || nil
@@ -111,6 +122,10 @@ module DTK
       end
 
       private
+      #TODO: DRY method probably
+      def component_template(component)
+        component.id_handle(id: component[:ancestor_id]).create_object
+      end
 
       def get_version_context(config_node, assembly_instance)
         ret =  []
@@ -149,7 +164,7 @@ module DTK
         end
       end
 
-      def components_with_attributes(config_node)
+      def components_with_attributes(config_node, opts)
         cmp_actions = config_node.component_actions
         node_components = cmp_actions.map { |ca| (component_external_ref(ca[:component]) || {})['name'] }.compact
         ndx_cmps = cmp_actions.inject({}) do |h, cmp_action|
@@ -163,7 +178,7 @@ module DTK
           attrs_for_guards = cmp_actions.flat_map { |cmp_action| cmp_action[:attributes] }
         end
         cmp_actions.map do |cmp_action|
-          component_with_deps(cmp_action, ndx_cmps).merge(ret_attributes(cmp_action, internal_guards, attrs_for_guards, node_components))
+          component_with_deps(cmp_action, ndx_cmps).merge(ret_attributes(cmp_action, internal_guards, attrs_for_guards, node_components, opts))
         end
       end
 
@@ -191,7 +206,7 @@ module DTK
       end
 
       # returns both attributes to set on node and dynmic attributes that get set by the node
-      def ret_attributes(action, internal_guards, attrs_for_guards, node_components = nil)
+      def ret_attributes(action, internal_guards, attrs_for_guards, node_components = nil, opts = {})
         ndx_attributes = {}
         dynamic_attrs = []
         (action[:attributes] || []).each do |attr|
@@ -220,9 +235,26 @@ module DTK
           end
         end
         ret = {}
+        if action_def = opts[:action_def]
+          parameter_defs = action_def[:parameter_defs] if action_def[:parameter_defs]
+          task_params = opts[:task_params] || {}
+          add_attrs_from_param_defs!(dynamic_attrs, ndx_attributes, parameter_defs, task_params) if parameter_defs
+        end
         ret.merge!('attributes' => ndx_attributes.values) unless ndx_attributes.empty?
         ret.merge!('dynamic_attributes' => dynamic_attrs) unless dynamic_attrs.empty?
         ret
+      end
+
+      def add_attrs_from_param_defs!(dynamic_attrs, ndx_attrs, param_defs, task_params)
+        if params = param_defs[:parameters]
+          params.each do |k, v|
+            if v.key?(:dynamic) && v[:dynamic] == true
+              dynamic_attrs << {name: k.to_s, type: 'dynamic'}
+            else
+              ndx_attrs[k.to_s] = {'name' => k.to_s, 'value' => task_params[k], 'type' => 'attribute'} if task_params.key? k
+            end
+          end
+        end
       end
 
       # returns no_more_processing

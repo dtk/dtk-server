@@ -28,8 +28,14 @@ module DTK; class ConfigAgent; module Adapter
       cmp_module             = component_action.component_module_name
       cmp_module_simple_name = component_action.component_module_name(no_namespace: true) 
       component              = component_action.component
+      component_template     = component_template(component)
+      action_def             = ActionDef.get_matching_action_def_params?(component_template, action_name)
       commands               = commands(config_node, cmp_module_simple_name, substitute_template_vars: true, assembly_instance: assembly_instance)
-       unless  config_node[:retry] != 0 || config_node[:attempts] != 0
+      task_params            = config_node[:task_params]
+
+      ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params) if task_params && action_def.key?(:paramter_defs)
+
+      unless  config_node[:retry] != 0 || config_node[:attempts] != 0
         failure_attempts = config_node[:retry]
         failure_sleep    = config_node[:attempts]
       end
@@ -68,6 +74,7 @@ module DTK; class ConfigAgent; module Adapter
     #   :assembly_instance
     def commands(config_node, component_module_simple_name, opts= {})
       ret = []
+      task_params = config_node[:task_params]
       config_node[:component_actions].each do |component_action|
         attr_and_param_vals = component_action.attribute_and_parameter_values
         action_def = component_action.action_def(cols: [:content, :method_name], with_parameters: true)
@@ -78,12 +85,17 @@ module DTK; class ConfigAgent; module Adapter
         
         action_def.commands.each do |command|
           if opts[:substitute_template_vars] && command.needs_template_substitution?
+            attr_and_param_vals = attr_and_param_vals.merge(task_params) if !task_params.nil? && !task_params.empty?
             command.bind_template_attributes!(attr_and_param_vals.merge(system_attributes))
           end
           ret << command_msg_form(command, stdout_and_stderr, component_action, attr_and_param_vals)
         end
       end
       ret
+    end
+
+    def component_template(component)
+      component.id_handle(id: component[:ancestor_id]).create_object
     end
 
     def stdout_and_stderr(action_def)

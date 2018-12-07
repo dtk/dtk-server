@@ -151,7 +151,7 @@ module DTK; class Task
       task_mh = target_idh_from_assembly(assembly).create_childMH(:task)
       subtasks = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
       #create_top_level_task(task_mh, assembly, task_action: task_action_name).add_subtasks(subtasks)
-      create_top_level_task(task_mh, assembly, task_action: task_action_name, retry: component[:retry]).add_subtasks(subtasks)
+      create_top_level_task(task_mh, assembly, task_action: task_action_name, retry: component[:retry], task_params: opts[:task_params]).add_subtasks(subtasks)
     end
 
     def self.create_for_delete_from_database(assembly, component, node, opts = {})
@@ -320,7 +320,8 @@ module DTK; class Task
         display_name: opts[:task_action] || 'assembly_converge',
         temporal_order: opts[:temporal_order] || 'sequential',
         retry: opts[:retry],
-        attempts: opts[:attempts]
+        attempts: opts[:attempts],
+        task_params: opts[:task_params]
       }
       if commit_msg = opts[:commit_msg]
         task_info_hash.merge!(commit_message: commit_msg)

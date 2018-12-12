@@ -36,11 +36,7 @@ module DTK; class Task
         content_params = unrolled_tasks.first[:content_params] || {}
         rows = unrolled_tasks.map do |hash_row|
           executable_action = hash_row[:executable_action]
-          # require 'byebug'
-          # require 'byebug/core'
-          # Byebug.wait_connection = true
-          # Byebug.start_server('localhost', 7777)
-          # debugger
+
           content_params_match = ContentParams.get_matching_content_params(content_params, executable_action) if !content_params.empty? && executable_action
           row = {
             display_name: hash_row[:display_name] || "task#{hash_row[:position]}",

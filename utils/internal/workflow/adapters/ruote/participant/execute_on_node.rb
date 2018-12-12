@@ -78,11 +78,11 @@ module DTK
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)
                   result = msg[:body].merge('task_id' => task_id)
+
                   if config_agent_type = action[:config_agent_type]
                     output_matched_dynamic_attr = match_dynamic_attributes(Marshal.load(Marshal.dump(result)), config_agent_type.to_sym, parameter_defs)
+                    task.add_action_results(output_matched_dynamic_attr, action) unless output_matched_dynamic_attr.nil?
                   end
-
-                  task.add_action_results(output_matched_dynamic_attr, action)
 
                   msg_data = (result[:data] || {})[:data]
                   if msg_data.kind_of?(::Hash)
@@ -245,7 +245,9 @@ module DTK
           return result if config_agent_type.eql? :bash_commands
 
           dynamic_attr_key = config_agent_type.eql?(:dynamic) ? 'dynamic_attributes' : :dynamic_attributes
-          dynamic_attributes = get_result_data(result)[dynamic_attr_key]
+          result_data = get_result_data(result)
+          return nil if result_data.kind_of?(Array)
+          dynamic_attributes = result_data[dynamic_attr_key]
           return result unless dynamic_attributes
 
           get_result_data(result)[dynamic_attr_key] =

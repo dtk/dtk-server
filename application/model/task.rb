@@ -27,6 +27,7 @@ module DTK
     r8_nested_require('task','node_group_processing')
     r8_nested_require('task','action_results')
     r8_nested_require('task','qualified_index')
+    r8_nested_require('task','content_params')
     include HierarchicalMixin
     include GetMixin
     extend GetClassMixin
@@ -58,7 +59,8 @@ module DTK
        :commit_message,
        :assembly_id,
        :target_id,
-       :task_params
+       :task_params,
+       :content_params
       ]
     end
 

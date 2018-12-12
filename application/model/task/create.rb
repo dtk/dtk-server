@@ -210,8 +210,6 @@ module DTK; class Task
       target_idh     = target_idh_from_assembly(assembly)
       task_mh        = target_idh.create_childMH(:task)
 
-      ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action, :retry, :attempts]))
-
       nodes_to_create, nodes_wait_for_start = nodes_to_process_in_task(assembly, Aux.hash_subset(opts, [:start_nodes, :ret_nodes_to_start]))
       case component_type
        when :service
@@ -236,6 +234,9 @@ module DTK; class Task
       opts_tt = opts.merge(component_type_filter: component_type)
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, opts_tt)
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
+
+      opts.merge!({task_params: opts_tt[:task_params], content_params: task_template_content.content_params})
+      ret = create_top_level_task(task_mh, assembly, Aux.hash_subset(opts, [:commit_msg, :task_action, :retry, :attempts, :task_params, :content_params]))
 
       if start_nodes_task.nil? && create_nodes_task.nil? && stages_config_nodes_task.empty?
         # means that no steps to execute
@@ -321,7 +322,8 @@ module DTK; class Task
         temporal_order: opts[:temporal_order] || 'sequential',
         retry: opts[:retry],
         attempts: opts[:attempts],
-        task_params: opts[:task_params]
+        task_params: opts[:task_params],
+        content_params: opts[:content_params]
       }
       if commit_msg = opts[:commit_msg]
         task_info_hash.merge!(commit_message: commit_msg)

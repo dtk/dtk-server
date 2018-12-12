@@ -34,10 +34,11 @@ module DTK
         breakpoint   = task[:breakpoint]
         @retry       = task[:retry]
         @task_idh    = task.id_handle
-        @task_action = task[:executable_action].merge(breakpoint: breakpoint, retry: task[:retry], attempts: task[:attempts], task_params: task[:task_params])
+        @task_action = task[:executable_action].merge(breakpoint: breakpoint, retry: task[:retry], attempts: task[:attempts], task_params: task[:task_params], content_params: task[:content_params])
         @klass       = self.class.load_for(@task_action)
         @attempts    = task[:attempts]
         @task_params = task[:task_params]
+        @content_params = task[:content_params]
       end
     end
     attr_reader :task_idh, :top_task_idh, :task_action, :klass, :breakpoint

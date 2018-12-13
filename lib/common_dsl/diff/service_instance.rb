@@ -23,8 +23,7 @@ module DTK
         require_relative('service_instance/nested_module')
         
         # returns object of type Diff::Result or raises error
-        def self.process(service_instance, module_branch, repo_diffs_summary)
-          
+        def self.process(project, updated_nested_modules, commit_sha, service_instance, module_branch, repo_diffs_summary)
           # TODO: DTK-2665: look at more consistently eithr putting error messages on results
           # or throwing errors
           # also look at doing pinpointed violation chaecking leveraging violation code
@@ -35,10 +34,12 @@ module DTK
             # Parses and processes any service instance dsl changes; can update diff_result
             diff_result.module_refs_to_delete = DSL.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
             unless diff_result.any_errors?
-              # Processes the changes to the nested module content and dsl 
-              Log.error("TODO: DTK-3366: update NestedModule.process_nested_module_changes")
-              NestedModule.process_partial_nested_module_changes(service_instance)
-              # NestedModule.process_nested_module_changes(diff_result, service_instance, module_branch, impacted_files, current_module_refs: current_module_refs)
+            # Processes the changes to the nested module content and dsl 
+            #Log.error("TODO: DTK-3366: update NestedModule.process_nested_module_changes")
+            NestedModule.process_partial_nested_module_changes(service_instance)
+            if !updated_nested_modules.nil? && !updated_nested_modules.empty?
+              NestedModule.process_nested_module_changes(diff_result, project, updated_nested_modules, commit_sha, service_instance, module_branch, impacted_files, current_module_refs: current_module_refs)
+            end
             end
           end
           diff_result

@@ -20,26 +20,44 @@ module DTK; module CommonDSL
     class ServiceInstance::NestedModule
       module DSL
         # Parses and processes anested module dsl changes; can update diff_result
-        def self.process_nested_module_dsl_changes(diff_result, service_instance, aug_service_specific_mb, impacted_files)
+        def self.process_nested_module_dsl_changes(diff_result, project, commit_sha, service_instance, aug_service_specific_mb, opts)
           # TODO: DTK-2727 use dtk-dsl library for parsing
-          Legacy.parse_and_update_nested_module(aug_service_specific_mb)
+          Legacy.parse_and_update_nested_module(aug_service_specific_mb, project, commit_sha, opts)
         end
         
         private
 
         module Legacy
-          def self.parse_and_update_nested_module(aug_service_specific_mb)
-            component_module = aug_service_specific_mb.component_module
-            impl_obj         = aug_service_specific_mb.implementation
-            version          = aug_service_specific_mb.version
-
+          def self.local_params(module_type, module_name, opts = {})
+            version = opts[:version]
+            namespace = opts[:namespace]
+            ::DTK::ModuleBranch::Location::LocalParams::Server.new(
+              module_type: module_type,
+              module_name: module_name,
+              version: version,
+              namespace: namespace
+            )
+          end
+          def self.parse_and_update_nested_module(aug_service_specific_mb, project, commit_sha, opts)
+            component_module = aug_service_specific_mb.get_module
+            impl_obj         = aug_service_specific_mb.get_implementation
+            version          = aug_service_specific_mb.version #aug_service_specific_mb.get_ancestor_branch?.version
+            
             aug_service_specific_mb.set_dsl_parsed!(false)
-
-            dsl_obj = ModuleDSL.parse_dsl(component_module, impl_obj)
-            fail dsl_obj if is_parsing_error?(dsl_obj)
-
-            dsl_obj.update_model_with_ref_integrity_check(version: version)
-
+            module_name = component_module.display_name
+            namespace= aug_service_specific_mb.namespace
+            initial_update     = false
+            version            = aug_service_specific_mb.get_ancestor_branch?.version
+            skip_missing_check = true
+            force_parse        = true
+            local_params       = local_params(:component_module, module_name, namespace: namespace, version: version)
+            opts.merge!(
+              force_parse: force_parse,
+              skip_missing_check: skip_missing_check,
+              initial_update: initial_update
+            )
+             ::DTK::CommonModule::Update::NestedModule.update_from_repo(project, commit_sha, local_params, aug_service_specific_mb, opts)
+    
             #TODO: do we need following from application/model/module/base_module/update_module.rb
             # when image_aws component is updated; need to check if new images are added and update node-bindings accordingly
             # if @base_module[:display_name].eql?('image_aws')

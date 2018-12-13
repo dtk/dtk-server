@@ -20,32 +20,31 @@ module DTK
     class Component < self
       require_relative('component/transform')
       
-      def create_or_update_from_parsed_common_module?(opts = {})
-        return unless module_info_exists?
-        CommonDSL::Parse.set_dsl_version!(self.component_module_branch, self.parsed_common_module)
+      def create_or_update_from_parsed_component_module?(opts = {})
+        CommonDSL::Parse.set_dsl_version!(self.component_module_branch, self.parsed_component_module)
         update_component_info_in_model_from_dsl(opts) if parse_needed?
       end
 
-      def self.component_defs_exist?(parsed_common_module)
-        !parsed_common_module.val(:ComponentDefs).nil?
+      def self.component_defs_exist?(parsed_component_module)
+        !parsed_component_module.val(:ComponentDefs).nil?
       end
 
-      def self.module_info_exists?(parsed_common_module)
+      def self.module_info_exists?(parsed_component_module)
         # second clause is to handle modules without any components
-        component_defs_exist?(parsed_common_module) or parsed_common_module.val(:Assemblies).nil?
+        component_defs_exist?(parsed_component_module) or parsed_component_module.val(:Assemblies).nil?
       end
 
       protected
 
       def component_module_branch 
-        @common_module__module_branch ||= create_module_and_branch?(create_implementation: true)
+        @component_module__module_branch ||= create_module_and_branch?(create_implementation: true)
       end
 
       def aug_component_module_branch
-        @common_module__module_branch ||= self.component_module_branch.augmented_module_branch.augment_with_component_module!
+        @component_module__module_branch ||= self.component_module_branch.augmented_module_branch.augment_with_component_module!
       end
 
-      def parsed_compoinent_defs
+      def parsed_component_defs
         @parsed_compoinent_defs ||= parsed_nested_object(:ComponentDefs)
       end
 
@@ -56,14 +55,14 @@ module DTK
       private
 
       def module_info_exists?
-        self.class.module_info_exists?(self.parsed_common_module)
+        self.class.module_info_exists?(self.parsed_component_module)
       end
 
       # TODO: DTK-2766: this uses the legacy parsing routines in the dtk-server gem. Port over to dtk-dsl parsing
       # opts can have keys
       #   :use_new_snapshot
       def update_component_info_in_model_from_dsl(opts = {})
-        aug_mb = self.common_module__module_branch # alias
+        aug_mb = self.component_module__module_branch # alias
         # TODO: for migration purposes needed the  Implementation.create? method. This shoudl be done during initial create
         impl = aug_mb.get_implementation? || Implementation.create?(self.project, self.local_params, aug_mb.repo)
         parse_opts = {
@@ -80,7 +79,7 @@ module DTK
 
       COMPONENT_YAML_FILENAME = 'dtk.model.yaml'
       def dsl_created_info
-        transform = Transform.new(self.parsed_common_module, self).compute_component_module_outputs!
+        transform = Transform.new(self.parsed_component_module, self).compute_component_module_outputs!
         content = transform.output_path_hash_pairs[COMPONENT_YAML_FILENAME] || fail(Error, "Unexpected that '#{COMPONENT_YAML_FILENAME}' not found")
         {
           path: COMPONENT_YAML_FILENAME,

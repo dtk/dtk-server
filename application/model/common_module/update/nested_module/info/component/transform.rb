@@ -18,10 +18,10 @@
 module DTK
   class CommonModule::Update::NestedModule::Info::Component
     class Transform
-      def initialize(parsed_common_module, parent)
+      def initialize(parsed_component_module, parent)
         @dtk_dsl_info_processor = dtk_dsl_transform_helper(parent).info_processor(:component_info)
         @input_files_processor  = ret_input_files_processor(@dtk_dsl_info_processor)
-        @input_files_processor.add_canonical_hash_content!(common_module_top_dsl_path, parsed_common_module)
+        @input_files_processor.add_canonical_hash_content!(component_module_top_dsl_path, parsed_component_module)
       end
 
       def compute_component_module_outputs!
@@ -43,11 +43,11 @@ module DTK
         dtk_dsl_transform_class.new(parent.namespace_name, parent.module_name, parent.version)
       end
 
-      def common_module_top_dsl_path
-        self.class.common_module_top_dsl_path
+      def component_module_top_dsl_path
+        self.class.component_module_top_dsl_path
       end
-      def self.common_module_top_dsl_path
-        @common_module_top_dsl_path ||= CommonDSL::FileType::CommonModule::DSLFile::Top.canonical_path
+      def self.component_module_top_dsl_path
+        @component_module_top_dsl_path ||= CommonDSL::FileType::CommonModule::DSLFile::Top.canonical_path
       end
 
       def ret_input_files_processor(dtk_dsl_info_processor)

@@ -22,14 +22,13 @@ module DTK
         # Returns object of type CommonDSL::Diff::Result
         # opts can have keys
         #   :force_pull - Boolean (default false) 
-        def self.update_from_repo(project, commit_sha, service_instance, opts = {})
+        def self.update_from_repo(project, updated_nested_modules, commit_sha, service_instance, opts = {})
           diff_result = CommonDSL::Diff::Result.new
           module_branch = service_instance.base_module_branch
-
           unless module_branch.is_set_to_sha?(commit_sha)
             module_branch.pull_repo_changes_and_return_diffs_summary(commit_sha, force: opts[:force_pull]) do |repo_diffs_summary|
               unless repo_diffs_summary.empty?
-                diff_result = CommonDSL::Diff::ServiceInstance.process(service_instance, module_branch, repo_diffs_summary)
+                diff_result = CommonDSL::Diff::ServiceInstance.process(project, updated_nested_modules, commit_sha, service_instance, module_branch, repo_diffs_summary)
               end
               # This sets sha on branch only after all processing goes through
               module_branch.update_current_sha_from_repo!

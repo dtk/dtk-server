@@ -27,11 +27,11 @@ module DTK
     extend UpdateModelClassMixin
     include UpdateModelMixin
 
-    attr_reader :input_hash, :project_idh, :module_branch
+    attr_reader :input_hash, :project_idh, :module_branch, :config_agent_type
     def initialize(impl_idh, module_branch, version_specific_input_hash, opts = {})
       @module_branch               = module_branch
       @version_specific_input_hash = version_specific_input_hash
-      @input_hash                  = version_parse_check_and_normalize(version_specific_input_hash, dependent_modules: opts[:dependent_modules])
+      @input_hash                  = version_parse_check_and_normalize(version_specific_input_hash, {dependent_modules: opts[:dependent_modules], integer_version: opts[:integer_version]})
       @impl_idh                    = impl_idh
       @project_idh                 = impl_idh.get_parent_id_handle_with_auth_info
       @ref_integrity_snapshot      = opts[:ref_integrity_snapshot]
@@ -87,10 +87,10 @@ module DTK
     end
     # parses and creates dsl_object form hash parsed in as target
     def self.create_from_file_obj_hash(impl_obj, dsl_filename, content, opts = {})
-      unless isa_dsl_filename?(dsl_filename)
+      unless isa_dsl_filename?(dsl_filename, opts[:integer_version])
         fail Error.new("The file path (#{dsl_filename}) does not refer to a dsl file name")
       end
-      parsed_name = parse_dsl_filename(dsl_filename)
+      parsed_name = parse_dsl_filename(dsl_filename, opts[:integer_version])
       opts[:file_path] = dsl_filename
       input_hash = 
         if content.kind_of?(::Hash)
@@ -328,7 +328,8 @@ module DTK
       1 => /^r8meta\.[a-z]+\.([a-z]+$)/,
       2 => /^dtk\.model\.([a-z]+$)/,
       3 => /^dtk\.model\.([a-z]+$)/,
-      4 => /^dtk\.model\.([a-z]+$)/
+      4 => /^dtk\.model\.(yaml$)/,
+      5 => /^dtk\.module\.(yaml$)/
     }
 
     VersionsTreated = DSLFilenameRegexp.keys

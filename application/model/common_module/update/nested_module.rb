@@ -43,13 +43,13 @@ module DTK
       end
       def update_from_repo(opts = {})
         ret = UpdateResponse.new
-        return ret if self.module_branch.is_set_to_sha?(self.commit_sha)
+       # return ret if self.module_branch.is_set_to_sha?(self.commit_sha)
             parse_needed = opts[:initial_update] || opts[:force_parse]
             create_or_update_opts = {
               parse_needed: parse_needed,
               initial_update: opts[:initial_update]
             }
-            create_or_update_from_parsed_common_module(create_or_update_opts)
+            create_or_update_from_parsed_component_module(create_or_update_opts)
           self.module_branch.set_dsl_parsed!(true)
           # This sets sha on branch only after all processing goes through
           self.module_branch.update_current_sha_from_repo!
@@ -64,8 +64,8 @@ module DTK
         @module_branch ||= get_module_branch
       end
 
-      def parsed_common_module 
-        @parsed_common_module ||= parsed_dsl_from_repo(:common_module)
+      def parsed_component_module 
+        @parsed_component_module ||= parsed_dsl_from_repo(:common_module)
       end
 
       def parsed_dependent_modules
@@ -82,7 +82,7 @@ module DTK
       # opts can have keys:
       #   :parse_needed
       #   :initial_update
-      def create_or_update_from_parsed_common_module(opts = {})
+      def create_or_update_from_parsed_component_module(opts = {})
         update_module_refs
         # Component info must be loaded before service info because assemblies can have dependencies its own componnets
         begin
@@ -137,7 +137,7 @@ module DTK
       #   :diffs_summary
       #   :initial_update  
       def create_or_update_component_info(opts = {})
-        ::DTK::CommonModule::Update::NestedModule::Info::Component.new(self, opts).create_or_update_from_parsed_common_module?(opts.merge(use_new_snapshot: true))
+        ::DTK::CommonModule::Update::NestedModule::Info::Component.new(self, opts).create_or_update_from_parsed_component_module?(opts.merge(use_new_snapshot: true))
       end
       
     end

@@ -26,7 +26,7 @@ module DTK; class ModuleDSL; class V2
       new.convert(input_hash, opts)
     end
     def convert(input_hash, opts = {})
-      component().new(input_hash.req(:module)).convert(input_hash['components'], context(input_hash, opts))
+      component().new(input_hash.req(:module)).convert(input_hash['components']||input_hash['component_defs'], context(input_hash, opts))
     end
 
     def self.convert_attribute_mapping(input_am, base_cmp, dep_cmp, opts = {})

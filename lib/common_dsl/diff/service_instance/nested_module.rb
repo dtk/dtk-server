@@ -20,12 +20,18 @@ module DTK; module CommonDSL
     module ServiceInstance
       class NestedModule
         require_relative('nested_module/dsl')
-
-        def initialize(existing_aug_mb, nested_module_info, service_instance, service_module_branch)
+        require_relative('nested_module/diff')
+        require_relative('nested_module/attribute')
+        require_relative('nested_module/component_link')
+        require_relative('nested_module/action')
+        require_relative('nested_module/component')
+        
+        def initialize(existing_aug_mb, nested_module_info, service_instance, service_module_branch, project)
           @existing_aug_mb       = existing_aug_mb # existing augmented module branch
           @nested_module_info    = nested_module_info
           @service_instance      = service_instance
           @service_module_branch = service_module_branch
+          @project               = project
         end
         private :initialize
 
@@ -47,46 +53,117 @@ module DTK; module CommonDSL
           end
         end
 
-        # Processes changes to the nested module content and dsl 
-        def self.process_nested_module_changes(diff_result, service_instance, service_module_branch, all_impacted_file_paths, opts = {})
-          fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
-
-          # ndx_existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
-          ndx_existing_aug_module_branches = service_instance.aug_dependent_base_module_branches.inject({}) { |h, r| h.merge(r[:module_name] => r) }
-          if nested_modules_info = impacted_nested_modules_info?(service_module_branch, all_impacted_file_paths)
-            # Find existing aug_module_branches for service instance nested modules and for each one impacted 
-            # create a service instance specfic branch if needed; ndx_existing_aug_module_branches is indexed by nested module name
-            nested_modules_info.each do |nested_module_info|
-              nested_module_name = nested_module_info.module_name
-              unless existing_aug_mb = ndx_existing_aug_module_branches[nested_module_name]
-                fail Error, "Unexpected that ndx_existing_aug_module_branches[#{nested_module_name}] is nil"
-              end
-              new(existing_aug_mb, nested_module_info, service_instance, service_module_branch).process(diff_result)
-            end
-          end
-
-          delete_nested_module_directories?(ndx_existing_aug_module_branches, service_module_branch, opts)
+        def self.add_component(diff_result, project_id, service_instance, service_module_branch, module_name, component_name, opts={})
+          ndx_existing_aug_module_branches = DependentModule.get_aug_dependent_module_branches(service_instance.assembly_instance)
+          existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql?(module_name) && mb[:version].eql?(service_instance.get_service_instance_branch[:version])}
+          nested_module_info = {}
+          impl = existing_aug_mb.get_implementation
+          parse_opts = {
+            dsl_created_info: dsl_created_info(component_name, module_name),
+            donot_update_module_refs: true,
+            use_new_snapshot: opts[:use_new_snapshot]
+          }
+          component_module = existing_aug_mb.get_module
+          update_opts = { version: existing_aug_mb.get_ancestor_branch?.version }
+          dsl_obj = ::DTK::ModuleDSL.parse_dsl(component_module, impl, parse_opts)
+          dsl_obj.update_model_with_ref_integrity_check(update_opts)
+          #::DTK::CommonDSL::Diff::ServiceInstance::NestedModule::Component::Diff::Add.process(project_id, existing_aug_mb, service_instance, dsl_obj)
+        end
+        
+        def self.delete_component(diff_result, project_id, service_instance, service_module_branch, module_name, component_name, opts={})
+          ndx_existing_aug_module_branches = DependentModule.get_aug_dependent_module_branches(service_instance.assembly_instance)
+          existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql?(module_name) && mb[:version].eql?(service_instance.get_service_instance_branch[:version])}
+          nested_module_info = {}
+          ::DTK::CommonDSL::Diff::ServiceInstance::NestedModule::Component::Diff::Delete.process(existing_aug_mb, service_instance, component_name)
         end
 
-        def process(diff_result)
-          aug_service_specific_mb = @service_instance.get_or_create_for_nested_module(nested_component_module, base_version)
+        def self.modify_component(diff_result, project_id, service_instance, service_module_branch, module_name, component_name, opts={})
+          ndx_existing_aug_module_branches = DependentModule.get_aug_dependent_module_branches(service_instance.assembly_instance)
+          existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql?(module_name) && mb[:version].eql?(service_instance.get_service_instance_branch[:version])}
+          nested_module_info = {}
+          ::DTK::CommonDSL::Diff::ServiceInstance::NestedModule::Component::Diff::Modify.process(component, component_name, extra_fields) 
+        end
 
-          # Push changes to impacted component modules repo
-          fail "TODO: DTK-3366: dont think NestedModuleRepo.push_to_nested_module is needed anymore"
-          # NestedModuleRepo.push_to_nested_module(@service_module_branch, aug_service_specific_mb, @nested_module_info)
+        def self.add_attribute(diff_result, service_instance, service_module_branch, module_name, component_name, attribute_name, attribute_value)
+          #get module branches
+          ndx_existing_aug_module_branches = service_instance.aug_dependent_base_module_branches
+          existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql? module_name}
+          nested_module_info = {}
+          component = existing_aug_mb.component_module.get_associated_component_instances.find{|c| c.display_name.eql? component_name}
+          extra_fields =  {
+          is_port: true,
+          hidden: false,
+          data_type: 'json',
+          external_ref: '{"type": "puppet_attribute"}'
+          }
+          ::DTK::CommonDSL::Diff::ServiceInstance::NestedModule::Attribute::Diff::Add.process(component, attribute_name, attribute_value, extra_fields)    
+        end
 
-          # TODO: DTK-2708: until use dtk-dsl to parse nested module dsl; need to do push first since'
-          # parsing looks at component module not the service isnatnce repo
-          dsl_changed = false
-          if impacted_dsl_files = @nested_module_info.restrict_to_dsl_files?
-            DSL.process_nested_module_dsl_changes(diff_result, @service_instance, aug_service_specific_mb, impacted_dsl_files)
-            dsl_changed = true
+        def self.delete_attribute(diff_result, service_instance, service_module_branch, module_name, component_name, attribute_name)
+          ndx_existing_aug_module_branches = service_instance.aug_dependent_base_module_branches
+          existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql? module_name}
+          nested_module_info = {}
+          component = existing_aug_mb.component_module.get_associated_component_instances.find{|c| c.display_name.eql? component_name}
+          #get attribute from name and component id
+          attribute = service_instance.assembly_instance.get_attributes_all_levels.find { |f| f[:display_name]==attribute_name && f[:component_component_id]==component.id}
+          ::DTK::CommonDSL::Diff::ServiceInstance::NestedModule::Attribute::Diff::Delete.process(attribute) 
+        end
+
+        def self.modify_attribute(diff_result, service_instance, service_module_branch, module_name, component_name, attribute_name, attribute_value)
+          #get module branches
+          ndx_existing_aug_module_branches = service_instance.aug_dependent_base_module_branches
+          existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql? module_name}
+          nested_module_info = {}
+          component = existing_aug_mb.component_module.get_associated_component_instances.find{|c| c.display_name.eql? component_name}
+          extra_fields =  {
+          is_port: true,
+          hidden: false,
+          data_type: 'json',
+          external_ref: '{"type": "puppet_attribute"}'
+          } 
+          old_attribute = service_instance.assembly_instance.get_attributes_all_levels.find { |f| f[:display_name]==attribute_name && f[:component_component_id]==component.id}
+          ::DTK::CommonDSL::Diff::ServiceInstance::NestedModule::Attribute::Diff::Modify.process(component, old_attribute, attribute_value, extra_fields)
+        end
+
+        # Processes changes to the nested module content and dsl 
+        def self.process_nested_module_changes(diff_result, project, updated_nested_modules, commit_sha, service_instance, service_module_branch, all_impacted_file_paths, opts = {})
+          #fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
+          ndx_existing_aug_module_branches = service_instance.aug_dependent_base_module_branches#.inject({}) { |h, r| h.merge(r[:module_name] => r) }
+          updated_nested_modules.each do |module_name, nm_commit_sha|
+            existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql?(module_name)}
+            nested_module_info = {}
+            new(existing_aug_mb, nested_module_info, service_instance, service_module_branch, project).process(diff_result, nm_commit_sha, opts)
           end
+          # if nested_modules_info = impacted_nested_modules_info?(service_module_branch, all_impacted_file_paths)
+            # Find existing aug_module_branches for service instance nested modules and for each one impacted 
+            # create a service instance specfic branch if needed; ndx_existing_aug_module_branches is indexed by nested module name
+           
+          #  service_module_branch, module_name, impacted_file_paths, opts = {}
+          #   nested_modules_info.each do |nested_module_info|
+          #     nested_module_name = nested_module_info.module_name
+          #     unless existing_aug_mb = ndx_existing_aug_module_branches[nested_module_name]
+          #       fail Error, "Unexpected that ndx_existing_aug_module_branches[#{nested_module_name}] is nil"
+          #     end
+          #     new(existing_aug_mb, nested_module_info, service_instance, service_module_branch).process(diff_result)
+          #   end
+          # end
+
+          # delete_nested_module_directories?(ndx_existing_aug_module_branches, service_module_branch, opts)
+        end
+
+        def process(diff_result, commit_sha, opts)
+          aug_service_specific_mb = @service_instance.get_or_create_for_nested_module(nested_component_module, base_version)
+          #Push changes to impacted component modules repo
+          #fail "TODO: DTK-3366: dont think NestedModuleRepo.push_to_nested_module is needed anymore"
+          #NestedModuleRepo.push_to_nested_module(@service_module_branch, aug_service_specific_mb, @nested_module_info)
+
+         # TODO: DTK-2708: until use dtk-dsl to parse nested module dsl; need to do push first since parsing looks at component module not the service isnatnce repo
+          DSL.process_nested_module_dsl_changes(diff_result, @project, commit_sha,  @service_instance, aug_service_specific_mb, opts)
           # Update the impacted component instancesm which includes updating the module_refs locks
           # This has to be done after all changes have been pushed to nested modules
-          update_opts =  { meta_file_changed: dsl_changed, service_instance_module: true }
-          AssemblyModule::Component.update_impacted_component_instances(assembly_instance, nested_component_module, aug_service_specific_mb, update_opts)
+          #AssemblyModule::Component.update_impacted_component_instances(assembly_instance, nested_component_module, aug_service_specific_mb, update_opts)
           # TODO: update diff_result to indicate module that was updated 
+
         end
 
         private

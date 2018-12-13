@@ -27,17 +27,17 @@ module DTK
       #   :diffs_summary
       #   :initial_update  
       def initialize(parent, opts = {})
-        common_module__module_branch  = parent.module_branch
+        component_module__module_branch  = parent.module_branch
         @parent                       = parent
         @project                      = parent.project
         @module_name                  = parent.local_params.module_name
         @namespace_name               = parent.local_params.namespace
-        @common_module__module_branch = common_module__module_branch
-        @version                      = common_module__module_branch.get_ancestor_branch?[:version] || common_module__module_branch[:version]
+        @component_module__module_branch = component_module__module_branch
+        @version                      = component_module__module_branch.get_ancestor_branch? ?  component_module__module_branch.get_ancestor_branch?[:version] : component_module__module_branch[:version]
         @local_params                 = self.class.create_local_params(module_type, @module_name, version: @version, namespace: @namespace_name)
-        @local                        = @local_params.create_local(@project, new_branch_name: common_module__module_branch[:display_name])
-        @parsed_common_module         = parent.parsed_common_module
-        @common_module__repo          = parent.repo
+        @local                        = @local_params.create_local(@project, new_branch_name: component_module__module_branch[:display_name])
+        @parsed_component_module      = parent.parsed_component_module
+        @component_module__repo       = parent.repo
         @module_class                 = self.class.get_class_from_module_type(module_type)
         @parse_needed                 = opts[:parse_needed]
         @diffs_summary                = opts[:diffs_summary]
@@ -60,7 +60,7 @@ module DTK
 
       protected
 
-      attr_reader :parent, :project, :local_params, :local, :parsed_common_module, :module_class, :common_module__repo, :common_module__module_branch
+      attr_reader :parent, :project, :local_params, :local, :parsed_component_module, :module_class, :component_module__repo, :component_module__module_branch
 
       def parse_needed?
         @parse_needed
@@ -110,7 +110,7 @@ module DTK
       end      
 
       def parsed_nested_object(nested_object_key)
-        self.parsed_common_module.val(nested_object_key)
+        self.parsed_component_module.val(nested_object_key)
       end
 
     end

@@ -19,6 +19,7 @@ module DTK
   class CommonModule
     class Update < self
       require_relative('update/module')
+      require_relative('update/nested_module')
       require_relative('update/service_instance')
     end
   end

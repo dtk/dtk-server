@@ -54,7 +54,7 @@ module DTK
       end
 
       def self.get_module_refs(module_branch)
-        common_module_branch = module_branch.common_module_branch
+        common_module_branch = module_branch.common_module_branch || module_branch
 
         content_hash_content = ModuleRef.get_module_ref_array(common_module_branch).inject({}) do |h, r|
           h.merge(key(r[:module_name]) => r)

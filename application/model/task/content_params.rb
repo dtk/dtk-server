@@ -21,31 +21,39 @@ module DTK
 
         def self.get_subtask_content_params!(subtasks)
           content_params = {}
-            subtasks.each do |subtask|
-              if subtask[:actions] && action = subtask[:actions].first
-                inline_params = get_and_remove_inline_params!(action) || {}
-                subtask_params = subtask[:parameters] || {}
-                subtask_params.merge! Hash[inline_params.collect do |param|
-                  split = param.split('=')
-                  [split[0].to_sym, split[1]]
-                end]
-                content_params.merge!({subtask[:actions].first => subtask_params})
-              end
+          subtasks.each do |subtask|
+            if subtask[:actions] && action = subtask[:actions].first
+              inline_params = get_and_remove_inline_params!(action) || {}
+              subtask_params = subtask[:parameters] || {}
+              subtask_params.merge! Hash[inline_params.collect do |param|
+                split = param.split('=')
+                [split[0].to_sym, split[1]]
+              end]
+              content_params.merge!({subtask[:actions].first => subtask_params})
             end
-            content_params
+          end
+          content_params
         end
 
         def self.get_matching_content_params(content_params, executable_action)
+          return nil if executable_action[:component_actions].nil? || content_params_empty?(content_params)
+
           component_action = executable_action[:component_actions].first
           method_name, component_name = get_name_data(component_action)
 
           content_params.each do |full_action_path, params|
             module_name, action_name = full_action_path.split('::') #module_name = action_params_test, action_name = base.ruby_.. || puppet_with_params
-            return params if match_full_action_path?(method_name, component_name, module_name, action_name)
+            return params if match_full_action_path?(method_name, component_name, module_name, action_name) ? params : nil
           end
+          nil
         end
 
         private
+
+        def self.content_params_empty?(content_params)
+          content_params.each { |k, v| return false unless v.empty?() }
+          true
+        end
 
         def self.get_and_remove_inline_params!(action)
           if inline_params_match = action.match(/(.+)[" "](.+)/)

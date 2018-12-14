@@ -37,9 +37,7 @@ module DTK
             # Processes the changes to the nested module content and dsl 
             #Log.error("TODO: DTK-3366: update NestedModule.process_nested_module_changes")
             NestedModule.process_partial_nested_module_changes(service_instance)
-            if !updated_nested_modules.nil? && !updated_nested_modules.empty?
-              NestedModule.process_nested_module_changes(diff_result, project, updated_nested_modules, commit_sha, service_instance, module_branch, impacted_files, current_module_refs: current_module_refs)
-            end
+            NestedModule.process_nested_module_changes(diff_result, project, updated_nested_modules, commit_sha, service_instance, module_branch, impacted_files, current_module_refs: current_module_refs)
             end
           end
           diff_result

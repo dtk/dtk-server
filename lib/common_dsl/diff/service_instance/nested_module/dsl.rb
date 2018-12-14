@@ -28,29 +28,19 @@ module DTK; module CommonDSL
         private
 
         module Legacy
-          def self.local_params(module_type, module_name, opts = {})
-            version = opts[:version]
-            namespace = opts[:namespace]
-            ::DTK::ModuleBranch::Location::LocalParams::Server.new(
-              module_type: module_type,
-              module_name: module_name,
-              version: version,
-              namespace: namespace
-            )
-          end
           def self.parse_and_update_nested_module(aug_service_specific_mb, project, commit_sha, opts)
             component_module = aug_service_specific_mb.get_module
             impl_obj         = aug_service_specific_mb.get_implementation
             version          = aug_service_specific_mb.version #aug_service_specific_mb.get_ancestor_branch?.version
             
             aug_service_specific_mb.set_dsl_parsed!(false)
-            module_name = component_module.display_name
-            namespace= aug_service_specific_mb.namespace
+            module_name        = component_module.display_name
+            namespace          = aug_service_specific_mb.namespace
             initial_update     = false
             version            = aug_service_specific_mb.get_ancestor_branch?.version
             skip_missing_check = true
             force_parse        = true
-            local_params       = local_params(:component_module, module_name, namespace: namespace, version: version)
+            local_params       = ::DTK::ModuleBranch::Location::LocalParams::Server.new(module_type: module_type, module_name: module_name, version: version, namespace: namespace)
             opts.merge!(
               force_parse: force_parse,
               skip_missing_check: skip_missing_check,

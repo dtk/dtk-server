@@ -43,20 +43,18 @@ module DTK
       end
       def update_from_repo(opts = {})
         ret = UpdateResponse.new
-       # return ret if self.module_branch.is_set_to_sha?(self.commit_sha)
-            parse_needed = opts[:initial_update] || opts[:force_parse]
-            create_or_update_opts = {
-              parse_needed: parse_needed,
-              initial_update: opts[:initial_update]
-            }
-            create_or_update_from_parsed_component_module(create_or_update_opts)
-          self.module_branch.set_dsl_parsed!(true)
-          # This sets sha on branch only after all processing goes through
-          self.module_branch.update_current_sha_from_repo!
-
+        #return ret if self.module_branch.is_set_to_sha?(self.commit_sha)
+        parse_needed = opts[:initial_update] || opts[:force_parse]
+        create_or_update_opts = {
+          parse_needed: parse_needed,
+          initial_update: opts[:initial_update]
+        }
+        create_or_update_from_parsed_component_module(create_or_update_opts)
+        self.module_branch.set_dsl_parsed!(true)
+        # This sets sha on branch only after all processing goes through
+        self.module_branch.update_current_sha_from_repo!
         ret
       end
-
 
       attr_reader :project, :local_params, :repo
 

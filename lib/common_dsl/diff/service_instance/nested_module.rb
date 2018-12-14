@@ -28,7 +28,6 @@ module DTK; module CommonDSL
         
         def initialize(existing_aug_mb, nested_module_info, service_instance, service_module_branch, project)
           @existing_aug_mb       = existing_aug_mb # existing augmented module branch
-          @nested_module_info    = nested_module_info
           @service_instance      = service_instance
           @service_module_branch = service_module_branch
           @project               = project
@@ -131,8 +130,7 @@ module DTK; module CommonDSL
           ndx_existing_aug_module_branches = service_instance.aug_dependent_base_module_branches#.inject({}) { |h, r| h.merge(r[:module_name] => r) }
           updated_nested_modules.each do |module_name, nm_commit_sha|
             existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql?(module_name)}
-            nested_module_info = {}
-            new(existing_aug_mb, nested_module_info, service_instance, service_module_branch, project).process(diff_result, nm_commit_sha, opts)
+            new(existing_aug_mb, service_instance, service_module_branch, project).process(diff_result, nm_commit_sha, opts)
           end
           # if nested_modules_info = impacted_nested_modules_info?(service_module_branch, all_impacted_file_paths)
             # Find existing aug_module_branches for service instance nested modules and for each one impacted 

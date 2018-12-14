@@ -40,13 +40,13 @@ module DTK; module CommonDSL
             version            = aug_service_specific_mb.get_ancestor_branch?.version
             skip_missing_check = true
             force_parse        = true
-            local_params       = ::DTK::ModuleBranch::Location::LocalParams::Server.new(module_type: module_type, module_name: module_name, version: version, namespace: namespace)
+            local_params       = ::DTK::ModuleBranch::Location::LocalParams::Server.new(module_type: component_module.module_type, module_name: module_name, version: version, namespace: namespace)
             opts.merge!(
               force_parse: force_parse,
               skip_missing_check: skip_missing_check,
               initial_update: initial_update
             )
-             ::DTK::CommonModule::Update::NestedModule.update_from_repo(project, commit_sha, local_params, aug_service_specific_mb, opts)
+            ::DTK::CommonModule::Update::NestedModule.update_from_repo(project, commit_sha, local_params, aug_service_specific_mb, opts)
     
             #TODO: do we need following from application/model/module/base_module/update_module.rb
             # when image_aws component is updated; need to check if new images are added and update node-bindings accordingly

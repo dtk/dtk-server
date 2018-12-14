@@ -26,7 +26,7 @@ module DTK; module CommonDSL
         require_relative('nested_module/action')
         require_relative('nested_module/component')
         
-        def initialize(existing_aug_mb, nested_module_info, service_instance, service_module_branch, project)
+        def initialize(existing_aug_mb, service_instance, service_module_branch, project)
           @existing_aug_mb       = existing_aug_mb # existing augmented module branch
           @service_instance      = service_instance
           @service_module_branch = service_module_branch

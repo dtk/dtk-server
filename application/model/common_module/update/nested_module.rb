@@ -82,7 +82,6 @@ module DTK
       #   :initial_update
       def create_or_update_from_parsed_component_module(opts = {})
         update_module_refs
-        # Component info must be loaded before service info because assemblies can have dependencies its own componnets
         begin
           create_or_update_component_info(opts)
         rescue ModuleDSL::ParsingError::RefComponentTemplates => exception

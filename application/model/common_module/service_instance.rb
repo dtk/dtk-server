@@ -141,11 +141,26 @@ module DTK
       private
 
       def process_base_module
+        add_base_component_module_as_dependency(self.base_module_branch.augmented_module_branch)
         add_to_base_module_branch__dsl_file
         add_to_base_module_branch__gitignore
         RepoManager.push_changes(self.base_module_branch)
         self.base_module_branch.update_current_sha_from_repo! # updates object model to indicate sha read in
         Assembly::Instance::ModuleRefSha.create_for_base_module(self.assembly_instance, self.base_module_branch.augmented_module_branch)
+      end
+      
+      def add_base_component_module_as_dependency(base_common_module_branch)
+        common_module = base_common_module_branch.get_module
+        base_version  = base_common_module_branch.get_module.get_augmented_module_branch[:version]
+        project = ::DTK::Project.get_all(self.assembly_instance.model_handle(:project)).first
+        if component_module = ComponentModule.module_exists(project, common_module.module_namespace, common_module.module_name, base_version, return_module: true)
+          get_or_create_opts = {
+            donot_update_model: true,
+            delete_existing_branch: true
+          }
+          aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
+          Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
+        end
       end
 
       def add_to_base_module_branch__dsl_file

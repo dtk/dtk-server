@@ -35,7 +35,7 @@ module DTK; module CommonDSL
             
             aug_service_specific_mb.set_dsl_parsed!(false)
             module_name        = component_module.display_name
-            namespace          = aug_service_specific_mb.namespace
+            namespace          = component_module.module_namespace
             initial_update     = false
             version            = aug_service_specific_mb.get_ancestor_branch?.version
             skip_missing_check = true
@@ -47,18 +47,6 @@ module DTK; module CommonDSL
               initial_update: initial_update
             )
             ::DTK::CommonModule::Update::NestedModule.update_from_repo(project, commit_sha, local_params, aug_service_specific_mb, opts)
-    
-            #TODO: do we need following from application/model/module/base_module/update_module.rb
-            # when image_aws component is updated; need to check if new images are added and update node-bindings accordingly
-            # if @base_module[:display_name].eql?('image_aws')
-            #   update_node_bindings = check_if_node_bindings_update_needed(@base_module.get_objs(cols: [:components]), dsl_obj.input_hash)
-            # end
-
-            # TODO: need to process module refs
-            # update_from_includes = UpdateModuleRefs.new(dsl_obj, @base_module).validate_includes_and_update_module_refs()
-            # return update_from_includes if is_parsing_error?(update_from_includes)
-            # opts_save_dsl = Opts.create?(message?: update_from_includes[:message], external_dependencies?: external_deps)
-            # dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch, opts_save_dsl)
             aug_service_specific_mb.set_dsl_parsed!(true)
           end
 

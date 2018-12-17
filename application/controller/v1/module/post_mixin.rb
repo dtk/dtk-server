@@ -188,8 +188,8 @@ module DTK
 
       def update_from_repo
         namespace, module_name, commit_sha = required_request_params(:namespace, :module_name, :commit_sha)
-        initial_update = boolean_request_params(:initial_update)
-        version            = request_params(:version)
+        initial_update     = boolean_request_params(:initial_update)
+        version            = service_instance.aug_dependent_base_module_branches(:version)
         skip_missing_check = request_params(:skip_missing_check)
         force_parse        = request_params(:force_parse)
         local_params       = local_params(:common_module, module_name, namespace: namespace, version: version)

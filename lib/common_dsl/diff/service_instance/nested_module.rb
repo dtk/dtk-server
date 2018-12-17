@@ -22,9 +22,6 @@ module DTK; module CommonDSL
         require_relative('nested_module/dsl')
         require_relative('nested_module/diff')
         require_relative('nested_module/attribute')
-        require_relative('nested_module/component_link')
-        require_relative('nested_module/action')
-        require_relative('nested_module/component')
         
         def initialize(existing_aug_mb, service_instance, service_module_branch, project)
           @existing_aug_mb       = existing_aug_mb # existing augmented module branch
@@ -126,43 +123,32 @@ module DTK; module CommonDSL
 
         # Processes changes to the nested module content and dsl 
         def self.process_nested_module_changes(diff_result, project, updated_nested_modules, commit_sha, service_instance, service_module_branch, all_impacted_file_paths, opts = {})
-          #fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
-          ndx_existing_aug_module_branches = service_instance.aug_dependent_base_module_branches#.inject({}) { |h, r| h.merge(r[:module_name] => r) }
+         if all_impacted_file_paths.include?('dtk.module.yaml')
+            module_ref_shas = Assembly::Instance::ModuleRefSha.get_for_base_and_nested_modules(service_instance.assembly_instance)
+            ndx_existing_aug_module_branches = []
+            module_ref_shas.each do |sha|
+              mbmh = service_instance.assembly_instance.model_handle.createMH(:module_branch)
+              sp_hash = {
+                cols: [:id, :display_name, :component_id, :component_module_info],
+                filter: [:eq, :id, sha[:module_branch_id]]
+              }
+              ndx_existing_aug_module_branches << Model.get_obj(mbmh, sp_hash)
+            end
+            existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:component_module][:display_name].eql?(service_module_branch.get_module[:display_name])}
+            ModuleBranch::Augmented.augment_with_repos!([existing_aug_mb])
+            new(existing_aug_mb, service_instance, service_module_branch, project).process(diff_result, nil, opts)
+          end
+          ndx_existing_aug_module_branches= DependentModule.get_aug_dependent_module_branches(service_instance.assembly_instance)
           updated_nested_modules.each do |module_name, nm_commit_sha|
-            existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql?(module_name)}
+            existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:module_name].eql?(module_name) && mb[:version].eql?(service_instance.get_service_instance_branch[:version])}
             new(existing_aug_mb, service_instance, service_module_branch, project).process(diff_result, nm_commit_sha, opts)
           end
-          # if nested_modules_info = impacted_nested_modules_info?(service_module_branch, all_impacted_file_paths)
-            # Find existing aug_module_branches for service instance nested modules and for each one impacted 
-            # create a service instance specfic branch if needed; ndx_existing_aug_module_branches is indexed by nested module name
-           
-          #  service_module_branch, module_name, impacted_file_paths, opts = {}
-          #   nested_modules_info.each do |nested_module_info|
-          #     nested_module_name = nested_module_info.module_name
-          #     unless existing_aug_mb = ndx_existing_aug_module_branches[nested_module_name]
-          #       fail Error, "Unexpected that ndx_existing_aug_module_branches[#{nested_module_name}] is nil"
-          #     end
-          #     new(existing_aug_mb, nested_module_info, service_instance, service_module_branch).process(diff_result)
-          #   end
-          # end
-
-          # delete_nested_module_directories?(ndx_existing_aug_module_branches, service_module_branch, opts)
         end
 
         def process(diff_result, commit_sha, opts)
-          aug_service_specific_mb = @service_instance.get_or_create_for_nested_module(nested_component_module, base_version)
-          #Push changes to impacted component modules repo
-          #fail "TODO: DTK-3366: dont think NestedModuleRepo.push_to_nested_module is needed anymore"
-          #NestedModuleRepo.push_to_nested_module(@service_module_branch, aug_service_specific_mb, @nested_module_info)
-
-         # TODO: DTK-2708: until use dtk-dsl to parse nested module dsl; need to do push first since parsing looks at component module not the service isnatnce repo
+          aug_service_specific_mb = @existing_aug_mb
           DSL.process_nested_module_dsl_changes(diff_result, @project, commit_sha,  @service_instance, aug_service_specific_mb, opts)
-          # Update the impacted component instancesm which includes updating the module_refs locks
-          # This has to be done after all changes have been pushed to nested modules
-          #AssemblyModule::Component.update_impacted_component_instances(assembly_instance, nested_component_module, aug_service_specific_mb, update_opts)
-          # TODO: update diff_result to indicate module that was updated 
-
-        end
+       end
 
         private
 

@@ -43,11 +43,11 @@ module DTK
         action_def          = ActionDef.get_matching_action_def_params?(component_template, method_name)
         task_params         = config_node[:task_params] || {}
         content_params      = config_node[:content_params] || {}
-        cmps_with_attrs     = components_with_attributes(config_node, action_def: action_def, task_params: task_params)
+        cmps_with_attrs     = components_with_attributes(config_node, action_def: action_def, task_params: task_params.merge!(content_params))
         assembly_attrs      = assembly_attributes(config_node)
         puppet_manifests    = NodeManifest.new(config_node, assembly: assembly).generate(cmps_with_attrs, assembly_attrs)
 
-        ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params.merge!(content_params)) if task_params && action_def.key?(:parameter_defs)
+        ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params) if task_params && action_def.key?(:parameter_defs)
 
         if config_node[:retry].kind_of?(::Hash) 
           failure_attempts = config_node[:retry][:attempts] || nil

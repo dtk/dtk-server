@@ -61,7 +61,8 @@ module DTK; class Clone
 
       def update_children(links)
         Dependency.new(links).update?()
-        # TODO: DTK-2068; put in logic to update component instances that are associated with componenttemplate with updated link defs 
+        # TODO: DTK-2068; put in logic to update component instances that are associated with component template with updated link defs 
+        ComponentLink.new(links).update?()
         IncludeModule.new(links).update?()
         Attribute.new(links).update?()
       end
@@ -84,10 +85,10 @@ module DTK; class Clone
 
       def get_instance_template_links(cmps, opts = {})
         ret = InstanceTemplate::Links.new()
-        component_types = cmps.map { |cmp| cmp.get_field?(:component_type) }.uniq
-        version_field   = @module_branch.get_field?(:version)
-        match_el_array  = component_types.map { |component_type| DTK::Component::Template::MatchElement.new(component_type, version_field) }
-
+        component_types  = cmps.map { |cmp| cmp.get_field?(:component_type) }.uniq
+        module_branch_id = @module_branch_id
+        version          = @module_branch.get_ancestor_branch?[:version]
+        match_el_array   = component_types.map { |component_type| DTK::Component::Template::MatchElement.new(component_type, version, module_branch_id) }
         ndx_cmp_type_template = DTK::Component::Template.get_matching_elements(@project_idh, match_el_array, opts).inject({}) do |h, r|
           h.merge(r[:component_type] => r)
         end

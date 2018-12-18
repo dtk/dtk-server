@@ -70,6 +70,9 @@ module DTK; class Component
         get_objs(mh, sp_hash([:implementation], :id, component_idhs)).map { |r| r[:implementation] }
       end
 
+      def get_component_links(component_idhs, opts = {})
+        get_component_children(component_idhs, ::DTK::LinkDef, :link_def, opts)
+      end
       private
 
       # opts can have keys:

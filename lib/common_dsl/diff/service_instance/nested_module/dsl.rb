@@ -31,13 +31,12 @@ module DTK; module CommonDSL
           def self.parse_and_update_nested_module(aug_service_specific_mb, project, commit_sha, opts)
             component_module = aug_service_specific_mb.get_module
             impl_obj         = aug_service_specific_mb.get_implementation
-            version          = aug_service_specific_mb.version #aug_service_specific_mb.get_ancestor_branch?.version
+            version          = aug_service_specific_mb.version
             
             aug_service_specific_mb.set_dsl_parsed!(false)
             module_name        = component_module.display_name
             namespace          = component_module.module_namespace
             initial_update     = false
-            version            = aug_service_specific_mb.get_ancestor_branch?.version
             skip_missing_check = true
             force_parse        = true
             local_params       = ::DTK::ModuleBranch::Location::LocalParams::Server.new(module_type: component_module.module_type, module_name: module_name, version: version, namespace: namespace)

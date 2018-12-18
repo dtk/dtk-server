@@ -29,6 +29,7 @@ module DTK; class Clone
     r8_nested_require('incremental_update', 'dependency')
     r8_nested_require('incremental_update', 'include_module')
     r8_nested_require('incremental_update', 'attribute')
+    r8_nested_require('incremental_update', 'component_link')
 
     # parent_links is of type Clone::InstanceTemplate::Links
     def initialize(parent_links = nil)

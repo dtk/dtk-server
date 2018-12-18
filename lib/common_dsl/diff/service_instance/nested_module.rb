@@ -123,7 +123,7 @@ module DTK; module CommonDSL
 
         # Processes changes to the nested module content and dsl 
         def self.process_nested_module_changes(diff_result, project, updated_nested_modules, commit_sha, service_instance, service_module_branch, all_impacted_file_paths, opts = {})
-         if all_impacted_file_paths.include?('dtk.module.yaml')
+          if all_impacted_file_paths.include?('dtk.module.yaml')
             module_ref_shas = Assembly::Instance::ModuleRefSha.get_for_base_and_nested_modules(service_instance.assembly_instance)
             ndx_existing_aug_module_branches = []
             module_ref_shas.each do |sha|
@@ -134,7 +134,7 @@ module DTK; module CommonDSL
               }
               ndx_existing_aug_module_branches << Model.get_obj(mbmh, sp_hash)
             end
-            existing_aug_mb = ndx_existing_aug_module_branches.find{|mb| mb[:component_module][:display_name].eql?(service_module_branch.get_module[:display_name])}
+            existing_aug_mb = ndx_existing_aug_module_branches.compact.find{|mb| mb[:component_module][:display_name].eql?(service_module_branch.get_module[:display_name])}
             ModuleBranch::Augmented.augment_with_repos!([existing_aug_mb])
             new(existing_aug_mb, service_instance, service_module_branch, project).process(diff_result, nil, opts)
           end
@@ -146,9 +146,10 @@ module DTK; module CommonDSL
         end
 
         def process(diff_result, commit_sha, opts)
-          aug_service_specific_mb = @existing_aug_mb
-          DSL.process_nested_module_dsl_changes(diff_result, @project, commit_sha,  @service_instance, aug_service_specific_mb, opts)
-       end
+          DSL.process_nested_module_dsl_changes(diff_result, @project, commit_sha,  @service_instance, @existing_aug_mb, opts)
+          update_opts =  { meta_file_changed: true, service_instance_module: true }
+          AssemblyModule::Component.update_impacted_component_instances(@service_instance.assembly_instance, @existing_aug_mb.get_module, @existing_aug_mb, update_opts)
+        end
 
         private
 

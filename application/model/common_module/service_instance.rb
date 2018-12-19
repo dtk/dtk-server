@@ -46,6 +46,11 @@ module DTK
         new(assembly_instance, create_opts).create_service_instance_and_nested_modules
       end
       def create_service_instance_and_nested_modules
+        require 'byebug'
+        require 'byebug/core'
+        Byebug.wait_connection = true
+        Byebug.start_server('localhost', 6666)
+        debugger
         process_base_module
         service_instance_repo_info = RepoInfo.new(self.base_module_branch)
         if self.add_nested_modules?
@@ -151,8 +156,9 @@ module DTK
       
       def add_base_component_module_as_dependency(base_common_module_branch)
         common_module = base_common_module_branch.get_module
+        base_version  = base_common_module_branch.get_ancestor_branch?[:version]
         project = ::DTK::Project.get_all(self.assembly_instance.model_handle(:project)).first
-        if component_module = ComponentModule.module_exists(project, common_module.module_namespace, common_module.module_name, @base_version, return_module: true)
+        if component_module = ComponentModule.module_exists(project, common_module.module_namespace, common_module.module_name, base_version, return_module: true)
           get_or_create_opts = {
             donot_update_model: true,
             delete_existing_branch: true

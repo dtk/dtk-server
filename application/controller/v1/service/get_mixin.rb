@@ -143,6 +143,9 @@ module DTK
             start_index:    request_params(:start_index),
             element_detail: element_detail
           }
+          if wait_for = request_params(:wait_for)
+            opts.merge!(wait_for: wait_for.to_sym)
+          end
         end
 
         begin
@@ -156,9 +159,6 @@ module DTK
         
         response =
           if form == 'stream_form'
-            if wait_for = request_params(:wait_for)
-              opts.merge!(wait_for: wait_for.to_sym)
-            end
             Task::Status::Assembly::StreamForm.get_status(assembly_instance.id_handle, opts)
           else
             Task::Status::Assembly.get_status(assembly_instance.id_handle, format: :table)

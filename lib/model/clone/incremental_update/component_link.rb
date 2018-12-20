@@ -18,6 +18,11 @@
 module DTK; class Clone
   class IncrementalUpdate
     class ComponentLink < self
+      def update?
+        links = get_instances_templates_links()
+        update_model?(links)
+      end
+
       private
 
       # TODO: put in equality test so that does not need to do the modify equal objects
@@ -25,12 +30,6 @@ module DTK; class Clone
         false
       end
 
-      def update?
-        links = get_instances_templates_links()
-        update_model?(links)
-        
-      end
-      
       def get_ndx_objects(component_idhs)
         ret = {}
         ::DTK::Component.get_component_links(component_idhs, cols_plus: [:component_id, :ref]).each do |r|

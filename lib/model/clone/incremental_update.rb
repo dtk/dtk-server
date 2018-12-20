@@ -132,7 +132,14 @@ module DTK; class Clone
     def create_from_templates(template__parent_links)
       # TODO: more efficient is group by common parent_links and pass all templates that are relevant at one time
       template__parent_links.each do |r|
-        Clone.create_child_object([r[:template].id_handle], r[:parent_link])
+        opts = {}
+        if self.class == Attribute
+          opts[:create_override_attrs] = {
+            value_derived: r[:template][:value_asserted],
+            value_asserted: nil
+          }
+         end
+        Clone.create_child_object([r[:template].id_handle], r[:parent_link], opts)
       end
     end
   end

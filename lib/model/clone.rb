@@ -38,17 +38,17 @@ module DTK
     end
 
     # parent_links of type InstanceTemplate::Links
-    def self.create_child_objects(template_child_idhs, parent_links)
+    def self.create_child_objects(template_child_idhs, parent_links, opts = {})
       ret = []
       return ret if template_child_idhs.empty? || parent_links.empty?
       child_context = ChildContext.create_from_parent_links(template_child_idhs, parent_links)
-      child_context.create_new_objects()
+      child_context.create_new_objects(opts)
     end
     # parent_link of type InstanceTemplate::Link
-    def self.create_child_object(template_child_idhs, parent_link)
+    def self.create_child_object(template_child_idhs, parent_link, opts = {})
       parent_links = InstanceTemplate::Links.new
       parent_links.add(parent_link.instance, parent_link.template)
-      create_child_objects(template_child_idhs, parent_links).first
+      create_child_objects(template_child_idhs, parent_links, opts).first
     end
 
     module Mixins

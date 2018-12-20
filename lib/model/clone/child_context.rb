@@ -129,8 +129,8 @@ module DTK; class Clone
       Model.update_from_select(model_handle, field_set_to_update, select_ds)
     end
 
-    def create_new_objects
-      create_override_attrs = {}
+    def create_new_objects(opts = {})
+      create_override_attrs = opts[:create_override_attrs] || {}
       ret_new_objs_info(ret_field_set_to_copy(), create_override_attrs)
     end
 

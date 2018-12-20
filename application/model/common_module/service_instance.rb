@@ -46,12 +46,12 @@ module DTK
         new(assembly_instance, create_opts).create_service_instance_and_nested_modules
       end
       def create_service_instance_and_nested_modules
-        require 'byebug'
-        require 'byebug/core'
-        Byebug.wait_connection = true
-        Byebug.start_server('localhost', 6666)
-        debugger
-        process_base_module
+#        require 'byebug'
+#        require 'byebug/core'
+#        Byebug.wait_connection = true
+#        Byebug.start_server('localhost', 6666)
+#        debugger
+#        process_base_module
         service_instance_repo_info = RepoInfo.new(self.base_module_branch)
         if self.add_nested_modules?
           self.aug_dependent_base_module_branches.each do |aug_base_module_branch|

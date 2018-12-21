@@ -30,6 +30,7 @@ module DTK; class Clone
     r8_nested_require('incremental_update', 'include_module')
     r8_nested_require('incremental_update', 'attribute')
     r8_nested_require('incremental_update', 'component_link')
+    r8_nested_require('incremental_update', 'component_links')
 
     # parent_links is of type Clone::InstanceTemplate::Links
     def initialize(parent_links = nil)
@@ -40,7 +41,7 @@ module DTK; class Clone
       links = get_instances_templates_links()
       update_model?(links)
     end
-
+   attr_accessor :parent_links
    private
 
     # must be overwritten; this method returns a hash where key is parent id and value is array of objects under this
@@ -113,6 +114,7 @@ module DTK; class Clone
       delete_instances(delete_instances, opts) unless delete_instances.empty?
       modify_instances(links.instance_model_handle(), modify_instances) unless modify_instances.empty?
       create_from_templates(create_from_templates) unless create_from_templates.empty?
+      links
     end
 
     def delete_instances(instances, opts = {})

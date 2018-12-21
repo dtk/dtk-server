@@ -73,6 +73,10 @@ module DTK; class Component
       def get_component_links(component_idhs, opts = {})
         get_component_children(component_idhs, ::DTK::LinkDef, :link_def, opts)
       end
+
+      def get_component_links_links(linkdef_idhs, opts = {})
+        get_component_children(linkdef_idhs, ::DTK::LinkDef::Link, :link_def_link, opts)
+      end
       private
 
       # opts can have keys:

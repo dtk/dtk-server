@@ -20,7 +20,23 @@ module DTK; class Clone
     class ComponentLink < self
       def update?
         links = get_instances_templates_links()
-        update_model?(links)
+        linkdefs = update_model?(links)
+        linkdefs.each do |linkdef|
+          new_links = ::DTK::Clone::InstanceTemplate::Links.new()
+          linkdef_instances = linkdef.instances 
+            linkdef.templates.each do |template|   
+              instance = linkdef_instances.find{|ld| ld[:ancestor_id].eql?(template[:id])}
+              unless instance
+                sp_hash = {
+                  cols: [:id, :group_id, :display_name, :description, :ancestor_id, :local_or_remote, :link_type, :component_component_id, :ref],
+                  filter: [:eq, :ancestor_id, template[:id]]
+                }
+                instance = Model.get_objs(template.model_handle, sp_hash).first
+              end
+              new_links.add(instance, template)
+            end
+          ComponentLinks.new(new_links).update?()
+        end
       end
 
       private
@@ -32,7 +48,7 @@ module DTK; class Clone
 
       def get_ndx_objects(component_idhs)
         ret = {}
-        ::DTK::Component.get_component_links(component_idhs, cols_plus: [:component_id, :ref]).each do |r|
+        ::DTK::Component.get_component_links(component_idhs, cols_plus: [:component_id, :ref, :ancestor_id]).each do |r|
           (ret[r[:component_component_id]] ||= []) << r
         end
         ret

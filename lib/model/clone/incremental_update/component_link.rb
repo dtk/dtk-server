@@ -20,7 +20,7 @@ module DTK; class Clone
     class ComponentLink < self
       def update?
         links = get_instances_templates_links()
-        linkdefs = update_model?(links)
+        linkdefs = update_model?(links) || []
         linkdefs.each do |linkdef|
           new_links = ::DTK::Clone::InstanceTemplate::Links.new()
           linkdef_instances = linkdef.instances 

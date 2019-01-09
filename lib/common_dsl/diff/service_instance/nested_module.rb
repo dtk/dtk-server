@@ -134,9 +134,10 @@ module DTK; module CommonDSL
               }
               ndx_existing_aug_module_branches << Model.get_obj(mbmh, sp_hash)
             end
-            existing_aug_mb = ndx_existing_aug_module_branches.compact.find{|mb| mb[:component_module][:display_name].eql?(service_module_branch.get_module[:display_name])}
-            ModuleBranch::Augmented.augment_with_repos!([existing_aug_mb])
-            new(existing_aug_mb, service_instance, service_module_branch, project).process(diff_result, nil, opts)
+            if existing_aug_mb = ndx_existing_aug_module_branches.compact.find{|mb| mb[:component_module][:display_name].eql?(service_module_branch.get_module[:display_name])}
+              ModuleBranch::Augmented.augment_with_repos!([existing_aug_mb])
+              new(existing_aug_mb, service_instance, service_module_branch, project).process(diff_result, nil, opts)
+            end
           end
           ndx_existing_aug_module_branches= DependentModule.get_aug_dependent_module_branches(service_instance.assembly_instance)
           updated_nested_modules.each do |module_name, nm_commit_sha|

@@ -63,7 +63,23 @@ module DTK
 
           task.add_internal_guards!(workflow.guards[:internal])
           execution_context(task, workitem, task_start) do
+            require 'byebug'; byebug
+            # TODO: DTK-3645
+            # If the action is a workflow action we want action.execute_on_server? to be true so it executes the workflow from teh server
+            # as opposed to preparing on the server a message to send to the arbiter and then waiting for a callback
+            # Using bybug by descending into action.execute_on_server? you wil see that its result is conditional 
+            # on config_agent type associated wih action
+            # The main logic wil need to go on the method process_executable_action (as opposed to initial instructions to put logic on
+            # ret_msg_content
             if action.execute_on_server?
+              # The method workflow.process_executable_action for config agent adapters that trigger action.execute_on_server?
+              # will end up calling the main function on the config agent adapter 'execute'. An example is a config agent taht we have 
+              # not used in a while that has an action def that is a ruby lambda that hets executed on the server. It's methods are in
+              # https://github.com/dtk/dtk-server/blob/084447693c851f9ac929fd3402ad30417affab74/lib/config_agent/adapter/ruby_function.rb
+              # This was written before we had ruby actions that execute on arbiters so its name is a minsomer. If you look at the
+              # execute method you will see logic it does to execute the lambda after binding attributes
+              # On the workflow config agent adapter you want to write something that follows the workflow,
+              # We wil have to iterate on about launching this in its own thread so it does not become blocking
               result = workflow.process_executable_action(task)
               process_action_result!(workitem, action, result, task, task_id, task_end, false)
               delete_task_info(workitem)

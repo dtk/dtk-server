@@ -57,6 +57,7 @@ module DTK
         # if component_id = request_params(:component_id)
         #  component_id = "#{ret_component_id(:component_id, assembly_instance, filter_by_node: true)}" unless (component_id =~ /^[0-9]+$/)
         #end
+        
         additional_filter_proc = Proc.new do |e|
           attr = e[:attribute]
           (!attr.is_a?(Attribute)) || !attr.filter_when_listing?({})
@@ -70,7 +71,7 @@ module DTK
         # TODO: DTK-3173: replaced code
         opts[:filter_proc] = additional_filter_proc
 
-        truncate = (format == 'table')
+        truncate = (format != 'yaml')
         opts.merge!(truncate_attribute_values: truncate, mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
         # TODO: DTK-3173: removed code

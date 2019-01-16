@@ -41,9 +41,10 @@ module DTK; class ConfigAgent
         service_instance_name = assembly_instance.display_name
         failure_attempts      = nil
         failure_sleep         = nil
-        task_params           = task_info[:task_params]
+        task_params           = task_info[:task_params] || {}
+        content_params        = task_info[:content_params] || {}
 
-        ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params) if task_params && action_def.key?(:parameter_defs)
+        ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params.merge!(content_params)) if task_params && action_def.key?(:parameter_defs)
 
         if task_info.is_a?(Hash)
           task_info_retry = task_info[:retry] || {}
@@ -78,9 +79,9 @@ module DTK; class ConfigAgent
         instance_attributes = AttributeRequestForm.component_attribute_values(component_action, assembly_instance, system_values)
 
         #format parameters sent from command line
-        if task_params && !task_params.empty?
+        if !task_params.empty?
           task_params = task_params.inject({}) { |h, (k, v)| h[k] = {:value => v, :datatype => 'string', :hidden => 'false'}; h }
-          instance_attributes = instance_attributes.merge(task_params) if task_params
+          instance_attributes.merge!(task_params)
         end
 
         msg = {

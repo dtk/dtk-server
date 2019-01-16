@@ -33,8 +33,11 @@ module DTK; class Task
         set_positions!()        
         # for db access efficiency implement into two phases: 1 - save all subtasks w/o ids, then put in ids
         unrolled_tasks = unroll_tasks()
+        content_params = unrolled_tasks.first[:content_params] || {}
         rows = unrolled_tasks.map do |hash_row|
           executable_action = hash_row[:executable_action]
+
+          content_params_match = ContentParams.get_matching_content_params(content_params, executable_action) if !content_params.empty? && executable_action
           row = {
             display_name: hash_row[:display_name] || "task#{hash_row[:position]}",
             ref: "task#{hash_row[:position]}",
@@ -50,6 +53,7 @@ module DTK; class Task
           row[:breakpoint] = (hash_row[:breakpoint].nil? ? false : hash_row[:breakpoint]) 
           row[:retry] = (hash_row[:retry].nil? ? 0 : hash_row[:retry]) 
           row[:attempts] = (hash_row[:attempts].nil? ? 0 : hash_row[:attempts]) 
+          row[:content_params] = content_params_match
 
           row
         end

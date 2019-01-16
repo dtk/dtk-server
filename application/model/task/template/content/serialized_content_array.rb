@@ -30,6 +30,8 @@ module DTK
 
         def self.normalize(serialized_content, actions, opts = {})
           subtasks             = Constant.matches?(serialized_content, :Subtasks)  || ([] if empty_subtasks?(serialized_content))
+          content_params       = Task::ContentParams.get_subtask_content_params!(subtasks) unless subtasks.nil?
+
           subtask_order_string = Constant.matches?(serialized_content, :SubtaskOrder)
           subtask_order        = subtask_order_string && subtask_order_string.to_sym
 
@@ -40,7 +42,7 @@ module DTK
             else
               [serialized_content]
             end
-          Content.new(new(normalized_subtasks), actions, opts.merge(subtask_order: subtask_order))
+          Content.new(new(normalized_subtasks), actions, opts.merge(subtask_order: subtask_order, content_params: content_params))
         end
 
         private

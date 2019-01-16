@@ -63,7 +63,6 @@ module DTK
 
           task.add_internal_guards!(workflow.guards[:internal])
           execution_context(task, workitem, task_start) do
-            require 'byebug'; byebug
             # TODO: DTK-3645
             # If the action is a workflow action we want action.execute_on_server? to be true so it executes the workflow from teh server
             # as opposed to preparing on the server a message to send to the arbiter and then waiting for a callback

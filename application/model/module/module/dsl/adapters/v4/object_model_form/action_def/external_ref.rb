@@ -33,7 +33,7 @@ module DTK; class ModuleDSL; class V4
         if create_action = action_defs_info.create_action
           if is_method_name?(create_action[:method_name])
             action_content = create_action[:content]
-            if action_content.kind_of?(Provider::Dynamic)
+            if action_content.kind_of?(Provider::Dynamic) || action_content.kind_of?(Provider::Workflow)
               action_content
             elsif action_content.respond_to?(:external_ref_from_create_action)
               external_ref_aux(action_content.external_ref_from_create_action, component_name, action_content['parameter_defs'])

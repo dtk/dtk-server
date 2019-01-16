@@ -23,6 +23,7 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       # TODO: DTK-2805:  cleanup provider/dtk since artifical catchall 
       require_relative('provider/dtk')
       require_relative('provider/puppet')
+      require_relative('provider/workflow')
 
 
       # opts can have:
@@ -51,7 +52,7 @@ module DTK; class ModuleDSL; class V4; class ObjectModelForm
       end
 
       # Dynamic must be last because it is catchall
-      PROVIDER_CLASSES = [Dtk, Puppet, BashCommands] + [Dynamic]
+      PROVIDER_CLASSES = [Dtk, Puppet, BashCommands, Workflow] + [Dynamic]
       PROVIDER_TYPE_TO_CLASS = PROVIDER_CLASSES.inject({}) { |h, klass| h.merge(klass.send(:type) => klass) }
 
       def self.provider_type_to_class?(provider_type)

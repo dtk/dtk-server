@@ -84,6 +84,10 @@ module DTK
       parse_and_reify_content?.docker
     end
 
+    def workflow
+      parse_and_reify_content?.workflow
+    end
+
     def content
       parse_and_reify_content?
     end

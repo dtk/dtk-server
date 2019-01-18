@@ -21,6 +21,7 @@ module DTK; class ConfigAgent
 
       def ret_msg_content(task_info, opts = {})
         component_action      = task_info[:component_actions].first
+        attributes            = get_attributes(component_action[:attributes]) if component_action[:attributes]
         method_name           = component_action.method_name? || 'create'
         component             = component_action.component
         component_template    = component_template(component)
@@ -29,12 +30,28 @@ module DTK; class ConfigAgent
         content_params        = task_info[:content_params] || {}
 
         ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params.merge!(content_params)) if task_params && action_def.key?(:parameter_defs)
+
+        action_def = component_action.action_def(cols: [:content, :method_name], with_parameters: true)
+        action_def.workflow.each do |workflow|
+          workflow.bind_template_attributes!(attributes.merge content_params) if workflow.needs_template_substitution?
+        end
+
       end
 
       private 
 
       def component_template(component)
         component.id_handle(id: component[:ancestor_id]).create_object
+      end
+
+      def get_attributes(attributes)
+        ret = {}
+        attributes.each do |attribute|
+          if (display_name = attribute[:display_name]) && (value_asserted = attribute[:value_asserted]) && value_asserted.is_a?(String)
+            ret[display_name.to_sym] = value_asserted
+          end
+        end
+        ret
       end
 
     end

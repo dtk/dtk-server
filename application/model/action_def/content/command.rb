@@ -21,10 +21,11 @@ module DTK; class ActionDef; class Content
     r8_nested_require('command', 'file_positioning')
     r8_nested_require('command', 'ruby_function')
     r8_nested_require('command', 'docker')
+    r8_nested_require('command', 'workflow')
 
     def self.parse(serialized_command)
       Syscall.parse?(serialized_command) || FilePositioning.parse?(serialized_command) || RubyFunction.parse?(serialized_command) ||
-        Docker.parse?(serialized_command) || fail(Error.new("Parse Error: #{serialized_command.inspect}")) # TODO: bring in dtk model parsing parse error class
+        Docker.parse?(serialized_command) || Workflow.parse?(serialized_command) || fail(Error.new("Parse Error: #{serialized_command.inspect}")) # TODO: bring in dtk model parsing parse error class
     end
 
     def syscall?

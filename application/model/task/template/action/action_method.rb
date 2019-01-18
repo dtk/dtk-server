@@ -38,7 +38,7 @@ module DTK; class Task; class Template
 
       private
 
-      ACTION_PROVIDER_TYPES = [:puppet, :dynamic, :ruby_function, :bash_commands]
+      ACTION_PROVIDER_TYPES = [:puppet, :dynamic, :ruby_function, :bash_commands, :workflow]
       def config_agent_type_from_provider
         if provider_string = canonical_provider_name(self[:provider])
           if matching_type = ACTION_PROVIDER_TYPES.find { |type| provider_string == provider_string_name(type) }

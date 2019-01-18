@@ -23,7 +23,7 @@ module DTK; class ActionDef
     require_relative('content/command')
     require_relative('content/template_processor')
 
-    attr_reader :commands, :functions, :docker
+    attr_reader :commands, :functions, :docker, :workflow
     def initialize(hash_content)
       super()
       replace(hash_content)
@@ -40,6 +40,9 @@ module DTK; class ActionDef
         Command.parse(serialized_command)
       end
       @docker = (self[Constant::Docker] || []).map do |serialized_command|
+        Command.parse(serialized_command)
+      end
+      @workflow = (self[Constant::Workflow] || []).map do |serialized_command|
         Command.parse(serialized_command)
       end
       self

@@ -23,6 +23,8 @@ module DTK
         config_agent_type = task_action.config_agent_type
         if type = ConfigAgent::Type.is_a?(config_agent_type, [:ruby_function, :no_op])
           response = ConfigAgent.load(:ruby_function).execute(task_action)
+        elsif type = ConfigAgent::Type.is_a?(config_agent_type, [:workflow])
+          response = ConfigAgent.load(:workflow).execute(task_action)
         elsif type = ConfigAgent::Type.is_a?(config_agent_type, [:delete_from_database])
           response = ConfigAgent.load(:delete_from_database).execute(task_action, top_task_idh)
         elsif type = ConfigAgent::Type.is_a?(config_agent_type, [:command_and_control_action])

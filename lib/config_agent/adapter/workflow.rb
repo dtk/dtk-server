@@ -19,6 +19,12 @@ module DTK; class ConfigAgent
   module Adapter
     class Workflow < ConfigAgent
 
+      def execute(task_action)
+        ret_msg_content(task_action)
+        #We now have a task action that has templates substituted in its components
+        #I suppose we should form the task hash here that will get executed
+      end
+
       def ret_msg_content(task_info, opts = {})
         component_action      = task_info[:component_actions].first
         attributes            = component_action[:attributes] || {}

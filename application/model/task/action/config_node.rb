@@ -289,7 +289,7 @@ module DTK; class Task
       end
 
       def execute_on_server?
-        ConfigAgent::Type.is_a?(config_agent_type, [:ruby_function, :no_op])
+        ConfigAgent::Type.is_a?(config_agent_type, [:ruby_function, :no_op, :workflow])
       end
 
       def action_agent_call?

@@ -21,7 +21,8 @@ module DTK; class ConfigAgent
 
       def ret_msg_content(task_info, opts = {})
         component_action      = task_info[:component_actions].first
-        attributes            = get_attributes(component_action[:attributes]) if component_action[:attributes]
+        attributes            = component_action[:attributes] || {}
+        formatted_attributes  = get_formatted_attributes(attributes)
         method_name           = component_action.method_name? || 'create'
         component             = component_action.component
         component_template    = component_template(component)
@@ -33,7 +34,7 @@ module DTK; class ConfigAgent
 
         action_def = component_action.action_def(cols: [:content, :method_name], with_parameters: true)
         action_def.workflow.each do |workflow|
-          workflow.bind_template_attributes!(attributes.merge content_params) if workflow.needs_template_substitution?
+          workflow.bind_template_attributes!(formatted_attributes.merge content_params) if workflow.needs_template_substitution?
         end
 
       end
@@ -44,7 +45,7 @@ module DTK; class ConfigAgent
         component.id_handle(id: component[:ancestor_id]).create_object
       end
 
-      def get_attributes(attributes)
+      def get_formatted_attributes(attributes)
         ret = {}
         attributes.each do |attribute|
           if (display_name = attribute[:display_name]) && (value_asserted = attribute[:value_asserted]) && value_asserted.is_a?(String)

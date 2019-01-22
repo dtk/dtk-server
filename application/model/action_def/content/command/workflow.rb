@@ -52,6 +52,10 @@ module DTK; class ActionDef; class Content
         'workflow'
       end
 
+      def subtasks_content
+        @subtasks_content
+      end
+
       private
 
       def ret_needs_template_substitution?

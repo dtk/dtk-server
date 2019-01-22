@@ -154,6 +154,18 @@ module DTK; class Task
       create_top_level_task(task_mh, assembly, task_action: task_action_name, retry: component[:retry], task_params: opts[:task_params]).add_subtasks(subtasks)
     end
 
+    def self.create_for_workflow_action(assembly, task_info)
+      #This should form and return the task hash in a similar way 
+      #to how create_from_assembly_instance forms it
+      #You mentioned trapping the code at task_template_content in create from assembly instance
+      #What i dont understand is:
+      #what am I looking for in task_template_content creation, I know that we get our action def there?
+      #Also, what keys are necessary for our task hash to have? Should I go through the steps in 
+      #create from assembly instance and try to understand how that method forms it?
+      #I have processed templates in workflow adapter, and should I somehow propagate those changes here, perhaps replace
+      #them over task_template_content action def value?
+    end
+
     def self.create_for_delete_from_database(assembly, component, node, opts = {})
       unless node.is_a?(Node)
         if node.eql?('assembly_wide')
@@ -233,6 +245,8 @@ module DTK; class Task
 
       opts_tt = opts.merge(component_type_filter: component_type)
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, opts_tt)
+      #task_template_content now contains our action def
+      #In our method create for workflow action: we change those 
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
 
       opts.merge!({task_params: opts_tt[:task_params], content_params: task_template_content.content_params})

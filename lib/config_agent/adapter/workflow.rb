@@ -19,8 +19,6 @@ module DTK; class ConfigAgent
   module Adapter
     class Workflow < ConfigAgent
 
-      def execute(task_action)
-        ret_msg_content(task_action)
         #We now have a task action that has templates substituted in its components
         #I suppose we should form the task hash here that will get executed
         # You want to first create a hirerachical task and then execute a workflow on it. If you trace executing a 
@@ -76,9 +74,9 @@ module DTK; class ConfigAgent
         # => 36:           serialized_result = Content.reify(<your workflow>)
         # an continues the processing path you will be leveraging the existing code to do what you want
 
-      end
-
-      def ret_msg_content(task_info, opts = {})
+      def execute(task_info, opts = {})
+        assembly_instance     = assembly_instance(opts[:task_idh], task_info) || fail(Error, "Unexepected that opts[:assembly] is nil")
+        service_instance_name = assembly_instance.display_name
         component_action      = task_info[:component_actions].first
         attributes            = component_action[:attributes] || {}
         formatted_attributes  = get_formatted_attributes(attributes)
@@ -96,6 +94,11 @@ module DTK; class ConfigAgent
           workflow.bind_template_attributes!(formatted_attributes.merge content_params) if workflow.needs_template_substitution?
         end
 
+        #will move to seperate method later
+        task = Task::Create.create_for_workflow_action(assembly_instance, task_info)
+        task = task.save_and_add_ids
+        ruote_workflow = Workflow.create(task)
+        ruote_workflow.defer_execution
       end
 
       private 
@@ -112,6 +115,29 @@ module DTK; class ConfigAgent
           end
         end
         ret
+      end
+
+      def assembly_instance(task_idh, task_info)
+        assembly_id =
+          if assembly_idh = task_info[:assembly_idh]
+            if assembly_idh.is_a?(IDHandle) then assembly_idh.get_id()
+            elsif assembly_idh.is_a?(Hash) then assembly_idh[:guid]
+            end
+          else
+            # TODO: think this is reached for node group member; need to check if reached under any other condition
+            if component_actions = task_info[:component_actions]
+              if component = component_actions.first && component_actions.first[:component]
+                component.get_field?(:assembly_id)
+              end
+            end
+          end
+
+        if assembly_id
+          task_idh.createIDH(model_name: :assembly_instance, id: assembly_id).create_object()
+        else
+          Log.error("Could not find assembly id for task with id '#{task_idh.get_id()}'")
+          nil
+        end
       end
 
     end

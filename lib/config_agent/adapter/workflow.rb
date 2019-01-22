@@ -47,6 +47,35 @@ module DTK; class ConfigAgent
         # The task you get in step 280 is essntially teh same structure saved by instance.rb#L268
         # Line 281 creates the ruote datastructure (step 2)
         # Line 282 executes the workflow (step 3)
+
+        # New 1/21/2019
+        # The high level commands shoudl be
+        #   workflow = ... from what was computed above
+        #   assembly_instance  = opts[:assembly] || fail(Error, "Unexepected that opts[:assembly] is nil")
+        #   task = Task::Create.create_for_workflow_action(workflow, assembly_instance) # The new method you write
+        #   task = task.save_and_add_ids
+        #   ruote_workflow = Workflow.create(task)
+        #   ruote_workflow.defer_execution
+        
+        # To see how to write Task::Create.create_for_workflow_action form dtk client execute a workflow
+        #  dtk exec create
+        # and trap the code at 
+        # [230, 239] in /home/dtk1/server/current/application/model/task/create.rb
+        # => 235:       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, opts_tt)
+        #
+        # The then want to also trap at
+        # [30, 39] in /home/dtk1/server/current/application/model/task/template/config_components/persistence.rb
+        # => 35:         if serialized_content = get_serialized_content_from_assembly(assembly, task_action, task_params: opts[:task_params])
+        # 36:           serialized_result = Content.reify(serialized_content)
+        # You wil see that what is returned by  get_serialized_content_from_assembly(assembly, task_action, task_params: opts[:task_params])
+        # such as in my example
+        # {:subtasks=>[{:components=>["ec2::node[test]"], :name=>"create test node"}, {:components=>["node_utility::ssh_access[ubuntu]"], :name=>"ssh access"}, {:components=>["aws_kms::master_key[default]"], :name=>"discover master key"}]}
+        # Wil be very similair (or maybe identical in structure to teh workflow hash you want to process.
+        # So if create_for_workflow_action essentially starts from 
+        # [31, 40] in /home/dtk1/server/current/application/model/task/template/config_components/persistence.rb
+        # => 36:           serialized_result = Content.reify(<your workflow>)
+        # an continues the processing path you will be leveraging the existing code to do what you want
+
       end
 
       def ret_msg_content(task_info, opts = {})

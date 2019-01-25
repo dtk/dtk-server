@@ -30,10 +30,12 @@ module DTK; class Task
 
       def initialize(object = nil, actions = [], opts = {})
         super()
-        @subtask_order = opts[:subtask_order]
-        @custom_name   = opts[:custom_name]
+        @subtask_order  = opts[:subtask_order]
+        @custom_name    = opts[:custom_name]
+        @content_params = opts[:content_params]
         create_stages!(object, actions, opts) if object
       end
+      attr_accessor :content_params
 
       def serialization_form(opts = {})
         ret = nil

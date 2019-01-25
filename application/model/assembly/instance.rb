@@ -234,6 +234,8 @@ module DTK; class  Assembly
         return { violations: violation_table.uniq } unless violation_table.empty?
       end
 
+      #prevent task params from propagating if service action
+      params.delete :task_params
       create_task_response = create_task(params)
       if create_task_response.has_key?(:empty_workflow) or
           # TODO: remove below for semantic conditions like :empty_workflow

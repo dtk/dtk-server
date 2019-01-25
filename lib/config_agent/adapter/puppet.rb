@@ -41,8 +41,9 @@ module DTK
         component_template  = component_template(component)
         method_name         = component_action.method_name? || 'create'
         action_def          = ActionDef.get_matching_action_def_params?(component_template, method_name)
-        task_params         = config_node[:task_params]
-        cmps_with_attrs     = components_with_attributes(config_node, action_def: action_def, task_params: task_params)
+        task_params         = config_node[:task_params] || {}
+        content_params      = config_node[:content_params] || {}
+        cmps_with_attrs     = components_with_attributes(config_node, action_def: action_def, task_params: task_params.merge!(content_params))
         assembly_attrs      = assembly_attributes(config_node)
         puppet_manifests    = NodeManifest.new(config_node, assembly: assembly).generate(cmps_with_attrs, assembly_attrs)
 
@@ -236,9 +237,9 @@ module DTK
         end
         ret = {}
         if action_def = opts[:action_def]
-          parameter_defs = action_def[:parameter_defs] if action_def[:parameter_defs]
+          parameter_defs = action_def[:parameter_defs] || {}
           task_params = opts[:task_params] || {}
-          add_attrs_from_param_defs!(dynamic_attrs, ndx_attributes, parameter_defs, task_params) if parameter_defs
+          add_attrs_from_param_defs!(dynamic_attrs, ndx_attributes, parameter_defs, task_params) unless parameter_defs.empty?
         end
         ret.merge!('attributes' => ndx_attributes.values) unless ndx_attributes.empty?
         ret.merge!('dynamic_attributes' => dynamic_attrs) unless dynamic_attrs.empty?

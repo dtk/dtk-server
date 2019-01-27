@@ -8,7 +8,7 @@ context_module = 'aws/aws_vpc'
 context_assembly_template = 'discover_using_node_profile'
 context_service_name = 'context_iam'
 context_name = 'discover_using_node_profile'
-context_version = '1.1.0'
+context_version = '1.3.0'
 
 # context attributes
 default_keypair = 'testing_use1'
@@ -23,7 +23,7 @@ describe "Context setup and update" do
     system("dtk module uninstall -v #{context_version} -y -d #{context_location} #{context_module}")
     system("rm -rf #{context_location}")
     system("mkdir #{context_location}")
-    system("dtk module install --update-deps -d #{context_location} #{context_module}")
+    system("dtk module install --update-deps -v #{context_version} #{context_module} #{context_location}")
   end
 
   context "List assemblies contained in this module" do

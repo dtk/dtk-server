@@ -90,12 +90,24 @@ module DTK; class ConfigAgent
         ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params.merge!(content_params)) if task_params && action_def.key?(:parameter_defs)
 
         action_def = component_action.action_def(cols: [:content, :method_name], with_parameters: true)
+        # require 'byebug'
+        # require 'byebug/core'
+        # Byebug.wait_connection = true
+        # Byebug.start_server('localhost', 5555)
+        # debugger
+        full_workflow = {}
         action_def.workflow.each do |workflow|
           workflow.bind_template_attributes!(formatted_attributes.merge content_params) if workflow.needs_template_substitution?
+          full_workflow = workflow
         end
 
         #will move to seperate method later
-        task = Task::Create.create_for_workflow_action(assembly_instance, task_info)
+        # require 'byebug'
+        # require 'byebug/core'
+        # Byebug.wait_connection = true
+        # Byebug.start_server('localhost', 5555)
+        # debugger
+        task = Task::Create.create_for_workflow_action(assembly_instance, task_info, full_workflow.subtasks_content)
         task = task.save_and_add_ids
         ruote_workflow = Workflow.create(task)
         ruote_workflow.defer_execution

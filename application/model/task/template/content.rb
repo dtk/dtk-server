@@ -194,6 +194,11 @@ module DTK; class Task
       end
 
       def create_stages!(object, actions, opts = {})
+        # require 'byebug'
+        # require 'byebug/core'
+        # Byebug.wait_connection = true
+        # Byebug.start_server('localhost', 5555)
+        # debugger
         if object.is_a?(TemporalConstraints)
           create_stages_from_temporal_constraints!(object, actions, opts)
         elsif object.is_a?(SerializedContentArray)

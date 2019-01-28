@@ -95,6 +95,11 @@ module DTK; class Task; class Template; class Stage
             end
 
             matching_actions = action_list.select { |a| a.match_component_ref?(cmp_type, cmp_title) }
+            # require 'byebug'
+            # require 'byebug/core'
+            # Byebug.wait_connection = true
+            # Byebug.start_server('localhost', 5555)
+            # debugger
             matching_actions.each do |a|
               node_id = a.node_id              
               pntr = info_per_node[node_id] ||= { actions: [], name: a.node_name, id: node_id, retry: @retry || opts[:retry], attempts: opts[:attempts] }
@@ -107,10 +112,32 @@ module DTK; class Task; class Template; class Stage
               merge!(node_actions)
             end
           end
+          # require 'byebug'
+          # require 'byebug/core'
+          # Byebug.wait_connection = true
+          # Byebug.start_server('localhost', 5555)
+          # debugger
           ret
         end
         CmpRefWithTitleRegexp = /(^[^\[]+)\[([^\]]+)\]$/
 
+        #temporary method for easier context for questions
+        def replace_workflow_info(workflow_action_def, nodes)
+
+          self.each do |app|
+            # require 'byebug'
+            # require 'byebug/core'
+            # Byebug.wait_connection = true
+            # Byebug.start_server('localhost', 5555)
+            # debugger
+            app[1].reduce.reduce.action.action_defs.first[:content][:workflow][:subtasks] = workflow_action_def
+            #hardcoded mongo:1
+            node = nodes.find { |node| node[:display_name].eql? 'mongo:1' }
+            app[1].reduce.reduce.component[:node] = node
+           # app[1].node = node
+
+          end
+        end
       end
     end
   end

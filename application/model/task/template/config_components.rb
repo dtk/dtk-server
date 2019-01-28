@@ -118,7 +118,12 @@ module DTK; class Task
         raise_error_if_unsupported_action_types(action_types)
 
         task_action = opts[:task_action]
-        opts_action_list = Aux.hash_subset(opts, [:component_type_filter])
+        opts_action_list = Aux.hash_subset(opts, [:component_type_filter, :nodes_to_create, :full_workflow])
+        # require 'byebug'
+        # require 'byebug/core'
+        # Byebug.wait_connection = true
+        # Byebug.start_server('localhost', 5555)
+        # debugger
         cmp_actions = ActionList::ConfigComponents.get(assembly, opts_action_list)
 
         # first see if there is a persistent serialized task template for assembly instance and that it should be used

@@ -42,6 +42,10 @@ module DTK; class Task; class Template
 
       attr_reader :configured_node
 
+      def component
+        @component
+      end
+
       def node
         @component[:node]
       end

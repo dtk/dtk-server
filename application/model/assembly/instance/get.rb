@@ -56,6 +56,11 @@ module DTK; class Assembly; class Instance
     #### get methods around components
 
     def get_component_info_for_action_list(opts = {})
+      # require 'byebug'
+      # require 'byebug/core'
+      # Byebug.wait_connection = true
+      # Byebug.start_server('localhost', 5555)
+      # debugger
       get_field?(:display_name)
       assembly_source = { type: 'assembly', object: hash_subset(:id, :display_name) }
       component_instances = get_objs_helper(:instance_component_list, :nested_component, opts.merge(augmented: true))

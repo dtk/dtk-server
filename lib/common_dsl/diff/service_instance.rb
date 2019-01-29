@@ -30,7 +30,7 @@ module DTK
           diff_result         = Result.new(repo_diffs_summary)
           impacted_files      = repo_diffs_summary.impacted_files
           current_module_refs = service_instance.aug_dependent_base_module_branches
-          Model.Transaction do
+          # Model.Transaction do
             # Parses and processes any service instance dsl changes; can update diff_result
             diff_result.module_refs_to_delete = DSL.process_service_instance_dsl_changes(diff_result, service_instance, module_branch, impacted_files)
             unless diff_result.any_errors?
@@ -39,7 +39,7 @@ module DTK
             NestedModule.process_partial_nested_module_changes(service_instance)
             NestedModule.process_nested_module_changes(diff_result, project, updated_nested_modules, commit_sha, service_instance, module_branch, impacted_files, current_module_refs: current_module_refs)
             end
-          end
+          # end
           diff_result
         end
         

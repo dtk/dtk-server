@@ -73,6 +73,7 @@ module DTK
         if parsed_dependent_modules
           parse_opts.merge!(dependent_modules: (self.parsed_dependent_modules || []).map { |dependent_module| dependent_module.req(:ModuleName) })
         end
+
         response = aug_mb.get_module.parse_dsl_and_update_model(impl, aug_mb.id_handle, self.version, parse_opts)
         fail response if ModuleDSL::ParsingError.is_error?(response)
       end

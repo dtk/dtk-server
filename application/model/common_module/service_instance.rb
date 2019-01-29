@@ -159,6 +159,9 @@ module DTK
             delete_existing_branch: true
           }
           aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
+
+          convert_component_to_template(aug_nested_module_branch)
+
           Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
         end
       end
@@ -184,6 +187,10 @@ module DTK
         CommonDSL::NestedModuleRepo.update_repo_for_stage(aug_nested_module_branch)
         Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
         aug_nested_module_branch
+
+        convert_component_to_template(aug_nested_module_branch)
+
+        aug_nested_module_branch
       end
 
       def get_nested_module_info(aug_nested_base_module_branch)
@@ -206,6 +213,50 @@ module DTK
 
       def directory_exists_in_module?(dir)
         RepoManager.file_exists?(dir, self.base_module_branch) 
+      end
+
+      def component_template_candidates
+        return @cmp_template_candidates if @cmp_template_candidates
+
+        @cmp_template_candidates = nil
+        nodes = self.assembly_instance.get_nodes
+
+        nodes.each do |node|
+          @cmp_template_candidates = node.get_components(cols: [:id, :group_id, :display_name, :component_type, :assembly_id, :component_module])
+        end
+
+        @cmp_template_candidates
+      end
+
+      def convert_component_to_template(aug_nested_module_branch)
+        project = ::DTK::Project.get_all(self.assembly_instance.model_handle(:project)).first
+        implementation = aug_nested_module_branch.get_implementation
+
+        component_template_candidates.each do |cmp_template_candidate|
+          if cmp_template_candidate[:component_module][:id] == aug_nested_module_branch.component_module[:id]
+            component_template = cmp_template_candidate.id_handle.create_object(model_name: :component_template_augmented).merge(cmp_template_candidate)
+            component_template_node = component_template.get_node
+
+            Model.update_from_rows(component_template.model_handle, [{
+              id: component_template[:id],
+              node_node_id: SQL::ColRef.null_id,
+              assembly_id: SQL::ColRef.null_id,
+              ancestor_id: SQL::ColRef.null_id,
+              implementation_id: implementation[:id],
+              module_branch_id: aug_nested_module_branch[:id],
+              project_project_id: project[:id]
+              }]
+            )
+
+            title = nil
+            if title_attr = Component::Template.get_title_attributes([component_template.id_handle]).first
+              title_attr.update_object!(:value_asserted, :value_derived)
+              title = title_attr[:value_asserted] || title_attr[:value_derived]
+            end
+
+            assembly_instance.add_component(component_template_node.id_handle, component_template, self, component_title: title, do_not_update_workflow: true)
+          end
+        end
       end
 
     end

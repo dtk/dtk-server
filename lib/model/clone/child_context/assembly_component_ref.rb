@@ -81,8 +81,8 @@ module DTK; class Clone
             ancestor_id: component_template_id,
             component_template_id: component_template_id,
             node_node_id: node_node_id,
-            assembly_id: node[:assembly_id],
-            locked_sha: component_template.get_current_sha!,
+            # assembly_id: node[:assembly_id],
+            # locked_sha: component_template.get_current_sha!,
             display_name: m[:display_name],
             ref: m[:ref]
           }
@@ -91,7 +91,7 @@ module DTK; class Clone
 
         mapping_ds = array_dataset(mapping_rows, :mapping)
         # all parent_rels will have same cols so taking a sample
-        remove_cols = [:ancestor_id, :assembly_id, :display_name, :ref, :locked_sha] + parent_rels.first.keys
+        remove_cols = [:ancestor_id, :display_name, :ref] + parent_rels.first.keys
         cmp_template_fs = field_set_to_copy.with_removed_cols(*remove_cols).with_added_cols(id: :component_template_id)
         cmp_template_wc = nil
         cmp_template_ds = Model.get_objects_just_dataset(component_mh, cmp_template_wc, Model::FieldSet.opt(cmp_template_fs))

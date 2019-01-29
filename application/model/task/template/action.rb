@@ -47,18 +47,83 @@ module DTK; class Task; class Template
     end
     
     def self.find_action_in_list?(serialized_item, node_name, action_list, opts = {})
+=begin
+
+      1/29 Vedad
+
+  serialized_item: 
+  "kubernetes_local_storage[catapult_node].create_workflow"
+
+  node_name: 
+  'catapult_node'
+
+  action_list: ---
+
+  opts: 
+  {
+               :nodes => [
+          [0] {
+                        :id => 2147754333,
+              :display_name => "catapult_node",
+                  :group_id => 2147484269,
+                      :type => "node_group_staged"
+          },
+          [1] {
+                        :id => 2147754334,
+              :display_name => "mongo",
+                  :group_id => 2147484269,
+                      :type => "node_group_staged"
+          },
+          [2] {
+                        :id => 2147754335,
+              :display_name => "assembly_wide",
+                  :group_id => 2147484269,
+                      :type => "assembly_wide"
+          }
+      ],
+       :subtask_order => nil,
+      :content_params => {
+          "kubernetes_local_storage[catapult_node].create_workflow" => {
+              :node_group => "catapult_node"
+          },
+                  "kubernetes_local_storage[mongo].create_workflow" => {
+              :node_group => "mongo"
+          }
+      },
+          :retry_node => nil
+  }
+=end
       ret = nil
       
       parsed             = WithMethod.parse(serialized_item)
       component_name_ref = parsed.component_name_ref
       method_name        = parsed.method_name
       params             = parsed.params
-      
+      # require 'byebug'
+      # require 'byebug/core'
+      # Byebug.wait_connection = true
+      # Byebug.start_server('localhost', 5555)
+      # debugger
       # if component has external_ref[:type] = 'bash_commands' it means it has bash command instead of puppet in create action
       # here we set bash create action to be executed instead of puppet_apply
       method_name ||= set_bash_create_action(action_list, component_name_ref)
       
+=begin
+  parsed:
+  #<struct XYZ::Task::Template::Action::WithMethod::ParseStruct component_name_ref="kubernetes_local_storage[catapult_node]", method_name="create_workflow", params=nil>
+  
+  component_name_ref:
+  "kubernetes_local_storage[catapult_node]"
+
+  method_name:
+  "create_workflow"
+
+  params: nil
+
+=end
+
       unless action = action_list.find_matching_action(node_name, component_name_ref: component_name_ref)
+        #action is nil hence error is raised
         RaiseError.bad_component_name_ref(node_name, parsed) unless opts[:skip_if_not_found]
       else
         if cgn = opts[:component_group_num]

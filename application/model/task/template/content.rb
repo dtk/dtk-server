@@ -214,12 +214,32 @@ module DTK; class Task
       #  ...
       def create_stages_from_serialized_content!(serialized_content_array, actions, opts = {})
         serialized_content_array.each do |serialized_content|
+          #serialized_content[:nodenodeob] = opts[:nodes]{cat node id?}
+          #if nodes = opts[:nodes] add_node_ids(serialized_content_array, nodes)
+          # require 'byebug'
+          # require 'byebug/core'
+          # Byebug.wait_connection = true
+          # Byebug.start_server('localhost', 5555)
+          # debugger
+          if nodes = opts[:nodes] 
+            add_node_object_info!(serialized_content, nodes)
+          end
           if stage = Stage::InterNode.parse_and_reify?(serialized_content, actions, opts)
             stage.attempts = opts[:attempts]
             stage.retry = opts[:retry]
             stage.add_to_template_content!(self, serialized_content, just_parse: opts[:just_parse])
           end
         end
+      end
+
+      def add_node_object_info!(serialized_content, nodes)
+
+        if node_group_param = serialized_content[:parameters][:node_group]
+          node = nodes.find { |node| node[:display_name] === node_group_param}
+          serialized_content[:node_object_id] = node[:id]
+          serialized_content[:node_object_name] = node[:display_name]
+        end
+
       end
 
       def create_stages_from_temporal_constraints!(temporal_constraints, actions, opts = {})

@@ -19,8 +19,15 @@ module DTK; class Task; class Template; class Stage
   class InterNode
     class MultiNode < self
       def initialize(serialized_multinode_action)
+        # require 'byebug'
+        # require 'byebug/core'
+        # Byebug.wait_connection = true
+        # Byebug.start_server('localhost', 5555)
+        # debugger
         super(serialized_multinode_action[:name], serialized_multinode_action[:breakpoint], serialized_multinode_action[:retry], serialized_multinode_action[:attempts])
         @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
+        @node_object_id = serialized_multinode_action[:node_object_id] || nil 
+        @node_object_name = serialized_multinode_action[:node_object_name] || nil
         @breakpoint = serialized_multinode_action[:breakpoint]
         @retry = serialized_multinode_action[:retry]
         @attempts = serialized_multinode_action[:attempts]
@@ -101,8 +108,9 @@ module DTK; class Task; class Template; class Stage
             # Byebug.start_server('localhost', 5555)
             # debugger
             matching_actions.each do |a|
-              node_id = a.node_id              
-              pntr = info_per_node[node_id] ||= { actions: [], name: a.node_name, id: node_id, retry: @retry || opts[:retry], attempts: opts[:attempts] }
+              node_id = @node_object_id ? @node_object_id : a.node_id
+              node_name = @node_object_name ? @node_object_name : a.node_name
+              pntr = info_per_node[node_id] ||= { actions: [], name: node_name, id: node_id, retry: @retry || opts[:retry], attempts: opts[:attempts] }
               pntr[:actions] << serialized_action
             end
           end

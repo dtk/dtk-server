@@ -33,6 +33,7 @@ module DTK; class Task
 =begin
       1/28 comments -> 2
 
+      Rich: 1/28 See comments on bottom of page; thi smight not be needed if you do what is said there
       As you mentioned, I think we can use something similar to NodeGroupProcessing.decompose_node_groups!(task) for this problem
       Since we already have info for all nodes in the nodegroup I can create a method which will go
       through all nodes in the nodes_to_create, then:
@@ -207,6 +208,8 @@ module DTK; class Task
       task_template_content    = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, opts)
 =begin
       1/28 comments -> 1
+
+      Rich: 1/28 See comments on bottom of page
 
       Output of task_template_content when executing dtk `describe -s -p actions/create` on `rich/wf` (`create` assembly instance)
       ...
@@ -448,7 +451,7 @@ module DTK; class Task
 
 =begin
       1/28 comments -> 3
-
+Rich: 1/28 See comments on bottom of page
 
   441    task_template_content.each do |task_template|
   442      task_template.replace_workflow_info(full_workflow, nodes_to_create)
@@ -1282,3 +1285,83 @@ we could insert a step in between 235 and 236 that modifies task_template_conten
     end
   end
 end; end
+
+=begin
+Rich: 1/28
+Vedad, when you write "We do not have info for node group catapult_node". Here is how you get that info:
+
+When you have a handle on the assembly (instance) you can get all the node and node groups in the assembly as shown below:
+
+[17, 26] in /home/dtk1/server/current/application/model/task/create.rb
+   17: #
+   18: module DTK; class Task
+   19:   module CreateClassMixin
+   20:     def create_from_assembly_instance?(assembly, opts = {})
+(byebug) pp assembly.get_nodes
+[{:id=>2147924882,
+  :display_name=>"ng",
+  :group_id=>2147484269,
+  :type=>"node_group_staged"},
+ {:id=>2147924883,
+  :display_name=>"assembly_wide",
+  :group_id=>2147484269,
+  :type=>"assembly_wide"},
+ {:id=>2147924881,
+  :display_name=>"node1",
+  :group_id=>2147484269,
+  :type=>"staged"}]
+
+Now here is an new idea how to use this info: in the workflow config_agent when you form the action workflow hash you call
+get_nodes on assebly_instance and for each step, knowing what node or node group it is on you can insert an extra key
+node_object_id:  ID
+
+So if step should be on nodegroup ng you woudl insert with that step
+  node_object_id: 2147924882
+
+Now in code below if the step being processed has the {key node_object_id: ID} you use that rather than a.node_id from the action list
+
+If you pass asembly instance so it gets into 
+[92, 101] in /home/dtk1/server/current/application/model/task/template/stage/inter_node/multi_node.rb
+    92:             if cmp_ref =~ CmpRefWithTitleRegexp
+    93:               cmp_type = Regexp.last_match(1)
+    94:               cmp_title = Regexp.last_match(2)
+    95:             end
+    96:
+=>  97:             matching_actions = action_list.select { |a| a.match_component_ref?(cmp_type, cmp_title) }
+    98:             matching_actions.each do |a|
+    99:               node_id = a.node_id
+   100:               pntr = info_per_node[node_id] ||= { actions: [], name: a.node_name, id: node_id, retry: @retry || opts[:retry], attempts: opts[:attempts] }
+   101:               pntr[:actions] << serialized_action
+
+Now a little more detail how to do this:
+
+In constructor:
+
+[17, 26] in /home/dtk1/server/current/application/model/task/template/stage/inter_node/multi_node.rb
+   17: #
+   18: module DTK; class Task; class Template; class Stage
+   19:   class InterNode
+   20:     class MultiNode < self
+   21:       def initialize(serialized_multinode_action)
+=> 22:         super(serialized_multinode_action[:name], serialized_multinode_action[:breakpoint], serialized_multinode_action[:retry], serialized_multinode_action[:attempts])
+   23:         @ordered_components, @components_or_actions_key = components_or_actions(serialized_multinode_action)
+   24:         @breakpoint = serialized_multinode_action[:breakpoint]
+   25:         @retry = serialized_multinode_action[:retry]
+   26:         @attempts = serialized_multinode_action[:attempts]
+
+We add a new instance attribute @node_object_id it compute its value (which could nil)
+@node_object_id = serialized_multinode_action[:node_object_id]
+
+So for example we might reach this rather tan seeing something like
+pp serialized_multinode_action
+{:components=>["wf::on_node[default]"], :name=>"on_node"}
+
+you optionally might have:
+
+{:components=>["wf::on_node[default]"], :name=>"on_node", :node_object_id=>ID_OF_NODE_THAT_COMPUTED_FROM_WORKFLOW_CONFIG_AGENT}
+
+and therefore get @node_object_id is a non null value and the code can case on this and insert ID_OF_NODE_THAT_COMPUTED_FROM_WORKFLOW_CONFIG_AGENT
+
+
+
+

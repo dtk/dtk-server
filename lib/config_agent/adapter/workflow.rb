@@ -44,8 +44,8 @@ module DTK; class ConfigAgent
         end
 =end
         # with below because component_action.action_def does not look for action def when its a create under external ref
-        workflow = workflow(component_template, method_name)
-        workflow.bind_template_attributes!(formatted_attributes.merge content_params) if workflow.needs_template_substitution?
+        component_workflow = component_workflow(component_template, method_name)
+        component_workflow.bind_template_attributes!(formatted_attributes.merge content_params) if component_workflow.needs_template_substitution?
 
         # require 'byebug'
         # require 'byebug/core'
@@ -53,7 +53,7 @@ module DTK; class ConfigAgent
         # Byebug.start_server('localhost', 5555)
         # debugger
 
-        task = Task::Create.create_for_workflow_action(assembly_instance, task_info, workflow.subtasks_content)
+        task = Task::Create.create_for_workflow_action(assembly_instance, task_info, component_workflow)
         task = task.save_and_add_ids
         ruote_workflow = Workflow.create(task)
         ruote_workflow.defer_execution
@@ -61,7 +61,7 @@ module DTK; class ConfigAgent
 
       private 
 
-      def workflow(component_template, method_name)
+      def component_workflow(component_template, method_name)
         action_def_hash = ActionDef.get_matching_action_def_params?(component_template, method_name) || 
           fail(Error, "Unexpected that ActionDef.get_matching_action_def_params? is nil")
         subtasks =  (action_def_hash[:workflow] || {})[:subtasks] || fail(Error, "Unexpected action_def_hash[:workflow][:subtasks] is nil")

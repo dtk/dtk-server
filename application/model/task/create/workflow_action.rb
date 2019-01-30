@@ -19,21 +19,56 @@ module DTK; class Task
   class Create
     class WorkflowAction
       module ClassMixin
-        def create_for_workflow_action(assembly, task_info, full_workflow)
-          # require 'byebug'
-          # require 'byebug/core'
-          # Byebug.wait_connection = true
-          # Byebug.start_server('localhost', 5555)
-          # debugger
-          require 'byebug'; byebug
-          
-          opts = {component_type_filter: :service, task_action: task_info[:top_task_display_name], breakpoint: task_info[:breakpoint], nodes: assembly.get_nodes }      
-          task_template_content  = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, opts)
-          
-          stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
-          
+        def create_for_workflow_action(assembly, task_info, component_workflow)
+          WorkflowAction.new(assembly, task_info, component_workflow).create_for_workflow_action
         end
       end
+      
+      def initialize(assembly, task_info, component_workflow)
+        @assembly            = assembly
+        @task_info          = task_info
+        @component_workflow = component_workflow
+      end
+      
+      def create_for_workflow_action
+        # require 'byebug'
+        # require 'byebug/core'
+        # Byebug.wait_connection = true
+        # Byebug.start_server('localhost', 5555)
+        # debugger
+        require 'byebug'; byebug
+
+        task_template_content = Template::Content.parse_and_reify(self.serialized_content, self.component_actions, self.parse_and_reify_opts)
+        task_template_content  = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], self.assembly, self.parse_and_reify_opts)
+        
+        stages_config_nodes_task = task_template_content.create_subtask_instances(self.task_mh, self.assembly.id_handle)
+        
+      end
+    
+      protected
+      
+      attr_reader :assembly, :task_info, :component_workflow
+      
+      def component_actions
+        @component_actions ||= Template::ActionList::ConfigComponents.get(self.assembly)
+      end
+
+      def task_template_content
+
+      end
+
+      def serialized_content
+        @serialized_content ||= Template.serialized_content_hash_form(subtasks: self.component_workflow.subtasks_content)
+      end
+
+      def parse_and_reify_opts
+        { component_type_filter: :service, 
+          task_action: self.task_info[:top_task_display_name], 
+          breakpoint: self.task_info[:breakpoint], 
+          nodes: self.assembly.get_nodes 
+        }      
+      end
+
     end
   end
 end; end

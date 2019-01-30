@@ -281,8 +281,6 @@ module DTK; class Task
       ret
     end
 
-
-
     def self.string_between_markers(string, marker1, marker2) 
         string[/#{Regexp.escape(marker1)}(.*?)#{Regexp.escape(marker2)}/m, 1]
     end

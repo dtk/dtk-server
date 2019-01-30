@@ -121,8 +121,7 @@ module DTK; class Task; class Template
   params: nil
 
 =end
-
-      unless action = action_list.find_matching_action(node_name, component_name_ref: component_name_ref)
+      unless action = find_matching_action?(action_list, node_name, component_name_ref, nodes: opts[:nodes])
         #action is nil hence error is raised
         RaiseError.bad_component_name_ref(node_name, parsed) unless opts[:skip_if_not_found]
       else
@@ -171,6 +170,23 @@ module DTK; class Task; class Template
     end
 
     private
+
+    # # Rich 1/29:
+    # Vedad; you wil need to double check this
+    # opts can have keys:
+    #  nodes:
+    def self.find_matching_action?(action_list, node_name, component_name_ref, opts = {})
+      if action = action_list.find_matching_action(node_name, component_name_ref: component_name_ref)
+        action
+      else
+        # This is for processing where the node the component runs on has been modified, in which case we assume its assembly wide
+        if node = (opts[:nodes] || []).find { |node_info| node_info[:display_name] == node_name }
+          if action = action_list.find_matching_action('assembly_wide', component_name_ref: component_name_ref)
+            action.clone_with_different_node(node)
+          end
+        end
+      end
+    end
 
     # opts can have keys
     #  :action_def

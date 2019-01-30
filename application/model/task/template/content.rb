@@ -233,13 +233,18 @@ module DTK; class Task
       end
 
       def add_node_object_info!(serialized_content, nodes)
-
-        if node_group_param = serialized_content[:parameters][:node_group]
-          node = nodes.find { |node| node[:display_name] === node_group_param}
-          serialized_content[:node_object_id] = node[:id]
-          serialized_content[:node_object_name] = node[:display_name]
+        # Rich 1/29:
+        # serialized content will look like
+        # {:components=>["wf2::component_in_wf[instance1]"],
+        #  :name=>"component_in_wf[instance1]",
+        #  :node=>"node1"}
+        # if placed on node by action workflow; otehrwise :node=>"node1 would be replaced by node_group (such as :node_group=>"ng")
+        # This code nils out :node_group and :node because it might interere with old legacy code
+        if node_object_name = serialized_content[:node_group] || serialized_content[:node]
+          node = nodes.find { |node| node[:display_name] === node_object_name} || 
+            fail(Error::Usage, "Action workflow refernces node object '#{node_object_name}' that does not exist") # TODO: more user friendly error message with more context
+          serialized_content.merge!(node_object_id: node[:id], node_object_name: node.display_name, node: nil, node_group: nil)
         end
-
       end
 
       def create_stages_from_temporal_constraints!(temporal_constraints, actions, opts = {})

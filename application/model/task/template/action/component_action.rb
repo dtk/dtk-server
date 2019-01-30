@@ -32,6 +32,12 @@ module DTK; class Task; class Template
       end
       private :initialize
 
+      ## Rich 1/29
+      # Vedad double check this logic; make sure that node putting in has all attributes needed by component attribute
+      def clone_with_different_node(node)
+        self.class.new(self.component.merge(node: node), index: self.index)
+      end
+
       def method_missing(name, *args, &block)
         @component.send(name, *args, &block)
       end
@@ -40,10 +46,10 @@ module DTK; class Task; class Template
         @component.respond_to?(name) || super
       end
 
-      attr_reader :configured_node
+      attr_reader :configured_node, :component
 
-      def component
-        @component
+      def on_remote_node?
+        @on_remote_node
       end
 
       def node
@@ -146,10 +152,6 @@ module DTK; class Task; class Template
 
       def on_remote_node_match?(node_name) 
         on_remote_node? and Node.is_assembly_wide_node_name?(node_name)
-      end
-
-      def on_remote_node?
-        @on_remote_node
       end
 
     end

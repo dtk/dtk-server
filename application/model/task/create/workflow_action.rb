@@ -25,7 +25,7 @@ module DTK; class Task
       end
       
       def initialize(assembly, task_info, component_workflow)
-        @assembly            = assembly
+        @assembly           = assembly
         @task_info          = task_info
         @component_workflow = component_workflow
       end
@@ -36,31 +36,44 @@ module DTK; class Task
         # Byebug.wait_connection = true
         # Byebug.start_server('localhost', 5555)
         # debugger
-        require 'byebug'; byebug
-
+        # require 'byebug'; byebug
+        
+        ret = self.top_level_task
+        # Rich 1/29
+        # This is what was equivalent to what was in there, which will use the top level workflow. I replaced it with following call, which uses 
+        # the component workflow
+        # task_template_content  = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], self.assembly, self.parse_and_reify_opts)
         task_template_content = Template::Content.parse_and_reify(self.serialized_content, self.component_actions, self.parse_and_reify_opts)
-        task_template_content  = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], self.assembly, self.parse_and_reify_opts)
-        
-        stages_config_nodes_task = task_template_content.create_subtask_instances(self.task_mh, self.assembly.id_handle)
-        
+        subtasks = task_template_content.create_subtask_instances(self.task_mh, self.assembly.id_handle)
+        ret.add_subtasks(subtasks)
+        ret
       end
-    
+      
       protected
       
       attr_reader :assembly, :task_info, :component_workflow
       
+      def top_level_task
+        # Vedad find good name for stubbed values below
+        opts = {
+          task_action: nil, # TODO: stubbed value
+          retry: nil, # TODO: stubbed value
+          task_params: nil,  # TODO: stubbed value; check if shoudl be hash rather than an array
+          attempts: nil, # TODO: stubbed value
+          content_params: nil # TODO: stubbed value; check if shoudl be hash rather than an array
+        }
+        Create.create_top_level_task(self.task_mh, self.assembly, opts) 
+      end
+      
+      
       def component_actions
         @component_actions ||= Template::ActionList::ConfigComponents.get(self.assembly)
       end
-
-      def task_template_content
-
-      end
-
+      
       def serialized_content
         @serialized_content ||= Template.serialized_content_hash_form(subtasks: self.component_workflow.subtasks_content)
       end
-
+      
       def parse_and_reify_opts
         { component_type_filter: :service, 
           task_action: self.task_info[:top_task_display_name], 
@@ -69,6 +82,10 @@ module DTK; class Task
         }      
       end
 
+      def task_mh
+        @task_mh ||= self.assembly.get_target.id_handle.create_childMH(:task)
+      end
+      
     end
   end
 end; end

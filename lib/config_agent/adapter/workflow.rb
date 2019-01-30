@@ -18,62 +18,6 @@
 module DTK; class ConfigAgent
   module Adapter
     class Workflow < ConfigAgent
-
-        #We now have a task action that has templates substituted in its components
-        #I suppose we should form the task hash here that will get executed
-        # You want to first create a hirerachical task and then execute a workflow on it. If you trace executing a 
-        # workflow you can trace at https://github.com/dtk/dtk-server/blob/master/application/model/assembly/instance.rb#L268
-        # AT This is point where a hierarchical task is created from pulling in the workflow to execute.
-        # On line 272 you see  task.save!() which is hack needed in this code base that faciliattes the next steps that 
-        # transalate the hierarchical task to the workflow executable language (ruote in this case).
-        # When we write a new workflow executor it wil have teh following high level functions 
-        # 1) One translate the workflow into the "hierarchical task form"
-        # 2) Map the hierarchical task form to the exact launguage that step 2 uses to step through teh workflow
-        # 3) Write code that steps through a workflow and sipatches actions to teh excutors (see arch slides I just posted) abd
-        #    collects rsults
-        # For the new executor we might be able to to make teh datastructure for teh hierarchical task the exact same that can be 
-        # used in step 3.
-        # Back tio teh curernt code. The key thing to look at after following https://github.com/dtk/dtk-server/blob/master/application/model/assembly/instance.rb#L268
-        # is the code that does part 2 and 3 above that starts at https://github.com/dtk/dtk-server/blob/master/application/model/assembly/instance.rb#L246
-        # You wil see you descend into code that does
-        # 
-        #  278:     def execute_service_action(task_id, params)
-        # => 279:       task_idh = id_handle().createIDH(id: task_id, model_name: :task)
-        # 280:       task     = Task::Hierarchical.get_and_reify(task_idh, params)
-        # 281:       workflow = Workflow.create(task)
-        # 282:       workflow.defer_execution()
-        # The task you get in step 280 is essntially teh same structure saved by instance.rb#L268
-        # Line 281 creates the ruote datastructure (step 2)
-        # Line 282 executes the workflow (step 3)
-
-        # New 1/21/2019
-        # The high level commands shoudl be
-        #   workflow = ... from what was computed above
-        #   assembly_instance  = opts[:assembly] || fail(Error, "Unexepected that opts[:assembly] is nil")
-        #   task = Task::Create.create_for_workflow_action(workflow, assembly_instance) # The new method you write
-        #   task = task.save_and_add_ids
-        #   ruote_workflow = Workflow.create(task)
-        #   ruote_workflow.defer_execution
-        
-        # To see how to write Task::Create.create_for_workflow_action form dtk client execute a workflow
-        #  dtk exec create
-        # and trap the code at 
-        # [230, 239] in /home/dtk1/server/current/application/model/task/create.rb
-        # => 235:       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, opts_tt)
-        #
-        # The then want to also trap at
-        # [30, 39] in /home/dtk1/server/current/application/model/task/template/config_components/persistence.rb
-        # => 35:         if serialized_content = get_serialized_content_from_assembly(assembly, task_action, task_params: opts[:task_params])
-        # 36:           serialized_result = Content.reify(serialized_content)
-        # You wil see that what is returned by  get_serialized_content_from_assembly(assembly, task_action, task_params: opts[:task_params])
-        # such as in my example
-        # {:subtasks=>[{:components=>["ec2::node[test]"], :name=>"create test node"}, {:components=>["node_utility::ssh_access[ubuntu]"], :name=>"ssh access"}, {:components=>["aws_kms::master_key[default]"], :name=>"discover master key"}]}
-        # Wil be very similair (or maybe identical in structure to teh workflow hash you want to process.
-        # So if create_for_workflow_action essentially starts from 
-        # [31, 40] in /home/dtk1/server/current/application/model/task/template/config_components/persistence.rb
-        # => 36:           serialized_result = Content.reify(<your workflow>)
-        # an continues the processing path you will be leveraging the existing code to do what you want
-
       def execute(task_info, opts = {})
         assembly_instance     = assembly_instance(opts[:task_idh], task_info) || fail(Error, "Unexepected that opts[:assembly] is nil")
         service_instance_name = assembly_instance.display_name
@@ -89,31 +33,40 @@ module DTK; class ConfigAgent
 
         ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params.merge!(content_params)) if task_params && action_def.key?(:parameter_defs)
 
+        # Rich 1/29: 
+        # Replaced 
+=begin
         action_def = component_action.action_def(cols: [:content, :method_name], with_parameters: true)
-        # require 'byebug'
-        # require 'byebug/core'
-        # Byebug.wait_connection = true
-        # Byebug.start_server('localhost', 5555)
-        # debugger
         full_workflow = {}
         action_def.workflow.each do |workflow|
           workflow.bind_template_attributes!(formatted_attributes.merge content_params) if workflow.needs_template_substitution?
           full_workflow = workflow
         end
+=end
+        # with below because component_action.action_def does not look for action def when its a create under external ref
+        workflow = workflow(component_template, method_name)
+        workflow.bind_template_attributes!(formatted_attributes.merge content_params) if workflow.needs_template_substitution?
 
-        #will move to seperate method later
         # require 'byebug'
         # require 'byebug/core'
         # Byebug.wait_connection = true
         # Byebug.start_server('localhost', 5555)
         # debugger
-        task = Task::Create.create_for_workflow_action(assembly_instance, task_info, full_workflow.subtasks_content)
+
+        task = Task::Create.create_for_workflow_action(assembly_instance, task_info, workflow.subtasks_content)
         task = task.save_and_add_ids
         ruote_workflow = Workflow.create(task)
         ruote_workflow.defer_execution
       end
 
       private 
+
+      def workflow(component_template, method_name)
+        action_def_hash = ActionDef.get_matching_action_def_params?(component_template, method_name) || 
+          fail(Error, "Unexpected that ActionDef.get_matching_action_def_params? is nil")
+        subtasks =  (action_def_hash[:workflow] || {})[:subtasks] || fail(Error, "Unexpected action_def_hash[:workflow][:subtasks] is nil")
+        ActionDef::Content::Command::Workflow.new(subtasks)
+      end
 
       def component_template(component)
         component.id_handle(id: component[:ancestor_id]).create_object

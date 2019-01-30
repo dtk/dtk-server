@@ -28,16 +28,11 @@ module DTK; class Task
         @assembly           = assembly
         @task_info          = task_info
         @component_workflow = component_workflow
+        @task_params        = task_info[:task_params]
+        @content_params     = task_info[:content_params]
       end
       
       def create_for_workflow_action
-        # require 'byebug'
-        # require 'byebug/core'
-        # Byebug.wait_connection = true
-        # Byebug.start_server('localhost', 5555)
-        # debugger
-        # require 'byebug'; byebug
-        
         ret = self.top_level_task
         # Rich 1/29
         # This is what was equivalent to what was in there, which will use the top level workflow. I replaced it with following call, which uses 
@@ -54,17 +49,21 @@ module DTK; class Task
       attr_reader :assembly, :task_info, :component_workflow
       
       def top_level_task
-        # Vedad find good name for stubbed values below
+        fail(Error, "Unexpected that content and task parameters are not hashes") unless param_is_hash?
+
         opts = {
-          task_action: nil, # TODO: stubbed value
-          retry: nil, # TODO: stubbed value
-          task_params: nil,  # TODO: stubbed value; check if shoudl be hash rather than an array
-          attempts: nil, # TODO: stubbed value
-          content_params: nil # TODO: stubbed value; check if shoudl be hash rather than an array
+          task_action: self.task_info[:top_task_display_name],
+          retry: self.task_info[:retry],
+          task_params: @task_params,
+          attempts: self.task_info[:attempts],
+          content_params: @content_params
         }
         Create.create_top_level_task(self.task_mh, self.assembly, opts) 
       end
       
+      def param_is_hash?
+        (@task_params.is_a?(Hash) || @task_params.nil?) && (@content_params.is_a?(Hash) || @content_params.nil?)
+      end
       
       def component_actions
         @component_actions ||= Template::ActionList::ConfigComponents.get(self.assembly)

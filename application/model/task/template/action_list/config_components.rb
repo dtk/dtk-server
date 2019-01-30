@@ -20,12 +20,6 @@ module DTK; class Task; class Template
     class ConfigComponents < self
       def self.get(assembly, opts = {})
         # component_list_filter_proc includes clause to make sure no target refs
-        # require 'byebug'
-        # require 'byebug/core'
-        # Byebug.wait_connection = true
-        # Byebug.start_server('localhost', 5555)
-        # debugger
-        # assembly.get_component_info_for_action_list(seed: new).set_action_indexes!
         assembly.get_component_info_for_action_list(seed: new, filter_proc: component_list_filter_proc(opts), full_workflow: opts[:full_workflow], nodes_to_create: opts[:nodes_to_create]).set_action_indexes!
       end
     end

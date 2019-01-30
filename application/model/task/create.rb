@@ -24,11 +24,6 @@ module DTK; class Task
       end
       task[:breakpoint] = opts[:breakpoint] if opts[:breakpoint]
       #alters task if needed to decompose node groups into node
-      # require 'byebug'
-      # require 'byebug/core'
-      # Byebug.wait_connection = true
-      # Byebug.start_server('localhost', 5555)
-      # debugger
       NodeGroupProcessing.decompose_node_groups!(task)
     end
 
@@ -240,13 +235,7 @@ module DTK; class Task
       end
 
       opts_tt = opts.merge(component_type_filter: component_type)
-      # require 'byebug'
-      # require 'byebug/core'
-      # Byebug.wait_connection = true
-      # Byebug.start_server('localhost', 5555)
-      # debugger
       task_template_content = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], assembly, opts_tt)
-      #task_template_content now contains our action def
       #In our method create for workflow action: we change those 
       stages_config_nodes_task = task_template_content.create_subtask_instances(task_mh, assembly.id_handle())
 

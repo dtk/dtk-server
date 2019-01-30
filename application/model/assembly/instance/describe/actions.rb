@@ -39,11 +39,6 @@ module DTK; class Assembly::Instance
           # how to calculate task status with fake ids instead of those from the database
           begin
             Model.Transaction do
-              # require 'byebug'
-              # require 'byebug/core'
-              # Byebug.wait_connection = true
-              # Byebug.start_server('localhost', 5555)
-              # debugger
               task.save!()
               task_status = Task::Status::Assembly.get_status(service_instance.id_handle, format: :table, top_level_task: task)
               raise DescribeActionRollback

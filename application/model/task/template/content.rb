@@ -194,11 +194,6 @@ module DTK; class Task
       end
 
       def create_stages!(object, actions, opts = {})
-        # require 'byebug'
-        # require 'byebug/core'
-        # Byebug.wait_connection = true
-        # Byebug.start_server('localhost', 5555)
-        # debugger
         if object.is_a?(TemporalConstraints)
           create_stages_from_temporal_constraints!(object, actions, opts)
         elsif object.is_a?(SerializedContentArray)
@@ -216,11 +211,6 @@ module DTK; class Task
         serialized_content_array.each do |serialized_content|
           #serialized_content[:nodenodeob] = opts[:nodes]{cat node id?}
           #if nodes = opts[:nodes] add_node_ids(serialized_content_array, nodes)
-          # require 'byebug'
-          # require 'byebug/core'
-          # Byebug.wait_connection = true
-          # Byebug.start_server('localhost', 5555)
-          # debugger
           if nodes = opts[:nodes] 
             add_node_object_info!(serialized_content, nodes)
           end

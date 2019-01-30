@@ -80,11 +80,6 @@ module DTK
               # execute method you will see logic it does to execute the lambda after binding attributes
               # On the workflow config agent adapter you want to write something that follows the workflow,
               # We wil have to iterate on about launching this in its own thread so it does not become blocking
-              # require 'byebug'
-              # require 'byebug/core'
-              # Byebug.wait_connection = true
-              # Byebug.start_server('localhost', 5555)
-              # debugger
               result = workflow.process_executable_action(task)
               process_action_result!(workitem, action, result, task, task_id, task_end, false)
               delete_task_info(workitem)

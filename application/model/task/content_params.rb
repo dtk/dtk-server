@@ -48,8 +48,8 @@ module DTK
           formed_action_path = component_name + (method_name || '')
 
           content_params.each do |full_action_path, params|
-            module_name, action_name = full_action_path.split('::')
-            diff_array = Diff::LCS.diff(formed_action_path, full_action_path)
+            module_name, action_name = full_action_path.to_s.split('::')
+            diff_array = Diff::LCS.diff(formed_action_path, full_action_path.to_s)
             return params if diff_array.size == 0 || (diff_array.first.size == 4 && diff_array.size == 1)
           end
           nil

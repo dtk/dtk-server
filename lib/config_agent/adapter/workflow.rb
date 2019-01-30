@@ -47,15 +47,10 @@ module DTK; class ConfigAgent
         component_workflow = component_workflow(component_template, method_name)
         component_workflow.bind_template_attributes!(formatted_attributes.merge content_params) if component_workflow.needs_template_substitution?
 
-        # require 'byebug'
-        # require 'byebug/core'
-        # Byebug.wait_connection = true
-        # Byebug.start_server('localhost', 5555)
-        # debugger
 
         task = Task::Create.create_for_workflow_action(assembly_instance, task_info, component_workflow)
         task = task.save_and_add_ids
-        ruote_workflow = Workflow.create(task)
+        ruote_workflow = DTK::Workflow.create(task)
         ruote_workflow.defer_execution
       end
 

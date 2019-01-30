@@ -31,6 +31,15 @@ module DTK
         rest_ok_response assembly_instance.list_actions(type), datatype: :service_actions
       end
 
+      def public_key_attribute
+        all_attributes = assembly_instance.list_attributes()
+        if public_key_attribute = all_attributes.select {|attr| attr[:name].eql? "encryption_public_key"}.first
+          rest_ok_response public_key_attribute[:value]
+        else
+          rest_ok_response
+        end
+      end
+
       def attributes
         # TODO: DTK-3173: temporarily took out node and component filtering until it is fixed up
         assembly_instance = assembly_instance()

@@ -155,12 +155,12 @@ module DTK
         project = ::DTK::Project.get_all(self.assembly_instance.model_handle(:project)).first
         if component_module = ComponentModule.module_exists(project, common_module.module_namespace, common_module.module_name, base_version, return_module: true)
           get_or_create_opts = {
-            donot_update_model: true,
+            donot_update_model: false,
             delete_existing_branch: true
           }
           aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
 
-          convert_component_to_template(aug_nested_module_branch)
+          # convert_component_to_template(aug_nested_module_branch)
 
           Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
         end
@@ -180,7 +180,7 @@ module DTK
         base_version     = aug_nested_base_module_branch.version
         # creating new branch, but no need to update the model
         get_or_create_opts = {
-          donot_update_model: true,
+          donot_update_model: false,
           delete_existing_branch: true
         }
         aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
@@ -188,7 +188,7 @@ module DTK
         Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
         aug_nested_module_branch
 
-        convert_component_to_template(aug_nested_module_branch)
+        # convert_component_to_template(aug_nested_module_branch)
 
         aug_nested_module_branch
       end

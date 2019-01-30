@@ -87,6 +87,7 @@ module DTK
     end
     # parses and creates dsl_object form hash parsed in as target
     def self.create_from_file_obj_hash(impl_obj, dsl_filename, content, opts = {})
+      opts[:integer_version] = 5
       unless isa_dsl_filename?(dsl_filename, opts[:integer_version])
         fail Error.new("The file path (#{dsl_filename}) does not refer to a dsl file name")
       end
@@ -279,7 +280,7 @@ module DTK
       { hash_content: convert_to_hash(info[:content], info[:format_type]) }.merge(Aux.hash_subset(info, [:format_type, :dsl_filename]))
     end
 
-    def self.get_dsl_file_raw_content_and_info(impl_obj, dsl_integer_version = nil, format_type = nil)
+    def self.get_dsl_file_raw_content_and_info(impl_obj, dsl_integer_version = 5, format_type = nil)
       unless dsl_filename = contains_dsl_file?(impl_obj, dsl_integer_version, format_type)
         fail Error.new('Cannot find DSL file')
       end

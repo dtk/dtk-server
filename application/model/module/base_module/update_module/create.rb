@@ -58,8 +58,8 @@ module DTK; class BaseModule; class UpdateModule
 
       dsl_created_info = ModuleDSLInfo::CreatedInfo.new()
       unless opts[:donot_update_model]
-        fail "DTK-3366: looking for dtk.model.yaml' as opposed to dtk.module.yaml"
-        if ModuleDSL.contains_dsl_file?(impl_obj)
+        # fail "DTK-3366: looking for dtk.model.yaml' as opposed to dtk.module.yaml"
+        if ModuleDSL.contains_dsl_file?(impl_obj, 5)
           if err = parse_dsl_and_update_model(impl_obj, module_branch_idh, version, opts.merge!(project: project))
             ret.merge!(dsl_parse_error: err)
           end

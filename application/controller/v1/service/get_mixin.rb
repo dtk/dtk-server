@@ -31,10 +31,11 @@ module DTK
         rest_ok_response assembly_instance.list_actions(type), datatype: :service_actions
       end
 
-      def public_key_attribute
+      def get_attribute
+        name = request_params(:name)
         all_attributes = assembly_instance.list_attributes()
-        if public_key_attribute = all_attributes.select {|attr| attr[:name].eql? "encryption_public_key"}.first
-          rest_ok_response public_key_attribute[:value]
+        if attribute = all_attributes.select {|attr| attr[:name].eql? name}.first
+          rest_ok_response attribute[:value]
         else
           rest_ok_response
         end

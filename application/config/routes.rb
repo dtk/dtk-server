@@ -65,7 +65,7 @@ DTK::ReactorRoute.draw do
 
   # TODO: make change so the route is api/v1/services/:service_id/attributes with query string that gives filter
   get    'api/v1/services/:service_id/required_attributes'    => 'v1::service#required_attributes'
-  get    'api/v1/services/:service_id/public_key_attribute'    => 'v1::service#public_key_attribute'
+  get    'api/v1/services/:service_id/get_attribute'    => 'v1::service#get_attribute'
 
   post 'api/v1/services/delete'      => 'v1::service#delete'
   post 'api/v1/services/uninstall'      => 'v1::service#uninstall'

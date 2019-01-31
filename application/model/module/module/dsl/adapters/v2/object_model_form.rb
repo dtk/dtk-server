@@ -26,7 +26,7 @@ module DTK; class ModuleDSL; class V2
       new.convert(input_hash, opts)
     end
     def convert(input_hash, opts = {})
-      component().new(input_hash.req(:module)).convert(input_hash['components']||input_hash['component_defs'], context(input_hash, opts))
+      component.new(module_name(input_hash)).convert(component_defs(input_hash), context(input_hash, opts))
     end
 
     def self.convert_attribute_mapping(input_am, base_cmp, dep_cmp, opts = {})
@@ -41,6 +41,23 @@ module DTK; class ModuleDSL; class V2
     end
     def component
       self.class::Component
+    end
+
+    def module_name(input_hash)
+      # taking to account that input_hash.req(:module) can no have form 'NS/MODULE_NAME
+      module_name_split = input_hash.req(:module).split('/')
+      case module_name_split.size
+      when 2
+        module_name_split[1]
+      when 1
+        module_name_split[0]
+      else
+        fail Error, "Unexepected that module_name_split.size == '#{ module_name_split.size}]"
+      end
+    end
+
+    def component_defs(input_hash)
+      input_hash['components'] || input_hash['component_defs'] || {}
     end
 
     def choice

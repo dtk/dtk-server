@@ -103,10 +103,10 @@ module DTK
         end
       return input_hash if ParsingError.is_error?(input_hash)
       
-      name_attribute_check = name_attribute_integrity_check(input_hash['components'])
+      name_attribute_check = name_attribute_integrity_check(component_defs(input_hash))
       return name_attribute_check if ParsingError.is_error?(name_attribute_check)
 
-      ports = raise_error_if_port_number_wrong(input_hash['components'])
+      ports = raise_error_if_port_number_wrong(component_defs(input_hash))
       return ports if ParsingError.is_error?(ports)
 
       ParsingError.trap do
@@ -180,6 +180,10 @@ module DTK
     end
 
     private
+
+    def self.component_defs(input_hash)
+      input_hash['components'] || input_hash['component_defs']
+    end
 
     def self.name_attribute_integrity_check(components)
       return unless components

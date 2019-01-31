@@ -19,6 +19,11 @@ module DTK
     module PostMixin
       ### Service instance specific
       def cancel_last_task
+        # require 'byebug'
+        # require 'byebug/core'
+        # Byebug.wait_connection = true
+        # Byebug.start_server('localhost', 5555)
+        # debugger
         if running_task = most_recent_task_is_executing?(assembly_instance)
           top_task_id = running_task.id()
         else

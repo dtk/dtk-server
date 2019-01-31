@@ -21,6 +21,11 @@ module Ramaze::Helper
       unless top_task = ::DTK::Task::Hierarchical.get_and_reify(id_handle(top_task_id,:task))
         raise ::DTK::ErrorUsage.new("Task with id '#{top_task_id}' does not exist")
       end
+      # require 'byebug'
+      # require 'byebug/core'
+      # Byebug.wait_connection = true
+      # Byebug.start_server('localhost', 5555)
+      # debugger
       ::DTK::Workflow.cancel(top_task)
     end
 

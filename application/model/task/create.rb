@@ -264,6 +264,11 @@ module DTK; class Task
       ###### end: TODO: DTK-2974
       ret.add_subtask(create_nodes_task) if create_nodes_task
       ret.add_subtask(start_nodes_task) if start_nodes_task
+      # require 'byebug'
+      # require 'byebug/core'
+      # Byebug.wait_connection = true
+      # Byebug.start_server('localhost', 5555)
+      # debugger
       ret.add_subtasks(stages_config_nodes_task) unless stages_config_nodes_task.empty?
       ret[:retry] = serialized_content[:retry] unless serialized_content[:retry].nil? 
       ret[:attempts] = serialized_content[:attempts] unless serialized_content[:attempts].nil?

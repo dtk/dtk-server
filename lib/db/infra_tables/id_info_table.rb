@@ -498,6 +498,11 @@ module DTK
         def update_instances(model_handle, returning_cols)
           return nil if returning_cols.empty?
           sample_parent_id = returning_cols.first[:parent_id]
+          # require 'byebug'
+          # require 'byebug/core'
+          # Byebug.wait_connection = true
+          # Byebug.start_server('localhost', 5555)
+          # debugger
           return update_top_instances(model_handle, returning_cols) if sample_parent_id.nil? || sample_parent_id == 0
           pairs_ds =  SQL::ArrayDataset.create(@db, returning_cols.map { |y| { pair_id: y[:id], pair_parent_id: y[:parent_id] || 0 } }, ModelHandle.new(model_handle[:c], :pairs)).sequel_ds
           parent_ds_wo_alias =  ds().select(:relation_id.as(:prt_relation_id), :relation_type.as(:prt_relation_type), :uri.as(:prt_uri))

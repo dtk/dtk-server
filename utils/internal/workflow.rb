@@ -71,13 +71,22 @@ module DTK
     @@Lock = Mutex.new
 
     def execute_in_current_thread
+      # require 'byebug'
+      # require 'byebug/core'
+      # Byebug.wait_connection = true
+      # Byebug.start_server('localhost', 5555)
+      # debugger
       execute(@top_task.id.to_s)
     end
 
     def defer_execution
       # start EM for passanger
       R8EM.start_em_for_passenger?()
-
+      # require 'byebug'
+      # require 'byebug/core'
+      # Byebug.wait_connection = true
+      # Byebug.start_server('localhost', 5555)
+      # debugger
       user_object  = CurrentSession.new.user_object()
       CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
         #  pp [:new_thread_from_defer, Thread.current, Thread.list]
@@ -106,6 +115,27 @@ module DTK
       unless task.has_status?(:executing) || task.has_status?(:debugging)
         fail ErrorUsage, "Task with id '#{task_id}' is not executing"
       end
+
+      # require 'byebug'
+      # require 'byebug/core'
+      # Byebug.wait_connection = true
+      # Byebug.start_server('localhost', 5555)
+      # debugger
+
+      #The task_id we get here is not a top_task itself,
+      #task id is child of `execute component having wf` which has display_name `create` (inside inner workflow)
+      #mentioned `create` task has children: component_in_wf[instance1] and component_in_wf[instance2]
+
+      #So the hierarchy is: create -> execute component having wf -> create -> component_in_wf[instance1] & component_in_wf[instance2]
+      #the second reate does not point to its parent (task_id is nil) and so when going further down the line of cancelation,
+      #the code doesn't get to the top task itself (first create)
+
+      #we tried to fix the problem in the following:
+      #   in application/model/task/hierarchical/get.rb
+      #=>  flat_subtask_list.each do |subtask|
+      
+      #There I left further comments
+
 
       # This shuts down workflow from advancing; however there can be stragler callbascks coming in
       @@Lock.synchronize do

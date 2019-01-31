@@ -30,10 +30,18 @@ module DTK; class Task
         @component_workflow = component_workflow
         @task_params        = task_info[:task_params]
         @content_params     = task_info[:content_params]
+        @task_id            = task_info[:top_task_id]
       end
       
       def create_for_workflow_action
+        # require 'byebug'
+        # require 'byebug/core'
+        # Byebug.wait_connection = true
+        # Byebug.start_server('localhost', 5555)
+        # debugger
         ret = self.top_level_task
+        ret[:task_id] = @task_id
+
         # Rich 1/29
         # This is what was equivalent to what was in there, which will use the top level workflow. I replaced it with following call, which uses 
         # the component workflow

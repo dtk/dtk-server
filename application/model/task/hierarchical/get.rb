@@ -48,6 +48,17 @@ module DTK; class Task
         
         flat_subtask_list.each do |subtask|
           subtask[QualifiedIndex::Field] = subtask_qualified_indexes[subtask[:id]][QualifiedIndex::Field]
+          # require 'byebug'
+          # require 'byebug/core'
+          # Byebug.wait_connection = true
+          # Byebug.start_server('localhost', 5555)
+          # debugger
+
+          # I tried modifying the task id brute force with the below shown assignment from debugger directly so that the task points its parent
+          # subtask[:executable_action][:component_actions].first[:component][:task_id] = <task id from `execute component having wf`> (found in flat_subtasks_list)
+          # This didn't exactly work as the cancelation still showed same results (task id didn't propagate to utils/internal/workflow.rb - in task hash)
+          
+          # I will continue trying to find a way of updating the task id 
           parent_id = subtask[:task_id]
           parent = ndx_task_list[parent_id]
           if subtask.node_group_member?()

@@ -50,7 +50,11 @@ module DTK; class ConfigAgent
 
         task = Task::Create.create_for_workflow_action(assembly_instance, task_info, component_workflow)
         task = task.save_and_add_ids
-        # require 'byebug'; byebug
+        # require 'byebug'
+        # require 'byebug/core'
+        # Byebug.wait_connection = true
+        # Byebug.start_server('localhost', 5555)
+        # debugger
         ruote_workflow = DTK::Workflow.create(task)
         ruote_workflow.execute_in_current_thread
       end

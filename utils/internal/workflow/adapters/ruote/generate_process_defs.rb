@@ -22,8 +22,7 @@ module DTK
       require_relative('generate_process_defs/bulk_create')
 
       @@count = 0
-      # TODO: remove _guards which is always nil now since no gaurds are being used
-      def compute_process_def(task, _guards)
+      def compute_process_def(task)
         count = @@count += 1 #TODO: see if we need to keep generating new ones or whether we can (delete) and reuse
         top_task_idh = task.id_handle
         name = "process-#{count}"

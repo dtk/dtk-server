@@ -70,6 +70,10 @@ module DTK
     @@active_workflows = ActiveWorkflow.new
     @@Lock = Mutex.new
 
+    def execute_in_current_thread
+      execute(@top_task.id.to_s)
+    end
+
     def defer_execution
       # start EM for passanger
       R8EM.start_em_for_passenger?()

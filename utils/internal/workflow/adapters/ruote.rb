@@ -58,7 +58,7 @@ module DTK
 
       def execute(top_task_id)
         begin
-          @wfid = Engine.launch(process_def())
+          @wfid = Engine.launch(process_def(top_task_id))
 
           # TODO: remove need to have to do Engine.wait_for and have last task trigger cleanup (which just 'wastes a  thread'
           Engine.wait_for(@wfid, timeout: TopTaskDefaultTimeOut)
@@ -94,12 +94,33 @@ module DTK
 
       def initialize(top_task)
         super
-        @process_def = nil
+        @process_defs = {} 
       end
 
-      def process_def
-        @process_def ||= compute_process_def(@top_task, @guards[:external])
+      def process_def(task_id)
+        task = task_with_all_its_fields(task_id)
+        @process_defs[task_id] ||= compute_process_def(task)
       end
+
+      def task_with_all_its_fields(task_id_x)
+        # hacky way to get task form task_id
+        task_id = 
+          case task_id_x
+          when ::Fixnum
+            task_id_x
+          when ::String
+            task_id_x.to_i
+          else
+            fail Error, "Unexepcted type for task_id_x: #{task_id_x.class}"
+          end
+
+        if @top_task.id == task_id
+          @top_task
+        else
+          @top_task.id_handle.createIDH(id: task_id).create_object.update_object!(*Task.common_columns)
+        end
+      end
+
     end
   end
 end

@@ -40,8 +40,7 @@ module DTK
           attempts: task[:attempts],
           task_params: task[:task_params],
           content_params: task[:content_params],
-          top_task_display_name: task[:top_task_display_name],
-          top_task_id: task[:top_task_id]
+          top_task_display_name: task[:top_task_display_name]
         }
         @task_action = task[:executable_action].merge(opts)
         @klass       = self.class.load_for(@task_action)

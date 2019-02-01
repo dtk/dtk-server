@@ -61,11 +61,6 @@ module DTK; class Task
         new_idhs = Model.create_from_rows(model_handle, rows, convert: true, do_not_update_info_table: true)
         unrolled_tasks.each_with_index { |task, i| task.set_id_handle(new_idhs[i]) }
         
-        # require 'byebug'
-        # require 'byebug/core'
-        # Byebug.wait_connection = true
-        # Byebug.start_server('localhost', 5555)
-        # debugger
         # set parent relationship and use to set task_id (subtask parent) and children_status
         par_rel_rows_for_id_info = set_and_ret_parents_and_children_status!()
         par_rel_rows_for_task = par_rel_rows_for_id_info.map { |r| { id: r[:id], task_id: r[:parent_id], children_status: r[:children_status] } }

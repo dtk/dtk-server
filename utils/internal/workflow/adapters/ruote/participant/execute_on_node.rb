@@ -31,7 +31,6 @@ module DTK
           task[:attempts] = top_task[:attempts].to_i unless top_task[:attempts].empty? || top_task[:attempts].nil?
           task[:task_params] = top_task[:task_params] unless top_task[:task_params].nil? || top_task[:task_params].empty?
           task[:top_task_display_name] = top_task[:display_name]
-          task[:top_task_id] = top_task.id
           # Almin, HACK: Consider Changing this.. 
           # Added because delete is making problems with :retry key, need to find where top_task is created and add key on subtasks objects instead of this fix
           top_task[:subtasks].each do |sub|
@@ -91,11 +90,7 @@ module DTK
             callbacks = {
               on_msg_received: proc do |msg|
                 debug = false # TODO: Move this
-                # require 'byebug'
-                # require 'byebug/core'
-                # Byebug.wait_connection = true
-                # Byebug.start_server('localhost', 5555)
-                # debugger
+
                 inspect_agent_response(msg)
                 CreateThread.defer_with_session(user_object, Ramaze::Current.session) do
                   PerformanceService.end_measurement("#{self.class.to_s.split('::').last}", self.object_id)

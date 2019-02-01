@@ -58,7 +58,7 @@ module DTK; class Task
         filter: [:and, [:eq, :task_id, nil], #so this is a top level task
                  filter].compact
       }
-      get_objs(model_handle, sp_hash).reject { |k, _v| k == :subtasks }
+      get_objs(model_handle, sp_hash).reject { |task| task.is_a_subtask? }
     end
 
     def get_most_recent_top_level_task(model_handle)

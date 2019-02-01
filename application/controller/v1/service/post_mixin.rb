@@ -29,7 +29,6 @@ module DTK
         else
           fail ErrorUsage.new('No running tasks found')
         end
-
         cancel_task(top_task_id)
         rest_ok_response task_id: top_task_id
       end

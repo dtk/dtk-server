@@ -40,12 +40,9 @@ module DTK; class Task
         # Byebug.start_server('localhost', 5555)
         # debugger
         ret = self.top_level_task
+        # Rich 1/31: not sure what 'ret[:task_id] = @task_id' is suppose to impact.
         ret[:task_id] = @task_id
 
-        # Rich 1/29
-        # This is what was equivalent to what was in there, which will use the top level workflow. I replaced it with following call, which uses 
-        # the component workflow
-        # task_template_content  = Template::ConfigComponents.get_or_generate_template_content([:assembly, :node_centric], self.assembly, self.parse_and_reify_opts)
         task_template_content = Template::Content.parse_and_reify(self.serialized_content, self.component_actions, self.parse_and_reify_opts)
         subtasks = task_template_content.create_subtask_instances(self.task_mh, self.assembly.id_handle)
         ret.add_subtasks(subtasks)
@@ -59,8 +56,10 @@ module DTK; class Task
       def top_level_task
         fail(Error, "Unexpected that content and task parameters are not hashes") unless param_is_hash?
 
+        # Rich 1/31: Need a way to mark this as a subtask so that when cancel a task we dont get subtasks
+        # I wrote Task.qualified_subtask_name to do that
         opts = {
-          task_action: self.task_info[:top_task_display_name],
+          task_action: Task.qualified_subtask_name(self.task_info[:top_task_display_name]),
           retry: self.task_info[:retry],
           task_params: @task_params,
           attempts: self.task_info[:attempts],

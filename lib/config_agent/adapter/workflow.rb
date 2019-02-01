@@ -32,21 +32,8 @@ module DTK; class ConfigAgent
         content_params        = task_info[:content_params] || {}
 
         ConfigAgent.raise_error_on_illegal_task_params(component_action.attributes, action_def, task_params.merge!(content_params)) if task_params && action_def.key?(:parameter_defs)
-
-        # Rich 1/29: 
-        # Replaced 
-=begin
-        action_def = component_action.action_def(cols: [:content, :method_name], with_parameters: true)
-        full_workflow = {}
-        action_def.workflow.each do |workflow|
-          workflow.bind_template_attributes!(formatted_attributes.merge content_params) if workflow.needs_template_substitution?
-          full_workflow = workflow
-        end
-=end
-        # with below because component_action.action_def does not look for action def when its a create under external ref
         component_workflow = component_workflow(component_template, method_name)
         component_workflow.bind_template_attributes!(formatted_attributes.merge content_params) if component_workflow.needs_template_substitution?
-
 
         task = Task::Create.create_for_workflow_action(assembly_instance, task_info, component_workflow)
         task = task.save_and_add_ids

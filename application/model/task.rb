@@ -88,6 +88,16 @@ module DTK
       Status::Type.task_has_status?(self, status)
     end
 
+    QUALIFIED_SUBTASK_NAME_DELIM = ':'
+    GENERIC_SUBTASK_NAME         = 'subtask'
+    def self.qualified_subtask_name(top_task_name, subtask_name = GENERIC_SUBTASK_NAME)
+      "#{top_task_name.gsub(QUALIFIED_SUBTASK_NAME_DELIM,'-')}#{QUALIFIED_SUBTASK_NAME_DELIM}#{subtask_name}"
+    end
+    def is_a_subtask?
+      split = self.display_name.split(QUALIFIED_SUBTASK_NAME_DELIM)
+      split.size == 2 and split.last == GENERIC_SUBTASK_NAME
+    end
+
     def self.checked_nodes
       @checked_nodes ||= []
     end

@@ -43,6 +43,26 @@ module DTK
         }
         response
       end
+      
+      def self.initiate_cancelation(task_idh, top_task_idh, task_action, opts =  {})
+        if ConfigAgent::Type.is_a?(task_action.config_agent_type, [:workflow])
+          # Rich 1/31: Need to write ConfigAgent::Adapter::Workflow#initiate_cancelation
+          # which below calls
+          # in initiate_cancelation it shoud use task_idh.get_id (the task id associated with the workflow step)
+          # To look up the task id that is associated with the workflow so you can call
+          # ::DTK::Workflow.cancel with this task as the argument. This must bhave an id that is in the cache
+          #  @@active_workflows in file utils/internal/workflow
+          # One way to do this is when ConfigAgent::Adapter::Workflow#execure runs it wil have task_id so when it creates the workflow task
+          # it can save in cache @@config_agent_cache a pointer to the workflow task (i.e., task wjose id is in @@active_workflows
+          # There was code when this hierechical task was created that looked like it tried to change its id to match task_id. Dont think though changing id works
+          # AN alternative approach to task is to have in the task that gets its id inserted into @@active_workflows a filed that you use to point to the task
+          # associated with the step that called it
+          ConfigAgent.load(:workflow).initiate_cancelation(task_action, task_idh: task_idh)
+        else
+          # no op
+        end
+      end
+      
     end
   end
 end

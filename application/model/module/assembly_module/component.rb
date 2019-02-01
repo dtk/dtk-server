@@ -39,7 +39,8 @@ module DTK; class AssemblyModule
           inherit_frozen_from_base: true,
           checkout_branch: opts[:checkout_branch],
           donot_update_model: opts[:donot_update_model],
-          delete_existing_branch: opts[:delete_existing_branch]
+          delete_existing_branch: opts[:delete_existing_branch],
+          integer_version: opts[:integer_version]
         }
         component_module.create_new_version(base_version, self.assembly_module_version, create_opts)
       end

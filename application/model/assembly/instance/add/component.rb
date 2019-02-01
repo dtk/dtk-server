@@ -46,7 +46,7 @@ module DTK
                 donot_update_model: true,
                 delete_existing_branch: true
               }
-              aug_nested_module_branch = service_instance.get_or_create_for_nested_module(aug_cmp_template.component_module, aug_cmp_template.version, get_or_create_opts)
+              aug_nested_module_branch = service_instance.get_or_create_for_nested_module(aug_cmp_template.get_component_module, aug_cmp_template.version, get_or_create_opts)
               ModuleRefSha.create_or_update_for_nested_module(service_instance.assembly_instance, aug_nested_module_branch)
 
               Component.pull_component_module_repos(aug_cmp_template, service_instance)
@@ -132,7 +132,7 @@ module DTK
             # fail "TODO: DTK-3366: need to use different metod than service_instance.aug_component_module_branches"
             # existing_aug_module_branches = service_instance.aug_component_module_branches(reload: true).inject({}) { |h, r| h.merge(r[:module_name] => r) }
             existing_aug_module_branches = service_instance.aug_dependent_base_module_branches.inject({}) { |h, r| h.merge(r[:module_name] => r) }
-            nested_module_name           = aug_cmp_template.component_module.module_name
+            nested_module_name           = aug_cmp_template.get_component_module.module_name
 
             if matching_module_branch = existing_aug_module_branches[nested_module_name]
               matching_module_branches = [matching_module_branch]

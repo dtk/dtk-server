@@ -118,7 +118,7 @@ module DTK; class BaseModule
 
       opts[:ret_parsed_dsl].add(dsl_obj) if opts[:ret_parsed_dsl]
 
-      update_opts = { version: version, use_new_snapshot: opts[:use_new_snapshot] }
+      update_opts = { version: version, use_new_snapshot: opts[:use_new_snapshot], integer_version: opts[:integer_version] }
 
       # when image_aws component is updated; need to check if new images are added and update node-bindings accordingly
       if self.base_module[:display_name].eql?('image_aws')
@@ -158,7 +158,8 @@ module DTK; class BaseModule
       unless opts[:donot_update_module_refs]
         if opts[:update_module_refs_from_file]
           # updating module refs from the component_module_ref file
-          ModuleRefs::Parse.update_component_module_refs(@module_class, module_branch)
+          # TODO: DTK-3575 don't need this, it was used before module 2.0
+          # ModuleRefs::Parse.update_component_module_refs(@module_class, module_branch)
         else
           opts_save_dsl = Opts.create?(message?: update_from_includes[:message], external_dependencies?: external_deps)
           if dsl_updated_info = UpdateModuleRefs.save_dsl?(module_branch, opts_save_dsl)

@@ -33,7 +33,8 @@ module DTK
         @module_name                  = parent.local_params.module_name
         @namespace_name               = parent.local_params.namespace
         @component_module__module_branch = component_module__module_branch
-        @version                      = component_module__module_branch.get_ancestor_branch? ?  component_module__module_branch.get_ancestor_branch?[:version] : component_module__module_branch[:version]
+        # @version                      = component_module__module_branch.get_ancestor_branch? ?  component_module__module_branch.get_ancestor_branch?[:version] : component_module__module_branch[:version]
+        @version                      = component_module__module_branch[:version]
         @local_params                 = self.class.create_local_params(module_type, @module_name, version: @version, namespace: @namespace_name)
         @local                        = @local_params.create_local(@project, new_branch_name: component_module__module_branch[:display_name])
         @parsed_component_module      = parent.parsed_component_module

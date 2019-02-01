@@ -23,7 +23,7 @@ module DTK
         # opts can have keys:
         #   :force
         def pull_repo_changes_and_return_diffs_summary(commit_sha, opts = {}, &body)
-          # RepoManager::Transaction.reset_on_error(self) do
+          RepoManager::Transaction.reset_on_error(self) do
             pull_opts = { force: opts[:force], ret_diffs: nil } #by having key :ret_diffs exist in options it will be set
             if opts[:install_on_server]
               repo_diffs_summary = {}
@@ -32,7 +32,7 @@ module DTK
               repo_diffs_summary = pull_opts[:ret_diffs].ret_summary # pull_from_remote_raise_error_if_merge_needed will have set pull_opts[:ret_diffs]
             end
             body.call(repo_diffs_summary)
-          # end
+          end
         end
 
 

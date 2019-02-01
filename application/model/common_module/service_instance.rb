@@ -67,7 +67,8 @@ module DTK
           donot_update_model: opts[:donot_update_model],
           delete_existing_branch: opts[:delete_existing_branch],
           base_version: base_version, 
-          ret_augmented_module_branch: true
+          ret_augmented_module_branch: true,
+          integer_version: opts[:integer_version]
         }
         AssemblyModule::Component.new(self.assembly_instance).create_module_for_service_instance?(component_module, create_opts) 
       end
@@ -156,11 +157,12 @@ module DTK
         if component_module = ComponentModule.module_exists(project, common_module.module_namespace, common_module.module_name, base_version, return_module: true)
           get_or_create_opts = {
             donot_update_model: false,
-            delete_existing_branch: true
+            delete_existing_branch: true,
+            integer_version: 5
           }
           aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
 
-          # convert_component_to_template(aug_nested_module_branch)
+          add_components_from_new_templates(aug_nested_module_branch)
 
           Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
         end
@@ -181,14 +183,15 @@ module DTK
         # creating new branch, but no need to update the model
         get_or_create_opts = {
           donot_update_model: false,
-          delete_existing_branch: true
+          delete_existing_branch: true,
+          integer_version: 5
         }
         aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
         CommonDSL::NestedModuleRepo.update_repo_for_stage(aug_nested_module_branch)
         Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
         aug_nested_module_branch
 
-        # convert_component_to_template(aug_nested_module_branch)
+        add_components_from_new_templates(aug_nested_module_branch)
 
         aug_nested_module_branch
       end
@@ -215,44 +218,38 @@ module DTK
         RepoManager.file_exists?(dir, self.base_module_branch) 
       end
 
-      def component_template_candidates
-        return @cmp_template_candidates if @cmp_template_candidates
+      def existing_component_instances
+        return @existing_cmp_instances if @existing_cmp_instances
 
-        @cmp_template_candidates = nil
+        @existing_cmp_instances = nil
         nodes = self.assembly_instance.get_nodes
 
         nodes.each do |node|
-          @cmp_template_candidates = node.get_components(cols: [:id, :group_id, :display_name, :component_type, :assembly_id, :component_module])
+          @existing_cmp_instances = node.get_components(cols: [:id, :group_id, :display_name, :component_type, :assembly_id, :component_module])
         end
 
-        @cmp_template_candidates
+        @existing_cmp_instances
       end
 
-      def convert_component_to_template(aug_nested_module_branch)
-        project = ::DTK::Project.get_all(self.assembly_instance.model_handle(:project)).first
+      def add_components_from_new_templates(aug_nested_module_branch)
+        project        = ::DTK::Project.get_all(self.assembly_instance.model_handle(:project)).first
         implementation = aug_nested_module_branch.get_implementation
+        templates      = aug_nested_module_branch.get_component_templates
 
-        component_template_candidates.each do |cmp_template_candidate|
-          if cmp_template_candidate[:component_module][:id] == aug_nested_module_branch.component_module[:id]
+        existing_component_instances.each do |existing_cmp_instance|
+          if existing_cmp_instance[:component_module][:id] == aug_nested_module_branch.component_module[:id]
+            cmp_template_candidate = templates.find{ |template| template[:component_type] == existing_cmp_instance[:component_type] }
             component_template = cmp_template_candidate.id_handle.create_object(model_name: :component_template_augmented).merge(cmp_template_candidate)
-            component_template_node = component_template.get_node
-
-            Model.update_from_rows(component_template.model_handle, [{
-              id: component_template[:id],
-              node_node_id: SQL::ColRef.null_id,
-              assembly_id: SQL::ColRef.null_id,
-              ancestor_id: SQL::ColRef.null_id,
-              implementation_id: implementation[:id],
-              module_branch_id: aug_nested_module_branch[:id],
-              project_project_id: project[:id]
-              }]
-            )
+            component_template_node = existing_cmp_instance.get_node
 
             title = nil
-            if title_attr = Component::Template.get_title_attributes([component_template.id_handle]).first
+            if title_attr = Component::Template.get_title_attributes([existing_cmp_instance.id_handle]).first
               title_attr.update_object!(:value_asserted, :value_derived)
               title = title_attr[:value_asserted] || title_attr[:value_derived]
             end
+
+            # delete component instances created during clone_into since they are tied to component templates from component modules
+            Model.delete_instance(existing_cmp_instance.id_handle)
 
             assembly_instance.add_component(component_template_node.id_handle, component_template, self, component_title: title, do_not_update_workflow: true)
           end

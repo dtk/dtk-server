@@ -58,17 +58,18 @@ module DTK
     def update_model_with_ref_integrity_check(opts = {})
       # get associated assembly templates before do any updates and use this to see if any referential integrity
       # problems within transaction after do update; transaction is aborted if any errors found
-      # Model.Transaction do
+      Model.Transaction do
         update_opts = {
           override_attrs: { 'module_branch_id' => @module_branch.id },
-          namespace: component_module.module_namespace
+          namespace: component_module.module_namespace,
+          integer_version: opts[:integer_version]
         }
         update_opts.merge!(version: opts[:version]) if opts[:version]
-        a = update_model(update_opts)
+        update_model(update_opts)
 
         ref_integrity_snapshot.raise_error_if_any_violations(opts)
         ref_integrity_snapshot.integrity_post_processing
-      # end
+      end
     end
 
     # For dtk shell
@@ -87,7 +88,6 @@ module DTK
     end
     # parses and creates dsl_object form hash parsed in as target
     def self.create_from_file_obj_hash(impl_obj, dsl_filename, content, opts = {})
-      opts[:integer_version] = 5
       unless isa_dsl_filename?(dsl_filename, opts[:integer_version])
         fail Error.new("The file path (#{dsl_filename}) does not refer to a dsl file name")
       end

@@ -227,6 +227,7 @@ module DTK; class  Assembly
         assembly_idhs.each do |assembly_idh|
           assembly = create_from_id_handle(assembly_idh)
           DependentModule.delete_dependent_module_repos?(assembly)
+          AssemblyModule::Component.new(assembly).delete_module?(do_not_raise: opts[:do_not_raise])
           AssemblyModule::Service.new(assembly).delete_module?(do_not_raise: opts[:do_not_raise])
         end
       end

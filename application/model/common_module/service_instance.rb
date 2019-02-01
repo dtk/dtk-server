@@ -189,7 +189,6 @@ module DTK
         aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
         CommonDSL::NestedModuleRepo.update_repo_for_stage(aug_nested_module_branch)
         Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
-        aug_nested_module_branch
 
         add_components_from_new_templates(aug_nested_module_branch)
 

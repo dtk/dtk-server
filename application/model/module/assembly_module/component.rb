@@ -159,6 +159,15 @@ module DTK; class AssemblyModule
       diffs
     end
 
+    def delete_module?(opts = {})
+      if service_module = self.assembly_instance.get_service_module
+        project = ::DTK::Project.get_all(self.assembly_instance.model_handle(:project)).first
+        if component_module = ComponentModule.module_exists(project, service_module.module_namespace, service_module.module_name, self.assembly_module_version, return_module: true)
+          component_module.delete_version?(self.assembly_module_version)
+        end
+      end
+    end
+
     private
 
     class ErrorComponentModule < ErrorUsage

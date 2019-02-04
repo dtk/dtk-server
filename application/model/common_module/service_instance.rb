@@ -161,10 +161,11 @@ module DTK
             integer_version: 5
           }
           aug_nested_module_branch = get_or_create_for_nested_module(component_module, base_version, get_or_create_opts)
+          module_ref_sha = Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
 
           add_components_from_new_templates(aug_nested_module_branch)
 
-          Assembly::Instance::ModuleRefSha.create_for_nested_module(self.assembly_instance, aug_nested_module_branch)
+          module_ref_sha
         end
       end
 

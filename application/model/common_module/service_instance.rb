@@ -29,6 +29,7 @@ module DTK
         @base_version       = opts[:version]
         @base_module_branch = get_or_create_module_for_service_instance(delete_existing_branch: opts[:delete_existing_branch], version: opts[:version])
         @add_nested_modules = opts[:add_nested_modules]
+        @components         = []
       end
 
       attr_reader :base_module_branch
@@ -54,6 +55,8 @@ module DTK
             service_instance_repo_info.add_nested_module_info!(aug_nested_module_branch)
           end
         end
+
+        LinkDef::AutoComplete.autocomplete_component_links(self.assembly_instance, components: @components)
 
         service_instance_repo_info
       end
@@ -251,7 +254,7 @@ module DTK
             # delete component instances created during clone_into since they are tied to component templates from component modules
             Model.delete_instance(existing_cmp_instance.id_handle)
 
-            assembly_instance.add_component(component_template_node.id_handle, component_template, self, component_title: title, do_not_update_workflow: true)
+            @components << assembly_instance.add_component(component_template_node.id_handle, component_template, self, component_title: title, do_not_update_workflow: true, dont_autolink_components: true).create_object
           end
         end
       end

@@ -36,7 +36,9 @@ module DTK
 
               Assembly::Instance::Add::Component.create_node_component_node(component, service_instance.assembly_instance, opts[:component_title])
 
-              LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
+              unless opts[:dont_autolink_components]
+                LinkDef::AutoComplete.autocomplete_component_links(self, components: [component])
+              end
 
               # fail "TODO: DTK-3394: implement when add component"
               # need to update module_refs_lock to add new component which will be used below to pull nested component module into service instance if needed

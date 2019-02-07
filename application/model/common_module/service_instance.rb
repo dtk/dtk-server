@@ -224,13 +224,14 @@ module DTK
       def existing_component_instances
         return @existing_cmp_instances if @existing_cmp_instances
 
-        @existing_cmp_instances = nil
+        @existing_cmp_instances = []
         nodes = self.assembly_instance.get_nodes
 
         nodes.each do |node|
-          @existing_cmp_instances = node.get_components(cols: [:id, :group_id, :display_name, :component_type, :assembly_id, :component_module])
+          @existing_cmp_instances << node.get_components(cols: [:id, :group_id, :display_name, :component_type, :assembly_id, :component_module])
         end
 
+        @existing_cmp_instances.flatten!
         @existing_cmp_instances
       end
 

@@ -27,7 +27,11 @@ module DTK
       rescue ::Grit::Git::CommandFailed => e
         # e.err empty is being interpretad as no error
         if e.err.nil? || e.err.empty?
-          Log.info("::Grit non zero exit status #{e.exitstatus} but grit err field is empty for command='#{e.command}'")
+          if e.out && !e.out.empty?
+            Log.info(e.out)
+          else
+            Log.info("::Grit non zero exit status #{e.exitstatus} but grit err field is empty for command='#{e.command}'")
+          end
         else
           # write more info to server log, but to client return user friendly message
           Log.info("::Grit error: #{e.err} exitstatus=#{e.exitstatus}; command='#{e.command}'")

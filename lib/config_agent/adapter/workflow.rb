@@ -38,7 +38,9 @@ module DTK; class ConfigAgent
         task = Task::Create.create_for_workflow_action(assembly_instance, task_info, component_workflow)
         task = task.save_and_add_ids
         ruote_workflow = DTK::Workflow.create(task)
-        ruote_workflow.execute_in_current_thread
+        require 'byebug'; byebug
+        x = ruote_workflow.execute_in_current_thread
+        x
       end
 
       def initiate_cancelation(task_action, opts = {})

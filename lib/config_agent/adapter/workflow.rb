@@ -38,17 +38,27 @@ module DTK; class ConfigAgent
         task = Task::Create.create_for_workflow_action(assembly_instance, task_info, component_workflow)
         task = task.save_and_add_ids
         ruote_workflow = DTK::Workflow.create(task)
-        require 'byebug'; byebug
-        x = ruote_workflow.execute_in_current_thread
-        x
+        ruote_workflow.execute_in_current_thread
+        task_status_after_execution(ruote_workflow)
       end
 
       def initiate_cancelation(task_action, opts = {})
         fail(Error, "Unexpected that task id handle is nil") unless task_idh = opts[:task_idh]
         DTK::Workflow.cancel(task_action)
       end
-
+      
       private 
+      
+      def task_status_after_execution(ruote_workflow)
+        # updates subtasks to be what is current which wil be what is in database  (that is what update_object! does
+        updated_subtasks = ruote_workflow.top_task[:subtasks].map {|subtask| subtask.update_object! }
+        failed_subtasks = updated_subtasks.select { |subtask| subtask[:status] == 'failed' }
+        # if no errors fine to return nil, otherwise need to return a task status hash or raise error
+        unless failed_subtasks.empty?
+          # TODO: Dig detail into the task hirerchical structure and get detailed error when step failed
+          fail ErrorUsage, "The following subtasks failed: #{failed_subtasks.map(&:display_name).join('. ')}"
+        end
+      end
 
       def component_workflow(component_template, method_name)
         action_def_hash = ActionDef.get_matching_action_def_params?(component_template, method_name) || 

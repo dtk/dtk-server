@@ -72,6 +72,9 @@ module DTK
 
     def execute_in_current_thread
       # save top task data for use in cancellation
+      # TODO: DTK-3686; comment1; the following will not work if there are two simulatneous instances of this class (@@workflow_agent_cache) @@workflow_agent_cache is just one value at teh class level
+      # instead; instaed consider declaring outside of function @@workflow_agent_cache = {} and below
+      # @@workflow_agent_cache[@top_task.id] = @top_task
       @@workflow_agent_cache = @top_task
       execute(@top_task.id.to_s)
     end
@@ -108,6 +111,10 @@ module DTK
       # if cancelling inner workflow: `task` has config agent type `workflow`
       # if cancelling top task: `task` is XYZ::Task
       if is_inner_workflow? task
+      # TODO: DTK-3686; see comment1 above; there I proposed @@workflow_agent_cache[@top_task.id] = @top_task, 
+      # but see here that the only index you have comes from task. So you might in execute_in_current_thread have more general form
+      # @@workflow_agent_cache[agent_cache_index] = @top_task 
+      # where execute_in_current_thread needs to compute some agent_cache_index that then can be ascertained here from task
         task = @@workflow_agent_cache
         reset_workflow_agent_cache
       end
@@ -158,6 +165,7 @@ module DTK
       task.respond_to?(:config_agent_type) && task.config_agent_type == 'workflow'
     end
 
+    # TODO: DTK-3686; see comment1 above; this needs to be modified in accordnace to other changes you put in
     def self.reset_workflow_agent_cache
       @@workflow_agent_cache = nil
     end

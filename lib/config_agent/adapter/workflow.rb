@@ -54,10 +54,38 @@ module DTK; class ConfigAgent
         updated_subtasks = ruote_workflow.top_task[:subtasks].map {|subtask| subtask.update_object! }
         failed_subtasks = updated_subtasks.select { |subtask| subtask[:status] == 'failed' }
         # if no errors fine to return nil, otherwise need to return a task status hash or raise error
-        unless failed_subtasks.empty?
-          # TODO: Dig detail into the task hirerchical structure and get detailed error when step failed
-          fail ErrorUsage, "The following subtasks failed: #{failed_subtasks.map(&:display_name).join('. ')}"
+        fail ErrorUsage, generate_error_report(failed_subtasks) unless failed_subtasks.empty?
+        nil
+      end
+
+      def generate_error_report(failed_subtasks)
+        error_report = ""
+        failed_subtasks.each do |failed_subtask|
+          failed_tasks = failed_subtask.subtasks.select { |task| task[:status] == 'failed'}
+          failed_tasks_errors = get_errors(failed_tasks)
+          error_report += failed_tasks_errors + "\n" if failed_tasks_errors
         end
+        error_report
+      end
+
+      def get_errors(failed_tasks)
+        error_result = ""
+        failed_tasks.each do |failed_task|
+          error_msg = get_error_message(failed_task)
+          if error_msg.key?(:content) && error_msg[:content].key?(:message)
+            error_result += error_msg[:content][:message] + "\n"
+          end
+        end
+        error_result
+      end
+
+      def get_error_message(failed_task)
+        model_handle = failed_task.model_handle.createMH(:task_error)
+        sp_hash = {
+          cols: [:content],
+          filter: [:eq, :task_id, failed_task.id]
+        }
+        Model.get_obj(failed_task.model_handle.createMH(:task_error), sp_hash)
       end
 
       def component_workflow(component_template, method_name)

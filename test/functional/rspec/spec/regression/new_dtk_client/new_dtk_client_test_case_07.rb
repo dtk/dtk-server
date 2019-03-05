@@ -1,4 +1,4 @@
-# This test script is used to test various options for editing dependency module and service push
+# Test Case 7: This test script is used to test various options for editing dependency module and service push
 # Things that are under test are:
 # - edit value for existing attribute in dtk.nested_module.yaml
 # - add new attribute in dtk.nested_module.yaml

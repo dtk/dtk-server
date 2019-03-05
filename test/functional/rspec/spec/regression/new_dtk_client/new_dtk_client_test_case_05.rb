@@ -1,4 +1,4 @@
-# This test script is used to test various options for service push
+# Test Case 5: This test script is used to test various options for service push
 # Things that are under test are:
 # - basic service push ability
 # - ability to add non existing component with service push and handle error

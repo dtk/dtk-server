@@ -14,8 +14,4 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   # config.order = 'random'
-  require './lib/repoman_rest_api'
-  config.before(:all) do
-    @repoman = RepomanRestApi.new
-  end
 end

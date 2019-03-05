@@ -1,4 +1,4 @@
-# This test script is used to test multiple breakpoints feature on both create and delete (assembly wide)
+# Test Case 2: This test script is used to test multiple breakpoints feature on both create and delete (assembly wide)
 # Things that are under test are:
 # - ability to stop on multiple breakpoints in create phase on assembly wide components
 # - ability to stop on multiple breakpoints in delete phase on assembly wide components

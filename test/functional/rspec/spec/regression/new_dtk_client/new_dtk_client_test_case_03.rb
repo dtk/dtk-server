@@ -1,4 +1,4 @@
-# This test script is used to test various options for module push
+# Test Case 3: This test script is used to test various options for module push
 # Things that are under test are:
 # - basic module push ability
 # - ability to add new component with module push

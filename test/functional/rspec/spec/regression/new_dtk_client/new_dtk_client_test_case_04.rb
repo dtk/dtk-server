@@ -1,4 +1,4 @@
-# This test script is used to test various options for service push
+# Test Case 4: This test script is used to test various options for service push
 # Things that are under test are:
 # - basic service push ability
 # - ability to change attributes with service push

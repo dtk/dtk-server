@@ -6,7 +6,7 @@ keywords: test
 description: test module
 license: Apache 2.0
 dependencies:
-  aws/ec2: 0.9.5
+  aws/ec2: 1.3.0
 assemblies:
   test_assembly:
     description: test assembly

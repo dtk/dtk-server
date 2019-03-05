@@ -1,4 +1,4 @@
-# This test script is used to test multiple breakpoints feature on both create and delete (node)
+# Test Case 4: This test script is used to test multiple breakpoints feature on both create and delete (node)
 # Things that are under test are:
 # - ability to stop on multiple breakpoints in create phase on components on the node
 # - ability to stop on multiple breakpoints in delete phase on components on the node

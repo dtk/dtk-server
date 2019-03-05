@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Test Case 1: Simple link scenario - $node.host_address from sink component is passed to upstream attribute of source component
 
 require './lib/dtk_common'

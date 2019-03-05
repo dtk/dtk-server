@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Test Case 8: Stage complex node group example, list nodes, delete nodes, check cardinality, list nodes/components/attributes after delete
 
 require './lib/dtk_common'

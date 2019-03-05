@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Test Case 1: Stage existing assembly and then delete service
 
 require './lib/dtk_common'

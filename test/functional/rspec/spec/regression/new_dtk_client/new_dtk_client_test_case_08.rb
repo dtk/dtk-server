@@ -1,4 +1,4 @@
-# This test script is used to test various options for delete and uninstall of service instance
+# Test Case 8: This test script is used to test various options for delete and uninstall of service instance
 # Things that are under test are:
 # - stage assembly template, delete and uninstall
 # - stage assembly template, converge, delete and uninstall

@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Test Case 3: Deploy from assembly (stage and converge), stop the running instance (nodes) and then delete service
 
 require './lib/dtk_common'

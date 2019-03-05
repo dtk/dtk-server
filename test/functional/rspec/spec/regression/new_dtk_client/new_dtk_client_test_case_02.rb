@@ -1,3 +1,10 @@
+# Test Case 2: This test script is used to test various module installation options
+# Things that are under test are:
+# - install master version of module from local filesystem
+# - install specific version of module from local filesystem
+# - install master version of module from remote
+# - install specific version of module from remote
+
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
 

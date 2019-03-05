@@ -1,4 +1,8 @@
-#!/usr/bin/env ruby
+# Test Case 1: Creating target based on auto discovered vpc data
+# This test script will test following: 
+# - create new target based on auto discovered vpc data from tenant
+# - converge an example service instance into new target
+
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
 

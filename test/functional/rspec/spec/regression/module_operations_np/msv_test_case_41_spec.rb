@@ -1,7 +1,5 @@
-#!/usr/bin/env ruby
 # Test Case 41: Install service module with dependency to one component and that component has dependency to another component which has dependency to itself
 
-require 'rubygems'
 require 'rest_client'
 require 'pp'
 require 'json'

@@ -1,4 +1,4 @@
-# This test script is used to test various options for adding/removing component links and service push
+# Test Case 6: This test script is used to test various options for adding/removing component links and service push
 # Things that are under test are:
 # - basic ability to auto-generate component links in dtk.service.yaml when assembly staged
 # - ability to remove one component link from list and push

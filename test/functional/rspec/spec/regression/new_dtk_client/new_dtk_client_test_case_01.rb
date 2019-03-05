@@ -1,3 +1,9 @@
+# Test Case 1: This test script is used to test standard operations via dtk client
+# Things that are under test are:
+# - install module and stage assembly into service instance
+# - converge service instance
+# - delete service instance and uninstall module
+
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
 

@@ -1,7 +1,5 @@
-#!/usr/bin/env ruby
 # Test Case 46: Install service module with dependency to two components and both of these components have dependency to two different components
 
-require 'rubygems'
 require 'rest_client'
 require 'pp'
 require 'json'

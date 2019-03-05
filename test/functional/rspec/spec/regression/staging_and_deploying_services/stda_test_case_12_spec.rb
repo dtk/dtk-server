@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Test Case 12: Ability to add and delete components on assembly level and set their attributes
 
 require './lib/dtk_common'

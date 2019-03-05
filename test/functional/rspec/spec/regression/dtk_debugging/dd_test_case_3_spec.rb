@@ -1,4 +1,4 @@
-# This test script is used to test breakpoint feature on both create and delete (node)
+# Test Case 3: This test script is used to test breakpoint feature on both create and delete (node)
 # Things that are under test are:
 # - ability to stop on specific breakpoint in create phase on component on the node
 # - ability to stop on specific breakpoint in delete phase on component on the node

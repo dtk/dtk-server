@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 # Test Case 2: Fan-out scenario - $node.host_address from sink components on different nodes (sink1, sink2) are linked to upstream attribute of source component
 
 require './lib/dtk_common'

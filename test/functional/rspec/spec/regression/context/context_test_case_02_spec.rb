@@ -1,4 +1,8 @@
-#!/usr/bin/env ruby
+# Test Case 2: Creating target based on specified: vpc_id, subnet_id and security_group_name
+# This test script will test following: 
+# - create new target based on specified target data (vpc_id, subnet_id, security_group_name)
+# - converge an example service instance into new target
+
 require './lib/dtk_cli_spec'
 require './lib/dtk_common'
 
@@ -29,7 +33,7 @@ dtk_common = Common.new('', '')
 describe "(Context) Test Case 02: Specified existing subnet id, vpc and security group name" do
   before(:all) do
     puts '********************************************************************************', ''
-    # Install aws:network module with required dependency modules
+    # Install aws:aws_vpc module with required dependency modules
     system("rm -rf /tmp/network && mkdir /tmp/network")
     system("dtk module install --update-deps -d #{context_location} #{context_module}")
   end

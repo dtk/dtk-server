@@ -96,6 +96,9 @@ module DTK
 
       cols = [:id, :display_name, :namespace_id, :namespace, include_any_detail && :module_branches_with_repos].compact
       unsorted_ret = get_all(project_idh, cols: cols, filter: filter)
+
+      return unsorted_ret if opts[:return_raw]
+
       unless include_versions
         # prune all but the base module branch
         unsorted_ret.reject! { |r| r[:module_branch] && r[:module_branch][:version] != ModuleBranch.version_field_default }

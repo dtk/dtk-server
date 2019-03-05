@@ -104,6 +104,54 @@ module DTK
       end
     end
 
+    def self.all_modules_with_versions_with_dependencies(project, response)
+      modules = CommonModule.list_modules(project, Opts.new(:detail_to_include=>[:versions], return_raw: true))
+      modules.each do |common_module|
+        local_params = ModuleBranch::Location::LocalParams::Server.new(
+          module_type: :common_module,
+          module_name: common_module[:display_name],
+          namespace: common_module[:namespace][:display_name],
+          version: common_module[:module_branch][:version]
+        )
+        get_versions_with_dependencies(project, local_params, response)
+      end
+    end
+
+    def self.get_versions_with_dependencies(project, local_params, response)
+      if matching_module = get_class_from_module_type(local_params.module_type).matching_module_with_module_branch?(project, local_params.namespace, local_params.module_name, local_params.version)
+        dependencies = matching_module.get_module_branch_from_local_params(local_params).get_module_refs
+        response["#{local_params.namespace}/#{local_params.module_name}"] = [] unless response["#{local_params.namespace}/#{local_params.module_name}"]
+
+        dep_hash = {
+          'name' => local_params.version,
+          'version' => local_params.version,
+          'dependencies' => dependencies.map do |dep|
+            {
+              'namespace' => dep[:namespace_info],
+              'module'    => dep[:display_name],
+              'version'   => dep[:version_info]
+            }
+          end
+        }
+
+        unless response["#{local_params.namespace}/#{local_params.module_name}"].include?(dep_hash)
+          response["#{local_params.namespace}/#{local_params.module_name}"] << dep_hash
+        end
+
+        dependencies.each do |dependency|
+          unless response["#{dependency[:namespace_info]}/#{dependency[:display_name]}"]
+            local_params = ModuleBranch::Location::LocalParams::Server.new(
+              module_type: :common_module,
+              module_name: dependency[:display_name],
+              namespace: dependency[:namespace_info],
+              version: dependency[:version_info]
+            )
+            get_versions_with_dependencies(project, local_params, response)
+          end
+        end
+      end
+    end
+
     def self.module_info_with_local_dependencies(project, module_list)
       Info::Component.module_info_with_local_dependencies(project, module_list)
     end

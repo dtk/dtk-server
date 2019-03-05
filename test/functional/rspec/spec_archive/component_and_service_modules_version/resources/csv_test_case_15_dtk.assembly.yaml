@@ -1,8 +1,0 @@
----
-name: temp15
-dsl_version: 1.0.0
-node_bindings:
-  test: precise-micro
-assembly:
-  nodes:
-    test:

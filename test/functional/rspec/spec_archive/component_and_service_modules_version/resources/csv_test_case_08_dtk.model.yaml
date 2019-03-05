@@ -1,9 +1,0 @@
----
-module: temp08
-dsl_version: 1.0.0
-module_type: puppet_module
-components:
-  temp08:
-    actions:
-      create:
-        puppet_class: temp08

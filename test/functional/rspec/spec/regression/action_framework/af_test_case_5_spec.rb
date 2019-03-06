@@ -85,23 +85,23 @@ describe '(Action Framework) Test Case 5: Service with one node that contains cm
   end
 
   context 'Get task status details for action with successfull if command' do
-    include_context 'Get task status details', service_instance_location, "STAGE 2", [expected_output_1]
+    include_context 'Get task status details', service_instance_location, "STAGE 3", [expected_output_1]
   end
 
   context 'Get task status details for action with successfull unless command' do
-    include_context 'Get task status details', service_instance_location, "STAGE 3", [expected_output_2]
+    include_context 'Get task status details', service_instance_location, "STAGE 4", [expected_output_2]
   end
 
   context 'Get task status details for action with successfull create file command' do
-    include_context 'Get task status details', service_instance_location, "STAGE 4", [expected_output_3_1, expected_output_3_2, expected_output_3_3]
+    include_context 'Get task status details', service_instance_location, "STAGE 5", [expected_output_3_1, expected_output_3_2, expected_output_3_3]
   end
 
   context 'Get task status details for action with successfull create file with permissions command' do
-    include_context 'Get task status details', service_instance_location, "STAGE 5", [expected_output_4_1, expected_output_4_2]
+    include_context 'Get task status details', service_instance_location, "STAGE 6", [expected_output_4_1, expected_output_4_2]
   end
 
   context 'Get task status details for action with failed create command (fake permissions)' do
-    include_context 'Get task status details', service_instance_location, "STAGE 6", [expected_output_5]
+    include_context 'Get task status details', service_instance_location, "STAGE 7", [expected_output_5]
   end
 
   context "Delete service instance" do

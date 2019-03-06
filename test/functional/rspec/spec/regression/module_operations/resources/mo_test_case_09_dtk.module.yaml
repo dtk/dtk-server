@@ -73,6 +73,10 @@ component_defs:
     actions:
       create:
         puppet_class: unit_test::sink
+  attribute_test:
+    actions:
+      create:
+        puppet_class: unit_test::attribute_test
   source:
     actions:
       create:

@@ -26,6 +26,7 @@ chown -R ${tenant_user}:${tenant_user} /home/${tenant_user}
 apt-get update
 
 /usr/local/rvm/bin/rvm install 2.2.9
+/usr/local/rvm/bin/rvm --default use 2.2.9
 
 puppet apply --debug --modulepath dtk-provisioning/modules docker/manifests/stage3.pp
 

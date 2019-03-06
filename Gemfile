@@ -10,7 +10,7 @@ gem 'dtk-dsl'#, :github => 'dtk/dtk-dsl'
 # required to start a server
 gem 'ramaze', '2012.04.14'
 gem 'sequel', '3.25.0'
-gem 'activesupport'
+gem 'activesupport', '4.1.16'
 gem 'i18n'
 gem 'ruote', '2.3.0.1'
 gem 'eventmachine', '1.2.7'

@@ -92,6 +92,16 @@ module DTK
         rest_ok_response assembly_instance.get_required_unset_attributes
       end
 
+      def get_attribute
+        name = request_params(:name)
+        all_attributes = assembly_instance.list_attributes()
+        if attribute = all_attributes.select {|attr| attr[:name].eql? name}.first
+          rest_ok_response attribute[:value]
+        else
+          rest_ok_response
+        end
+      end
+
       def components
         datatype = :component
         opts = Opts.new(detail_level: nil)

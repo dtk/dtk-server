@@ -157,7 +157,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activesupport
+  activesupport (= 4.1.16)
   addressable
   awesome_print (= 1.1.0)
   aws-sdk

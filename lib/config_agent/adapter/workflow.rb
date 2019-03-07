@@ -39,14 +39,54 @@ module DTK; class ConfigAgent
         task = task.save_and_add_ids
         ruote_workflow = DTK::Workflow.create(task)
         ruote_workflow.execute_in_current_thread
+        task_status_after_execution(ruote_workflow)
       end
 
       def initiate_cancelation(task_action, opts = {})
         fail(Error, "Unexpected that task id handle is nil") unless task_idh = opts[:task_idh]
         DTK::Workflow.cancel(task_action)
       end
-
+      
       private 
+      
+      def task_status_after_execution(ruote_workflow)
+        # updates subtasks to be what is current which wil be what is in database  (that is what update_object! does
+        updated_subtasks = ruote_workflow.top_task[:subtasks].map {|subtask| subtask.update_object! }
+        failed_subtasks = updated_subtasks.select { |subtask| subtask[:status] == 'failed' }
+        # if no errors fine to return nil, otherwise need to return a task status hash or raise error
+        fail ErrorUsage, generate_error_report(failed_subtasks) unless failed_subtasks.empty?
+        nil
+      end
+
+      def generate_error_report(failed_subtasks)
+        error_report = ""
+        failed_subtasks.each do |failed_subtask|
+          failed_tasks = failed_subtask.subtasks.select { |task| task[:status] == 'failed'}
+          failed_tasks_errors = get_errors(failed_tasks)
+          error_report += failed_tasks_errors + "\n" if failed_tasks_errors
+        end
+        error_report
+      end
+
+      def get_errors(failed_tasks)
+        error_result = ""
+        failed_tasks.each do |failed_task|
+          error_msg = get_error_message(failed_task)
+          if error_msg.key?(:content) && error_msg[:content].key?(:message)
+            error_result += error_msg[:content][:message] + "\n"
+          end
+        end
+        error_result
+      end
+
+      def get_error_message(failed_task)
+        model_handle = failed_task.model_handle.createMH(:task_error)
+        sp_hash = {
+          cols: [:content],
+          filter: [:eq, :task_id, failed_task.id]
+        }
+        Model.get_obj(failed_task.model_handle.createMH(:task_error), sp_hash)
+      end
 
       def component_workflow(component_template, method_name)
         action_def_hash = ActionDef.get_matching_action_def_params?(component_template, method_name) || 

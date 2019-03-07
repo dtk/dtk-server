@@ -69,11 +69,14 @@ module DTK
     # Lock is needed in case of concurrent execution
     @@active_workflows = ActiveWorkflow.new
     @@Lock = Mutex.new
+    @@workflow_agent_cache = {}
+    agent_cache_index = nil
 
     def execute_in_current_thread
       # save top task data for use in cancellation
-      @@workflow_agent_cache = @top_task
-      execute(@top_task.id.to_s)
+      agent_cache_index = @top_task.id
+      @@workflow_agent_cache[agent_cache_index] = @top_task
+      execute(agent_cache_index.to_s)
     end
 
     def defer_execution
@@ -108,7 +111,8 @@ module DTK
       # if cancelling inner workflow: `task` has config agent type `workflow`
       # if cancelling top task: `task` is XYZ::Task
       if is_inner_workflow? task
-        task = @@workflow_agent_cache
+        fail ErrorUsage, "Unexpected that agent cache index is nil" if agent_cache_index.nil?
+        task = @@workflow_agent_cache[agent_cache_index]
         reset_workflow_agent_cache
       end
 
@@ -158,8 +162,9 @@ module DTK
       task.respond_to?(:config_agent_type) && task.config_agent_type == 'workflow'
     end
 
+    # TODO: DTK-3686; see comment1 above; this needs to be modified in accordnace to other changes you put in
     def self.reset_workflow_agent_cache
-      @@workflow_agent_cache = nil
+      @@workflow_agent_cache.delete! agent_cache_index
     end
 
     class Adapter

@@ -175,7 +175,7 @@ module DTK
        # update_meta == true is the default
        update_meta = ret_request_params(:update_meta)
        opts.merge!(update_meta: true) unless !update_meta.nil? && !update_meta
-       opts.merge!(update_dsl: true)
+       opts.merge!(update_dsl: true,  partial_value: false) # later so do replace on hashes and not deep merge
        
        response = assembly.set_attributes(av_pairs, opts)
        response.merge!(repo_updated: true)

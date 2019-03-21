@@ -94,9 +94,9 @@ module DTK
 
       def get_attribute
         name = request_params(:name)
-        all_attributes = assembly_instance.list_attributes()
-        if attribute = all_attributes.select {|attr| attr[:name].eql? name}.first
-          rest_ok_response attribute[:value]
+        all_attributes = assembly_instance.get_attributes_all_levels()
+        if attribute = all_attributes.select {|attr| attr[:display_name].eql? name}.first
+          rest_ok_response attribute
         else
           rest_ok_response
         end

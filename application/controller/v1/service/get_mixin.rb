@@ -93,9 +93,12 @@ module DTK
       end
 
       def get_attribute
-        name = request_params(:name)
+        name      = request_params(:name)
+        component_name = request_params(:component)
+        component = component_name.gsub('::','__')
         all_attributes = assembly_instance.get_attributes_all_levels()
-        if attribute = all_attributes.select {|attr| attr[:display_name].eql? name}.first
+        attributes = all_attributes.select {|attr| attr[:display_name].eql? name}
+        if (component && attribute = attributes.select{|attr| attr[:nested_component][:display_name] == component}.first) || (!component && attribute = attributes.first)
           rest_ok_response attribute
         else
           rest_ok_response

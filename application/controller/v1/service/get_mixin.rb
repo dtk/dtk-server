@@ -39,6 +39,7 @@ module DTK
         opts              = Opts.new(detail_level: nil)
         # TODO: DTK-3173: removed code
         filter_component  = request_params(:filter_component)
+        attribute_name    = request_params(:attribute_name)
         format            = request_params(:format) || 'table' # default format type is table
         all, links        = boolean_request_params(:all, :links)
 
@@ -52,6 +53,9 @@ module DTK
           opts.merge!(filter_component: filter_component)
         end
 
+        unless attribute_name.empty?
+          opts.merge!(attribute_name: attribute_name)
+        end
         # TODO: DTK-3173: removed code
         # if node_id = request_params(:node_id)
         #  node_id = "#{ret_node_id(:node_id, assembly_instance)}" unless (node_id =~ /^[0-9]+$/)

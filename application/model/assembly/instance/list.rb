@@ -99,7 +99,7 @@ module DTK; class Assembly::Instance
       def list_attributes(opts = Opts.new)
         if opts[:settings_form]
           filter_proc = opts[:filter_proc]
-          attrs_all_levels_struct = get_attributes_all_levels_struct(filter_proc)
+          attrs_all_levels_struct = get_attributes_all_levels_struct(filter_proc, opts)
           ServiceSetting::AttributeSettings::HashForm.render(attrs_all_levels_struct)
         else
           cols_to_get = (opts[:raw_attribute_value] ? [:display_name, :value] : [:id, :display_name, :value, :linked_to_display_form, :datatype, :name])

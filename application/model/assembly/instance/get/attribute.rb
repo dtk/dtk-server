@@ -45,7 +45,7 @@ module DTK; class Assembly; class Instance; module Get
 
     AttributesAllLevels = Struct.new(:assembly_attrs, :component_attrs)
     def get_attributes_all_levels_struct(filter_proc = nil)
-      assembly_attrs = get_assembly_level_attributes(filter_proc)
+      assembly_attrs  = get_assembly_level_attributes(filter_proc)
       component_attrs = get_augmented_component_attributes(filter_proc)
       # TODO: The pruning below might go in get_augmented_component_attributes
       component_attrs.reject! do |attr|
@@ -82,25 +82,26 @@ module DTK; class Assembly; class Instance; module Get
 
     def get_component_attributes_print_form_aux(component_attrs, opts = Opts.new)
       # default for opts[:all] is true
-      if opts[:all].nil? ? true : opts[:all]
-        ret_print_form_component_attrs(component_attrs, opts)
-      elsif filter_component = opts[:filter_component]
+      if filter_component = opts[:filter_component]
         # if filter component than just components that meet this filter
         ret_print_form_component_attrs(filter_components(filter_component, component_attrs), opts)
       else
-        # if all not selected and no fiter component that no component attributes
-        []
+        # if no filter component than all attributes
+        ret_print_form_component_attrs(component_attrs, opts)
       end
     end
 
     def filter_components(filter, component_attrs)
-      regexp_filters = filter.split(",").map do | user_friendly_componet_name|
-        Regexp.new("^#{user_friendly_componet_name.gsub('::','__')}")
+      # regexp_filters = filter.split(",").map do | user_friendly_componet_name|
+      #   Regexp.new("^#{user_friendly_componet_name.gsub('::','__')}")
+      # end
+      components = filter.split(",").map do |user_friendly_component_name|
+        user_friendly_component_name.gsub('::','__')
       end
       ret = []
       component_attrs.each do |attr|
         if component = attr[:nested_component]
-          ret << attr if regexp_filters.find { |regexp| component.display_name =~ regexp }
+          ret << attr if components.find { |filter_component| component.display_name == filter_component }
         end
       end
       ret

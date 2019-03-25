@@ -43,7 +43,7 @@ echo "gem: --no-ri --no-rdoc" > ~/.gemrc
 gem2.0 install puppet -v 3.6.2
 
 # install RVM and Ruby
-RUBY_VERSION=1.9.3-p484
+RUBY_VERSION=2.2.9
 curl -sSL https://get.rvm.io | bash -s master --ruby=ruby-$RUBY_VERSION
 /usr/local/rvm/wrappers/default/gem install bundler --no-rdoc --no-ri
 

@@ -581,8 +581,13 @@ module DTK; class  Assembly
 
       ordered_components = []
       workflow_delete_order.each do |o_cmp|
-        if matching_cmp = components.find{ |cmp| cmp[:display_name].eql?(o_cmp) }
-          ordered_components << matching_cmp
+        if matching_cmps = components.select{ |cmp| cmp[:display_name].eql?(o_cmp) }
+          matching_cmps.each do |matching_cmp|
+            ordered_components << matching_cmp
+          end
+          # if matching_cmp = components.find{ |cmp| cmp[:display_name].eql?(o_cmp) }
+          #   ordered_components << matching_cmp
+          # end
         end
       end
 

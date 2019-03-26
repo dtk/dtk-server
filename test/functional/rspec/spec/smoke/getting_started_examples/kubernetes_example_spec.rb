@@ -11,7 +11,7 @@ kubernetes_assembly_name = 'cluster'
 kubernetes_service_name = "kubernetes_cluster" + rand(10..1000).to_s
 kubernetes_remote_module = 'kubernetes/kubernetes'
 kubernetes_remote_module_location = '/tmp/kubernetes'
-kubernetes_remote_module_version = '1.2.0'
+kubernetes_remote_module_version = '1.3.0'
 
 rails_assembly_name = 'on_kubernetes_with_db'
 rails_service_name = "rails_sample_app" + rand(10..1000).to_s

@@ -121,12 +121,12 @@ module DTK; class Task
 
     # TODO: DTK-3010; this is hack for DTK-3010; want to call parsing logic
     COMPONENT_OR_ACTION_KEYS = {
-      delete: [:ordered_components, :components, :actions, :component, :action],
-      create: [:ordered_components, :components, :component, :actions]
+      delete: [:ordered_components, :components, :actions, :component, :action, 'ordered_components', 'components', 'actions', 'component', 'action'],
+      create: [:ordered_components, :components, :component, :actions, 'ordered_components', 'components', 'component', 'actions']
     }
     def subtype_component_types(type, subtask)
       keys = COMPONENT_OR_ACTION_KEYS[type]
-      if matching_key = keys.find { |key| subtask.has_key?(key) }
+      if matching_key = keys.find { |key| subtask.has_key?(key) } || keys.find { |key| subtask.has_key?(key.to_s) }
         component_or_actions = subtask[matching_key]
         component_or_actions = [component_or_actions] unless component_or_actions.kind_of?(::Array)
         component_or_actions.map do |item|

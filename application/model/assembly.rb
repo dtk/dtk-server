@@ -32,11 +32,12 @@ module DTK
     end
 
     ### standard get methods
-    def get_assembly_level_attributes(filter_proc = nil)
+    def get_assembly_level_attributes(filter_proc = nil, opts = {})
       sp_hash = {
         cols: [:id, :display_name, :attribute_value, :data_type, :hidden, :ancestor_id],
         filter: [:eq, :component_component_id, id()]
       }
+      sp_hash.merge!(filter: [:and, [:eq, :component_component_id, id()],  [:eq, :display_name, opts[:attribute_name]]]) if opts[:attribute_name]
       ret = Model.get_objs(model_handle(:attribute), sp_hash)
       if filter_proc
         ret.select { |r| filter_proc.call(r) }

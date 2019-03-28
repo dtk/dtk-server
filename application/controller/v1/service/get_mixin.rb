@@ -38,7 +38,8 @@ module DTK
         datatype          = :workspace_attribute
         opts              = Opts.new(detail_level: nil)
         # TODO: DTK-3173: removed code
-        # filter_component  = request_params(:filter_component)
+        filter_component  = request_params(:filter_component)
+        attribute_name    = request_params(:attribute_name)
         format            = request_params(:format) || 'table' # default format type is table
         all, links        = boolean_request_params(:all, :links)
 
@@ -48,6 +49,13 @@ module DTK
           datatype = :workspace_attribute_w_link
         end
 
+        if filter_component
+          opts.merge!(filter_component: filter_component)
+        end
+
+        unless attribute_name.empty?
+          opts.merge!(attribute_name: attribute_name)
+        end
         # TODO: DTK-3173: removed code
         # if node_id = request_params(:node_id)
         #  node_id = "#{ret_node_id(:node_id, assembly_instance)}" unless (node_id =~ /^[0-9]+$/)
@@ -74,8 +82,6 @@ module DTK
         opts.merge!(truncate_attribute_values: truncate, mark_unset_required: true)
         opts.merge!(detail_to_include: detail_to_include.map(&:to_sym)) unless detail_to_include.empty?
         # TODO: DTK-3173: removed code
-        # opts.merge!(all: all, filter_component: filter_component)
-        opts.merge!(all: all)
         response = 
           if format == 'yaml'
             opts.merge!(:yaml_format => true)

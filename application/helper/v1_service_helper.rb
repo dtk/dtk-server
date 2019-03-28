@@ -34,7 +34,14 @@ module Ramaze::Helper
     end
 
     def format_yaml_response(response)
-      response.map { |info| { name: info[:display_name], value: info[:value] } }
+      attributes_content_input = {}
+      response.each do |attribute| 
+        attributes_content_input[attribute[:display_name]] = attribute[:value] || {} 
+      end
+      top_level_content_input  = ::DTK::CommonDSL::ObjectLogic::ContentInputHash.new('attributes' => attributes_content_input)
+      dsl_version  = service_instance.get_service_instance_branch.dsl_version
+      yaml_content = ::DTK::CommonDSL::Generate::FileGenerator.generate_yaml_text(:workflow, top_level_content_input, dsl_version)
+      hash_content = YAML.load(yaml_content)
     end
 
     def matches_existing_assembly_instance?(service_name, assembly_template)

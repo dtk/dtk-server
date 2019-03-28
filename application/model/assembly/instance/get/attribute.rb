@@ -109,13 +109,12 @@ module DTK; class Assembly; class Instance; module Get
       # regexp_filters = filter.split(",").map do | user_friendly_componet_name|
       #   Regexp.new("^#{user_friendly_componet_name.gsub('::','__')}")
       # end
-      components = filter.split(",").map do |user_friendly_component_name|
-        user_friendly_component_name.gsub('::','__')
-      end
+      components = filter.split(",")
       ret = []
       component_attrs.each do |attr|
         if component = attr[:nested_component]
-          ret << attr if components.find { |filter_component| component.display_name == filter_component }
+          display_name = self.info_about(:components).find{|comp| comp[:id] == component[:id]}[:display_name]
+          ret << attr if components.find { |filter_component| display_name == filter_component }
         end
       end
       ret

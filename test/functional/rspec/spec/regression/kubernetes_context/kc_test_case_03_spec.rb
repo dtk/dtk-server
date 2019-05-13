@@ -39,7 +39,7 @@ describe 'Test case 3: Install kubernetes/kubernetes_grafana module, stage to co
     include_context 'Converge service instance', service_instance_location, dtk_common, service_instance_name
   end
 
-  context 'Sanity check' do 
+  context 'Grafana sanity check' do
     include_context 'Sanity check of grafana instance', dtk_common, context_name, node_name
   end  
 

@@ -19,7 +19,9 @@ module AssemblyAndServiceOperationsMixin
       puts "Expected only one node, but found: #{selected_node_arr}"
       return false
     end
-    selected_node_arr.first
+    node = selected_node_arr.first
+    puts "Found requested node: #{node}"
+    node
   end
 
   def verify_service_instance_nodes_terminated(service_instance_name)

@@ -39,7 +39,7 @@ describe 'Test case 2: Install kubernetes/kubernetes_base_cluster module, stage 
     include_context 'Converge service instance', service_instance_location, dtk_common, service_instance_name
   end
 
-  context 'Sanity check' do 
+  context 'Prometheus sanity check' do
     include_context 'Sanity check of prometheus instance', dtk_common, service_instance_name, node_name
   end
 

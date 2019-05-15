@@ -7,7 +7,6 @@ require './lib/app_sanity_check_spec.rb'
 
 remote_module = 'kubernetes:kubernetes_grafana'
 remote_module_location = '~/dtk/modules/tests/kubernetes_grafana'
-version = 'master'
 
 service_instance_location = '~/dtk/'
 service_instance_name = 'grafana_unit_test'
@@ -23,8 +22,8 @@ describe 'Test case 3: Install kubernetes/kubernetes_grafana module, stage to co
     puts '************************************************************************************************', ''
   end
 
-  context 'Install module from dtkn' do
-    include_context 'Install module from dtkn', remote_module, remote_module_location, version
+  context 'Install latest module version from dtkn' do
+    include_context 'Install module from dtkn', remote_module, remote_module_location
   end
 
   context 'List assemblies' do
@@ -42,6 +41,10 @@ describe 'Test case 3: Install kubernetes/kubernetes_grafana module, stage to co
   context 'Grafana sanity check' do
     include_context 'Sanity check of grafana instance', dtk_common, context_name, node_name
   end  
+
+  context 'Destroy grafana instance' do
+    include_context 'Destroy service instance', service_instance_location, service_instance_name
+  end
 
   after(:all) do
     puts '', ''

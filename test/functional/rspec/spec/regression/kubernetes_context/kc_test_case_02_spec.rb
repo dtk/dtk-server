@@ -8,7 +8,6 @@ require './lib/app_sanity_check_spec.rb'
 
 remote_module = 'kubernetes:kubernetes_base_cluster'
 remote_module_location = '~/dtk/modules/tests/kubernetes_base_cluster'
-version = 'master'
 
 service_instance_location = '~/dtk/'
 service_instance_name = 'kubernetes_base_cluster_unit_test_1'
@@ -23,8 +22,8 @@ describe 'Test case 2: Install kubernetes/kubernetes_base_cluster module, stage 
     puts '************************************************************************************************', ''
   end
 
-  context 'Install module from dtkn' do
-    include_context 'Install module from dtkn', remote_module, remote_module_location, version
+  context 'Install latest module version from dtkn' do
+    include_context 'Install module from dtkn', remote_module, remote_module_location
   end
 
   context 'List assemblies' do

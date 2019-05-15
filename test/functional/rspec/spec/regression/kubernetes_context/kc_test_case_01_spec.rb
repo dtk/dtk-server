@@ -6,7 +6,6 @@ require './lib/dtk_cli_spec'
 
 remote_module = 'kubernetes:kubernetes'
 remote_module_location = '~/dtk/modules/tests/kubernetes'
-version = 'master';
 
 assembly_name = 'cluster'
 
@@ -21,7 +20,7 @@ describe 'Test case 1: Install kubernetes module, stage and converge cluster' do
   end
 
   context 'Install module from dtkn' do
-    include_context 'Install module from dtkn', remote_module, remote_module_location, version 
+    include_context 'Install module from dtkn', remote_module, remote_module_location
   end
 
   context 'List assemblies' do
@@ -34,6 +33,10 @@ describe 'Test case 1: Install kubernetes module, stage and converge cluster' do
 
   context 'Converge service instance' do
     include_context 'Converge service instance', service_instance_location, dtk_common, service_instance_name 
+  end
+
+  context 'Destroy kubernetes/kubernetes instance' do
+    include_context 'Destroy service instance', service_instance_location, service_instance_name
   end
 
   after(:all) do

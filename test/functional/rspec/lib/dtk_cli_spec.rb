@@ -10,7 +10,7 @@ shared_context 'Install module' do |module_name, module_location|
   it "installs #{module_name} module from local filesystem to server" do
     puts 'Install module:', '----------------------'
     pass = true
-    value = `dtk module install -u --update-deps #{module_location}`
+    value = `dtk module install -d #{module_location} -u --update-deps`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
     puts "Install of module #{module_name} was completed successfully!" if pass == true
@@ -25,7 +25,7 @@ shared_context 'Install module from dtkn' do |remote_module, remote_module_locat
     puts 'Install module from dtkn:', '-----------------------------'
     pass = true
     version = '-v ' + version if !version.empty?
-    value = `dtk module install #{version} --update-deps #{remote_module} #{remote_module_location}`
+    value = `dtk module install -d #{remote_module_location} -v #{version} --update-deps #{remote_module}`
     puts value
     pass = false if ((value.include? 'ERROR') || (value.include? 'exists already'))
     puts "Install of module #{remote_module} was completed successfully!" if pass == true

@@ -1,5 +1,29 @@
 module AssemblyAndServiceOperationsMixin
   # Commands used from new dtk client
+
+  def check_if_instance_running(node_address, port, path)
+    endpoint = node_address + ":" + port
+    response = request_response(path, {}, 'get', endpoint);
+    response.code == 200
+  end
+
+  def get_node_by_name(service_instance_name, node_name)
+    nodes_response = send_request("/rest/api/v1/services/#{service_instance_name}/nodes", {}, 'get')
+    nodes = nodes_response['data']
+    if nodes.empty?
+      puts "No nodes found";
+      return false
+    end
+    selected_node_arr = nodes.select { |node| node['display_name'] == node_name } if nodes
+    if selected_node_arr.empty? || selected_node_arr.length > 1
+      puts "Expected only one node, but found: #{selected_node_arr}"
+      return false
+    end
+    node = selected_node_arr.first
+    puts "Found requested node: #{node}"
+    node
+  end
+
   def verify_service_instance_nodes_terminated(service_instance_name)
     require 'aws-sdk-ec2'
     puts "Verify service instance nodes have been terminated", "-----------------------------------------------------"
